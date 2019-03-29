@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getPingsQueryString } from '../../../../../plugins/uptime/public/components/queries/ping_list/get_pings';
 import pingList from './fixtures/ping_list';
 import pingListCount from './fixtures/ping_list_count';

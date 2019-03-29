@@ -34,7 +34,7 @@ export default (gulp, { buildTarget }) => {
     // As result of it, we need to move the transpiled js files for the correct folder
     // and in the end deleting the generated outDir from the intermediateBuildDirectory.
     //
-    //# TODO: This might be able to go away with the upgrade to babel 7
+    //# TODO: This might be able to go away as soon as we upgrade the x-pack build to use babel7
     await moveFiles(
       gulp,
       resolve(buildRoot, 'x-pack/build/plugin/kibana/x-pack/**/!(*.test).js'),

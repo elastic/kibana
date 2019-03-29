@@ -495,6 +495,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             fill={true}
             iconSide="left"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <FormattedMessage

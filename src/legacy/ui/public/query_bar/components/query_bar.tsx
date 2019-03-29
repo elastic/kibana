@@ -97,6 +97,7 @@ interface Props {
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  customSubmitButton?: any;
 }
 
 interface State {
@@ -634,7 +635,9 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderUpdateButton() {
-    const button = (
+    const button = this.props.customSubmitButton ? (
+      React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
+    ) : (
       <EuiSuperUpdateButton
         needsUpdate={this.isDirty()}
         isDisabled={this.state.isDateRangeInvalid}
@@ -642,16 +645,17 @@ export class QueryBarUI extends Component<Props, State> {
         data-test-subj="querySubmitButton"
       />
     );
-    if (this.props.showDatePicker) {
-      return (
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          {this.renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else {
+
+    if (!this.props.showDatePicker) {
       return button;
     }
+
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        {this.renderDatePicker()}
+        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   private renderDatePicker() {

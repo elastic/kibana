@@ -20,7 +20,8 @@
 import _ from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import '../../validate_date_interval';
+import '../directives/validate_date_interval';
+import '../directives/input_number';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';

@@ -239,8 +239,7 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
 }
 
 export function getWaterfall(
-  trace: TraceAPIResponse['trace'],
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'],
+  { trace, errorsPerTransaction }: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
   if (isEmpty(trace) || !entryTransactionId) {

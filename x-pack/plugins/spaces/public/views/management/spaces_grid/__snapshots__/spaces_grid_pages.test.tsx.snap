@@ -44,6 +44,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -128,13 +129,13 @@ exports[`SpacesGridPage renders as expected 1`] = `
       sorting={false}
     />
   </EuiPageContent>
-  <Component />
+  <SecureSpaceMessage />
 </div>
 `;
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
-  <Component
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
@@ -175,8 +176,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
-  <Component
+  </SpaceAvatar>,
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
@@ -216,8 +217,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
-  <Component
+  </SpaceAvatar>,
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
@@ -260,6 +261,6 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
+  </SpaceAvatar>,
 ]
 `;

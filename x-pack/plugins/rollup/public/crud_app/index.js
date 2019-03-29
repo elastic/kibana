@@ -8,7 +8,6 @@ import React from 'react';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
@@ -33,9 +32,7 @@ const renderReact = async (elem) => {
   render(
     <I18nContext>
       <Provider store={rollupJobsStore}>
-        <HashRouter>
-          <App />
-        </HashRouter>
+        <App />
       </Provider>
     </I18nContext>,
     elem

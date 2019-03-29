@@ -5,4 +5,5 @@
  */
 
 export { registerTestBed } from './testbed';
-export { getRandomString } from './lib';
+export { getRandomString, nextTick } from './lib';
+export { findTestSubject } from '@elastic/eui/lib/test';
