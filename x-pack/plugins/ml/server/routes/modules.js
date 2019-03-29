@@ -70,7 +70,7 @@ export function dataRecognizer(server, commonRouteConfig) {
 
   server.route({
     method: 'GET',
-    path: '/api/ml/modules/get_module/{moduleId}',
+    path: '/api/ml/modules/get_module/{moduleId?}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const moduleId = request.params.moduleId;
