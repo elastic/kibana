@@ -1,5 +1,5 @@
 [[upgrade-standard]]
-=== Standard Upgrade
+=== Standard upgrade
 
 NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
 to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
