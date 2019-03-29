@@ -86,6 +86,7 @@ containing a JSON structure similar to the following example:
     {
       "id": "my-pattern",
       "type": "index-pattern",
+      "title": "my-pattern-*",
       "error": {
         "type": "conflict"
       },
