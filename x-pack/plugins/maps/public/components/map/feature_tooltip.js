@@ -20,7 +20,7 @@ export class FeatureTooltip extends React.Component {
     let icon;
     if (tooltipProperty.isFilterable()) {
       icon = (<EuiButtonIcon
-        iconType="logstashFilter"
+        iconType="plusInCircle"
         title="Filter on property"
         onClick={() => {
           this.props.closeTooltip();
@@ -71,28 +71,36 @@ export class FeatureTooltip extends React.Component {
     });
   }
 
-  render() {
+  _renderCloseButton() {
+    if (!this.props.showCloseButton) {
+      return null;
+    }
+    return (
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
+          <EuiFlexItem>&nbsp;</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              onClick={this.props.closeTooltip}
+              iconType="cross"
+              aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
+                defaultMessage: 'Close tooltip'
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
 
+  render() {
     const hasFilterableProperties = this.props.properties.some(prop => {
       return prop.isFilterable();
     });
     return (
       <Fragment>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
-              <EuiFlexItem>&nbsp;</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  onClick={this.props.closeTooltip}
-                  iconType="cross"
-                  aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
-                    defaultMessage: 'Close tooltip'
-                  })}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {this._renderCloseButton()}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               {this._renderProperties(hasFilterableProperties)}

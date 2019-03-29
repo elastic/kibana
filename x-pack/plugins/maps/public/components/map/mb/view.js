@@ -240,11 +240,13 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
+    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
       <FeatureTooltip
         properties={content}
         closeTooltip={this._onTooltipClose}
-        isFilterable={this.props.isFilterable && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED}
+        isFilterable={this.props.isFilterable && isLocked}
+        showCloseButton={isLocked}
       />
     ), this._tooltipContainer);
 
