@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { ResponseObject, ResponseToolkit } from 'hapi';
 import { difference } from 'lodash';
+import { BaseReturnType } from '../../common/return_types';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkResponse,
-  FrameworkRouteHandler,
-  FrameworkRouteOptions,
 } from './adapters/framework/adapter_types';
 
 export class BackendFrameworkLib {
@@ -26,13 +25,18 @@ export class BackendFrameworkLib {
   public registerRoute<
     RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+  >(route: {
+    path: string;
+    method: string | string[];
+    licenseRequired?: string[];
+    requiredRoles?: string[];
+    handler: (request: FrameworkRequest<RouteRequest>) => Promise<BaseReturnType>;
+    config?: {};
+  }) {
     this.adapter.registerRoute({
       ...route,
-      handler: this.wrapRouteWithSecurity(
-        route.handler,
-        route.licenseRequired || [],
-        route.requiredRoles
+      handler: this.wrapErrors(
+        this.wrapRouteWithSecurity(route.handler, route.licenseRequired || [], route.requiredRoles)
       ),
     });
   }
@@ -71,25 +75,35 @@ export class BackendFrameworkLib {
   }
 
   private wrapRouteWithSecurity(
-    handler: FrameworkRouteHandler<any, any>,
+    handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>,
     requiredLicense: string[],
     requiredRoles?: string[]
-  ) {
-    return async (request: FrameworkRequest, h: any) => {
+  ): (request: FrameworkRequest) => Promise<BaseReturnType> {
+    return async (request: FrameworkRequest) => {
       if (
         requiredLicense.length > 0 &&
         (this.license.expired || !requiredLicense.includes(this.license.type))
       ) {
-        return Boom.forbidden(
-          `Your ${
-            this.license.type
-          } license does not support this API or is expired. Please upgrade your license.`
-        );
+        return {
+          error: {
+            message: `Your ${
+              this.license.type
+            } license does not support this API or is expired. Please upgrade your license.`,
+            code: 403,
+          },
+          success: false,
+        };
       }
 
       if (requiredRoles) {
         if (request.user.kind !== 'authenticated') {
-          return h.response().code(403);
+          return {
+            error: {
+              message: `Request must be authenticated`,
+              code: 403,
+            },
+            success: false,
+          };
         }
 
         if (
@@ -97,10 +111,67 @@ export class BackendFrameworkLib {
           !request.user.roles.includes('superuser') &&
           difference(requiredRoles, request.user.roles).length !== 0
         ) {
-          return h.response().code(403);
+          return {
+            error: {
+              message: `Request must be authenticated by a user with one of the following user roles: ${requiredRoles.join(
+                ','
+              )}`,
+              code: 403,
+            },
+            success: false,
+          };
         }
       }
-      return await handler(request, h);
+      return await handler(request);
+    };
+  }
+  private wrapErrors(
+    handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>
+  ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<ResponseObject> {
+    return async (request: FrameworkRequest, h: ResponseToolkit) => {
+      try {
+        const result = await handler(request);
+        if (!result.error) {
+          return h.response(result);
+        }
+        return h
+          .response({
+            error: result.error,
+            success: false,
+          })
+          .code(result.error.code || 400);
+      } catch (err) {
+        let statusCode = err.statusCode;
+
+        // This is the only known non-status code error in the system, but just in case we have an else
+        if (!statusCode && (err.message as string).includes('Invalid user type')) {
+          statusCode = 403;
+        } else {
+          statusCode = 500;
+        }
+
+        if (statusCode === 403) {
+          return h
+            .response({
+              error: {
+                message: 'Insufficient user permissions for managing Beats configuration',
+                code: 403,
+              },
+              success: false,
+            })
+            .code(403);
+        }
+
+        return h
+          .response({
+            error: {
+              message: err.message,
+              code: statusCode,
+            },
+            success: false,
+          })
+          .code(statusCode);
+      }
     };
   }
 }
