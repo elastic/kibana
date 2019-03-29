@@ -187,4 +187,62 @@ describe('POST /api/saved_objects/_import', () => {
       ],
     });
   });
+
+  test('imports a visualization with missing references', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [] });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          id: 'my-vis',
+          type: 'visualization',
+          title: 'my-vis',
+          error: {
+            type: 'missing_references',
+            references: [
+              {
+                type: 'index-pattern',
+                id: 'my-pattern-*',
+              },
+            ],
+          },
+        },
+        {
+          id: 'my-dashboard',
+          type: 'dashboard',
+          title: 'Look at my dashboard',
+          error: {
+            type: 'references_missing_references',
+            references: [
+              {
+                type: 'index-pattern',
+                id: 'my-pattern-*',
+              },
+            ],
+          },
+        },
+      ],
+    });
+  });
 });

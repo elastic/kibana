@@ -83,6 +83,67 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
+  test('retries importin a dashboard', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_resolve_import_errors',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[{"type":"dashboard","id":"my-dashboard"}]',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({ success: true, successCount: 1 });
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {
+            "title": "Look at my dashboard",
+          },
+          "id": "my-dashboard",
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
   test('resolves conflicts for dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
