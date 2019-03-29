@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiSuperSelect } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiSuperSelect,
+  IconType,
+} from '@elastic/eui';
 import React from 'react';
-import { SelectOperation, TermsOperation } from '../../../common';
+import {
+  DatasourceField,
+  fieldToOperation,
+  SelectOperation,
+  TermsOperation,
+} from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
-  Field,
   getColumnIdByIndex,
   selectColumn,
   UnknownVisModel,
@@ -19,7 +26,7 @@ import {
   VisModel,
 } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
-import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
+import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
 interface XyChartPrivateState {
   xAxis: Axis;
@@ -122,7 +129,7 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | '
   }
 }
 
-const displayTypeIcon = {
+const displayTypeIcon: { [id: string]: IconType } = {
   line: 'visLine',
   area: 'visArea',
 };
@@ -139,43 +146,28 @@ function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', 
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: 'xy_chart',
-  };
+  } as Suggestion;
 }
 
-function getSuggestionsForField(indexPatternName: string, field: Field, visModel: XyChartVisModel) {
+function getSuggestionsForField(
+  datasourceName: string,
+  field: DatasourceField,
+  visModel: XyChartVisModel
+): Suggestion[] {
   const operationNames = getOperationsForField(field);
 
   if (operationNames.length === 0) {
     return [];
   }
 
-  let firstOperation: SelectOperation;
-
-  if (operationNames[0] === 'terms') {
-    firstOperation = {
-      operation: 'column',
-      argument: { field: field.name, size: 5 },
-    };
-  } else if (operationNames[0] === 'date_histogram') {
-    firstOperation = {
-      operation: 'date_histogram',
-      argument: { field: field.name, interval: '1d' },
-    };
-  } else if (operationNames[0] === 'count') {
-    firstOperation = { operation: 'count' };
-  } else {
-    firstOperation = {
-      operation: operationNames[0],
-      argument: { field: field.name },
-    } as Exclude<SelectOperation, TermsOperation>;
-  }
+  const firstOperation = fieldToOperation(field, operationNames[0]);
 
   // Replaces the whole query and both axes. Good for first field, not for 2+
   const prefilledVisModel: XyChartVisModel = {
     ...visModel,
     queries: {
       q1: {
-        datasourceRef: indexPatternName,
+        datasourceRef: datasourceName,
         select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
       },
     },
@@ -195,6 +187,14 @@ function getSuggestionsForField(indexPatternName: string, field: Field, visModel
       visModel: prefilledVisModel,
       title: 'Basic Line Chart',
       iconType: displayTypeIcon.line,
+      pluginName: 'xy_chart',
+    },
+    {
+      previewExpression: toExpression(prefilledVisModel),
+      score: 0.5,
+      visModel: prefilledVisModel,
+      title: 'Basic Area Chart',
+      iconType: displayTypeIcon.area,
       pluginName: 'xy_chart',
     },
   ];

@@ -7,6 +7,7 @@
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
+import { DatasourceField, fieldToOperation } from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
@@ -16,7 +17,10 @@ import {
   updatePrivateState,
   VisModel,
 } from '../../common/lib';
-import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
+import { getOperationsForField } from '../../common/lib/field_config';
+import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+
+const PLUGIN_NAME = 'pie_chart';
 
 interface PieChartPrivateState {
   sliceAxis: Axis;
@@ -117,10 +121,10 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 }
 
-function getSuggestion(visModel: PieChartVisModel) {
+function getSuggestion(visModel: PieChartVisModel): Suggestion {
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as PieChartVisModel;
   return {
-    pluginName: 'pie_chart',
+    pluginName: PLUGIN_NAME,
     previewExpression: toExpression(prefilledVisModel),
     score: 0.5,
     visModel: prefilledVisModel,
@@ -129,11 +133,56 @@ function getSuggestion(visModel: PieChartVisModel) {
   };
 }
 
+function getSuggestionsForField(
+  datasourceRef: string,
+  field: DatasourceField,
+  visModel: PieChartVisModel
+): Suggestion[] {
+  const operationNames = getOperationsForField(field);
+
+  if (operationNames.length === 0) {
+    return [];
+  }
+
+  const firstOperation = fieldToOperation(field, operationNames[0]);
+
+  // Replaces the whole query and both axes. Good for first field, not for 2+
+  const prefilledVisModel: PieChartVisModel = {
+    ...visModel,
+    editorPlugin: 'pie_chart',
+    queries: {
+      q1: {
+        datasourceRef,
+        select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
+      },
+    },
+    private: {
+      ...visModel.private,
+      pieChart: {
+        sliceAxis: { title: 'Slice By', columns: ['q1_0'] },
+        angleAxis: { title: 'Size By', columns: ['q1_1'] },
+      },
+    },
+  };
+
+  return [
+    {
+      previewExpression: toExpression(prefilledVisModel),
+      score: 0.5,
+      visModel: prefilledVisModel,
+      title: 'Basic Pie Chart',
+      iconType: 'visPie',
+      pluginName: PLUGIN_NAME,
+    },
+  ];
+}
+
 export const config: EditorPlugin<PieChartVisModel> = {
-  name: 'pie_chart',
+  name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
   getChartSuggestions: visModel => [getSuggestion(visModel)],
+  getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
 };

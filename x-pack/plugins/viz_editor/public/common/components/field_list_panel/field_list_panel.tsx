@@ -16,21 +16,32 @@ import {
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { PanelComponentProps } from '../../../editor_plugin_registry';
-import { Field } from '../../lib';
+import { PanelComponentProps, Suggestion } from '../../../editor_plugin_registry';
+import { DatasourceField } from '../../lib';
+import { VisualizationModal } from '../visualization_modal';
 
 interface State {
   fieldsFilter: string;
+  modal: {
+    isOpen: boolean;
+    suggestions: Suggestion[];
+    fieldName: string;
+  };
 }
 
 function initialState(): State {
   return {
     fieldsFilter: '',
+    modal: {
+      isOpen: false,
+      suggestions: [],
+      fieldName: '',
+    },
   };
 }
 
-function sortFields(fieldA: Field, fieldB: Field) {
-  return fieldA.name < fieldB.name ? -1 : 1;
+function sortFields(fieldA: DatasourceField, fieldB: DatasourceField) {
+  return fieldA.name.toLowerCase() < fieldB.name.toLowerCase() ? -1 : 1;
 }
 
 export function FieldListPanel({
@@ -41,14 +52,25 @@ export function FieldListPanel({
   const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
-  function filterFields(field: Field) {
+  function filterFields(field: DatasourceField) {
     return field.name.includes(state.fieldsFilter);
   }
   if (datasource === null) {
     return <div />;
   }
 
-  const handleFieldClick = (field: Field) => {
+  function closeModal() {
+    setState({
+      ...state,
+      modal: {
+        isOpen: false,
+        suggestions: [],
+        fieldName: '',
+      },
+    });
+  }
+
+  const handleFieldClick = (field: DatasourceField) => {
     return () => {
       if (!getSuggestionsForField) {
         return;
@@ -57,7 +79,15 @@ export function FieldListPanel({
       const suggestions = getSuggestionsForField(datasource.id, field, visModel);
 
       if (suggestions.length) {
-        onChangeVisModel(suggestions[0].visModel);
+        // onChangeVisModel(suggestions[0].visModel);
+        setState({
+          ...state,
+          modal: {
+            isOpen: true,
+            suggestions,
+            fieldName: field.name,
+          },
+        });
       }
     };
   };
@@ -86,7 +116,6 @@ export function FieldListPanel({
             .sort(sortFields)
             .map(field => (
               <div
-                // type="div"
                 key={field.name}
                 className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
               >
@@ -101,6 +130,18 @@ export function FieldListPanel({
               </div>
             ))}
         </div>
+      )}
+
+      {state.modal.isOpen && (
+        <VisualizationModal
+          title={`Suggested visualizations for ${state.modal.fieldName}`}
+          suggestions={state.modal.suggestions}
+          onClose={() => closeModal()}
+          onSelect={newVisModel => {
+            closeModal();
+            onChangeVisModel(newVisModel);
+          }}
+        />
       )}
     </>
   );
