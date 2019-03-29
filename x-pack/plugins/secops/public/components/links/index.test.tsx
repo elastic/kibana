@@ -10,7 +10,14 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 
-import { GoogleLink, HostDetailsLink, IPDetailsLink, VirusTotalLink } from '.';
+import {
+  GoogleLink,
+  HostDetailsLink,
+  IPDetailsLink,
+  ReputationLink,
+  VirusTotalLink,
+  WhoIsLink,
+} from '.';
 
 describe('Custom Links', () => {
   const hostId = '133fd7715f1d47979ce817ba0df10c6e';
@@ -92,6 +99,33 @@ describe('Custom Links', () => {
     });
   });
 
+  describe('ReputationLink', () => {
+    test('it renders link text', () => {
+      const wrapper = mountWithIntl(
+        <ReputationLink domain={'192.0.2.0'}>{'Example Link'}</ReputationLink>
+      );
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders correct href', () => {
+      const wrapper = mountWithIntl(
+        <ReputationLink domain={'192.0.2.0'}>{'Example Link'} </ReputationLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://www.talosintelligence.com/reputation_center/lookup?search=192.0.2.0'
+      );
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <ReputationLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</ReputationLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://www.talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C/script%3E"
+      );
+    });
+  });
+
   describe('VirusTotalLink', () => {
     test('it renders sha passed in as value', () => {
       const wrapper = mountWithIntl(<VirusTotalLink link={'abc'}>{'Example Link'}</VirusTotalLink>);
@@ -111,6 +145,27 @@ describe('Custom Links', () => {
       );
       expect(wrapper.find('a').prop('href')).toEqual(
         "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C/script%3E"
+      );
+    });
+  });
+
+  describe('WhoisLink', () => {
+    test('it renders ip passed in as domain', () => {
+      const wrapper = mountWithIntl(<WhoIsLink domain={'192.0.2.0'}>{'Example Link'}</WhoIsLink>);
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders correct href', () => {
+      const wrapper = mountWithIntl(<WhoIsLink domain={'192.0.2.0'}>{'Example Link'} </WhoIsLink>);
+      expect(wrapper.find('a').prop('href')).toEqual('https://www.iana.org/whois?q=192.0.2.0');
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <WhoIsLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</WhoIsLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://www.iana.org/whois?q=%3Cscript%3Ealert('XSS')%3C/script%3E"
       );
     });
   });

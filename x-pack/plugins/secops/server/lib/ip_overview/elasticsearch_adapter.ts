@@ -12,7 +12,7 @@ import { TermAggregation } from '../types';
 
 import { IpOverviewRequestOptions } from './index';
 import { buildQuery } from './query.dsl';
-import { GenericBuckets, IpOverviewAdapter, IpOverviewHit } from './types';
+import { IpOverviewAdapter, IpOverviewHit } from './types';
 
 export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -56,13 +56,6 @@ const getIpOverviewAgg = (
     `aggregations.${type}.host.results.hits.hits[0]._source.host`,
     response
   );
-  const domains = getOr([], `aggregations.${type}.domains.buckets`, response).map(
-    (b: GenericBuckets) => ({
-      name: b.key,
-      count: b.doc_count,
-      lastSeen: b.timestamp.value_as_string,
-    })
-  );
 
   return {
     [type]: {
@@ -71,7 +64,6 @@ const getIpOverviewAgg = (
       autonomousSystem: {
         ...autonomousSystem,
       },
-      domains: [...domains],
       host: {
         ...hostFields,
       },

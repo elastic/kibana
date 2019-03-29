@@ -18,17 +18,10 @@ export const ipOverviewSchema = gql`
     ip: String
   }
 
-  type Domain {
-    name: String!
-    count: Float!
-    lastSeen: Date!
-  }
-
   type Overview {
     firstSeen: Date
     lastSeen: Date
     autonomousSystem: AutonomousSystem!
-    domains: [Domain!]!
     host: HostEcsFields!
     geo: GeoEcsFields!
   }

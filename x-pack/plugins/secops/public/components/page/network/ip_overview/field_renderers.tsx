@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { FormattedRelative } from '@kbn/i18n/react';
-import { getOr } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getOr, isString } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
 import {
   AutonomousSystem,
-  Domain,
   HostEcsFields,
   IpOverviewData,
   IpOverviewType,
@@ -28,23 +24,24 @@ import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../.
 import { IpOverviewId } from './index';
 import * as i18n from './translations';
 
-const MoreDomains = styled(EuiIcon)`
-  margin-left: 5px;
-`;
-
 export const locationRenderer = (
   fieldNames: string[],
   data: IpOverviewData
 ): React.ReactElement => {
-  return fieldNames.some((fieldName: string) => getOr(null, fieldName, data)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+  return fieldNames.length > 0 &&
+    fieldNames.every((fieldName: string) => getOr(null, fieldName, data)) ? (
+    <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
       {fieldNames.map((fieldName: string, index: number) => {
-        const locationValue = getOr(null, fieldName, data);
+        const locationValue = getOr('', fieldName, data);
         return (
           <React.Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
-              <DefaultDraggable id={IpOverviewId} field={fieldName} value={locationValue} />
+              <DefaultDraggable
+                id={`${IpOverviewId}-${fieldName}`}
+                field={fieldName}
+                value={locationValue}
+              />
             </EuiFlexItem>
           </React.Fragment>
         );
@@ -57,7 +54,11 @@ export const locationRenderer = (
 
 export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => {
   const value = getOr(null, fieldName, data);
-  return value ? <PreferenceFormattedDate value={new Date(value)} /> : getEmptyTagValue();
+  return value && isString(value) ? (
+    <PreferenceFormattedDate value={new Date(value)} />
+  ) : (
+    getEmptyTagValue()
+  );
 };
 
 export const autonomousSystemRenderer = (
@@ -68,13 +69,13 @@ export const autonomousSystemRenderer = (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={IpOverviewId}
+          id={`${IpOverviewId}-${flowType}.autonomous_system.as_org`}
           field={`${flowType}.autonomous_system.as_org`}
           value={as.as_org}
         />{' '}
         /
         <DefaultDraggable
-          id={IpOverviewId}
+          id={`${IpOverviewId}-${flowType}.autonomous_system.asn`}
           field={`${flowType}.autonomous_system.asn`}
           value={as.asn}
         />
@@ -85,56 +86,11 @@ export const autonomousSystemRenderer = (
   );
 };
 
-export const domainsRenderer = (
-  domains: Domain[],
-  flowType: IpOverviewType
-): React.ReactElement => {
-  return domains.length > 0 ? (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <DefaultDraggable id={IpOverviewId} field={`${flowType}.domain`} value={domains[0].name}>
-          {`${domains[0].name}`}
-        </DefaultDraggable>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>({numeral(domains[0].count).format('0,000')})</EuiFlexItem>
-
-      {domains.length > 1 && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              <>
-                {domains.slice(1, 6).map(domain => (
-                  <span key={`${IpOverviewId}-${domain.name}`}>
-                    {`${domain.name} | (${numeral(domain.count).format('0,000')}) | `}
-                    <FormattedRelative value={new Date(domain.lastSeen)} />
-                    <br />
-                  </span>
-                ))}
-                {domains.slice(1).length > 5 && (
-                  <b>
-                    <br />
-                    {i18n.MORE}
-                  </b>
-                )}
-              </>
-            }
-          >
-            <MoreDomains type="eye" />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  ) : (
-    getEmptyTagValue()
-  );
-};
-
 export const hostIdRenderer = (host: HostEcsFields, ipFilter: string): React.ReactElement => {
   return host.id && host.ip && host.ip.includes(ipFilter) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <DefaultDraggable id={IpOverviewId} field={'host.id'} value={host.id}>
+        <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.id'} value={host.id}>
           <HostDetailsLink hostId={host.id} />
         </DefaultDraggable>
       </EuiFlexItem>
@@ -148,7 +104,7 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter: string): React.R
   return host.id && host.ip && host.ip.includes(ipFilter) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <DefaultDraggable id={IpOverviewId} field={'host.name'} value={host.id}>
+        <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.id}>
           <HostDetailsLink hostId={host.id}>
             {host.name ? host.name : getEmptyTagValue()}
           </HostDetailsLink>

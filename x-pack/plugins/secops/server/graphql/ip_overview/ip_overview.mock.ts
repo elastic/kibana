@@ -14,7 +14,6 @@ export const mockIpOverviewData: { IpOverviewData: IpOverviewData } = {
       firstSeen: '2019-02-07T17:19:41.636Z',
       lastSeen: '2019-02-07T17:19:41.636Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
-      domains: [{ name: 'test.domain', count: 23, lastSeen: '2019-02-07T17:19:41.636Z' }],
       geo: {},
       host: {
         os: {
@@ -33,7 +32,6 @@ export const mockIpOverviewData: { IpOverviewData: IpOverviewData } = {
       firstSeen: '2019-02-07T17:19:41.648Z',
       lastSeen: '2019-02-07T17:19:41.648Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
-      domains: [{ name: 'test.domain', count: 23, lastSeen: '2019-02-07T17:19:41.636Z' }],
       geo: {},
       host: {
         os: {

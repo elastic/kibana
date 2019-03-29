@@ -30,21 +30,6 @@ const getAggs = (type: string, ip: string) => {
             field: '@timestamp',
           },
         },
-        domains: {
-          terms: {
-            field: `${type}.domain`,
-            order: {
-              timestamp: 'desc',
-            },
-          },
-          aggs: {
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
-          },
-        },
         autonomous_system: {
           filter: {
             exists: {

@@ -10,17 +10,16 @@ import { pure } from 'recompose';
 
 import { IpOverviewType } from '../../../../graphql/types';
 
-import { IpOverviewId } from './index';
 import * as i18n from './translations';
 
 const toggleTypeOptions = (id: string) => [
   {
-    id: `${id}-${IpOverviewId}-select-type`,
+    id: `${id}-${IpOverviewType.source}`,
     value: IpOverviewType.source,
     inputDisplay: i18n.AS_SOURCE,
   },
   {
-    id: `${id}-${IpOverviewId}-select-type`,
+    id: `${id}-${IpOverviewType.destination}`,
     value: IpOverviewType.destination,
     inputDisplay: i18n.AS_DESTINATION,
   },

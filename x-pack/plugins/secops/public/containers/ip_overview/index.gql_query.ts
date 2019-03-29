@@ -19,11 +19,6 @@ export const ipOverviewQuery = gql`
         source {
           firstSeen
           lastSeen
-          domains {
-            name
-            count
-            lastSeen
-          }
           autonomousSystem {
             as_org
             asn
@@ -59,11 +54,6 @@ export const ipOverviewQuery = gql`
         destination {
           firstSeen
           lastSeen
-          domains {
-            name
-            count
-            lastSeen
-          }
           autonomousSystem {
             as_org
             asn

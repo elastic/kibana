@@ -727,8 +727,6 @@ export interface Overview {
 
   autonomousSystem: AutonomousSystem;
 
-  domains: Domain[];
-
   host: HostEcsFields;
 
   geo: GeoEcsFields;
@@ -740,14 +738,6 @@ export interface AutonomousSystem {
   asn?: string | null;
 
   ip?: string | null;
-}
-
-export interface Domain {
-  name: string;
-
-  count: number;
-
-  lastSeen: Date;
 }
 
 export interface KpiNetworkData {
@@ -3401,8 +3391,6 @@ export namespace OverviewResolvers {
 
     autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, Context>;
 
-    domains?: DomainsResolver<Domain[], TypeParent, Context>;
-
     host?: HostResolver<HostEcsFields, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields, TypeParent, Context>;
@@ -3423,11 +3411,6 @@ export namespace OverviewResolvers {
     Parent = Overview,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type DomainsResolver<R = Domain[], Parent = Overview, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
   export type HostResolver<
     R = HostEcsFields,
     Parent = Overview,
@@ -3464,32 +3447,6 @@ export namespace AutonomousSystemResolvers {
     Parent = AutonomousSystem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace DomainResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = Domain> {
-    name?: NameResolver<string, TypeParent, Context>;
-
-    count?: CountResolver<number, TypeParent, Context>;
-
-    lastSeen?: LastSeenResolver<Date, TypeParent, Context>;
-  }
-
-  export type NameResolver<R = string, Parent = Domain, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CountResolver<R = number, Parent = Domain, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type LastSeenResolver<R = Date, Parent = Domain, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
 }
 
 export namespace KpiNetworkDataResolvers {

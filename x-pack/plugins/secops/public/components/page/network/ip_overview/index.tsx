@@ -88,10 +88,6 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
             ? autonomousSystemRenderer(typeData.autonomousSystem, flowType)
             : getEmptyTagValue(),
         },
-        // {
-        //   title: i18n.DOMAINS,
-        //   description: typeData ? domainsRenderer(typeData.domains, flowType) : getEmptyTagValue(),
-        // },
       ],
       [
         { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },

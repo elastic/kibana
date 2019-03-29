@@ -18,14 +18,6 @@ export const ASN = i18n.translate('xpack.secops.network.ipDetails.ipOverview.asn
   defaultMessage: 'ASN',
 });
 
-export const DOMAINS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.domainsTitle', {
-  defaultMessage: 'Domains',
-});
-
-export const MORE = i18n.translate('xpack.secops.network.ipDetails.ipOverview.moreDescription', {
-  defaultMessage: 'More ...',
-});
-
 export const FIRST_SEEN = i18n.translate(
   'xpack.secops.network.ipDetails.ipOverview.firstSeenTitle',
   {

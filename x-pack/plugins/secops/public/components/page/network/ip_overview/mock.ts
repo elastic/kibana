@@ -6,20 +6,24 @@
 
 import { IpOverviewData } from '../../../../graphql/types';
 
-export const mockData: { IpOverview: IpOverviewData } = {
-  IpOverview: {
+export const mockData: { [key: string]: IpOverviewData } = {
+  complete: {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',
       lastSeen: '2019-02-07T17:19:41.636Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
-      domains: [
-        {
-          name: 'test.domain',
-          count: 23,
-          lastSeen: '2019-02-07T17:19:41.636Z',
+      geo: {
+        continent_name: 'North America',
+        city_name: 'New York',
+        country_iso_code: 'US',
+        country_name: null,
+        location: {
+          lat: 40.7214,
+          lon: -74.0052,
         },
-      ],
-      geo: {},
+        region_iso_code: 'US-NY',
+        region_name: 'New York',
+      },
       host: {
         os: {
           kernel: '4.14.50-v7+',
@@ -37,14 +41,18 @@ export const mockData: { IpOverview: IpOverviewData } = {
       firstSeen: '2019-02-07T17:19:41.648Z',
       lastSeen: '2019-02-07T17:19:41.648Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
-      domains: [
-        {
-          name: 'test.domain',
-          count: 23,
-          lastSeen: '2019-02-07T17:19:41.636Z',
+      geo: {
+        continent_name: 'North America',
+        city_name: 'New York',
+        country_iso_code: 'US',
+        country_name: null,
+        location: {
+          lat: 40.7214,
+          lon: -74.0052,
         },
-      ],
-      geo: {},
+        region_iso_code: 'US-NY',
+        region_name: 'New York',
+      },
       host: {
         os: {
           kernel: '4.14.50-v7+',

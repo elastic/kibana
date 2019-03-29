@@ -698,8 +698,6 @@ export interface Overview {
 
   autonomousSystem: AutonomousSystem;
 
-  domains: Domain[];
-
   host: HostEcsFields;
 
   geo: GeoEcsFields;
@@ -711,14 +709,6 @@ export interface AutonomousSystem {
   asn?: string | null;
 
   ip?: string | null;
-}
-
-export interface Domain {
-  name: string;
-
-  count: number;
-
-  lastSeen: Date;
 }
 
 export interface KpiNetworkData {
@@ -1561,23 +1551,11 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
-    domains: Domains[];
-
     autonomousSystem: AutonomousSystem;
 
     geo: Geo;
 
     host: Host;
-  };
-
-  export type Domains = {
-    __typename?: 'Domain';
-
-    name: string;
-
-    count: number;
-
-    lastSeen: Date;
   };
 
   export type AutonomousSystem = {
@@ -1653,23 +1631,11 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
-    domains: _Domains[];
-
     autonomousSystem: _AutonomousSystem;
 
     geo: _Geo;
 
     host: _Host;
-  };
-
-  export type _Domains = {
-    __typename?: 'Domain';
-
-    name: string;
-
-    count: number;
-
-    lastSeen: Date;
   };
 
   export type _AutonomousSystem = {
