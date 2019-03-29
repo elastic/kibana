@@ -168,11 +168,13 @@ describe('workspace_handler tests', () => {
     );
   });
 
+  // @ts-ignore
   before(() => {
     mkdirp.sync(workspaceDir);
     mkdirp.sync(repoDir);
   });
 
+  // @ts-ignore
   after(() => {
     rimraf.sync(baseDir);
   });
