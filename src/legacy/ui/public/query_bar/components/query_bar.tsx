@@ -86,6 +86,7 @@ interface Props {
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
@@ -594,10 +595,17 @@ export class QueryBarUI extends Component<Props, State> {
                       }}
                       autoComplete="off"
                       spellCheck={false}
-                      aria-label={this.props.intl.formatMessage({
-                        id: 'common.ui.queryBar.searchInputAriaLabel',
-                        defaultMessage: 'Search input',
-                      })}
+                      aria-label={this.props.intl.formatMessage(
+                        {
+                          id: 'common.ui.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previousltTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previousltTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )}
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
