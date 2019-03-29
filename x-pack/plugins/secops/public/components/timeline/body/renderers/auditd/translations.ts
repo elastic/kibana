@@ -6,6 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+// Note for translators and programmers
+// Examples of these strings are all of the form
+// Session {session.id} {primary} as {secondary}@{hostname} in {folder} was authorized to use {executable} with result {result.success/failure}
+// E.x. Session 5 Frank as root@server-1 in /root was authorized to use wget with result success
+
+// However, the strings can be dropped depending on the circumstances of the variables. For example, with no data at all
+// Session 10
+// Example with just a user name and hostname
+// Session 20 frank@server-1
+// Example with user name, hostname, but no result
+// Session 20 frank@server-1 acquired credentials to curl
+
 export const SESSION = i18n.translate('xpack.secops.auditd.sessionDescription', {
   defaultMessage: 'Session',
 });
