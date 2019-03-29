@@ -23,14 +23,14 @@ This makes it easier to identify the changes you need to make to upgrade and ena
 you to perform a rolling upgrade with no downtime. 
 
 Please see 
-*{stack-ov}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]* for a 
+*{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]* for a 
 comprehensive overview of the upgrade process.
 
 [float]
 ==== Upgrading from 6.6 or earlier
 {es} can read indices created in the previous major version. If you have indices 
 created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
-See {stack-ov}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading from 6.6 or earlier] 
+See {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading from 6.6 or earlier] 
 for more information.
 
 Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
