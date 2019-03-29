@@ -142,7 +142,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body).to.eql({});
+        expect(body).to.eql({ success: true });
       });
     });
   });
