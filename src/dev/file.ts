@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import minimatch = require('minimatch');
+import minimatch from 'minimatch';
 import { dirname, extname, join, relative, resolve, sep } from 'path';
 
 import { REPO_ROOT } from './constants';

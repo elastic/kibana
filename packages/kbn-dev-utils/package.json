@@ -19,9 +19,9 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/expect": "1.0.0",
-    "babel-cli": "^6.26.0",
     "chance": "1.0.6"
   }
 }

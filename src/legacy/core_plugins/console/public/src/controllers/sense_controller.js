@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/doc_title';
-import { useResizeChecker } from '../sense_editor_resize';
+import { DocTitleProvider } from 'ui/doc_title';
+import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
@@ -30,11 +30,12 @@ const module = require('ui/modules').get('app/sense');
 
 module.run(function (Private, $rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    return useResizeChecker($rootScope, $el, ...editors);
+    return applyResizeCheckerToEditors($rootScope, $el, ...editors);
   };
 });
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
+  const docTitle = Private(DocTitleProvider);
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);

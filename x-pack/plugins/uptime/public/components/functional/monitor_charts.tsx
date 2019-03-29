@@ -29,24 +29,20 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 
 interface MonitorChartsProps {
   checkDomainLimits: number[];
-  crosshairLocation: number;
   danger: string;
   durationDomainLimits: number[];
   monitorChartData: MonitorChart;
   primary: string;
   secondary: string;
-  updateCrosshairLocation: (crosshairLocation: number) => void;
 }
 
 export const MonitorCharts = ({
   checkDomainLimits,
-  crosshairLocation,
   danger,
   durationDomainLimits,
   monitorChartData: { durationArea, durationLine, status },
   primary,
   secondary,
-  updateCrosshairLocation,
 }: MonitorChartsProps) => (
   <Fragment>
     <EuiFlexGroup>
@@ -60,7 +56,6 @@ export const MonitorCharts = ({
             />
           </h4>
         </EuiTitle>
-
         <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
           <EuiSeriesChart
             margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
@@ -69,8 +64,6 @@ export const MonitorCharts = ({
             xType={EuiSeriesChartUtils.SCALE.TIME}
             xCrosshairFormat="YYYY-MM-DD hh:mmZ"
             yDomain={durationDomainLimits}
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
           >
             <EuiAreaSeries
               color={secondary}
@@ -120,8 +113,6 @@ export const MonitorCharts = ({
             xType={EuiSeriesChartUtils.SCALE.TIME}
             xCrosshairFormat="YYYY-MM-DD hh:mmZ"
             stackBy="y"
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
             yDomain={checkDomainLimits}
           >
             <EuiAreaSeries
