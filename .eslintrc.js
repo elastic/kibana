@@ -47,6 +47,38 @@ module.exports = {
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
+    '@kbn/eslint/no-restricted-paths': [
+      'error',
+      {
+        basePath: __dirname,
+        zones: [
+          {
+            target: [
+              'src/legacy/**/*',
+              'x-pack/**/*',
+              '!x-pack/**/*.test.*',
+              'src/plugins/**/(public|server)/**/*',
+              'src/core/(public|server)/**/*',
+            ],
+            from: [
+              'src/core/public/**/*',
+              '!src/core/public/index*',
+              '!src/core/public/utils/**/*',
+
+              'src/core/server/**/*',
+              '!src/core/server/index*',
+
+              'src/plugins/**/public/**/*',
+              '!src/plugins/**/public/index*',
+
+              'src/plugins/**/server/**/*',
+              '!src/plugins/**/server/index*',
+            ],
+            allowSameFolder: true,
+          },
+        ],
+      },
+    ],
     '@kbn/eslint/module_migration': [
       'error',
       [
