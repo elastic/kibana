@@ -154,7 +154,9 @@ export const file = handleActions(
       }),
     [String(closeTreePath)]: (state: FileState, action: Action<any>) =>
       produce<FileState>(state, (draft: FileState) => {
-        draft.openedPaths = state.openedPaths.filter(p => !p.startsWith(action.payload!));
+        const path = action.payload!;
+        const isSubFolder = (p: string) => p.startsWith(path + '/');
+        draft.openedPaths = state.openedPaths.filter(p => !(p === path || isSubFolder(p)));
       }),
     [String(fetchRepoCommitsSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {

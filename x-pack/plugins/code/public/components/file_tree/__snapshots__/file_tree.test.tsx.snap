@@ -107,6 +107,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-android-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -166,6 +167,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-futures-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -224,6 +226,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-open"
                 focusable="false"
                 height="16"
                 style={null}
@@ -285,6 +288,7 @@ exports[`render correctly 1`] = `
                   </svg>
                   <svg
                     className="euiIcon euiIcon--medium"
+                    data-test-subj="codeFileTreeNode-Directory-Icon-guava/javadoc-link-closed"
                     focusable="false"
                     height="16"
                     style={null}
@@ -391,6 +395,7 @@ exports[`render correctly 1`] = `
                   </svg>
                   <svg
                     className="euiIcon euiIcon--medium"
+                    data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google-open"
                     focusable="false"
                     height="16"
                     style={null}
@@ -455,6 +460,7 @@ exports[`render correctly 1`] = `
                       </svg>
                       <svg
                         className="euiIcon euiIcon--medium"
+                        data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google/common-closed"
                         focusable="false"
                         height="16"
                         style={null}
@@ -514,6 +520,7 @@ exports[`render correctly 1`] = `
                       </svg>
                       <svg
                         className="euiIcon euiIcon--medium"
+                        data-test-subj="codeFileTreeNode-Directory-Icon-guava/src/com/google/thirdparty/publicsuffix-closed"
                         focusable="false"
                         height="16"
                         style={null}
@@ -577,6 +584,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-bom-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -636,6 +644,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-gwt-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -695,6 +704,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-testlib-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -754,6 +764,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-guava-tests-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -813,6 +824,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-refactorings-closed"
                 focusable="false"
                 height="16"
                 style={null}
@@ -872,6 +884,7 @@ exports[`render correctly 1`] = `
               </svg>
               <svg
                 className="euiIcon euiIcon--medium"
+                data-test-subj="codeFileTreeNode-Directory-Icon-util-closed"
                 focusable="false"
                 height="16"
                 style={null}
