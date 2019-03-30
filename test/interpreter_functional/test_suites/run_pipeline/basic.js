@@ -66,7 +66,7 @@ export default function ({ getService, updateBaselines }) {
       });
 
       // its also possible to check snapshot at every step of expression (after execution of each function)
-      it ('runs the expression and compares output at every step', async () => {
+      it.skip ('runs the expression and compares output at every step', async () => {
         await expectExpression('step_output_test', expression).steps.toMatchSnapshot();
       });
 

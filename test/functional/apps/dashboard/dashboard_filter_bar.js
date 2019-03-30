@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', async () => {
+    describe.skip('filter editor field list', async () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
