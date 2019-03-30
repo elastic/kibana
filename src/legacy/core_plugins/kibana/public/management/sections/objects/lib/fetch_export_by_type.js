@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import { kfetch } from 'ui/kfetch';
 
-const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
-export async function scanAllTypes($http, typesToInclude) {
-  const results = await $http.post(`${apiBase}/export`, { typesToInclude });
-  return results.data;
+export async function fetchExportByType(types) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      type: types,
+    }),
+  });
 }

@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { saveAs } from '@elastic/filesaver';
+import { kfetch } from 'ui/kfetch';
 
-export function saveToFile(resultsJson) {
-  const blob = new Blob([resultsJson], { type: 'application/json' });
-  saveAs(blob, 'export.json');
+export async function fetchExportObjects(objects) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({ objects }),
+  });
 }

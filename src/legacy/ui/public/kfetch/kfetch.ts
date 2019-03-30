@@ -61,11 +61,17 @@ export async function kfetch(
       });
 
       return window.fetch(fullUrl, restOptions).then(async res => {
-        const body = await getBodyAsJson(res);
-        if (res.ok) {
-          return body;
+        if (!res.ok) {
+          throw new KFetchError(res, await getBodyAsJson(res));
         }
-        throw new KFetchError(res, body);
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.split(';')[0] === 'application/json') {
+          return await getBodyAsJson(res);
+        }
+        if (contentType && contentType.split(';')[0] === 'application/ndjson') {
+          return await getBodyAsBlob(res);
+        }
+        return res;
       });
     }
   );
@@ -96,13 +102,25 @@ async function getBodyAsJson(res: Response) {
   }
 }
 
+async function getBodyAsBlob(res: Response) {
+  try {
+    return await res.blob();
+  } catch (e) {
+    return null;
+  }
+}
+
 export function withDefaultOptions(options?: KFetchOptions): KFetchOptions {
   return merge(
     {
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json',
+        ...(options && options.headers && options.headers.hasOwnProperty('Content-Type')
+          ? {}
+          : {
+              'Content-Type': 'application/json',
+            }),
         'kbn-version': metadata.version,
       },
     },

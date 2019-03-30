@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { debounce, flattenDeep } from 'lodash';
+import { debounce } from 'lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
@@ -40,14 +41,13 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import {
-  retrieveAndExportDocs,
-  scanAllTypes,
-  saveToFile,
   parseQuery,
   getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
+  fetchExportObjects,
+  fetchExportByType,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -279,16 +279,14 @@ class ObjectsTableUI extends Component {
   };
 
   onExport = async () => {
-    const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
+    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+    const blob = await fetchExportObjects(objectsToExport);
+    saveAs(blob, 'export.ndjson');
   };
 
   onExportAll = async () => {
-    const { $http } = this.props;
     const { exportAllSelectedOptions } = this.state;
-
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -298,8 +296,8 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const results = await scanAllTypes($http, exportTypes);
-    saveToFile(JSON.stringify(flattenDeep(results), null, 2));
+    const blob = await fetchExportByType(exportTypes);
+    saveAs(blob, 'export.ndjson');
   };
 
   finishImport = () => {

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { kfetch } from 'ui/kfetch';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { groupBy, take, get as getField } from 'lodash';
@@ -41,6 +42,9 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 import { importFile } from '../../../../lib/import_file';
 import {
@@ -68,7 +72,10 @@ class FlyoutUI extends Component {
       conflictedIndexPatterns: undefined,
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
-      conflicts: undefined,
+      unmatchedReferences: undefined,
+      conflictingRecord: undefined,
+      objectsToOverwrite: undefined,
+      objectsToRetry: undefined,
       error: undefined,
       file: undefined,
       importCount: 0,
@@ -77,6 +84,7 @@ class FlyoutUI extends Component {
       isLoading: false,
       loadingMessage: undefined,
       wasImportSuccessful: false,
+      isLegacyFile: false,
     };
   }
 
@@ -99,10 +107,185 @@ class FlyoutUI extends Component {
   };
 
   setImportFile = ([file]) => {
-    this.setState({ file });
+    this.setState({
+      file,
+      isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',
+    });
   };
 
   import = async () => {
+    const { file, isOverwriteAllChecked } = this.state;
+    this.setState({ isLoading: true, error: undefined });
+
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await kfetch({
+      method: 'POST',
+      pathname: '/api/saved_objects/_import',
+      body: formData,
+      headers: {
+        // Important to be undefined, it forces proper headers to be set for FormData
+        'Content-Type': undefined,
+      },
+      query: {
+        overwrite: isOverwriteAllChecked
+      },
+    });
+
+    const failedImports = [];
+    const unmatchedReferences = new Map();
+    for (const { error, ...obj } of response.errors || []) {
+      if (error.type === 'missing_references') {
+        for (const missingReference of error.references) {
+          if (missingReference.type !== 'index-pattern') {
+            // Currently only supports resolving conflicts on index patterns
+            continue;
+          }
+          const conflict = unmatchedReferences.get(`${missingReference.type}:${missingReference.id}`) || {
+            existingIndexPatternId: missingReference.id,
+            list: [],
+            newIndexPatternId: undefined,
+          };
+          conflict.list.push(obj);
+          unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
+        }
+        failedImports.push({ obj, error });
+      } else {
+        failedImports.push({ obj, error });
+      }
+    }
+
+    this.setState({
+      failedImports,
+      unmatchedReferences: Array.from(unmatchedReferences.values()),
+      isLoading: false,
+      importCount: response.successCount,
+      wasImportSuccessful: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error && issue.error.type === 'conflict'),
+      conflictedSavedObjectsLinkedToSavedSearches: undefined,
+      conflictedSearchDocs: undefined,
+      possibleRecordsToOverwrite: (response.errors || []).filter(obj => obj.error.type === 'conflict'),
+    });
+
+    if (unmatchedReferences.size === 0) {
+      this.resolveImportErrors();
+    }
+  }
+
+  async getConflictResolutions(objects) {
+    const resolutions = {};
+    for (const { type, id, title } of objects) {
+      const overwrite = await new Promise((resolve) => {
+        this.setState({
+          conflictingRecord: {
+            id,
+            type,
+            title,
+            done: resolve,
+          },
+        });
+      });
+      resolutions[`${type}:${id}`] = overwrite;
+      this.setState({ conflictingRecord: undefined });
+    }
+    return resolutions;
+  }
+
+  resolveImportErrors = async () => {
+    this.setState({
+      error: undefined,
+      isLoading: true,
+      loadingMessage: undefined,
+    });
+
+    let overwriteDecisionCache = {};
+    const replaceReferencesCache = new Map();
+    const { isOverwriteAllChecked, unmatchedReferences } = this.state;
+    let { importCount: successImportCount, failedImports: importFailures } = this.state;
+    function map({ error, obj }) {
+      const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
+      if (!isOverwriteGranted && error.type === 'conflict') {
+        return;
+      }
+      if (error.type === 'missing_references') {
+        const objReplaceReferences = replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [];
+        for (const reference of error.references) {
+          if (reference.type !== 'index-pattern') {
+            continue;
+          }
+          for (const unmatchedReference of unmatchedReferences) {
+            if (!unmatchedReference.newIndexPatternId || unmatchedReference.existingIndexPatternId !== reference.id) {
+              continue;
+            }
+            if (objReplaceReferences.some(replaceReference => replaceReference.from === reference.id)) {
+              continue;
+            }
+            objReplaceReferences.push({
+              type: 'index-pattern',
+              from: unmatchedReference.existingIndexPatternId,
+              to: unmatchedReference.newIndexPatternId,
+            });
+          }
+        }
+        replaceReferencesCache.set(`${obj.type}:${obj.id}`, objReplaceReferences);
+        if (objReplaceReferences.length === 0) {
+          return;
+        }
+      }
+      return {
+        id: obj.id,
+        type: obj.type,
+        overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true,
+        replaceReferences: replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [],
+      };
+    }
+    function getOverwriteDecision({ obj }) {
+      return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
+    }
+    while (importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))) {
+      if (!isOverwriteAllChecked) {
+        const result = await this.getConflictResolutions(
+          importFailures
+            .filter(({ error }) => error.type === 'conflict')
+            .filter(getOverwriteDecision)
+            .map(({ obj }) => obj)
+        );
+        overwriteDecisionCache = { ...overwriteDecisionCache, ...result };
+      }
+      const retries = importFailures
+        .map(failure => map(failure))
+        .filter(obj => !!obj);
+      if (retries.length === 0) {
+        // Scenario where skip everything, no other failures
+        importFailures = [];
+        continue;
+      }
+      const formData = new FormData();
+      formData.append('file', this.state.file);
+      formData.append('retries', JSON.stringify(retries));
+      const response = await kfetch({
+        method: 'POST',
+        pathname: '/api/saved_objects/_resolve_import_errors',
+        headers: {
+          // Important to be undefined, it forces proper headers to be set for FormData
+          'Content-Type': undefined,
+        },
+        body: formData,
+      });
+      successImportCount += response.successCount;
+      importFailures = [];
+      for (const { error, ...obj } of response.errors || []) {
+        importFailures.push({ error, obj });
+      }
+    }
+    this.setState({
+      isLoading: false,
+      wasImportSuccessful: true,
+      importCount: successImportCount,
+      failedImports: importFailures,
+    });
+  }
+
+  legacyImport = async () => {
     const { services, indexPatterns, intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
@@ -162,7 +345,7 @@ class FlyoutUI extends Component {
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
       obj.searchSource.getOwnField('index')
     );
-    const conflicts = Object.entries(byId).reduce(
+    const unmatchedReferences = Object.entries(byId).reduce(
       (accum, [existingIndexPatternId, list]) => {
         accum.push({
           existingIndexPatternId,
@@ -170,7 +353,7 @@ class FlyoutUI extends Component {
           list: list.map(({ doc }) => ({
             id: existingIndexPatternId,
             type: doc._type,
-            name: doc._source.title,
+            title: doc._source.title,
           })),
         });
         return accum;
@@ -183,19 +366,19 @@ class FlyoutUI extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       failedImports,
-      conflicts,
+      unmatchedReferences,
       importCount: importedObjectCount,
       isLoading: false,
-      wasImportSuccessful: conflicts.length === 0,
+      wasImportSuccessful: unmatchedReferences.length === 0,
     });
   };
 
-  get hasConflicts() {
-    return this.state.conflicts && this.state.conflicts.length > 0;
+  get hasUnmatchedReferences() {
+    return this.state.unmatchedReferences && this.state.unmatchedReferences.length > 0;
   }
 
   get resolutions() {
-    return this.state.conflicts.reduce(
+    return this.state.unmatchedReferences.reduce(
       (accum, { existingIndexPatternId, newIndexPatternId }) => {
         if (newIndexPatternId) {
           accum.push({
@@ -209,7 +392,7 @@ class FlyoutUI extends Component {
     );
   }
 
-  confirmImport = async () => {
+  confirmLegacyImport = async () => {
     const {
       conflictedIndexPatterns,
       isOverwriteAllChecked,
@@ -228,14 +411,14 @@ class FlyoutUI extends Component {
 
     let importCount = this.state.importCount;
 
-    if (this.hasConflicts) {
+    if (this.hasUnmatchedReferences) {
       try {
         const resolutions = this.resolutions;
 
         // Do not Promise.all these calls as the order matters
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmImport.resolvingConflictsLoadingMessage',
+            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
             defaultMessage: 'Resolving conflicts…',
           }),
         });
@@ -248,7 +431,7 @@ class FlyoutUI extends Component {
         }
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmImport.savingConflictsLoadingMessage',
+            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
             defaultMessage: 'Saving conflicts…',
           }),
         });
@@ -258,7 +441,7 @@ class FlyoutUI extends Component {
         );
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmImport.savedSearchAreLinkedProperlyLoadingMessage',
+            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
             defaultMessage: 'Ensure saved searches are linked properly…',
           }),
         });
@@ -270,7 +453,7 @@ class FlyoutUI extends Component {
         );
         this.setState({
           loadingMessage: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.confirmImport.retryingFailedObjectsLoadingMessage',
+            id: 'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
             defaultMessage: 'Retrying failed objects…',
           }),
         });
@@ -294,7 +477,7 @@ class FlyoutUI extends Component {
   onIndexChanged = (id, e) => {
     const value = e.target.value;
     this.setState(state => {
-      const conflictIndex = state.conflicts.findIndex(
+      const conflictIndex = state.unmatchedReferences.findIndex(
         conflict => conflict.existingIndexPatternId === id
       );
       if (conflictIndex === -1) {
@@ -302,23 +485,23 @@ class FlyoutUI extends Component {
       }
 
       return {
-        conflicts: [
-          ...state.conflicts.slice(0, conflictIndex),
+        unmatchedReferences: [
+          ...state.unmatchedReferences.slice(0, conflictIndex),
           {
-            ...state.conflicts[conflictIndex],
+            ...state.unmatchedReferences[conflictIndex],
             newIndexPatternId: value,
           },
-          ...state.conflicts.slice(conflictIndex + 1),
+          ...state.unmatchedReferences.slice(conflictIndex + 1),
         ],
       };
     });
   };
 
-  renderConflicts() {
-    const { conflicts } = this.state;
+  renderUnmatchedReferences() {
+    const { unmatchedReferences } = this.state;
     const { intl } = this.props;
 
-    if (!conflicts) {
+    if (!unmatchedReferences) {
       return null;
     }
 
@@ -362,7 +545,7 @@ class FlyoutUI extends Component {
         render: list => {
           return (
             <ul style={{ listStyle: 'none' }}>
-              {take(list, 3).map((obj, key) => <li key={key}>{obj.name}</li>)}
+              {take(list, 3).map((obj, key) => <li key={key}>{obj.title}</li>)}
             </ul>
           );
         },
@@ -402,7 +585,7 @@ class FlyoutUI extends Component {
 
     return (
       <EuiInMemoryTable
-        items={conflicts}
+        items={unmatchedReferences}
         columns={columns}
         pagination={pagination}
       />
@@ -433,6 +616,7 @@ class FlyoutUI extends Component {
   }
 
   renderBody() {
+    const { intl } = this.props;
     const {
       isLoading,
       loadingMessage,
@@ -456,7 +640,7 @@ class FlyoutUI extends Component {
       );
     }
 
-    if (failedImports.length && !this.hasConflicts) {
+    if (failedImports.length && !this.hasUnmatchedReferences) {
       return (
         <EuiCallOut
           title={(
@@ -468,12 +652,30 @@ class FlyoutUI extends Component {
           <p>
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
-              defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects.Import failed"
+              defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
               values={{ failedImportCount: failedImports.length, totalImportCount: importCount + failedImports.length, }}
             />
           </p>
           <p>
-            {failedImports.map(({ error }) => getField(error, 'body.message', error.message || '')).join(' ')}
+            {failedImports.map(({ error, obj }) => {
+              if (error.type === 'missing_references') {
+                return error.references.map((reference) => {
+                  return intl.formatMessage(
+                    {
+                      id: 'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
+                      defaultMessage: '{type} (id: {id}) could not locate {refType} (id: {refId})',
+                    },
+                    {
+                      id: obj.id,
+                      type: obj.type,
+                      refId: reference.id,
+                      refType: reference.type,
+                    }
+                  );
+                });
+              }
+              return getField(error, 'body.message', error.message || '');
+            }).join(' ')}
           </p>
         </EuiCallOut>
       );
@@ -518,8 +720,8 @@ class FlyoutUI extends Component {
       );
     }
 
-    if (this.hasConflicts) {
-      return this.renderConflicts();
+    if (this.hasUnmatchedReferences) {
+      return this.renderUnmatchedReferences();
     }
 
     return (
@@ -528,7 +730,7 @@ class FlyoutUI extends Component {
           label={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Please select a JSON file to import"
+              defaultMessage="Please select a file to import"
             />
           )}
         >
@@ -580,10 +782,10 @@ class FlyoutUI extends Component {
           />
         </EuiButton>
       );
-    } else if (this.hasConflicts) {
+    } else if (this.hasUnmatchedReferences) {
       confirmButton = (
         <EuiButton
-          onClick={this.confirmImport}
+          onClick={this.state.isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
           size="s"
           fill
           isLoading={isLoading}
@@ -598,7 +800,7 @@ class FlyoutUI extends Component {
     } else {
       confirmButton = (
         <EuiButton
-          onClick={this.import}
+          onClick={this.state.isLegacyFile ? this.legacyImport : this.import}
           size="s"
           fill
           isLoading={isLoading}
@@ -629,16 +831,29 @@ class FlyoutUI extends Component {
 
   renderSubheader() {
     if (
-      !this.hasConflicts ||
       this.state.isLoading ||
       this.state.wasImportSuccessful
     ) {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
+    let legacyFileWarning;
+    if (this.state.isLegacyFile) {
+      legacyFileWarning = (<EuiCallOut
+        title={(
+          <FormattedMessage
+            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+            defaultMessage="Importing .json files is deprecated"
+          />
+        )}
+        color="warning"
+        iconType="help"
+      />);
+    }
+
+    let indexPatternConflictsWarning;
+    if (this.hasUnmatchedReferences) {
+      indexPatternConflictsWarning = (
         <EuiCallOut
           title={(
             <FormattedMessage
@@ -667,13 +882,80 @@ class FlyoutUI extends Component {
               }}
             />
           </p>
-        </EuiCallOut>
+        </EuiCallOut>);
+    }
+
+    if (!legacyFileWarning && !indexPatternConflictsWarning) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        {legacyFileWarning &&
+          <span>
+            <EuiSpacer size="s" />
+            {legacyFileWarning}
+          </span>
+        }
+        {indexPatternConflictsWarning &&
+          <span>
+            <EuiSpacer size="s" />
+            {indexPatternConflictsWarning}
+          </span>
+        }
       </Fragment>
     );
   }
 
+  overwriteConfirmed() {
+    this.state.conflictingRecord.done(true);
+  }
+
+  overwriteSkipped() {
+    this.state.conflictingRecord.done(false);
+  }
+
   render() {
-    const { close } = this.props;
+    const { close, intl } = this.props;
+
+    let confirmOverwriteModal;
+    if (this.state.conflictingRecord) {
+      confirmOverwriteModal = (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={intl.formatMessage(
+              {
+                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteTitle',
+                defaultMessage: 'Overwrite {type}?'
+              },
+              { type: this.state.conflictingRecord.type }
+            )}
+            cancelButtonText={intl.formatMessage(
+              {
+                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
+                defaultMessage: 'Cancel',
+              },
+            )}
+            confirmButtonText={intl.formatMessage(
+              {
+                id: 'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
+                defaultMessage: 'Overwrite',
+              },
+            )}
+            onCancel={this.overwriteSkipped.bind(this)}
+            onConfirm={this.overwriteConfirmed.bind(this)}
+            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+          >
+            <p>
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.flyout.confirmOverwriteBody"
+                defaultMessage="Are you sure you want to overwrite {title}?"
+                values={{ title: this.state.conflictingRecord.title }}
+              />
+            </p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>);
+    }
 
     return (
       <EuiFlyout onClose={close} size="s">
@@ -695,6 +977,7 @@ class FlyoutUI extends Component {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>{this.renderFooter()}</EuiFlyoutFooter>
+        {confirmOverwriteModal}
       </EuiFlyout>
     );
   }

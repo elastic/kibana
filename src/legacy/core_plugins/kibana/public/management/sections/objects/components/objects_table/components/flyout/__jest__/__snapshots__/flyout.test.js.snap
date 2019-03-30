@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Flyout conflicts should allow conflict resolution 1`] = `
+exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
@@ -22,43 +22,62 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer
-      size="s"
-    />
-    <EuiCallOut
-      color="warning"
-      iconType="help"
-      size="m"
-      title={
-        <FormattedMessage
-          defaultMessage="Index Pattern Conflicts"
-          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
-          values={Object {}}
-        />
-      }
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
-          values={
-            Object {
-              "indexPatternLink": <EuiLink
-                color="primary"
-                href=""
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="create a new index pattern"
-                  id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>,
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title={
+          <FormattedMessage
+            defaultMessage="Importing .json files is deprecated"
+            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+            values={Object {}}
+          />
+        }
+      />
+    </span>
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title={
+          <FormattedMessage
+            defaultMessage="Index Pattern Conflicts"
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+            values={
+              Object {
+                "indexPatternLink": <EuiLink
+                  color="primary"
+                  href=""
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="create a new index pattern"
+                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
             }
-          }
-        />
-      </p>
-    </EuiCallOut>
+          />
+        </p>
+      </EuiCallOut>
+    </span>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiInMemoryTable
@@ -164,7 +183,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout conflicts should handle errors 1`] = `
+exports[`Flyout legacy conflicts should handle errors 1`] = `
 <EuiCallOut
   color="danger"
   iconType="cross"
@@ -214,7 +233,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Please select a JSON file to import"
+            defaultMessage="Please select a file to import"
             id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />

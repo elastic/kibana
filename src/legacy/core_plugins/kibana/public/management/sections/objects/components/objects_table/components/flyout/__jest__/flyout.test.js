@@ -35,6 +35,16 @@ jest.mock('ui/errors', () => ({
   },
 }));
 
+jest.mock('ui/kfetch', () => jest.fn());
+
+jest.mock('../../../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
+}));
+
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
@@ -63,7 +73,10 @@ const defaultProps = {
 };
 
 const mockFile = {
-  path: '/home/foo.txt',
+  path: '/home/foo.ndjson',
+};
+const legacyMockFile = {
+  path: '/home/foo.json',
 };
 
 describe('Flyout', () => {
@@ -117,20 +130,194 @@ describe('Flyout', () => {
       throw new Error('foobar');
     });
 
-    await component.instance().import();
+    await component.instance().legacyImport();
     expect(component.state('error')).toBe('The file could not be processed.');
 
     importFile.mockImplementation(() => ({
       invalid: true,
     }));
 
-    await component.instance().import();
+    await component.instance().legacyImport();
     expect(component.state('error')).toBe(
       'Saved objects file format is invalid and cannot be imported.'
     );
   });
 
+  // TODO
   describe('conflicts', () => {
+    // const { importFile } = require('../../../../../lib/import_file');
+    // const {
+    //   resolveSavedObjects,
+    //   resolveSavedSearches,
+    //   resolveIndexPatternConflicts,
+    //   saveObjects,
+    // } = require('../../../../../lib/resolve_saved_objects');
+
+    // const mockData = [
+    //   {
+    //     _id: '1',
+    //     _type: 'search',
+    //   },
+    //   {
+    //     _id: '2',
+    //     _type: 'index-pattern',
+    //   },
+    //   {
+    //     _id: '3',
+    //     _type: 'invalid',
+    //   },
+    // ];
+
+    // const mockConflictedIndexPatterns = [
+    //   {
+    //     doc: {
+    //       _type: 'index-pattern',
+    //       _id: '1',
+    //       _source: {
+    //         title: 'MyIndexPattern*',
+    //       },
+    //     },
+    //     obj: {
+    //       searchSource: {
+    //         getOwnField: () => 'MyIndexPattern*',
+    //       },
+    //     },
+    //   },
+    // ];
+
+    // const mockConflictedSavedObjectsLinkedToSavedSearches = [2];
+    // const mockConflictedSearchDocs = [3];
+
+    // beforeEach(() => {
+    //   importFile.mockImplementation(() => mockData);
+    //   resolveSavedObjects.mockImplementation(() => ({
+    //     conflictedIndexPatterns: mockConflictedIndexPatterns,
+    //     conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
+    //     conflictedSearchDocs: mockConflictedSearchDocs,
+    //     importedObjectCount: 2,
+    //   }));
+    // });
+
+    // it('should figure out unmatchedReferences', async () => {
+    //   const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+    //   // Ensure all promises resolve
+    //   await new Promise(resolve => process.nextTick(resolve));
+    //   // Ensure the state changes are reflected
+    //   component.update();
+
+    //   component.setState({ file: mockFile, isLegacyFile: true });
+    //   await component.instance().legacyImport();
+
+    //   expect(importFile).toHaveBeenCalledWith(mockFile);
+    //   // Remove the last element from data since it should be filtered out
+    //   expect(resolveSavedObjects).toHaveBeenCalledWith(
+    //     mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
+    //     true,
+    //     defaultProps.services,
+    //     defaultProps.indexPatterns
+    //   );
+
+    //   expect(component.state()).toMatchObject({
+    //     conflictedIndexPatterns: mockConflictedIndexPatterns,
+    //     conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
+    //     conflictedSearchDocs: mockConflictedSearchDocs,
+    //     importCount: 2,
+    //     isLoading: false,
+    //     wasImportSuccessful: false,
+    //     unmatchedReferences: [
+    //       {
+    //         existingIndexPatternId: 'MyIndexPattern*',
+    //         newIndexPatternId: undefined,
+    //         list: [
+    //           {
+    //             id: 'MyIndexPattern*',
+    //             name: 'MyIndexPattern*',
+    //             type: 'index-pattern',
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   });
+    // });
+
+    // it('should allow conflict resolution', async () => {
+    //   const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+    //   // Ensure all promises resolve
+    //   await new Promise(resolve => process.nextTick(resolve));
+    //   // Ensure the state changes are reflected
+    //   component.update();
+
+    //   component.setState({ file: mockFile, isLegacyFile: true });
+    //   await component.instance().legacyImport();
+
+    //   // Ensure it looks right
+    //   component.update();
+    //   expect(component).toMatchSnapshot();
+
+    //   // Ensure we can change the resolution
+    //   component
+    //     .instance()
+    //     .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+    //   expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
+
+    //   // Let's resolve now
+    //   await component
+    //     .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
+    //     .simulate('click');
+    //   // Ensure all promises resolve
+    //   await new Promise(resolve => process.nextTick(resolve));
+    //   expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
+    //     component.instance().resolutions,
+    //     mockConflictedIndexPatterns,
+    //     true
+    //   );
+    //   expect(saveObjects).toHaveBeenCalledWith(
+    //     mockConflictedSavedObjectsLinkedToSavedSearches,
+    //     true
+    //   );
+    //   expect(resolveSavedSearches).toHaveBeenCalledWith(
+    //     mockConflictedSearchDocs,
+    //     defaultProps.services,
+    //     defaultProps.indexPatterns,
+    //     true
+    //   );
+    // });
+
+    // it('should handle errors', async () => {
+    //   const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+    //   // Ensure all promises resolve
+    //   await new Promise(resolve => process.nextTick(resolve));
+    //   // Ensure the state changes are reflected
+    //   component.update();
+
+    //   resolveIndexPatternConflicts.mockImplementation(() => {
+    //     throw new Error('foobar');
+    //   });
+
+    //   component.setState({ file: mockFile, isLegacyFile: true });
+
+    //   // Go through the import flow
+    //   await component.instance().legacyImport();
+    //   component.update();
+    //   // Set a resolution
+    //   component
+    //     .instance()
+    //     .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+    //   await component
+    //     .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
+    //     .simulate('click');
+    //   // Ensure all promises resolve
+    //   await new Promise(resolve => process.nextTick(resolve));
+
+    //   expect(component.state('error')).toEqual('foobar');
+    //   expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();
+    // });
+  });
+
+  describe('legacy conflicts', () => {
     const { importFile } = require('../../../../../lib/import_file');
     const {
       resolveSavedObjects,
@@ -184,7 +371,7 @@ describe('Flyout', () => {
       }));
     });
 
-    it('should figure out conflicts', async () => {
+    it('should figure out unmatchedReferences', async () => {
       const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
       // Ensure all promises resolve
@@ -192,10 +379,10 @@ describe('Flyout', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      component.setState({ file: mockFile });
-      await component.instance().import();
+      component.setState({ file: legacyMockFile, isLegacyFile: true });
+      await component.instance().legacyImport();
 
-      expect(importFile).toHaveBeenCalledWith(mockFile);
+      expect(importFile).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
         mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
@@ -211,7 +398,7 @@ describe('Flyout', () => {
         importCount: 2,
         isLoading: false,
         wasImportSuccessful: false,
-        conflicts: [
+        unmatchedReferences: [
           {
             existingIndexPatternId: 'MyIndexPattern*',
             newIndexPatternId: undefined,
@@ -235,8 +422,8 @@ describe('Flyout', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      component.setState({ file: mockFile });
-      await component.instance().import();
+      component.setState({ file: legacyMockFile, isLegacyFile: true });
+      await component.instance().legacyImport();
 
       // Ensure it looks right
       component.update();
@@ -246,7 +433,7 @@ describe('Flyout', () => {
       component
         .instance()
         .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
-      expect(component.state('conflicts')[0].newIndexPatternId).toBe('2');
+      expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
 
       // Let's resolve now
       await component
@@ -283,10 +470,10 @@ describe('Flyout', () => {
         throw new Error('foobar');
       });
 
-      component.setState({ file: mockFile });
+      component.setState({ file: legacyMockFile, isLegacyFile: true });
 
       // Go through the import flow
-      await component.instance().import();
+      await component.instance().legacyImport();
       component.update();
       // Set a resolution
       component

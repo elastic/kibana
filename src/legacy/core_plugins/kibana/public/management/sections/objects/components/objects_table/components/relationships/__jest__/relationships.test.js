@@ -37,6 +37,14 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
 
+jest.mock('../../../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
+}));
+
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
