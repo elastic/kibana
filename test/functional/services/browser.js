@@ -105,7 +105,7 @@ export async function BrowserProvider({ getService }) {
      */
     async moveMouseTo(element, xOffset, yOffset) {
       const mouse = driver.actions().mouse();
-      const actions = driver.actions({ bridge: true });
+      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions.pause(mouse).move({ origin: element._webElement }).perform();
       } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
