@@ -35,9 +35,9 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-import { UA_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
+import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor, trackUserAction } from '../../../../services';
+import { healthToColor, trackUiMetric } from '../../../../services';
 import {
   getBannerExtensions,
   getFilterExtensions,
@@ -224,7 +224,7 @@ export class IndexTableUi extends Component {
             className="indTable__link"
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              trackUserAction(UA_SHOW_DETAILS_CLICK);
+              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >

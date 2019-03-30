@@ -28,12 +28,31 @@ interface AggParamReactWrapperProps<T> {
   aggParam: AggParam;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
   value: T;
+  isInvalid: boolean;
   onChange(value: T): void;
+  setValidity(isValid: boolean): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
-  const { agg, aggParam, paramEditor: ParamEditor, onChange, value } = props;
-  return <ParamEditor value={value} setValue={onChange} aggParam={aggParam} agg={agg} />;
+  const {
+    agg,
+    aggParam,
+    paramEditor: ParamEditor,
+    onChange,
+    value,
+    isInvalid,
+    setValidity,
+  } = props;
+  return (
+    <ParamEditor
+      value={value}
+      setValue={onChange}
+      aggParam={aggParam}
+      agg={agg}
+      isInvalid={isInvalid}
+      setValidity={setValidity}
+    />
+  );
 }
 
 export { AggParamReactWrapper };

@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
-import '../directives/infinite_scroll';
+import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from '../render_complete';

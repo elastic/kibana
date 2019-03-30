@@ -26,8 +26,8 @@ function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorPro
   return (
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
-      className="form-group"
       fullWidth={true}
+      className="visEditorSidebar__aggParamFormRow"
     >
       <EuiFieldText
         value={value || ''}
