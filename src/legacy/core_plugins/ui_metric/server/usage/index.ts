@@ -17,21 +17,4 @@
  * under the License.
  */
 
-import { registerUserActionRoute } from './server/routes/api/ui_metric';
-import { registerUiMetricUsageCollector } from './server/usage/index';
-
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'ui_metric',
-    require: ['kibana', 'elasticsearch'],
-
-    uiExports: {
-      mappings: require('./mappings.json'),
-    },
-
-    init: function (server) {
-      registerUserActionRoute(server);
-      registerUiMetricUsageCollector(server);
-    }
-  });
-}
+export { registerUiMetricUsageCollector } from './collector';
