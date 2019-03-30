@@ -95,7 +95,7 @@ describe.skip('<JobList />', () => {
       ]);
 
       // Mock all user actions tracking
-      server.respondWith('POST', /\/api\/user_action/, [200, { 'Content-Type': 'application/json' }, '']);
+      server.respondWith('POST', /\/api\/ui_metric/, [200, { 'Content-Type': 'application/json' }, '']);
 
       const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
       ({ component, exists, getMetadataFromEuiTable } = initTestBed(undefined, testBedOptions));
