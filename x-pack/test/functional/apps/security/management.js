@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', () => {
+  describe.skip('Management', () => {
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
