@@ -36,7 +36,7 @@ function TransactionLink({
     return <Fragment>{NOT_AVAILABLE_LABEL}</Fragment>;
   }
 
-  const isSampled = transaction.sampled;
+  const isSampled = transaction.transaction.sampled;
   if (!isSampled) {
     return <Fragment>{transaction.transaction.id}</Fragment>;
   }

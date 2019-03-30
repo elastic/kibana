@@ -55,7 +55,7 @@ module.directive('metricVisParams', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return 0;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.metric.colorsRange[index - 1].to;
       };
 
