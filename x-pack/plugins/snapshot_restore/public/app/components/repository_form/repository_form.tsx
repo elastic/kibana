@@ -22,7 +22,6 @@ import { TypeSettings } from './type_settings';
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -31,8 +30,6 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  // @ts-ignore
-  EuiSuperSelect,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -40,7 +37,9 @@ interface Props {
   repository: Repository;
   isEditing?: boolean;
   isSaving: boolean;
-  saveError?: React.ReactNode;
+  errors?: {
+    save?: React.ReactNode;
+  };
   onSave: (repository: Repository) => void;
   onCancel: () => void;
 }
@@ -49,7 +48,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   repository: originalRepository,
   isEditing,
   isSaving,
-  saveError,
+  errors,
   onSave,
   onCancel,
 }) => {
@@ -366,10 +365,10 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   };
 
   const renderSaveError = () => {
-    if (saveError) {
+    if (errors && errors.save) {
       return (
         <Fragment>
-          {saveError}
+          {errors.save}
           <EuiSpacer size="m" />
         </Fragment>
       );

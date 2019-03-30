@@ -9,7 +9,6 @@ import { Repository, S3Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 
 import {
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -76,12 +75,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.bucketDescription"
-              defaultMessage="The name of the bucket to be used for snapshots. Required."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.bucketDescription"
+            defaultMessage="The name of the bucket to be used for snapshots. Required."
+          />
         }
         idAria="s3RepositoryBucketDescription"
         fullWidth
@@ -122,12 +119,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.clientDescription"
-              defaultMessage="The name of client to use to connect to S3."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.clientDescription"
+            defaultMessage="The name of client to use to connect to S3."
+          />
         }
         idAria="s3RepositoryClientDescription"
         fullWidth
@@ -168,12 +163,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.basePathDescription"
-              defaultMessage="Specifies the path within bucket to repository data. Base path should omit the leading forward slash."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.basePathDescription"
+            defaultMessage="Specifies the path within bucket to repository data. Base path should omit the leading forward slash."
+          />
         }
         idAria="s3RepositoryBasePathDescription"
         fullWidth
@@ -396,12 +389,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.cannedAclDescription"
-              defaultMessage="When the S3 repository creates buckets and objects, it adds the canned ACL into the buckets and objects."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.cannedAclDescription"
+            defaultMessage="When the S3 repository creates buckets and objects, it adds the canned ACL into the buckets and objects."
+          />
         }
         idAria="s3RepositoryCannedAclDescription"
         fullWidth
@@ -443,14 +434,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.storageClassDescription"
-              defaultMessage="Sets the S3 storage class for objects stored in the snapshot repository.
-                Changing this setting on an existing repository only affects the storage class for newly created objects,
-                resulting in a mixed usage of storage classes."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.storageClassDescription"
+            defaultMessage="Sets the S3 storage class for objects stored in the snapshot repository.
+              Changing this setting on an existing repository only affects the storage class for newly created objects,
+              resulting in a mixed usage of storage classes."
+          />
         }
         idAria="s3RepositoryStorageClassDescription"
         fullWidth

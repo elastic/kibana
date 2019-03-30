@@ -8,12 +8,7 @@ import React, { Fragment } from 'react';
 import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import 'brace/theme/textmate';
 

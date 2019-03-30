@@ -10,9 +10,7 @@ import { useAppDependencies } from '../../../index';
 
 import {
   EuiCode,
-  // @ts-ignore
   EuiCodeEditor,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -63,12 +61,10 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.uriDescription"
-              defaultMessage="The URI address for HDFS. Required."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeHDFS.uriDescription"
+            defaultMessage="The URI address for HDFS. Required."
+          />
         }
         idAria="hdfsRepositoryUriDescription"
         fullWidth
@@ -109,12 +105,10 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.pathDescription"
-              defaultMessage="The file path within the filesystem where data is stored/loaded. Required."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeHDFS.pathDescription"
+            defaultMessage="The file path within the filesystem where data is stored/loaded. Required."
+          />
         }
         idAria="hdfsRepositoryPathDescription"
         fullWidth

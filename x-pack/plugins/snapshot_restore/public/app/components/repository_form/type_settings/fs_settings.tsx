@@ -10,7 +10,6 @@ import { useAppDependencies } from '../../../index';
 
 import {
   EuiCode,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,

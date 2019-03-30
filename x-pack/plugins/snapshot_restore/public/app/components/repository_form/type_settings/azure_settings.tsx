@@ -10,7 +10,6 @@ import { useAppDependencies } from '../../../index';
 
 import {
   EuiCode,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -54,12 +53,10 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.clientDescription"
-              defaultMessage="Azure named client to use."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.clientDescription"
+            defaultMessage="Azure named client to use."
+          />
         }
         idAria="azureRepositoryClientDescription"
         fullWidth
@@ -100,12 +97,10 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.containerDescription"
-              defaultMessage="Container name. You must create the azure container before creating the repository."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.containerDescription"
+            defaultMessage="Container name. You must create the azure container before creating the repository."
+          />
         }
         idAria="azureRepositoryContainerDescription"
         fullWidth
@@ -146,12 +141,10 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathDescription"
-              defaultMessage="Specifies the path within container to repository data."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathDescription"
+            defaultMessage="Specifies the path within container to repository data."
+          />
         }
         idAria="azureRepositoryBasePathDescription"
         fullWidth
@@ -328,15 +321,13 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.locationModeDescription"
-              defaultMessage="Setting to {secondaryOnly} will force read-only to true."
-              values={{
-                secondaryOnly: <EuiCode>{locationModeOptions[1].value}</EuiCode>,
-              }}
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.locationModeDescription"
+            defaultMessage="Setting to {secondaryOnly} will force read-only to true."
+            values={{
+              secondaryOnly: <EuiCode>{locationModeOptions[1].value}</EuiCode>,
+            }}
+          />
         }
         idAria="azureRepositoryLocationModeDescription"
         fullWidth

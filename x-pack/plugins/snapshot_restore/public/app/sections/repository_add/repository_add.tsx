@@ -24,7 +24,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [saveError, setSaveError] = useState<null | any>(null);
+  const [errors, setErrors] = useState<any>({});
 
   // Set breadcrumb
   useEffect(() => {
@@ -37,7 +37,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
 
   const onSave = async (newRepository: Repository) => {
     setIsSaving(true);
-    setSaveError(null);
+    setErrors({ ...errors, save: null });
     const { name } = newRepository;
     const { error } = await sendRequest({
       path: chrome.addBasePath(`${API_BASE_PATH}repositories`),
@@ -47,7 +47,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
     });
     setIsSaving(false);
     if (error) {
-      setSaveError(error);
+      setErrors({ ...errors, save: error });
     } else {
       history.push(`${BASE_PATH}/${section}/${name}`);
     }
@@ -64,7 +64,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
   };
 
   const renderSaveError = () => {
-    return (
+    return errors.save ? (
       <SectionError
         title={
           <FormattedMessage
@@ -72,9 +72,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
             defaultMessage="Error registering new repository"
           />
         }
-        error={saveError}
+        error={errors.save}
       />
-    );
+    ) : null;
   };
 
   return (
@@ -92,7 +92,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
         <RepositoryForm
           repository={emptyRepository}
           isSaving={isSaving}
-          saveError={saveError ? renderSaveError() : null}
+          errors={{
+            save: renderSaveError(),
+          }}
           onSave={onSave}
           onCancel={onCancel}
         />

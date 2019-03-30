@@ -8,14 +8,7 @@ import React, { Fragment } from 'react';
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 
-import {
-  // @ts-ignore
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSwitch,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: GCSRepository;
@@ -47,12 +40,10 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketDescription"
-              defaultMessage="The name of the bucket to be used for snapshots. Required."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketDescription"
+            defaultMessage="The name of the bucket to be used for snapshots. Required."
+          />
         }
         idAria="gcsRepositoryBucketDescription"
         fullWidth
@@ -93,12 +84,10 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.clientDescription"
-              defaultMessage="The name of the client to use to connect to Google Cloud Storage."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.clientDescription"
+            defaultMessage="The name of the client to use to connect to Google Cloud Storage."
+          />
         }
         idAria="gcsRepositoryClientDescription"
         fullWidth
@@ -139,12 +128,10 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
           </EuiTitle>
         }
         description={
-          <Fragment>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.basePathDescription"
-              defaultMessage="Specifies the path within bucket to repository data."
-            />
-          </Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.basePathDescription"
+            defaultMessage="Specifies the path within bucket to repository data."
+          />
         }
         idAria="gcsRepositoryBasePathDescription"
         fullWidth

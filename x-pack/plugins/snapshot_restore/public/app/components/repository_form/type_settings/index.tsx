@@ -119,10 +119,7 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
     }
   };
 
-  if (type === REPOSITORY_TYPES.source) {
-    const { delegate_type } = settings;
-    return renderTypeSettings(delegate_type);
-  }
-
-  return renderTypeSettings(type);
+  return type === REPOSITORY_TYPES.source
+    ? renderTypeSettings(settings.delegate_type)
+    : renderTypeSettings(type);
 };

@@ -46,7 +46,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [saveError, setSaveError] = useState<null | any>(null);
+  const [errors, setErrors] = useState<any>({});
 
   // Set breadcrumb
   useEffect(() => {
@@ -75,8 +75,8 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
 
   // Save repository
   const onSave = async (editedRepository: Repository) => {
-    setSaveError(false);
     setIsSaving(true);
+    setErrors({ ...errors, save: null });
     const { error } = await sendRequest({
       path: chrome.addBasePath(`${API_BASE_PATH}repositories/${name}`),
       method: 'put',
@@ -85,14 +85,14 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
     });
     setIsSaving(false);
     if (error) {
-      setSaveError(error);
+      setErrors({ ...errors, save: error });
     } else {
       history.push(`${BASE_PATH}/${section}/${name}`);
     }
   };
 
   const onCancel = () => {
-    history.push(`${BASE_PATH}/${section}/${name}`);
+    history.push(`${BASE_PATH}/${section}`);
   };
 
   const renderLoading = () => {
@@ -134,7 +134,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   };
 
   const renderSaveError = () => {
-    return (
+    return errors.save ? (
       <SectionError
         title={
           <FormattedMessage
@@ -142,9 +142,9 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
             defaultMessage="Error saving repository details"
           />
         }
-        error={saveError}
+        error={errors.save}
       />
-    );
+    ) : null;
   };
 
   const renderContent = () => {
@@ -160,7 +160,9 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
         repository={repository}
         isEditing={true}
         isSaving={isSaving}
-        saveError={saveError ? renderSaveError() : null}
+        errors={{
+          save: renderSaveError(),
+        }}
         onSave={onSave}
         onCancel={onCancel}
       />

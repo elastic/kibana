@@ -25,7 +25,6 @@ import { TypeDetails } from './type_details';
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
