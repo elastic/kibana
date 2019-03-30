@@ -19,6 +19,7 @@
 
 import Boom from 'boom';
 import { SavedObject, SavedObjectsClient } from '../service/saved_objects_client';
+import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
 interface ObjectToExport {
@@ -31,6 +32,7 @@ interface ExportObjectsOptions {
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
+  includeNestedDependencies: boolean;
 }
 
 export async function getSortedObjectsForExport({
@@ -38,6 +40,7 @@ export async function getSortedObjectsForExport({
   objects,
   savedObjectsClient,
   exportSizeLimit,
+  includeNestedDependencies,
 }: ExportObjectsOptions) {
   let objectsToExport: SavedObject[] = [];
   if (objects) {
@@ -64,6 +67,9 @@ export async function getSortedObjectsForExport({
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: objectsToExport } = findResponse);
+  }
+  if (includeNestedDependencies) {
+    objectsToExport = await injectNestedDependencies(objectsToExport, savedObjectsClient);
   }
   return sortObjects(objectsToExport);
 }

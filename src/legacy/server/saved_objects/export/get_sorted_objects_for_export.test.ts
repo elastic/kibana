@@ -66,6 +66,7 @@ describe('getSortedObjectsForExport()', () => {
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
+      includeNestedDependencies: false,
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -137,6 +138,7 @@ Array [
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
+        includeNestedDependencies: false,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
   });
@@ -175,6 +177,7 @@ Array [
           id: '2',
         },
       ],
+      includeNestedDependencies: false,
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -221,6 +224,103 @@ Array [
 `);
   });
 
+  test('includes nested dependencies when passed in', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+      ],
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
+    const response = await getSortedObjectsForExport({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      types: ['index-pattern', 'search'],
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+      includeNestedDependencies: true,
+    });
+    expect(response).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
+]
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "2",
+          "type": "search",
+        },
+      ],
+    ],
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {
     const exportOpts = {
       exportSizeLimit: 1,
@@ -236,6 +336,7 @@ Array [
           id: '2',
         },
       ],
+      includeNestedDependencies: false,
     };
     await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`

@@ -63,15 +63,33 @@ describe('POST /api/saved_objects/_export', () => {
       method: 'POST',
       url: '/api/saved_objects/_export',
       payload: {
-        type: 'index-pattern',
+        type: 'search',
+        includeNestedDependencies: true,
       },
     };
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       saved_objects: [
         {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+      ],
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
           id: '1',
           type: 'index-pattern',
+          attributes: {},
           references: [],
         },
       ],
@@ -86,9 +104,22 @@ describe('POST /api/saved_objects/_export', () => {
     expect(objects).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
+  },
+  Object {
+    "attributes": Object {},
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "name": "ref_0",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
   },
 ]
 `);
@@ -101,9 +132,29 @@ Array [
         "sortField": "_id",
         "sortOrder": "asc",
         "type": Array [
-          "index-pattern",
+          "search",
         ],
       },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ],
     ],
   ],
   "results": Array [
