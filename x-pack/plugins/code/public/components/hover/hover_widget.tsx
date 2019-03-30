@@ -96,8 +96,6 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   private renderInitialting() {
     return (
       <div className="hover-row">
-        {/*
-              // @ts-ignore */}
         <Text textAlign="center">
           <h4>Language Server is initializing…</h4>
           <p>Depending on the size of your repo, this could take a few minutes.</p>

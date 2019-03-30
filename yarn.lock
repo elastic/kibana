@@ -2554,6 +2554,15 @@
   resolved "https://registry.yarnpkg.com/@types/wrap-ansi/-/wrap-ansi-2.0.14.tgz#5afbdd8374de9ff8ad752cb03ab9f225f7c2ee24"
   integrity sha1-Wvvdg3Ten/itdSywOrnyJffC7iQ=
 
+"@types/wreck@^14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@types/wreck/-/wreck-14.0.0.tgz#8bf39fd789d32af63176bee5eb5705108cd8be5e"
+  integrity sha512-cxA8o5fGbXg2e/UUoA7z8lMaEw4CwxvJW1Fv+E8xP/n2MOzRdeQUX+e7aUxgr1ganECiIQXUka0OwwKR2ixo1w==
+  dependencies:
+    "@types/boom" "*"
+    "@types/events" "*"
+    "@types/node" "*"
+
 "@types/write-pkg@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@types/write-pkg/-/write-pkg-3.1.0.tgz#f58767f4fb9a6a3ad8e95d3e9cd1f2d026ceab26"

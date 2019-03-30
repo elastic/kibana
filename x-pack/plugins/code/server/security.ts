@@ -64,7 +64,6 @@ export class SecureRoute {
   }
 
   private isSecurityEnabledInEs() {
-    // @ts-ignore
     const xpackInfo = this.server.plugins.xpack_main.info;
     if (
       xpackInfo.isAvailable() &&

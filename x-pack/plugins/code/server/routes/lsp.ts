@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import hapi from 'hapi';
-// @ts-ignore
 import { groupBy, last } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';

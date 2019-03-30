@@ -20,7 +20,6 @@ export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
     });
 
     // Returns a race between our timeout and the passed in promise
-    // @ts-ignore
     return Promise.race([promise, timeout]);
   } else {
     return Promise.reject(boom);
