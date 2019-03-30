@@ -346,7 +346,7 @@
     "eslint-plugin-react": "^7.11.1",
     "faker": "1.1.0",
     "fetch-mock": "7.3.0",
-    "geckodriver": "1.12.2",
+    "geckodriver": "^1.16.0",
     "getopts": "2.0.0",
     "grunt": "1.0.1",
     "grunt-cli": "^1.2.0",
