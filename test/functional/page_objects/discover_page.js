@@ -28,6 +28,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
+
 
   class DiscoverPage {
     async getQueryField() {
@@ -151,6 +154,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
 
       return bars;
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getChartInterval() {

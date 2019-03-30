@@ -162,6 +162,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -261,7 +262,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct data for chart interval Weekly', async function () {
         const chartInterval = 'Weekly';
         const expectedBarChartData = [4757, 9247];
-
         await PageObjects.discover.setChartInterval(chartInterval);
         await retry.try(async () => {
           await verifyChartData(expectedBarChartData);
@@ -378,13 +378,14 @@ export default function ({ getService, getPageObjects }) {
       }
     });
 
-    describe('query #2, which has an empty time range', function () {
+    describe('query #2, which has an empty time range', async () => {
       const fromTime = '1999-06-11 09:22:11.000';
       const toTime = '1999-06-12 11:21:04.000';
 
-      before(() => {
+      before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('should show "no results"', async () => {
