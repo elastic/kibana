@@ -36,6 +36,6 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-node spawn "xpack functional tests ${CI_GROUP}" node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
+node ../spawn "xpack functional tests ${CI_GROUP}" node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
 echo ""
 echo ""
