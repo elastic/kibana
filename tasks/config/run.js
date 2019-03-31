@@ -82,7 +82,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('sasslint'),
-        require.resolve('../../scripts/sasslint')
+        'scripts/sasslint'
       ]
     },
 
@@ -92,7 +92,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('checkFileCasing'),
-        require.resolve('../../scripts/check_file_casing'),
+        'scripts/check_file_casing',
         '--quiet' // only log errors, not warnings
       ]
     },
@@ -103,7 +103,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('tslint'),
-        require.resolve('../../scripts/tslint')
+        'scripts/tslint'
       ]
     },
 
@@ -113,7 +113,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('typeCheck'),
-        require.resolve('../../scripts/type_check')
+        'scripts/type_check'
       ]
     },
 
@@ -123,7 +123,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('checkTsProjects'),
-        require.resolve('../../scripts/check_ts_projects')
+        'scripts/check_ts_projects'
       ]
     },
 
@@ -133,7 +133,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('i18nCheck'),
-        require.resolve('../../scripts/i18n_check'),
+        'scripts/i18n_check',
         '--ignore-missing',
       ]
     },
@@ -144,7 +144,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         ...spawn('mocha'),
-        require.resolve('../../scripts/mocha')
+        'scripts/mocha'
       ]
     },
 
