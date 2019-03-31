@@ -4,16 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerRoute } from 'hapi';
 import { Legacy } from 'kibana';
-import {
-  createEmailAction,
-  createSlackAction,
-  LoggerAction,
-  notificationService,
-  ServerFacade,
-} from './server';
-import { notificationServiceSendRoute } from './server/routes/api/v1/notifications';
+import { Plugin } from './server/plugin';
 
 /**
  * Initialize the Action Service with various actions provided by X-Pack, when configured.
@@ -21,26 +13,16 @@ import { notificationServiceSendRoute } from './server/routes/api/v1/notificatio
  * @param server {Object} HapiJS server instance
  */
 export function init(legacyServer: Legacy.Server): void {
-  const server: ServerFacade = {
+  const coreSetup = {
     log: legacyServer.log,
     config: legacyServer.config,
     plugins: legacyServer.plugins,
   };
 
-  // the logger
-  notificationService.setAction(new LoggerAction({ server }));
+  const notificationSetup = new Plugin().setup(coreSetup, {});
 
-  if (server.config().get('xpack.notifications.email.enabled')) {
-    notificationService.setAction(createEmailAction(server));
-  }
-
-  if (server.config().get('xpack.notifications.slack.enabled')) {
-    notificationService.setAction(createSlackAction(server));
-  }
-
-  const route: ServerRoute = notificationServiceSendRoute(server, notificationService);
-  legacyServer.route(route);
+  legacyServer.route(notificationSetup.getRoute());
 
   // expose the notification service for other plugins
-  legacyServer.expose('notificationService', notificationService);
+  legacyServer.expose('notificationService', notificationSetup.getService());
 }

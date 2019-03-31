@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import Joi from 'joi';
 import Boom from 'boom';
 import { Action, INotificationService, RequestFacade, ServerFacade } from '../../../../';
-
-import { Lifecycle, Request, RouteOptions, ServerRoute } from 'hapi';
 
 interface INotification {
   action: string;
@@ -95,9 +92,8 @@ export async function sendNotification(
 export function notificationServiceSendRoute(
   server: ServerFacade,
   notificationService: INotificationService
-): ServerRoute {
-  const options: RouteOptions = {};
-  const handler: Lifecycle.Method = (req: Request) => {
+) {
+  const handler = (req: any) => {
     const requestFacade: RequestFacade = {
       payload: req.payload as object,
     };
@@ -116,10 +112,10 @@ export function notificationServiceSendRoute(
     return Boom.badRequest(msg);
   };
 
-  const route: ServerRoute = {
+  const route = {
     method: 'POST',
     path: '/api/notifications/v1/notify',
-    options,
+    options: {},
     handler,
   };
 
