@@ -823,6 +823,10 @@ export interface KpiNetworkData {
   uniqueSourcePrivateIps?: number | null;
 
   uniqueDestinationPrivateIps?: number | null;
+
+  dnsQueries?: number | null;
+
+  tlsHandshakes?: number | null;
 }
 
 // ====================================================

@@ -9,7 +9,9 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
 import { mockMsearchOptions, mockOptions, mockRequest, mockResponse, mockResult } from './mock';
+import * as dnsQueryDsl from './query_dns.dsl';
 import * as generalQueryDsl from './query_general.dsl';
+import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
 
 describe('Network Kpi elasticsearch_adapter', () => {
@@ -23,6 +25,8 @@ describe('Network Kpi elasticsearch_adapter', () => {
   };
   let mockBuildQuery: jest.SpyInstance;
   let mockBuildUniquePrvateIpsQuery: jest.SpyInstance;
+  let mockBuildDnsQuery: jest.SpyInstance;
+  let mockBuildTlsHandshakeQuery: jest.SpyInstance;
   let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;
   let data: KpiNetworkData;
 
@@ -35,6 +39,11 @@ describe('Network Kpi elasticsearch_adapter', () => {
       mockBuildQuery = jest.spyOn(generalQueryDsl, 'buildGeneralQuery').mockReturnValue([]);
       mockBuildUniquePrvateIpsQuery = jest
         .spyOn(uniquePrvateIpQueryDsl, 'buildUniquePrvateIpQuery')
+        .mockReturnValue([]);
+
+      mockBuildDnsQuery = jest.spyOn(dnsQueryDsl, 'buildDnsQuery').mockReturnValue([]);
+      mockBuildTlsHandshakeQuery = jest
+        .spyOn(tlsHandshakesQueryDsl, 'buildTlsHandshakeQuery')
         .mockReturnValue([]);
       EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
       data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
@@ -56,6 +65,14 @@ describe('Network Kpi elasticsearch_adapter', () => {
 
     test('should build query for unique private ip (destination) with correct option', () => {
       expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith('destination', mockOptions);
+    });
+
+    test('should build query for dns with correct option', () => {
+      expect(mockBuildDnsQuery).toHaveBeenCalledWith(mockOptions);
+    });
+
+    test('should build query for tls handshakes with correct option', () => {
+      expect(mockBuildTlsHandshakeQuery).toHaveBeenCalledWith(mockOptions);
     });
 
     test('should send msearch request', () => {
@@ -103,6 +120,8 @@ describe('Network Kpi elasticsearch_adapter', () => {
         activeAgents: null,
         uniqueSourcePrivateIps: null,
         uniqueDestinationPrivateIps: null,
+        dnsQueries: null,
+        tlsHandshakes: null,
       });
     });
   });
