@@ -97,14 +97,14 @@ const start = async function () {
     repo: 'kibana',
     name: title,
     head_sha: process.env.ghprbActualCommit,
+    started_at: new Date().toISOString(),
     // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
     //details_url: 'http://www.google.com',
     //external_id: 'external id',
     status: 'in_progress',
     output: {
       title: cmdArgs.join(' '),
-      summary: `summary`,
-      text: `text`,
+      summary: `.`,
     },
   }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
 
@@ -123,6 +123,7 @@ const start = async function () {
       //external_id: 'external id',
       //status: 'complete',
       conclusion: code === 0 ? 'success' : 'failure',
+      completed_at: new Date().toISOString(),
       output: {
         title: cmdArgs.join(' '),
         summary: `summary`,
