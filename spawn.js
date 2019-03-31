@@ -88,7 +88,7 @@ const start = async function () {
   const cmd = process.argv[3];
   const cmdArgs = process.argv.slice(4);
   const cmdSpawnConfig = {
-    cwd: __dirname,
+    // cwd: __dirname,
     stdio: 'inherit'
   };
 
