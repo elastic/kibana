@@ -4573,6 +4573,22 @@
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "dnsQueries",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tlsHandshakes",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,

@@ -3644,6 +3644,10 @@ export namespace KpiNetworkDataResolvers {
       TypeParent,
       Context
     >;
+
+    dnsQueries?: DnsQueriesResolver<number | null, TypeParent, Context>;
+
+    tlsHandshakes?: TlsHandshakesResolver<number | null, TypeParent, Context>;
   }
 
   export type NetworkEventsResolver<
@@ -3667,6 +3671,16 @@ export namespace KpiNetworkDataResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type UniqueDestinationPrivateIpsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DnsQueriesResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TlsHandshakesResolver<
     R = number | null,
     Parent = KpiNetworkData,
     Context = SecOpsContext
