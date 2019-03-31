@@ -113,7 +113,8 @@ const start = async function () {
     headers: {
       'x-ratelimit-limit': limit,
       'x-ratelimit-remaining': remaining
-    } }) => console.log(`limit: ${remaining} / ${limit}`));
+    } }) => console.log(`limit: ${remaining} / ${limit}`))
+    .catch(err => console.log('*************ERROR: ', err));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
 
@@ -146,4 +147,5 @@ const start = async function () {
 
 };
 
+console.log('**********JUST BEFORE START');
 start();
