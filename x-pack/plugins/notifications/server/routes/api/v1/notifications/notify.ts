@@ -6,7 +6,7 @@
 
 // import Joi from 'joi';
 import Boom from 'boom';
-import { Action, INotificationService, ServerFacade } from '../../../../';
+import { Action, INotificationService, RequestFacade, ServerFacade } from '../../../../';
 
 import { Lifecycle, Request, RouteOptions, ServerRoute } from 'hapi';
 
@@ -98,8 +98,17 @@ export function notificationServiceSendRoute(
 ): ServerRoute {
   const options: RouteOptions = {};
   const handler: Lifecycle.Method = (req: Request) => {
-    if (isNotification(req.payload)) {
-      return sendNotification(server, notificationService, req.payload.action, req.payload.data);
+    const requestFacade: RequestFacade = {
+      payload: req.payload as object,
+    };
+
+    if (isNotification(requestFacade.payload)) {
+      return sendNotification(
+        server,
+        notificationService,
+        requestFacade.payload.action,
+        requestFacade.payload.data
+      );
     }
 
     const msg = `Unrecognized notification payload.`;

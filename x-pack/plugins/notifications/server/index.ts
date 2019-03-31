@@ -17,3 +17,7 @@ export interface ServerFacade {
   config: () => Legacy.KibanaConfig;
   plugins: { xpack_main: { info: { license: { isNotBasic: () => boolean } } } };
 }
+
+export interface RequestFacade {
+  payload: object;
+}
