@@ -23,13 +23,13 @@ import { getSort } from './lib/get_sort';
 import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
-import { dispatchRenderComplete } from '../render_complete';
-import { uiModules } from '../modules';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../courier/utils/courier_inspector_utils';
+import { dispatchRenderComplete } from 'ui/render_complete';
+import { uiModules } from 'ui/modules';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
-uiModules.get('kibana')
+uiModules.get('app/discover')
   .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier, i18n) {
     return {
       restrict: 'E',

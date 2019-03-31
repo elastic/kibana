@@ -18,9 +18,9 @@
  */
 
 import _ from 'lodash';
-import '../../filters/short_dots';
+import 'ui/filters/short_dots';
 import headerHtml from './table_header.html';
-import { uiModules } from '../../modules';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 

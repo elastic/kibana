@@ -20,15 +20,15 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import '../../doc_viewer';
-import '../../filters/uriescape';
-import '../../filters/short_dots';
-import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
+import 'ui/doc_viewer';
+import 'ui/filters/uriescape';
+import 'ui/filters/short_dots';
+import { noWhiteSpace } from '../../../../common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
-import { uiModules } from '../../modules';
+import { uiModules } from 'ui/modules';
 import { disableFilter } from '@kbn/es-query';
-import { dispatchRenderComplete } from '../../render_complete';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const module = uiModules.get('app/discover');
 
@@ -46,8 +46,8 @@ const MIN_LINE_LENGTH = 20;
  * ```
  */
 module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
-  const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
-  const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const cellTemplate = _.template(noWhiteSpace(require('../components/table_row/cell.html')));
+  const truncateByHeightTemplate = _.template(noWhiteSpace(require('../components/table_row/truncate_by_height.html')));
 
   return {
     restrict: 'A',

@@ -21,7 +21,7 @@ import angular from 'angular';
 import expect from '@kbn/expect';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import '../../private';
+import 'ui/private';
 import '..';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
