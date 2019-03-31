@@ -130,6 +130,26 @@ else
 fi
 
 ###
+### use the geckodriver cache if it exists
+###
+if [ -d "$dir/.geckodriver" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
+  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
+    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  GECKODRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
+
+###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"

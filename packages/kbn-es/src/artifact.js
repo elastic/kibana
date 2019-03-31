@@ -167,7 +167,7 @@ exports.Artifact = class Artifact {
       return;
     }
 
-    await this._verifyChecksum(artifactResp.checksum);
+    await this._verifyChecksum(artifactResp);
 
     // cache the etag for future downloads
     cache.writeMeta(dest, { etag: artifactResp.etag });
@@ -181,7 +181,7 @@ exports.Artifact = class Artifact {
    * @param {string} tmpPath
    * @param {string} etag
    * @param {string} ts
-   * @return {{ cached: true }|{ checksum: string, etag: string }}
+   * @return {{ cached: true }|{ checksum: string, etag: string, first500Bytes: Buffer }}
    */
   async _download(tmpPath, etag, ts) {
     const url = this.getUrl();
@@ -219,12 +219,23 @@ exports.Artifact = class Artifact {
     }
 
     const hash = createHash(this.getChecksumType());
+    let first500Bytes = Buffer.alloc(0);
+    let contentLength = 0;
 
     mkdirp.sync(path.dirname(tmpPath));
     await asyncPipeline(
       resp.body,
       new Transform({
         transform(chunk, encoding, cb) {
+          contentLength += Buffer.byteLength(chunk);
+
+          if (first500Bytes.length < 500) {
+            first500Bytes = Buffer.concat(
+              [first500Bytes, chunk],
+              first500Bytes.length + chunk.length
+            ).slice(0, 500);
+          }
+
           hash.update(chunk, encoding);
           cb(null, chunk);
         },
@@ -235,16 +246,18 @@ exports.Artifact = class Artifact {
     return {
       checksum: hash.digest('hex'),
       etag: resp.headers.get('etag'),
+      contentLength,
+      first500Bytes,
     };
   }
 
   /**
    * Verify the checksum of the downloaded artifact with the checksum at checksumUrl
-   * @param {string} actualChecksum
+   * @param {{ checksum: string, contentLength: number, first500Bytes: Buffer }} artifactResp
    * @return {Promise<void>}
    */
-  async _verifyChecksum(actualChecksum) {
-    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getUrl()));
+  async _verifyChecksum(artifactResp) {
+    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getChecksumUrl()));
 
     const abc = new AbortController();
     const resp = await fetch(this.getChecksumUrl(), {
@@ -258,11 +271,13 @@ exports.Artifact = class Artifact {
 
     // in format of stdout from `shasum` cmd, which is `<checksum>   <filename>`
     const [expectedChecksum] = (await resp.text()).split(' ');
-    if (actualChecksum !== expectedChecksum) {
+    if (artifactResp.checksum !== expectedChecksum) {
+      const len = `${artifactResp.first500Bytes / artifactResp.contentLength}`;
       throw createCliError(
         `artifact downloaded from ${this.getUrl()} does not match expected checksum\n` +
           `  expected: ${expectedChecksum}\n` +
-          `  received: ${actualChecksum}`
+          `  received: ${artifactResp.checksum}\n` +
+          `  content[${len}]: ${artifactResp.first500Bytes.toString('utf8')}`
       );
     }
 

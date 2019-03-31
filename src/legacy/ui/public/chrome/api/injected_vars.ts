@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { InjectedMetadataSetup } from '../../../../../core/public/injected_metadata';
+import { InjectedMetadataSetup } from '../../../../../core/public';
 
 let newPlatformInjectedVars: InjectedMetadataSetup;
 

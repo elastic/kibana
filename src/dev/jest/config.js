@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
+
 export default {
   rootDir: '../../..',
   roots: [
@@ -76,7 +78,7 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
-    'integration_tests/'
+    `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
