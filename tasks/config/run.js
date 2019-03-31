@@ -72,7 +72,7 @@ module.exports = function (grunt) {
       args: [
         require.resolve('../../spawn'),
         'eslint',
-        'node',
+        process.execPath,
         require.resolve('../../scripts/eslint'),
         '--no-cache'
       ]
