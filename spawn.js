@@ -89,6 +89,7 @@ const start = async function () {
   const cmdArgs = process.argv.slice(3);
   const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
 
+  console.log('spawn', title, cmd, cmdArgs.join(' '));
   //todo check env vars
   //todo - fire api request
   //get title
