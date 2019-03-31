@@ -121,7 +121,7 @@ module.exports = function (grunt) {
     checkTsProjects: {
       cmd: process.execPath,
       args: [
-        spawn('checkTsProjects'),
+        ...spawn('checkTsProjects'),
         require.resolve('../../scripts/check_ts_projects')
       ]
     },
