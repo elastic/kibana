@@ -63,6 +63,7 @@ module.exports = function (grunt) {
   ];
 
   console.log('eslint: ', process.execPath, require.resolve('../../spawn'), require.resolve('../../scripts/eslint'));
+  const spawn = title => [require.resolve('../../spawn'), title, process.execPath];
 
   return {
     // used by the test and jenkins:unit tasks
@@ -70,9 +71,7 @@ module.exports = function (grunt) {
     eslint: {
       cmd: process.execPath,
       args: [
-        require.resolve('../../spawn'),
-        'eslint',
-        process.execPath,
+        ...spawn('eslint'),
         require.resolve('../../scripts/eslint'),
         '--no-cache'
       ]
@@ -81,6 +80,7 @@ module.exports = function (grunt) {
     sasslint: {
       cmd: process.execPath,
       args: [
+        ...spawn('sasslint'),
         require.resolve('../../scripts/sasslint')
       ]
     },
@@ -90,6 +90,7 @@ module.exports = function (grunt) {
     checkFileCasing: {
       cmd: process.execPath,
       args: [
+        ...spawn('checkFileCasing'),
         require.resolve('../../scripts/check_file_casing'),
         '--quiet' // only log errors, not warnings
       ]
@@ -100,6 +101,7 @@ module.exports = function (grunt) {
     tslint: {
       cmd: process.execPath,
       args: [
+        ...spawn('tslint'),
         require.resolve('../../scripts/tslint')
       ]
     },
@@ -109,6 +111,7 @@ module.exports = function (grunt) {
     typeCheck: {
       cmd: process.execPath,
       args: [
+        ...spawn('typeCheck'),
         require.resolve('../../scripts/type_check')
       ]
     },
@@ -118,6 +121,7 @@ module.exports = function (grunt) {
     checkTsProjects: {
       cmd: process.execPath,
       args: [
+        spawn('checkTsProjects'),
         require.resolve('../../scripts/check_ts_projects')
       ]
     },
@@ -127,6 +131,7 @@ module.exports = function (grunt) {
     i18nCheck: {
       cmd: process.execPath,
       args: [
+        ...spawn('i18nCheck'),
         require.resolve('../../scripts/i18n_check'),
         '--ignore-missing',
       ]
@@ -137,6 +142,7 @@ module.exports = function (grunt) {
     mocha: {
       cmd: process.execPath,
       args: [
+        ...spawn('mocha'),
         require.resolve('../../scripts/mocha')
       ]
     },
@@ -186,6 +192,7 @@ module.exports = function (grunt) {
       },
       cmd: process.execPath,
       args: [
+        ...spawn('verifyNotice'),
         'scripts/notice',
         '--validate'
       ]
@@ -194,6 +201,7 @@ module.exports = function (grunt) {
     apiIntegrationTests: {
       cmd: process.execPath,
       args: [
+        ...spawn('apiIntegrationTests'),
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
         '--bail',
