@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  notificationService,
-  Action,
-  ActionResult,
-} from './service';
-export { createEmailAction } from './email';
-export { createSlackAction } from './slack';
-export { LoggerAction } from './logger';
+export { notificationService } from './notification_service';
+export { INotificationService } from './notification_service';
+export { Action, Field } from './action';
+export { ActionResult } from './action_result';

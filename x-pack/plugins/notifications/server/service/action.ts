@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '..';
 import { ActionResult } from './action_result';
+
+export interface Field {
+  field: string;
+  name: string;
+  type: string;
+}
 
 /**
  * Actions represent a singular, generic "action", such as "Send to Email".
@@ -13,7 +20,9 @@ import { ActionResult } from './action_result';
  * these actions from the UI (triggering a server-side call), but these should be called for such a purpose.
  */
 export class Action {
-
+  protected server: Server;
+  private id: string;
+  private name: string;
   /**
    * Create a new Action.
    *
@@ -24,7 +33,7 @@ export class Action {
    * @param {String} id The unique identifier for the action.
    * @param {String} name User-friendly name for the action.
    */
-  constructor({ server, id, name }) {
+  constructor({ server, id, name }: { server: Server; id: string; name: string }) {
     this.server = server;
     this.id = id;
     this.name = name;
@@ -35,7 +44,7 @@ export class Action {
    *
    * @return {String}
    */
-  getId() {
+  public getId(): string {
     return this.id;
   }
 
@@ -44,7 +53,7 @@ export class Action {
    *
    * @return {String}
    */
-  getName() {
+  public getName(): string {
     return this.name;
   }
 
@@ -55,9 +64,9 @@ export class Action {
    * This is intended to be a simple check of the {@code notification}, rather than an asynchronous action.
    *
    * @param {Object} notification The notification data to use.
-   * @return {Array} Array defining missing fields. Empty if none.
+   * @return {Array<Field>} Array defining missing fields. Empty if none.
    */
-  getMissingFields() {
+  public getMissingFields(data: any): Field[] {
     return [];
   }
 
@@ -72,7 +81,7 @@ export class Action {
    * @return {Promise} The result of the health check, which must be an {@code ActionResult}.
    * @throws {Error} if there is an unexpected failure occurs.
    */
-  async doPerformHealthCheck() {
+  public async doPerformHealthCheck(): Promise<ActionResult> {
     throw new Error(`[doPerformHealthCheck] is not implemented for '${this.name}' action.`);
   }
 
@@ -81,13 +90,13 @@ export class Action {
    *
    * @return {Promise} Always an {@code ActionResult}.
    */
-  async performHealthCheck() {
+  public async performHealthCheck(): Promise<ActionResult> {
     try {
       return await this.doPerformHealthCheck();
     } catch (error) {
       return new ActionResult({
         message: `Unable to perform '${this.name}' health check: ${error.message}.`,
-        error
+        error,
       });
     }
   }
@@ -101,8 +110,12 @@ export class Action {
    * @return {Promise} The result of the action, which must be a {@code ActionResult}.
    * @throws {Error} if the method is not implemented or an unexpected failure occurs.
    */
-  async doPerformAction(notification) {
-    throw new Error(`[doPerformAction] is not implemented for '${this.name}' action: ${JSON.stringify(notification)}`);
+  public async doPerformAction(notification: any): Promise<ActionResult> {
+    throw new Error(
+      `[doPerformAction] is not implemented for '${this.name}' action: ${JSON.stringify(
+        notification
+      )}`
+    );
   }
 
   /**
@@ -111,7 +124,7 @@ export class Action {
    * @return {Boolean} true when it is usable
    * @throws {Error} if there is an unexpected issue checking the license
    */
-  isLicenseValid() {
+  public isLicenseValid(): boolean {
     return this.server.plugins.xpack_main.info.license.isNotBasic();
   }
 
@@ -125,7 +138,7 @@ export class Action {
    * @param {Object} notification The notification data to use.
    * @return {Promise} The result of the action, which must be a {@code ActionResult}.
    */
-  async performAction(notification) {
+  public async performAction(notification: any): Promise<ActionResult> {
     try {
       if (!this.isLicenseValid()) {
         throw new Error(`The current license does not allow '${this.name}' action.`);
@@ -135,9 +148,8 @@ export class Action {
     } catch (error) {
       return new ActionResult({
         message: `Unable to perform '${this.name}' action: ${error.message}.`,
-        error
+        error,
       });
     }
   }
-
 }

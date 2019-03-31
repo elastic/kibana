@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 
-import { Action, ActionResult } from '../';
+import { Action, ActionResult, Field, Server } from '..';
 
 export const EMAIL_ACTION_ID = 'xpack-notifications-email';
 
@@ -14,6 +14,8 @@ export const EMAIL_ACTION_ID = 'xpack-notifications-email';
  * Email Action enables generic sending of emails, when configured.
  */
 export class EmailAction extends Action {
+  private transporter: any;
+  private defaults: any;
 
   /**
    * Create a new Action capable of sending emails.
@@ -23,14 +25,24 @@ export class EmailAction extends Action {
    * @param {Object} defaults Default fields used when sending emails.
    * @param {Object} _nodemailer Exposed for tests.
    */
-  constructor({ server, options, defaults = { }, _nodemailer = nodemailer }) {
+  constructor({
+    server,
+    options,
+    defaults = {},
+    _createTransport = createTransport,
+  }: {
+    server: Server;
+    options?: any;
+    defaults?: any;
+    _createTransport?: any;
+  }) {
     super({ server, id: EMAIL_ACTION_ID, name: 'Email' });
 
-    this.transporter = _nodemailer.createTransport(options, defaults);
+    this.transporter = _createTransport(options, defaults);
     this.defaults = defaults;
   }
 
-  getMissingFields(notification) {
+  public getMissingFields(notification: any): Field[] {
     const missingFields = [];
 
     if (!Boolean(this.defaults.to) && !Boolean(notification.to)) {
@@ -68,19 +80,19 @@ export class EmailAction extends Action {
     return missingFields;
   }
 
-  async doPerformHealthCheck() {
+  public async doPerformHealthCheck() {
     // this responds with a boolean 'true' response, otherwise throws an Error
     const response = await this.transporter.verify();
 
     return new ActionResult({
       message: `Email action SMTP configuration has been verified.`,
       response: {
-        verified: response
+        verified: response,
       },
     });
   }
 
-  async doPerformAction(notification) {
+  public async doPerformAction(notification: any): Promise<ActionResult> {
     // Note: This throws an Error upon failure
     const response = await this.transporter.sendMail({
       // email routing
@@ -99,5 +111,4 @@ export class EmailAction extends Action {
       response,
     });
   }
-
 }

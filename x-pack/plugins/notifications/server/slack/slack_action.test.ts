@@ -6,65 +6,59 @@
 
 import { WebClient } from '@slack/client';
 import { ActionResult } from '../';
-import {
-  SLACK_ACTION_ID,
-  SlackAction,
-  webClientCreator,
-} from './slack_action';
+import { SLACK_ACTION_ID, SlackAction } from './slack_action';
 
 describe('SlackAction', () => {
-
-  const server = { };
-  const options = { options: true };
-  const defaults = { defaults: true };
-  const client = {
+  const server: any = {};
+  const options: any = { options: true };
+  const defaults: any = { defaults: true };
+  const client: any = {
     api: {
       // see beforeEach
     },
     chat: {
       // see beforeEach
-    }
+    },
   };
-  let _webClientCreator;
+  let webClientCreator: (options: any) => WebClient;
 
-  let action;
+  let action: SlackAction;
 
   beforeEach(() => {
     client.api.test = jest.fn();
     client.chat.postMessage = jest.fn();
-    _webClientCreator = jest.fn().mockReturnValue(client);
+    webClientCreator = jest.fn().mockReturnValue(client);
 
-    action = new SlackAction({ server, options, defaults, _webClientCreator });
-  });
-
-  test('webClientCreator creates a WebClient', () => {
-    expect(webClientCreator('faketoken') instanceof WebClient).toBe(true);
+    action = new SlackAction({ server, options, defaults, _webClientCreator: webClientCreator });
   });
 
   test('id and name to be from constructor', () => {
     expect(action.getId()).toBe(SLACK_ACTION_ID);
     expect(action.getName()).toBe('Slack');
-    expect(action.client).toBe(client);
 
-    expect(_webClientCreator).toHaveBeenCalledTimes(1);
-    expect(_webClientCreator).toHaveBeenCalledWith(options);
+    expect(webClientCreator).toHaveBeenCalledTimes(1);
+    expect(webClientCreator).toHaveBeenCalledWith(options);
   });
 
   describe('getMissingFields', () => {
-
     test('returns missing fields', () => {
       const channel = { field: 'channel', name: 'Channel', type: 'text' };
       const subject = { field: 'subject', name: 'Message', type: 'markdown' };
 
       const missing = [
-        { defaults: { }, notification: { }, missing: [ channel, subject, ], },
-        { defaults: { }, notification: { channel: '#kibana', }, missing: [ subject, ], },
-        { defaults: { channel: '#kibana', }, notification: { }, missing: [ subject, ], },
-        { defaults: { }, notification: { subject: 'subject', }, missing: [ channel, ], },
+        { defaults: {}, notification: {}, missing: [channel, subject] },
+        { defaults: {}, notification: { channel: '#kibana' }, missing: [subject] },
+        { defaults: { channel: '#kibana' }, notification: {}, missing: [subject] },
+        { defaults: {}, notification: { subject: 'subject' }, missing: [channel] },
       ];
 
       missing.forEach(check => {
-        const newDefaultsAction = new SlackAction({ server, options, defaults: check.defaults, _webClientCreator });
+        const newDefaultsAction = new SlackAction({
+          server,
+          options,
+          defaults: check.defaults,
+          _webClientCreator: webClientCreator,
+        });
 
         expect(newDefaultsAction.getMissingFields(check.notification)).toEqual(check.missing);
       });
@@ -72,29 +66,30 @@ describe('SlackAction', () => {
 
     test('returns [] when all fields exist', () => {
       const exists = [
-        { defaults: { }, notification: { channel: '#kibana', subject: 'subject', }, },
-        { defaults: { channel: '#kibana', }, notification: { subject: 'subject', }, },
+        { defaults: {}, notification: { channel: '#kibana', subject: 'subject' } },
+        { defaults: { channel: '#kibana' }, notification: { subject: 'subject' } },
       ];
 
       exists.forEach(check => {
-        const newDefaultsAction = new SlackAction({ server, options, defaults: check.defaults, _webClientCreator });
+        const newDefaultsAction = new SlackAction({
+          server,
+          options,
+          defaults: check.defaults,
+          _webClientCreator: webClientCreator,
+        });
 
         expect(newDefaultsAction.getMissingFields(check.notification)).toEqual([]);
       });
     });
-
   });
 
   describe('doPerformHealthCheck', () => {
-
     test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       client.api.test.mockRejectedValue(error);
 
-      await expect(action.doPerformHealthCheck())
-        .rejects
-        .toThrow(error);
+      await expect(action.doPerformHealthCheck()).rejects.toThrow(error);
 
       expect(client.api.test).toHaveBeenCalledTimes(1);
       expect(client.api.test).toHaveBeenCalledWith();
@@ -149,18 +144,16 @@ describe('SlackAction', () => {
       expect(client.api.test).toHaveBeenCalledTimes(1);
       expect(client.api.test).toHaveBeenCalledWith();
     });
-
   });
 
   describe('renderMessage', () => {
-
     test('does not contain attachments', () => {
       const message = { subject: 'subject' };
       const response = action.renderMessage(message);
 
       expect(response).toMatchObject({
         text: message.subject,
-        attachments: [ ]
+        attachments: [],
       });
     });
 
@@ -170,27 +163,20 @@ describe('SlackAction', () => {
 
       expect(response).toMatchObject({
         text: message.subject,
-        attachments: [
-          {
-            text: message.markdown
-          }
-        ]
+        attachments: [{ text: message.markdown }],
       });
     });
-
   });
 
   describe('doPerformAction', () => {
-    const message = { channel: '#kibana', subject: 'subject', markdown: 'body', };
+    const message = { channel: '#kibana', subject: 'subject', markdown: 'body' };
 
     test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       client.chat.postMessage.mockRejectedValue(error);
 
-      await expect(action.doPerformAction(message))
-        .rejects
-        .toThrow(error);
+      await expect(action.doPerformAction(message)).rejects.toThrow(error);
 
       expect(client.chat.postMessage).toHaveBeenCalledTimes(1);
       expect(client.chat.postMessage).toHaveBeenCalledWith({
@@ -220,7 +206,6 @@ describe('SlackAction', () => {
         channel: message.channel,
       });
     });
-
 
     test('returns ActionResult for success', async () => {
       const response = { fake: true };
@@ -255,13 +240,20 @@ describe('SlackAction', () => {
         ...message,
         channel: undefined,
       };
-      const newDefaultsAction = new SlackAction({ server, options, defaults: channelDefaults, _webClientCreator });
+      const newDefaultsAction = new SlackAction({
+        server,
+        options,
+        defaults: channelDefaults,
+        _webClientCreator: webClientCreator,
+      });
 
       const result = await newDefaultsAction.doPerformAction(noChannelMessage);
 
       expect(result instanceof ActionResult).toBe(true);
       expect(result.isOk()).toBe(true);
-      expect(result.getMessage()).toMatch(`Posted Slack message to channel '${channelDefaults.channel}'.`);
+      expect(result.getMessage()).toMatch(
+        `Posted Slack message to channel '${channelDefaults.channel}'.`
+      );
       expect(result.getResponse()).toBe(response);
 
       expect(client.chat.postMessage).toHaveBeenCalledTimes(1);
@@ -271,7 +263,5 @@ describe('SlackAction', () => {
         channel: channelDefaults.channel,
       });
     });
-
   });
-
 });

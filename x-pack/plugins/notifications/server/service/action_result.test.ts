@@ -7,7 +7,6 @@
 import { ActionResult } from './action_result';
 
 describe('ActionResult', () => {
-
   const message = 'this is a message';
   const response = { other: { side: { response: true } } };
   const error = { message: `Error: ${message}` };
@@ -50,5 +49,4 @@ describe('ActionResult', () => {
       response,
     });
   });
-
 });

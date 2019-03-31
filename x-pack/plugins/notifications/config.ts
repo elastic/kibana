@@ -10,7 +10,7 @@
  * @param {Object} Joi - HapiJS Joi module that allows for schema validation
  * @return {Object} config schema
  */
-export const config = (Joi) => {
+export function config(Joi: any) {
   return Joi.object({
     enabled: Joi.boolean().default(true),
     email: Joi.object({
@@ -22,14 +22,20 @@ export const config = (Joi) => {
         pool: Joi.boolean().default(false),
         auth: Joi.object({
           username: Joi.string(),
-          password: Joi.string()
+          password: Joi.string(),
         }).default(),
       }).default(),
       defaults: Joi.object({
         from: Joi.string(),
-        to: Joi.array().single().items(Joi.string()),
-        cc: Joi.array().single().items(Joi.string()),
-        bcc: Joi.array().single().items(Joi.string()),
+        to: Joi.array()
+          .single()
+          .items(Joi.string()),
+        cc: Joi.array()
+          .single()
+          .items(Joi.string()),
+        bcc: Joi.array()
+          .single()
+          .items(Joi.string()),
       }).default(),
     }).default(),
     slack: Joi.object({
@@ -46,6 +52,6 @@ export const config = (Joi) => {
         unfurl_media: Joi.boolean().default(true),
         username: Joi.string(),
       }).default(),
-    })
+    }),
   }).default();
-};
+}

@@ -4,42 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../';
+import { ActionResult } from '..';
 import { EMAIL_ACTION_ID, EmailAction } from './email_action';
 
 describe('EmailAction', () => {
-
-  const server = { };
-  const options = { options: true };
-  const defaults = { defaults: true };
-  const transporter = {
+  const server: any = {};
+  const options: any = { options: true };
+  const defaults: any = { defaults: true };
+  const transporter: any = {
     // see beforeEach
   };
-  const _nodemailer = {
+  let transport: any = {
     // see beforeEach
   };
 
-  let action;
+  let action: EmailAction;
 
   beforeEach(() => {
     transporter.verify = jest.fn();
     transporter.sendMail = jest.fn();
-    _nodemailer.createTransport = jest.fn().mockReturnValue(transporter);
+    transport = jest.fn().mockReturnValue(transporter);
 
-    action = new EmailAction({ server, options, defaults, _nodemailer });
+    action = new EmailAction({ server, options, defaults, _createTransport: transport });
   });
 
   test('id and name to be from constructor', () => {
     expect(action.getId()).toBe(EMAIL_ACTION_ID);
     expect(action.getName()).toBe('Email');
-    expect(action.transporter).toBe(transporter);
 
-    expect(_nodemailer.createTransport).toHaveBeenCalledTimes(1);
-    expect(_nodemailer.createTransport).toHaveBeenCalledWith(options, defaults);
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect(transport).toHaveBeenCalledWith(options, defaults);
   });
 
   describe('getMissingFields', () => {
-
     test('returns missing fields', () => {
       const to = { field: 'to', name: 'To', type: 'email' };
       const from = { field: 'from', name: 'From', type: 'email' };
@@ -47,17 +44,45 @@ describe('EmailAction', () => {
       const markdown = { field: 'markdown', name: 'Body', type: 'markdown' };
 
       const missing = [
-        { defaults: { }, notification: { }, missing: [ to, from, subject, markdown, ], },
-        { defaults: { }, notification: { from: 'b@c.co', subject: 'subject', markdown: 'body', }, missing: [ to, ], },
-        { defaults: { from: 'b@c.co', }, notification: { subject: 'subject', markdown: 'body', }, missing: [ to, ], },
-        { defaults: { }, notification: { to: 'a@b.co', subject: 'subject', markdown: 'body', }, missing: [ from, ], },
-        { defaults: { to: 'a@b.co', }, notification: { subject: 'subject', markdown: 'body', }, missing: [ from, ], },
-        { defaults: { }, notification: { to: 'a@b.co', from: 'b@c.co', markdown: 'body', }, missing: [ subject, ], },
-        { defaults: { }, notification: { to: 'a@b.co', from: 'b@c.co', subject: 'subject', }, missing: [ markdown, ], },
+        { defaults: {}, notification: {}, missing: [to, from, subject, markdown] },
+        {
+          defaults: {},
+          notification: { from: 'b@c.co', subject: 'subject', markdown: 'body' },
+          missing: [to],
+        },
+        {
+          defaults: { from: 'b@c.co' },
+          notification: { subject: 'subject', markdown: 'body' },
+          missing: [to],
+        },
+        {
+          defaults: {},
+          notification: { to: 'a@b.co', subject: 'subject', markdown: 'body' },
+          missing: [from],
+        },
+        {
+          defaults: { to: 'a@b.co' },
+          notification: { subject: 'subject', markdown: 'body' },
+          missing: [from],
+        },
+        {
+          defaults: {},
+          notification: { to: 'a@b.co', from: 'b@c.co', markdown: 'body' },
+          missing: [subject],
+        },
+        {
+          defaults: {},
+          notification: { to: 'a@b.co', from: 'b@c.co', subject: 'subject' },
+          missing: [markdown],
+        },
       ];
 
       missing.forEach(check => {
-        const newDefaultsAction = new EmailAction({ server, defaults: check.defaults, _nodemailer });
+        const newDefaultsAction = new EmailAction({
+          server,
+          defaults: check.defaults,
+          _createTransport: transport,
+        });
 
         expect(newDefaultsAction.getMissingFields(check.notification)).toEqual(check.missing);
       });
@@ -65,31 +90,43 @@ describe('EmailAction', () => {
 
     test('returns [] when all fields exist', () => {
       const exists = [
-        { defaults: { }, notification: { to: 'a@b.co', from: 'b@c.co', subject: 'subject', markdown: 'body', }, },
-        { defaults: { to: 'a@b.co', }, notification: { from: 'b@c.co', subject: 'subject', markdown: 'body', }, },
-        { defaults: { from: 'b@c.co', }, notification: { to: 'a@b.co', subject: 'subject', markdown: 'body', }, },
-        { defaults: { to: 'a@b.co', from: 'b@c.co', }, notification: { subject: 'subject', markdown: 'body', }, },
+        {
+          defaults: {},
+          notification: { to: 'a@b.co', from: 'b@c.co', subject: 'subject', markdown: 'body' },
+        },
+        {
+          defaults: { to: 'a@b.co' },
+          notification: { from: 'b@c.co', subject: 'subject', markdown: 'body' },
+        },
+        {
+          defaults: { from: 'b@c.co' },
+          notification: { to: 'a@b.co', subject: 'subject', markdown: 'body' },
+        },
+        {
+          defaults: { to: 'a@b.co', from: 'b@c.co' },
+          notification: { subject: 'subject', markdown: 'body' },
+        },
       ];
 
       exists.forEach(check => {
-        const newDefaultsAction = new EmailAction({ server, defaults: check.defaults, _nodemailer });
+        const newDefaultsAction = new EmailAction({
+          server,
+          defaults: check.defaults,
+          _createTransport: transport,
+        });
 
         expect(newDefaultsAction.getMissingFields(check.notification)).toEqual([]);
       });
     });
-
   });
 
   describe('doPerformHealthCheck', () => {
-
     test('rethrows Error for failure', async () => {
       const error = new Error('TEST - expected');
 
       transporter.verify.mockRejectedValue(error);
 
-      await expect(action.doPerformHealthCheck())
-        .rejects
-        .toThrow(error);
+      await expect(action.doPerformHealthCheck()).rejects.toThrow(error);
 
       expect(transporter.verify).toHaveBeenCalledTimes(1);
       expect(transporter.verify).toHaveBeenCalledWith();
@@ -104,13 +141,12 @@ describe('EmailAction', () => {
       expect(result.isOk()).toBe(true);
       expect(result.getMessage()).toMatch('Email action SMTP configuration has been verified.');
       expect(result.getResponse()).toEqual({
-        verified: true
+        verified: true,
       });
 
       expect(transporter.verify).toHaveBeenCalledTimes(1);
       expect(transporter.verify).toHaveBeenCalledWith();
     });
-
   });
 
   describe('doPerformAction', () => {
@@ -121,9 +157,7 @@ describe('EmailAction', () => {
 
       transporter.sendMail.mockRejectedValue(error);
 
-      await expect(action.doPerformAction(email))
-        .rejects
-        .toThrow(error);
+      await expect(action.doPerformAction(email)).rejects.toThrow(error);
 
       expect(transporter.sendMail).toHaveBeenCalledTimes(1);
       expect(transporter.sendMail).toHaveBeenCalledWith({
@@ -160,7 +194,5 @@ describe('EmailAction', () => {
         text: email.markdown,
       });
     });
-
   });
-
 });

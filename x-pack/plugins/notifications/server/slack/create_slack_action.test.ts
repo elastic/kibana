@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '..';
+import { createSlackAction, defaultsFromConfig, optionsFromConfig } from './create_slack_action';
 import { SlackAction } from './slack_action';
-import {
-  createSlackAction,
-  defaultsFromConfig,
-  optionsFromConfig,
-} from './create_slack_action';
 
 describe('create_slack_action', () => {
-
   test('optionsFromConfig uses config without modification', () => {
-    const get = key => {
-      const suffixes = [
-        'token',
-      ];
+    const get = (key: string) => {
+      const suffixes = ['token'];
       const value = suffixes.find(suffix => {
         return `xpack.notifications.slack.${suffix}` === key;
       });
@@ -35,7 +29,7 @@ describe('create_slack_action', () => {
   });
 
   test('defaultsFromConfig uses config without modification', () => {
-    const get = key => {
+    const get = (key: string) => {
       const suffixes = [
         'channel',
         'as_user',
@@ -72,23 +66,30 @@ describe('create_slack_action', () => {
   });
 
   test('createSlackAction', async () => {
-    const config = { };
-    const server = { config: jest.fn().mockReturnValue(config) };
-    const _options = jest.fn().mockReturnValue({ options: true });
+    const config = {};
+    const testOptions = jest.fn().mockReturnValue({ options: true });
     const defaults = { defaults: true };
-    const _defaults = jest.fn().mockReturnValue(defaults);
+    const testDefaults = jest.fn().mockReturnValue(defaults);
 
-    const action = createSlackAction(server, { _options, _defaults });
+    const server: Server = {
+      log: jest.fn(),
+      route: jest.fn(),
+      config: jest.fn().mockReturnValue(config),
+      plugins: {},
+    };
+
+    const action: SlackAction = createSlackAction(server, {
+      _options: testOptions,
+      _defaults: testDefaults,
+    });
 
     expect(action instanceof SlackAction).toBe(true);
-    expect(action.defaults).toBe(defaults);
 
     expect(server.config).toHaveBeenCalledTimes(1);
     expect(server.config).toHaveBeenCalledWith();
-    expect(_options).toHaveBeenCalledTimes(1);
-    expect(_options).toHaveBeenCalledWith(config);
-    expect(_defaults).toHaveBeenCalledTimes(1);
-    expect(_defaults).toHaveBeenCalledWith(config);
+    expect(testOptions).toHaveBeenCalledTimes(1);
+    expect(testOptions).toHaveBeenCalledWith(config);
+    expect(testDefaults).toHaveBeenCalledTimes(1);
+    expect(testDefaults).toHaveBeenCalledWith(config);
   });
-
 });

@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  notificationService,
-  createEmailAction,
-  createSlackAction,
-  LoggerAction,
-} from './server';
+import { Server } from 'hapi';
+import { createEmailAction, createSlackAction, LoggerAction, notificationService } from './server';
 import { notificationServiceSendRoute } from './server/routes/api/v1/notifications';
 
 /**
@@ -17,7 +13,7 @@ import { notificationServiceSendRoute } from './server/routes/api/v1/notificatio
  *
  * @param server {Object} HapiJS server instance
  */
-export function init(server) {
+export function init(server: Server): void {
   const config = server.config();
 
   // the logger

@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../';
+import { ActionResult, Server } from '..';
 import { LOGGER_ACTION_ID, LoggerAction } from './logger_action';
 
 describe('LoggerAction', () => {
+  const server: Server = {
+    log: jest.fn(),
+    route: jest.fn(),
+    config: jest.fn(),
+    plugins: {},
+  };
 
-  const action = new LoggerAction({ server: { } });
+  const action = new LoggerAction({ server });
 
   test('id and name to be from constructor', () => {
-    expect(action.id).toBe(LOGGER_ACTION_ID);
-    expect(action.name).toBe('Log');
+    expect(action.getId()).toBe(LOGGER_ACTION_ID);
+    expect(action.getName()).toBe('Log');
   });
 
   test('getMissingFields to return []', () => {
-    expect(action.getMissingFields()).toEqual([]);
+    expect(action.getMissingFields({})).toEqual([]);
   });
 
   test('doPerformHealthCheck returns ActionResult', async () => {
@@ -26,25 +32,19 @@ describe('LoggerAction', () => {
     expect(result instanceof ActionResult).toBe(true);
     expect(result.isOk()).toBe(true);
     expect(result.getMessage()).toMatch('Logger action is always usable.');
-    expect(result.getResponse()).toEqual({ });
+    expect(result.getResponse()).toEqual({});
   });
 
   test('doPerformAction logs and returns ActionResult', async () => {
     const notification = { fake: true };
-
-    const logger = jest.fn();
-    const server = { log: logger };
-    const action = new LoggerAction({ server });
-
-    const result = await action.doPerformAction(notification);
+    const result = await new LoggerAction({ server }).doPerformAction(notification);
 
     expect(result instanceof ActionResult).toBe(true);
     expect(result.isOk()).toBe(true);
     expect(result.getMessage()).toMatch('Logged data returned as response.');
     expect(result.getResponse()).toBe(notification);
 
-    expect(logger).toHaveBeenCalledTimes(1);
-    expect(logger).toHaveBeenCalledWith([LOGGER_ACTION_ID, 'info'], notification);
+    expect(server.log).toHaveBeenCalledTimes(1);
+    expect(server.log).toHaveBeenCalledWith([LOGGER_ACTION_ID, 'info'], notification);
   });
-
 });

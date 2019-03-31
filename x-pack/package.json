@@ -56,6 +56,7 @@
     "@types/lodash": "^3.10.1",
     "@types/mocha": "^5.2.6",
     "@types/object-hash": "^1.2.0",
+    "@types/nodemailer": "^4.6.7",
     "@types/pngjs": "^3.3.1",
     "@types/prop-types": "^15.5.3",
     "@types/react-dom": "^16.8.0",

@@ -8,6 +8,9 @@
  * Action Results represent generic, predictable responses from Actions.
  */
 export class ActionResult {
+  private message: string;
+  private response: any;
+  private error: any;
 
   /**
    * Create a new Action Result.
@@ -18,11 +21,10 @@ export class ActionResult {
    * @param {Object|undefined} response The response from the "other" side.
    * @param {Object|undefined} error The error, if any.
    */
-  constructor({ message, response, error }) {
+  constructor({ message, response, error }: { message: string; response?: any; error?: any }) {
     this.message = message;
     this.response = response;
     this.error = error;
-    this.ok = !Boolean(error);
   }
 
   /**
@@ -30,7 +32,7 @@ export class ActionResult {
    *
    * @returns {Object|undefined} The error response, or {@code undefined} if no error.
    */
-  getError() {
+  public getError() {
     return this.error;
   }
 
@@ -39,7 +41,7 @@ export class ActionResult {
    *
    * @returns {String} The message.
    */
-  getMessage() {
+  public getMessage(): string {
     return this.message;
   }
 
@@ -48,7 +50,7 @@ export class ActionResult {
    *
    * @returns {Object|undefined} The JSON response.
    */
-  getResponse() {
+  public getResponse() {
     return this.response;
   }
 
@@ -57,17 +59,16 @@ export class ActionResult {
    *
    * @returns {Boolean} {@code true} for success.
    */
-  isOk() {
-    return this.ok;
+  public isOk(): boolean {
+    return !Boolean(this.error);
   }
 
-  toJson() {
+  public toJson() {
     return {
-      ok: this.ok,
+      ok: this.isOk(),
       error: this.error,
       message: this.message,
       response: this.response,
     };
   }
-
 }

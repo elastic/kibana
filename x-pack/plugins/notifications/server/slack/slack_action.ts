@@ -6,7 +6,7 @@
 
 import { WebClient } from '@slack/client';
 
-import { Action, ActionResult } from '../';
+import { Action, ActionResult, Field, Server } from '../';
 
 export const SLACK_ACTION_ID = 'xpack-notifications-slack';
 
@@ -18,7 +18,7 @@ export const SLACK_ACTION_ID = 'xpack-notifications-slack';
  * @param {Object} options Slack API options.
  * @returns {WebClient} Always.
  */
-export function webClientCreator(options) {
+export function webClientCreator(options: any): WebClient {
   return new WebClient(options.token);
 }
 
@@ -26,6 +26,8 @@ export function webClientCreator(options) {
  * Slack Action enables generic sending of Slack messages.
  */
 export class SlackAction extends Action {
+  private defaults: any;
+  private client: any;
 
   /**
    * Create a new Action capable of sending Slack messages.
@@ -35,14 +37,25 @@ export class SlackAction extends Action {
    * @param {Object} defaults Default fields used when sending messages.
    * @param {Function} _webClientCreator Exposed for tests.
    */
-  constructor({ server, options, defaults = { }, _webClientCreator = webClientCreator }) {
+
+  constructor({
+    server,
+    options,
+    defaults = {},
+    _webClientCreator = webClientCreator,
+  }: {
+    server: Server;
+    options: any;
+    defaults: any;
+    _webClientCreator?: (options: any) => WebClient;
+  }) {
     super({ server, id: SLACK_ACTION_ID, name: 'Slack' });
 
     this.client = _webClientCreator(options);
     this.defaults = defaults;
   }
 
-  getMissingFields(data) {
+  public getMissingFields(data: any): Field[] {
     const missingFields = [];
 
     if (!Boolean(this.defaults.channel) && !Boolean(data.channel)) {
@@ -64,7 +77,7 @@ export class SlackAction extends Action {
     return missingFields;
   }
 
-  async doPerformHealthCheck() {
+  public async doPerformHealthCheck() {
     const response = await this.client.api.test();
 
     if (response.ok) {
@@ -84,7 +97,7 @@ export class SlackAction extends Action {
   /**
    * Render the message based on whether or not a {@code markdown} body was supplied.
    */
-  renderMessage({ subject, markdown }) {
+  public renderMessage({ subject, markdown = '' }: { subject: string; markdown?: string }) {
     const attachments = [];
 
     if (markdown) {
@@ -94,7 +107,15 @@ export class SlackAction extends Action {
     return { text: subject, attachments };
   }
 
-  async doPerformAction({ subject, markdown, channel }) {
+  public async doPerformAction({
+    subject,
+    markdown,
+    channel,
+  }: {
+    subject: string;
+    markdown: string;
+    channel?: string;
+  }) {
     // NOTE: When we want to support files, then we should look into using client.files.upload({ ... })
     //       without _also_ sending chat message because the file upload endpoint supports chat behavior
     //       in addition to files, but the reverse is not true.
@@ -112,5 +133,4 @@ export class SlackAction extends Action {
       error: response.error,
     });
   }
-
 }

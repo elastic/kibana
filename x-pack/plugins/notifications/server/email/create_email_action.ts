@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '..';
 import { EmailAction } from './email_action';
 
 /**
@@ -12,7 +13,7 @@ import { EmailAction } from './email_action';
  * @param {Object} config The server configuration.
  * @return {Object} An object that configures Nodemailer.
  */
-export function optionsFromConfig(config) {
+export function optionsFromConfig(config: any) {
   return {
     host: config.get('xpack.notifications.email.smtp.host'),
     port: config.get('xpack.notifications.email.smtp.port'),
@@ -33,7 +34,7 @@ export function optionsFromConfig(config) {
  * @param {Object} config The server configuration.
  * @return {Object} An object that configures Nodemailer on a per-message basis.
  */
-export function defaultsFromConfig(config) {
+export function defaultsFromConfig(config: any) {
   return {
     from: config.get('xpack.notifications.email.defaults.from'),
     to: config.get('xpack.notifications.email.defaults.to'),
@@ -48,7 +49,13 @@ export function defaultsFromConfig(config) {
  * @param {Object} server The server object.
  * @return {EmailAction} A new email action based on the kibana.yml configuration.
  */
-export function createEmailAction(server, { _options = optionsFromConfig, _defaults = defaultsFromConfig } = { }) {
+export function createEmailAction(
+  server: Server,
+  {
+    _options = optionsFromConfig,
+    _defaults = defaultsFromConfig,
+  }: { _options?: any; _defaults?: any } = {}
+): EmailAction {
   const config = server.config();
 
   const options = _options(config);

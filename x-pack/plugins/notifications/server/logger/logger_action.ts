@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action, ActionResult } from '../';
+import { Action, ActionResult, Field, Server } from '..';
 
 export const LOGGER_ACTION_ID = 'xpack-notifications-logger';
 
@@ -14,29 +14,27 @@ export const LOGGER_ACTION_ID = 'xpack-notifications-logger';
  * This is mostly useful for debugging.
  */
 export class LoggerAction extends Action {
-
-  constructor({ server }) {
+  constructor({ server }: { server: Server }) {
     super({ server, id: LOGGER_ACTION_ID, name: 'Log' });
   }
 
-  getMissingFields() {
+  public getMissingFields(data: any): Field[] {
     return [];
   }
 
-  async doPerformHealthCheck() {
+  public async doPerformHealthCheck() {
     return new ActionResult({
       message: `Logger action is always usable.`,
-      response: { },
+      response: {},
     });
   }
 
-  async doPerformAction(notification) {
+  public async doPerformAction(notification: any): Promise<ActionResult> {
     this.server.log([LOGGER_ACTION_ID, 'info'], notification);
 
     return new ActionResult({
       message: 'Logged data returned as response.',
-      response: notification
+      response: notification,
     });
   }
-
 }

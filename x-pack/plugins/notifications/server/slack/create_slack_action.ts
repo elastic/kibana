@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '..';
 import { SlackAction } from './slack_action';
 
 /**
@@ -12,9 +13,9 @@ import { SlackAction } from './slack_action';
  * @param {Object} config The server configuration.
  * @return {Object} An object that configures Slack.
  */
-export function optionsFromConfig(config) {
+export function optionsFromConfig(config: any) {
   return {
-    token: config.get('xpack.notifications.slack.token')
+    token: config.get('xpack.notifications.slack.token'),
   };
 }
 
@@ -26,7 +27,7 @@ export function optionsFromConfig(config) {
  * @param {Object} config The server configuration.
  * @return {Object} An object that configures Slack on a per-message basis.
  */
-export function defaultsFromConfig(config) {
+export function defaultsFromConfig(config: any) {
   return {
     channel: config.get('xpack.notifications.slack.defaults.channel'),
     as_user: config.get('xpack.notifications.slack.defaults.as_user'),
@@ -43,10 +44,13 @@ export function defaultsFromConfig(config) {
 /**
  * Create a new Slack Action based on the configuration.
  *
- * @param {Object} server The server object.
+ * @param {Server} server The server object.
  * @return {SlackAction} A new Slack Action based on the kibana.yml configuration.
  */
-export function createSlackAction(server, { _options = optionsFromConfig, _defaults = defaultsFromConfig } = { }) {
+export function createSlackAction(
+  server: Server,
+  { _options = optionsFromConfig, _defaults = defaultsFromConfig } = {}
+): SlackAction {
   const config = server.config();
 
   const options = _options(config);
