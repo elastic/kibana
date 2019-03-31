@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { uiModules } from '../modules';
-// Filters out all duplicate items in an array
+import MarkdownIt from 'markdown-it';
+import { uiModules } from 'ui/modules';
+import 'angular-sanitize';
+
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 uiModules
-  .get('kibana')
-  .filter('unique', function () {
-    return function (arr) {
-      const list = _.unique(arr);
-      return list;
-    };
+  .get('kibana', ['ngSanitize'])
+  .filter('markdown', function ($sanitize) {
+    return md => md ? $sanitize(markdownIt.render(md)) : '';
   });
