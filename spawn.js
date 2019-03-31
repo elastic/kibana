@@ -120,6 +120,7 @@ const start = async function () {
   //todo - fire api request before exiting
   // determine success or failure
   ls.on('close', (code) => {
+    console.log('******************TASK COMPLETE');
     clientWithAuth.checks.create({
       owner: 'elastic',
       repo: 'kibana',
@@ -141,7 +142,7 @@ const start = async function () {
         'x-ratelimit-remaining': remaining } }) => {
       console.log(`limit: ${remaining} / ${limit}`);
       process.exit(code);});
-  });
+  }).catch(err => console.log('*************ERROR: ', err));
 
 };
 
