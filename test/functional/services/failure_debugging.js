@@ -58,6 +58,10 @@ export async function FailureDebuggingProvider({ getService }) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
 
+    test.extra_thing = {
+      hi: 'hello'
+    };
+
     await Promise.all([
       screenshots.takeForFailure(name),
       logCurrentUrl(),
