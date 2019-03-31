@@ -23,7 +23,7 @@ const Octokit = require('@octokit/rest');
 const App = require('@octokit/app');
 const request = require('@octokit/request');
 
-
+/*
 const getInstallation = async function (jwt) {
   return await request('GET /repos/:owner/:repo/installation', {
     owner: 'elastic',
@@ -34,6 +34,7 @@ const getInstallation = async function (jwt) {
     }
   });
 };
+*/
 
 const getClientWithAuth = async function () {
   console.log('hi from script');
@@ -108,7 +109,11 @@ const start = async function () {
       title: cmdArgs.join(' '),
       summary: `.`,
     },
-  }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
+  }).then(({
+    headers: {
+      'x-ratelimit-limit': limit,
+      'x-ratelimit-remaining': remaining
+    } }) => console.log(`limit: ${remaining} / ${limit}`));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
 

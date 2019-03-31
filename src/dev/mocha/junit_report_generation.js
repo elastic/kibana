@@ -119,7 +119,6 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     });
 
     function addTestcaseEl(node) {
-      debugger;
       return testsuitesEl.ele('testcase', {
         name: getFullTitle(node),
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,

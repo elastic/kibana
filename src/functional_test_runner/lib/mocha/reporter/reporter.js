@@ -145,7 +145,7 @@ export function MochaReporterProvider({ getService }) {
       log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
     }
 
-    onFail = (runnable, err, err2) => {
+    onFail = (runnable, err) => {
       // NOTE: this is super gross
       //
       //  - I started by trying to extract the Base.list() logic from mocha
@@ -162,8 +162,7 @@ export function MochaReporterProvider({ getService }) {
         console.log = realLog;
       }
 
-      log.write('HIHIHIHHIHIHIHIHIHIHIHIHIHIHIHI ###############################');
-      debugger;
+      log.write('HIHIHIHHIHIHIHIHIHIHIHIHIHIHIHI ###############################', err);
       log.write(
         `- ${colors.fail(`${symbols.err} fail: "${runnable.fullTitle()}"`)}` +
         '\n' +
