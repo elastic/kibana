@@ -71,6 +71,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../spawn'),
+        'eslint',
         process.execPath,
         require.resolve('../../scripts/eslint'),
         '--no-cache'

@@ -84,8 +84,9 @@ const getClientWithAuth = async function () {
 
 const start = async function () {
   const clientWithAuth = await getClientWithAuth();
-  const cmd = process.argv[2];
-  const cmdArgs = process.argv.slice(3);
+  const title = process.argv[2];
+  const cmd = process.argv[3];
+  const cmdArgs = process.argv.slice(2);
   const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
 
   //todo check env vars
@@ -94,16 +95,16 @@ const start = async function () {
   clientWithAuth.checks.create({
     owner: 'elastic',
     repo: 'kibana',
-    name: cmd,
+    name: title,
     head_sha: process.env.ghprbActualCommit,
     // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-    details_url: 'http://www.google.com',
-    external_id: 'external id',
+    //details_url: 'http://www.google.com',
+    //external_id: 'external id',
     status: 'in_progress',
     output: {
-      title: `title ${cmd}`,
-      summary: `summary ${cmd}`,
-      text: `text ${cmd}`,
+      title: cmdArgs.join(' '),
+      //summary: `summary ${cmd}`,
+      //text: `text ${cmd}`,
     },
   }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
 
@@ -115,21 +116,25 @@ const start = async function () {
     clientWithAuth.checks.create({
       owner: 'elastic',
       repo: 'kibana',
-      name: cmd,
+      name: title,
       head_sha: process.env.ghprbActualCommit,
       // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-      details_url: 'http://www.google.com',
-      external_id: 'external id',
+      //details_url: 'http://www.google.com',
+      //external_id: 'external id',
       //status: 'complete',
       conclusion: code === 0 ? 'success' : 'failure',
       output: {
-        title: `title ${cmd}`,
-        summary: `summary ${cmd}`,
-        text: `text ${cmd}`,
+        title: cmdArgs.join(' '),
+        //summary: `summary ${cmd}`,
+        //text: `text ${cmd}`,
       },
-    }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
+    }).then(({
+      headers: { 'x-ratelimit-limit': limit,
+        'x-ratelimit-remaining': remaining } }) => {
+      console.log(`limit: ${remaining} / ${limit}`);
+      process.exit(code);});
+  });
 
-    process.exit(code);});
 };
 
 start();
