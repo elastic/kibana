@@ -63,7 +63,7 @@ module.exports = function (grunt) {
   ];
 
   console.log('eslint: ', process.execPath, require.resolve('../../spawn'), require.resolve('../../scripts/eslint'));
-  const spawn = title => [require.resolve('../../spawn'), title, process.execPath];
+  const spawn = title => [require.resolve('../../spawn'), title, 'node'];
   console.log('PAAAAAAAAAAATH: ', process.env.PATH);
 
   return {
