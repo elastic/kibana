@@ -113,8 +113,8 @@ const start = async function () {
     headers: {
       'x-ratelimit-limit': limit,
       'x-ratelimit-remaining': remaining
-    } }) => console.log(`limit: ${remaining} / ${limit}`))
-    .catch(err => console.log('*************ERROR: ', err));
+    } }) => console.log(`limit: ${remaining} / ${limit}`));
+  //.catch(err => console.log('*************ERROR: ', err));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
 
@@ -143,7 +143,8 @@ const start = async function () {
         'x-ratelimit-remaining': remaining } }) => {
       console.log(`limit: ${remaining} / ${limit}`);
       process.exit(code);});
-  }).catch(err => console.log('*************ERROR: ', err));
+  });
+  //.catch(err => console.log('*************ERROR: ', err));
 
 };
 
