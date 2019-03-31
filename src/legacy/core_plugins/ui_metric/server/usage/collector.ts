@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
-
-interface UiMetricAndCountKeyValuePair {
-  key: string;
-  value: number;
-}
-
 const UI_METRIC_USAGE_TYPE = 'ui_metric';
 
-export function registerUiMetricUsageCollector(server: Server) {
+export function registerUiMetricUsageCollector(server: any) {
   const collector = server.usage.collectorSet.makeUsageCollector({
     type: UI_METRIC_USAGE_TYPE,
-    fetch: async callCluster => {
+    fetch: async (callCluster: any) => {
       const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
       const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -40,7 +33,7 @@ export function registerUiMetricUsageCollector(server: Server) {
         fields: ['count'],
       });
 
-      const uiMetricsByAppName = rawUiMetrics.reduce((accum, rawUiMetric) => {
+      const uiMetricsByAppName = rawUiMetrics.reduce((accum: any, rawUiMetric: any) => {
         const {
           id,
           attributes: { count },
@@ -52,7 +45,7 @@ export function registerUiMetricUsageCollector(server: Server) {
           accum[appName] = [];
         }
 
-        const pair: UiMetricAndCountKeyValuePair = { key: metricType, value: count };
+        const pair = { key: metricType, value: count };
         accum[appName].push(pair);
         return accum;
       }, {});
