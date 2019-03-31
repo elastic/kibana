@@ -3,7 +3,6 @@
 ++++
 <titleabbrev>6.7.0</titleabbrev>
 ++++
-coming[6.7.0]
 
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 6.7.0.
@@ -129,7 +128,7 @@ image::images/highlights-6.7.0-logs.png[Logs app]
 This release introduces *Uptime*, which enables you to easily navigate the 
 status of your active application checks powered by 
 https://www.elastic.co/products/beats/heartbeat[Heartbeat]. See the 
-Uptime documentation for details.
+<<xpack-uptime, Uptime documentation>> for details.
 
 
 [role="screenshot"]
@@ -137,11 +136,11 @@ image::images/highlights-6.7.0-uptime.png[Uptime]
 
 
 [float]
-=== Reindex tool reintroduced
+=== Upgrade Assistant reintroduced
 
-The reindex tool available in {kib} 5.6 has been reintroduced in 6.7 to assist 
+The <<upgrade-assistant, Upgrade Assistant>> available in {kib} 5.6 has been reintroduced in 6.7 to assist 
 with your upgrade to {es} 7.0. The reindex feature is enhanced in two important ways. 
-When you initiate a <<upgrade-assistant, reindex through the Upgrade Assistant>>, the process is now 
+When you initiate a reindex through the Upgrade Assistant, the process is now 
 managed in the background. You can navigate away from the page and get an 
 updated status for the reindex when you return. When reindexing, {kib} also now 
 fixes commonly used settings that were removed in 7.0. If 
