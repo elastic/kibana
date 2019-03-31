@@ -82,35 +82,15 @@ const getClientWithAuth = async function () {
 
 // -------------
 
-const clientWithAuth = getClientWithAuth();
-const cmd = process.argv[2];
-const cmdArgs = process.argv.slice(3);
-const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
+const start = async function () {
+  const clientWithAuth = await getClientWithAuth();
+  const cmd = process.argv[2];
+  const cmdArgs = process.argv.slice(3);
+  const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
 
-//todo check env vars
-//todo - fire api request
-//get title
-clientWithAuth.checks.create({
-  owner: 'elastic',
-  repo: 'kibana',
-  name: cmd,
-  head_sha: process.env.ghprbActualCommit,
-  // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-  details_url: 'http://www.google.com',
-  external_id: 'external id',
-  status: 'in_progress',
-  output: {
-    title: `title ${cmd}`,
-    summary: `summary ${cmd}`,
-    text: `text ${cmd}`,
-  },
-}).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
-
-const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
-
-//todo - fire api request before exiting
-// determine success or failure
-ls.on('close', (code) => {
+  //todo check env vars
+  //todo - fire api request
+  //get title
   clientWithAuth.checks.create({
     owner: 'elastic',
     repo: 'kibana',
@@ -119,8 +99,7 @@ ls.on('close', (code) => {
     // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
     details_url: 'http://www.google.com',
     external_id: 'external id',
-    //status: 'complete',
-    conclusion: code === 0 ? 'success' : 'failure',
+    status: 'in_progress',
     output: {
       title: `title ${cmd}`,
       summary: `summary ${cmd}`,
@@ -128,4 +107,29 @@ ls.on('close', (code) => {
     },
   }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
 
-  process.exit(code);});
+  const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
+
+  //todo - fire api request before exiting
+  // determine success or failure
+  ls.on('close', (code) => {
+    clientWithAuth.checks.create({
+      owner: 'elastic',
+      repo: 'kibana',
+      name: cmd,
+      head_sha: process.env.ghprbActualCommit,
+      // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
+      details_url: 'http://www.google.com',
+      external_id: 'external id',
+      //status: 'complete',
+      conclusion: code === 0 ? 'success' : 'failure',
+      output: {
+        title: `title ${cmd}`,
+        summary: `summary ${cmd}`,
+        text: `text ${cmd}`,
+      },
+    }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
+
+    process.exit(code);});
+};
+
+start();
