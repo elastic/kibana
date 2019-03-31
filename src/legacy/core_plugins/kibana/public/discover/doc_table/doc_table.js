@@ -135,10 +135,10 @@ uiModules.get('app/discover')
             let inspectorRequest = undefined;
             if (_.has($scope, 'inspectorAdapters.requests')) {
               $scope.inspectorAdapters.requests.reset();
-              const title = i18n('common.ui.docTable.inspectorRequestDataTitle', {
+              const title = i18n('kbn.docTable.inspectorRequestDataTitle', {
                 defaultMessage: 'Data',
               });
-              const description = i18n('common.ui.docTable.inspectorRequestDescription', {
+              const description = i18n('kbn.docTable.inspectorRequestDescription', {
                 defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
               });
               inspectorRequest = $scope.inspectorAdapters.requests.start(title, { description });

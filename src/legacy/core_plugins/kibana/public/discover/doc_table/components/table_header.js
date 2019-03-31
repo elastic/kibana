@@ -49,7 +49,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
 
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
-        return i18n('common.ui.docTable.tableHeader.sortByColumnTooltip', {
+        return i18n('kbn.docTable.tableHeader.sortByColumnTooltip', {
           defaultMessage: 'Sort by {columnName}',
           values: { columnName: shortDotsFilter(column) },
         });
@@ -126,12 +126,12 @@ module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
-          return i18n('common.ui.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+          return i18n('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
             defaultMessage: 'Sort {columnName} descending',
             values: { columnName: name },
           });
         }
-        return i18n('common.ui.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+        return i18n('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
           defaultMessage: 'Sort {columnName} ascending',
           values: { columnName: name },
         });
