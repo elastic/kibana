@@ -11,8 +11,6 @@ source src/dev/ci_setup/setup.sh
 source src/dev/ci_setup/checkout_sibling_es.sh
 
 echo "************* HELLO HELLO HELLO $ghprbActualCommit"
-which node
-which grunt
 #echo $ghprbActualCommit | wc -m
 #echo $GITHUB_TOKEN | wc -m
 #node .ci/checks_api_test.js
