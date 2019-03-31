@@ -86,7 +86,7 @@ const start = async function () {
   const clientWithAuth = await getClientWithAuth();
   const title = process.argv[2];
   const cmd = process.argv[3];
-  const cmdArgs = process.argv.slice(2);
+  const cmdArgs = process.argv.slice(3);
   const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
 
   //todo check env vars
