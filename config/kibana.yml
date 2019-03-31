@@ -18,6 +18,10 @@
 # default to `true` starting in Kibana 7.0.
 #server.rewriteBasePath: false
 
+# Specifies the default route when opening Kibana. You can use this setting to modify
+# the landing page when opening Kibana.
+#server.defaultRoute: /app/kibana
+
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
 
@@ -35,9 +39,6 @@
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations and
 # dashboards. Kibana creates a new index if the index doesn't already exist.
 #kibana.index: ".kibana"
-
-# The default application to load.
-#kibana.defaultAppId: "home"
 
 # If your Elasticsearch is protected with basic authentication, these settings provide
 # the username and password that the Kibana server uses to perform maintenance on the Kibana

@@ -35,7 +35,8 @@ import {
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
-  UPDATE_SOURCE_DATA_REQUEST
+  UPDATE_SOURCE_DATA_REQUEST,
+  SET_TOOLTIP_STATE
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -84,6 +85,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 const INITIAL_STATE = {
   ready: false,
   goto: null,
+  tooltipState: null,
   mapState: {
     zoom: 4,
     center: {
@@ -114,6 +116,11 @@ export function map(state = INITIAL_STATE, action) {
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);
+    case SET_TOOLTIP_STATE:
+      return {
+        ...state,
+        tooltipState: action.tooltipState
+      };
     case SET_MOUSE_COORDINATES:
       return {
         ...state,

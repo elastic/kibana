@@ -78,6 +78,11 @@ class AnnotationsEditor extends Component {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
+    const togglePanelActivation = () => {
+      handleChange({
+        hidden: !model.hidden,
+      });
+    };
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newAnnotation);
@@ -249,6 +254,8 @@ class AnnotationsEditor extends Component {
             <AddDeleteButtons
               onAdd={handleAdd}
               onDelete={handleDelete}
+              togglePanelActivation={togglePanelActivation}
+              isPanelActive={!model.hidden}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -22,6 +22,8 @@ import { defaultValidationErrorHandler } from '../../../../core/server/http/http
 
 const defaultConfig = {
   'kibana.index': '.kibana',
+  'savedObjects.maxImportExportSize': 10000,
+  'savedObjects.maxImportPayloadBytes': 52428800,
 };
 
 export function createMockServer(config: { [key: string]: any } = defaultConfig) {
@@ -37,6 +39,9 @@ export function createMockServer(config: { [key: string]: any } = defaultConfig)
     return {
       get(key: string) {
         return config[key];
+      },
+      has(key: string) {
+        return config.hasOwnProperty(key);
       },
     };
   };

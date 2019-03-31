@@ -454,7 +454,8 @@ node scripts/docs.js --open
 
 Part of this process only applies to maintainers, since it requires access to Github labels.
 
-Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
+Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html).
+To include your change in the Release Notes:
 
 1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
 1. Label the PR with the targeted version (ex: 6.5).
@@ -462,7 +463,13 @@ Kibana publishes major, minor and patch releases periodically through the year. 
     * For a new feature or functionality, use `release_note:enhancement`.
     * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
     * For a deprecated feature, use `release_note:deprecation`.
-    * For a breaking change, use `release-breaking:note`.
+    * For a breaking change, use `release_note:breaking`.
+
+To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
+`build`, `docs`, `test`, `non-issue`, `jenkins`, `backport`,  and `chore`.
+
+To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
+`build`, `docs`, `test_*`,`test-*`, `non-issue`, `jenkins`, `backport`,  and `chore`.
 
 We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
 

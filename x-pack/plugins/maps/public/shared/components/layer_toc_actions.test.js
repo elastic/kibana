@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { LayerTocActions } from './layer_toc_actions';
 
@@ -41,7 +41,7 @@ describe('LayerTocActions', () => {
   });
 
   test('is rendered', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />
@@ -56,9 +56,26 @@ describe('LayerTocActions', () => {
       .toMatchSnapshot();
   });
 
+  test('should not show edit actions in read only mode', async () => {
+    const component = shallowWithIntl(
+      <LayerTocActions
+        {...defaultProps}
+        isReadOnly={true}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component)
+      .toMatchSnapshot();
+  });
+
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />
@@ -75,7 +92,7 @@ describe('LayerTocActions', () => {
 
   test('should display spinner when layer is loading', async () => {
     isLayerLoading = true;
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />
@@ -92,7 +109,7 @@ describe('LayerTocActions', () => {
 
   test('should show warning when layer has errors', async () => {
     hasErrors = true;
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />
@@ -109,7 +126,7 @@ describe('LayerTocActions', () => {
 
   test('should show visible toggle when layer is not visible', async () => {
     isVisible = false;
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />
@@ -126,7 +143,7 @@ describe('LayerTocActions', () => {
 
   test('should provide feedback when layer is not visible because of current zoom level', async () => {
     showAtZoomLevel = false;
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
       />

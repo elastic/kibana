@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import Wreck from 'wreck';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';

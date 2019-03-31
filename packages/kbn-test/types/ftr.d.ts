@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { DefaultServiceProviders } from '../../../src/functional_test_runner/types';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Config, Lifecycle } from '../../../src/functional_test_runner/lib';
 
 interface AsyncInstance<T> {
   /**
@@ -39,22 +40,23 @@ type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X :
  * Convert a map of providers to a map of the instance types they provide, also converting
  * promise types into the async instances that other providers will receive.
  */
-type ProvidedTypeMap<T extends object> = {
+type ProvidedTypeMap<T extends {}> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? MaybeAsyncInstance<ReturnType<T[K]>>
-    : never
+    : unknown
 };
 
 export interface GenericFtrProviderContext<
-  ServiceProviders extends object,
-  PageObjectProviders extends object,
-  ServiceMap = ProvidedTypeMap<ServiceProviders & DefaultServiceProviders>,
+  ServiceProviders extends {},
+  PageObjectProviders extends {},
+  ServiceMap = ProvidedTypeMap<ServiceProviders>,
   PageObjectMap = ProvidedTypeMap<PageObjectProviders>
 > {
   /**
    * Determine if a service is avaliable
    * @param serviceName
    */
+  hasService(serviceName: 'config' | 'log' | 'lifecycle'): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is keyof ServiceMap;
 
@@ -63,6 +65,9 @@ export interface GenericFtrProviderContext<
    * outside of a test/hook, then make sure to call its `.init()` method and await it's promise.
    * @param serviceName
    */
+  getService(serviceName: 'config'): Config;
+  getService(serviceName: 'log'): ToolingLog;
+  getService(serviceName: 'lifecycle'): Lifecycle;
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**

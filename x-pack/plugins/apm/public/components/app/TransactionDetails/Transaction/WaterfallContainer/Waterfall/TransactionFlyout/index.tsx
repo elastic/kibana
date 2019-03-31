@@ -22,7 +22,7 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';

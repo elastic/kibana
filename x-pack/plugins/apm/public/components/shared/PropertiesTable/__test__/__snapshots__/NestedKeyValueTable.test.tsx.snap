@@ -29,7 +29,7 @@ exports[`FormattedKey component should render when the value is defined 3`] = `
 
 exports[`FormattedKey component should render when the value is null or undefined 1`] = `
 .c0 {
-  color: rgb(152,162,179);
+  color: #98a2b3;
 }
 
 <FormattedKey
@@ -48,7 +48,7 @@ exports[`FormattedKey component should render when the value is null or undefine
 
 exports[`FormattedKey component should render when the value is null or undefined 2`] = `
 .c0 {
-  color: rgb(152,162,179);
+  color: #98a2b3;
 }
 
 <FormattedKey
@@ -134,7 +134,7 @@ exports[`FormattedValue component should render an object 1`] = `
 
 exports[`FormattedValue component should render null 1`] = `
 .c0 {
-  color: rgb(152,162,179);
+  color: #98a2b3;
 }
 
 <FormattedValue
@@ -152,7 +152,7 @@ exports[`FormattedValue component should render null 1`] = `
 
 exports[`FormattedValue component should render undefined 1`] = `
 .c0 {
-  color: rgb(152,162,179);
+  color: #98a2b3;
 }
 
 <FormattedValue>
@@ -187,7 +187,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="a"
           value={1}
         />
@@ -205,7 +204,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="b"
           value={2}
         />
@@ -229,7 +227,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="c"
           value={
             Array [
@@ -258,7 +255,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="d"
           value={
             Object {

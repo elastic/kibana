@@ -90,6 +90,12 @@ export function getElementCounts(state) {
   Object.keys(resolvedArgs).forEach(resolvedArg => {
     const arg = resolvedArgs[resolvedArg];
     const { expressionRenderable } = arg;
+
+    if (!expressionRenderable) {
+      results.pending++;
+      return;
+    }
+
     const { value, state } = expressionRenderable;
 
     if (value && value.as === 'error') {
@@ -110,8 +116,14 @@ export function getElementStats(state) {
 
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-    .map(el => el.filter)
-    .filter(str => str != null && str.length)
+    .reduce((acc, el) => {
+      // check that a filter is defined
+      if (el.filter != null && el.filter.length) {
+        return acc.concat(el.filter);
+      }
+
+      return acc;
+    }, [])
     .join(' | ');
 }
 
