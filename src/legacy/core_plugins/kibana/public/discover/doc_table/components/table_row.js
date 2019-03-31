@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import 'ui/doc_viewer';
+import 'plugins/kibana/doc_viewer';
 import 'ui/filters/uriescape';
 import 'ui/filters/short_dots';
 import { noWhiteSpace } from '../../../../common/utils/no_white_space';
