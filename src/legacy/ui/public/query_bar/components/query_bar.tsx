@@ -34,8 +34,7 @@ import {
   getAutocompleteProvider,
 } from '../../autocomplete_providers';
 import chrome from '../../chrome';
-import { fromUser, toUser } from '../../parse_query';
-import { matchPairs } from '../lib/match_pairs';
+import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
