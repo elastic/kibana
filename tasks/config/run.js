@@ -62,7 +62,7 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
-console.log('eslint: ', process.execPath, require.resolve('../../spawn'), require.resolve('../../scripts/eslint'));
+  console.log('eslint: ', process.execPath, require.resolve('../../spawn'), require.resolve('../../scripts/eslint'));
 
   return {
     // used by the test and jenkins:unit tasks
@@ -71,6 +71,7 @@ console.log('eslint: ', process.execPath, require.resolve('../../spawn'), requir
       cmd: process.execPath,
       args: [
         require.resolve('../../spawn'),
+        process.execPath,
         require.resolve('../../scripts/eslint'),
         '--no-cache'
       ]
