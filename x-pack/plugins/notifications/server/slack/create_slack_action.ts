@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '..';
+import { ServerFacade } from '..';
 import { SlackAction } from './slack_action';
 
 /**
@@ -44,11 +44,11 @@ export function defaultsFromConfig(config: any) {
 /**
  * Create a new Slack Action based on the configuration.
  *
- * @param {Server} server The server object.
+ * @param {ServerFacade} server The server object.
  * @return {SlackAction} A new Slack Action based on the kibana.yml configuration.
  */
 export function createSlackAction(
-  server: Server,
+  server: ServerFacade,
   { _options = optionsFromConfig, _defaults = defaultsFromConfig } = {}
 ): SlackAction {
   const config = server.config();

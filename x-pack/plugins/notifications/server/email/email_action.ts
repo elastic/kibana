@@ -6,7 +6,7 @@
 
 import { createTransport } from 'nodemailer';
 
-import { Action, ActionResult, Field, Server } from '..';
+import { Action, ActionResult, Field, ServerFacade } from '..';
 
 export const EMAIL_ACTION_ID = 'xpack-notifications-email';
 
@@ -31,7 +31,7 @@ export class EmailAction extends Action {
     defaults = {},
     _createTransport = createTransport,
   }: {
-    server: Server;
+    server: ServerFacade;
     options?: any;
     defaults?: any;
     _createTransport?: any;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '..';
+import { ServerFacade } from '..';
 import { ActionResult } from './action_result';
 
 export interface Field {
@@ -20,7 +20,7 @@ export interface Field {
  * these actions from the UI (triggering a server-side call), but these should be called for such a purpose.
  */
 export class Action {
-  protected server: Server;
+  protected server: ServerFacade;
   private id: string;
   private name: string;
   /**
@@ -33,7 +33,7 @@ export class Action {
    * @param {String} id The unique identifier for the action.
    * @param {String} name User-friendly name for the action.
    */
-  constructor({ server, id, name }: { server: Server; id: string; name: string }) {
+  constructor({ server, id, name }: { server: ServerFacade; id: string; name: string }) {
     this.server = server;
     this.id = id;
     this.name = name;

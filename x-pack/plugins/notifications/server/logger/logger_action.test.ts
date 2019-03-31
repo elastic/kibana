@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult, Server } from '..';
+import { ActionResult, ServerFacade } from '..';
 import { LOGGER_ACTION_ID, LoggerAction } from './logger_action';
 
 describe('LoggerAction', () => {
-  const server: Server = {
+  const server: ServerFacade = {
     log: jest.fn(),
-    route: jest.fn(),
     config: jest.fn(),
-    plugins: {},
+    plugins: { xpack_main: { info: { license: { isNotBasic: () => true } } } },
   };
 
   const action = new LoggerAction({ server });

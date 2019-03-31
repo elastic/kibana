@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '..';
+import { ServerFacade } from '..';
 import { EmailAction } from './email_action';
 
 /**
@@ -50,7 +50,7 @@ export function defaultsFromConfig(config: any) {
  * @return {EmailAction} A new email action based on the kibana.yml configuration.
  */
 export function createEmailAction(
-  server: Server,
+  server: ServerFacade,
   {
     _options = optionsFromConfig,
     _defaults = defaultsFromConfig,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '..';
+import { ServerFacade } from '..';
 import { Action } from './action';
 import { ActionResult } from './action_result';
 
@@ -14,27 +14,17 @@ describe('Action', () => {
   const throwsErrorName = 'Throws Error';
   const passThruName = 'Test Action';
 
-  let server: Server = {
+  let server: ServerFacade = {
     log: jest.fn(),
-    route: jest.fn(),
     config: jest.fn(),
-    plugins: {},
+    plugins: { xpack_main: { info: { license: { isNotBasic: () => true } } } },
   };
 
   beforeEach(() => {
     server = {
       log: jest.fn(),
-      route: jest.fn(),
       config: jest.fn(),
-      plugins: {
-        xpack_main: {
-          info: {
-            license: {
-              isNotBasic: () => true,
-            },
-          },
-        },
-      },
+      plugins: { xpack_main: { info: { license: { isNotBasic: () => true } } } },
     };
   });
 

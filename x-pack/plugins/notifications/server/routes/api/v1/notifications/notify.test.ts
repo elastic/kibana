@@ -5,14 +5,13 @@
  */
 
 import Boom from 'boom';
-import { Action, ActionResult, Field, Server } from '../../../../';
+import { Action, ActionResult, Field, ServerFacade } from '../../../../';
 import { checkForErrors, sendNotification } from './notify';
 
-const server: Server = {
+const server: ServerFacade = {
   log: jest.fn(),
-  route: jest.fn(),
   config: jest.fn(),
-  plugins: {},
+  plugins: { xpack_main: { info: { license: { isNotBasic: () => true } } } },
 };
 
 class TestAction extends Action {

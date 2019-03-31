@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action, ActionResult, Field, Server } from '..';
+import { Action, ActionResult, Field, ServerFacade } from '..';
 
 export const LOGGER_ACTION_ID = 'xpack-notifications-logger';
 
@@ -14,7 +14,7 @@ export const LOGGER_ACTION_ID = 'xpack-notifications-logger';
  * This is mostly useful for debugging.
  */
 export class LoggerAction extends Action {
-  constructor({ server }: { server: Server }) {
+  constructor({ server }: { server: ServerFacade }) {
     super({ server, id: LOGGER_ACTION_ID, name: 'Log' });
   }
 

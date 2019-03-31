@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '..';
+import { ServerFacade } from '..';
 import { createEmailAction, defaultsFromConfig, optionsFromConfig } from './create_email_action';
 import { EmailAction } from './email_action';
 
@@ -63,11 +63,10 @@ describe('create_email_action', () => {
     const defaults = { defaults: true };
     const testDefaults = jest.fn().mockReturnValue(defaults);
 
-    const server: Server = {
+    const server: ServerFacade = {
       log: jest.fn(),
-      route: jest.fn(),
       config: jest.fn().mockReturnValue(config),
-      plugins: {},
+      plugins: { xpack_main: { info: { license: { isNotBasic: () => true } } } },
     };
 
     const action = createEmailAction(server, { _options: testOptions, _defaults: testDefaults });

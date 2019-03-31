@@ -6,7 +6,7 @@
 
 import { WebClient } from '@slack/client';
 
-import { Action, ActionResult, Field, Server } from '../';
+import { Action, ActionResult, Field, ServerFacade } from '../';
 
 export const SLACK_ACTION_ID = 'xpack-notifications-slack';
 
@@ -44,7 +44,7 @@ export class SlackAction extends Action {
     defaults = {},
     _webClientCreator = webClientCreator,
   }: {
-    server: Server;
+    server: ServerFacade;
     options: any;
     defaults: any;
     _webClientCreator?: (options: any) => WebClient;

@@ -6,9 +6,9 @@
 
 // import Joi from 'joi';
 import Boom from 'boom';
-import { Action, INotificationService, IServer } from '../../../../';
+import { Action, INotificationService, ServerFacade } from '../../../../';
 
-import { Lifecycle, Request, RouteOptions, Server, ServerRoute } from 'hapi';
+import { Lifecycle, Request, RouteOptions, ServerRoute } from 'hapi';
 
 interface INotification {
   action: string;
@@ -63,7 +63,7 @@ export function checkForErrors(action: Action, data: any) {
  * @param {Function} _checkForErrors Exposed for testing.
  */
 export async function sendNotification(
-  server: Server | IServer,
+  server: ServerFacade,
   notificationService: INotificationService,
   actionId: string,
   data: any,
@@ -93,9 +93,9 @@ export async function sendNotification(
  * Notification Service route to perform actions (aka send data).
  */
 export function notificationServiceSendRoute(
-  server: Server | IServer,
+  server: ServerFacade,
   notificationService: INotificationService
-) {
+): ServerRoute {
   const options: RouteOptions = {};
   const handler: Lifecycle.Method = (req: Request) => {
     if (isNotification(req.payload)) {
@@ -114,5 +114,5 @@ export function notificationServiceSendRoute(
     handler,
   };
 
-  server.route(route);
+  return route;
 }
