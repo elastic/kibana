@@ -103,8 +103,8 @@ const start = async function () {
     status: 'in_progress',
     output: {
       title: cmdArgs.join(' '),
-      //summary: `summary ${cmd}`,
-      //text: `text ${cmd}`,
+      summary: `summary`,
+      text: `text`,
     },
   }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
 
@@ -125,8 +125,8 @@ const start = async function () {
       conclusion: code === 0 ? 'success' : 'failure',
       output: {
         title: cmdArgs.join(' '),
-        //summary: `summary ${cmd}`,
-        //text: `text ${cmd}`,
+        summary: `summary`,
+        text: `text`,
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
