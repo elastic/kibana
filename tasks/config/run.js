@@ -62,6 +62,8 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
+console.log('eslint: ', process.execPath, require.resolve('../../spawn'), require.resolve('../../scripts/eslint'));
+
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
