@@ -87,7 +87,10 @@ const start = async function () {
   const title = process.argv[2];
   const cmd = process.argv[3];
   const cmdArgs = process.argv.slice(4);
-  const cmdSpawnConfig = { cwd: __dirname, stdio: 'inherit' };
+  const cmdSpawnConfig = {
+    cwd: __dirname,
+    stdio: 'inherit'
+  };
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
@@ -106,7 +109,7 @@ const start = async function () {
     //external_id: 'external id',
     status: 'in_progress',
     output: {
-      title: cmdArgs.join(' '),
+      title: `${cmd} ${cmdArgs.join(' ')}`,
       summary: `.`,
     },
   }).then(({
