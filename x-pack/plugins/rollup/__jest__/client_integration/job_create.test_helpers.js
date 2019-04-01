@@ -130,7 +130,7 @@ export const mockServerResponses = server => {
   };
 
   const mockUserActions = () => {
-    server.respondWith(/\/api\/user_action\/.*/, [
+    server.respondWith(/\/api\/ui_metric\/.*/, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify({}),

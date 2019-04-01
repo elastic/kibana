@@ -104,6 +104,7 @@ function getExplorerDefaultState() {
     influencersFilterQuery: undefined,
     hasResults: false,
     influencers: {},
+    isAndOperator: false,
     loading: true,
     noInfluencersConfigured: true,
     noJobsFound: true,
@@ -633,6 +634,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         filterActive,
         filteredFields,
         influencersFilterQuery,
+        isAndOperator,
         noInfluencersConfigured,
         noJobsFound,
         selectedCells,
@@ -710,7 +712,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
         filterActive,
         filteredFields,
-        selectedJobs
+        isAndOperator,
+        selectedJobs,
+        selectedCells
       });
 
       Object.assign(stateUpdate, viewBySwimlaneOptions);
@@ -753,12 +757,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       // do a sanity check against selectedCells. It can happen that a previously
       // selected lane loaded via URL/AppState is not available anymore.
+      // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
+      // Ok to keep cellSelection in this case
       let clearSelection = false;
       if (
         selectedCells !== null &&
         selectedCells.type === SWIMLANE_TYPE.VIEW_BY
       ) {
-        clearSelection = !selectedCells.lanes.some((lane) => {
+        clearSelection = (filterActive === false) && !selectedCells.lanes.some((lane) => {
           return viewBySwimlaneData.points.some((point) => {
             return (
               point.laneLabel === lane &&
@@ -959,18 +965,21 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
+      isAndOperator,
       filteredFields,
       queryString,
       tableQueryString }) => {
-      const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
+      const { selectedCells, swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         const stateUpdate = {
           filterActive: false,
           filteredFields: [],
           influencersFilterQuery: undefined,
+          isAndOperator: false,
           maskAll: false,
           queryString: '',
           tableQueryString: '',
@@ -979,25 +988,37 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.updateExplorer(stateUpdate, false);
       } else {
-        // Set View by dropdown to first relevant fieldName based on incoming filter
-        for (let i = 0; i < filteredFields.length; i++) {
-          if (viewBySwimlaneOptions.includes(filteredFields[i])) {
-            selectedViewByFieldName = filteredFields[i];
-            this.props.appStateHandler(
-              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-              { swimlaneViewByFieldName: selectedViewByFieldName },
-            );
-            break;
+        // if it's an AND filter set view by swimlane to job ID as the others will have no results
+        if (isAndOperator && selectedCells === null) {
+          selectedViewByFieldName = VIEW_BY_JOB_LABEL;
+          this.props.appStateHandler(
+            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            { swimlaneViewByFieldName: selectedViewByFieldName },
+          );
+        } else {
+        // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
+        // or if selected cell is from overall swimlane as this won't include an additional influencer filter
+          for (let i = 0; i < filteredFields.length; i++) {
+            if (viewBySwimlaneOptions.includes(filteredFields[i]) &&
+                ((selectedCells === null || (selectedCells && selectedCells.type === 'overall')))) {
+              selectedViewByFieldName = filteredFields[i];
+              this.props.appStateHandler(
+                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                { swimlaneViewByFieldName: selectedViewByFieldName },
+              );
+              break;
+            }
           }
         }
 
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
-          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString });
+          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString, isAndOperator });
 
         this.updateExplorer({
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
+          isAndOperator,
           queryString,
           tableQueryString,
           maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
