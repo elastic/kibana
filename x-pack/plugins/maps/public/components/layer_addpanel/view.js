@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
+import { ALL_SOURCES, DATA_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -57,7 +57,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderNextBtn() {
-    if (!this.state.sourceType) {
+    if (!this.props.importView && !this.state.sourceType) {
       return null;
     }
 
@@ -89,7 +89,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderSourceCards() {
-    return ALL_SOURCES.map(Source => {
+    return DATA_SOURCES.map(Source => {
       const icon = Source.icon
         ? <EuiIcon type={Source.icon} size="l" />
         : null;
@@ -134,7 +134,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderSourceEditor() {
-    const Source = ALL_SOURCES.find((Source) => {
+    const Source = ALL_SOURCES.find(Source => {
       return Source.type === this.state.sourceType;
     });
     if (!Source) {

@@ -16,7 +16,7 @@ import { ESGeoGridSource } from './es_geo_grid_source';
 import { ESSearchSource } from './es_search_source';
 
 
-export const ALL_SOURCES = [
+export const DATA_SOURCES = [
   ESSearchSource,
   ESGeoGridSource,
   EMSFileSource,
@@ -25,5 +25,13 @@ export const ALL_SOURCES = [
   KibanaTilemapSource,
   XYZTMSSource,
   WMSSource,
+];
+
+export const IMPORT_SOURCES = [
   GeojsonFileSource,
+];
+
+export const ALL_SOURCES = [
+  ...DATA_SOURCES,
+  ...IMPORT_SOURCES,
 ];
