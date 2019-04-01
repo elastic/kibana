@@ -35,6 +35,8 @@ jest.mock('ui/errors', () => ({
   },
 }));
 
+jest.mock('ui/kfetch', () => jest.fn());
+
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));

@@ -49,8 +49,8 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
 
-jest.mock('../../../../../lib/import_file', () => ({
-  importFile: jest.fn(),
+jest.mock('../../../../../lib/import_legacy_file', () => ({
+  importLegacyFile: jest.fn(),
 }));
 
 jest.mock('../../../../../lib/resolve_saved_objects', () => ({
@@ -118,7 +118,7 @@ describe('Flyout', () => {
   });
 
   it('should handle invalid files', async () => {
-    const { importFile } = require('../../../../../lib/import_file');
+    const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
     const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
@@ -126,14 +126,14 @@ describe('Flyout', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    importFile.mockImplementation(() => {
+    importLegacyFile.mockImplementation(() => {
       throw new Error('foobar');
     });
 
     await component.instance().legacyImport();
     expect(component.state('error')).toBe('The file could not be processed.');
 
-    importFile.mockImplementation(() => ({
+    importLegacyFile.mockImplementation(() => ({
       invalid: true,
     }));
 
@@ -145,7 +145,7 @@ describe('Flyout', () => {
 
   // TODO
   describe('conflicts', () => {
-    // const { importFile } = require('../../../../../lib/import_file');
+    // const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
     // const {
     //   resolveSavedObjects,
     //   resolveSavedSearches,
@@ -189,7 +189,7 @@ describe('Flyout', () => {
     // const mockConflictedSearchDocs = [3];
 
     // beforeEach(() => {
-    //   importFile.mockImplementation(() => mockData);
+    //   importLegacyFile.mockImplementation(() => mockData);
     //   resolveSavedObjects.mockImplementation(() => ({
     //     conflictedIndexPatterns: mockConflictedIndexPatterns,
     //     conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
@@ -209,7 +209,7 @@ describe('Flyout', () => {
     //   component.setState({ file: mockFile, isLegacyFile: true });
     //   await component.instance().legacyImport();
 
-    //   expect(importFile).toHaveBeenCalledWith(mockFile);
+    //   expect(importLegacyFile).toHaveBeenCalledWith(mockFile);
     //   // Remove the last element from data since it should be filtered out
     //   expect(resolveSavedObjects).toHaveBeenCalledWith(
     //     mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
@@ -318,7 +318,7 @@ describe('Flyout', () => {
   });
 
   describe('legacy conflicts', () => {
-    const { importFile } = require('../../../../../lib/import_file');
+    const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
     const {
       resolveSavedObjects,
       resolveSavedSearches,
@@ -362,7 +362,7 @@ describe('Flyout', () => {
     const mockConflictedSearchDocs = [3];
 
     beforeEach(() => {
-      importFile.mockImplementation(() => mockData);
+      importLegacyFile.mockImplementation(() => mockData);
       resolveSavedObjects.mockImplementation(() => ({
         conflictedIndexPatterns: mockConflictedIndexPatterns,
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
@@ -382,7 +382,7 @@ describe('Flyout', () => {
       component.setState({ file: legacyMockFile, isLegacyFile: true });
       await component.instance().legacyImport();
 
-      expect(importFile).toHaveBeenCalledWith(legacyMockFile);
+      expect(importLegacyFile).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
         mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),

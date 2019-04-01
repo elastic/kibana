@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { groupBy, take, get as getField } from 'lodash';
@@ -46,7 +45,7 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
-import { importFile } from '../../../../lib/import_file';
+import { importFile, importLegacyFile, resolveImportErrors } from '../../../../lib';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
@@ -117,20 +116,7 @@ class FlyoutUI extends Component {
     const { file, isOverwriteAllChecked } = this.state;
     this.setState({ isLoading: true, error: undefined });
 
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await kfetch({
-      method: 'POST',
-      pathname: '/api/saved_objects/_import',
-      body: formData,
-      headers: {
-        // Important to be undefined, it forces proper headers to be set for FormData
-        'Content-Type': undefined,
-      },
-      query: {
-        overwrite: isOverwriteAllChecked
-      },
-    });
+    const response = await importFile(file, isOverwriteAllChecked);
 
     const failedImports = [];
     const unmatchedReferences = new Map();
@@ -190,6 +176,45 @@ class FlyoutUI extends Component {
     return resolutions;
   }
 
+  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache }) => {
+    const { isOverwriteAllChecked, unmatchedReferences } = this.state;
+    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
+    if (!isOverwriteGranted && error.type === 'conflict') {
+      return;
+    }
+    if (error.type === 'missing_references') {
+      const objReplaceReferences = replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [];
+      for (const reference of error.references) {
+        if (reference.type !== 'index-pattern') {
+          continue;
+        }
+        for (const unmatchedReference of unmatchedReferences) {
+          if (!unmatchedReference.newIndexPatternId || unmatchedReference.existingIndexPatternId !== reference.id) {
+            continue;
+          }
+          if (objReplaceReferences.some(replaceReference => replaceReference.from === reference.id)) {
+            continue;
+          }
+          objReplaceReferences.push({
+            type: 'index-pattern',
+            from: unmatchedReference.existingIndexPatternId,
+            to: unmatchedReference.newIndexPatternId,
+          });
+        }
+      }
+      replaceReferencesCache.set(`${obj.type}:${obj.id}`, objReplaceReferences);
+      if (objReplaceReferences.length === 0) {
+        return;
+      }
+    }
+    return {
+      id: obj.id,
+      type: obj.type,
+      overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true,
+      replaceReferences: replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [],
+    };
+  }
+
   resolveImportErrors = async () => {
     this.setState({
       error: undefined,
@@ -199,48 +224,16 @@ class FlyoutUI extends Component {
 
     let overwriteDecisionCache = {};
     const replaceReferencesCache = new Map();
-    const { isOverwriteAllChecked, unmatchedReferences } = this.state;
+    const { file, isOverwriteAllChecked } = this.state;
     let { importCount: successImportCount, failedImports: importFailures } = this.state;
-    function map({ error, obj }) {
-      const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
-      if (!isOverwriteGranted && error.type === 'conflict') {
-        return;
-      }
-      if (error.type === 'missing_references') {
-        const objReplaceReferences = replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [];
-        for (const reference of error.references) {
-          if (reference.type !== 'index-pattern') {
-            continue;
-          }
-          for (const unmatchedReference of unmatchedReferences) {
-            if (!unmatchedReference.newIndexPatternId || unmatchedReference.existingIndexPatternId !== reference.id) {
-              continue;
-            }
-            if (objReplaceReferences.some(replaceReference => replaceReference.from === reference.id)) {
-              continue;
-            }
-            objReplaceReferences.push({
-              type: 'index-pattern',
-              from: unmatchedReference.existingIndexPatternId,
-              to: unmatchedReference.newIndexPatternId,
-            });
-          }
-        }
-        replaceReferencesCache.set(`${obj.type}:${obj.id}`, objReplaceReferences);
-        if (objReplaceReferences.length === 0) {
-          return;
-        }
-      }
-      return {
-        id: obj.id,
-        type: obj.type,
-        overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true,
-        replaceReferences: replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [],
-      };
-    }
     function getOverwriteDecision({ obj }) {
       return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
     }
+    const callMap = (failure) => {
+      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, ...failure });
+    };
+
+    // Loop until all issues are resolved
     while (importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))) {
       if (!isOverwriteAllChecked) {
         const result = await this.getConflictResolutions(
@@ -252,31 +245,21 @@ class FlyoutUI extends Component {
         overwriteDecisionCache = { ...overwriteDecisionCache, ...result };
       }
       const retries = importFailures
-        .map(failure => map(failure))
+        .map(callMap)
         .filter(obj => !!obj);
       if (retries.length === 0) {
         // Scenario where skip everything, no other failures
         importFailures = [];
         continue;
       }
-      const formData = new FormData();
-      formData.append('file', this.state.file);
-      formData.append('retries', JSON.stringify(retries));
-      const response = await kfetch({
-        method: 'POST',
-        pathname: '/api/saved_objects/_resolve_import_errors',
-        headers: {
-          // Important to be undefined, it forces proper headers to be set for FormData
-          'Content-Type': undefined,
-        },
-        body: formData,
-      });
+      const response = await resolveImportErrors(file, retries);
       successImportCount += response.successCount;
       importFailures = [];
       for (const { error, ...obj } of response.errors || []) {
         importFailures.push({ error, obj });
       }
     }
+
     this.setState({
       isLoading: false,
       wasImportSuccessful: true,
@@ -294,12 +277,12 @@ class FlyoutUI extends Component {
     let contents;
 
     try {
-      contents = await importFile(file);
+      contents = await importLegacyFile(file);
     } catch (e) {
       this.setState({
         isLoading: false,
         error: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
+          id: 'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
           defaultMessage: 'The file could not be processed.',
         }),
       });

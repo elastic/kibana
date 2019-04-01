@@ -19,19 +19,17 @@
 
 import { kfetch } from 'ui/kfetch';
 
-export async function importFile(file, overwriteAll = false) {
+export async function resolveImportErrors(file, retries) {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('retries', JSON.stringify(retries));
   return await kfetch({
     method: 'POST',
-    pathname: '/api/saved_objects/_import',
-    body: formData,
+    pathname: '/api/saved_objects/_resolve_import_errors',
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },
-    query: {
-      overwrite: overwriteAll
-    },
+    body: formData,
   });
 }

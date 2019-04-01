@@ -25,5 +25,7 @@ export * from './get_saved_object_counts';
 export * from './get_saved_object_icon';
 export * from './get_saved_object_label';
 export * from './import_file';
+export * from './import_legacy_file';
 export * from './parse_query';
+export * from './resolve_import_errors';
 export * from './resolve_saved_objects';
