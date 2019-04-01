@@ -106,7 +106,9 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, indexPattern, groupBy, qu
       <h3>Data Frame Pivot Preview</h3>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <EuiInMemoryTable items={dataFramePreviewData} columns={columns} pagination={true} />
+      {dataFramePreviewData.length > 0 && (
+        <EuiInMemoryTable items={dataFramePreviewData} columns={columns} pagination={true} />
+      )}
     </Fragment>
   );
 };

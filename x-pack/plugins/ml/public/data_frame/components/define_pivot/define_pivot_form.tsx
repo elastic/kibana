@@ -23,8 +23,8 @@ import {
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
 import { AggListForm } from '../../components/aggregation_list';
 import { GroupByList } from '../../components/group_by_list/list';
+import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
-import { SourceIndexPreview } from './source_index_preview';
 
 import { Dictionary } from '../../../../common/types/common';
 import {
