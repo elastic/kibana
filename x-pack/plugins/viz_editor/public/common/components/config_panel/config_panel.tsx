@@ -49,6 +49,19 @@ export const columnOperations: ColumnOperations = {
       );
     },
   },
+  cardinality: {
+    summarize(op: SumOperation) {
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Cardinality of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
+    },
+  },
   count: {
     summarize(op) {
       return (

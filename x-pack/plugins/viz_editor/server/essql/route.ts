@@ -9,7 +9,6 @@
 // ------------------------------------------------------------------------------------------
 
 import { Legacy } from 'kibana';
-import { zipObject } from 'lodash';
 import { API_PREFIX } from '../../common';
 
 /**

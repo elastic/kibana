@@ -133,7 +133,7 @@ function getSuggestion(visModel: PieChartVisModel): Suggestion {
     score: 0.5,
     visModel: prefilledVisModel,
     title: 'Basic Pie Chart',
-    iconType: 'visPie' as IconType,
+    iconType: 'visPie',
   };
 }
 

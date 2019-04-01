@@ -130,7 +130,11 @@ const displayTypeIcon: { [id: string]: IconType } = {
   area: 'visArea',
 };
 
-function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', title: string) {
+function getSuggestion(
+  visModel: XyChartVisModel,
+  displayType: 'line' | 'area',
+  title: string
+): Suggestion {
   const prefilledVisModel = prefillPrivateState(
     visModel as UnknownVisModel,
     displayType
@@ -153,7 +157,7 @@ function getSuggestionsForField(
   const operationNames = getOperationsForField(field);
 
   if (operationNames.length === 0) {
-    return [];
+    return [] as Suggestion[];
   }
 
   return operationNames.map(operationName => {

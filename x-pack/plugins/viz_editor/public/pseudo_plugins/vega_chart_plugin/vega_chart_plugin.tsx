@@ -7,7 +7,7 @@
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { UnknownVisModel, updatePrivateState, VisModel } from '../../common/lib';
-import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
+import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
 interface VegaChartPrivateState {
   spec: string;
@@ -59,7 +59,7 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   };
 }
 
-function getSuggestion(visModel: VegaChartVisModel) {
+function getSuggestion(visModel: VegaChartVisModel): Suggestion {
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as VegaChartVisModel;
   return {
     pluginName: 'vega_chart',
