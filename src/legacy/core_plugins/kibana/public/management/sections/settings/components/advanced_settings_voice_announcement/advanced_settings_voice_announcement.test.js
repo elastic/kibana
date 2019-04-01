@@ -29,8 +29,7 @@ const testProps = {
       [{
         ariaName: 'General'
       }]
-    ],
-    categoryCounts: 1
+    ]
   },
   searchResult: {
     query: 'dark theme',
@@ -38,21 +37,19 @@ const testProps = {
       [{
         ariaName: 'General'
       }]
-    ],
-    categoryCounts: 1
+    ]
   }
 };
 
 describe('Advanced Settings: Voice Announcement', () => {
   it('should render nothing', async () => {
 
-    const { query, filteredSettings, categoryCounts } = testProps.nothing;
+    const { query, filteredSettings } = testProps.nothing;
 
     const component = shallow(
       <AdvancedSettingsVoiceAnnouncement
         query={query}
         settings={filteredSettings}
-        totalCounts={categoryCounts}
       />
     );
 
@@ -61,13 +58,12 @@ describe('Advanced Settings: Voice Announcement', () => {
 
   it('should render announcement', async () => {
 
-    const { query, filteredSettings, categoryCounts } = testProps.searchResult;
+    const { query, filteredSettings } = testProps.searchResult;
 
     const component = shallow(
       <AdvancedSettingsVoiceAnnouncement
         query={query}
         settings={filteredSettings}
-        totalCounts={categoryCounts}
       />
     );
 
