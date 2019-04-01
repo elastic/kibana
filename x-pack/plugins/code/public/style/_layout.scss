@@ -90,4 +90,10 @@
 
 .codeContainer__directoryList {
   padding: $euiSizeL;
+  &:first-child{
+    padding-bottom: 0;
+  }
+  &:not(:first-child) {
+    padding-top: 0;
+  }
 }
