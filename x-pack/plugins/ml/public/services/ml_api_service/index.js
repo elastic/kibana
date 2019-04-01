@@ -249,7 +249,7 @@ export const ml = {
 
   listDataRecognizerModules() {
     return http({
-      url: `${basePath}/modules/list_modules`,
+      url: `${basePath}/modules/get_module`,
       method: 'GET'
     });
   },
