@@ -7,13 +7,10 @@ import React, { Fragment, Component } from 'react';
 import chrome from 'ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { capitalize, partial } from 'lodash';
+import { capitalize } from 'lodash';
 import {
   EuiHealth,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiToolTip,
   EuiCallOut,
   EuiSpacer,
@@ -25,6 +22,9 @@ import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/a
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { getClusters } from '../../../store/selectors';
+import { connect } from 'react-redux';
+import { withTableProps } from '../../table/with_table_props';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -355,12 +355,16 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
-export class Listing extends Component {
+class ListingUIComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
       [STANDALONE_CLUSTER_STORAGE_KEY]: false,
     };
+  }
+
+  componentWillMount() {
+    this.props.fetchData();
   }
 
   renderStandaloneClusterCallout(changeCluster, storage) {
@@ -414,54 +418,61 @@ export class Listing extends Component {
   }
 
   render() {
-    const { angular, clusters, sorting, pagination, onTableChange } = this.props;
+    const { showLicenseExpiration, filterText, clusters, sorting, pagination, onTableChange } = this.props;
 
-    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
-    const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
-    const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
+    if (!clusters) {
+      return <h2>Loading</h2>;
+    }
+
+
+    // const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
+    // const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
+    // const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
     const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
-            <EuiMonitoringTable
-              className="clusterTable"
-              rows={clusters}
-              columns={getColumns(
-                angular.showLicenseExpiration,
-                _changeCluster,
-                _handleClickIncompatibleLicense,
-                _handleClickInvalidLicense
-              )}
-              rowProps={item => {
-                return {
-                  'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                };
-              }}
-              sorting={{
-                ...sorting,
-                sort: {
-                  ...sorting.sort,
-                  field: 'cluster_name'
-                }
-              }}
-              pagination={pagination}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: angular.scope.filterText
-                },
-              }}
-              onTableChange={onTableChange}
-              executeQueryOptions={{
-                defaultFields: ['cluster_name']
-              }}
-            />
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <div>
+        {hasStandaloneCluster ? this.renderStandaloneClusterCallout(changeCluster) : null}
+        <EuiMonitoringTable
+          className="clusterTable"
+          rows={clusters}
+          columns={getColumns(
+            showLicenseExpiration,
+            changeCluster,
+            handleClickIncompatibleLicense,
+            handleClickInvalidLicense
+          )}
+          rowProps={item => {
+            return {
+              'data-test-subj': `clusterRow_${item.cluster_uuid}`
+            };
+          }}
+          sorting={{
+            ...sorting,
+            sort: {
+              ...sorting.sort,
+              field: 'cluster_name'
+            }
+          }}
+          pagination={pagination}
+          search={{
+            box: {
+              incremental: true,
+              placeholder: filterText
+            },
+          }}
+          onTableChange={onTableChange}
+          executeQueryOptions={{
+            defaultFields: ['cluster_name']
+          }}
+        />
+      </div>
     );
   }
 }
+
+export const Listing = withTableProps(connect(
+  state => ({
+    clusters: getClusters(state)
+  }),
+)(ListingUIComponent));
