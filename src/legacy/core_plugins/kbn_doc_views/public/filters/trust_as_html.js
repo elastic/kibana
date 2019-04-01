@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { uiModules } from '../modules';
-// Filters out all duplicate items in an array
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/doc_views');
 
-uiModules
-  .get('kibana')
-  .filter('unique', function () {
-    return function (arr) {
-      const list = _.unique(arr);
-      return list;
-    };
-  });
+// Simple filter to allow using ng-bind-html without explicitly calling $sce.trustAsHtml in a controller
+// (See http://goo.gl/mpj9o2)
+module.filter('trustAsHtml', function ($sce) {
+  return $sce.trustAsHtml;
+});
