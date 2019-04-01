@@ -20,12 +20,12 @@
 import React from 'react';
 import { I18nService, I18nSetup } from './i18n_service';
 
-const PassThroughComponet = ({ children }: { children: React.ReactNode }) => children;
+const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<I18nSetup> = {
     // By default mock the Context component so it simply renders all children
-    Context: jest.fn().mockImplementation(PassThroughComponet),
+    Context: jest.fn().mockImplementation(PassThroughComponent),
   };
   return setupContract;
 };

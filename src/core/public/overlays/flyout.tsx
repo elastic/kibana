@@ -40,7 +40,7 @@ const CONTAINER_ID = 'flyout-container';
  */
 class FlyoutSession {
   /**
-   * A promise that will be resolved once this flytout session is closed,
+   * A promise that will be resolved once this flyout session is closed,
    * by the user or by closing it from the outside via valling {@link #close}.
    */
   public readonly onClose$: Observable<void>;
