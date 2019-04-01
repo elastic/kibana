@@ -152,9 +152,16 @@ export class DataRecognizer {
 
   async listModules() {
     const manifestFiles = await this.loadManifestFiles();
-    return manifestFiles
-      .map(({ json }) => json)
-      .sort((a, b) => a.id.localeCompare(b.id)); // sort as json files are read from disk and could be in any order.
+    const ids = manifestFiles
+      .map(({ json }) => json.id)
+      .sort((a, b) => a.localeCompare(b)); // sort as json files are read from disk and could be in any order.
+
+    const modules = [];
+    for (let i = 0; i < ids.length; i++) {
+      const module = await this.getModule(ids[i]);
+      modules.push(module);
+    }
+    return modules;
   }
 
   // called externally by an endpoint
@@ -231,6 +238,7 @@ export class DataRecognizer {
     }
 
     return {
+      ...manifestJSON,
       jobs,
       datafeeds,
       kibana
