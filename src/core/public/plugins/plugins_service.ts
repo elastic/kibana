@@ -21,7 +21,7 @@ import { CoreSetup } from '..';
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
-import { Plugin } from './plugin';
+import { PluginWrapper } from './plugin';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 /** @internal */
@@ -40,7 +40,10 @@ export interface PluginsServiceSetup {
  */
 export class PluginsService implements CoreService<PluginsServiceSetup> {
   /** Plugin wrappers in topological order. */
-  private readonly plugins: Map<PluginName, Plugin<unknown, Record<string, unknown>>> = new Map();
+  private readonly plugins: Map<
+    PluginName,
+    PluginWrapper<unknown, Record<string, unknown>>
+  > = new Map();
   private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {}
@@ -50,7 +53,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     deps.injectedMetadata
       .getPlugins()
       .forEach(({ id, plugin }) =>
-        this.plugins.set(id, new Plugin(plugin, createPluginInitializerContext(deps, plugin)))
+        this.plugins.set(
+          id,
+          new PluginWrapper(plugin, createPluginInitializerContext(deps, plugin))
+        )
       );
 
     // Load plugin bundles

@@ -19,7 +19,7 @@
 import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
-import { Plugin } from './plugin';
+import { PluginWrapper } from './plugin';
 
 function createManifest(
   id: string,
@@ -34,7 +34,7 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
-let plugin: Plugin<unknown, Record<string, unknown>>;
+let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const initializerContext = {};
 const addBasePath = (path: string) => path;
 
@@ -42,58 +42,60 @@ beforeEach(() => {
   mockPluginLoader.mockClear();
   mockPlugin.setup.mockClear();
   mockPlugin.stop.mockClear();
-  plugin = new Plugin(createManifest('plugin-a'), initializerContext);
+  plugin = new PluginWrapper(createManifest('plugin-a'), initializerContext);
 });
 
-test('`load` calls loadPluginBundle', () => {
-  plugin.load(addBasePath);
-  expect(mockPluginLoader).toHaveBeenCalledWith(addBasePath, 'plugin-a');
-});
+describe('PluginWrapper', () => {
+  test('`load` calls loadPluginBundle', () => {
+    plugin.load(addBasePath);
+    expect(mockPluginLoader).toHaveBeenCalledWith(addBasePath, 'plugin-a');
+  });
 
-test('`setup` fails if load is not called first', async () => {
-  await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"plugin-a\\" can't be setup since its bundle isn't loaded."`
-  );
-});
+  test('`setup` fails if load is not called first', async () => {
+    await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Plugin \\"plugin-a\\" can't be setup since its bundle isn't loaded."`
+    );
+  });
 
-test('`setup` fails if plugin.setup is not a function', async () => {
-  mockInitializer.mockReturnValueOnce({ stop: jest.fn() } as any);
-  await plugin.load(addBasePath);
-  await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
-  );
-});
+  test('`setup` fails if plugin.setup is not a function', async () => {
+    mockInitializer.mockReturnValueOnce({ stop: jest.fn() } as any);
+    await plugin.load(addBasePath);
+    await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
+    );
+  });
 
-test('`setup` calls initializer with initializer context', async () => {
-  await plugin.load(addBasePath);
-  await plugin.setup({} as any, {} as any);
-  expect(mockInitializer).toHaveBeenCalledWith(initializerContext);
-});
+  test('`setup` calls initializer with initializer context', async () => {
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    expect(mockInitializer).toHaveBeenCalledWith(initializerContext);
+  });
 
-test('`setup` calls plugin.setup with context and dependencies', async () => {
-  await plugin.load(addBasePath);
-  const context = { any: 'thing' } as any;
-  const deps = { otherDep: 'value' };
-  await plugin.setup(context, deps);
-  expect(mockPlugin.setup).toHaveBeenCalledWith(context, deps);
-});
+  test('`setup` calls plugin.setup with context and dependencies', async () => {
+    await plugin.load(addBasePath);
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+    await plugin.setup(context, deps);
+    expect(mockPlugin.setup).toHaveBeenCalledWith(context, deps);
+  });
 
-test('`stop` fails if plugin is not setup up', async () => {
-  expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
-  );
-});
+  test('`stop` fails if plugin is not setup up', async () => {
+    expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
+      `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
+    );
+  });
 
-test('`stop` calls plugin.stop', async () => {
-  await plugin.load(addBasePath);
-  await plugin.setup({} as any, {} as any);
-  await plugin.stop();
-  expect(mockPlugin.stop).toHaveBeenCalled();
-});
+  test('`stop` calls plugin.stop', async () => {
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    await plugin.stop();
+    expect(mockPlugin.stop).toHaveBeenCalled();
+  });
 
-test('`stop` does not fail if plugin.stop does not exist', async () => {
-  mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
-  await plugin.load(addBasePath);
-  await plugin.setup({} as any, {} as any);
-  expect(() => plugin.stop()).not.toThrow();
+  test('`stop` does not fail if plugin.stop does not exist', async () => {
+    mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    expect(() => plugin.stop()).not.toThrow();
+  });
 });

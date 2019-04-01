@@ -25,7 +25,7 @@ import { FatalErrorsSetup } from '../fatal_errors';
 import { I18nSetup } from '../i18n';
 import { NotificationsSetup } from '../notifications';
 import { UiSettingsSetup } from '../ui_settings';
-import { Plugin } from './plugin';
+import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps } from './plugins_service';
 
 // tslint:disable-next-line no-empty-interface
@@ -68,7 +68,7 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
-  plugin: Plugin<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): PluginSetupContext {
   return { ...deps };
 }

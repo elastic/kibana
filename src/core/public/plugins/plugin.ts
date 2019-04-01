@@ -21,23 +21,25 @@ import { DiscoveredPlugin, PluginName } from '../../server';
 import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 
+export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
+  setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+  stop?: () => void;
+}
+
 /**
  * The `plugin` export at the root of a plugin's `public` directory should conform
  * to this interface.
  */
 export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (
   core: PluginInitializerContext
-) => {
-  setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
-  stop?: () => void;
-};
+) => Plugin<TSetup, TDependencies>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
  * @internal
  */
-export class Plugin<
+export class PluginWrapper<
   TSetup = unknown,
   TDependenciesSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
@@ -46,7 +48,7 @@ export class Plugin<
   public readonly requiredDependencies: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalDependencies: DiscoveredPlugin['optionalPlugins'];
   private initializer?: PluginInitializer<TSetup, TDependenciesSetup>;
-  private instance?: ReturnType<PluginInitializer<TSetup, TDependenciesSetup>>;
+  private instance?: Plugin<TSetup, TDependenciesSetup>;
 
   constructor(
     readonly discoveredPlugin: DiscoveredPlugin,

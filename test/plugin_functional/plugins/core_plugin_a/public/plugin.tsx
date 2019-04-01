@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginSetupContext } from 'kibana/public';
+import { Plugin, PluginSetupContext } from 'kibana/public';
 
-export class CorePluginAPlugin implements ReturnType<PluginInitializer<CorePluginAPluginSetup>> {
+export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup> {
   public setup(core: PluginSetupContext, deps: {}) {
     return {
       getGreeting() {
