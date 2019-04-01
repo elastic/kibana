@@ -15,8 +15,8 @@ export type AllowUnknownProperties<T> = T extends object
     }
   : T;
 
-export type PromiseReturnType<T> = T extends Promise<infer U>
-  ? U
-  : T extends (...args: any[]) => Promise<infer V>
+export type PromiseReturnType<T> = T extends (
+  ...args: any[]
+) => Promise<infer V>
   ? V
   : T;
