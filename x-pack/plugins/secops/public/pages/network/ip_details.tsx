@@ -50,18 +50,14 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   {({ poll, to, from, setQuery }) => (
                     <IpOverviewQuery
                       sourceId="default"
-                      startDate={from}
-                      endDate={to}
                       filterQuery={filterQuery}
                       type={networkModel.NetworkType.details}
                       ip={decodeIpv6(ip)}
                     >
-                      {({ id, ipOverviewData, loading }) => (
+                      {({ ipOverviewData, loading }) => (
                         <IpOverview
                           ip={decodeIpv6(ip)}
                           data={ipOverviewData}
-                          startDate={from}
-                          endDate={to}
                           loading={loading}
                           type={networkModel.NetworkType.details}
                         />

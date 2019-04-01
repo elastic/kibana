@@ -72,11 +72,6 @@ describe('Test Source Resolvers', () => {
     const data = await createIpOverviewResolvers(mockIpOverviewLibs).Source.IpOverview(
       source as Source,
       {
-        timerange: {
-          interval: '12h',
-          to: 1514782800000,
-          from: 1546318799999,
-        },
         ip: '10.10.10.10',
       },
       context,

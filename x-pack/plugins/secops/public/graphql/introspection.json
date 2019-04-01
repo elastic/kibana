@@ -282,16 +282,6 @@
                 "defaultValue": null
               },
               {
-                "name": "timerange",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "filterQuery",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },

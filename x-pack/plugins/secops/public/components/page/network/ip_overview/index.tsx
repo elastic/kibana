@@ -44,15 +44,13 @@ const SelectTypeItem = styled(EuiFlexItem)`
 
 interface DescriptionList {
   title: string;
-  description: React.ReactElement;
+  description: JSX.Element;
 }
 
 interface OwnProps {
   ip: string;
   data: IpOverviewData;
   loading: boolean;
-  startDate: number;
-  endDate: number;
   type: networkModel.NetworkType;
 }
 

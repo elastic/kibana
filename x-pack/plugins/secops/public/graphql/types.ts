@@ -913,8 +913,6 @@ export interface HostsSourceArgs {
 export interface IpOverviewSourceArgs {
   id?: string | null;
 
-  timerange: TimerangeInput;
-
   filterQuery?: string | null;
 
   ip: string;
@@ -1517,7 +1515,6 @@ export namespace GetHostsTableQuery {
 export namespace GetIpOverviewQuery {
   export type Variables = {
     sourceId: string;
-    timerange: TimerangeInput;
     filterQuery?: string | null;
     ip: string;
   };

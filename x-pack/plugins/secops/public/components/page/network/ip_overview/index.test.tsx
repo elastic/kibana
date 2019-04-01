@@ -34,8 +34,6 @@ describe('IP Overview Component', () => {
             loading={false}
             ip="'10.10.10.10'"
             data={mockData.IpOverview}
-            startDate={552204000000}
-            endDate={618472800000}
             type={networkModel.NetworkType.details}
           />
         </TestProviders>
@@ -54,8 +52,6 @@ describe('IP Overview Component', () => {
               loading={false}
               ip="'10.10.10.10'"
               data={mockData.complete}
-              startDate={552204000000}
-              endDate={618472800000}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

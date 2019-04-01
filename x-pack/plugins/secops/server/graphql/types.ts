@@ -942,8 +942,6 @@ export interface HostsSourceArgs {
 export interface IpOverviewSourceArgs {
   id?: string | null;
 
-  timerange: TimerangeInput;
-
   filterQuery?: string | null;
 
   ip: string;
@@ -1194,8 +1192,6 @@ export namespace SourceResolvers {
   > = Resolver<R, Parent, Context, IpOverviewArgs>;
   export interface IpOverviewArgs {
     id?: string | null;
-
-    timerange: TimerangeInput;
 
     filterQuery?: string | null;
 

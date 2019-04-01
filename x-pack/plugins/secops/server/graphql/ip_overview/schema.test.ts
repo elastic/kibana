@@ -23,12 +23,11 @@ const testCaseSource = {
   id: 'Test case to query IpOverview',
   query: `
   query GetIpOverviewQuery(
-    $timerange: TimerangeInput!
     $filterQuery: String
     $ip: String!
   ) {
     source(id: "default") {
-      IpOverview(timerange: $timerange, filterQuery: $filterQuery, ip: $ip) {
+      IpOverview(filterQuery: $filterQuery, ip: $ip) {
         source {
           firstSeen
           lastSeen
@@ -106,11 +105,6 @@ const testCaseSource = {
   }
 `,
   variables: {
-    timerange: {
-      interval: '12h',
-      to: new Date('2018-01-01T05:00:00.000Z').valueOf(),
-      from: new Date('2019-01-01T04:59:59.999Z').valueOf(),
-    },
     ip: '10.10.10.10',
   },
   context: {

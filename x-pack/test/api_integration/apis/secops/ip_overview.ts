@@ -17,20 +17,12 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
-
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetIpOverviewQuery.Query>({
             query: ipOverviewQuery,
             variables: {
               sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
               ip: '151.205.0.17',
             },
           })
@@ -50,20 +42,12 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
-
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetIpOverviewQuery.Query>({
             query: ipOverviewQuery,
             variables: {
               sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
               ip: '185.53.91.88',
             },
           })

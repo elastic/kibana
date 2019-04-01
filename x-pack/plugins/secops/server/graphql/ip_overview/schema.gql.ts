@@ -32,11 +32,6 @@ export const ipOverviewSchema = gql`
   }
 
   extend type Source {
-    IpOverview(
-      id: String
-      timerange: TimerangeInput!
-      filterQuery: String
-      ip: String!
-    ): IpOverviewData
+    IpOverview(id: String, filterQuery: String, ip: String!): IpOverviewData
   }
 `;
