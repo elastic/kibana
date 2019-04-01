@@ -105,6 +105,7 @@ export class SearchBar extends React.PureComponent<Props> {
           appName="code"
           suggestionProviders={suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={true}
           ref={instance => {
             if (instance) {
               // @ts-ignore

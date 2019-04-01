@@ -4,6 +4,7 @@ exports[`render correctly with empty query string 1`] = `
 <CodeQueryBar
   appName="mockapp"
   disableAutoFocus={false}
+  enableSubmitWhenOptionsChanged={false}
   onSearchScopeChanged={[Function]}
   onSelect={[Function]}
   onSubmit={[Function]}
@@ -727,6 +728,7 @@ exports[`render correctly with input query string changed 1`] = `
     <CodeQueryBar
       appName="mockapp"
       disableAutoFocus={false}
+      enableSubmitWhenOptionsChanged={false}
       onSearchScopeChanged={[Function]}
       onSelect={[Function]}
       onSubmit={[Function]}

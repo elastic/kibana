@@ -100,6 +100,7 @@ export class CodeSearchBar extends React.Component<Props> {
           appName="code"
           disableAutoFocus={true}
           suggestionProviders={this.suggestionProviders}
+          enableSubmitWhenOptionsChanged={false}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           ref={instance => {
             if (instance) {

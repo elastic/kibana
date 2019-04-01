@@ -35,6 +35,7 @@ test('render correctly with empty query string', () => {
       disableAutoFocus={false}
       appName="mockapp"
       suggestionProviders={[]}
+      enableSubmitWhenOptionsChanged={false}
       onSubmit={emptyFn}
       onSelect={emptyFn}
       onSearchScopeChanged={emptyFn}
@@ -94,6 +95,7 @@ test('render correctly with input query string changed', done => {
           mockSymbolSuggestionsProvider,
           mockRepositorySuggestionsProvider,
         ]}
+        enableSubmitWhenOptionsChanged={false}
         onSubmit={submitSpy}
         onSelect={emptyFn}
         onSearchScopeChanged={emptyFn}
