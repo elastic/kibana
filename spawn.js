@@ -22,6 +22,7 @@ const { spawn } = require('child_process');
 const Octokit = require('@octokit/rest');
 const App = require('@octokit/app');
 const request = require('@octokit/request');
+const stripAnsi = require('strip-ansi');
 
 /*
 const getInstallation = async function (jwt) {
@@ -116,13 +117,13 @@ const start = async function () {
     headers: {
       'x-ratelimit-limit': limit,
       'x-ratelimit-remaining': remaining
-    } }) => console.log(`limit: ${remaining} / ${limit}`));
+    } }) => console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`));
   //.catch(err => console.log('*************ERROR: ', err));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
   for await (const data of ls.stdout) {
-    cmdLogs += data;
+    cmdLogs += stripAnsi(data);
   }
 
   //todo - fire api request before exiting
@@ -142,12 +143,12 @@ const start = async function () {
       output: {
         title: `${cmd} ${cmdArgs.join(' ')}`,
         summary: `.`,
-        text: cmdLogs
+        text: `\`${cmdLogs}\``
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
         'x-ratelimit-remaining': remaining } }) => {
-      console.log(`limit: ${remaining} / ${limit}`);
+      console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`);
       process.exit(code);});
   });
   //.catch(err => console.log('*************ERROR: ', err));
