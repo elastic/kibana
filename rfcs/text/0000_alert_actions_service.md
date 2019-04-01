@@ -4,19 +4,28 @@
 
 # Summary
 
-An actions service for registering *action instances* for a specific
-*action type* for a given *handler*.
+In order to support alerts within Kibana there is a need to be able to take
+specific actions when an alerts' conditions are met. This includes providing
+data from the context of the alert condition itself. For instance an action
+might be something like creating a github issue with details from the ES index
+that generated the alert. For that same type of alert we do not want to restrict
+it to only integrating with github but rather allow the user to choose what
+action(s) they would like to perform when that alert is triggered. The action
+service therefore will be responsible for handling the integrations such as with
+github, slack, email, and PagerDuty. Allowing the alert service to focus on
+handling the conditional logic. Separating the two will allow for alerts to
+support any number of integrations for a specific **action type**.
 
 # Basic example
 
-An example of a preconfigured `instance` of a `actionType` with a specific
-`handler` (i.e. slack).
+Here is a basic example of a preconfigured `instance` of an `actionType` with a
+specific `handler` (i.e. slack).
 
 ```JS
 server.actions.fire({
   action: 'send message to slack', // instance
   actionType: 'send message',
-  params: {
+  actionParams: {
     message: 'This is a test message from kibana actions service',
     title: 'custom title',
   },
@@ -26,18 +35,119 @@ server.actions.fire({
 # Motivation
 
 In order to support multiple integrations with external services such as slack,
-email, pager-duty, twitter, etc. There is a need for an interface that an alert
+email, PagerDuty, twitter, etc. There is a need for an interface that an alert
 task would use to execute actions with customized content that is specific to
-that alert. In order to increase customization and extensibility there is a need
-for a way the task could fire an action without knowing the specifics of a
-particular service (i.e email, slack)
+that alert, but agnostic of the external integration details. In order to
+increase customization and extensibility there is a need for a way the alert
+task could fire an action without knowing the specifics of a particular service
+(i.e email server, slack tokenized url).
+
+We also want to be able to support multiple configurations for each integration.
+Such as multiple slacks and/or slack channels. Multiple send email addresses. So
+the actions service will provide the capability to define multiple
+configurations per integration. we want these configuration **instances** to
+support spaces so that they can be separated between user groups. We want to
+make the service extensible and allow for additional integrations to be
+**registered** by other plugins for different purposes not just for those
+methods listed above.
 
 # Detailed design
 
 This proposal defines one method to allow an alert task to be decoupled from the
-action(s) that the user wants the alert task to execute when the alert is
-*triggered*. The `action` is a preconfigured saved `instance` of a `actionType`
-for a specific `handler`
+action(s) that the user wants to be taken when an alert is *triggered*. The
+`action` is a preconfigured saved `instance` of an `actionType` for a specific
+`handler` and is fired with the parameters for that `actionType`.
+
+The service is broken down into multiple registered types of objects. First and
+foremost there is the **action type** which defines the generic parameters that
+anyone who wants to `fire` an action of that type needs to provide.
+
+## Defining Action Types
+
+Registering action types is the way that these actions are exposed. Included in
+the definition are the required parameters that will then be passed to the
+**handler** should provide and those that are handed off to the **handlers** to
+fit into whatever service integration they provide.
+
+```JS
+server.actions.registerActionType({
+  name: 'notification',
+  actionParams: [
+    { name: 'destination', type: 'string' },
+    { name: 'message', type: 'string' },
+    { name: 'title', type: 'string', optional: true },
+  ],
+});
+```
+
+The above action parameters are used to validate the inputs to the `fire`
+method.
+
+## The Handler
+
+The `handler` is what defines what happens when an action is *fired*. This
+will define the particular integration such as slack, email, etc.
+
+```JS
+server.actions.registerHandler({
+  actionType: 'notification',
+  type: 'slack',
+  handlerParams: {
+    { name: 'channel', type: 'string' },
+  },
+  async handler({ actionParams, handlerParams }) {
+    try {
+      const body = JSON.stringify({
+        ...handlerParams,
+        username: 'webhookbot',
+        text: actionParams.message,
+        icon_emoji: ':ghost:',
+      });
+      const result = new url.URL(actionParams.destination);
+      await fetch(result.toString(), {
+        method: 'POST',
+        body,
+      });
+    } catch (e) {
+      warn(`[slack] failed with ${e.message}`);
+    }
+  },
+});
+```
+
+The **handler** will do the actual work of integration, and will receive
+decrypted credentials if necessary in order to connect to external services. Any
+number of **handlers** can be registered with the actions service by any
+dependent plugin, prior to start up to ensure availability for any existing
+alerts, or action instances.
+
+Based on the **action type**'s action parameters and the handlers parameters the
+handler function will receive the parameters passed to the `fire(...)` method.  
+
+
+
+## Creating Instances
+
+Instances are saved in the Kibana index and are used in order to `fire` an action with parameters. The
+`params` required are specific to the `actionType`. Changing the `actionType` also
+changes what `handlers` are available for it.
+
+
+```JS
+server.actions.registerInstance({
+  name: 'send message to slack',
+  actionType: 'notification',
+  handler: 'slack',
+  params: {
+    destination: '<slack url>',
+  },
+  handlerParams: {
+    channel: '#bot-playground',
+  },
+});
+```
+
+*Note: instances are saved objects that are space aware*
 
 ## Executing Actions
 
@@ -60,79 +170,6 @@ server.actions.fire({
 
 The action `send message to slack` is the instance that is being fired. See
 below for details how to create them
-
-## Creating Instances
-
-Instances are saved in the Kibana index and are used in order to `fire` an action with parameters. The
-`params` required are specific to the `actionType`. Changing the `actionType` also
-changes what `handlers` are available for it.
-
-
-```JS
-server.actions.instance({
-  name: 'send message to slack',
-  actionType: 'notification',
-  handler: 'slack',
-  params: {
-    destination: '<slack url>',
-  },
-  handlerParams: {
-    channel: '#bot-playground',
-  },
-});
-```
-
-*Note: instances are saved objects that are space aware*
-
-## The Handler
-
-The `handler` is what defines what happens when an action is *fired*. This
-will define the particular integration such as slack, email, etc.
-
-```JS
-server.actions.registerHandler({
-  actionType: 'notification',
-  type: 'slack',
-  params: {
-    { name: 'channel', type: 'string' },
-  },
-  async handler({ actionParams, params }) {
-    try {
-      const body = JSON.stringify({
-        ...params,
-        username: 'webhookbot',
-        text: actionParams.message,
-        icon_emoji: ':ghost:',
-      });
-      const result = new url.URL(actionParams.destination);
-      await fetch(result.toString(), {
-        method: 'POST',
-        body,
-      });
-    } catch (e) {
-      warn(`[slack] failed with ${e.message}`);
-    }
-  },
-});
-```
-
-## Defining Action Types
-
-Registering action types is the way that these actions are exposed to the
-alerts. Included in the definition are the required parameters that the alert
-should provide and those that are handed off to the *handlers* to fit into
-whatever service integration they provide.
-
-```JS
-server.actions.registerActionType({
-  name: 'notification',
-  params: [
-    { name: 'destination', type: 'string' },
-    { name: 'message', type: 'string' },
-    { name: 'title', type: 'string', optional: true },
-  ],
-});
-```
 
 ## Retrieve a list of available actions
 
