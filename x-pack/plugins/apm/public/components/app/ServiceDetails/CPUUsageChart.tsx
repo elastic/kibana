@@ -11,11 +11,11 @@ import React from 'react';
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import { HoverXHandlers } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
-import { CPUChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_cpu_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { CPUMetricSeries } from '../../../store/selectors/chartSelectors';
 
 interface Props {
-  data: CPUChartAPIResponse;
+  data: CPUMetricSeries;
   hoverXHandlers: HoverXHandlers;
 }
 

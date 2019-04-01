@@ -84,6 +84,9 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      interpreterConfig: {
+        enableInVisualize: true
+      }
     },
   },
   rootDomElement,
