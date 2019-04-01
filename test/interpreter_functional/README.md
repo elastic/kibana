@@ -19,3 +19,8 @@ node scripts/functional_test_runner.js --config test/interpreter_functional/conf
 # Writing tests
 
 Look into test_suites/run_pipeline/basic.js for examples
+
+to update baseline screenshots and snapshots run with:
+```
+node scripts/functional_test_runner.js --config test/interpreter_functional/config.js --updateBaselines
+```
