@@ -28,6 +28,7 @@ import { toastNotifications } from '../../notify';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';
+import { registerSubUrlHooks } from './sub_url_hooks';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
@@ -137,6 +138,7 @@ export function initAngularApi(chrome, internals) {
       });
 
     directivesProvider(chrome, internals);
+    registerSubUrlHooks(kibana, internals);
 
     uiModules.link(kibana);
   };
