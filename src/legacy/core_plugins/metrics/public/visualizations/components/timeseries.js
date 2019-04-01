@@ -25,7 +25,9 @@ import {
   Position,
   Settings,
   getAxisId,
-  getGroupId
+  getGroupId,
+  DARK_THEME,
+  LIGHT_THEME
 } from '@elastic/charts';
 import { Series } from './series';
 import { GRID_LINE_CONFIG } from '../lib/config';
@@ -33,6 +35,7 @@ import { GRID_LINE_CONFIG } from '../lib/config';
 import '@elastic/charts/dist/style.css';
 
 export const TimeSeries = ({
+  isDarkMode,
   showGrid,
   legend,
   legendPosition,
@@ -49,6 +52,7 @@ export const TimeSeries = ({
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}
+        theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
       />
 
       { series.map(s => (
@@ -90,6 +94,7 @@ TimeSeries.defaultProps = {
 };
 
 TimeSeries.propTypes = {
+  isDarkMode: PropTypes.bool,
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,

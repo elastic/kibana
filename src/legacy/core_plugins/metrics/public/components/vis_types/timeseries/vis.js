@@ -31,6 +31,7 @@ import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
+import { isBackgroundDark } from '../../../../common/set_is_reversed';
 
 class TimeseriesVisualization extends Component {
 
@@ -173,6 +174,7 @@ class TimeseriesVisualization extends Component {
     const style = { backgroundColor: model.background_color };
 
     const params = {
+      isDarkMode: isBackgroundDark(model.background_color),
       showGrid: Boolean(model.show_grid),
       legend: Boolean(model.show_legend),
       legendPosition: model.legend_position,
