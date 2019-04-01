@@ -116,8 +116,14 @@ export function getElementStats(state) {
 
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-    .map(el => el.filter)
-    .filter(str => str != null && str.length)
+    .reduce((acc, el) => {
+      // check that a filter is defined
+      if (el.filter != null && el.filter.length) {
+        return acc.concat(el.filter);
+      }
+
+      return acc;
+    }, [])
     .join(' | ');
 }
 
