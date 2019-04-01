@@ -23,7 +23,7 @@ import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
 import {
-  EuiBasicTable,
+  EuiBasicTable as EuiBasicTableTyped,
   EuiButtonIcon,
   EuiPageContent,
   EuiSpacer,
@@ -296,7 +296,7 @@ class ReportListingUi extends Component<Props, State> {
     };
 
     return (
-      <EuiBasicTable
+      <EuiBasicTableTyped
         itemId={'id'}
         items={this.state.jobs}
         loading={this.state.isLoading}

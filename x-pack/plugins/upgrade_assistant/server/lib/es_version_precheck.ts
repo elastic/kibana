@@ -49,7 +49,18 @@ export const EsVersionPrecheck = {
     const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('admin');
     const callCluster = callWithRequest.bind(callWithRequest, request) as CallCluster;
 
-    const allNodeVersions = await getAllNodeVersions(callCluster);
+    let allNodeVersions: SemVer[];
+
+    try {
+      allNodeVersions = await getAllNodeVersions(callCluster);
+    } catch (e) {
+      if (e.status === 403) {
+        throw Boom.forbidden(e.message);
+      }
+
+      throw e;
+    }
+
     // This will throw if there is an issue
     verifyAllMatchKibanaVersion(allNodeVersions);
 

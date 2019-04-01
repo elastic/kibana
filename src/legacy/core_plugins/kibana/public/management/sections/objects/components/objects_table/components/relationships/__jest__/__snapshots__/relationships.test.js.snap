@@ -32,12 +32,7 @@ exports[`Relationships should render dashboards normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList
-      align="left"
-      compressed={false}
-      textStyle="normal"
-      type="row"
-    >
+    <EuiDescriptionList>
       <EuiDescriptionListTitle
         style={
           Object {
@@ -191,12 +186,7 @@ exports[`Relationships should render index patterns normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList
-      align="left"
-      compressed={false}
-      textStyle="normal"
-      type="row"
-    >
+    <EuiDescriptionList>
       <EuiDescriptionListTitle
         style={
           Object {
@@ -350,12 +340,7 @@ exports[`Relationships should render searches normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList
-      align="left"
-      compressed={false}
-      textStyle="normal"
-      type="row"
-    >
+    <EuiDescriptionList>
       <EuiDescriptionListTitle
         style={
           Object {
@@ -521,12 +506,7 @@ exports[`Relationships should render visualizations normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList
-      align="left"
-      compressed={false}
-      textStyle="normal"
-      type="row"
-    >
+    <EuiDescriptionList>
       <EuiDescriptionListTitle
         style={
           Object {

@@ -25,6 +25,21 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
+  <EuiTitle
+    size="m"
+    textTransform="none"
+  >
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create new calendar"
+        id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+        values={Object {}}
+      />
+    </h1>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
   <EuiFormRow
     describedByIds={Array []}
     error={
@@ -156,16 +171,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="l"
   />
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -175,6 +183,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         iconSide="left"
         isDisabled={true}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -185,7 +194,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -194,6 +202,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         href="undefined/app/ml#/settings/calendars_list"
         iconSide="left"
         isDisabled={false}
+        size="m"
         type="button"
       >
         <FormattedMessage

@@ -96,7 +96,21 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
     create: (sourceConfiguration: CreateSourceInput) => ({ setState }) => {
       const variables = {
         sourceId,
-        sourceConfiguration,
+        sourceConfiguration: {
+          name: sourceConfiguration.name,
+          description: sourceConfiguration.description,
+          metricAlias: sourceConfiguration.metricAlias,
+          logAlias: sourceConfiguration.logAlias,
+          fields: sourceConfiguration.fields
+            ? {
+                container: sourceConfiguration.fields.container,
+                host: sourceConfiguration.fields.host,
+                pod: sourceConfiguration.fields.pod,
+                tiebreaker: sourceConfiguration.fields.tiebreaker,
+                timestamp: sourceConfiguration.fields.timestamp,
+              }
+            : undefined,
+        },
       };
 
       setState(actions.startOperation({ name: 'create', parameters: variables }));

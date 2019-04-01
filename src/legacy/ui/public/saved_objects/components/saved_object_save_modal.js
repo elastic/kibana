@@ -223,10 +223,15 @@ export class SavedObjectSaveModal extends React.Component {
               isLoading={this.state.isLoading}
               isDisabled={this.state.title.length === 0}
             >
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
-                defaultMessage="Confirm Save"
-              />
+              {this.props.confirmButtonLabel
+                ? this.props.confirmButtonLabel
+                : (
+                  <FormattedMessage
+                    id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+                    defaultMessage="Confirm Save"
+                  />
+                )
+              }
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -241,5 +246,6 @@ SavedObjectSaveModal.propTypes = {
   title: PropTypes.string.isRequired,
   showCopyOnSave: PropTypes.bool.isRequired,
   objectType: PropTypes.string.isRequired,
+  confirmButtonLabel: PropTypes.node,
   options: PropTypes.node,
 };

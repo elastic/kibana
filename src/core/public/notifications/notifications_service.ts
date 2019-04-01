@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { I18nStart } from '../i18n';
+import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
 
 interface Params {
@@ -25,7 +25,7 @@ interface Params {
 }
 
 interface Deps {
-  i18n: I18nStart;
+  i18n: I18nSetup;
 }
 
 export class NotificationsService {
@@ -40,11 +40,11 @@ export class NotificationsService {
     });
   }
 
-  public start({ i18n }: Deps) {
+  public setup({ i18n }: Deps) {
     this.params.targetDomElement.appendChild(this.toastsContainer);
 
     return {
-      toasts: this.toasts.start({ i18n }),
+      toasts: this.toasts.setup({ i18n }),
     };
   }
 
@@ -55,4 +55,4 @@ export class NotificationsService {
   }
 }
 
-export type NotificationsStart = ReturnType<NotificationsService['start']>;
+export type NotificationsSetup = ReturnType<NotificationsService['setup']>;

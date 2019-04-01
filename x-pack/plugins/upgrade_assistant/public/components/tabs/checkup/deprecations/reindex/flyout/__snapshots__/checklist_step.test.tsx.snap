@@ -17,16 +17,14 @@ exports[`ChecklistFlyout renders 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
-                consider using a different upgrade strategy."
+          defaultMessage="If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
           values={Object {}}
         />
       </p>
       <p>
         <FormattedMessage
-          defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
-                need to return to this page to resume reindexing."
+          defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will need to return to this page to resume reindexing."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
           values={Object {}}
         />
@@ -45,7 +43,7 @@ exports[`ChecklistFlyout renders 1`] = `
         />
       </h3>
     </EuiTitle>
-    <Component
+    <ReindexProgress
       cancelReindex={[MockFunction]}
       reindexState={
         Object {
@@ -64,16 +62,9 @@ exports[`ChecklistFlyout renders 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -92,7 +83,6 @@ exports[`ChecklistFlyout renders 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -102,6 +92,7 @@ exports[`ChecklistFlyout renders 1`] = `
           iconSide="left"
           isLoading={false}
           onClick={[MockFunction]}
+          size="m"
           type="button"
         >
           <FormattedMessage

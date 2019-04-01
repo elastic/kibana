@@ -771,6 +771,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         fill={true}
                                         iconSide="left"
                                         onClick={[Function]}
+                                        size="m"
                                         type="button"
                                       >
                                         <button
@@ -986,19 +987,12 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1034,7 +1028,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1047,6 +1040,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -1488,19 +1482,12 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1536,7 +1523,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1549,6 +1535,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -1990,19 +1977,12 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2038,7 +2018,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2051,6 +2030,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -2492,19 +2472,12 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2540,7 +2513,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2553,6 +2525,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -2994,19 +2967,12 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -3042,7 +3008,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -3055,6 +3020,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button

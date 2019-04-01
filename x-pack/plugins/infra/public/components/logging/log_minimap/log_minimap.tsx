@@ -24,15 +24,6 @@ interface LogMinimapProps {
     start: number;
   } | null;
   jumpToTarget: (params: LogEntryTime) => any;
-  reportVisibleInterval: (
-    params: {
-      start: number;
-      end: number;
-      bucketsOnPage: number;
-      pagesBeforeStart: number;
-      pagesAfterEnd: number;
-    }
-  ) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
   // searchSummaryBuckets?: SearchSummaryBucket[];
@@ -69,37 +60,6 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
 
     return ((time - minTime) * height) / intervalSize;
   };
-
-  public updateVisibleInterval = () => {
-    const { summaryBuckets, intervalSize } = this.props;
-    const [minTime, maxTime] = this.getYScale().domain();
-
-    const firstBucket = summaryBuckets[0];
-    const lastBucket = summaryBuckets[summaryBuckets.length - 1];
-
-    const pagesBeforeStart = firstBucket ? (minTime - firstBucket.start) / intervalSize : 0;
-    const pagesAfterEnd = lastBucket ? (lastBucket.end - maxTime) / intervalSize : 0;
-    const bucketsOnPage = firstBucket
-      ? (maxTime - minTime) / (firstBucket.end - firstBucket.start)
-      : 0;
-
-    this.props.reportVisibleInterval({
-      end: Math.ceil(maxTime),
-      start: Math.floor(minTime),
-      bucketsOnPage,
-      pagesBeforeStart,
-      pagesAfterEnd,
-    });
-  };
-
-  public componentDidUpdate(prevProps: LogMinimapProps) {
-    const hasNewTarget = prevProps.target !== this.props.target;
-    const hasNewIntervalSize = prevProps.intervalSize !== this.props.intervalSize;
-
-    if (hasNewTarget || hasNewIntervalSize) {
-      this.updateVisibleInterval();
-    }
-  }
 
   public render() {
     const {
