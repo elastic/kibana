@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FileUploadAndParse } from './components/file_upload_and_parse';
-export { indexingService } from './util/indexing_service';
+export { JsonUploadAndParse } from './components/json_upload_and_parse';
+export { triggerIndexing } from './util/indexing_service';
