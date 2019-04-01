@@ -11,7 +11,9 @@ import {
   EuiButton,
   EuiCodeEditor,
   EuiDescribedFormGroup,
-  EuiFieldText,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSelect,
@@ -24,12 +26,13 @@ import { map } from 'lodash';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { toastNotifications } from 'ui/notify';
-import { ACTION_MODES } from '../../../../common/constants';
+import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
 import { getActionType } from '../../../../common/lib/get_action_type';
 import { BaseWatch, ExecutedWatchResults } from '../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { executeWatch } from '../../../lib/api';
 import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
+import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
 interface TableDataRow {
@@ -40,34 +43,14 @@ interface TableDataRow {
 
 interface TableData extends Array<TableDataRow> {}
 
+// todo if the user doesn't make changes, is it going to send zero back?
 const EXECUTE_DETAILS_INITIAL_STATE = {
-  triggeredTime: '',
-  scheduledTime: '',
+  triggeredTimeValue: 0,
+  triggeredTimeUnit: TIME_UNITS.MILLISECOND,
+  scheduledTimeValue: 0,
+  scheduledTimeUnit: TIME_UNITS.SECOND,
   ignoreCondition: false,
 };
-
-const ACTION_OPTIONS = [
-  {
-    value: ACTION_MODES.SIMULATE,
-    text: ACTION_MODES.SIMULATE,
-  },
-  {
-    value: ACTION_MODES.FORCE_SIMULATE,
-    text: ACTION_MODES.FORCE_SIMULATE,
-  },
-  {
-    value: ACTION_MODES.EXECUTE,
-    text: ACTION_MODES.EXECUTE,
-  },
-  {
-    value: ACTION_MODES.FORCE_EXECUTE,
-    text: ACTION_MODES.FORCE_EXECUTE,
-  },
-  {
-    value: ACTION_MODES.SKIP,
-    text: ACTION_MODES.SKIP,
-  },
-];
 
 const INPUT_OVERRIDE_ID = 'simulateExecutionInputOverride';
 
@@ -136,7 +119,28 @@ export const JsonWatchEditSimulate = () => {
       }),
       render: ({}, row: { actionId: string }) => (
         <EuiSelect
-          options={ACTION_OPTIONS}
+          options={[
+            {
+              value: ACTION_MODES.SIMULATE,
+              text: ACTION_MODES.SIMULATE,
+            },
+            {
+              value: ACTION_MODES.FORCE_SIMULATE,
+              text: ACTION_MODES.FORCE_SIMULATE,
+            },
+            {
+              value: ACTION_MODES.EXECUTE,
+              text: ACTION_MODES.EXECUTE,
+            },
+            {
+              value: ACTION_MODES.FORCE_EXECUTE,
+              text: ACTION_MODES.FORCE_EXECUTE,
+            },
+            {
+              value: ACTION_MODES.SKIP,
+              text: ACTION_MODES.SKIP,
+            },
+          ]}
           value={executeDetails.actionModes[row.actionId]}
           onChange={e => {
             setExecuteDetails(
@@ -195,51 +199,106 @@ export const JsonWatchEditSimulate = () => {
           )}
         >
           <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.watcher.sections.watchEdit.simulate.form.triggeredTimeFieldLabel',
-              {
-                defaultMessage: 'Triggered time',
-              }
-            )}
-          >
-            <EuiFieldText
-              fullWidth
-              name="triggeredTime"
-              value={executeDetails.triggeredTime}
-              onChange={e => {
-                setExecuteDetails(
-                  new ExecuteDetails({
-                    ...executeDetails,
-                    triggeredTime: e.target.value,
-                  })
-                );
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            id="simulateExecutionScheduledTime"
-            fullWidth
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.scheduledTimeFieldLabel',
               {
-                defaultMessage: 'Scheduled time',
+                defaultMessage: 'Schedule every',
               }
             )}
           >
-            <EuiFieldText
-              fullWidth
-              name="scheduledTime"
-              value={executeDetails.scheduledTime}
-              onChange={e => {
-                setExecuteDetails(
-                  new ExecuteDetails({
-                    ...executeDetails,
-                    scheduledTime: e.target.value,
-                  })
-                );
-              }}
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFieldNumber
+                  value={executeDetails.scheduledTimeValue}
+                  min={0}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setExecuteDetails(
+                      new ExecuteDetails({
+                        ...executeDetails,
+                        scheduledTimeValue: value === '' ? value : parseInt(value, 10),
+                      })
+                    );
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  value={executeDetails.scheduledTimeUnit}
+                  options={[
+                    {
+                      value: TIME_UNITS.SECOND,
+                      text: timeUnits[TIME_UNITS.SECOND].labelPlural,
+                    },
+                    {
+                      value: TIME_UNITS.MINUTE,
+                      text: timeUnits[TIME_UNITS.MINUTE].labelPlural,
+                    },
+                    {
+                      value: TIME_UNITS.HOUR,
+                      text: timeUnits[TIME_UNITS.HOUR].labelPlural,
+                    },
+                  ]}
+                  onChange={e => {
+                    setExecuteDetails(
+                      new ExecuteDetails({
+                        ...executeDetails,
+                        scheduledTimeUnit: e.target.value,
+                      })
+                    );
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.simulate.form.triggeredTimeFieldLabel',
+              {
+                defaultMessage: 'Trigger after',
+              }
+            )}
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFieldNumber
+                  value={executeDetails.triggeredTimeValue}
+                  min={0}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setExecuteDetails(
+                      new ExecuteDetails({
+                        ...executeDetails,
+                        triggeredTimeValue: value === '' ? value : parseInt(value, 10),
+                      })
+                    );
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  value={executeDetails.triggeredTimeUnit}
+                  options={[
+                    {
+                      value: TIME_UNITS.MILLISECOND,
+                      text: timeUnits[TIME_UNITS.MILLISECOND].labelPlural,
+                    },
+                    {
+                      value: TIME_UNITS.SECOND,
+                      text: timeUnits[TIME_UNITS.SECOND].labelPlural,
+                    },
+                  ]}
+                  onChange={e => {
+                    setExecuteDetails(
+                      new ExecuteDetails({
+                        ...executeDetails,
+                        triggeredTimeUnit: e.target.value,
+                      })
+                    );
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFormRow>
         </EuiDescribedFormGroup>
         <EuiDescribedFormGroup
