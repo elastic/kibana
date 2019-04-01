@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 
 describe('Basic Response Handler', function () {

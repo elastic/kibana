@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { copyPersistentState } from '../../../store/util';
+
 export class AbstractSource {
 
   static renderEditor() {
@@ -24,6 +26,10 @@ export class AbstractSource {
   }
 
   destroy() {}
+
+  cloneDescriptor() {
+    return copyPersistentState(this._descriptor);
+  }
 
   async supportsFitToBounds() {
     return true;
@@ -104,6 +110,10 @@ export class AbstractSource {
   }
 
   shouldBeIndexed() {
+    return false;
+  }
+
+  supportsElasticsearchFilters() {
     return false;
   }
 }

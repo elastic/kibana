@@ -130,6 +130,26 @@ else
 fi
 
 ###
+### use the geckodriver cache if it exists
+###
+if [ -d "$dir/.geckodriver" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
+  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
+    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  GECKODRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
+
+###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
@@ -141,6 +161,22 @@ yarn kbn bootstrap --prefer-offline
 GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
   echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
+fi
+
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building kbn-pm distributable"
+yarn kbn run build -i @kbn/pm
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi

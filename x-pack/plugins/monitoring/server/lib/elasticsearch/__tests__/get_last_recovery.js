@@ -5,7 +5,7 @@
  */
 
 import { handleLastRecoveries, filterOldShardActivity } from '../get_last_recovery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('get_last_recovery', () => {
   // Note: times are from the epoch!

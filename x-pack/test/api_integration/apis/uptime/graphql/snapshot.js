@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSnapshotQueryString } from '../../../../../plugins/uptime/public/components/queries/snapshot/get_snapshot';
 import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
