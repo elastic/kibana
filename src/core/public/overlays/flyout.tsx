@@ -36,7 +36,6 @@ const CONTAINER_ID = 'flyout-container';
  * the user closes it), you must listen to the "closed" event on this instance.
  * It will be emitted whenever the flyout will be closed and you should throw
  * away your reference to this instance whenever you receive that event.
- * @extends EventEmitter
  */
 class FlyoutSession {
   /**
