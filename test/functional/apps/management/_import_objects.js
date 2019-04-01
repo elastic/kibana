@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.ndjson'));
+        await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson'));
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
