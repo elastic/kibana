@@ -4,19 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ConfigurationBlock } from '../../../../common/domain_types';
+import { ReturnTypeBulkUpsert, ReturnTypeList } from '../../../../common/return_types';
 
 export interface FrontendConfigBlocksAdapter {
-  upsert(
-    blocks: ConfigurationBlock[]
-  ): Promise<Array<{ success?: boolean; blockID?: string; error?: string }>>;
-  getForTags(
-    tagIds: string[],
-    page: number
-  ): Promise<{
-    error?: string;
-    blocks: ConfigurationBlock[];
-    page: number;
-    total: number;
-  }>;
+  upsert(blocks: ConfigurationBlock[]): Promise<ReturnTypeBulkUpsert>;
+  getForTags(tagIds: string[], page: number): Promise<ReturnTypeList<ConfigurationBlock>>;
   delete(id: string): Promise<boolean>;
 }
