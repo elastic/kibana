@@ -18,14 +18,24 @@
  */
 
 import getTimerange from './helpers/get_timerange';
-export default function offsetTime(req, by) {
+
+const OFFSET_PATTERN = /^([+-]?[\d]+)([shmdwMy]|ms)$/;
+
+export const isOffsetValid = by => OFFSET_PATTERN.test(by);
+
+export const offsetTime = (req, by) => {
   const { from, to } = getTimerange(req);
-  if (!/^[+-]?([\d]+)([shmdwMy]|ms)$/.test(by)) return { from, to };
-  const matches = by.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);
+
+  if (!isOffsetValid(by)) {
+    return { from, to };
+  }
+
+  const matches = by.match(OFFSET_PATTERN);
   const offsetValue = Number(matches[1]);
   const offsetUnit = matches[2];
+
   return {
     from: from.clone().subtract(offsetValue, offsetUnit),
-    to: to.clone().subtract(offsetValue, offsetUnit)
+    to: to.clone().subtract(offsetValue, offsetUnit),
   };
-}
+};

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import offsetTime from '../../offset_time';
+import { offsetTime } from '../../offset_time';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import { buildEsQuery } from '@kbn/es-query';
 
