@@ -44,7 +44,9 @@ can be generally imported into 7.x.
 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
 to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
 
-You can also use the <<upgrade-standard, Standard upgrade>> instructions to upgrade to 7.0.
+After you have addressed any issues that were identified by the Upgrade Assistant, 
+<<upgrade-standard,upgrade to 7.0>>, you can use the <<upgrade-standard, Standard upgrade>> 
+instructions to upgrade to 7.0.
 
 
 include::upgrade/upgrade-standard.asciidoc[]
