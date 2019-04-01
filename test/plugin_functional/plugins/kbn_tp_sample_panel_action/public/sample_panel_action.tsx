@@ -38,8 +38,7 @@ class SamplePanelAction extends ContextMenuAction {
     if (!embeddable) {
       return;
     }
-    // TODO: Remove exclamation mark once we have a typed assurance core is there
-    getNewPlatform().start.core!.overlays.openFlyout(
+    getNewPlatform().setup.core.overlays.openFlyout(
       <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
