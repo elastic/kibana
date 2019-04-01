@@ -3,6 +3,14 @@
   flex-grow: 1;
 }
 
+.codeContainer__main {
+  width: calc(100% - 16rem);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .codeContainer__import {
   max-width: 56rem;
   margin: auto;
@@ -22,6 +30,17 @@
 .codeContainer__editor {
   overflow: hidden;
   flex-grow: 1;
+}
+
+.codeContainer__blame {
+  position: relative;
+  max-height: calc(100% - (6rem + 1px));
+  flex-grow: 1;
+}
+
+.codeContainer__directoryView, .codeContainer__history {
+  flex-grow: 1;
+  overflow: auto;
 }
 
 .codeFooter--error {

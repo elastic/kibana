@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
@@ -48,42 +48,6 @@ import { Directory } from './directory';
 import { ErrorPanel } from './error_panel';
 import { NotFound } from './not_found';
 import { TopBar } from './top_bar';
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  & > *:first-child {
-    margin-right: ${theme.euiSizeS};
-  }
-  & .euiButton {
-    min-width: ${theme.euiSizeS};
-  }
-`;
-
-const EditorBlameContainer = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  max-height: calc(100% - 97px);
-`;
-
-const DirectoryViewContainer = styled.div`
-  overflow: auto;
-  flex-grow: 1;
-`;
-const CommitHistoryContainer = styled.div`
-  overflow: auto;
-  flex-grow: 1;
-`;
-
-const Root = styled.div`
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: calc(100% - 256px);
-`;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   isNotFound: boolean;
@@ -222,7 +186,7 @@ class CodeContent extends React.PureComponent<Props> {
       ];
 
       return (
-        <ButtonsContainer>
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
@@ -230,6 +194,7 @@ class CodeContent extends React.PureComponent<Props> {
             type="single"
             idSelected={buttonId}
             onChange={this.switchButton}
+            className="codeButtonGroup"
           />
           <EuiButtonGroup
             buttonSize="s"
@@ -238,12 +203,13 @@ class CodeContent extends React.PureComponent<Props> {
             type="single"
             idSelected={''}
             onChange={this.openRawFile}
+            className="codeButtonGroup"
           />
-        </ButtonsContainer>
+        </EuiFlexGroup>
       );
     } else {
       return (
-        <ButtonsContainer>
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
@@ -261,14 +227,14 @@ class CodeContent extends React.PureComponent<Props> {
             idSelected={buttonId}
             onChange={this.switchButton}
           />
-        </ButtonsContainer>
+        </EuiFlexGroup>
       );
     }
   };
 
   public render() {
     return (
-      <Root>
+      <div className="codeContainer__main">
         <TopBar
           defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
@@ -278,7 +244,7 @@ class CodeContent extends React.PureComponent<Props> {
           branches={this.props.branches}
         />
         {this.renderContent()}
-      </Root>
+      </div>
     );
   }
 
@@ -325,7 +291,7 @@ class CodeContent extends React.PureComponent<Props> {
       case PathTypes.tree:
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
-          <DirectoryViewContainer>
+          <div className="codeContainer__directoryView">
             <Directory node={node} />
             <CommitHistory
               commits={commits}
@@ -345,7 +311,7 @@ class CodeContent extends React.PureComponent<Props> {
                 </React.Fragment>
               }
             />
-          </DirectoryViewContainer>
+          </div>
         );
       case PathTypes.blob:
         if (!file) {
@@ -389,19 +355,19 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         return (
-          <EditorBlameContainer>
+          <EuiFlexGroup direction="row" className="codeContainer__blame">
             <Editor showBlame={false} />
-          </EditorBlameContainer>
+          </EuiFlexGroup>
         );
       case PathTypes.blame:
         return (
-          <EditorBlameContainer>
+          <EuiFlexGroup direction="row" className="codeContainer__blame">
             <Editor showBlame={true} />
-          </EditorBlameContainer>
+          </EuiFlexGroup>
         );
       case PathTypes.commits:
         return (
-          <CommitHistoryContainer>
+          <div className="codeContainer__history">
             <InfiniteScroll
               initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
@@ -420,7 +386,7 @@ class CodeContent extends React.PureComponent<Props> {
                 }
               />
             </InfiniteScroll>
-          </CommitHistoryContainer>
+          </div>
         );
     }
   }
