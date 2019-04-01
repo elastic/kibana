@@ -84,6 +84,7 @@ const getClientWithAuth = async function () {
 // -------------
 
 const start = async function () {
+  const [owner, repo] = process.env.ghprbGhRepository.split('/');
   const title = process.argv[2];
   const cmd = process.argv[3];
   const cmdArgs = process.argv.slice(4);
@@ -99,13 +100,12 @@ const start = async function () {
   //todo - fire api request
   //get title
   clientWithAuth.checks.create({
-    owner: 'elastic',
-    repo: 'kibana',
+    owner,
+    repo,
     name: title,
     head_sha: process.env.ghprbActualCommit,
     started_at: new Date().toISOString(),
-    // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-    //details_url: 'http://www.google.com',
+    details_url: process.env.BUILD_URL,
     //external_id: 'external id',
     status: 'in_progress',
     output: {
@@ -126,12 +126,11 @@ const start = async function () {
   ls.on('close', (code) => {
     console.log('******************TASK COMPLETE');
     clientWithAuth.checks.create({
-      owner: 'elastic',
-      repo: 'kibana',
+      owner,
+      repo,
       name: title,
       head_sha: process.env.ghprbActualCommit,
-      // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-      //details_url: 'http://www.google.com',
+      details_url: process.env.BUILD_URL,
       //external_id: 'external id',
       //status: 'complete',
       conclusion: code === 0 ? 'success' : 'failure',
