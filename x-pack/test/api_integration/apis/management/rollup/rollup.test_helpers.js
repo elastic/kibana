@@ -107,7 +107,7 @@ export const registerHelpers = ({ supertest, es }) => {
           // It seems that there is a flakiness when requesting rollup indices
           // If we did not succeed fetching the indices we won't be able to delete them.
           // https://github.com/elastic/kibana/issues/33282
-          console.log(`[WARNING] Error fetching rollup indices with error: "${body}"`);
+          console.log(`[WARNING] Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
           return;
         }
 
