@@ -27,6 +27,8 @@ export default function splitByTerm(req, panel, series) {
     if (series.split_mode === 'terms' && series.terms_field) {
       const direction = series.terms_direction || 'desc';
       _.set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
+      _.set(doc, `aggs.${series.id}.terms.include`, series.terms_include);
+      _.set(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
       _.set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       const metric = series.metrics.find(item => item.id === series.terms_order_by);
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
