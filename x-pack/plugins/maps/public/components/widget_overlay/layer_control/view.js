@@ -15,8 +15,9 @@ import {
 import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function LayerControl({ isReadOnly, showAddLayerWizard }) {
+export function LayerControl({ isReadOnly, showAddLayerWizard, showFileImportWizard }) {
   let addLayer;
+  let importFile;
   if (!isReadOnly) {
     addLayer = (
       <EuiFlexItem grow={false}>
@@ -29,6 +30,21 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
           <FormattedMessage
             id="xpack.maps.layerControl.addLayerButtonLabel"
             defaultMessage="Add layer"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    );
+    importFile = (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          flush="right"
+          onClick={showFileImportWizard}
+          data-test-subj="importFileButton"
+        >
+          <FormattedMessage
+            id="xpack.maps.layerControl.importFileButtonLabel"
+            defaultMessage="Import file"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -54,6 +70,7 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {importFile}
           {addLayer}
         </EuiFlexGroup>
       </EuiFlexItem>

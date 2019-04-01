@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export async function parseFile(file, postProcessing, FileReader = window.FileReader) {
+export async function parseFile(file, postProcessing = null, FileReader = window.FileReader) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
     fr.onload = ({ target: { result } }) => {

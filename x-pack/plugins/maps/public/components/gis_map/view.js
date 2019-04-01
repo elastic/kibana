@@ -59,6 +59,7 @@ export class GisMap extends Component {
     const {
       layerDetailsVisible,
       addLayerVisible,
+      importFileVisible,
       noFlyoutVisible,
       isFullScreen,
       exitFullScreen,
@@ -71,7 +72,10 @@ export class GisMap extends Component {
       currentPanel = null;
     } else if (addLayerVisible) {
       currentPanelClassName = 'mapMapLayerPanel-isVisible';
-      currentPanel = <AddLayerPanel/>;
+      currentPanel = <AddLayerPanel importView={false}/>;
+    } else if (importFileVisible) {
+      currentPanelClassName = 'mapMapLayerPanel-isVisible';
+      currentPanel = <AddLayerPanel importView={true}/>;
     } else if (layerDetailsVisible) {
       currentPanelClassName = 'mapMapLayerPanel-isVisible';
       currentPanel = (

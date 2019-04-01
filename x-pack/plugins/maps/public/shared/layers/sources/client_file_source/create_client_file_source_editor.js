@@ -6,10 +6,10 @@
 
 
 import React from 'react';
-import { FileUploadAndParse } from '../../../../../../file_upload/public/';
+import { JsonUploadAndParse } from '../../../../../../file_upload/public/';
 
 export function ClientFileCreateSourceEditor({ previewGeojsonFile }) {
   return (
-    <FileUploadAndParse previewFile={previewGeojsonFile}/>
+    <JsonUploadAndParse previewFile={previewGeojsonFile}/>
   );
 }

@@ -14,7 +14,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static type = GEOJSON_FILE;
   static title = 'GeoJSON Vector File';
   static description = 'Client-provided GeoJSON vector shape file';
-  static icon = 'emsApp';
 
   static createDescriptor(featureCollection, name) {
     return {

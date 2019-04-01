@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { triggerIndexing } from '../../../../file_upload/public/';
+import { GeojsonFileSource } from '../../shared/layers/sources/client_file_source';
 import _ from 'lodash';
 
 export class AddLayerPanel extends Component {
@@ -125,12 +126,14 @@ export class AddLayerPanel extends Component {
     );
   }
 
-  _renderSourceEditor() {
-    const editorProperties = {
+  _getEditorProperties() {
+    return {
       onPreviewSource: this._previewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
     };
+  }
 
+  _renderSourceEditor() {
     const Source = ALL_SOURCES.find((Source) => {
       return Source.type === this.state.sourceType;
     });
@@ -153,7 +156,29 @@ export class AddLayerPanel extends Component {
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
         <EuiPanel>
-          {Source.renderEditor(editorProperties)}
+          {Source.renderEditor(this._getEditorProperties())}
+        </EuiPanel>
+      </Fragment>
+    );
+  }
+
+  _renderFileImportEditor() {
+    return (
+      <Fragment>
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          onClick={this._clearSource}
+          iconType="arrowLeft"
+        >
+          <FormattedMessage
+            id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
+            defaultMessage="Change data source"
+          />
+        </EuiButtonEmpty>
+        <EuiSpacer size="s" />
+        <EuiPanel>
+          {GeojsonFileSource.renderEditor(this._getEditorProperties())}
         </EuiPanel>
       </Fragment>
     );
@@ -167,7 +192,7 @@ export class AddLayerPanel extends Component {
     return this._renderSourceEditor();
   }
 
-  _renderFlyout() {
+  _renderFlyout(importView) {
     return (
       <EuiFlexGroup
         direction="column"
@@ -188,7 +213,11 @@ export class AddLayerPanel extends Component {
           className="mapLayerPanel__body"
           data-test-subj="layerAddForm"
         >
-          {this._renderAddLayerForm()}
+          {
+            importView
+              ? this._renderFileImportEditor()
+              : this._renderAddLayerForm()
+          }
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
@@ -215,6 +244,7 @@ export class AddLayerPanel extends Component {
   }
 
   render() {
-    return (this.props.flyoutVisible) ? this._renderFlyout() : null;
+    const { importView, flyoutVisible } = this.props;
+    return (flyoutVisible) ? this._renderFlyout(importView) : null;
   }
 }
