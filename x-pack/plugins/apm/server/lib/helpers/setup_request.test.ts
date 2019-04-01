@@ -46,7 +46,7 @@ describe('setupRequest', () => {
     });
   });
 
-  it('should add not add `observer.version_major` filter if `omitLegacyData=true` ', async () => {
+  it('should not add `observer.version_major` filter if `omitLegacyData=false` ', async () => {
     const setup = setupRequest(mockReq);
     await setup.client('myType', {
       omitLegacyData: false,
