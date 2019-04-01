@@ -16,7 +16,7 @@ function queryToEsAggsConfigs(query: Query): any {
     switch (selectOperation.operation) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
-      case 'avg':
+      case 'cardinality':
         return {
           enabled: true,
           id: String(index),
