@@ -101,7 +101,16 @@ export const registerHelpers = ({ supertest, es }) => {
 
   const deleteIndicesGeneratedByJobs = () => (
     supertest.get(`${API_BASE_PATH}/indices`)
-      .then(({ body }) => {
+      .then(({ status, body }) => {
+
+        if (status !== 200) {
+          // It seems that there is a flakiness when requesting rollup indices
+          // If we did not succeed fetching the indices we won't be able to delete them.
+          // https://github.com/elastic/kibana/issues/33282
+          console.log(`[WARNING] Error fetching rollup indices with error: "${body}"`);
+          return;
+        }
+
         const index = Object.keys(body);
         if (!index.length) {
           return;
