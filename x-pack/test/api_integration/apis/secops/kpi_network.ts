@@ -41,7 +41,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
             expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
             expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(9);
+            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
           });
       });
     });
@@ -74,7 +74,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
             expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
             expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(9);
+            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
           });
       });
     });
