@@ -80,7 +80,7 @@ requests to check Elasticsearch for an updated list of nodes.
 `elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other
 Elasticsearch nodes on startup.
 
-`elasticsearch.sniffOnConectionFault:`:: *Default: false* Update the list of
+`elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
 Elasticsearch nodes immediately following a connection fault.
 
 `elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls

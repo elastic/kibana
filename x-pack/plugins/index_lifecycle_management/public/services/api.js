@@ -5,13 +5,13 @@
  */
 import chrome from 'ui/chrome';
 import {
-  UA_POLICY_DELETE,
-  UA_POLICY_ATTACH_INDEX,
-  UA_POLICY_ATTACH_INDEX_TEMPLATE,
-  UA_POLICY_DETACH_INDEX,
-  UA_INDEX_RETRY_STEP,
+  UIM_POLICY_DELETE,
+  UIM_POLICY_ATTACH_INDEX,
+  UIM_POLICY_ATTACH_INDEX_TEMPLATE,
+  UIM_POLICY_DETACH_INDEX,
+  UIM_INDEX_RETRY_STEP,
 } from '../../common/constants';
-import { trackUserAction } from './user_action';
+import { trackUiMetric } from './ui_metric';
 
 let httpClient;
 export const setHttpClient = (client) => {
@@ -53,7 +53,7 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
   const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
   // Only track successful actions.
-  trackUserAction(UA_POLICY_DELETE, httpClient);
+  trackUiMetric(UIM_POLICY_DELETE, httpClient);
   return response.data;
 }
 
@@ -73,27 +73,27 @@ export async function getAffectedIndices(indexTemplateName, policyName, httpClie
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   // Only track successful actions.
-  trackUserAction(UA_INDEX_RETRY_STEP, httpClient);
+  trackUiMetric(UIM_INDEX_RETRY_STEP, httpClient);
   return response.data;
 };
 
 export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
   // Only track successful actions.
-  trackUserAction(UA_POLICY_DETACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_DETACH_INDEX, httpClient);
   return response.data;
 };
 
 export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/add`, body);
   // Only track successful actions.
-  trackUserAction(UA_POLICY_ATTACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX, httpClient);
   return response.data;
 };
 
 export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/template`, body);
   // Only track successful actions.
-  trackUserAction(UA_POLICY_ATTACH_INDEX_TEMPLATE, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX_TEMPLATE, httpClient);
   return response.data;
 };
