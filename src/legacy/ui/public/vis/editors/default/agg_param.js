@@ -33,7 +33,8 @@ uiModules
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'value',
-    'isInvalid'
+    'isInvalid',
+    'field'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -62,6 +63,7 @@ uiModules
             set-validity="setValidity"
             set-touched="setTouched"
             indexed-fields="indexedFields"
+            field="agg.params.field"
           ></vis-agg-param-react-wrapper>`;
         }
 

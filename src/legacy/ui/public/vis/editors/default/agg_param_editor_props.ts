@@ -30,7 +30,7 @@ export interface AggParamEditorProps<T> {
   value: T;
   indexedFields?: any[];
   isInvalid: boolean;
-  setValue(value: T): void;
+  setValue(value?: T): void;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }
