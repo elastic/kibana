@@ -54,9 +54,13 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope) {
+        controller($scope, $location) {
           // Notifications
           $scope.notifList = notify._notifs;
+
+          $scope.getFirstPathSegment = () => {
+            return $location.path().split('/')[1];
+          };
 
           // Non-scope based code (e.g., React)
 

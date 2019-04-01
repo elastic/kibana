@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
-import { InjectedMetadataSetup } from '../../../../../core/public';
-
-let newPlatformInjectedVars: InjectedMetadataSetup;
-
-export function __newPlatformInit__(instance: InjectedMetadataSetup) {
-  if (newPlatformInjectedVars) {
-    throw new Error('ui/chrome/api/injected_vars is already initialized');
-  }
-
-  newPlatformInjectedVars = instance;
-}
-
-export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
-  chrome.getInjected = (name?: string, defaultValue?: any) =>
-    cloneDeep(
-      name
-        ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)
-        : newPlatformInjectedVars.getInjectedVars()
-    );
-}
+export { configureAppAngularModule } from './angular_config';
