@@ -94,5 +94,5 @@ export {
 } from './sort_table';
 
 export {
-  trackUserAction,
-} from './track_user_action';
+  trackUiMetric,
+} from './track_ui_metric';
