@@ -63,6 +63,22 @@ export const timelineQuery = gql`
                 sequence
               }
             }
+            file {
+              path
+              target_path
+              extension
+              type
+              device
+              inode
+              uid
+              owner
+              gid
+              group
+              mode
+              size
+              mtime
+              ctime
+            }
             host {
               id
               name

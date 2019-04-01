@@ -188,7 +188,22 @@ export const ecsSchema = gql`
     RA: Boolean
     TC: Boolean
   }
-
+  type FileFields {
+    path: String
+    target_path: String
+    extension: String
+    type: String
+    device: String
+    inode: String
+    uid: String
+    owner: String
+    gid: String
+    group: String
+    mode: String
+    size: Float
+    mtime: Date
+    ctime: Date
+  }
   type ZeekHttpData {
     resp_mime_types: [String!]
     trans_depth: String
@@ -303,6 +318,7 @@ export const ecsSchema = gql`
     message: [String!]
     user: UserEcsFields
     process: ProcessEcsFields
+    file: FileFields
   }
 
   type EcsEdges {

@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <styled.div>
+    <span>
+      some children
+    </span>
+    <styled.div
+      width={100}
+    >
+      <pure(Component)
+        browserFields={Object {}}
+        contextId="connected-to"
+        data={
+          Object {
+            "_id": "27",
+            "auditd": Object {
+              "data": null,
+              "result": "success",
+              "session": "246",
+              "summary": Object {
+                "actor": Object {
+                  "primary": "alice",
+                  "secondary": "alice",
+                },
+                "how": "/usr/bin/wget",
+                "message_type": null,
+                "object": Object {
+                  "primary": "93.184.216.34",
+                  "secondary": "80",
+                  "type": "socket",
+                },
+                "sequence": null,
+              },
+            },
+            "destination": Object {
+              "ip": "93.184.216.34",
+              "port": 80,
+            },
+            "event": Object {
+              "action": "connected-to",
+              "category": "audit-rule",
+              "dataset": null,
+              "id": null,
+              "module": "auditd",
+              "severity": null,
+            },
+            "geo": null,
+            "host": Object {
+              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "ip": Array [
+                "46.101.3.136",
+                "10.16.0.5",
+                "fe80::4066:42ff:fe19:b3b9",
+              ],
+              "name": "zeek-london",
+            },
+            "http": null,
+            "network": null,
+            "process": Object {
+              "args": null,
+              "executable": "/usr/bin/wget",
+              "name": "wget",
+              "pid": 1490,
+              "ppid": 1476,
+              "title": "wget www.example.com",
+              "working_directory": null,
+            },
+            "source": null,
+            "suricata": null,
+            "timestamp": "2019-03-22T19:13:11.026Z",
+            "url": null,
+            "user": Object {
+              "name": "alice",
+            },
+            "zeek": null,
+          }
+        }
+        text="some text"
+      />
+    </styled.div>
+  </styled.div>
+</span>
+`;
+
+exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <styled.div>
+    <span>
+      some children
+    </span>
+    <styled.div
+      width={100}
+    >
+      <pure(Component)
+        browserFields={Object {}}
+        contextId="opened-file"
+        data={
+          Object {
+            "_id": "28",
+            "auditd": Object {
+              "data": null,
+              "result": "success",
+              "session": "unset",
+              "summary": Object {
+                "actor": Object {
+                  "primary": "unset",
+                  "secondary": "root",
+                },
+                "how": "/lib/systemd/systemd-journald",
+                "message_type": null,
+                "object": Object {
+                  "primary": "/proc/15990/attr/current",
+                  "secondary": null,
+                  "type": "file",
+                },
+                "sequence": null,
+              },
+            },
+            "destination": null,
+            "event": Object {
+              "action": "opened-file",
+              "category": "audit-rule",
+              "dataset": null,
+              "id": null,
+              "module": "auditd",
+              "severity": null,
+            },
+            "file": Object {
+              "ctime": null,
+              "device": "00:00",
+              "extension": null,
+              "gid": "0",
+              "group": "root",
+              "inode": "27672309",
+              "mode": "0666",
+              "mtime": null,
+              "owner": "root",
+              "path": "/proc/15990/attr/current",
+              "size": null,
+              "target_path": null,
+              "type": null,
+              "uid": "0",
+            },
+            "geo": null,
+            "host": Object {
+              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "ip": Array [
+                "46.101.3.136",
+                "10.16.0.5",
+                "fe80::4066:42ff:fe19:b3b9",
+              ],
+              "name": "zeek-london",
+            },
+            "http": null,
+            "network": null,
+            "process": Object {
+              "args": null,
+              "executable": "/lib/systemd/systemd-journald",
+              "name": "systemd-journal",
+              "pid": 27244,
+              "ppid": 1,
+              "title": "/lib/systemd/systemd-journald",
+              "working_directory": "/",
+            },
+            "source": null,
+            "suricata": null,
+            "timestamp": "2019-03-26T22:12:18.609Z",
+            "url": null,
+            "user": Object {
+              "name": "root",
+            },
+            "zeek": null,
+          }
+        }
+        fileIcon="document"
+        text="some text"
+      />
+    </styled.div>
+  </styled.div>
+</span>
+`;

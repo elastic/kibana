@@ -9,7 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { DraggableBadge } from '../../../draggables';
+import { DraggableBadge } from '../../../../draggables';
 
 import * as i18n from './translations';
 
