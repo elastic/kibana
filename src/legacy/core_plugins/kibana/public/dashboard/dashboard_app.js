@@ -137,12 +137,12 @@ app.directive('dashboardApp', function ($injector) {
           query: dashboardStateManager.getQuery(),
           filters: queryFilter.getFilters(),
           timeRestore: dashboardStateManager.getTimeRestore(),
-          title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
           timeRange: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
+        $scope.screenTitle = dashboardStateManager.getTitle();
 
         const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {
