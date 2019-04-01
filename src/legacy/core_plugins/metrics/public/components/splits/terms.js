@@ -155,7 +155,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('include')}
             label={(<FormattedMessage
-              id="tsvb.splits.terms.include"
+              id="tsvb.splits.terms.includeLabel"
               defaultMessage="Include"
             />)}
           >
@@ -166,7 +166,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('exclude')}
             label={(<FormattedMessage
-              id="tsvb.splits.terms.exclude"
+              id="tsvb.splits.terms.excludeLabel"
               defaultMessage="Exclude"
             />)}
           >
