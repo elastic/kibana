@@ -34,17 +34,24 @@ export function initAppAuthorization(
 ) {
   const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
   const protectedApplications = new ProtectedApplications(xpackMainPlugin);
+  const log = (msg: string) => server.log(['security', 'app-authorization', 'debug'], msg);
 
   server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
     const { path } = request;
-    // if the path doesn't start with "/app/" or we aren't using RBAC for this request, just continue
-    if (!path.startsWith('/app/') || !mode.useRbacForRequest(request)) {
+    // if the path doesn't start with "/app/", just continue
+    if (!path.startsWith('/app/')) {
+      return h.continue;
+    }
+
+    // if we aren't using RBAC, just continue
+    if (!mode.useRbacForRequest(request)) {
       return h.continue;
     }
 
     const appId = path.split('/', 3)[2];
 
     if (!protectedApplications.shouldProtect(appId)) {
+      log(`not authorizing - "${appId}" isn't a protected application`);
       return h.continue;
     }
 
@@ -52,11 +59,14 @@ export function initAppAuthorization(
     const appAction = actions.app.get(appId);
     const checkPrivilegesResponse = await checkPrivileges(appAction);
 
+    log(`authorizing access to "${appId}"`);
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
+      log(`authorized for "${appId}"`);
       return h.continue;
     }
 
+    log(`not authorized for "${appId}"`);
     return Boom.notFound();
   });
 }
