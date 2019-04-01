@@ -34,7 +34,7 @@ See {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading from 6.
 for more information.
 
 Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
-instructions to do a manual upgrade. The recommended path is to upgrade to 6.7 before upgrading to 7.0.
+instructions. The recommended path is to upgrade to 6.7 before upgrading to 7.0.
 
 *Note:* Saved searches, visualizations, and dashboards created in {kib} 6.x
 can be generally imported into 7.x.
