@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { capitalize } from 'lodash';
 import React, { Component } from 'react';
 interface Props {
   onChange: (visible: boolean) => void;
@@ -15,6 +15,26 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
 }
+
+interface ToggleOption {
+  id: 'show' | 'hide';
+  text: string;
+}
+
+const options: ToggleOption[] = [
+  {
+    id: 'show',
+    text: i18n.translate('xpack.spaces.management.showAllFeaturesText', {
+      defaultMessage: 'Show all',
+    }),
+  },
+  {
+    id: 'hide',
+    text: i18n.translate('xpack.spaces.management.hideAllFeaturesText', {
+      defaultMessage: 'Hide all',
+    }),
+  },
+];
 
 export class ToggleAllFeatures extends Component<Props, State> {
   public state = {
@@ -31,17 +51,17 @@ export class ToggleAllFeatures extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = (['show', 'hide'] as Array<'show' | 'hide'>).map(item => {
+    const items = options.map(item => {
       return (
         <EuiContextMenuItem
-          data-test-subj={`spc-toggle-all-features-${item}`}
-          key={item}
+          data-test-subj={`spc-toggle-all-features-${item.id}`}
+          key={item.id}
           onClick={() => {
-            this.onSelect(item);
+            this.onSelect(item.id);
           }}
           disabled={this.props.disabled}
         >
-          {capitalize(item)}
+          {item.text}
         </EuiContextMenuItem>
       );
     });
