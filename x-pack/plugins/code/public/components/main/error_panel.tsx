@@ -6,18 +6,12 @@
 
 import { EuiButton, EuiPanel, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
 import { history } from '../../utils/url';
 import { ErrorIcon } from '../shared/icons';
 
-const Root = styled.div`
-  width: 31rem;
-  margin: auto;
-`;
-
 export const ErrorPanel = (props: { title: ReactNode; content: string }) => {
   return (
-    <Root>
+    <div className="codePanel__error">
       <EuiPanel>
         <EuiSpacer />
         <EuiText textAlign="center">
@@ -39,6 +33,6 @@ export const ErrorPanel = (props: { title: ReactNode; content: string }) => {
         <EuiSpacer />
         <EuiSpacer />
       </EuiPanel>
-    </Root>
+    </div>
   );
 };
