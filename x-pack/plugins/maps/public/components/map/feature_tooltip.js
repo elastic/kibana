@@ -36,7 +36,7 @@ export class FeatureTooltip extends React.Component {
 
 
     return (
-      <EuiFlexItem className="mapFeatureTooltipFilterButton" style={{ 'width': '32px' }}>
+      <EuiFlexItem className="mapFeatureTooltipFilterButton" grow={false}>
         {icon}
       </EuiFlexItem>
     );
@@ -59,10 +59,10 @@ export class FeatureTooltip extends React.Component {
 
       return (
         <EuiFlexGroup key={index}>
-          <EuiFlexItem style={{ 'width': '64px' }}>
+          <EuiFlexItem grow={4}>
             <strong>{tooltipProperty.getPropertyName()}</strong>
           </EuiFlexItem>
-          <EuiFlexItem style={{ 'width': '128px' }}>
+          <EuiFlexItem grow={6}>
             {htmlValue}
           </EuiFlexItem>
           {this._renderFilterButton(tooltipProperty, hasFilters)}
@@ -76,20 +76,22 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
     return (
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
-          <EuiFlexItem>&nbsp;</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={this.props.closeTooltip}
-              iconType="cross"
-              aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
-                defaultMessage: 'Close tooltip'
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
+            <EuiFlexItem>&nbsp;</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                onClick={this.props.closeTooltip}
+                iconType="cross"
+                aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
+                  defaultMessage: 'Close tooltip'
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
