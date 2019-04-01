@@ -192,8 +192,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           const showCustomize = hasCustomizations && isAllowedCustomizations;
 
-          if (effectivePrivilege._reserved != null && effectivePrivilege._reserved.length > 0) {
-            return <PrivilegeDisplay privilege={effectivePrivilege._reserved} />;
+          if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
+            return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
           } else if (record.isGlobal) {
             return (
               <PrivilegeDisplay

@@ -68,8 +68,8 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     const hasReservedPrivileges =
       calculatedPrivileges &&
-      calculatedPrivileges._reserved != null &&
-      calculatedPrivileges._reserved.length > 0;
+      calculatedPrivileges.reserved != null &&
+      calculatedPrivileges.reserved.length > 0;
 
     const description = (
       <p>
@@ -97,7 +97,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
             {hasReservedPrivileges ? (
               <EuiComboBox
                 fullWidth
-                selectedOptions={calculatedPrivileges._reserved!.map(privilege => ({
+                selectedOptions={calculatedPrivileges.reserved!.map(privilege => ({
                   label: privilege,
                 }))}
                 isDisabled
