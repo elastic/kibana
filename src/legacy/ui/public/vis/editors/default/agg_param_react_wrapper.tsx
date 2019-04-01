@@ -31,7 +31,7 @@ interface AggParamReactWrapperProps<T> {
   value: T;
   isInvalid: boolean;
   indexedFields: FieldParamType[];
-  setTouched: () => void;
+  setTouched(): void;
   onChange(value: T): void;
   setValidity(isValid: boolean): void;
 }

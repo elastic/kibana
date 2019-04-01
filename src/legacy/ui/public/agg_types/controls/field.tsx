@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { get } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { AggConfig } from 'ui/vis';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamEditorProps } from '../../vis/editors/default';
@@ -47,7 +46,7 @@ function FieldParamEditor({
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     setValue(get(options, '0.value'));
 
-    if (isFunction(aggParam.onChange)) {
+    if (aggParam.onChange) {
       aggParam.onChange(agg);
     }
   };
