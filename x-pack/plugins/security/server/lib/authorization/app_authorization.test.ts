@@ -84,9 +84,6 @@ describe('initAppAuthorization', () => {
   });
 
   test(`unprotected route that starts with "/app/", and "mode.useRbacForRequest()" returns true continues`, async () => {
-    const headers = {
-      authorization: 'foo',
-    };
     const server = new Server();
     const mockAuthorizationService: AuthorizationService = {
       actions,
@@ -107,7 +104,6 @@ describe('initAppAuthorization', () => {
     const { request, result, statusCode } = await server.inject({
       method: 'GET',
       url: '/app/bar',
-      headers,
     });
     expect(result).toBe('bar app response');
     expect(statusCode).toBe(200);
