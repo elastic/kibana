@@ -14,14 +14,14 @@ import {
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { droppable, Field, initialState, VisModel } from '../../common/lib';
+import { Field, initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
+import { Draggable } from '../../common/components/draggable';
 import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
 import { registry as editorRegistry } from '../../editor_plugin_registry';
 
@@ -116,29 +116,25 @@ export function Main(props: MainProps) {
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
-        <div
+        <Draggable
           className="euiPanel euiPanel--paddingLarge euiPageContent"
-          {...droppable({
-            canHandleDrop(field: Field) {
-              return !!field && !!field.type;
-            },
-            drop(field: Field) {
-              const { visModel } = state;
-              if (!getSuggestionsForField || !visModel.datasource) {
-                return;
-              }
+          canHandleDrop={(field: Field) => !!field && !!field.type}
+          onDrop={(field: Field) => {
+            const { visModel } = state;
+            if (!getSuggestionsForField || !visModel.datasource) {
+              return;
+            }
 
-              const fieldSuggestions = getSuggestionsForField(
-                visModel.datasource.id,
-                field,
-                visModel
-              );
+            const fieldSuggestions = getSuggestionsForField(
+              visModel.datasource.id,
+              field,
+              visModel
+            );
 
-              if (fieldSuggestions.length) {
-                onChangeVisModel(fieldSuggestions[0].visModel);
-              }
-            },
-          })}
+            if (fieldSuggestions.length) {
+              onChangeVisModel(fieldSuggestions[0].visModel);
+            }
+          }}
         >
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
@@ -157,7 +153,7 @@ export function Main(props: MainProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
-        </div>
+        </Draggable>
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />

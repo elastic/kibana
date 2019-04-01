@@ -7,7 +7,8 @@
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { columnSummary } from '../../common/components/config_panel';
-import { droppable, Field, selectColumn, updateColumn, VisModel } from '../../common/lib';
+import { Draggable } from '../../common/components/draggable';
+import { Field, selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function YAxisEditor({
   col,
@@ -54,9 +55,7 @@ export function YAxisEditor({
   ];
 
   return (
-    <div
-      {...droppable({ canHandleDrop: (f: Field) => f && f.type === 'number', drop: onDropField })}
-    >
+    <Draggable canHandleDrop={(f: Field) => f && f.type === 'number'} onDrop={onDropField}>
       {fieldName ? (
         <EuiSelect
           options={options}
@@ -66,6 +65,6 @@ export function YAxisEditor({
       ) : (
         columnSummary(selectColumn(col, visModel))
       )}
-    </div>
+    </Draggable>
   );
 }

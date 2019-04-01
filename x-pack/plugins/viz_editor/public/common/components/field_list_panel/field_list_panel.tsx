@@ -17,8 +17,8 @@ import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PanelComponentProps } from '../../../editor_plugin_registry';
+import { Draggable } from '../../components/draggable';
 import { Field } from '../../lib';
-import { draggable } from '../../lib';
 
 interface State {
   fieldsFilter: string;
@@ -68,13 +68,14 @@ export function FieldListPanel({ visModel }: PanelComponentProps) {
             .filter(filterFields)
             .sort(sortFields)
             .map(field => (
-              <div
-                {...draggable({ value: field })}
+              <Draggable
+                draggable={true}
+                value={field}
                 key={field.name}
                 className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
               >
                 {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-              </div>
+              </Draggable>
             ))}
         </div>
       )}
