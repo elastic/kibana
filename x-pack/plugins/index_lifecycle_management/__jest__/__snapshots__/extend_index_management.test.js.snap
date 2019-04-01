@@ -524,8 +524,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   <div
                     className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
                     id="phaseExecutionPopover"
-                    onClick={[Function]}
                     onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"

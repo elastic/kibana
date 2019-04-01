@@ -18,14 +18,14 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
 import { OverlaySetup } from './overlays';
-import { UiSettingsSetup } from './ui_settings';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
 export { CoreSystem } from './core_system';
 
@@ -40,3 +40,23 @@ export interface CoreSetup {
   chrome: ChromeSetup;
   overlays: OverlaySetup;
 }
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  ChromeSetup,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};

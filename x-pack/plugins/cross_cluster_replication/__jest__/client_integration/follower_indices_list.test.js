@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockAllHttpRequests, nextTick, getRandomString } from './test_helpers';
+import { initTestBed, registerHttpRequestMockHelpers, nextTick, getRandomString } from './test_helpers';
 import { FollowerIndicesList } from '../../public/app/sections/home/follower_indices_list';
 import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
@@ -28,12 +28,17 @@ describe('<FollowerIndicesList />', () => {
   let getMetadataFromEuiTable;
   let getUserActions;
   let tableCellsValues;
-  let updateHttpMockResponse;
+  let setLoadFollowerIndicesResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    (updateHttpMockResponse = mockAllHttpRequests(server));
+
+    // Register helpers to mock Http Requests
+    ({ setLoadFollowerIndicesResponse } = registerHttpRequestMockHelpers(server));
+
+    // Set "default" mock responses by not providing any arguments
+    setLoadFollowerIndicesResponse();
   });
 
   describe('on component mount', () => {
@@ -79,7 +84,7 @@ describe('<FollowerIndicesList />', () => {
     let clickFollowerIndexAt;
 
     beforeEach(async () => {
-      updateHttpMockResponse('loadFollowerIndices', { indices: followerIndices });
+      setLoadFollowerIndicesResponse({ indices: followerIndices });
 
       // Mount the component
       ({
@@ -289,19 +294,19 @@ describe('<FollowerIndicesList />', () => {
 
       test('should set the correct follower index settings values', () => {
         const mapSettingsToFollowerIndexProp = {
-          'Status': 'status',
-          'RemoteCluster': 'remoteCluster',
-          'LeaderIndex': 'leaderIndex',
-          'MaxReadReqOpCount': 'maxReadRequestOperationCount',
-          'MaxOutstandingReadReq': 'maxOutstandingReadRequests',
-          'MaxReadReqSize': 'maxReadRequestSize',
-          'MaxWriteReqOpCount': 'maxWriteRequestOperationCount',
-          'MaxWriteReqSize': 'maxWriteRequestSize',
-          'MaxOutstandingWriteReq': 'maxOutstandingWriteRequests',
-          'MaxWriteBufferCount': 'maxWriteBufferCount',
-          'MaxWriteBufferSize': 'maxWriteBufferSize',
-          'MaxRetryDelay': 'maxRetryDelay',
-          'ReadPollTimeout': 'readPollTimeout'
+          Status: 'status',
+          RemoteCluster: 'remoteCluster',
+          LeaderIndex: 'leaderIndex',
+          MaxReadReqOpCount: 'maxReadRequestOperationCount',
+          MaxOutstandingReadReq: 'maxOutstandingReadRequests',
+          MaxReadReqSize: 'maxReadRequestSize',
+          MaxWriteReqOpCount: 'maxWriteRequestOperationCount',
+          MaxWriteReqSize: 'maxWriteRequestSize',
+          MaxOutstandingWriteReq: 'maxOutstandingWriteRequests',
+          MaxWriteBufferCount: 'maxWriteBufferCount',
+          MaxWriteBufferSize: 'maxWriteBufferSize',
+          MaxRetryDelay: 'maxRetryDelay',
+          ReadPollTimeout: 'readPollTimeout'
         };
 
         clickFollowerIndexAt(0);
