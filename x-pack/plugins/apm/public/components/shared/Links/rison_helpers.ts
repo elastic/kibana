@@ -69,18 +69,22 @@ export function getRisonHref({
   const g = createG(nextQuery);
   const encodedG = rison.encode(g);
   const encodedA = query._a ? rison.encode(query._a) : ''; // TODO: Do we need to url-encode the _a values before rison encoding _a?
-  const risonQuery: RisonEncoded = {
-    _g: encodedG
-  };
+
+  const risonQuery: RisonEncoded = { _g: encodedG };
 
   if (encodedA) {
     risonQuery._a = encodedA;
   }
 
   // don't URI-encode the already-encoded rison
-  const search = qs.stringify(risonQuery, undefined, undefined, {
-    encodeURIComponent: (v: string) => v
-  });
+  const search = qs.stringify(
+    { ...query, ...risonQuery },
+    undefined,
+    undefined,
+    {
+      encodeURIComponent: (v: string) => v
+    }
+  );
 
   const href = url.format({
     pathname: chrome.addBasePath(pathname),

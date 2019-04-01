@@ -74,6 +74,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     const hostName = idx(transaction, _ => _.host.hostname);
     const podId = idx(transaction, _ => _.kubernetes.pod.uid);
     const containerId = idx(transaction, _ => _.container.id);
+    const traceId = idx(transaction, _ => _.trace.id);
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -89,7 +90,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/pod-logs/${podId}`,
         query: { time }
       },
-
       {
         icon: 'loggingApp',
         label: i18n.translate(
@@ -100,7 +100,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/container-logs/${containerId}`,
         query: { time }
       },
-
       {
         icon: 'loggingApp',
         label: i18n.translate(
@@ -111,7 +110,16 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/host-logs/${hostName}`,
         query: { time }
       },
-
+      {
+        icon: 'loggingApp',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
+          { defaultMessage: 'Show trace logs' }
+        ),
+        target: traceId,
+        hash: `/link-to/logs`,
+        query: { filter: `trace.id:${traceId}` }
+      },
       {
         icon: 'infraApp',
         label: i18n.translate(
@@ -122,7 +130,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery
       },
-
       {
         icon: 'infraApp',
         label: i18n.translate(
@@ -133,7 +140,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery
       },
-
       {
         icon: 'infraApp',
         label: i18n.translate(
