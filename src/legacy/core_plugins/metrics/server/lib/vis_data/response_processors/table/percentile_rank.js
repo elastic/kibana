@@ -20,13 +20,14 @@ import { last } from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
+import getAggValue from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentile(bucket, panel, series) {
+export default function percentileRank(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 
-    if (metric.type !== METRIC_TYPES.PERCENTILE) {
+    if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 
@@ -35,16 +36,21 @@ export default function percentile(bucket, panel, series) {
     };
 
     getSplits(fakeResp, panel, series).forEach(split => {
+      // table allows only one percentile rank in a series (the last one will be chosen in case of several)
+      const lastRankValue = last(metric.values);
+      const percentileRank = toPercentileNumber(lastRankValue);
 
-      // table allows only one percentile in a series (the last one will be chosen in case of several)
-      const percentile = last(metric.percentiles);
-      const percentileKey = toPercentileNumber(percentile.value);
-      const data = split.timeseries.buckets
-        .map(bucket => [bucket.key, bucket[metric.id].values[percentileKey]]);
+      const data = split.timeseries.buckets.map(bucket => (
+        [bucket.key, getAggValue(bucket, {
+          ...metric,
+          value: percentileRank
+        })]
+      ));
 
       results.push({
+        data,
         id: split.id,
-        data
+        label: `${split.label} (${percentileRank || 0})`,
       });
     });
 

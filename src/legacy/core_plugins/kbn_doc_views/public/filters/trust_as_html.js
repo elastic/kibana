@@ -17,25 +17,11 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/doc_views');
 
-import {
-  parseCommaSeparatedList,
-  formatListAsProse,
-} from '../../../utils';
-
-uiModules
-  .get('kibana')
-  .filter('commaList', function () {
-  /**
-   * Angular filter that accepts either an array or a comma-separated string
-   * and outputs a comma-separated string for presentation.
-   *
-   * @param {String|Array} input - The comma-separated list or array
-   * @param {Boolean} inclusive - Should the list be joined with an "and"?
-   * @return {String}
-   */
-    return function (input, inclusive = false) {
-      return formatListAsProse(parseCommaSeparatedList(input), { inclusive });
-    };
-  });
+// Simple filter to allow using ng-bind-html without explicitly calling $sce.trustAsHtml in a controller
+// (See http://goo.gl/mpj9o2)
+module.filter('trustAsHtml', function ($sce) {
+  return $sce.trustAsHtml;
+});

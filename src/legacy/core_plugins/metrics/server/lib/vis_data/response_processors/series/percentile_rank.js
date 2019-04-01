@@ -16,38 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { last } from 'lodash';
+import getAggValue from '../../helpers/get_agg_value';
+import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentile(bucket, panel, series) {
+export default function percentileRank(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 
-    if (metric.type !== METRIC_TYPES.PERCENTILE) {
+    if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 
-    const fakeResp = {
-      aggregations: bucket,
-    };
+    getSplits(resp, panel, series, meta).forEach(split => {
+      (metric.values || []).forEach(percentileRank => {
+        const data = split.timeseries.buckets.map(bucket => (
+          [bucket.key, getAggValue(bucket, {
+            ...metric,
+            value: toPercentileNumber(percentileRank)
+          })]
+        ));
 
-    getSplits(fakeResp, panel, series).forEach(split => {
-
-      // table allows only one percentile in a series (the last one will be chosen in case of several)
-      const percentile = last(metric.percentiles);
-      const percentileKey = toPercentileNumber(percentile.value);
-      const data = split.timeseries.buckets
-        .map(bucket => [bucket.key, bucket[metric.id].values[percentileKey]]);
-
-      results.push({
-        id: split.id,
-        data
+        results.push({
+          data,
+          id: `${split.id}:${percentileRank}`,
+          label: `${split.label} (${percentileRank || 0})`,
+          color: split.color,
+          ...getDefaultDecoration(series),
+        });
       });
     });
-
     return next(results);
   };
 }
