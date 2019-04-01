@@ -9,10 +9,13 @@ Object {
       "listenOnChange": true,
     },
     "visConfig": Object {
+      "bucket": undefined,
       "maxFontSize": 72,
       "metric": Object {
         "accessor": 0,
-        "format": Object {},
+        "format": Object {
+          "id": "number",
+        },
       },
       "minFontSize": 18,
       "orientation": "single",

@@ -33,8 +33,7 @@ describe('interpreter/functions#tagcloud', () => {
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,
-    metric: 0,
-    format: 'number'
+    metric: { accessor: 0, format: { id: 'number' } },
   };
 
   it('returns an object with the correct structure', () => {
