@@ -1,5 +1,200 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Flyout conflicts should allow conflict resolution 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiTitle
+      size="m"
+      textTransform="none"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="Import saved objects"
+          id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title={
+          <FormattedMessage
+            defaultMessage="Index Pattern Conflicts"
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+            values={
+              Object {
+                "indexPatternLink": <EuiLink
+                  color="primary"
+                  href=""
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="create a new index pattern"
+                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </EuiCallOut>
+    </span>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "description": "ID of the index pattern",
+            "field": "existingIndexPatternId",
+            "name": "ID",
+            "sortable": true,
+          },
+          Object {
+            "description": "How many affected objects",
+            "field": "list",
+            "name": "Count",
+            "render": [Function],
+          },
+          Object {
+            "description": "Sample of affected objects",
+            "field": "list",
+            "name": "Sample of affected objects",
+            "render": [Function],
+          },
+          Object {
+            "field": "existingIndexPatternId",
+            "name": "New index pattern",
+            "render": [Function],
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      items={
+        Array [
+          Object {
+            "existingIndexPatternId": "MyIndexPattern*",
+            "list": Array [
+              Object {
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
+              },
+            ],
+            "newIndexPatternId": undefined,
+          },
+        ]
+      }
+      pagination={
+        Object {
+          "pageSizeOptions": Array [
+            5,
+            10,
+            25,
+          ],
+        }
+      }
+      responsive={true}
+      sorting={false}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="primary"
+          iconSide="left"
+          onClick={[MockFunction]}
+          size="s"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="importSavedObjectsConfirmBtn"
+          fill={true}
+          iconSide="left"
+          isLoading={false}
+          onClick={[Function]}
+          size="s"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Confirm all changes"
+            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout conflicts should handle errors 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title={
+    <FormattedMessage
+      defaultMessage="Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+      values={Object {}}
+    />
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+      values={
+        Object {
+          "failedImportCount": 1,
+          "totalImportCount": 1,
+        }
+      }
+    />
+  </p>
+  <p />
+</EuiCallOut>
+`;
+
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"

@@ -113,10 +113,23 @@ class FlyoutUI extends Component {
   };
 
   import = async () => {
+    const { intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
     this.setState({ isLoading: true, error: undefined });
 
-    const response = await importFile(file, isOverwriteAllChecked);
+    let response;
+    try {
+      response = await importFile(file, isOverwriteAllChecked);
+    } catch (e) {
+      this.setState({
+        isLoading: false,
+        error: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
+          defaultMessage: 'The file could not be processed.',
+        }),
+      });
+      return;
+    }
 
     const failedImports = [];
     const unmatchedReferences = new Map();
@@ -206,6 +219,14 @@ class FlyoutUI extends Component {
       if (objReplaceReferences.length === 0) {
         return;
       }
+    } else if (error.type === 'references_missing_references') {
+      const indexPatternsBeingReplaced = unmatchedReferences.filter(obj => !!obj.newIndexPatternId).map(obj => obj.existingIndexPatternId);
+      const referencesBeingReplaced = error.references.filter(({ type, id }) => {
+        return type === 'index-pattern' && indexPatternsBeingReplaced.includes(id);
+      });
+      if (referencesBeingReplaced.length === 0) {
+        return;
+      }
     }
     return {
       id: obj.id,
@@ -216,6 +237,7 @@ class FlyoutUI extends Component {
   }
 
   resolveImportErrors = async () => {
+    const { intl } = this.props;
     this.setState({
       error: undefined,
       isLoading: true,
@@ -252,7 +274,19 @@ class FlyoutUI extends Component {
         importFailures = [];
         continue;
       }
-      const response = await resolveImportErrors(file, retries);
+      let response;
+      try {
+        response = await resolveImportErrors(file, retries);
+      } catch (e) {
+        this.setState({
+          isLoading: false,
+          error: intl.formatMessage({
+            id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
+            defaultMessage: 'The file could not be processed.',
+          }),
+        });
+        return;
+      }
       successImportCount += response.successCount;
       importFailures = [];
       for (const { error, ...obj } of response.errors || []) {
@@ -607,6 +641,7 @@ class FlyoutUI extends Component {
       wasImportSuccessful,
       importCount,
       failedImports = [],
+      isLegacyFile,
     } = this.state;
 
     if (isLoading) {
@@ -623,7 +658,8 @@ class FlyoutUI extends Component {
       );
     }
 
-    if (failedImports.length && !this.hasUnmatchedReferences) {
+    // Kept backwards compatible logic
+    if (failedImports.length && (!this.hasUnmatchedReferences || (isLegacyFile === false && wasImportSuccessful))) {
       return (
         <EuiCallOut
           title={(
