@@ -87,8 +87,6 @@ Visualizations::
 [float]
 [[enhancement-7.0.0-rc2]]
 === Enhancements
-APM::
-* Adds `created_by` field to Auditbeat and APM data recognizer jobs {pull}33863[#33863]
 Canvas::
 * Removes WebSockets from Canvas expressions interpreter {pull}29792[#29792]
 * Optimizes Canvas REST calls via batching {pull}29847[#29847]
@@ -120,6 +118,7 @@ Management::
 * Adds `Request timestamp` to request inspector stats {pull}25667[#25667]
 * Adds "Reload indices" button to Index Management {pull}27033[#27033]
 Machine Learning::
+* Adds `created_by` field to Auditbeat and APM data recognizer jobs {pull}33863[#33863]
 * Adds the time of the anomaly to the `aria-label` of the actions button in each row of the anomalies table {pull}32777[#32777]
 * Adds `role="alert"` callouts on the Job Management page to ensure the information is read out by screen readers {pull}32911[#32911]
 * Adds EUI `ScreenReaderOnly` component to the "Analyzing data" modal {pull}32472[#32472]
