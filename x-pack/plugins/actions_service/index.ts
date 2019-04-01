@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 import fetch from 'node-fetch';
 import url from 'url';
 import mappings from './mappings.json';
+import { Plugin } from './server/plugin';
 // import './types.d';
 
 export const actionsService = (kibana: any) => {
@@ -28,6 +29,7 @@ export const actionsService = (kibana: any) => {
     },
 
     init(server: Legacy.Server) {
+      const plugin = new Plugin();
       const registrar: Map<string, ActionType> = new Map();
       const handlers: Map<string, ActionHandler> = new Map();
       const info = (message: string) => server.log(['actions_service', 'info'], message);
@@ -73,7 +75,7 @@ export const actionsService = (kibana: any) => {
         const { action, actionType, params } = execution;
 
         try {
-          const response: any = await so.get('actionConfiguration', `${actionType}:${action}`);
+          const response: any = await so.get('server-action', `${actionType}:${action}`);
 
           if (response === undefined) {
             warn(
@@ -112,12 +114,15 @@ export const actionsService = (kibana: any) => {
         }
       };
 
-      server.expose('actions', {
-        registerActionType,
-        registerHandler,
-        instance,
-        fire,
-      });
+      server.expose(
+        'actions',
+        plugin.setup(
+          {
+            log: server.log,
+          },
+          {}
+        )
+      );
 
       registerActionType({
         name: 'send message',

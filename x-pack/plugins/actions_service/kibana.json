@@ -1,0 +1,7 @@
+{
+  "id": "actions_service",
+  "version": "0.0.1",
+  "configPath": ["xpack", "actions_service"],
+  "server": true,
+  "ui": false
+}
