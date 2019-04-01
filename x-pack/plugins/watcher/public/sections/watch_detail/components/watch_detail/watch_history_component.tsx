@@ -244,36 +244,7 @@ const WatchHistoryUI = ({
         }}
         watchesToDelete={watchesToDelete}
       />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSelect
-            options={watchHistoryTimeSpanOptions}
-            value={watchHistoryTimeSpan}
-            onChange={onTimespanChange}
-            // TODO[pcs]: define aria labels
-            aria-label=""
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="btnDeleteWatch"
-            onClick={() => {
-              setWatchesToDelete([watchId]);
-            }}
-            color="danger"
-            disabled={false}
-          >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteWatchButtonLabel"
-              defaultMessage="Delete"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <h1>
@@ -283,23 +254,54 @@ const WatchHistoryUI = ({
               />
             </h1>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiInMemoryTable
-            items={history}
-            itemId="id"
-            columns={columns}
-            pagination={pagination}
-            sorting={true}
-            loading={isLoading}
-            message={
-              <FormattedMessage
-                id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-                defaultMessage="No current status to show"
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                options={watchHistoryTimeSpanOptions}
+                value={watchHistoryTimeSpan}
+                onChange={onTimespanChange}
+                aria-label="Change timespan of watch history"
               />
-            }
-          />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="btnDeleteWatch"
+                onClick={() => {
+                  setWatchesToDelete([watchId]);
+                }}
+                color="danger"
+                disabled={false}
+              >
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchList.deleteWatchButtonLabel"
+                  defaultMessage="Delete"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiInMemoryTable
+        items={history}
+        itemId="id"
+        columns={columns}
+        pagination={pagination}
+        sorting={true}
+        loading={isLoading}
+        message={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
+            defaultMessage="No current status to show"
+          />
+        }
+      />
       {flyout}
     </Fragment>
   );
