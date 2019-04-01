@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('visual builder', function describeIndexTests() {
-    describe('Time Series', () => {
+    describe.skip('Time Series', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
       });
