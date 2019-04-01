@@ -100,14 +100,13 @@ export async function onWatchSave(watch: BaseWatch): Promise<any> {
           message: i18n.translate(
             'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionText',
             {
-              defaultMessage: `Watch with ID "{watchId}" {watchNameMessageFragment}
-                already exists. Do you want to overwrite it?`,
+              defaultMessage:
+                'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
               values: {
                 watchId: existingWatch.id,
                 watchNameMessageFragment: existingWatch.name
                   ? i18n.translate(
-                      `xpack.watcher.sections.watchEdit
-                      .json.saveConfirmModal.descriptionFragmentText`,
+                      'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText',
                       {
                         defaultMessage: '(name: "{existingWatchName}")',
                         values: {

@@ -17,13 +17,13 @@ interface WatchTab {
 export const WATCH_TABS: WatchTab[] = [
   {
     id: WATCH_TAB_ID_EDIT,
-    name: i18n.translate('xpack.watcher.sections.watchEdit.json.tabs.edit', {
+    name: i18n.translate('xpack.watcher.sections.watchEdit.json.editTabLabel', {
       defaultMessage: 'Edit',
     }),
   },
   {
     id: WATCH_TAB_ID_SIMULATE,
-    name: i18n.translate('xpack.watcher.sections.watchEdit.json.tabs.simulate', {
+    name: i18n.translate('xpack.watcher.sections.watchEdit.json.simulateTabLabel', {
       defaultMessage: 'Simulate',
     }),
   },
