@@ -16,7 +16,7 @@ import {
   updatePrivateState,
   VisModel,
 } from '../../common/lib';
-import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
+import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
 interface PieChartPrivateState {
   sliceAxis: Axis;
@@ -126,7 +126,7 @@ function getSuggestion(visModel: PieChartVisModel) {
     visModel: prefilledVisModel,
     title: 'Standard Pie Chart',
     iconType: 'visPie',
-  };
+  } as Suggestion;
 }
 
 export const config: EditorPlugin<PieChartVisModel> = {

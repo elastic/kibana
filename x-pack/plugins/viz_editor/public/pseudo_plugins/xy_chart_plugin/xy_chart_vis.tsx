@@ -6,21 +6,14 @@
 
 // register all the stuff which the pipeline needs later
 
-import {
-  AreaSeries,
-  Axis,
-  Chart,
-  getAxisId,
-  getSpecId,
-  LineSeries,
-  Position,
-  ScaleType,
-} from '@elastic/charts';
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
+
+// @ts-ignore
+import { XyChart } from './xy_chart';
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
@@ -72,51 +65,7 @@ function sampleVisRenderer() {
     render: async (domNode: HTMLDivElement, config: any, handlers: any) => {
       domNode.style.position = 'relative';
       domNode.style.height = '500px';
-      ReactDOM.render(
-        <Chart renderer="canvas" className={'story-chart'}>
-          <Axis
-            id={getAxisId('bottom')}
-            title={'timestamp per 1 minute'}
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-          />
-          <Axis
-            id={getAxisId('left')}
-            title={config.title}
-            position={Position.Left}
-            tickFormat={d => Number(d).toFixed(2)}
-          />
-
-          {config.seriesType === 'line' ? (
-            <LineSeries
-              id={getSpecId('lines')}
-              xScaleType={
-                config.xAxisType === 'ordinal'
-                  ? ScaleType.Ordinal
-                  : config.xAxisType === 'linear'
-                  ? ScaleType.Linear
-                  : ScaleType.Time
-              }
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={config.data}
-              yScaleToDataExtent={false}
-            />
-          ) : (
-            <AreaSeries
-              id={getSpecId('area')}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={config.data}
-              yScaleToDataExtent={false}
-            />
-          )}
-        </Chart>,
-        domNode
-      );
+      ReactDOM.render(<XyChart config={config} />, domNode);
     },
   };
 }
