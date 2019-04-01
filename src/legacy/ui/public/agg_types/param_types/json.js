@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import '../directives/validate_json';
 import { RawJsonParamEditor } from '../controls/raw_json';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
