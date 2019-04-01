@@ -103,7 +103,7 @@ const start = async function () {
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
   for await (const data of ls.stdout) {
-    cmdLogs += stripAnsi(data);
+    cmdLogs += stripAnsi(data.toString());
   }
 
   ls.on('close', (code) => {
