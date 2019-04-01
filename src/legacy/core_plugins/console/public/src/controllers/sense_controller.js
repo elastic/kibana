@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/doc_title';
+import { DocTitleProvider } from 'ui/doc_title';
+
 import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
@@ -34,7 +35,8 @@ module.run(function (Private, $rootScope) {
   };
 });
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
+  const docTitle = Private(DocTitleProvider);
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
