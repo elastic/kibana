@@ -40,10 +40,10 @@ describe('UnconnectedKibanaLink', () => {
     );
   });
 
-  it('should ignore new query params except for _g and _a', () => {
-    const wrapper = getLinkWrapper({ query: { transactionId: 'test-id' } });
-    expect(wrapper.find('EuiLink').props().href).not.toEqual(
-      expect.stringContaining('transactionId')
+  it('should include extra query params', () => {
+    const wrapper = getLinkWrapper({ query: { anything: 'test-id' } });
+    expect(wrapper.find('EuiLink').props().href).toEqual(
+      expect.stringContaining('anything=test-id')
     );
   });
 
