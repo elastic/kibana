@@ -89,9 +89,9 @@ const start = async function () {
   const cmd = process.argv[3];
   const cmdArgs = process.argv.slice(4);
   const cmdSpawnConfig = {
-    // cwd: __dirname,
-    stdio: 'inherit'
+    stdio: ['inherit', 'pipe', 'inherit']
   };
+  let cmdLogs = '';
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
@@ -120,6 +120,10 @@ const start = async function () {
   //.catch(err => console.log('*************ERROR: ', err));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
+  ls.stdout.pipe(process.stdout);
+  for await (const data of ls.stdout) {
+    cmdLogs += data;
+  }
 
   //todo - fire api request before exiting
   // determine success or failure
@@ -138,6 +142,7 @@ const start = async function () {
       output: {
         title: `${cmd} ${cmdArgs.join(' ')}`,
         summary: `.`,
+        text: cmdLogs
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
