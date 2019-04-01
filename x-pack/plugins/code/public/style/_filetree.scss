@@ -6,6 +6,10 @@
   z-index: 2;
 }
 
+.codeFileTree__container .euiSideNavItem--branch {
+  padding-left: $euiSize;
+}
+
 .codeFileTree__group {
   display: flex;
   flex-direction: row;
@@ -31,6 +35,8 @@
   background: $euiColorLightShade;
   left: 0;
   height: 1.8125rem;
+  // Use box shadows instead of tricky absolute positioning to set the active state
+  box-shadow: -10rem 0 0 $euiColorLightShade, 10rem 0 0 $euiColorLightShade;
 }
 
 .codeFileTree__container {
