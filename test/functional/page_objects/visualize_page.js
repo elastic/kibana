@@ -300,7 +300,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async getGaugeValue() {
       const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text.split('\n');
+      }));
+      // .flat() replacement
+      return values.reduce((acc, val) => [...acc, ...val], []);
     }
 
     async clickMetricEditor() {
