@@ -27,7 +27,7 @@ Please see
 comprehensive overview of the upgrade process.
 
 [float]
-==== Upgrading from a version prior to 6.x
+==== Upgrading from 5.x or earlier
 {es} can read indices created in the previous major version. If you have indices 
 created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
 See {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack] 
