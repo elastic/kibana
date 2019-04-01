@@ -26,76 +26,60 @@ export const columnOperations: ColumnOperations = {
   date_histogram: {
     summarize(op: DateHistogramOperation) {
       return (
-        <div className="configPanel-summary">
+        <span>
           <EuiIcon type="calendar" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Date histogram of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
-          </div>
-        </div>
+          {` Date histogram of ${op.argument.field}`}
+        </span>
       );
     },
   },
   sum: {
     summarize(op: SumOperation) {
       return (
-        <div className="configPanel-summary">
+        <span>
           <EuiIcon type="number" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Sum of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
-          </div>
-        </div>
+          {` Sum of ${op.argument.field}`}
+        </span>
       );
     },
   },
   count: {
     summarize(op) {
       return (
-        <div className="configPanel-summary">
+        <span>
           <EuiIcon type="number" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Count</strong>
-          </div>
-        </div>
+          {` Count`}
+        </span>
       );
     },
   },
   column: {
     summarize(op: ColumnOperation) {
       return (
-        <div className="configPanel-summary">
-          <EuiIcon type="document" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">{op.argument.field}</strong>
-          </div>
-        </div>
+        <span>
+          <EuiIcon type="string" className="configPanel-summary-icon" />
+          {` ${op.argument.field}`}
+        </span>
       );
     },
   },
   avg: {
     summarize(op) {
       return (
-        <div className="configPanel-summary">
+        <span>
           <EuiIcon type="number" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Average of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
-          </div>
-        </div>
+          {` Average of ${op.argument.field}`}
+        </span>
       );
     },
   },
   terms: {
     summarize(op) {
       return (
-        <div className="configPanel-summary">
+        <span>
           <EuiIcon type="string" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Unique terms of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
-          </div>
-        </div>
+          {` Unique values of ${op.argument.field}`}
+        </span>
       );
     },
   },

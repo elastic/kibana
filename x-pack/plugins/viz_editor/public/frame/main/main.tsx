@@ -19,7 +19,7 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, VisModel } from '../../common/lib';
+import { droppable, Field, initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
 import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
@@ -116,7 +116,30 @@ export function Main(props: MainProps) {
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
-        <EuiPageContent>
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          {...droppable({
+            canHandleDrop(field: Field) {
+              return !!field && !!field.type;
+            },
+            drop(field: Field) {
+              const { visModel } = state;
+              if (!getSuggestionsForField || !visModel.datasource) {
+                return;
+              }
+
+              const fieldSuggestions = getSuggestionsForField(
+                visModel.datasource.id,
+                field,
+                visModel
+              );
+
+              if (fieldSuggestions.length) {
+                onChangeVisModel(fieldSuggestions[0].visModel);
+              }
+            },
+          })}
+        >
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
@@ -134,7 +157,7 @@ export function Main(props: MainProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
-        </EuiPageContent>
+        </div>
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />

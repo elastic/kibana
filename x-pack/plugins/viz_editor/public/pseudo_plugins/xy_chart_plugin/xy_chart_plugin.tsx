@@ -23,6 +23,7 @@ import {
 } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+import { YAxisEditor } from './yaxis_editor';
 
 interface XyChartPrivateState {
   xAxis: Axis;
@@ -72,7 +73,12 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChart
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col, visModel))}</span>
+          <YAxisEditor
+            key={col}
+            col={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
       <div className="configPanel-axis">

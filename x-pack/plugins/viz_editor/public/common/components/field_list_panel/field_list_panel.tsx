@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PanelComponentProps } from '../../../editor_plugin_registry';
 import { Field } from '../../lib';
+import { draggable } from '../../lib';
 
 interface State {
   fieldsFilter: string;
@@ -33,11 +34,7 @@ function sortFields(fieldA: Field, fieldB: Field) {
   return fieldA.name < fieldB.name ? -1 : 1;
 }
 
-export function FieldListPanel({
-  visModel,
-  onChangeVisModel,
-  getSuggestionsForField,
-}: PanelComponentProps) {
+export function FieldListPanel({ visModel }: PanelComponentProps) {
   const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
@@ -47,20 +44,6 @@ export function FieldListPanel({
   if (datasource === null) {
     return <div />;
   }
-
-  const handleFieldClick = (field: Field) => {
-    return () => {
-      if (!getSuggestionsForField) {
-        return;
-      }
-
-      const suggestions = getSuggestionsForField(datasource.id, field, visModel);
-
-      if (suggestions.length) {
-        onChangeVisModel(suggestions[0].visModel);
-      }
-    };
-  };
 
   return (
     <>
@@ -86,18 +69,11 @@ export function FieldListPanel({
             .sort(sortFields)
             .map(field => (
               <div
-                // type="div"
+                {...draggable({ value: field })}
                 key={field.name}
                 className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
               >
                 {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-                <div>
-                  <EuiButton
-                    size="s"
-                    onClick={handleFieldClick(field)}
-                    iconType="plusInCircleFilled"
-                  />
-                </div>
               </div>
             ))}
         </div>
