@@ -75,26 +75,6 @@ describe('SessionUserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('Session');
     });
 
-    test('it renders with only eventId and contextId', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <EuiFlexItem grow={false} component="span">
-            <SessionUserHostWorkingDir
-              eventId="eventid-123"
-              contextId="contextid-123"
-              session={undefined}
-              hostName={undefined}
-              userName={undefined}
-              primary={undefined}
-              secondary={undefined}
-              workingDirectory={undefined}
-            />
-          </EuiFlexItem>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('Session');
-    });
-
     test('it renders with only eventId, contextId, session', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
