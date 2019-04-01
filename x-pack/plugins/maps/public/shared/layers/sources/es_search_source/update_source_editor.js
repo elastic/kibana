@@ -10,7 +10,7 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import { MultiFieldSelect } from '../../../components/multi_field_select';
+import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { indexPatternService } from '../../../../kibana_services';
 import { i18n } from '@kbn/i18n';
@@ -62,34 +62,22 @@ export class UpdateSourceEditor extends Component {
     this.setState({ fields: indexPattern.fields });
   }
 
-  onTooltipPropertiesSelect = (propertyNames) => {
+  _onTooltipPropertiesSelect = (propertyNames) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  onFilterByMapBoundsChange = event => {
+  _onFilterByMapBoundsChange = event => {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
   render() {
     return (
       <Fragment>
-        <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.source.esSearch.fieldsLabel', {
-              defaultMessage: `Fields to display in tooltip`
-            })
-          }
-        >
-          <MultiFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.fieldsPlaceholder', {
-              defaultMessage: `Select fields`
-            })
-            }
-            value={this.props.tooltipProperties}
-            onChange={this.onTooltipPropertiesSelect}
-            fields={this.state.fields}
-          />
-        </EuiFormRow>
+        <TooltipSelector
+          tooltipProperties={this.props.tooltipProperties}
+          onChange={this._onTooltipPropertiesSelect}
+          fields={this.state.fields}
+        />
 
         <EuiFormRow>
           <EuiSwitch
@@ -100,7 +88,7 @@ export class UpdateSourceEditor extends Component {
 
             }
             checked={this.props.filterByMapBounds}
-            onChange={this.onFilterByMapBoundsChange}
+            onChange={this._onFilterByMapBoundsChange}
           />
         </EuiFormRow>
       </Fragment>
