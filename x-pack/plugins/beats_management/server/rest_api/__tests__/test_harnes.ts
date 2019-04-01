@@ -82,7 +82,7 @@ export const testHarnes = {
       const versionHeader = 'kbn-version';
       const xsrfHeader = 'kbn-xsrf';
 
-      server.ext('onPostAuth', (req: any, h: any) => {
+      server.ext('onRequest', (req: any, h: any) => {
         const isSafeMethod = req.method === 'get' || req.method === 'head';
         const hasVersionHeader = versionHeader in req.headers;
         const hasXsrfHeader = xsrfHeader in req.headers;

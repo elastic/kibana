@@ -25,7 +25,7 @@ export function setupXsrf(server, config) {
   const versionHeader = 'kbn-version';
   const xsrfHeader = 'kbn-xsrf';
 
-  server.ext('onPostAuth', function onPostAuthXsrf(req, h) {
+  server.ext('onRequest', function onRequestXsrf(req, h) {
     if (disabled) {
       return h.continue;
     }

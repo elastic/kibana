@@ -23,7 +23,7 @@ export function setupVersionCheck(server, config) {
   const versionHeader = 'kbn-version';
   const actualVersion = config.get('pkg.version');
 
-  server.ext('onPostAuth', function onPostAuthVersionCheck(req, h) {
+  server.ext('onRequest', function onRequestVersionCheck(req, h) {
     const versionRequested = req.headers[versionHeader];
 
     if (versionRequested && versionRequested !== actualVersion) {
