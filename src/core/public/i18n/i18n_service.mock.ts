@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { I18nService, I18nStart } from './i18n_service';
+import { I18nService, I18nSetup } from './i18n_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<I18nStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<I18nSetup> = {
     Context: jest.fn(),
   };
-  return startContract;
+  return setupContract;
 };
 
 type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mocked: jest.Mocked<I18nServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const i18nServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

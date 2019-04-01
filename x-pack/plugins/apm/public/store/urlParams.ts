@@ -7,18 +7,15 @@
 import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
-import { createSelector } from 'reselect';
 import {
   legacyDecodeURIComponent,
   toQuery
 } from '../components/shared/Links/url_helpers';
 import { LOCATION_UPDATE } from './location';
-import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
-import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
 import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
-export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
+export const TIME_RANGE_REFRESH = 'TIME_RANGE_REFRESH';
 export const TIMEPICKER_DEFAULTS = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
@@ -26,34 +23,43 @@ export const TIMEPICKER_DEFAULTS = {
   refreshInterval: '0'
 };
 
-function calculateTimePickerDefaults() {
-  const parsed = {
-    from: datemath.parse(TIMEPICKER_DEFAULTS.rangeFrom),
-    // roundUp: true is required for the quick select relative date values to work properly
-    to: datemath.parse(TIMEPICKER_DEFAULTS.rangeTo, { roundUp: true })
-  };
-
-  const result: IUrlParams = {};
-  if (parsed.from) {
-    result.start = parsed.from.toISOString();
-  }
-  if (parsed.to) {
-    result.end = parsed.to.toISOString();
-  }
-  return result;
+interface TimeRange {
+  rangeFrom: string;
+  rangeTo: string;
 }
-
-const INITIAL_STATE: IUrlParams = calculateTimePickerDefaults();
 
 interface LocationAction {
   type: typeof LOCATION_UPDATE;
   location: Location;
 }
-interface TimepickerAction {
-  type: typeof TIMEPICKER_UPDATE;
-  time: { min: string; max: string };
+interface TimeRangeRefreshAction {
+  type: typeof TIME_RANGE_REFRESH;
+  time: TimeRange;
 }
-export type APMAction = LocationAction | TimepickerAction;
+export type APMAction = LocationAction | TimeRangeRefreshAction;
+
+function getParsedDate(rawDate?: string, opts = {}) {
+  if (rawDate) {
+    const parsed = datemath.parse(rawDate, opts);
+    if (parsed) {
+      return parsed.toISOString();
+    }
+  }
+}
+
+function getStart(prevState: IUrlParams, rangeFrom?: string) {
+  if (prevState.rangeFrom !== rangeFrom) {
+    return getParsedDate(rangeFrom);
+  }
+  return prevState.start;
+}
+
+function getEnd(prevState: IUrlParams, rangeTo?: string) {
+  if (prevState.rangeTo !== rangeTo) {
+    return getParsedDate(rangeTo, { roundUp: true });
+  }
+  return prevState.end;
+}
 
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
@@ -63,7 +69,10 @@ export type APMAction = LocationAction | TimepickerAction;
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = INITIAL_STATE, action: APMAction) {
+export function urlParamsReducer(
+  state: IUrlParams = {},
+  action: APMAction
+): IUrlParams {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -84,11 +93,23 @@ export function urlParamsReducer(state = INITIAL_STATE, action: APMAction) {
         page,
         sortDirection,
         sortField,
-        kuery
+        kuery,
+        refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
+        refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
+        rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
+        rangeTo = TIMEPICKER_DEFAULTS.rangeTo
       } = toQuery(action.location.search);
 
       return removeUndefinedProps({
         ...state,
+
+        // date params
+        start: getStart(state, rangeFrom),
+        end: getEnd(state, rangeTo),
+        rangeFrom,
+        rangeTo,
+        refreshPaused: toBoolean(refreshPaused),
+        refreshInterval: toNumber(refreshInterval),
 
         // query params
         sortDirection,
@@ -111,11 +132,11 @@ export function urlParamsReducer(state = INITIAL_STATE, action: APMAction) {
       });
     }
 
-    case TIMEPICKER_UPDATE:
+    case TIME_RANGE_REFRESH:
       return {
         ...state,
-        start: action.time.min,
-        end: action.time.max
+        start: getParsedDate(action.time.rangeFrom),
+        end: getParsedDate(action.time.rangeTo)
       };
 
     default:
@@ -129,16 +150,11 @@ export function toNumber(value?: string) {
   }
 }
 
-function toString(str?: string | string[]) {
-  if (
-    str === '' ||
-    str === 'null' ||
-    str === 'undefined' ||
-    Array.isArray(str)
-  ) {
+function toString(value?: string) {
+  if (value === '' || value === 'null' || value === 'undefined') {
     return;
   }
-  return str;
+  return value;
 }
 
 export function toBoolean(value?: string) {
@@ -181,34 +197,15 @@ function getPathParams(pathname: string) {
   }
 }
 
-interface TimeUpdate {
-  min: string;
-  max: string;
-}
-
 // ACTION CREATORS
-export function updateTimePicker(time: TimeUpdate) {
-  return { type: TIMEPICKER_UPDATE, time };
+export function refreshTimeRange(time: TimeRange): TimeRangeRefreshAction {
+  return { type: TIME_RANGE_REFRESH, time };
 }
 
 // Selectors
-export const getUrlParams = createSelector(
-  (state: IReduxState) => state.urlParams,
-  getDefaultTransactionType,
-  getDefaultDistributionSample,
-  (
-    urlParams,
-    transactionType: string,
-    { traceId, transactionId }
-  ): IUrlParams => {
-    return {
-      transactionType,
-      transactionId,
-      traceId,
-      ...urlParams
-    };
-  }
-);
+export function getUrlParams(state: IReduxState) {
+  return state.urlParams;
+}
 
 export interface IUrlParams {
   detailTab?: string;
@@ -216,9 +213,13 @@ export interface IUrlParams {
   errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshInterval?: number;
+  refreshPaused?: boolean;
   serviceName?: string;
-  sortField?: string;
   sortDirection?: string;
+  sortField?: string;
   start?: string;
   traceId?: string;
   transactionId?: string;

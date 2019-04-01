@@ -34,6 +34,7 @@ const ELASTIC_LICENSE_HEADER = `
 
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
+  plugins: ['@kbn/eslint-plugin-eslint'],
 
   settings: {
     'import/resolver': {
@@ -46,6 +47,47 @@ module.exports = {
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
+    '@kbn/eslint/no-restricted-paths': [
+      'error',
+      {
+        basePath: __dirname,
+        zones: [
+          {
+            target: [
+              'src/legacy/**/*',
+              'x-pack/**/*',
+              '!x-pack/**/*.test.*',
+              'src/plugins/**/(public|server)/**/*',
+              'src/core/(public|server)/**/*',
+            ],
+            from: [
+              'src/core/public/**/*',
+              '!src/core/public/index*',
+              '!src/core/public/utils/**/*',
+
+              'src/core/server/**/*',
+              '!src/core/server/index*',
+
+              'src/plugins/**/public/**/*',
+              '!src/plugins/**/public/index*',
+
+              'src/plugins/**/server/**/*',
+              '!src/plugins/**/server/index*',
+            ],
+            allowSameFolder: true,
+          },
+        ],
+      },
+    ],
+    '@kbn/eslint/module_migration': [
+      'error',
+      [
+        {
+          from: 'expect.js',
+          to: '@kbn/expect',
+        },
+      ],
+    ],
   },
 
   overrides: [
@@ -55,7 +97,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/eslint-plugin-kibana-custom/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
@@ -87,7 +129,7 @@ module.exports = {
     {
       files: ['x-pack/test/functional/apps/**/*', 'x-pack/plugins/apm/**/*'],
       rules: {
-        'kibana-custom/no-default-export': 'off',
+        '@kbn/eslint/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -155,6 +197,7 @@ module.exports = {
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
+        'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],
@@ -241,7 +284,7 @@ module.exports = {
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
-        'packages/kbn-eslint-plugin-license-header/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*',
@@ -266,15 +309,14 @@ module.exports = {
      */
     {
       files: ['**/*.js'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: APACHE_2_0_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [ELASTIC_LICENSE_HEADER],
@@ -288,15 +330,14 @@ module.exports = {
      */
     {
       files: ['x-pack/**/*.js'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: ELASTIC_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [APACHE_2_0_LICENSE_HEADER],

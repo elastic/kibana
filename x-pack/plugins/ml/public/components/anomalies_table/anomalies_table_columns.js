@@ -26,7 +26,7 @@ import {
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
-import { EntityCell } from './entity_cell';
+import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../privilege/check_privilege';
@@ -51,7 +51,7 @@ function renderTime(date, aggregationInterval) {
 function showLinksMenuForItem(item) {
   const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
   return (canConfigureRules ||
-    item.isTimeSeriesViewDetector ||
+    item.isTimeSeriesViewRecord ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);
 }
@@ -67,7 +67,8 @@ export function getColumns(
   showRuleEditorFlyout,
   itemIdToExpandedRowMap,
   toggleRow,
-  filter) {
+  filter,
+  influencerFilter) {
 
   const columns = [
     {
@@ -136,6 +137,7 @@ export function getColumns(
           entityName={item.entityName}
           entityValue={entityValue}
           filter={filter}
+          wrapText={true}
         />
       ),
       textOnly: true,
@@ -153,6 +155,7 @@ export function getColumns(
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
           influencers={influencers}
+          influencerFilter={influencerFilter}
         />
       ),
       textOnly: true,

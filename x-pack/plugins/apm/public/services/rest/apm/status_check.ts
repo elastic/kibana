@@ -13,7 +13,9 @@ export async function loadServerStatus() {
 }
 
 export async function loadAgentStatus() {
-  return callApi<{ dataFound: boolean }>({
+  const res = await callApi<{ dataFound: boolean }>({
     pathname: `/api/apm/status/agent`
   });
+
+  return res.dataFound;
 }
