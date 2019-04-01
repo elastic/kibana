@@ -78,8 +78,7 @@ export class FeatureTooltip extends React.Component {
     return (
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
-            <EuiFlexItem>&nbsp;</EuiFlexItem>
+          <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 onClick={this.props.closeTooltip}
