@@ -19,33 +19,40 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { assign } from 'lodash';
+import AggSelect from '../agg_select';
+import FieldSelect from '../field_select';
+import AggRow from '../agg_row';
+import createChangeHandler from '../../lib/create_change_handler';
+import createSelectHandler from '../../lib/create_select_handler';
+import { PercentileRankValues } from './percentile_rank_values';
+
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
-  const defaults = { value: '' };
+  const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
-
-  const handleChange = createChangeHandler(props.onChange, model);
-  const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
+  const isTablePanel = panel.type === 'table';
+  const handleChange = createChangeHandler(props.onChange, model);
+  const handleSelectChange = createSelectHandler(handleChange);
+
+  const handlePercentileRankValuesChange = (values) => {
+    handleChange(assign({}, model, {
+      values,
+    }));
+  };
 
   return (
     <AggRow
@@ -89,21 +96,15 @@ export const PercentileRankAgg = props => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('value')}
-            label={(<FormattedMessage
-              id="tsvb.percentileRank.valueLabel"
-              defaultMessage="Value"
-            />)}
-          >
-            <EuiFieldText
-              value={model.value}
-              onChange={handleTextChange('value')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer/>
+      <PercentileRankValues
+        disableAdd={isTablePanel}
+        disableDelete={isTablePanel}
+        showOnlyLastRow={isTablePanel}
+        model={model.values}
+        onChange={handlePercentileRankValuesChange}
+      />
     </AggRow>
   );
 };
