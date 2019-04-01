@@ -63,4 +63,8 @@ export class GeojsonFileSource extends AbstractVectorSource {
     return true;
   }
 
+  shouldBeIndexed() {
+    return true;
+  }
+
 }

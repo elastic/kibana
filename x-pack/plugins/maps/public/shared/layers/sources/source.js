@@ -102,6 +102,10 @@ export class AbstractSource {
   isJoinable() {
     return false;
   }
+
+  shouldBeIndexed() {
+    return false;
+  }
 }
 
 

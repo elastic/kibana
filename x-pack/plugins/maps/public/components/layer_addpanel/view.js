@@ -21,6 +21,7 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { triggerIndexing } from '../../../../file_upload/public/';
 import _ from 'lodash';
 
 export class AddLayerPanel extends Component {
@@ -67,8 +68,14 @@ export class AddLayerPanel extends Component {
         iconSide="right"
         iconType={'sortRight'}
         onClick={() => {
+          const layerSource = this.state.layer.getSource();
+          const boolIndexLayer = layerSource.shouldBeIndexed();
           this.setState({ layer: null });
-          selectLayerAndAdd();
+          if (boolIndexLayer) {
+            triggerIndexing();
+          } else {
+            selectLayerAndAdd();
+          }
         }}
         fill
       >
