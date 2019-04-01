@@ -50,6 +50,7 @@ export class PanelUtils {
 
     panel.gridData = {
       //     x: panel.col - 1,
+      x: panel.col - 1,
       y: panel.row - 1,
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
