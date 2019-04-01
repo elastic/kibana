@@ -13,9 +13,6 @@ const getTlsHandshakesQueryFilter = () => [
     bool: {
       filter: [
         {
-          match_all: {},
-        },
-        {
           bool: {
             filter: [
               {
@@ -141,10 +138,6 @@ export const buildTlsHandshakeQuery = ({
         },
       },
       size: 0,
-      _source: {
-        excludes: [],
-      },
-      stored_fields: ['*'],
     },
   ];
 

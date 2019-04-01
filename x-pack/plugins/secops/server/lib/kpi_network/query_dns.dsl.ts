@@ -13,9 +13,6 @@ const getDnsQueryFilter = () => [
     bool: {
       filter: [
         {
-          match_all: {},
-        },
-        {
           bool: {
             should: [
               {
@@ -105,10 +102,6 @@ export const buildDnsQuery = ({
         },
       },
       size: 0,
-      _source: {
-        excludes: [],
-      },
-      stored_fields: ['*'],
     },
   ];
 
