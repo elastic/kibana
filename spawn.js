@@ -115,7 +115,7 @@ const start = async function () {
       output: {
         title: `${cmd} ${cmdArgs.join(' ')}`,
         summary: `.`,
-        text: `\`\`\`${cmdLogs.trim() ? cmdLogs : 'no output'}\`\`\``
+        text: `\`\`\`${cmdLogs.trim() ? cmdLogs.slice(-65535) : 'no output'}\`\`\``
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
