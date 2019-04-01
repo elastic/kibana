@@ -10,6 +10,7 @@ import { SpacesPlugin } from 'x-pack/plugins/spaces/types';
 import { XPackFeature, XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 // @ts-ignore
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { APPLICATION_PREFIX } from '../../../common/constants';
 import { OptionalPlugin } from '../optional_plugin';
 import { Actions, actionsFactory } from './actions';
 import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
@@ -39,7 +40,7 @@ export function createAuthorizationService(
   const config = server.config();
 
   const actions = actionsFactory(config);
-  const application = `kibana-${config.get('kibana.index')}`;
+  const application = `${APPLICATION_PREFIX}${config.get('kibana.index')}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
     actions,
     application,
