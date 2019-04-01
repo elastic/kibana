@@ -22,7 +22,6 @@ const { spawn } = require('child_process');
 const Octokit = require('@octokit/rest');
 const App = require('@octokit/app');
 const request = require('@octokit/request');
-const stripAnsi = require('strip-ansi');
 
 /*
 const getInstallation = async function (jwt) {
@@ -59,27 +58,6 @@ const getClientWithAuth = async function () {
   const installationAccessToken = await app.getInstallationAccessToken({ installationId });
 
   return new Octokit({ auth: `token ${installationAccessToken}` });
-  /*
-  const clientWithAuth = new Octokit({ auth: `token ${installationAccessToken}` });
-
-  console.log('creating check');
-  clientWithAuth.checks.create({
-    owner: 'elastic',
-    repo: 'kibana',
-    name: 'check name',
-    head_sha: process.env.ghprbActualCommit,
-    // head_sha: '7680ee538b1443fbb5f8d7a1e3c335bf477dbbdf',
-    details_url: 'http://www.google.com',
-    external_id: 'external id',
-    status: 'in_progress',
-    output: {
-      title: 'title',
-      summary: 'summary',
-      text: 'text',
-    },
-  }).then(({ headers: { 'x-ratelimit-limit': limit, 'x-ratelimit-remaining': remaining } }) => console.log(`limit: ${remaining} / ${limit}`));
-  console.log('check created');
-*/
 };
 
 // -------------
@@ -98,52 +76,45 @@ const start = async function () {
 
   const clientWithAuth = await getClientWithAuth();
   //todo check env vars
-  //todo - fire api request
-  //get title
-  clientWithAuth.checks.create({
+
+  const commonArgs = {
     owner,
     repo,
     name: title,
     head_sha: process.env.ghprbActualCommit,
-    started_at: new Date().toISOString(),
     details_url: process.env.BUILD_URL,
-    //external_id: 'external id',
+  };
+
+  clientWithAuth.checks.create({
+    ...commonArgs,
+    started_at: new Date().toISOString(),
     status: 'in_progress',
     output: {
       title: `${cmd} ${cmdArgs.join(' ')}`,
-      summary: `.`,
+      summary: `in progress`,
     },
   }).then(({
     headers: {
       'x-ratelimit-limit': limit,
       'x-ratelimit-remaining': remaining
     } }) => console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`));
-  //.catch(err => console.log('*************ERROR: ', err));
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
   for await (const data of ls.stdout) {
-    cmdLogs += stripAnsi(data);
+    cmdLogs += data;
   }
 
-  //todo - fire api request before exiting
-  // determine success or failure
   ls.on('close', (code) => {
     console.log('******************TASK COMPLETE');
     clientWithAuth.checks.create({
-      owner,
-      repo,
-      name: title,
-      head_sha: process.env.ghprbActualCommit,
-      details_url: process.env.BUILD_URL,
-      //external_id: 'external id',
-      //status: 'complete',
+      ...commonArgs,
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: new Date().toISOString(),
       output: {
         title: `${cmd} ${cmdArgs.join(' ')}`,
         summary: `.`,
-        text: `\`${cmdLogs}\``
+        text: `\`\`\`${cmdLogs ? cmdLogs : 'no output'}\`\`\``
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
@@ -151,8 +122,6 @@ const start = async function () {
       console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`);
       process.exit(code);});
   });
-  //.catch(err => console.log('*************ERROR: ', err));
-
 };
 
 console.log('**********JUST BEFORE START');
