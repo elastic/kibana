@@ -22,6 +22,23 @@ export const auditdMap: Readonly<Record<string, string>> = {
   'auditd.summary.sequence': 'auditd.summary.sequence',
 };
 
+export const fileMap: Readonly<Record<string, string>> = {
+  'file.path': 'file.path',
+  'file.target_path': 'file.target_path',
+  'file.extension': 'file.extension',
+  'file.type': 'file.type',
+  'file.device': 'file.device',
+  'file.inode': 'file.inode',
+  'file.uid': 'file.uid',
+  'file.owner': 'file.owner',
+  'file.gid': 'file.gid',
+  'file.group': 'file.group',
+  'file.mode': 'file.mode',
+  'file.size': 'file.size',
+  'file.mtime': 'file.mtime',
+  'file.ctime': 'file.ctime',
+};
+
 export const osFieldsMap: Readonly<Record<string, string>> = {
   'os.platform': 'os.platform',
   'os.name': 'os.name',
@@ -222,4 +239,5 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...httpFieldsMap },
   ...{ ...userFieldsMap },
   ...{ ...processFieldsMap },
+  ...{ ...fileMap },
 };

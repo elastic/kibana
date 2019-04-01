@@ -23,7 +23,6 @@ import {
   EVENT_END_FIELD_NAME,
   EVENT_START_FIELD_NAME,
 } from '../../../netflow/netflow_columns/duration_event_start_end';
-import { PROCESS_NAME_FIELD_NAME } from '../../../netflow/netflow_columns/user_process';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../../../port';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
@@ -77,7 +76,6 @@ export const AuditdNetflow = pure<{ data: Ecs }>(({ data }) => (
     networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}
     networkPackets={asArrayIfExists(get(NETWORK_PACKETS_FIELD_NAME, data))}
     networkProtocol={asArrayIfExists(get(NETWORK_PROTOCOL_FIELD_NAME, data))}
-    processName={asArrayIfExists(get(PROCESS_NAME_FIELD_NAME, data))}
     sourceBytes={asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, data))}
     sourceGeoContinentName={asArrayIfExists(get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, data))}
     sourceGeoCountryName={asArrayIfExists(get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, data))}

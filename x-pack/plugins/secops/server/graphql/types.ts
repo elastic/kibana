@@ -330,6 +330,8 @@ export interface Ecs {
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
+
+  file?: FileFields | null;
 }
 
 export interface AuditdEcsFields {
@@ -660,6 +662,36 @@ export interface Thread {
   id?: number | null;
 
   start?: string | null;
+}
+
+export interface FileFields {
+  path?: string | null;
+
+  target_path?: string | null;
+
+  extension?: string | null;
+
+  type?: string | null;
+
+  device?: string | null;
+
+  inode?: string | null;
+
+  uid?: string | null;
+
+  owner?: string | null;
+
+  gid?: string | null;
+
+  group?: string | null;
+
+  mode?: string | null;
+
+  size?: number | null;
+
+  mtime?: Date | null;
+
+  ctime?: Date | null;
 }
 
 export interface EventDetailsData {
@@ -1936,6 +1968,8 @@ export namespace EcsResolvers {
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
 
     process?: ProcessResolver<ProcessEcsFields | null, TypeParent, Context>;
+
+    file?: FileResolver<FileFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = Ecs, Context = SecOpsContext> = Resolver<
@@ -2028,6 +2062,11 @@ export namespace EcsResolvers {
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type FileResolver<R = FileFields | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace AuditdEcsFieldsResolvers {
@@ -3131,6 +3170,109 @@ export namespace ThreadResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace FileFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = FileFields> {
+    path?: PathResolver<string | null, TypeParent, Context>;
+
+    target_path?: TargetPathResolver<string | null, TypeParent, Context>;
+
+    extension?: ExtensionResolver<string | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+
+    device?: DeviceResolver<string | null, TypeParent, Context>;
+
+    inode?: InodeResolver<string | null, TypeParent, Context>;
+
+    uid?: UidResolver<string | null, TypeParent, Context>;
+
+    owner?: OwnerResolver<string | null, TypeParent, Context>;
+
+    gid?: GidResolver<string | null, TypeParent, Context>;
+
+    group?: GroupResolver<string | null, TypeParent, Context>;
+
+    mode?: ModeResolver<string | null, TypeParent, Context>;
+
+    size?: SizeResolver<number | null, TypeParent, Context>;
+
+    mtime?: MtimeResolver<Date | null, TypeParent, Context>;
+
+    ctime?: CtimeResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type PathResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TargetPathResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ExtensionResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DeviceResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type InodeResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UidResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type OwnerResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type GidResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type GroupResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ModeResolver<
+    R = string | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SizeResolver<
+    R = number | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MtimeResolver<
+    R = Date | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CtimeResolver<
+    R = Date | null,
+    Parent = FileFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace EventDetailsDataResolvers {

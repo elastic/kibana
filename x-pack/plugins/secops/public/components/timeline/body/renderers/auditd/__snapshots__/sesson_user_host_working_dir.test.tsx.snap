@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AuditdEndedSessionDetails rendering it renders the default AuditdEndedSessionDetails 1`] = `
+exports[`SessionUserHostWorkingDir rendering it renders the default SessionUserHostWorkingDir 1`] = `
 <Component
   intl={
     Object {
@@ -105,74 +105,20 @@ exports[`AuditdEndedSessionDetails rendering it renders the default AuditdEndedS
     }
   }
 >
-  <pure(Component)
-    browserFields={Object {}}
-    data={
-      Object {
-        "_id": "22",
-        "auditd": Object {
-          "data": Object {
-            "acct": "alice",
-            "op": "PAM:setcred",
-            "terminal": "ssh",
-          },
-          "result": "success",
-          "session": "340",
-          "summary": Object {
-            "actor": Object {
-              "primary": "alice",
-              "secondary": "alice",
-            },
-            "how": "/usr/sbin/sshd",
-            "message_type": null,
-            "object": Object {
-              "primary": "ssh",
-              "secondary": "8.42.77.171",
-              "type": "user-session",
-            },
-            "sequence": null,
-          },
-        },
-        "destination": null,
-        "event": Object {
-          "action": "disposed-credentials",
-          "category": "user-login",
-          "dataset": null,
-          "id": null,
-          "module": "auditd",
-          "severity": null,
-        },
-        "geo": null,
-        "host": Object {
-          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
-          "ip": Array [
-            "139.59.11.147",
-            "10.47.0.5",
-            "fe80::ec0b:1bff:fe29:80bd",
-          ],
-          "name": "suricata-bangalore",
-        },
-        "http": null,
-        "network": null,
-        "process": Object {
-          "args": null,
-          "executable": "/usr/sbin/sshd",
-          "name": null,
-          "pid": 21202,
-          "ppid": null,
-          "title": null,
-          "working_directory": null,
-        },
-        "source": null,
-        "suricata": null,
-        "timestamp": "2019-03-13T03:35:21.614Z",
-        "url": null,
-        "user": Object {
-          "name": "root",
-        },
-        "zeek": null,
-      }
-    }
-  />
+  <EuiFlexItem
+    component="span"
+    grow={false}
+  >
+    <pure(Component)
+      contextId="contextid-123"
+      eventId="eventid-123"
+      hostName="hostname-123"
+      primary="primary-123"
+      secondary="secondary-123"
+      session="session-123"
+      userName="username-123"
+      workingDirectory="workingdir-123"
+    />
+  </EuiFlexItem>
 </Component>
 `;

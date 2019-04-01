@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AuditExecutedDetails rendering it renders the default AuditExecutedDetails 1`] = `
+exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetails 1`] = `
 <Component
   intl={
     Object {
@@ -106,13 +106,38 @@ exports[`AuditExecutedDetails rendering it renders the default AuditExecutedDeta
   }
 >
   <pure(Component)
+    browserFields={Object {}}
+    contextId="contextid-123"
     data={
       Object {
-        "_id": "20",
+        "_id": "22",
+        "auditd": Object {
+          "data": Object {
+            "acct": "alice",
+            "op": "PAM:setcred",
+            "terminal": "ssh",
+          },
+          "result": "success",
+          "session": "340",
+          "summary": Object {
+            "actor": Object {
+              "primary": "alice",
+              "secondary": "alice",
+            },
+            "how": "/usr/sbin/sshd",
+            "message_type": null,
+            "object": Object {
+              "primary": "ssh",
+              "secondary": "8.42.77.171",
+              "type": "user-session",
+            },
+            "sequence": null,
+          },
+        },
         "destination": null,
         "event": Object {
-          "action": "executed",
-          "category": "audit-rule",
+          "action": "disposed-credentials",
+          "category": "user-login",
           "dataset": null,
           "id": null,
           "module": "auditd",
@@ -120,39 +145,36 @@ exports[`AuditExecutedDetails rendering it renders the default AuditExecutedDeta
         },
         "geo": null,
         "host": Object {
-          "id": "f896741c3b3b44bdb8e351a4ab6d2d7c",
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
           "ip": Array [
-            "134.209.63.134",
-            "10.46.0.5",
-            "fe80::a0d9:16ff:fecf:e70b",
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
           ],
-          "name": "zeek-sanfran",
+          "name": "suricata-bangalore",
         },
         "http": null,
         "network": null,
         "process": Object {
-          "args": Array [
-            "gpgconf",
-            "--list-dirs",
-            "agent-socket",
-          ],
-          "executable": "/usr/bin/gpgconf",
-          "name": "gpgconf",
-          "pid": 5402,
-          "ppid": 5401,
-          "title": "gpgconf --list-dirs agent-socket",
-          "working_directory": "/",
+          "args": null,
+          "executable": "/usr/sbin/sshd",
+          "name": null,
+          "pid": 21202,
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
         },
         "source": null,
         "suricata": null,
-        "timestamp": "2019-03-13T05:42:11.815Z",
+        "timestamp": "2019-03-13T03:35:21.614Z",
         "url": null,
         "user": Object {
-          "name": "johnson",
+          "name": "root",
         },
         "zeek": null,
       }
     }
+    text="generic-text-123"
   />
 </Component>
 `;
