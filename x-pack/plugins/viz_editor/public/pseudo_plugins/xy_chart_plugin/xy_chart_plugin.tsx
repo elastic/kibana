@@ -10,17 +10,17 @@ import {
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { SelectOperation, TermsOperation } from '../../../common';
+import { DatasourceField, fieldToOperation } from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
-  Field,
   getColumnIdByIndex,
   selectColumn,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
 } from '../../common/lib';
+import { operationToName } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
@@ -146,12 +146,12 @@ function getSuggestion(
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: 'xy_chart',
-  };
+  } as Suggestion;
 }
 
 function getSuggestionsForField(
-  indexPatternName: string,
-  field: Field,
+  datasourceName: string,
+  field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
   const operationNames = getOperationsForField(field);
@@ -160,55 +160,41 @@ function getSuggestionsForField(
     return [] as Suggestion[];
   }
 
-  let firstOperation: SelectOperation;
+  return operationNames.map(operationName => {
+    const firstOperation = fieldToOperation(field, operationName);
+    const formattedNameX = operationToName(operationName);
+    const formattedNameY = operationToName('count');
 
-  if (operationNames[0] === 'terms') {
-    firstOperation = {
-      operation: 'column',
-      argument: { field: field.name, size: 5 },
-    };
-  } else if (operationNames[0] === 'date_histogram') {
-    firstOperation = {
-      operation: 'date_histogram',
-      argument: { field: field.name, interval: '1d' },
-    };
-  } else if (operationNames[0] === 'count') {
-    firstOperation = { operation: 'count' };
-  } else {
-    firstOperation = {
-      operation: operationNames[0],
-      argument: { field: field.name },
-    } as Exclude<SelectOperation, TermsOperation>;
-  }
-
-  // Replaces the whole query and both axes. Good for first field, not for 2+
-  const prefilledVisModel: XyChartVisModel = {
-    ...visModel,
-    queries: {
-      q1: {
-        datasourceRef: indexPatternName,
-        select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
+    // Replaces the whole query and both axes. Good for first field, not for 2+
+    const prefilledVisModel: XyChartVisModel = {
+      ...visModel,
+      queries: {
+        q1: {
+          datasourceRef: datasourceName,
+          select: [
+            { ...firstOperation, alias: field.name },
+            { operation: 'count', alias: 'count' },
+          ],
+        },
       },
-    },
-    private: {
-      ...visModel.private,
-      xyChart: {
-        xAxis: { title: 'X Axis', columns: ['q1_0'] },
-        yAxis: { title: 'Y Axis', columns: ['q1_1'] },
+      private: {
+        ...visModel.private,
+        xyChart: {
+          xAxis: { title: 'X Axis', columns: ['q1_0'] },
+          yAxis: { title: 'Y Axis', columns: ['q1_1'] },
+        },
       },
-    },
-  };
+    };
 
-  return [
-    {
+    return {
       previewExpression: toExpression(prefilledVisModel),
       score: 0.5,
       visModel: prefilledVisModel,
-      title: 'Basic Line Chart',
+      title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,
       iconType: displayTypeIcon.line,
       pluginName: 'xy_chart',
-    },
-  ];
+    };
+  });
 }
 
 export const config: EditorPlugin<XyChartVisModel> = {

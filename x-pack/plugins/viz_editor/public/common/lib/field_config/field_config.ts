@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SelectOperator } from '../../../../common';
-import { Field } from '../vis_model';
+import { DatasourceField, SelectOperator } from '../../../../common';
 
-export function getOperationsForField(field: Field): SelectOperator[] {
+export function getOperationsForField(field: DatasourceField): SelectOperator[] {
   // TODO: Make this configuration plugin-oriented
   if (!field.aggregatable) {
     return ['column'];
@@ -16,11 +15,14 @@ export function getOperationsForField(field: Field): SelectOperator[] {
   if (field.type === 'date') {
     return ['date_histogram'];
   }
+
   if (field.type === 'number') {
-    return ['count', 'avg', 'sum'];
+    return ['column', 'avg', 'sum'];
   }
+
   if (field.type === 'string') {
-    return ['terms'];
+    return ['terms', 'count'];
   }
+
   return ['count'];
 }

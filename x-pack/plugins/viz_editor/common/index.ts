@@ -5,5 +5,7 @@
  */
 
 export * from './constants';
+export * from './datasource';
+export * from './select_builder';
 export * from './query_types';
 export * from './util';
