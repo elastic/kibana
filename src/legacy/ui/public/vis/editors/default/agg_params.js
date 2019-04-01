@@ -22,7 +22,6 @@ import { get } from 'lodash';
 import { aggTypes } from '../../../agg_types';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
-import '../../../filters/match_any';
 import { uiModules } from '../../../modules';
 import { editorConfigProviders } from '../config/editor_config_providers';
 import advancedToggleHtml from './advanced_toggle.html';
