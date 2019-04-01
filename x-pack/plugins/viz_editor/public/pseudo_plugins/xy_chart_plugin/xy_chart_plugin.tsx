@@ -10,7 +10,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { DatasourceField } from '../../../common';
+import { DatasourceField, fieldToOperation } from '../../../common';
 import {
   Axis,
   getColumnIdByIndex,
@@ -171,6 +171,7 @@ function getSuggestionsForField(
   }
 
   return operationNames.map(operationName => {
+    const firstOperation = fieldToOperation(field, operationName);
     const formattedNameX = operationToName(operationName);
     const formattedNameY = operationToName('count');
 
@@ -181,7 +182,7 @@ function getSuggestionsForField(
         q1: {
           datasourceRef: datasourceName,
           select: [
-            { operation: 'column', alias: field.name, argument: { field: field.name } },
+            { ...firstOperation, alias: field.name },
             { operation: 'count', alias: 'count' },
           ],
         },
