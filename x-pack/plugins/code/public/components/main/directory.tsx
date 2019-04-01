@@ -4,33 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, IconType } from '@elastic/eui';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { encodeRevisionString } from '../../utils/url';
-
-const Root = styled.div`
-  padding: ${theme.paddingSizes.m};
-`;
-
-const DirectoryNodesContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const Title = styled(EuiTitle)`
-  margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
-`;
-
-const Container = styled.div`
-  &:not(:first-child) {
-    margin-top: calc(20rem / 14);
-  }
-`;
 
 interface DirectoryNodesProps {
   title: string;
@@ -46,25 +25,34 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
-    <Link
-      className="code-link"
-      key={n.path}
-      to={props.getUrl(n.path!)}
-      data-test-subj={`codeFileExplorerNode-${n.name}`}
-    >
-      <div className="code-directory__node">
-        <EuiIcon type={typeIconMap[n.type]} />
-        <span className="code-fileNodeName eui-textTruncate">{n.name}</span>
-      </div>
-    </Link>
+    <EuiFlexItem key={n.path} grow={false}>
+      <Link
+        className="code-link"
+        to={props.getUrl(n.path!)}
+        data-test-subj={`codeFileExplorerNode-${n.name}`}
+      >
+        <div className="code-directory__node">
+          <EuiIcon type={typeIconMap[n.type]} />
+          <EuiText size="s" className="code-fileNodeName eui-textTruncate">
+            {n.name}
+          </EuiText>
+        </div>
+      </Link>
+    </EuiFlexItem>
   ));
   return (
-    <Container>
-      <Title size="s">
-        <h3>{props.title}</h3>
-      </Title>
-      <DirectoryNodesContainer>{nodes}</DirectoryNodesContainer>
-    </Container>
+    <EuiFlexItem className="codeContainer__directoryList">
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{props.title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexGroup wrap direction="row" gutterSize="none" justifyContent="flexStart">
+          {nodes}
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };
 
@@ -91,9 +79,9 @@ export const Directory = withRouter((props: Props) => {
     <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />
   );
   return (
-    <Root>
+    <EuiFlexGroup direction="column">
       {files.length > 0 && fileList}
       {folders.length > 0 && folderList}
-    </Root>
+    </EuiFlexGroup>
   );
 });
