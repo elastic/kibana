@@ -70,5 +70,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): PluginSetupContext {
-  return { ...deps };
+  return {
+    basePath: deps.basePath,
+    chrome: deps.chrome,
+    fatalErrors: deps.fatalErrors,
+    i18n: deps.i18n,
+    notifications: deps.notifications,
+    uiSettings: deps.uiSettings,
+  };
 }

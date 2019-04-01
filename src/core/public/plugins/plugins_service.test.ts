@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { omit } from 'lodash';
+
 import {
   MockedPluginInitializer,
   mockLoadPluginBundle,
@@ -35,6 +37,7 @@ mockPluginInitializerProvider.mockImplementation(
 
 const mockCoreContext: CoreContext = {};
 let mockDeps: any;
+let mockInitContext: any;
 
 beforeEach(() => {
   mockDeps = {
@@ -53,7 +56,13 @@ beforeEach(() => {
         return path;
       },
     },
+    chrome: {},
+    fatalErrors: {},
+    i18n: {},
+    notifications: {},
+    uiSettings: {},
   } as any;
+  mockInitContext = omit(mockDeps, 'injectedMetadata');
 
   // Reset these for each test.
   mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([
@@ -144,10 +153,14 @@ test('`PluginsService.setup` exposes dependent setup contracts to plugins', asyn
   const pluginBInstance = mockPluginInitializers.get('pluginB')!.mock.results[0].value;
   const pluginCInstance = mockPluginInitializers.get('pluginC')!.mock.results[0].value;
 
-  expect(pluginAInstance.setup).toHaveBeenCalledWith(mockDeps, {});
-  expect(pluginBInstance.setup).toHaveBeenCalledWith(mockDeps, { pluginA: { exportedValue: 1 } });
+  expect(pluginAInstance.setup).toHaveBeenCalledWith(mockInitContext, {});
+  expect(pluginBInstance.setup).toHaveBeenCalledWith(mockInitContext, {
+    pluginA: { exportedValue: 1 },
+  });
   // Does not supply value for `nonexist` optional dep
-  expect(pluginCInstance.setup).toHaveBeenCalledWith(mockDeps, { pluginA: { exportedValue: 1 } });
+  expect(pluginCInstance.setup).toHaveBeenCalledWith(mockInitContext, {
+    pluginA: { exportedValue: 1 },
+  });
 });
 
 test('`PluginsService.setup` does not set missing dependent setup contracts', async () => {
@@ -161,7 +174,7 @@ test('`PluginsService.setup` does not set missing dependent setup contracts', as
 
   // If a dependency is missing it should not be in the deps at all, not even as undefined.
   const pluginDInstance = mockPluginInitializers.get('pluginD')!.mock.results[0].value;
-  expect(pluginDInstance.setup).toHaveBeenCalledWith(mockDeps, {});
+  expect(pluginDInstance.setup).toHaveBeenCalledWith(mockInitContext, {});
   const pluginDDeps = pluginDInstance.setup.mock.calls[0][1];
   expect(pluginDDeps).not.toHaveProperty('missing');
 });
