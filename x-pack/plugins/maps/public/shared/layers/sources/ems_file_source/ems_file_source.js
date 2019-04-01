@@ -11,6 +11,7 @@ import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { UpdateSourceEditor } from './update_source_editor';
 import _ from 'lodash';
 
 export class EMSFileSource extends AbstractVectorSource {
@@ -25,19 +26,11 @@ export class EMSFileSource extends AbstractVectorSource {
   static icon = 'emsApp';
 
   static createDescriptor({ id, tooltipProperties = [] }) {
-    console.log('create descriptor', id, tooltipProperties);
     return {
       type: EMSFileSource.type,
       id: id,
       tooltipProperties: tooltipProperties
     };
-  }
-
-  constructor(descriptor, inspectorAdapters) {
-    super({
-      id: descriptor.id,
-      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-    }, inspectorAdapters);
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
@@ -47,6 +40,24 @@ export class EMSFileSource extends AbstractVectorSource {
       onPreviewSource(emsFileSource);
     };
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
+  }
+
+
+  constructor(descriptor, inspectorAdapters) {
+    super({
+      id: descriptor.id,
+      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
+    }, inspectorAdapters);
+  }
+
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor
+        onChange={onChange}
+        tooltipProperties={this._descriptor.tooltipProperties}
+        layerId={this._descriptor.id}
+      />
+    );
   }
 
   async _getEmsVectorFileMeta() {
@@ -130,11 +141,10 @@ export class EMSFileSource extends AbstractVectorSource {
     const newProperties = {};
     for (const key in properties) {
       if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
-        newProperties[key] === properties[key];
+        newProperties[key] = properties[key];
       }
     }
     return super.filterAndFormatPropertiesToHtml(newProperties);
-
   }
 
 }

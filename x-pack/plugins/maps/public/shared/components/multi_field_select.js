@@ -53,7 +53,7 @@ export function MultiFieldSelect({
 
 MultiFieldSelect.propTypes = {
   placeholder: PropTypes.string,
-  fields: PropTypes.object, // IndexedArray object
+  // fields: PropTypes.object, // IndexedArray object
   onChange: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.string), // array of fieldNames
   filterField: PropTypes.func,

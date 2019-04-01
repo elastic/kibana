@@ -43,6 +43,7 @@ export class UpdateSourceEditor extends Component {
       indexPattern = await indexPatternService.get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
+        //todo: use this loaderror in UX
         this.setState({
           loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
             defaultMessage: `Unable to find Index pattern {id}`,
@@ -85,7 +86,6 @@ export class UpdateSourceEditor extends Component {
               i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
                 defaultMessage: `Dynamically filter for data in the visible map area.`
               })
-
             }
             checked={this.props.filterByMapBounds}
             onChange={this._onFilterByMapBoundsChange}
