@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BarSeries, Chart, getSpecId, ScaleType } from '@elastic/charts';
 import {
   EuiHealth,
   // @ts-ignore missing type definition
@@ -116,31 +117,43 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             render: (upSeries, monitor) => {
               const { downSeries } = monitor;
               return (
-                <EuiSeriesChart
-                  showDefaultAxis={false}
-                  width={180}
-                  height={70}
-                  stackBy="y"
-                  // TODO: style hack
-                  style={{ marginBottom: '-20px' }}
-                  xType={EuiSeriesChartUtils.SCALE.TIME}
-                  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                >
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(downSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
-                      defaultMessage: 'Down',
-                    })}
-                    color={dangerColor}
-                  />
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(upSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-                      defaultMessage: 'Up',
-                    })}
-                    color={primaryColor}
-                  />
-                </EuiSeriesChart>
+                <div style={{ height: 50, width: '100%' }}>
+                  <Chart renderer="canvas">
+                    <BarSeries
+                      id={getSpecId('Down Monitors Sparkline')}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={formatSparklineCounts(downSeries).map(({ x, y }) => [x, y])}
+                    />
+                  </Chart>
+                </div>
+                // <EuiSeriesChart
+                //   showDefaultAxis={false}
+                //   width={180}
+                //   height={70}
+                //   stackBy="y"
+                //   // TODO: style hack
+                //   style={{ marginBottom: '-20px' }}
+                //   xType={EuiSeriesChartUtils.SCALE.TIME}
+                //   xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+                // >
+                //   <EuiHistogramSeries
+                //     data={formatSparklineCounts(downSeries)}
+                //     name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
+                //       defaultMessage: 'Down',
+                //     })}
+                //     color={dangerColor}
+                //   />
+                //   <EuiHistogramSeries
+                //     data={formatSparklineCounts(upSeries)}
+                //     name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
+                //       defaultMessage: 'Up',
+                //     })}
+                //     color={primaryColor}
+                //   />
+                // </EuiSeriesChart>
               );
             },
           },

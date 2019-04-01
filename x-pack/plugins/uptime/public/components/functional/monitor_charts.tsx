@@ -60,13 +60,13 @@ export const MonitorCharts = ({
   return (
     <Fragment>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ height: 400 }}>
           <EuiTitle size="xs">
             <h4>Monitor Duration ms</h4>
           </EuiTitle>
           <EuiPanel>
             <Chart renderer="canvas" className="uptime-monitor-chart">
-              <Settings legendPosition={Position.Right} showLegend={true} />
+              <Settings legendPosition={Position.Top} showLegend={true} />
               <Axis
                 id={getAxisId('durationBottom')}
                 position={Position.Bottom}
@@ -96,7 +96,7 @@ export const MonitorCharts = ({
               />
               <LineSeries
                 data={durationLine.map(({ x, y }) => [x, microsToMillis(y)])}
-                id={getSpecId('durationLineSeries')}
+                id={getSpecId('Average')}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={0}
@@ -131,6 +131,40 @@ export const MonitorCharts = ({
             </Chart>
           </EuiPanel>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>Check status</h4>
+          </EuiTitle>
+          <EuiPanel>
+            <Chart renderer="canvas">
+              <Settings legendPosition={Position.Top} showLegend={true} />
+              <Axis
+                id={getAxisId('checksBottom')}
+                position={Position.Bottom}
+                tickFormat={timeFormatter('HH:mm')}
+                showOverlappingTicks={true}
+              />
+              <Axis
+                id={getAxisId('checksLeft')}
+                position={Position.Left}
+                tickFormat={d => Number(d).toFixed(0)}
+              />
+              <AreaSeries
+                id={getSpecId('checkAreaSeries')}
+                curve={CurveType.CURVE_BASIS}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={0}
+                yAccessors={[1, 2]}
+                seriesType="area"
+                stackAccessors={['y']}
+                data={status.map(({ x, up, down }) => [x, up || 0, down || 0])}
+              />
+            </Chart>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>

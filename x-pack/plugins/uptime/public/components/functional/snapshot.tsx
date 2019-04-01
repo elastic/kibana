@@ -98,8 +98,7 @@ export const Snapshot = ({
           />
         </h5>
       </EuiTitle>
-      {/* TODO: this is a UI hack that should be replaced */}
-      <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
+      <EuiPanel paddingSize="s">
         {histogram && (
           <SnapshotHistogram
             dangerColor={dangerColor}
