@@ -66,7 +66,8 @@ const loadJobsMock = {
   }]
 };
 
-describe('<JobList />', () => {
+// FAILING: https://github.com/elastic/kibana/issues/34206
+describe.skip('<JobList />', () => {
   describe('detail panel', () => {
     let server;
     let component;

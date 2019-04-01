@@ -37,10 +37,10 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
 import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
-import { BASE_PATH, UA_EDIT_CLICK } from '../../../../../common/constants';
+import { BASE_PATH, UIM_EDIT_CLICK } from '../../../../../common/constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
-import { trackUserAction } from '../../../../services';
+import { trackUiMetric } from '../../../../services';
 import { NoMatch } from '../no_match';
 import { ConfirmDelete } from './confirm_delete';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
@@ -179,7 +179,7 @@ export class PolicyTableUi extends Component {
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
           href={getPolicyPath(value)}
-          onClick={() => trackUserAction(UA_EDIT_CLICK)}
+          onClick={() => trackUiMetric(UIM_EDIT_CLICK)}
         >
           {value}
         </EuiLink>
