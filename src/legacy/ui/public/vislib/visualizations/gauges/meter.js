@@ -282,7 +282,7 @@ export function MeterGaugeProvider() {
             if (textTooLong) {
               hiddenLabels = true;
             }
-            return valueLabelHidden || smallContainer || textTooLong ? 'none' : 'initial';
+            return smallContainer || textTooLong ? 'none' : 'initial';
           });
 
         svg
