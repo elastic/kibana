@@ -25,7 +25,7 @@ import { loadPluginBundle } from './plugin_loader';
  * The `plugin` export at the root of a plugin's `public` directory should conform
  * to this interface.
  */
-export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown>> = (
+export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (
   core: PluginInitializerContext
 ) => {
   setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
