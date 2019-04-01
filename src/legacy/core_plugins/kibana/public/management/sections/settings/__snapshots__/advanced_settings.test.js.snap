@@ -290,12 +290,6 @@ exports[`AdvancedSettings should render normally 1`] = `
         ],
       }
     }
-    totalCounts={
-      Object {
-        "elasticsearch": 2,
-        "general": 11,
-      }
-    }
   />
   <InjectIntl(FormUI)
     categories={
@@ -669,12 +663,6 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "value": undefined,
           },
         ],
-      }
-    }
-    totalCounts={
-      Object {
-        "elasticsearch": 2,
-        "general": 11,
       }
     }
   />
