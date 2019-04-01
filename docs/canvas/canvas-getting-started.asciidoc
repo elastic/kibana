@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-getting-started]]
 == Getting started with Canvas
 
