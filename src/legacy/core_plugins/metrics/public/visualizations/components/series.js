@@ -30,7 +30,7 @@ import {
 import { calculateFillColor } from '../lib/calculate_fill_color';
 
 export const Series = ({
-  mode,
+  yScaleType,
   id,
   groupId,
   label,
@@ -38,6 +38,7 @@ export const Series = ({
   bars,
   lines,
   color,
+  stack
 }) => {
   const { fill: barFill, show: isBarSeries } = bars;
   const { fill: lineFill, steps } = lines;
@@ -59,9 +60,10 @@ export const Series = ({
       id={specId}
       groupId={getGroupId(groupId)}
       xScaleType={ScaleType.Time}
-      yScaleType={mode}
+      yScaleType={yScaleType}
       xAccessor={0}
       yAccessors={[1]}
+      stackAccessors={stack ? [0] : null}
       data={data}
       yScaleToDataExtent={false}
       customSeriesColors={customSeriesColors}
@@ -71,7 +73,7 @@ export const Series = ({
 };
 
 Series.defaultProps = {
-  mode: ScaleType.Linear,
+  yScaleType: ScaleType.Linear,
   bars: {},
   lines: {},
 };
@@ -79,7 +81,7 @@ Series.defaultProps = {
 Series.propTypes = {
   hideInLegend: PropTypes.bool,
   id: PropTypes.string,
-  mode: PropTypes.string,
+  yScaleType: PropTypes.string,
   groupId: PropTypes.string,
   label: PropTypes.node,
   data: PropTypes.array,

@@ -42,8 +42,6 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter
 }) => {
-  const [mainAxis] = yaxes;
-  const { mode } = mainAxis;
   return (
     <Chart renderer="canvas" className="tvbVisTimeSeries" >
       <Settings
@@ -57,7 +55,6 @@ export const TimeSeries = ({
         <Series
           key={`${s.id}-${s.label}`}
           {...s}
-          mode={mode}
         />))
       }
 

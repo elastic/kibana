@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 import { htmlIdGenerator } from '@elastic/eui';
+import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
@@ -110,14 +111,10 @@ class TimeseriesVisualization extends Component {
       position: model.axis_position,
       tickFormatter,
     };
+    const mainAxisScaleType = model.axis_scale === 'log' ? ScaleType.Log : ScaleType.Linear;
 
     if (model.axis_min) mainAxis.min = Number(model.axis_min);
     if (model.axis_max) mainAxis.max = Number(model.axis_max);
-    if (model.axis_scale === 'log') {
-      mainAxis.mode = 'log';
-      mainAxis.transform = value => value > 0 ? Math.log(value) / Math.LN10 : null;
-      mainAxis.inverseTransform = value => Math.pow(10, value);
-    }
 
     const yaxes = [mainAxis];
 
@@ -129,34 +126,29 @@ class TimeseriesVisualization extends Component {
       seriesData.forEach(seriesDataRow => {
         seriesDataRow.tickFormatter = seriesGroupTickFormatter;
         seriesDataRow.groupId = seriesGroup.separate_axis ? seriesGroupId : mainAxisGroupId;
+        seriesDataRow.yScaleType = seriesGroup.separate_axis ? ScaleType.Linear : mainAxisScaleType;
         seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-
-        if (seriesGroup.stacked !== 'none') {
-          seriesDataRow.data = seriesDataRow.data.map(point => {
-            if (!point[1]) return [point[0], 0];
-            return point;
-          });
-        }
       });
 
-      if (seriesGroup.stacked === 'percent') {
-        seriesGroup.separate_axis = true;
-        seriesGroup.axisFormatter = 'percent';
-        seriesGroup.axis_min = 0;
-        seriesGroup.axis_max = 1;
-        seriesGroup.axis_position = model.axis_position;
-        const first = seriesData[0];
-        if (first) {
-          first.data.forEach((row, index) => {
-            const rowSum = seriesData.reduce((acc, item) => {
-              return item.data[index][1] + acc;
-            }, 0);
-            seriesData.forEach(item => {
-              item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
-            });
-          });
-        }
-      }
+      /* Temporarily disable support of stacking by percent*/
+      // if (seriesGroup.stacked === 'percent') {
+      //   seriesGroup.separate_axis = true;
+      //   seriesGroup.axisFormatter = 'percent';
+      //   seriesGroup.axis_min = 0;
+      //   seriesGroup.axis_max = 1;
+      //   seriesGroup.axis_position = model.axis_position;
+      //   const first = seriesData[0];
+      //   if (first) {
+      //     first.data.forEach((row, index) => {
+      //       const rowSum = seriesData.reduce((acc, item) => {
+      //         return item.data[index][1] + acc;
+      //       }, 0);
+      //       seriesData.forEach(item => {
+      //         item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
+      //       });
+      //     });
+      //   }
+      // }
 
       if (seriesGroup.separate_axis) {
         const yaxis = {
