@@ -405,7 +405,7 @@ describe('Flyout', () => {
             list: [
               {
                 id: 'MyIndexPattern*',
-                name: 'MyIndexPattern*',
+                title: 'MyIndexPattern*',
                 type: 'index-pattern',
               },
             ],

@@ -116,7 +116,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             "list": Array [
               Object {
                 "id": "MyIndexPattern*",
-                "name": "MyIndexPattern*",
+                "title": "MyIndexPattern*",
                 "type": "index-pattern",
               },
             ],
