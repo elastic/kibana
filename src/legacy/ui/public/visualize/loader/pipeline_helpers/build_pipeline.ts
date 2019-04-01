@@ -29,8 +29,6 @@ interface SchemaFormat {
 }
 
 interface SchemaConfigParams {
-  isDate: boolean;
-  isNumeric: boolean;
   precision?: number;
   useGeocentroid?: boolean;
 }
@@ -131,10 +129,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
     );
 
-    const params: SchemaConfigParams = {
-      isDate: format.id === 'date',
-      isNumeric: format.id === 'number',
-    };
+    const params: SchemaConfigParams = {};
 
     if (agg.type.name === 'geohash_grid') {
       params.precision = agg.params.precision;
