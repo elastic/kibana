@@ -177,6 +177,7 @@ function getSuggestionsForField(
           ],
         },
       },
+      editorPlugin: 'xy_chart',
       private: {
         ...visModel.private,
         xyChart: {
