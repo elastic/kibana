@@ -80,13 +80,13 @@ export function toExpression(viewState: VisModel) {
   }
   const firstQuery = Object.values(viewState.queries)[0];
   if (isRawDocumentQuery(firstQuery)) {
-    return `client_esdocs index='${viewState.datasource.title}' fields='${JSON.stringify(
+    return `client_esdocs index='${viewState.datasource.id}' fields='${JSON.stringify(
       firstQuery.select.map(operation =>
         operation.operation === 'column' ? operation.argument.field : ''
       )
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }
   return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${
-    viewState.datasource ? viewState.datasource.id : ''
+    viewState.datasource.id
   }'`;
 }

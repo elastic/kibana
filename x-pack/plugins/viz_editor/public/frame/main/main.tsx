@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonToggle,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -17,7 +18,9 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
+  EuiTextArea,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useReducer } from 'react';
 import { initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
@@ -28,6 +31,7 @@ import { registry as editorRegistry } from '../../editor_plugin_registry';
 type Action =
   | { type: 'loaded' }
   | { type: 'loadError'; message: string }
+  | { type: 'expressionMode' }
   | { type: 'updateVisModel'; newState: VisModel };
 
 export interface MainProps {
@@ -38,12 +42,46 @@ export interface MainProps {
 export interface RootState {
   visModel: VisModel;
   // TODO stuff like dirt and valid will go in here
-  metadata: {};
+  metadata: {
+    expressionMode: boolean;
+  };
+}
+
+function getExpression(visModel: VisModel) {
+  const { toExpression: toRenderExpression } = editorRegistry.getByName(visModel.editorPlugin);
+
+  const { toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
+    visModel.datasourcePlugin
+  );
+  const renderExpression = toRenderExpression
+    ? toRenderExpression(visModel, 'edit')
+    : `${visModel.editorPlugin}_chart { config }`;
+
+  const fetchExpression = toDataFetchExpression
+    ? toDataFetchExpression(visModel, 'edit')
+    : `${visModel.editorPlugin}_chart { config }`;
+
+  return `${fetchExpression} | ${renderExpression}`;
 }
 
 function reducer(state: RootState, action: Action): RootState {
   switch (action.type) {
+    case 'expressionMode':
+      return {
+        ...state,
+        metadata: { ...state.metadata, expressionMode: true },
+        visModel: {
+          ...state.visModel,
+          private: {
+            ...state.visModel.private,
+            expression: getExpression(state.visModel),
+          },
+        },
+      };
     case 'updateVisModel':
+      if (Object.keys(action.newState.queries).length > 1) {
+        throw new Error('Only a single query supported at the moment');
+      }
       // TODO this is the place where we can hook in an undo/redo history later
       return { ...state, visModel: action.newState };
     default:
@@ -52,18 +90,16 @@ function reducer(state: RootState, action: Action): RootState {
 }
 
 export function Main(props: MainProps) {
-  const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
+  const [state, dispatch] = useReducer(reducer, {
+    visModel: initialState(),
+    metadata: { expressionMode: false },
+  });
 
-  const {
-    ConfigPanel,
-    WorkspacePanel,
-    toExpression: toRenderExpression,
-    getSuggestionsForField,
-  } = editorRegistry.getByName(state.visModel.editorPlugin);
-
-  const { DataPanel, toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
-    state.visModel.datasourcePlugin
+  const { ConfigPanel, WorkspacePanel, getSuggestionsForField } = editorRegistry.getByName(
+    state.visModel.editorPlugin
   );
+
+  const { DataPanel } = datasourceRegistry.getByName(state.visModel.datasourcePlugin);
 
   const onChangeVisModel = (newState: VisModel) => {
     dispatch({ type: 'updateVisModel', newState });
@@ -75,16 +111,9 @@ export function Main(props: MainProps) {
     getSuggestionsForField,
   };
 
-  // TODO add a meaningful default expression builder implementation here
-  const renderExpression = toRenderExpression
-    ? toRenderExpression(state.visModel, 'edit')
-    : `${state.visModel.editorPlugin}_chart { config }`;
-
-  const fetchExpression = toDataFetchExpression
-    ? toDataFetchExpression(state.visModel, 'edit')
-    : `${state.visModel.editorPlugin}_chart { config }`;
-
-  const expression = `${fetchExpression} | ${renderExpression}`;
+  const expression = state.metadata.expressionMode
+    ? state.visModel.private.expression
+    : getExpression(state.visModel);
 
   const suggestions = editorRegistry
     .getAll()
@@ -94,27 +123,29 @@ export function Main(props: MainProps) {
 
   return (
     <EuiPage>
-      <EuiPageSideBar>
-        {datasourceRegistry.getAll().map(({ name, icon }) => (
-          <EuiButtonToggle
-            key={name}
-            label={name}
-            iconType={icon as any}
-            onChange={() => {
-              onChangeVisModel({
-                ...state.visModel,
-                datasourcePlugin: name,
-                datasource: null,
-                queries: {},
-              });
-            }}
-            isSelected={name === state.visModel.datasourcePlugin}
-            isEmpty
-            isIconOnly
-          />
-        ))}
-        <DataPanel {...panelProps} />
-      </EuiPageSideBar>
+      {!state.metadata.expressionMode && (
+        <EuiPageSideBar>
+          {datasourceRegistry.getAll().map(({ name, icon }) => (
+            <EuiButtonToggle
+              key={name}
+              label={name}
+              iconType={icon as any}
+              onChange={() => {
+                onChangeVisModel({
+                  ...state.visModel,
+                  datasourcePlugin: name,
+                  datasource: null,
+                  queries: {},
+                });
+              }}
+              isSelected={name === state.visModel.datasourcePlugin}
+              isEmpty
+              isIconOnly
+            />
+          ))}
+          <DataPanel {...panelProps} />
+        </EuiPageSideBar>
+      )}
       <EuiPageBody className="vzBody">
         <EuiPageContent>
           <EuiPageContentBody>
@@ -128,34 +159,65 @@ export function Main(props: MainProps) {
                   <ExpressionRenderer {...props} expression={expression} />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem>
-                {/* TODO as soon as something changes here, switch to the "expression"-editor */}
-                <EuiCodeBlock>{expression}</EuiCodeBlock>
-              </EuiFlexItem>
+              {state.metadata.expressionMode ? (
+                <EuiFlexItem>
+                  <EuiTextArea
+                    fullWidth
+                    value={expression}
+                    onChange={e => {
+                      onChangeVisModel({
+                        ...state.visModel,
+                        private: { ...state.visModel.private, expression: e.target.value },
+                      });
+                    }}
+                  />
+                </EuiFlexItem>
+              ) : (
+                <>
+                  <EuiFlexItem>
+                    <EuiCodeBlock>{expression}</EuiCodeBlock>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="row" alignItems="flexStart">
+                      <EuiButtonEmpty
+                        size="xs"
+                        onClick={() => dispatch({ type: 'expressionMode' })}
+                      >
+                        <FormattedMessage
+                          id="xpack.viz_editor.frame.editExpressionButtonLabel"
+                          defaultMessage="Edit expression directly"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </>
+              )}
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
-      <EuiPageSideBar>
-        <ConfigPanel {...panelProps} />
+      {!state.metadata.expressionMode && (
+        <EuiPageSideBar>
+          <ConfigPanel {...panelProps} />
 
-        <h4>Suggestions</h4>
-        <EuiListGroup>
-          {suggestions.map((suggestion, i) => (
-            <EuiListGroupItem
-              key={i}
-              label={suggestion.title}
-              iconType={suggestion.iconType}
-              onClick={() => {
-                onChangeVisModel({
-                  ...suggestion.visModel,
-                  editorPlugin: suggestion.pluginName,
-                });
-              }}
-            />
-          ))}
-        </EuiListGroup>
-      </EuiPageSideBar>
+          <h4>Suggestions</h4>
+          <EuiListGroup>
+            {suggestions.map((suggestion, i) => (
+              <EuiListGroupItem
+                key={i}
+                label={suggestion.title}
+                iconType={suggestion.iconType}
+                onClick={() => {
+                  onChangeVisModel({
+                    ...suggestion.visModel,
+                    editorPlugin: suggestion.pluginName,
+                  });
+                }}
+              />
+            ))}
+          </EuiListGroup>
+        </EuiPageSideBar>
+      )}
     </EuiPage>
   );
 }
