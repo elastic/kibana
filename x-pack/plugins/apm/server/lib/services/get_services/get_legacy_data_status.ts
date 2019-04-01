@@ -10,6 +10,7 @@ import {
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { APMSearchParams, Setup } from '../../helpers/setup_request';
 
+// returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
   const { client, config } = setup;
 

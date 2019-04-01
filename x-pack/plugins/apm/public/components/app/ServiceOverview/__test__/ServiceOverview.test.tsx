@@ -8,15 +8,16 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
+import { toastNotifications } from 'ui/notify';
 import * as apmRestServices from 'x-pack/plugins/apm/public/services/rest/apm/services';
 // @ts-ignore
 import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
 import { ServiceOverview } from '../view';
 
-function Comp() {
+function renderServiceOverview() {
   const store = configureStore();
 
-  return (
+  return render(
     <Provider store={store}>
       <ServiceOverview urlParams={{}} />
     </Provider>
@@ -63,7 +64,7 @@ describe('Service Overview -> View', () => {
         ]
       });
 
-    const { container, getByText } = render(<Comp />);
+    const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
     await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
@@ -81,7 +82,7 @@ describe('Service Overview -> View', () => {
         items: []
       });
 
-    const { container, getByText } = render(<Comp />);
+    const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
     await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
@@ -105,12 +106,54 @@ describe('Service Overview -> View', () => {
         items: []
       });
 
-    const { container, getByText } = render(<Comp />);
+    const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
     await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
     await waitForElement(() => getByText('No services found'));
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
+  });
+
+  it('should render upgrade migration notification when legacy data is found, ', async () => {
+    // create spies
+    const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
+    const dataFetchingSpy = jest
+      .spyOn(apmRestServices, 'loadServiceList')
+      .mockResolvedValue({
+        hasLegacyData: true,
+        hasHistoricalData: true,
+        items: []
+      });
+
+    renderServiceOverview();
+
+    // wait for requests to be made
+    await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
+
+    expect(toastSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: 'Legacy data was detected within the selected time range'
+      })
+    );
+  });
+
+  it('should not render upgrade migration notification when legacy data is not found, ', async () => {
+    // create spies
+    const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
+    const dataFetchingSpy = jest
+      .spyOn(apmRestServices, 'loadServiceList')
+      .mockResolvedValue({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: []
+      });
+
+    renderServiceOverview();
+
+    // wait for requests to be made
+    await wait(() => expect(dataFetchingSpy).toHaveBeenCalledTimes(1));
+
+    expect(toastSpy).not.toHaveBeenCalled();
   });
 });
