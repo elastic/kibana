@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, SelectOperation } from '../../../common';
-
-export interface Field {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  searchable: boolean;
-}
+import { DatasourceField, Query, SelectOperation } from '../../../common';
 
 export interface Datasource<M = any> {
   id: string;
   title: string;
   timeFieldName?: string;
-  fields: Field[];
+  fields: DatasourceField[];
   fieldFormatMap?: string;
   meta?: M;
 }

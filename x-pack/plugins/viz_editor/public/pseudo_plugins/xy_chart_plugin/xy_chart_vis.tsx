@@ -41,6 +41,8 @@ function sampleVisFunction() {
           // TODO this should come via the expression
           title: 'A title',
           seriesType: args.displayType,
+          xAxisName: xColumn,
+          yAxisName: yColumn,
           xAxisType:
             context.columns[0].type === 'string'
               ? 'ordinal'

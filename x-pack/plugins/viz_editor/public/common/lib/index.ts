@@ -6,3 +6,4 @@
 
 export * from './field_config';
 export * from './vis_model';
+export * from './operation_display';

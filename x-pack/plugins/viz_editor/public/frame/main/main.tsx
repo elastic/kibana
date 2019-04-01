@@ -18,12 +18,12 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { Field, initialState, VisModel } from '../../common/lib';
+import { initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
-import { Draggable } from '../../common/components/draggable';
 import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
-import { registry as editorRegistry } from '../../editor_plugin_registry';
+import { GetSuggestionsType, registry as editorRegistry } from '../../editor_plugin_registry';
+import { DroppablePane } from './droppable_pane';
 
 type Action =
   | { type: 'loaded' }
@@ -58,7 +58,6 @@ export function Main(props: MainProps) {
     ConfigPanel,
     WorkspacePanel,
     toExpression: toRenderExpression,
-    getSuggestionsForField,
   } = editorRegistry.getByName(state.visModel.editorPlugin);
 
   const { DataPanel, toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
@@ -69,10 +68,24 @@ export function Main(props: MainProps) {
     dispatch({ type: 'updateVisModel', newState });
   };
 
+  const getAllSuggestionsForField: GetSuggestionsType<VisModel> = (
+    datasourceName,
+    field,
+    visModel
+  ) => {
+    return editorRegistry
+      .getAll()
+      .flatMap(plugin =>
+        plugin.getSuggestionsForField
+          ? plugin.getSuggestionsForField(datasourceName, field, visModel)
+          : []
+      );
+  };
+
   const panelProps = {
     visModel: state.visModel,
     onChangeVisModel,
-    getSuggestionsForField,
+    getSuggestionsForField: getAllSuggestionsForField,
   };
 
   // TODO add a meaningful default expression builder implementation here
@@ -116,25 +129,10 @@ export function Main(props: MainProps) {
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
-        <Draggable
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
-          canHandleDrop={(field: Field) => !!field && !!field.type}
-          onDrop={(field: Field) => {
-            const { visModel } = state;
-            if (!getSuggestionsForField || !visModel.datasource) {
-              return;
-            }
-
-            const fieldSuggestions = getSuggestionsForField(
-              visModel.datasource.id,
-              field,
-              visModel
-            );
-
-            if (fieldSuggestions.length) {
-              onChangeVisModel(fieldSuggestions[0].visModel);
-            }
-          }}
+        <DroppablePane
+          visModel={state.visModel}
+          getAllSuggestionsForField={getAllSuggestionsForField}
+          onChangeVisModel={onChangeVisModel}
         >
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
@@ -153,7 +151,7 @@ export function Main(props: MainProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
-        </Draggable>
+        </DroppablePane>
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />

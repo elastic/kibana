@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './constants';
-export * from './datasource';
-export * from './select_builder';
-export * from './query_types';
-export * from './util';
+export interface DatasourceField {
+  name: string;
+  type: string;
+  aggregatable: boolean;
+  searchable: boolean;
+}
