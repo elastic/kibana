@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '@elastic/charts/dist/style.css';
 import 'react-vis/dist/style.css';
 import 'ui/angular-bootstrap';
 import 'ui/autoload/all';
