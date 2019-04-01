@@ -5,9 +5,12 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import url from 'url';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceList } from '../../../services/rest/apm/services';
@@ -24,6 +27,8 @@ const initalData = {
   hasLegacyData: false
 };
 
+let hasDisplayedToast = false;
+
 export function ServiceOverview({ urlParams }: Props) {
   const { start, end, kuery } = urlParams;
   const { data = initalData } = useFetcher(
@@ -33,24 +38,30 @@ export function ServiceOverview({ urlParams }: Props) {
 
   useEffect(
     () => {
-      if (data.hasLegacyData) {
+      if (data.hasLegacyData && !hasDisplayedToast) {
+        hasDisplayedToast = true;
         toastNotifications.addWarning({
-          title: i18n.translate(
-            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
-            {
-              defaultMessage:
-                'Legacy data was detected within current timerange'
-            }
-          ),
+          title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
+            defaultMessage:
+              'Legacy data was detected within the selected time range'
+          }),
           text: (
             <p>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
-                {
-                  defaultMessage:
-                    'Your are running the Elastic Stack 7.0+ and incompatible data from a previous 6.x version was detected. If you wish to see this data in APM you must migrate it. See more in the Migration Assistant'
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceOverview.toastText', {
+                defaultMessage:
+                  'Your are running the Elastic Stack 7.0+ and incompatible data from a previous 6.x version was detected. If you wish to view this data in APM you must migrate it. See more in '
+              })}
+
+              <EuiLink
+                href={url.format({
+                  pathname: chrome.addBasePath('/app/kibana'),
+                  hash: '/management/elasticsearch/upgrade_assistant'
+                })}
+              >
+                {i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
+                  defaultMessage: 'the upgrade assistant'
+                })}
+              </EuiLink>
             </p>
           )
         });
