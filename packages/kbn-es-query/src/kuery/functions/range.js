@@ -63,6 +63,20 @@ export function toElasticsearchQuery(node, indexPattern) {
 
     return {
       range: {
+        /*
+        TODO: check if the range is a date, implement similar method but slightly different to:
+      if (field.type === 'date') {
+      return [...accumulator, {
+        range: {
+          [field.name]: {
+            gte: value,
+            lte: value,
+            time_zone: 'Africa/Johannesburg',
+          },
+        }
+      }];
+    }
+        */
         [field.name]: queryParams
       }
     };

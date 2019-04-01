@@ -18,16 +18,24 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment-timezone';
+const detectedTimezone = moment.tz.guess();
 
 /**
  * Decorate queries with default parameters
  * @param query object
  * @param queryStringOptions query:queryString:options from UI settings
+ * @param dateFormatTZ dateFormat:tz from UI settings
  * @returns {object}
  */
-export function decorateQuery(query, queryStringOptions) {
+
+export function decorateQuery(query, queryStringOptions, dateFormatTZ) {
+  // TODO: A user could potentially put in a full ISO dateTime that has a timezone in it. What happens when the timezone they put in is different to the time_zone that is set by default?
   if (_.has(query, 'query_string.query')) {
     _.extend(query.query_string, queryStringOptions);
+    if (dateFormatTZ) {
+      _.defaults(query.query_string, { time_zone: dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ });
+    }
   }
 
   return query;

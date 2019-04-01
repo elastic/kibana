@@ -18,11 +18,14 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment-timezone';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
+
+const detectedTimezone = moment.tz.guess();
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -41,10 +44,11 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern, dateFormatTZ) {
+  // the indexPattern needs work too
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
 
-  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
+  const fieldName = ast.toElasticsearchQuery(fieldNameArg); // TINA, Q: should we be passing dateFormatTZ back in here?
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
@@ -116,6 +120,22 @@ export function toElasticsearchQuery(node, indexPattern) {
         }
       }];
     }
+    /*
+      If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
+      dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
+    */
+    else if (field.type === 'date') {
+      return [...accumulator, {
+        range: {
+          [field.name]: {
+            gte: value,
+            lte: value,
+            time_zone: dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ,
+            // time_zone: 'Africa/Johannesburg',
+          },
+        }
+      }];
+    }
     else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
       return [...accumulator, {
@@ -133,4 +153,5 @@ export function toElasticsearchQuery(node, indexPattern) {
     }
   };
 }
+
 
