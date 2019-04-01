@@ -22,7 +22,7 @@ const { spawn } = require('child_process');
 const Octokit = require('@octokit/rest');
 const App = require('@octokit/app');
 const request = require('@octokit/request');
-// const stripAnsi = require('strip-ansi');
+const stripAnsi = require('strip-ansi');
 
 /*
 const getInstallation = async function (jwt) {
@@ -103,8 +103,7 @@ const start = async function () {
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
   for await (const data of ls.stdout) {
-    // cmdLogs += stripAnsi(data.toString());
-    cmdLogs += data.toString();
+    cmdLogs += stripAnsi(data.toString());
   }
 
   ls.on('close', (code) => {
