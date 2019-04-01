@@ -38,8 +38,6 @@ const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChar
 
 function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   if (!visModel.private.xyChart) {
-    updateXyState(visModel, {});
-
     return <>No chart configured</>;
   }
 
@@ -98,10 +96,6 @@ function toExpression(viewState: XyChartVisModel) {
 }
 
 function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
-  if (!visModel.private.xyChart) {
-    // visModel
-  }
-
   if (visModel.private.xyChart) {
     if (displayType) {
       return updateXyState(visModel, { displayType });

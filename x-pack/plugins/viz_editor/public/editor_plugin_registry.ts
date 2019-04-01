@@ -9,6 +9,7 @@ import { DatasourceField } from '../common';
 import { UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
+import { config as scatterChartConfig } from './pseudo_plugins/scatter_chart_plugin';
 import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';
 import { config as xyChartConfig } from './pseudo_plugins/xy_chart_plugin';
 
@@ -58,6 +59,7 @@ const pluginMap: { [key: string]: EditorPlugin<any> } = {
   xy_chart: xyChartConfig,
   pie_chart: pieChartConfig,
   vega_chart: vegaChartConfig,
+  scatter_chart: scatterChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected

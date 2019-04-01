@@ -62,6 +62,7 @@ export function ExpressionRenderer(props: any) {
 
   return (
     <div
+      className="expressionRenderer"
       ref={el => {
         mountpoint.current = el;
       }}
