@@ -52,6 +52,8 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
+        // Required to load new platform plugins via `--plugin-path` flag.
+        '--env.name=development',
       ],
     },
   };
