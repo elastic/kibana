@@ -137,9 +137,8 @@ const start = async function () {
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: new Date().toISOString(),
       output: {
-        title: cmdArgs.join(' '),
-        summary: `summary`,
-        text: `text`,
+        title: `${cmd} ${cmdArgs.join(' ')}`,
+        summary: `.`,
       },
     }).then(({
       headers: { 'x-ratelimit-limit': limit,
