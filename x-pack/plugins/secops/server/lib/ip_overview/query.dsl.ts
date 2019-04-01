@@ -97,7 +97,6 @@ const getAggs = (type: string, ip: string) => {
 
 export const buildQuery = ({
   filterQuery,
-  timerange: { from, to },
   sourceConfiguration: {
     fields: { timestamp },
     logAlias,
