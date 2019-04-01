@@ -12,7 +12,6 @@ describe('SnapshotHistogram component', () => {
   const props: SnapshotHistogramProps = {
     successColor: '#FEFEFE',
     dangerColor: '#FF00FF',
-    windowWidth: 1200,
     histogram: [
       { upCount: 7, downCount: 3, x: 1548697920000, x0: 1548697620000, y: 1 },
       { upCount: 7, downCount: 3, x: 1548698220000, x0: 1548697920000, y: 1 },
