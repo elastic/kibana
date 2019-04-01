@@ -31,14 +31,11 @@ export interface SpanRaw extends APMBaseDoc {
       url?: {
         original?: string;
       };
-      [key: string]: unknown;
     };
     db?: {
       statement?: string;
       type?: string;
-      [key: string]: unknown;
     };
-    [key: string]: unknown;
   };
   transaction?: {
     id: string;
