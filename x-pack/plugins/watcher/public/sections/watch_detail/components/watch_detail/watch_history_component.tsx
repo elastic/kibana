@@ -6,7 +6,7 @@
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import {
   activateWatch,
@@ -234,7 +234,7 @@ const WatchHistoryUI = ({
   }
   const activationButtonText = isActivated ? 'Deactivate Watch' : 'Activate Watch';
   return (
-    <EuiPageContent>
+    <Fragment>
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {
@@ -301,7 +301,7 @@ const WatchHistoryUI = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {flyout}
-    </EuiPageContent>
+    </Fragment>
   );
 };
 

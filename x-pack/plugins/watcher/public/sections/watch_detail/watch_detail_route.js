@@ -21,13 +21,17 @@ import './components/watch_detail';
 import { WatchDetail } from './components/watch_detail/watch_detail_component';
 import { WatchHistory } from './components/watch_detail/watch_history_component';
 import { I18nContext } from 'ui/i18n';
+import { EuiPageContent, EuiSpacer } from '@elastic/eui';
 
 let elem;
 const renderReact = async (elem, watchId, kbnUrlService) => {
   render(
     <I18nContext>
-      <WatchDetail watchId={watchId}/>
-      <WatchHistory watchId={watchId} urlService={kbnUrlService}/>
+      <EuiPageContent>
+        <WatchDetail watchId={watchId}/>
+        <EuiSpacer size="xxl"/>
+        <WatchHistory watchId={watchId} urlService={kbnUrlService}/>
+      </EuiPageContent>
     </I18nContext>,
     elem
   );

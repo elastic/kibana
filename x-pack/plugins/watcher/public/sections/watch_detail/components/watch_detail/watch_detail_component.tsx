@@ -5,7 +5,7 @@
  */
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import { fetchWatchDetail } from '../../../../lib/api';
 
@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -76,35 +75,31 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
   }, []);
 
   return (
-    <EuiPageContent>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchDetail.header"
-                defaultMessage="Current Status"
-              />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiInMemoryTable
-            items={actions}
-            itemId="id"
-            columns={columns}
-            pagination={pagination}
-            sorting={true}
-            loading={isWatchesLoading}
-            message={
-              <FormattedMessage
-                id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-                defaultMessage="No current status to show"
-              />
-            }
+    <Fragment>
+      <EuiTitle size="m">
+        <h1>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchDetail.header"
+            defaultMessage="Current Status"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPageContent>
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiInMemoryTable
+        items={actions}
+        itemId="id"
+        columns={columns}
+        pagination={pagination}
+        sorting={true}
+        loading={isWatchesLoading}
+        message={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
+            defaultMessage="No current status to show"
+          />
+        }
+      />
+    </Fragment>
   );
 };
 
