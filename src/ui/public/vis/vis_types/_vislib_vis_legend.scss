@@ -19,60 +19,60 @@ $visLegendLineHeight: $euiSize;
   padding: $euiSizeXS 0;
   min-height: 0;
   height: 100%;
+}
 
-  // flex-direction re-aligns toggle button
-  .visLib--legend-left & {
-    flex-direction: row-reverse;
+// flex-direction re-aligns toggle button
+.visLib--legend-left .visLegend {
+  flex-direction: row-reverse;
+}
+
+.visLib--legend-right .visLegend {
+  flex-direction: row;
+}
+
+.visLib--legend-top .visLegend {
+  flex-direction: column-reverse;
+  width: 100%;
+  padding-left: $euiSizeL;
+}
+
+.visLib--legend-bottom .visLegend {
+  flex-direction: column;
+  width: 100%;
+  padding-left: $euiSizeL;
+}
+
+/**
+  * 1. Position the .visLegend__valueDetails absolutely against the legend item
+  * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
+  * 3. Make sure the currently selected item is top most in z level
+  */
+.visLegend__list {
+  display: flex;
+  line-height: $visLegendLineHeight;
+
+  width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &.hidden {
+    visibility: hidden;
   }
+}
 
-  .visLib--legend-right & {
-    flex-direction: row;
-  }
+.visLib--legend-top .visLegend__list,
+.visLib--legend-bottom .visLegend__list {
+  width: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: visible; /* 2 */
 
-  .visLib--legend-top & {
-    flex-direction: column-reverse;
-    width: 100%;
-    padding-left: $euiSizeL;
-
-  }
-  .visLib--legend-bottom & {
-    flex-direction: column;
-    width: 100%;
-    padding-left: $euiSizeL;
-  }
-
-  /**
-   * 1. Position the .visLegend__valueDetails absolutely against the legend item
-   * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
-   * 3. Make sure the currently selected item is top most in z level
-   */
-  .visLegend__list {
-    display: flex;
-    line-height: $visLegendLineHeight;
-
-    width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    .visLib--legend-top &,
-    .visLib--legend-bottom & {
-      width: auto;
-      flex-direction: row;
-      flex-wrap: wrap;
-      overflow: visible; /* 2 */
-
-      .visLegend__value {
-        flex-grow: 0;
-        max-width: $visLegendWidth;
-      }
-    }
-
-    &.hidden {
-      visibility: hidden;
-    }
+  .visLegend__value {
+    flex-grow: 0;
+    max-width: $visLegendWidth;
   }
 }
 
@@ -107,27 +107,27 @@ $visLegendLineHeight: $euiSize;
 
 .visLegend__valueDetails {
   background-color: $euiColorEmptyShade;
+}
 
-  .visLib--legend-left &,
-  .visLib--legend-right & {
-    margin-top: $euiSizeXS;
-    border-bottom: $euiBorderThin;
-  }
+.visLib--legend-left .visLegend__valueDetails,
+.visLib--legend-right .visLegend__valueDetails {
+  margin-top: $euiSizeXS;
+  border-bottom: $euiBorderThin;
+}
 
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
-    @include euiBottomShadowMedium;
-    position: absolute; /* 1 */
-    border-radius: $euiBorderRadius;
-  }
+.visLib--legend-top .visLegend__valueDetails,
+.visLib--legend-bottom .visLegend__valueDetails {
+  @include euiBottomShadowMedium;
+  position: absolute; /* 1 */
+  border-radius: $euiBorderRadius;
+}
 
-  .visLib--legend-bottom & {
-    bottom: $visLegendLineHeight + 2 * $euiSizeXS;
-  }
+.visLib--legend-bottom .visLegend__valueDetails {
+  bottom: $visLegendLineHeight + 2 * $euiSizeXS;
+}
 
-  .visLib--legend-top & {
-    margin-top: $euiSizeXS;
-  }
+.visLib--legend-top .visLegend__valueDetails {
+  margin-top: $euiSizeXS;
 }
 
 .visLegend__valueColorPicker {
