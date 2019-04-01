@@ -22,8 +22,10 @@ import { i18n } from '@kbn/i18n';
 
 export function IndicesEditSectionsProvider() {
 
-  return function (indexPattern, indexPatternListProvider) {
-    const fieldCount = _.countBy(indexPattern.fields, function (field) {
+  return function (indexPattern, fieldFilter, indexPatternListProvider) {
+    const lowercaseFilter = (fieldFilter || '').toLowerCase();
+    const filteredFields = indexPattern.fields.filter(({ name }) => name.toLowerCase().includes(lowercaseFilter));
+    const fieldCount = _.countBy(filteredFields, function (field) {
       return (field.scripted) ? 'scripted' : 'indexed';
     });
 
