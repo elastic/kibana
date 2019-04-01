@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects }) {
 
@@ -40,6 +40,22 @@ export default function ({ getPageObjects }) {
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
+      });
+
+      it('should allow deletion of layer', async () => {
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        expect(exists).to.be(false);
+      });
+    });
+
+    describe('ESJoinSource with missing index pattern id', async () => {
+      const MISSING_INDEX_ID = 'idThatDoesNotExitForESJoinSource';
+      const LAYER_NAME = 'geo_shapes*';
+
+      it('should diplay error message in layer panel', async () => {
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
+        expect(errorMsg).to.equal(`Join error: Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
       });
 
       it('should allow deletion of layer', async () => {
@@ -88,6 +104,21 @@ export default function ({ getPageObjects }) {
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`);
+      });
+
+      it('should allow deletion of layer', async () => {
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        expect(exists).to.be(false);
+      });
+    });
+
+    describe('KibanaTilemapSource with missing map.tilemap.url configuration', async () => {
+      const LAYER_NAME = 'Custom_TMS';
+
+      it('should diplay error message in layer panel', async () => {
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
+        expect(errorMsg).to.equal(`Unable to find map.tilemap.url configuration in the kibana.yml`);
       });
 
       it('should allow deletion of layer', async () => {

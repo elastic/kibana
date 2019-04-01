@@ -7,9 +7,10 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
-import { getFilteredQueryAndStatusFilter } from '../../helper';
-import { DatabaseAdapter } from '../database';
+import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
+import { formatEsBucketsForHistogram } from '../../helper';
+import { getFilterFromMust } from '../../helper/get_filter_from_must';
+import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
@@ -163,12 +164,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
-  ): Promise<HistogramSeries[] | null> {
-    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
+  ): Promise<HistogramDataPoint[]> {
+    const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -181,36 +178,24 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
               buckets: 25,
             },
             aggs: {
-              by_id: {
-                terms: {
-                  field: 'monitor.id',
-                  size: 200,
+              down: {
+                filter: {
+                  term: {
+                    'monitor.status': 'down',
+                  },
                 },
                 aggs: {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
-                      size: 2,
+                  bucket_count: {
+                    cardinality: {
+                      field: 'monitor.id',
                     },
                   },
                 },
               },
-            },
-          },
-          current_status: {
-            terms: {
-              field: 'monitor.id',
-              size: 200,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      '@timestamp': 'desc',
-                    },
-                  ],
+              bucket_total: {
+                cardinality: {
+                  field: 'monitor.id',
+                  precision_threshold: 20000,
                 },
               },
             },
@@ -219,83 +204,21 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       },
     };
 
-    /**
-     * The following code associates a monitor's ID with the data that will
-     * be displayed along with its histogram. The histogram components we're using
-     * require data to be formatted beyond simply an x/y shape; instead we need
-     * a definition of space to occupy on the x axis for each data point, defined as
-     * "x" and "x0".
-     *
-     * Each data point is assigned to a key/value pair, where the key is the monitor's
-     * ID, and the value is a list of data points associated with its up or down status.
-     */
-    const histogramList: HistogramSeries[] = [];
-    // This function adds a processed data point to the histogram series for the appropriate monitor ID
-    // Because we aren't applying filters to our top_hits result in the above query, we drop anything
-    // that doesn't conform to the filter, if it's defined. If an entry already exists in our list, we
-    // add the given data point to it, otherwise we create a new entry.
-    const updateHistogramSeries = (key: string, value: object) => {
-      const status = get(
-        currentStatus.find(h => h.key === key),
-        'latest.hits.hits[0]._source.monitor.status',
-        null
-      );
-      if (!statusFilter || (statusFilter && status === statusFilter)) {
-        const histogramEntry = histogramList.find(
-          (entry: HistogramSeries) => entry.monitorId === key
-        );
-        if (histogramEntry && histogramEntry.data) {
-          histogramEntry.data.push(value);
-        } else {
-          histogramList.push({ monitorId: key, data: [value] });
-        }
-      }
-    };
     const result = await this.database.search(request, params);
-    const buckets: any[] = get(result, 'aggregations.timeseries.buckets', []);
-    const currentStatus: any[] = get(result, 'aggregations.current_status.buckets', []);
-    // null is allowed for this type
-    if (buckets.length === 0) {
-      return null;
-    }
-    /**
-     * In the below loop, we iterate each monitor.id term, and within iterate
-     * over the data result from our auto_histogram agg, and append those data
-     * to the series collection we will return to the client.
-     */
-    const defaultBucketSize = Math.abs(buckets[0].key - buckets[1].key);
-    buckets.forEach((bucket: any, index: number, array: any[]) => {
-      const nextPoint = array[index + 1];
-      let bucketSize = 0;
-      if (nextPoint) {
-        bucketSize = Math.abs(nextPoint.key - bucket.key);
-      } else {
-        bucketSize = defaultBucketSize;
-      }
-      const { buckets: idBuckets } = bucket.by_id;
-      idBuckets.forEach(
-        ({ key: monitorId, status }: { key: string; status: { buckets: any[] } }) => {
-          let upCount = null;
-          let downCount = null;
-          status.buckets.forEach(({ key, doc_count }: { key: string; doc_count: number }) => {
-            if (key === 'up') {
-              upCount = doc_count;
-            } else if (key === 'down') {
-              downCount = doc_count;
-            }
-          });
-          updateHistogramSeries(monitorId, {
-            upCount,
-            downCount,
-            x: bucket.key + bucketSize,
-            x0: bucket.key,
-            y: 1,
-          });
-        }
-      );
+    const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
+    const mappedBuckets = buckets.map(bucket => {
+      const key: number = get(bucket, 'key');
+      const total: number = get(bucket, 'bucket_total.value');
+      const downCount: number = get(bucket, 'down.bucket_count.value');
+      return {
+        key,
+        downCount,
+        upCount: total - downCount,
+        y: 1,
+      };
     });
 
-    return histogramList;
+    return formatEsBucketsForHistogram(mappedBuckets);
   }
 
   /**

@@ -13,6 +13,8 @@ import { registerIndexRoutes } from './server/routes/api/index';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN_ID } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
+import { registerIndexLifecycleManagementUsageCollector } from './server/usage';
+
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
     config: (Joi) => {
@@ -41,8 +43,8 @@ export function indexLifecycleManagement(kibana) {
     isEnabled(config) {
       return (
         config.get('xpack.ilm.enabled') &&
-        config.has('index_management.enabled') &&
-        config.get('index_management.enabled')
+        config.has('xpack.index_management.enabled') &&
+        config.get('xpack.index_management.enabled')
       );
     },
     init: function (server) {
@@ -52,6 +54,8 @@ export function indexLifecycleManagement(kibana) {
       registerPoliciesRoutes(server);
       registerLifecycleRoutes(server);
       registerIndexRoutes(server);
+      registerIndexLifecycleManagementUsageCollector(server);
+
       if (
         server.config().get('xpack.ilm.ui.enabled') &&
         server.plugins.index_management &&

@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import {
@@ -57,6 +58,7 @@ interface SearchEmbeddableConfig {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedSearch: SavedSearch;
   editUrl: string;
+  editable: boolean;
   $rootScope: ng.IRootScopeService;
   $compile: ng.ICompileService;
 }
@@ -79,6 +81,7 @@ export class SearchEmbeddable extends Embeddable {
   constructor({
     onEmbeddableStateChanged,
     savedSearch,
+    editable,
     editUrl,
     $rootScope,
     $compile,
@@ -86,7 +89,8 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
-      indexPattern: savedSearch.searchSource.getField('index'),
+      editable,
+      indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;

@@ -9,6 +9,7 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export interface ErrorsPerTransaction {
@@ -41,15 +42,7 @@ export async function getTraceErrorsPerTransaction(
           filter: [
             { term: { [TRACE_ID]: traceId } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
+            { range: rangeFilter(start, end) }
           ]
         }
       },
@@ -66,7 +59,7 @@ export async function getTraceErrorsPerTransaction(
   const resp = await client<never, TraceErrorsAggResponse>('search', params);
 
   return resp.aggregations.transactions.buckets.reduce(
-    (acc, bucket: TraceErrorsAggBucket) => ({
+    (acc, bucket) => ({
       ...acc,
       [bucket.key]: bucket.doc_count
     }),

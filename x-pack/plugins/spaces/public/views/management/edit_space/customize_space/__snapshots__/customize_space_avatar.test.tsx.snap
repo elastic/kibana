@@ -5,7 +5,6 @@ exports[`renders without crashing 1`] = `
   onSubmit={[Function]}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFormRow
@@ -13,6 +12,7 @@ exports[`renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label="Initials (2 max)"
+      labelType="label"
     >
       <EuiFieldText
         compressed={false}
@@ -26,7 +26,6 @@ exports[`renders without crashing 1`] = `
     </EuiFormRow>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={true}
   >
     <EuiFormRow
@@ -34,6 +33,7 @@ exports[`renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label="Color"
+      labelType="label"
     >
       <EuiColorPicker
         aria-label="Select a color"

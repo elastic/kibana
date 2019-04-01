@@ -25,22 +25,25 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
+import indexPatternListTemplate from './list.html';
+import { IndexPatternTable } from './index_pattern_table';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
+import { EuiBadge } from '@elastic/eui';
+import { getListBreadcrumbs } from './breadcrumbs';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IndexPatternList } from './index_pattern_list';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
 export function updateIndexPatternList(
-  $scope,
-  indexPatternCreationOptions,
-  defaultIndex,
   indexPatterns,
+  kbnUrl,
+  indexPatternCreationOptions,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -49,11 +52,13 @@ export function updateIndexPatternList(
 
   render(
     <I18nContext>
-      <IndexPatternList
-        indexPatternCreationOptions={indexPatternCreationOptions}
-        defaultIndex={defaultIndex}
-        indexPatterns={indexPatterns}
-      />
+      <UICapabilitiesProvider>
+        <IndexPatternTable
+          indexPatterns={indexPatterns}
+          navTo={kbnUrl.redirect}
+          indexPatternCreationOptions={indexPatternCreationOptions}
+        />
+      </UICapabilitiesProvider>
     </I18nContext>,
     node,
   );
@@ -79,7 +84,14 @@ const indexPatternsResolutions = {
 // add a dependency to all of the subsection routes
 uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
-    resolve: indexPatternsResolutions
+    resolve: indexPatternsResolutions,
+    requireUICapability: 'management.kibana.index_patterns',
+  });
+
+uiRoutes
+  .when('/management/kibana/index_patterns', {
+    template: indexPatternListTemplate,
+    k7Breadcrumbs: getListBreadcrumbs
   });
 
 // wrapper directive, which sets some global stuff up like the left nav
@@ -103,7 +115,10 @@ uiModules.get('apps/management')
 
             return {
               id: id,
-              title: pattern.get('title'),
+              title:
+  <span>
+    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge className="indexPatternList__badge">Default</EuiBadge>)}
+  </span>,
               url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
               default: $scope.defaultIndex === id,
@@ -125,7 +140,7 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+          updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);

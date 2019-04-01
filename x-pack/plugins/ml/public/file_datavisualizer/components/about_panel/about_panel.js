@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
+  EuiPageContent,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
@@ -27,9 +27,11 @@ export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, i
   return (
     <EuiPage restrictWidth={1000}>
       <EuiPageBody>
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={true}>
-            <EuiPanel paddingSize="l">
+        <EuiPageContent
+          className="file-datavisualizer-about-panel__content"
+        >
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={true}>
               <WelcomeContent />
 
               <EuiHorizontalRule margin="l" />
@@ -45,10 +47,10 @@ export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, i
                   className="file-datavisualizer-file-picker"
                 />
               </div>
-            </EuiPanel>
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
@@ -58,25 +60,25 @@ export function LoadingPanel() {
   return (
     <EuiPage restrictWidth={400}>
       <EuiPageBody>
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="l" style={{ textAlign: 'center' }} >
-              <EuiTitle size="s">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
-                    defaultMessage="Analyzing data"
-                  />
-                </h3>
-              </EuiTitle>
+        <EuiPageContent
+          className="file-datavisualizer-about-panel__content"
+          paddingSize="l"
+        >
+          <div style={{ textAlign: 'center' }}>
+            <EuiTitle size="s">
+              <h3 role="alert">
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
+                  defaultMessage="Analyzing data"
+                />
+              </h3>
+            </EuiTitle>
 
-              <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
 
-              <EuiLoadingSpinner size="xl"/>
-
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiLoadingSpinner size="xl"/>
+          </div>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );

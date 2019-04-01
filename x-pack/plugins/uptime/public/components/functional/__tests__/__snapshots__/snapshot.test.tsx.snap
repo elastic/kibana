@@ -3,15 +3,9 @@
 exports[`Snapshot component renders without errors 1`] = `
 <EuiFlexGroup
   alignItems="baseline"
-  component="div"
-  direction="row"
   gutterSize="xl"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={4}
   >
     <EuiTitle
@@ -32,18 +26,10 @@ exports[`Snapshot component renders without errors 1`] = `
       paddingSize="m"
     >
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
         gutterSize="xl"
         justifyContent="spaceEvenly"
-        responsive={true}
-        wrap={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -59,10 +45,7 @@ exports[`Snapshot component renders without errors 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -78,10 +61,7 @@ exports[`Snapshot component renders without errors 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -101,7 +81,6 @@ exports[`Snapshot component renders without errors 1`] = `
     </EuiPanel>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={8}
     style={
       Object {
@@ -132,899 +111,86 @@ exports[`Snapshot component renders without errors 1`] = `
         }
       }
     >
-      <Component
+      <SnapshotHistogram
         dangerColor="#F050F0"
         histogram={
           Array [
             Object {
-              "data": Array [
-                Object {
-                  "downCount": 293,
-                  "upCount": 1,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 300,
-                  "upCount": null,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 155,
-                  "upCount": 145,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 300,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 77,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-tcp-0X81440A68E839814C",
+              "downCount": 3,
+              "upCount": 7,
+              "x": 1548697920000,
+              "x0": 1548697620000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 79,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 80,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 86,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 1,
-                  "upCount": 87,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 81,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 100,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 100,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 99,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 96,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 81,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 80,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 20,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0XD9AE729FC1C1E04A",
+              "downCount": 3,
+              "upCount": 7,
+              "x": 1548698220000,
+              "x0": 1548697920000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 79,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 80,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 86,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 88,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 81,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 95,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 94,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 98,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 93,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 81,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 80,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 20,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0XDD2D4E60FD4A61C3",
+              "downCount": 3,
+              "upCount": 7,
+              "x": 1548698520000,
+              "x0": 1548698220000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 74,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 73,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 74,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 75,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 19,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0X131221E73F825974",
+              "downCount": 3,
+              "upCount": 7,
+              "x": 1548698820000,
+              "x0": 1548698520000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": 74,
-                  "upCount": null,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 75,
-                  "upCount": null,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 19,
-                  "upCount": null,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0X3675F89EF0612091",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548699120000,
+              "x0": 1548698820000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 69,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 70,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 68,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 69,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 69,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 69,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 70,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 70,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 70,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 69,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 70,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 18,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0X9CB71300ABD5A2A8",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548699420000,
+              "x0": 1548699120000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 58,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 60,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 16,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0X970CBD2F2102BFA8",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548699720000,
+              "x0": 1548699420000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": 57,
-                  "upCount": null,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 60,
-                  "upCount": null,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 61,
-                  "upCount": null,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 56,
-                  "upCount": null,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 45,
-                  "upCount": null,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 49,
-                  "upCount": null,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 60,
-                  "upCount": null,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 60,
-                  "upCount": null,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 64,
-                  "upCount": null,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 59,
-                  "upCount": null,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 60,
-                  "upCount": null,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": 14,
-                  "upCount": null,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0XA8096548ECEB85B7",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548700020000,
+              "x0": 1548699720000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 1,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0XC9CDA429418EDC2B",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548700320000,
+              "x0": 1548700020000,
+              "y": 1,
             },
             Object {
-              "data": Array [
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548697920000,
-                  "x0": 1548697620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698220000,
-                  "x0": 1548697920000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698520000,
-                  "x0": 1548698220000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548698820000,
-                  "x0": 1548698520000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699120000,
-                  "x0": 1548698820000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699420000,
-                  "x0": 1548699120000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548699720000,
-                  "x0": 1548699420000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700020000,
-                  "x0": 1548699720000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700320000,
-                  "x0": 1548700020000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700620000,
-                  "x0": 1548700320000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 5,
-                  "x": 1548700920000,
-                  "x0": 1548700620000,
-                  "y": 1,
-                },
-                Object {
-                  "downCount": null,
-                  "upCount": 1,
-                  "x": 1548701220000,
-                  "x0": 1548700920000,
-                  "y": 1,
-                },
-              ],
-              "monitorId": "auto-http-0XE3B163481423197D",
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548700620000,
+              "x0": 1548700320000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 2,
+              "upCount": 8,
+              "x": 1548700920000,
+              "x0": 1548700620000,
+              "y": 1,
             },
           ]
         }

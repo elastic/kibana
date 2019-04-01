@@ -19,7 +19,7 @@
 
 import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
-import { getKbnFieldType } from '../utils';
+import { getKbnFieldType } from '../legacy/utils';
 
 export default function stubbedLogstashIndexPatternService(Private) {
   const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);

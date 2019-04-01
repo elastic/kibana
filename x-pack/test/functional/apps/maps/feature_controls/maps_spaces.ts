@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SpacesService } from 'x-pack/test/common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
@@ -48,6 +48,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a map to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('maps', '', {
           basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.maps.saveMap('my test map');
       });
@@ -55,6 +57,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a map to be deleted`, async () => {
         await PageObjects.common.navigateToActualUrl('maps', '', {
           basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.maps.deleteSavedMaps('my test map');
       });

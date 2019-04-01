@@ -60,8 +60,11 @@ const find = (num) => {
 
 test('renders empty page in before initial fetch to avoid flickering', () => {
   const component = shallowWithIntl(<DashboardListing.WrappedComponent
-    find={find.bind(null, 2)}
-    delete={() => {}}
+    findItems={find.bind(null, 2)}
+    deleteItems={() => {}}
+    createItem={() => {}}
+    editItem={() => {}}
+    getViewUrl={() => {}}
     listingLimit={1000}
     hideWriteControls={false}
   />);
@@ -71,8 +74,11 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
 describe('after fetch', () => {
   test('initialFilter', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
       initialFilter="my dashboard"
@@ -88,8 +94,11 @@ describe('after fetch', () => {
 
   test('renders table rows', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
     />);
@@ -104,8 +113,11 @@ describe('after fetch', () => {
 
   test('renders call to action when no dashboards exist', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 0)}
-      delete={() => {}}
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);
@@ -118,26 +130,13 @@ describe('after fetch', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('hideWriteControls with no dashboards', async () => {
+  test('hideWriteControls', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 0)}
-      delete={() => {}}
-      listingLimit={1}
-      hideWriteControls={true}
-    />);
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('hideWriteControls with dashboards', async () => {
-    const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 1)}
-      delete={() => {}}
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
@@ -152,8 +151,11 @@ describe('after fetch', () => {
 
   test('renders warning when listingLimit is exceeded', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);

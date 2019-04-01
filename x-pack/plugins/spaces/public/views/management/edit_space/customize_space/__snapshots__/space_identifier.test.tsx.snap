@@ -10,7 +10,7 @@ exports[`renders without crashing 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
-          id="xpack.spaces.management.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
+          id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
           values={
             Object {
               "spaceIdentifier": <strong>
@@ -44,6 +44,7 @@ exports[`renders without crashing 1`] = `
         </EuiLink>
       </p>
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

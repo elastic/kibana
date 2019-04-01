@@ -6,11 +6,8 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
-import {
-  AgentName,
-  createApmTelementry,
-  storeApmTelemetry
-} from '../lib/apm_telemetry';
+import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
+import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';
@@ -30,7 +27,8 @@ export function initServicesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: async req => {
       const setup = setupRequest(req);
@@ -53,7 +51,8 @@ export function initServicesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);

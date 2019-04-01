@@ -22,7 +22,11 @@ import { FileDataVisualizerPage } from './file_datavisualizer';
 
 import uiRoutes from 'ui/routes';
 
-const template = '<ml-nav-menu name="datavisualizer" /><file-datavisualizer-page />';
+const template = `
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
+  <file-datavisualizer-page />
+`;
 
 uiRoutes
   .when('/filedatavisualizer/?', {

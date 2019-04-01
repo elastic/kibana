@@ -20,13 +20,9 @@ import {
 import {
   PHASE_COLD,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-  PHASE_NODE_ATTRS,
   PHASE_REPLICA_COUNT,
   PHASE_FREEZE_ENABLED
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
@@ -40,15 +36,6 @@ class ColdPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    }).isRequired,
   };
   render() {
     const {
@@ -100,8 +87,8 @@ class ColdPhaseUi extends PureComponent {
                 }
                 id={`${PHASE_COLD}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_ENABLED, e.target.checked);
+                onChange={e => {
+                  setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="coldPhaseContent"
               />
@@ -157,8 +144,8 @@ class ColdPhaseUi extends PureComponent {
                       <EuiFieldNumber
                         id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
                         value={phaseData[PHASE_REPLICA_COUNT]}
-                        onChange={async e => {
-                          await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                        onChange={e => {
+                          setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         }}
                         min={0}
                       />
@@ -197,8 +184,8 @@ class ColdPhaseUi extends PureComponent {
               <EuiSwitch
                 data-test-subj="freezeSwitch"
                 checked={phaseData[PHASE_FREEZE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                onChange={e => {
+                  setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
                 }}
                 label={freezeLabel}
                 aria-label={freezeLabel}

@@ -28,8 +28,12 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Name"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Name
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
     >
@@ -44,8 +48,12 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Seeds"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Seeds
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
     >
@@ -54,9 +62,13 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Connection"
     width="160px"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Connection
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
     >
@@ -124,9 +136,13 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Connected nodes"
     width="160px"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Connected nodes
+    </div>
     <div
       class="euiTableCellContent"
     >
@@ -246,8 +262,12 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Name"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Name
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
     >
@@ -294,8 +314,12 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Seeds"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Seeds
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
     >
@@ -304,9 +328,13 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Connection"
     width="160px"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Connection
+    </div>
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
     >
@@ -374,9 +402,13 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
   </td>
   <td
     class="euiTableRowCell"
-    data-header="Connected nodes"
     width="160px"
   >
+    <div
+      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+    >
+      Connected nodes
+    </div>
     <div
       class="euiTableCellContent"
     >

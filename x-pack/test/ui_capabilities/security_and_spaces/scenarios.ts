@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Features } from '../common/features';
 import { Space, User } from '../common/types';
 
 const NoKibanaPrivileges: User = {
@@ -208,7 +207,7 @@ const EverythingSpace: Space = {
 const NothingSpace: Space = {
   id: 'nothing_space',
   name: 'nothing_space',
-  disabledFeatures: Object.keys(new Features()),
+  disabledFeatures: '*',
 };
 
 export const Spaces: Space[] = [EverythingSpace, NothingSpace];
@@ -420,30 +419,30 @@ const NothingSpaceReadAtNothingSpace: NothingSpaceReadAtNothingSpace = {
   space: NothingSpace,
 };
 
-export type UserAtSpaceScenarios =
-  | NoKibanaPrivilegesAtEverythingSpace
-  | NoKibanaPrivilegesAtNothingSpace
-  | SuperuserAtEverythingSpace
-  | SuperuserAtNothingSpace
-  | LegacyAllAtEverythingSpace
-  | LegacyAllAtNothingSpace
-  | DualPrivilegesAllAtEverythingSpace
-  | DualPrivilegesAllAtNothingSpace
-  | DualPrivilegesReadAtEverythingSpace
-  | DualPrivilegesReadAtNothingSpace
-  | GlobalAllAtEverythingSpace
-  | GlobalAllAtNothingSpace
-  | GlobalReadAtEverythingSpace
-  | GlobalReadAtNothingSpace
-  | EverythingSpaceAllAtEverythingSpace
-  | EverythingSpaceAllAtNothingSpace
-  | EverythingSpaceReadAtEverythingSpace
-  | EverythingSpaceReadAtNothingSpace
-  | NothingSpaceAllAtEverythingSpace
-  | NothingSpaceAllAtNothingSpace
-  | NothingSpaceReadAtEverythingSpace
-  | NothingSpaceReadAtNothingSpace;
-export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
+export const UserAtSpaceScenarios: [
+  NoKibanaPrivilegesAtEverythingSpace,
+  NoKibanaPrivilegesAtNothingSpace,
+  SuperuserAtEverythingSpace,
+  SuperuserAtNothingSpace,
+  LegacyAllAtEverythingSpace,
+  LegacyAllAtNothingSpace,
+  DualPrivilegesAllAtEverythingSpace,
+  DualPrivilegesAllAtNothingSpace,
+  DualPrivilegesReadAtEverythingSpace,
+  DualPrivilegesReadAtNothingSpace,
+  GlobalAllAtEverythingSpace,
+  GlobalAllAtNothingSpace,
+  GlobalReadAtEverythingSpace,
+  GlobalReadAtNothingSpace,
+  EverythingSpaceAllAtEverythingSpace,
+  EverythingSpaceAllAtNothingSpace,
+  EverythingSpaceReadAtEverythingSpace,
+  EverythingSpaceReadAtNothingSpace,
+  NothingSpaceAllAtEverythingSpace,
+  NothingSpaceAllAtNothingSpace,
+  NothingSpaceReadAtEverythingSpace,
+  NothingSpaceReadAtNothingSpace
+] = [
   NoKibanaPrivilegesAtEverythingSpace,
   NoKibanaPrivilegesAtNothingSpace,
   SuperuserAtEverythingSpace,

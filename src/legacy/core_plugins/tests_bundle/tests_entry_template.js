@@ -30,7 +30,7 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import 'babel-polyfill';
+import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
@@ -92,7 +92,7 @@ new CoreSystem({
           showWriteControls: true
         },
         visualize: {
-          showWriteControls: true
+          save: true
         },
         dashboard: {
           showWriteControls: true
@@ -108,5 +108,5 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).start()
+}).setup()
 `;

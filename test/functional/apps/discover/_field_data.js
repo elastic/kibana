@@ -17,7 +17,7 @@
 * under the License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
@@ -94,7 +93,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Expected "*", ":", "<", "<=", ">", ">=", "\\", [\\ \\t\\r\\n] or end of input but "(" found.';
+        const expectedError = 'Discover: Expected "*", ":", "<", "<=", ">", ">=", "\\", "\\n", ' +
+          '"\\r", "\\t", [\\ \\t\\r\\n] or end of input but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
         const toastMessage =  await PageObjects.header.getToastMessage();

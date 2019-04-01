@@ -22,9 +22,7 @@ import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
 export function apacheLogsSpecProvider(server, context) {
-  const moduleName = 'apache2';
-  const geoipRequired = true;
-  const uaRequired = true;
+  const moduleName = 'apache';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'apacheLogs',
@@ -36,30 +34,30 @@ export function apacheLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.apacheLogs.longDescription', {
-      defaultMessage: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server. \
+      defaultMessage: 'The apache Filebeat module parses access and error logs created by the Apache HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-apache2.html',
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-apache.html',
       },
     }),
     euiIconType: 'logoApache',
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Apache2-Dashboard',
+          id: 'Filebeat-Apache-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.apacheLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Apache2 logs dashboard',
+            defaultMessage: 'Apache logs dashboard',
           }),
           isOverview: true
         }
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache2.html'
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache.html'
       }
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

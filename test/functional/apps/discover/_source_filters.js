@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });
 

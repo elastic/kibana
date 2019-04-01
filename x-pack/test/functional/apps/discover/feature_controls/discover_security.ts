@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SecurityService } from 'x-pack/test/common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
@@ -11,9 +11,22 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'security',
+    'share',
+    'spaceSelector',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+
+  async function setDiscoverTimeRange() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
+    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+  }
 
   describe('security', () => {
     before(async () => {
@@ -79,6 +92,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
+
+      it('Permalinks shows create short-url button', async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
+      });
     });
 
     describe('global discover read-only privileges', () => {
@@ -128,6 +146,63 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverNewButton', 10000);
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it(`doesn't show visualize button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
+      });
+    });
+
+    describe('discover and visualize privileges', () => {
+      before(async () => {
+        await security.role.create('global_discover_visualize_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_discover_visualize_read_user', {
+          password: 'global_discover_visualize_read_user-password',
+          roles: ['global_discover_visualize_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_discover_visualize_read_user',
+          'global_discover_visualize_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await security.role.delete('global_discover_visualize_read_role');
+        await security.user.delete('global_discover_visualize_read_user');
+      });
+
+      it(`shows the visualize button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
     });
 

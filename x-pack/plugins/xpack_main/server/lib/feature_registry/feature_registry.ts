@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IconType } from '@elastic/eui';
 import Joi from 'joi';
-import _ from 'lodash';
+import { cloneDeep, difference } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
@@ -24,11 +23,18 @@ export interface FeatureKibanaPrivileges {
   ui: string[];
 }
 
-export interface Feature {
+type PrivilegesSet = Record<string, FeatureKibanaPrivileges>;
+
+export type FeatureWithAllOrReadPrivileges = Feature<{
+  all?: FeatureKibanaPrivileges;
+  read?: FeatureKibanaPrivileges;
+}>;
+
+export interface Feature<TPrivileges extends Partial<PrivilegesSet> = PrivilegesSet> {
   id: string;
   name: string;
   validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum'>;
-  icon?: IconType;
+  icon?: string;
   description?: string;
   navLinkId?: string;
   app: string[];
@@ -36,9 +42,7 @@ export interface Feature {
     [sectionId: string]: string[];
   };
   catalogue?: string[];
-  privileges: {
-    [key: string]: FeatureKibanaPrivileges;
-  };
+  privileges: TPrivileges;
   privilegesTooltip?: string;
 }
 
@@ -73,7 +77,7 @@ const schema = Joi.object({
   catalogue: catalogueSchema,
   privileges: Joi.object()
     .pattern(
-      featurePrivilegePartRegex,
+      /^(read|all)$/,
       Joi.object({
         grantWithBaseRead: Joi.bool(),
         management: managementSchema,
@@ -101,7 +105,7 @@ export class FeatureRegistry {
   private locked = false;
   private features: Record<string, Feature> = {};
 
-  public register(feature: Feature) {
+  public register(feature: FeatureWithAllOrReadPrivileges) {
     if (this.locked) {
       throw new Error(`Features are locked, can't register new features`);
     }
@@ -112,16 +116,16 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
-    this.features[feature.id] = feature;
+    this.features[feature.id] = feature as Feature;
   }
 
   public getAll(): Feature[] {
     this.locked = true;
-    return _.cloneDeep(Object.values(this.features));
+    return cloneDeep(Object.values(this.features));
   }
 }
 
-function validateFeature(feature: Feature) {
+function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
   const validateResult = Joi.validate(feature, schema);
   if (validateResult.error) {
     throw validateResult.error;
@@ -130,7 +134,11 @@ function validateFeature(feature: Feature) {
   const { app = [], management = {}, catalogue = [] } = feature;
 
   Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
-    const unknownAppEntries = _.difference(privilegeDefinition.app || [], app);
+    if (!privilegeDefinition) {
+      throw new Error('Privilege definition may not be null or undefined');
+    }
+
+    const unknownAppEntries = difference(privilegeDefinition.app || [], app);
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -139,7 +147,7 @@ function validateFeature(feature: Feature) {
       );
     }
 
-    const unknownCatalogueEntries = _.difference(privilegeDefinition.catalogue || [], catalogue);
+    const unknownCatalogueEntries = difference(privilegeDefinition.catalogue || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -158,10 +166,7 @@ function validateFeature(feature: Feature) {
           );
         }
 
-        const unknownSectionEntries = _.difference(
-          managementEntry,
-          management[managementSectionId]
-        );
+        const unknownSectionEntries = difference(managementEntry, management[managementSectionId]);
 
         if (unknownSectionEntries.length > 0) {
           throw new Error(

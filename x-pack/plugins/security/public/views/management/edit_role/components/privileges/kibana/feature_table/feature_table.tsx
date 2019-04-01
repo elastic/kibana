@@ -12,6 +12,7 @@ import {
   // @ts-ignore
   EuiInMemoryTable,
   EuiText,
+  IconType,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
@@ -123,7 +124,7 @@ export class FeatureTable extends Component<Props, {}> {
 
         return (
           <span>
-            <EuiIcon size="m" type={feature.icon} className="secPrivilegeFeatureIcon" />
+            <EuiIcon size="m" type={feature.icon as IconType} className="secPrivilegeFeatureIcon" />
             {feature.name} {tooltipElement}
           </span>
         );

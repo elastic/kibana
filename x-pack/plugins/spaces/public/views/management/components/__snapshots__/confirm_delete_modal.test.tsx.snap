@@ -53,6 +53,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           hasEmptyLabelSpace={false}
           isInvalid={false}
           label="Confirm space name to delete"
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}
@@ -113,6 +114,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

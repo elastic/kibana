@@ -13,8 +13,6 @@ import {
   DeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
 
-import { getDeprecatedApmIndices } from './apm';
-
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
@@ -30,19 +28,15 @@ export interface UpgradeAssistantStatus {
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
   req: Request,
-  isCloudEnabled: boolean,
-  apmIndices: string[]
+  isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const [deprecations, apmIndexDeprecations] = await Promise.all([
-    (await callWithRequest(req, 'transport.request', {
-      path: '/_migration/deprecations',
-      method: 'GET',
-    })) as DeprecationAPIResponse,
-    getDeprecatedApmIndices(callWithRequest, req, apmIndices),
-  ]);
+  const deprecations = await callWithRequest(req, 'transport.request', {
+    path: '/_migration/deprecations',
+    method: 'GET',
+  });
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
-  const indices = getCombinedIndexInfos(deprecations, apmIndexDeprecations);
+  const indices = getCombinedIndexInfos(deprecations);
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
@@ -54,35 +48,22 @@ export async function getUpgradeAssistantStatus(
 }
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
-const getCombinedIndexInfos = (
-  deprecations: DeprecationAPIResponse,
-  apmIndexDeprecations: EnrichedDeprecationInfo[]
-) => {
-  const apmIndices = apmIndexDeprecations.reduce((acc, dep) => acc.add(dep.index), new Set());
-
-  return Object.keys(deprecations.index_settings)
-    .reduce(
-      (indexDeprecations, indexName) => {
-        // prevent APM indices from showing up for general re-indexing
-        if (apmIndices.has(indexName)) {
-          return indexDeprecations;
-        }
-
-        return indexDeprecations.concat(
-          deprecations.index_settings[indexName].map(
-            d =>
-              ({
-                ...d,
-                index: indexName,
-                reindex: /Index created before/.test(d.message),
-              } as EnrichedDeprecationInfo)
-          )
-        );
-      },
-      [] as EnrichedDeprecationInfo[]
-    )
-    .concat(apmIndexDeprecations);
-};
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
+  Object.keys(deprecations.index_settings).reduce(
+    (indexDeprecations, indexName) => {
+      return indexDeprecations.concat(
+        deprecations.index_settings[indexName].map(
+          d =>
+            ({
+              ...d,
+              index: indexName,
+              reindex: /Index created before/.test(d.message),
+            } as EnrichedDeprecationInfo)
+        )
+      );
+    },
+    [] as EnrichedDeprecationInfo[]
+  );
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
   const combined = deprecations.cluster_settings

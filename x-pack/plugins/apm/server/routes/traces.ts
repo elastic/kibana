@@ -26,7 +26,8 @@ export function initTracesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -42,7 +43,8 @@ export function initTracesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const { traceId } = req.params;

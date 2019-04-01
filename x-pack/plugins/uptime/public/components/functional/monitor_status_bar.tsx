@@ -11,7 +11,7 @@ import moment from 'moment';
 import React from 'react';
 
 interface Props {
-  duration?: number;
+  duration?: number | null;
   url?: string;
   status?: string;
   timestamp?: string;
@@ -50,20 +50,21 @@ export const MonitorStatusBar = ({ timestamp, url, duration, status }: Props) =>
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexItem>
-      <EuiFlexItem
-        aria-label={i18n.translate('xpack.uptime.monitorStatusBar.durationTextAriaLabel', {
-          defaultMessage: 'Monitor duration in milliseconds',
-        })}
-        grow={false}
-      >
-        <FormattedMessage
-          id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
-          // TODO: this should not be computed inline
-          values={{ duration: duration ? duration / 1000 : 0 }}
-          defaultMessage="{duration}ms"
-          description="The 'ms' is an abbreviation for 'milliseconds'."
-        />
-      </EuiFlexItem>
+      {!!duration && (
+        <EuiFlexItem
+          aria-label={i18n.translate('xpack.uptime.monitorStatusBar.durationTextAriaLabel', {
+            defaultMessage: 'Monitor duration in milliseconds',
+          })}
+          grow={false}
+        >
+          <FormattedMessage
+            id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
+            values={{ duration }}
+            defaultMessage="{duration}ms"
+            description="The 'ms' is an abbreviation for 'milliseconds'."
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         aria-label={i18n.translate('xpack.uptime.monitorStatusBar.timestampFromNowTextAriaLabel', {
           defaultMessage: 'Time since last check',

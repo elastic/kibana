@@ -50,6 +50,7 @@ export const withStateFromLocation = <StateInLocation extends {}>({
         const stateFromLocation = mapLocationToState(location);
 
         return (
+          // @ts-ignore
           <WrappedComponent
             {...otherProps}
             {...stateFromLocation}

@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
@@ -25,81 +25,82 @@ import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';
 
-export const CrossClusterReplicationHome = injectI18n(
-  class extends PureComponent {
-    state = {
-      activeSection: 'follower_indices'
-    }
-
-    tabs = [{
-      id: 'follower_indices',
-      name: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
-          defaultMessage="Follower indices"
-        />
-      )
-    }, {
-      id: 'auto_follow_patterns',
-      name: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-          defaultMessage="Auto-follow patterns"
-        />
-      )
-    }]
-
-    componentDidMount() {
-      chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
-    }
-
-    static getDerivedStateFromProps(props) {
-      const { match: { params: { section } } } = props;
-      return {
-        activeSection: section
-      };
-    }
-
-    onSectionChange = (section) => {
-      routing.navigate(`/${section}`);
-    }
-
-    render() {
-      return (
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                  defaultMessage="Cross Cluster Replication"
-                />
-              </h1>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiTabs>
-              {this.tabs.map(tab => (
-                <EuiTab
-                  onClick={() => this.onSectionChange(tab.id)}
-                  isSelected={tab.id === this.state.activeSection}
-                  key={tab.id}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-
-            <EuiSpacer size="m" />
-
-            <Switch>
-              <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
-              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-            </Switch>
-          </EuiPageContent>
-        </EuiPageBody>
-      );
-    }
+export class CrossClusterReplicationHome extends PureComponent {
+  state = {
+    activeSection: 'follower_indices'
   }
-);
+
+  tabs = [{
+    id: 'follower_indices',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
+        defaultMessage="Follower indices"
+      />
+    ),
+    testSubj: 'ccrFollowerIndicesTab',
+  }, {
+    id: 'auto_follow_patterns',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+        defaultMessage="Auto-follow patterns"
+      />
+    ),
+    testSubj: 'ccrAutoFollowPatternsTab',
+  }]
+
+  componentDidMount() {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { match: { params: { section } } } = props;
+    return {
+      activeSection: section
+    };
+  }
+
+  onSectionChange = (section) => {
+    routing.navigate(`/${section}`);
+  }
+
+  render() {
+    return (
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiTitle size="l" data-test-subj="ccrAppTitle">
+            <h1>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
+                defaultMessage="Cross-Cluster Replication"
+              />
+            </h1>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiTabs>
+            {this.tabs.map(tab => (
+              <EuiTab
+                onClick={() => this.onSectionChange(tab.id)}
+                isSelected={tab.id === this.state.activeSection}
+                key={tab.id}
+                data-test-subj={tab.testSubj}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+
+          <EuiSpacer size="m" />
+
+          <Switch>
+            <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+          </Switch>
+        </EuiPageContent>
+      </EuiPageBody>
+    );
+  }
+}

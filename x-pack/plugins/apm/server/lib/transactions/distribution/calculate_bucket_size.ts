@@ -6,6 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
@@ -29,6 +30,7 @@ export async function calculateBucketSize(
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
             {

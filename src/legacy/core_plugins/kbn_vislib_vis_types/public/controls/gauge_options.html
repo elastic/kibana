@@ -173,7 +173,7 @@
               type="number"
               class="form-control"
               name="range.from"
-              greater-or-equal-than="{{getGreaterThan($index)}}"
+              greater-or-equal-than="getGreaterThan($index)"
               required
               step="any" />
           </td>
@@ -184,7 +184,7 @@
               type="number"
               class="form-control"
               name="range.to"
-              greater-or-equal-than="{{range.from}}"
+              greater-or-equal-than="range.from"
               required
               step="any" />
           </td>
@@ -217,9 +217,8 @@
         i18n-id="kbnVislibVisTypes.controls.gaugeOptions.addRangeTitle"
         i18n-default-message="Add Range"
       ></div>
-      <div class="euiSpacer euiSpacer--s"></div>
       <div
-        class="text text-center text-info"
+        class="euiFormHelpText"
         i18n-id="kbnVislibVisTypes.controls.gaugeOptions.howToChangeColorsDescription"
         i18n-default-message="Note: colors can be changed in the legend"
       ></div>

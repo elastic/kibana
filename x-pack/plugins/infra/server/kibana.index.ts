@@ -33,12 +33,21 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     app: ['infra', 'kibana'],
     catalogue: ['infraops'],
     privileges: {
-      read: {
+      all: {
+        api: ['infra'],
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'configureSource'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['config', 'infrastructure-ui-source'],
+        },
+        ui: ['show'],
       },
     },
   });
@@ -53,12 +62,21 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     app: ['infra', 'kibana'],
     catalogue: ['infralogging'],
     privileges: {
-      read: {
+      all: {
+        api: ['infra'],
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'configureSource'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['config', 'infrastructure-ui-source'],
+        },
+        ui: ['show'],
       },
     },
   });
@@ -71,6 +89,9 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     fields: Joi.object({
       container: Joi.string(),
       host: Joi.string(),
+      message: Joi.array()
+        .items(Joi.string())
+        .single(),
       pod: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),
@@ -92,10 +113,3 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
 
   return InfraRootConfigSchema;
 };
-
-export const getDeprecations = () => [];
-
-// interface DeprecationHelpers {
-//   rename(oldKey: string, newKey: string): (settings: unknown, log: unknown) => void;
-//   unused(oldKey: string): (settings: unknown, log: unknown) => void;
-// }

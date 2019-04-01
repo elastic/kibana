@@ -6,9 +6,9 @@
 
 import { resolve } from 'path';
 import init from './init';
-import './server/build_fix';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';
+import { migrations } from './migrations';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
@@ -24,6 +24,7 @@ export function canvas(kibana) {
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
+      interpreter: ['plugins/canvas/browser_functions', 'plugins/canvas/renderers'],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override
@@ -31,6 +32,7 @@ export function canvas(kibana) {
       ],
       home: ['plugins/canvas/register_feature'],
       mappings,
+      migrations,
     },
 
     config: Joi => {

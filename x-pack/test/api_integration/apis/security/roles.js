@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const es = getService('es');
@@ -52,9 +52,9 @@ export default function ({ getService }) {
               {
                 base: ['all'],
                 feature: {
-                  dashboard: ["read"],
-                  discover: ["all"],
-                  ml: ["all"]
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
                 },
                 spaces: ['marketing', 'sales']
               }
@@ -164,17 +164,17 @@ export default function ({ getService }) {
               {
                 base: ['read'],
                 feature: {
-                  dashboard: ["read"],
-                  dev_tools: ["all"],
+                  dashboard: ['read'],
+                  dev_tools: ['all'],
                 },
                 spaces: ['*']
               },
               {
                 base: ['all'],
                 feature: {
-                  dashboard: ["read"],
-                  discover: ["all"],
-                  ml: ["all"]
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
                 },
                 spaces: ['marketing', 'sales']
               }

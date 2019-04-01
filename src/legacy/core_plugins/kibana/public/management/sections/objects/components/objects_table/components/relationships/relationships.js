@@ -45,6 +45,7 @@ class RelationshipsUI extends Component {
     title: PropTypes.string.isRequired,
     close: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
   };
 
@@ -101,7 +102,7 @@ class RelationshipsUI extends Component {
   }
 
   renderRelationships() {
-    const { getEditUrl, goInApp, intl } = this.props;
+    const { getEditUrl, canGoInApp, goInApp, intl } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -227,7 +228,7 @@ class RelationshipsUI extends Component {
               items={list}
               columns={[
                 {
-                  width: 24,
+                  width: '24px',
                   render: () => (
                     <EuiToolTip
                       position="top"
@@ -267,7 +268,9 @@ class RelationshipsUI extends Component {
                         defaultMessage: 'View this saved object within Kibana'
                       }),
                       icon: 'eye',
+                      available: () => canGoInApp(type),
                       onClick: object => goInApp(object.id, type),
+                      testId: 'savedObjectsManagementRelationshipsViewInApp'
                     },
                   ],
                 },

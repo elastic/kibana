@@ -48,7 +48,7 @@ export const StepLegend: React.SFC<Props> = ({ legend, formatter }) => {
 
 const StepLegendContainer = styled.div`
   display: flex;
-  padding: 10px;
+  padding: 10px 40px 10px 10px;
 `;
 
 const StepContainer = styled.div`

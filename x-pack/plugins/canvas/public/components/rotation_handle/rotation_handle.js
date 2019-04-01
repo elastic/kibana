@@ -6,12 +6,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import aero from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const RotationHandle = ({ transformMatrix }) => (
   <div
     className="canvasRotationHandle canvasRotationHandle--connector canvasLayoutAnnotation"
-    style={{ transform: aero.dom.matrixToCSS(transformMatrix) }}
+    style={{ transform: matrixToCSS(transformMatrix) }}
   >
     <div className="canvasRotationHandle--handle" />
   </div>

@@ -23,7 +23,7 @@ import { createReadStream } from 'fs';
 import {
   createPromiseFromStreams,
   concatStreamProviders,
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   isGzip,
@@ -88,7 +88,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, log });
+    await migrateKibanaIndex({ client, log, kibanaUrl });
   }
 
   return result;

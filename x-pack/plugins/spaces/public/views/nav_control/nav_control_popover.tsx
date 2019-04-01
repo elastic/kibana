@@ -72,6 +72,7 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return (
+      // @ts-ignore repositionOnScroll doesn't exist on EuiPopover
       <EuiPopover
         id={'spcMenuPopover'}
         data-test-subj={`spacesNavSelector`}
@@ -80,7 +81,6 @@ export class NavControlPopover extends Component<Props, State> {
         closePopover={this.closeSpaceSelector}
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
-        // @ts-ignore
         repositionOnScroll={true}
         withTitle={this.props.anchorPosition.includes('down')}
         ownFocus

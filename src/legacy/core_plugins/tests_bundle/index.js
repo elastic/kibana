@@ -22,7 +22,7 @@ import { createReadStream } from 'fs';
 import globby from 'globby';
 import MultiStream from 'multistream';
 
-import { fromRoot } from '../../../utils';
+import { fromRoot } from '../../../legacy/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
@@ -52,13 +52,13 @@ export default (kibana) => {
         } = kbnServer;
 
         const testGlobs = [
-          'src/ui/public/**/*.js',
-          '!src/ui/public/flot-charts/**/*',
+          'src/legacy/ui/public/**/*.js',
+          '!src/legacy/ui/public/flot-charts/**/*',
         ];
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testGlobs.push('!src/ui/public/**/__tests__/**/*');
+          testGlobs.push('!src/legacy/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
             const plugin = plugins
               .find(plugin => plugin.id === pluginId);

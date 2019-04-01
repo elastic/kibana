@@ -37,7 +37,7 @@ class PostSaveService {
       const datafeedId = mlJobService.getDatafeedId(jobId);
 
       mlJobService.openJob(jobId)
-        .catch()
+        .catch(() => {})
         .then(() => {
           mlJobService.startDatafeed(datafeedId, jobId, 0, undefined)
             .then(() => {
@@ -63,7 +63,7 @@ class PostSaveService {
           .then(() => {
             if (createWatch) {
               mlCreateWatchService.createNewWatch(jobId)
-                .catch()
+                .catch(() => {})
                 .then(() => {
                   resolve();
                 });

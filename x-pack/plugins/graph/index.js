@@ -23,7 +23,6 @@ export function graph(kibana) {
         order: 9000,
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
-        description: 'Graph exploration',
         main: 'plugins/graph/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -45,8 +44,6 @@ export function graph(kibana) {
       server.injectUiAppVars('graph', () => {
         const config = server.config();
         return {
-          esApiVersion: config.get('elasticsearch.apiVersion'),
-          esShardTimeout: config.get('elasticsearch.shardTimeout'),
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
           canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };
@@ -67,7 +64,7 @@ export function graph(kibana) {
               all: ['graph-workspace'],
               read: ['config', 'index-pattern'],
             },
-            ui: [],
+            ui: ['save', 'delete'],
           },
           read: {
             savedObject: {

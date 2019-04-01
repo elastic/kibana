@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { translate } from './translate';
-import { plugins } from './plugins';
 import { registerServerFunctions } from './server_functions';
 
 export function routes(server) {
-  plugins(server);
-  translate(server);
   registerServerFunctions(server);
 }

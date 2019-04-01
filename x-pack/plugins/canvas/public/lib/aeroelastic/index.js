@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const dom = require('./dom');
-const geometry = require('./geometry');
-const gestures = require('./gestures');
-const layout = require('./layout');
-const matrix = require('./matrix');
-const state = require('./state');
+import { updater } from './layout';
+import { multiply, rotateZ, translate } from './matrix';
+import { createStore } from './store';
 
-module.exports = {
-  dom,
-  geometry,
-  gestures,
-  layout,
-  matrix,
-  state,
-};
+export const matrix = { multiply, rotateZ, translate };
+
+export const createLayoutStore = (initialState, onChangeCallback) =>
+  createStore(initialState, updater, onChangeCallback);

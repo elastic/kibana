@@ -43,12 +43,9 @@ export default function uiCapabilitesTests({
       }
     });
 
-    loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./canvas'));
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./discover'));
-    loadTestFile(require.resolve('./maps'));
+    loadTestFile(require.resolve('./catalogue'));
+    loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./timelion'));
+    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

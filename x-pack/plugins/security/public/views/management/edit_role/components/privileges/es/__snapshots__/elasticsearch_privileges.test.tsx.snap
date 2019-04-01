@@ -45,6 +45,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <ClusterPrivileges
         onChange={[Function]}
@@ -62,9 +63,7 @@ exports[`it renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiDescribedFormGroup
     description={
       <p>
@@ -105,6 +104,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -112,6 +112,7 @@ exports[`it renders without crashing 1`] = `
         isClearable={true}
         isDisabled={false}
         onChange={[Function]}
+        onCreateOption={[Function]}
         options={Array []}
         placeholder="Add a user…"
         selectedOptions={Array []}
@@ -119,9 +120,7 @@ exports[`it renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -186,16 +185,14 @@ exports[`it renders without crashing 1`] = `
       }
     }
   />
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiButton
     color="primary"
     fill={false}
     iconSide="left"
     iconType="plusInCircleFilled"
     onClick={[Function]}
+    size="m"
     type="button"
   >
     <FormattedMessage

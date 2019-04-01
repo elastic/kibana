@@ -8,7 +8,6 @@ import { shallowEqual } from 'recompose';
 import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { arrayToMap, identity } from '../../lib/aeroelastic/functional';
-import defaultConfiguration from '../../lib/aeroelastic/config';
 import {
   addElement,
   removeElements,
@@ -19,12 +18,48 @@ import {
 } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
 import { selectElement } from '../actions/transient';
-import { addPage, removePage, duplicatePage } from '../actions/pages';
+import { addPage, removePage, duplicatePage, setPage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
-const isGroupId = id => id.startsWith(defaultConfiguration.groupName);
+const aeroelasticConfiguration = {
+  getAdHocChildAnnotationName: 'adHocChildAnnotation',
+  adHocGroupName: 'adHocGroup',
+  alignmentGuideName: 'alignmentGuide',
+  atopZ: 1000,
+  depthSelect: true,
+  devColor: 'magenta',
+  groupName: 'group',
+  groupResize: true,
+  guideDistance: 3,
+  hoverAnnotationName: 'hoverAnnotation',
+  hoverLift: 100,
+  intraGroupManipulation: false,
+  intraGroupSnapOnly: false,
+  minimumElementSize: 2,
+  persistentGroupName: 'persistentGroup',
+  resizeAnnotationConnectorOffset: 0,
+  resizeAnnotationOffset: 0,
+  resizeAnnotationOffsetZ: 0.1, // causes resize markers to be slightly above the shape plane
+  resizeAnnotationSize: 10,
+  resizeConnectorName: 'resizeConnector',
+  resizeHandleName: 'resizeHandle',
+  rotateAnnotationOffset: 12,
+  rotateSnapInPixels: 10,
+  rotationEpsilon: 0.001,
+  rotationHandleName: 'rotationHandle',
+  rotationHandleSize: 14,
+  rotationTooltipName: 'rotationTooltip',
+  shortcuts: false,
+  singleSelect: false,
+  snapConstraint: true,
+  tooltipZ: 1100,
+};
+
+const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
+
+const pageChangerActions = [duplicatePage.toString(), addPage.toString(), setPage.toString()];
 
 /**
  * elementToShape
@@ -226,10 +261,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
   const createStore = page =>
     aero.createStore(
       {
-        shapeAdditions: [],
         primaryUpdate: null,
-        currentScene: { shapes: [] },
-        configuration: defaultConfiguration,
+        currentScene: { shapes: [], configuration: aeroelasticConfiguration },
       },
       onChangeCallback,
       page
@@ -251,6 +284,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
   const unselectShape = page => {
     aero.commit(page, 'shapeSelect', { shapes: [] });
+  };
+
+  const unhoverShape = page => {
+    aero.commit(page, 'cursorPosition', {});
   };
 
   return next => action => {
@@ -285,6 +322,15 @@ export const aeroelastic = ({ dispatch, getState }) => {
       }
 
       aero.removeStore(action.payload);
+    }
+
+    if (pageChangerActions.indexOf(action.type) >= 0) {
+      if (getSelectedElement(getState())) {
+        dispatch(selectElement(null)); // ensure sidebar etc. get updated; will update the layout engine too
+      } else {
+        unselectShape(prevPage); // deselect persistent groups as they're not currently selections in Redux
+      }
+      unhoverShape(prevPage); // ensure hover box isn't stuck on page change, no matter how action originated
     }
 
     next(action);

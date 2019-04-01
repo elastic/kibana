@@ -57,7 +57,7 @@ export function extractIntlMessages(node) {
     : undefined;
 
   if (!messageId) {
-    createFailError(`Empty "id" value in intl.formatMessage() is not allowed.`);
+    throw createFailError(`Empty "id" value in intl.formatMessage() is not allowed.`);
   }
 
   const message = messageProperty

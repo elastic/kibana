@@ -36,6 +36,7 @@ export function buildEsQuery(
   config = {
     allowLeadingWildcards: false,
     queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
   }) {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
@@ -45,7 +46,7 @@ export function buildEsQuery(
 
   const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards);
   const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern);
+  const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);
 
   return {
     bool: {

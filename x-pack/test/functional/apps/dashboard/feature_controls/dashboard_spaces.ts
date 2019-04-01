@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SpacesService } from 'x-pack/test/common/services';
 // eslint-disable-next-line max-len
 import {
@@ -63,7 +63,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           }
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.existOrFail('newDashboardLink');
+        await testSubjects.existOrFail('newItemButton');
       });
 
       it(`create new dashboard shows addNew button`, async () => {

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
-import { UICapabilitiesProvider } from './services';
+import { FeaturesProvider, UICapabilitiesProvider } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -29,6 +30,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         security: SecurityServiceProvider,
         spaces: SpacesServiceProvider,
         uiCapabilities: UICapabilitiesProvider,
+        features: FeaturesProvider,
       },
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
@@ -47,6 +49,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
         ],
       },
     };

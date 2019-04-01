@@ -45,7 +45,7 @@ export function ConnectionStatus({ isConnected }) {
   }
 
   const seedNodeTooltip = i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedToolTip', {
-    defaultMessage: "Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.",
+    defaultMessage: `Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.`,
   });
 
   return (

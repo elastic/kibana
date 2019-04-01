@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
@@ -66,7 +66,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query stored with map', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
@@ -80,11 +81,13 @@ export default function ({ getPageObjects, getService }) {
           const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
+          await PageObjects.maps.waitForLayersToLoad();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');
 
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           await inspector.close();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');

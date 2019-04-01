@@ -46,15 +46,8 @@ exports[`Form should render normally 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -117,15 +110,8 @@ exports[`Form should render normally 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -170,15 +156,8 @@ exports[`Form should render normally 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -186,7 +165,6 @@ exports[`Form should render normally 1`] = `
             </h2>
           </EuiFlexItem>
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <em>
@@ -258,15 +236,8 @@ exports[`Form should render read-only when saving is disabled 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -329,15 +300,8 @@ exports[`Form should render read-only when saving is disabled 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -382,15 +346,8 @@ exports[`Form should render read-only when saving is disabled 1`] = `
       >
         <EuiFlexGroup
           alignItems="baseline"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <h2>
@@ -398,7 +355,6 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             </h2>
           </EuiFlexItem>
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <em>

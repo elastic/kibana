@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Chance from 'chance';
 
@@ -25,7 +25,7 @@ import {
   createPromiseFromStreams,
   createConcatStream,
   createListStream
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import {
   createCreateIndexStream

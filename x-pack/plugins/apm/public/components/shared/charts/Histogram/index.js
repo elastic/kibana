@@ -21,9 +21,10 @@ import {
   makeWidthFlexible,
   VerticalGridLines
 } from 'react-vis';
-import { unit, colors } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { tint } from 'polished';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -70,7 +71,9 @@ export class HistogramInner extends PureComponent {
       return {
         ...item,
         color:
-          item === selectedItem ? theme.euiColorPrimary : colors.apmLightBlue,
+          item === selectedItem
+            ? theme.euiColorVis1
+            : tint(0.5, theme.euiColorVis1),
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -178,7 +181,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: theme.euiColorPrimary,
+                stroke: theme.euiColorVis1,
                 rx: '0px',
                 ry: '0px'
               }}
@@ -187,7 +190,6 @@ export class HistogramInner extends PureComponent {
 
           <VerticalRectSeries
             colorType="literal"
-            color={colors.apmLightBlue}
             data={chartData}
             style={{
               rx: '0px',

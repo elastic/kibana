@@ -23,7 +23,7 @@ import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
 
-import { createPromiseFromStreams } from '../../utils';
+import { createPromiseFromStreams } from '../../legacy/utils';
 
 const unlinkAsync = promisify(Fs.unlink);
 

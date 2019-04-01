@@ -90,7 +90,8 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
-    const auditMessages = await getAuditMessagesSummary(fullJobsList.length);
+    const fullJobsIds = fullJobsList.map(job => job.job_id);
+    const auditMessages = await getAuditMessagesSummary(fullJobsIds);
     const auditMessagesByJob = auditMessages.reduce((p, c) => {
       p[c.job_id] = c;
       return p;
@@ -127,7 +128,7 @@ export function jobsProvider(callWithRequest) {
         tempJob.fullJob = job;
       }
       const auditMessage = auditMessagesByJob[tempJob.id];
-      if (auditMessage !== undefined) {
+      if (auditMessage !== undefined && job.create_time <= auditMessage.msgTime) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
           text: auditMessage.highestLevelText
@@ -146,13 +147,19 @@ export function jobsProvider(callWithRequest) {
     const groups = {};
     const datafeeds = {};
     const calendarsByJobId = {};
-    const results = await Promise.all([
+    const requests = (jobIds.length > 0) ? [
       callWithRequest('ml.jobs', { jobId: jobIds }),
-      callWithRequest('ml.jobStats', { jobId: jobIds }),
+      callWithRequest('ml.jobStats', { jobId: jobIds })
+    ] : [
+      callWithRequest('ml.jobs'),
+      callWithRequest('ml.jobStats'),
+    ];
+    requests.push(
       callWithRequest('ml.datafeeds'),
       callWithRequest('ml.datafeedStats'),
-      calMngr.getAllCalendars(),
-    ]);
+      calMngr.getAllCalendars());
+
+    const results = await Promise.all(requests);
 
     if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
       results[DATAFEEDS].datafeeds.forEach((datafeed) => {

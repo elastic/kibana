@@ -25,6 +25,7 @@ import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), 'kibana/test'),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
 
@@ -33,6 +34,9 @@ export const PROJECTS = [
   // both took closer to 1000ms.
   ...glob
     .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
 ];
 

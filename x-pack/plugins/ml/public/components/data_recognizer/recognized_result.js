@@ -9,6 +9,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import {
+  EuiIcon,
+} from '@elastic/eui';
+
 export const RecognizedResult = ({
   config,
   indexPattern,
@@ -22,8 +26,10 @@ export const RecognizedResult = ({
 
   let logo = null;
   // if a logo is available, use that, otherwise display the id
-  // the logo should be a base64 encoded image
-  if (config.logo && config.logo.src) {
+  // the logo should be a base64 encoded image or an eui icon
+  if(config.logo && config.logo.icon) {
+    logo = <div className="synopsisIcon"><EuiIcon type={config.logo.icon} size="xl" /></div>;
+  } else if (config.logo && config.logo.src) {
     logo = <div><img className="synopsisIcon" alt="" src={config.logo.src}/></div>;
   } else {
     logo = <h3 className="euiTitle euiTitle--small">{config.id}</h3>;

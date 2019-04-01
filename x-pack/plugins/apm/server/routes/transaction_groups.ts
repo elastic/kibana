@@ -29,7 +29,8 @@ export function initTransactionGroupsApi(server: Server) {
         query: withDefaultValidators({
           query: Joi.string()
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const { serviceName, transactionType } = req.params;
@@ -49,7 +50,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -69,7 +71,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -88,7 +91,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -112,7 +116,8 @@ export function initTransactionGroupsApi(server: Server) {
           transactionId: Joi.string().default(''),
           traceId: Joi.string().default('')
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import lzString from 'lz-string';
 import { historyProvider } from '../history_provider';
 

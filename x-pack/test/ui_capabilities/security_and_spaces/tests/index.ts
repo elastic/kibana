@@ -7,23 +7,31 @@
 import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function uiCapabilitesTests({
+export default function uiCapabilitiesTests({
   loadTestFile,
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
   const securityService: SecurityService = getService('security');
   const spacesService: SpacesService = getService('spaces');
+  const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {
     this.tags('ciGroup5');
 
     before(async () => {
+      const features = await featuresService.get();
       for (const space of Spaces) {
-        await spacesService.create(space);
+        const disabledFeatures =
+          space.disabledFeatures === '*' ? Object.keys(features) : space.disabledFeatures;
+        await spacesService.create({
+          ...space,
+          disabledFeatures,
+        });
       }
 
       for (const user of Users) {
@@ -54,12 +62,9 @@ export default function uiCapabilitesTests({
       }
     });
 
-    loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./canvas'));
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./discover'));
-    loadTestFile(require.resolve('./maps'));
+    loadTestFile(require.resolve('./catalogue'));
+    loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./timelion'));
+    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

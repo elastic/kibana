@@ -1,29 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#allOperations if type of "" included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations if type of {} included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations if type of 1 included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations if type of null included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations if type of true included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations if type of undefined included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of "" throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of {} throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of 1 throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of null throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of true throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#allOperations type of undefined throws error 1`] = `"type is required and must be a string"`;
-
 exports[`#get operation of "" throws error 1`] = `"operation is required and must be a string"`;
 
 exports[`#get operation of {} throws error 1`] = `"operation is required and must be a string"`;
@@ -47,51 +23,3 @@ exports[`#get type of null throws error 1`] = `"type is required and must be a s
 exports[`#get type of true throws error 1`] = `"type is required and must be a string"`;
 
 exports[`#get type of undefined throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of "" included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of {} included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of 1 included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of null included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of true included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations if type of undefined included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of "" throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of {} throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of 1 throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of null throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of true throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#readOperations type of undefined throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of "" included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of {} included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of 1 included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of null included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of true included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations if type of undefined included in types throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of "" throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of {} throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of 1 throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of null throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of true throws error 1`] = `"type is required and must be a string"`;
-
-exports[`#writeOperations type of undefined throws error 1`] = `"type is required and must be a string"`;

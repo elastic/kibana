@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
@@ -22,7 +22,7 @@ export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultPr
     async expectCreateWorkpadButtonDisabled() {
       const button = await testSubjects.find('create-workpad-button');
       const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be('');
+      expect(disabledAttr).to.be('true');
     },
 
     async expectAddElementButton() {

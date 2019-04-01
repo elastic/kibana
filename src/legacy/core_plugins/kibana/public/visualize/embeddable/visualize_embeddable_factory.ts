@@ -17,26 +17,57 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { getIndexPattern } from 'ui/embeddable/get_index_pattern';
+import { uiCapabilities } from 'ui/capabilities';
+import {
+  EmbeddableInstanceConfiguration,
+  OnEmbeddableStateChanged,
+} from 'ui/embeddable/embeddable_factory';
+import { VisTypesRegistry } from 'ui/registry/vis_types';
+import { VisualizationAttributes } from '../../../../../server/saved_objects/service/saved_objects_client';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import { getIndexPattern } from './get_index_pattern';
 
-export interface VisualizeEmbeddableInstanceConfiguration {
-  id: string;
-}
-
-export class VisualizeEmbeddableFactory extends EmbeddableFactory {
+export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationAttributes> {
   private savedVisualizations: SavedVisualizations;
   private config: Legacy.KibanaConfig;
 
-  constructor(savedVisualizations: SavedVisualizations, config: Legacy.KibanaConfig) {
-    super({ name: 'visualization' });
+  constructor(
+    savedVisualizations: SavedVisualizations,
+    config: Legacy.KibanaConfig,
+    visTypes: VisTypesRegistry
+  ) {
+    super({
+      name: 'visualization',
+      savedObjectMetaData: {
+        name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
+        type: 'visualization',
+        getIconForSavedObject: savedObject => {
+          return (
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+          );
+        },
+        getTooltipForSavedObject: savedObject => {
+          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
+          return `${savedObject.attributes.title} (${visType})`;
+        },
+        showSavedObject: savedObject => {
+          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
+            return true;
+          }
+          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+          const visType = visTypes.byName[typeName];
+          return visType.stage !== 'experimental';
+        },
+      },
+    });
     this.config = config;
     this.savedVisualizations = savedVisualizations;
   }
@@ -54,11 +85,12 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
   public async create(
-    panelMetadata: VisualizeEmbeddableInstanceConfiguration,
+    panelMetadata: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
+    const editable: boolean = uiCapabilities.visualize.save as boolean;
 
     const loader = await getVisualizeLoader();
     const savedObject = await this.savedVisualizations.get(visId);
@@ -69,12 +101,14 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     }
 
     const indexPattern = await getIndexPattern(savedObject);
+    const indexPatterns = indexPattern ? [indexPattern] : [];
     return new VisualizeEmbeddable({
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
       editUrl,
+      editable,
       loader,
-      indexPattern,
+      indexPatterns,
     });
   }
 }

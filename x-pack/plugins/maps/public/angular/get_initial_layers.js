@@ -25,9 +25,8 @@ export function getInitialLayers(savedMapLayerListJSON) {
   }
 
   const dataSources = getDataSourcesSync();
-  const kibanaTilemapUrl = _.get(dataSources, 'kibana.tilemap.url');
-  if (kibanaTilemapUrl) {
-    const sourceDescriptor = KibanaTilemapSource.createDescriptor(kibanaTilemapUrl);
+  if (_.get(dataSources, 'kibana.tilemap.url')) {
+    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
     const source = new KibanaTilemapSource(sourceDescriptor);
     const layer = source.createDefaultLayer();
     return [

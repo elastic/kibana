@@ -68,7 +68,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     beforeEach(() => {
       getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetAllParams = {
-        index: 'heartbeat*',
+        index: 'heartbeat-8*',
         body: {
           query: {
             bool: {
@@ -151,7 +151,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     beforeEach(() => {
       getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetLatestSearchParams = {
-        index: 'heartbeat*',
+        index: 'heartbeat-8*',
         body: {
           query: {
             bool: {

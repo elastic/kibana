@@ -26,6 +26,7 @@ interface Props {
   timeRange: InfraTimerangeInput;
   onFilter: (filter: string) => void;
   bounds: InfraWaffleMapBounds;
+  dataBounds: InfraWaffleMapBounds;
 }
 
 export const Map: React.SFC<Props> = ({
@@ -36,6 +37,7 @@ export const Map: React.SFC<Props> = ({
   formatter,
   bounds,
   nodeType,
+  dataBounds,
 }) => {
   const map = nodesToWaffleMap(nodes);
   return (
@@ -80,7 +82,12 @@ export const Map: React.SFC<Props> = ({
                 }
               })}
             </WaffleMapInnerContainer>
-            <Legend formatter={formatter} bounds={bounds} legend={options.legend} />
+            <Legend
+              formatter={formatter}
+              bounds={bounds}
+              dataBounds={dataBounds}
+              legend={options.legend}
+            />
           </WaffleMapOuterContainer>
         );
       }}

@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 import sinon from 'sinon';
 
-import { SavedObject } from 'src/server/saved_objects';
+import { SavedObject } from 'src/legacy/server/saved_objects';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
@@ -100,6 +100,11 @@ describe('onPostAuthRequestInterceptor', () => {
                 name: 'feature 4',
                 app: ['app-1', 'app-4'],
               },
+              {
+                id: 'feature-5',
+                name: 'feature 4',
+                app: ['kibana'],
+              },
             ] as Feature[],
         },
       };
@@ -186,6 +191,23 @@ describe('onPostAuthRequestInterceptor', () => {
       expect(response.statusCode).toEqual(302);
       expect(response.headers.location).toEqual(serverBasePath);
     });
+  });
+
+  it('when accessing the kibana app it always allows the request to continue', async () => {
+    const spaces = [
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+          disabledFeatures: ['feature-1', 'feature-2', 'feature-4', 'feature-5'],
+        },
+      },
+    ];
+
+    const response = await request('/s/a-space/app/kibana', spaces);
+
+    expect(response.statusCode).toEqual(200);
   });
 
   describe('when accessing an API endpoint within a non-existent space', () => {

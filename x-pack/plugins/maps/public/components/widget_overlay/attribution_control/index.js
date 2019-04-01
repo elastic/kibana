@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { AttributionControl } from './view';
-import { getLayerList } from "../../../selectors/map_selectors";
+import { getLayerList } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

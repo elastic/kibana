@@ -33,7 +33,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public version: string;
 
   constructor(private server: Legacy.Server) {
-    this.version = server.plugins.kibana.status.plugin.version;
+    this.version = server.config().get('pkg.version');
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -56,6 +56,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           schema,
         }),
         path: routePath,
+        route: {
+          tags: ['access:infra'],
+        },
       },
       plugin: graphqlHapi,
     });
@@ -67,6 +70,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           passHeader: `'kbn-version': '${this.version}'`,
         }),
         path: `${routePath}/graphiql`,
+        route: {
+          tags: ['access:infra'],
+        },
       },
       plugin: graphiqlHapi,
     });

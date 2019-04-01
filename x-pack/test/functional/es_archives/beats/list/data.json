@@ -1,181 +1,171 @@
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "beat:qux",
+    "index": ".management-beats",
     "source": {
-      "type": "beat",
       "beat": {
-        "type": "filebeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
         "host_ip": "1.2.3.4",
         "host_name": "foo.bar.com",
         "id": "qux",
         "name": "qux_filebeat",
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
-      }
+        "type": "filebeat"
+      },
+      "type": "beat"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "beat:baz",
+    "index": ".management-beats",
     "source": {
-      "type": "beat",
       "beat": {
-        "type": "metricbeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
         "host_ip": "22.33.11.44",
         "host_name": "baz.bar.com",
         "id": "baz",
         "name": "baz_metricbeat",
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
-      }
+        "type": "metricbeat"
+      },
+      "type": "beat"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "beat:foo",
+    "index": ".management-beats",
     "source": {
-      "type": "beat",
       "beat": {
-        "type": "metricbeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
         "host_ip": "1.2.3.4",
         "host_name": "foo.bar.com",
         "id": "foo",
         "name": "foo_metricbeat",
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
-        "verified_on": "2018-05-15T16:25:38.924Z",
         "tags": [
           "production",
           "qa"
-        ]
-      }
+        ],
+        "type": "metricbeat",
+        "verified_on": "2018-05-15T16:25:38.924Z"
+      },
+      "type": "beat"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "beat:bar",
+    "index": ".management-beats",
     "source": {
-      "type": "beat",
       "beat": {
-        "type": "filebeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
         "active": true,
         "host_ip": "11.22.33.44",
         "host_name": "foo.com",
         "id": "bar",
         "name": "bar_filebeat",
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
-      }
+        "type": "filebeat"
+      },
+      "type": "beat"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "tag:production",
+    "index": ".management-beats",
     "source": {
-      "type": "tag",
       "tag": {
         "color": "blue"
-      }
+      },
+      "type": "tag"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "tag:development",
+    "index": ".management-beats",
     "source": {
-      "type": "tag",
       "tag": {
         "color": "red"
-      }
+      },
+      "type": "tag"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
     "id": "tag:qa",
+    "index": ".management-beats",
     "source": {
-      "type": "tag",
       "tag": {
         "color": "green"
-      }
+      },
+      "type": "tag"
     }
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:SDfsdfIBdsfsf50zbta",
+    "index": ".management-beats",
     "source": {
-      "type": "configuration_block",
       "configuration_block": {
-        "type": "output",
+        "config": "{ \"username\": \"some-username\",  \"hosts\": [\"localhost:11211\"] }",
         "description": "some description",
-        "tag": "production",
         "last_updated": "2018-05-15T16:25:38.924Z",
-        "config": "{ \"username\": \"some-username\",  \"hosts\": [\"localhost:11211\"] }"
-      }
-    }
+        "tag": "production",
+        "type": "output"
+      },
+      "type": "configuration_block"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:W0tpsmIBdsfsf50zbta",
+    "index": ".management-beats",
     "source": {
-      "type": "configuration_block",
       "configuration_block": {
-        "type": "metricbeat.modules",
-        "tag": "production",
+        "config": "{ \"module\": \"memcached\",  \"hosts\": [\"localhost:11211\"] }",
         "last_updated": "2018-05-15T16:25:38.924Z",
-        "config": "{ \"module\": \"memcached\",  \"hosts\": [\"localhost:11211\"] }"
-      }
-    }
+        "tag": "production",
+        "type": "metricbeat.modules"
+      },
+      "type": "configuration_block"
+    },
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
   "value": {
-    "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:W0tpsmIBdwcYyG50zbta",
+    "index": ".management-beats",
     "source": {
-      "type": "configuration_block",
       "configuration_block": {
-        "type": "metricbeat.modules",
-        "tag": "qa",
+        "config": "{\"module\": \"memcached\", \"node.namespace\": \"node\", \"hosts\": [\"localhost:4949\"] }",
         "last_updated": "2018-05-15T16:25:38.924Z",
-        "config": "{\"module\": \"memcached\", \"node.namespace\": \"node\", \"hosts\": [\"localhost:4949\"] }"
-      }
-    }
+        "tag": "qa",
+        "type": "metricbeat.modules"
+      },
+      "type": "configuration_block"
+    },
+    "type": "_doc"
   }
 }

@@ -17,7 +17,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     const params = {
       id: `enrollment_token:${enrollmentToken}`,
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
     await this.database.delete(user, params);
@@ -31,10 +30,10 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
     const response = await this.database.get(user, params);
+
     const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,
@@ -50,7 +49,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     );
   }
 
-  public async upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },
@@ -65,7 +64,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
 
     if (result.errors) {

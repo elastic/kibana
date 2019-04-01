@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import 'ngreact';
-
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
-
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { mlCheckboxShowChartsService } from './checkbox_showcharts';
+import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
+import { showCharts$ } from './checkbox_showcharts';
 
-module.service('mlCheckboxShowChartsService', function (Private) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlCheckboxShowChartsService.state = stateFactory('mlCheckboxShowCharts', {
-    showCharts: true
-  });
-  mlCheckboxShowChartsService.initialized = true;
+module.service('mlCheckboxShowChartsService', function (AppState, $rootScope) {
+  subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync());
 });

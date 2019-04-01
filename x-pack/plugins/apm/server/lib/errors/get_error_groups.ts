@@ -6,7 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -16,6 +16,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 interface ErrorResponseItems {
@@ -37,7 +38,7 @@ export async function getErrorGroups({
 }: {
   serviceName: string;
   sortField: string;
-  sortDirection: 'desc' | 'asc';
+  sortDirection: string;
   setup: Setup;
 }): Promise<ErrorGroupListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
@@ -51,15 +52,7 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
+            { range: rangeFilter(start, end) }
           ]
         }
       },
