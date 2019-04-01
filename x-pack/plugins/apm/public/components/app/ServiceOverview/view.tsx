@@ -58,9 +58,12 @@ export function ServiceOverview({ urlParams }: Props) {
                   hash: '/management/elasticsearch/upgrade_assistant'
                 })}
               >
-                {i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
-                  defaultMessage: 'the upgrade assistant'
-                })}
+                {i18n.translate(
+                  'xpack.apm.serviceOverview.upgradeAssistantLink',
+                  {
+                    defaultMessage: 'the upgrade assistant'
+                  }
+                )}
               </EuiLink>
             </p>
           )
