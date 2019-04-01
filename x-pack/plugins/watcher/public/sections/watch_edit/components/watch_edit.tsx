@@ -27,8 +27,8 @@ const getTitle = (watch: BaseWatch) => {
     );
   } else {
     return i18n.translate('xpack.watcher.sections.watchEdit.json.titlePanel.editWatchTitle', {
-      defaultMessage: 'Edit {watchId}',
-      values: { watchId: watch.id },
+      defaultMessage: 'Edit {watchName}',
+      values: { watchName: watch.name ? watch.name : watch.id },
     });
   }
 };
