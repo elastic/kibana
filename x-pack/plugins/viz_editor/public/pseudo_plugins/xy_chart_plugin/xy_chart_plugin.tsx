@@ -11,11 +11,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { DatasourceField } from '../../../common';
-import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
   getColumnIdByIndex,
-  selectColumn,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
@@ -23,6 +21,7 @@ import {
 import { operationToName } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
 interface XyChartPrivateState {
@@ -84,7 +83,12 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChart
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col, visModel))}</span>
+          <XAxisEditor
+            key={col}
+            col={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
     </>
