@@ -181,12 +181,12 @@ describe('AggTable Directive', function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
-          { accessor: 1, format: { id: 'date', params: { pattern: 'YYYY-MM-DD' } }, params: { isDate: true } }
+          { accessor: 1, format: { id: 'date', params: { pattern: 'YYYY-MM-DD' } } },
         ], metrics: [
-          { accessor: 2, format: { id: 'number' }, params: { isNumeric: true } },
-          { accessor: 3, format: { id: 'date' }, params: { isDate: true } },
-          { accessor: 4, format: { id: 'number' }, params: { isNumeric: true } },
-          { accessor: 5, format: { id: 'number' }, params: { isNumeric: true } }
+          { accessor: 2, format: { id: 'number' } },
+          { accessor: 3, format: { id: 'date' } },
+          { accessor: 4, format: { id: 'number' } },
+          { accessor: 5, format: { id: 'number' } },
         ]
       };
       const response = await tableAggResponse(
