@@ -49,7 +49,7 @@ export function ServiceOverview({ urlParams }: Props) {
             <p>
               {i18n.translate('xpack.apm.serviceOverview.toastText', {
                 defaultMessage:
-                  'Your are running the Elastic Stack 7.0+ and incompatible data from a previous 6.x version was detected. If you wish to view this data in APM you must migrate it. See more in '
+                  "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in "
               })}
 
               <EuiLink
