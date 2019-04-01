@@ -90,6 +90,50 @@ This section summarizes the changes in each release.
 
 coming[6.7.1]
 
+See <<breaking-changes, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+[float]
+[[enhancement--6.7.1]]
+=== Enhancements
+
+Canvas::
+* Adds display name and help description for progress arg {pull}33819[#33819]
+
+
+[float]
+[[bug-6.7.1]]
+=== Bug fixes
+
+Canvas::
+* Fixes hover on key-based page back and forth {pull}33631[#33631]
+
+Geo::
+* Coerces string doc-values to numbers if used in styling {pull}33657[#33657]
+
+Kibana App::
+* Fixes missing formatting for values in table titles {pull}33566[#33566]
+* Allows editing of `editorState` in data panel {pull}33305[#33305]
+* Fixes issue with dark theme and visualization legends {pull}34199[#34199]
+
+Machine Learning::
+* Fixes check to determine whether telemetry is enabled {pull}33975[#33975]
+
+Monitoring::
+* Ensures the Pipelines page uses `reactNodeId` {pull}33798[#33798]
+* Improves performance of the Logstash Pipeline Viewer {pull}33793[#33793]
+
+Platform::
+* Uses `credentials: same-origin` for fetching translations JSON {pull}34036[#34036]
+
+Security::
+* Fixes ID validation in Space API {pull}33716[#33716]
+* Forces user to re-authenticate if token refresh fails with 400 status code {pull}33774[#33774]
+
+Uptime::
+* Removes crosshair synchronization to avoid display bug {pull}33660[#33660]
+
+
 [[release-notes-6.7.0]]
 == {kib} 6.7.0
 
