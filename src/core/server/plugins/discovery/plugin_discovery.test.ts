@@ -182,4 +182,12 @@ test('properly iterates through plugin search locations', async () => {
       'kibana.json'
     )})`,
   ]);
+
+  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] are only supported in development. Relative imports will not work in production.",
+  ],
+]
+`);
 });

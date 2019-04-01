@@ -47,7 +47,7 @@ export class PluginsConfig {
   public readonly pluginSearchPaths: ReadonlyArray<string>;
 
   /**
-   * Defines directories where a known plugin exists.
+   * Defines directories where an additional plugin exists.
    */
   public readonly additionalPluginPaths: ReadonlyArray<string>;
 
