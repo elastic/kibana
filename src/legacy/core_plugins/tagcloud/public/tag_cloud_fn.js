@@ -61,35 +61,19 @@ export const tagcloud = () => ({
       default: true,
     },
     metric: {
-      types: ['string', 'number'],
+      types: ['vis_dimension'],
       help: i18n.translate('tagCloud.function.metric.help', {
-        defaultMessage: 'Column in your dataset to use as a metric (either column index or column name)'
+        defaultMessage: 'metric dimension configuration'
       }),
     },
     bucket: {
-      types: ['string', 'number'],
+      types: ['vis_dimension'],
       help: i18n.translate('tagCloud.function.bucket.help', {
-        defaultMessage: 'Column in your dataset to use as a bucket (either column index or column name)'
+        defaultMessage: 'bucket dimension configuration'
       }),
     },
-    bucketFormat: {
-      types: ['string'],
-      default: 'string'
-    },
-    bucketFormatParams: {
-      types: ['string'],
-      default: '"{}"',
-    }
   },
   fn(context, args) {
-    const metricAccessor = Number.isInteger(args.metric) ?
-      args.metric :
-      context.columns.find(c => c.id === args.metric);
-    if (metricAccessor === undefined) {
-      throw new Error(i18n.translate('tagCloud.function.error.metric', {
-        defaultMessage: 'Column name provided for metric is invalid'
-      }));
-    }
 
     const visConfig = {
       scale: args.scale,
@@ -97,30 +81,9 @@ export const tagcloud = () => ({
       minFontSize: args.minFontSize,
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
-      metric: {
-        accessor: metricAccessor,
-        format: {},
-      },
+      metric: args.metric,
+      bucket: args.bucket,
     };
-
-    if (args.bucket !== undefined) {
-      const bucketAccessor = Number.isInteger(args.bucket) ?
-        args.bucket :
-        context.columns.find(c => c.id === args.bucket);
-      if (bucketAccessor === undefined) {
-        throw new Error(i18n.translate('tagCloud.function.error.metric', {
-          defaultMessage: 'Column name provided for bucket is invalid'
-        }));
-      }
-
-      visConfig.bucket = {
-        accessor: args.bucket,
-        format: {
-          id: args.bucketFormat,
-          params: JSON.parse(args.bucketFormatParams),
-        },
-      };
-    }
 
     return {
       type: 'render',
