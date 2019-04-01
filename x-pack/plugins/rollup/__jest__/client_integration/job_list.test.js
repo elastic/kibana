@@ -93,8 +93,8 @@ describe('<JobList />', () => {
         JSON.stringify(loadJobsMock),
       ]);
 
-      // Mock all user actions tracking
-      server.respondWith('POST', /\/api\/user_action/, [200, { 'Content-Type': 'application/json' }, '']);
+      // Mock all other HTTP Requests
+      server.respondWith([200, {}, '']);
 
       const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
       ({ component, exists, getMetadataFromEuiTable } = initTestBed(undefined, testBedOptions));

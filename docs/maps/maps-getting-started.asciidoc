@@ -1,3 +1,4 @@
+[role="xpack"]
 [[maps-getting-started]]
 == Getting started with Maps
 
@@ -28,7 +29,8 @@ In this tutorial, you'll learn to:
 * Use symbols, colors, and labels to style a layer
 * Create layers for {es} data
 
-
+[role="xpack"]
+[[maps-create]]
 === Creating a new map
 
 The first thing to do is to create a new map.
@@ -41,7 +43,8 @@ A new map is created using a base tile layer.
 [role="screenshot"]
 image::maps/images/gs_create_new_map.png[]
 
-
+[role="xpack"]
+[[maps-add-choropleth-layer]]
 === Adding a choropleth layer
 
 Now that you have a map, you'll want to add layers to it.
@@ -86,6 +89,8 @@ Your map now looks like this:
 [role="screenshot"]
 image::maps/images/gs_add_cloropeth_layer.png[]
 
+[role="xpack"]
+[[maps-add-elasticsearch-layer]]
 === Adding layers for {es} data
 
 You'll add two layers for {es} data. The first layer displays documents, and the
@@ -153,6 +158,8 @@ Your map now looks like this:
 [role="screenshot"]
 image::maps/images/gs_add_es_layer.png[]
 
+[role="xpack"]
+[[maps-save]]
 === Saving the map
 Now that your map is complete, you'll want to save it so others can use it.
 
