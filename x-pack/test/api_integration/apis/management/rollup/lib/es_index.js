@@ -27,7 +27,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
       .catch((err) => {
         // silently fail if an index could not be deleted
         if (err && err.statusCode !== 404) {
-          console.log(`[WARNING] index "${index}" could not be deleted`);
+          throw new Error(`[WARNING] index "${index}" could not be deleted`);
         }
       });
   };

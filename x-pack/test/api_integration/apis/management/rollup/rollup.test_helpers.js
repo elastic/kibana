@@ -107,8 +107,7 @@ export const registerHelpers = ({ supertest, es }) => {
           // It seems that there is a flakiness when requesting rollup indices
           // If we did not succeed fetching the indices we won't be able to delete them.
           // https://github.com/elastic/kibana/issues/33282
-          console.log(`[WARNING] Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
-          return;
+          throw new Error(`[WARNING] Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
         }
 
         const index = Object.keys(body);
@@ -119,7 +118,7 @@ export const registerHelpers = ({ supertest, es }) => {
           .catch((err) => {
             // silently fail if an index could not be deleted
             if (err && err.statusCode !== 404) {
-              console.log(`[WARNING] index "${index}" could not be deleted`);
+              throw new Error(`[WARNING] index "${index}" could not be deleted`);
             }
           });
       })
@@ -132,7 +131,7 @@ export const registerHelpers = ({ supertest, es }) => {
       deleteIndicesGeneratedByJobs(),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
-      throw(err);
+      throw err;
     })
   );
 
