@@ -241,7 +241,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
             {(uiCapabilities.code.admin as boolean) && (
               // @ts-ignore
               <EuiButton
-                className="codeButton__import-project"
+                className="codeButton__projectImport"
                 onClick={this.openModal}
                 data-test-subj="newProjectButton"
               >
