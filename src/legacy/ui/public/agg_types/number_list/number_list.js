@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import { parseRange } from '../utils/range';
+import { parseRange } from '../../utils/range';
 import './number_list_input';
-import '../directives/input_focus';
-import { uiModules } from '../modules';
+import '../../directives/input_focus';
+import { uiModules } from '../../modules';
 import numberListTemplate from './number_list.html';
 
 uiModules
