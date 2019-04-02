@@ -3,11 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+jest.mock('../../../lib/api', () => {
+  return {
+    UserAPIClient: {
+      changePassword: jest.fn(),
+    },
+  };
+});
 import { EuiFieldText } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { User } from '../../../../common/model/user';
+import { UserAPIClient } from '../../../lib/api';
 import { ChangePasswordForm } from './change_password_form';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
@@ -62,15 +70,22 @@ describe('<ChangePasswordForm>', () => {
       );
 
       const currentPassword = getCurrentPasswordField(wrapper);
-      currentPassword.props().onChange({ target: { value: 'myCurrentPassword ' } });
+      currentPassword.props().onChange!({ target: { value: 'myCurrentPassword' } } as any);
 
       const newPassword = getNewPasswordField(wrapper);
-      newPassword.props().onChange({ target: { value: 'myNewPassword ' } });
+      newPassword.props().onChange!({ target: { value: 'myNewPassword' } } as any);
 
       const confirmPassword = getConfirmPasswordField(wrapper);
-      confirmPassword.props().onChange({ target: { value: 'myNewPassword ' } });
+      confirmPassword.props().onChange!({ target: { value: 'myNewPassword' } } as any);
 
-      // TODO: finish test
+      wrapper.find('button[data-test-subj="changePasswordButton"]').simulate('click');
+
+      expect(UserAPIClient.changePassword).toHaveBeenCalledTimes(1);
+      expect(UserAPIClient.changePassword).toHaveBeenCalledWith(
+        'user',
+        'myNewPassword',
+        'myCurrentPassword'
+      );
     });
   });
 
