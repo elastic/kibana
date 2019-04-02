@@ -41,7 +41,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abcdef"
           />
@@ -88,7 +88,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abc"
           />
@@ -135,7 +135,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="rgba(50, 100, 150, .5)"
           />
@@ -183,7 +183,7 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value=""
           />
@@ -301,7 +301,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abcd"
           />
@@ -344,7 +344,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="canvas"
           />
@@ -396,7 +396,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abcdef"
           />
@@ -493,7 +493,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abcdef"
           />
@@ -590,7 +590,7 @@ Array [
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="#hex color"
+            placeholder="Color code"
             type="text"
             value="#abcdef"
           />

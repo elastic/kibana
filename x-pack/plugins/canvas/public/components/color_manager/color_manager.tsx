@@ -70,7 +70,7 @@ export const ColorManager: FunctionComponent<Props> = ({
         <EuiFieldText
           value={value}
           isInvalid={!validColor && value.length > 0}
-          placeholder="#hex color"
+          placeholder="Color code"
           onChange={e => onChange(e.target.value)}
         />
       </EuiFlexItem>

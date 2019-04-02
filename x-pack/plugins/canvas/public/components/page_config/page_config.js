@@ -23,7 +23,7 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background color">
+      <EuiFormRow label="Background color" helpText="Accepts HEX, RGB or HTML Color names">
         <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
