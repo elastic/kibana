@@ -15,6 +15,7 @@ import {
   updatePrivateState,
   VisModel,
 } from '../../common/lib';
+import { getTypes } from '../../common/lib/operation_types';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
 interface ScatterChartPrivateState {
@@ -173,18 +174,34 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 }
 
-function getSuggestion(visModel: ScatterChartVisModel, title: string): Suggestion {
+function getChartSuggestions(visModel: ScatterChartVisModel): Suggestion[] {
+  if (Object.keys(visModel.queries).length === 0) {
+    return [];
+  }
+  if (!visModel.datasource) {
+    return [];
+  }
+  const firstQuery = Object.values(visModel.queries)[0];
+  const containsNonNumberColumns = getTypes(firstQuery, visModel.datasource.fields).some(
+    type => type !== 'number'
+  );
+  if (containsNonNumberColumns) {
+    return [];
+  }
   const prefilledVisModel = prefillPrivateState(
     visModel as UnknownVisModel
   ) as ScatterChartVisModel;
-  return {
-    previewExpression: toExpression(prefilledVisModel),
-    score: 0.5,
-    visModel: prefilledVisModel,
-    title,
-    iconType: 'visHeatmap',
-    pluginName: 'scatter_chart',
-  } as Suggestion;
+
+  return [
+    {
+      previewExpression: toExpression(prefilledVisModel),
+      score: 0.5,
+      visModel: prefilledVisModel,
+      title: 'Basic Scatter Chart',
+      iconType: 'visHeatmap',
+      pluginName: 'scatter_chart',
+    },
+  ];
 }
 
 function getSuggestionsForField(
@@ -233,7 +250,7 @@ export const config: EditorPlugin<ScatterChartVisModel> = {
   name: 'xy_chart',
   toExpression,
   ConfigPanel: configPanel,
-  getChartSuggestions: visModel => [getSuggestion(visModel, 'Basic Scatter Chart')],
+  getChartSuggestions,
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
