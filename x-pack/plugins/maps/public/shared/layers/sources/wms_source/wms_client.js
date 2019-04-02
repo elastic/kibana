@@ -18,6 +18,38 @@ export class WmsClient {
     return fetch(url);
   }
 
+  _createUrl(defaultQueryParams) {
+    const serviceUrl = parse(this._serviceUrl, true);
+    const queryParams = {
+      ...serviceUrl.query,
+      ...defaultQueryParams
+    };
+    return format({
+      protocol: serviceUrl.protocol,
+      hostname: serviceUrl.hostname,
+      port: serviceUrl.port,
+      pathname: serviceUrl.pathname,
+      query: queryParams
+    });
+  }
+
+  getUrlTemplate(layers, styles) {
+    const urlTemplate = this._createUrl({
+      format: 'image/png',
+      service: 'WMS',
+      version: '1.1.1',
+      request: 'GetMap',
+      srs: 'EPSG:3857',
+      transparent: 'true',
+      width: '256',
+      height: '256',
+      layers,
+      styles
+    });
+    //TODO Find a better way to avoid URL encoding the template braces
+    return `${urlTemplate}&bbox={bbox-epsg-3857}`;
+  }
+
   /**
    * Extend any query parameters supplied in the URL but override with required defaults
    * (ex. service must be WMS)
