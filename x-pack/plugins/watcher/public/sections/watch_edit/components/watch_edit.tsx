@@ -37,10 +37,14 @@ export const WatchEdit = ({
   watchId,
   watchType,
   savedObjectsClient,
+  kbnUrl,
+  licenseService,
 }: {
   watchId: string;
   watchType: string;
   savedObjectsClient: any;
+  kbnUrl: any;
+  licenseService: any;
 }) => {
   // hooks
   const [watch, setWatch] = useState<any>(null);
@@ -74,7 +78,12 @@ export const WatchEdit = ({
   }
   return (
     <WatchContext.Provider value={{ watch, setWatch }}>
-      <EditComponent savedObjectsClient={savedObjectsClient} pageTitle={pageTitle} />
+      <EditComponent
+        savedObjectsClient={savedObjectsClient}
+        pageTitle={pageTitle}
+        kbnUrl={kbnUrl}
+        licenseService={licenseService}
+      />
     </WatchContext.Provider>
   );
 };

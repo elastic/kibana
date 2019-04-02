@@ -23,7 +23,15 @@ import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
 import { WatchContext } from './watch_context';
 
-const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
+const JsonWatchEditUi = ({
+  pageTitle,
+  kbnUrl,
+  licenseService,
+}: {
+  pageTitle: string;
+  kbnUrl: any;
+  licenseService: any;
+}) => {
   const { watch } = useContext(WatchContext);
   // hooks
   const [modal, setModal] = useState<{ message: string } | null>(null);
@@ -34,7 +42,7 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
         modalOptions={modal}
         callback={async isConfirmed => {
           if (isConfirmed) {
-            saveWatch(watch);
+            saveWatch(watch, kbnUrl, licenseService);
           }
           setModal(null);
         }}
@@ -62,7 +70,11 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
       <EuiSpacer size="l" />
       {selectedTab === WATCH_TAB_ID_SIMULATE && <JsonWatchEditSimulate />}
       {selectedTab === WATCH_TAB_ID_EDIT && (
-        <JsonWatchEditForm setModal={(options: { message: string }) => setModal(options)} />
+        <JsonWatchEditForm
+          kbnUrl={kbnUrl}
+          licenseService={licenseService}
+          setModal={(options: { message: string }) => setModal(options)}
+        />
       )}
     </EuiPageContent>
   );

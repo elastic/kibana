@@ -63,8 +63,12 @@ const ERRORS = {
 };
 
 export const JsonWatchEditForm = ({
+  kbnUrl,
+  licenseService,
   setModal,
 }: {
+  kbnUrl: any;
+  licenseService: any;
   setModal: (
     options: {
       message: string;
@@ -189,7 +193,7 @@ export const JsonWatchEditForm = ({
               setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
               setIsShowingErrors(!!error);
               if (!error) {
-                const savedWatch = await onWatchSave(watch);
+                const savedWatch = await onWatchSave(watch, kbnUrl, licenseService);
                 if (savedWatch && savedWatch.error) {
                   return setModal(savedWatch.error);
                 }

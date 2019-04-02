@@ -54,7 +54,7 @@ function createActionsForWatch(watchInstance: BaseWatch) {
   return watchInstance;
 }
 
-export async function saveWatch(watch: BaseWatch) {
+export async function saveWatch(watch: BaseWatch, kbnUrl: any, licenseService: any) {
   try {
     await createWatch(watch);
     toastNotifications.addSuccess(
@@ -65,13 +65,20 @@ export async function saveWatch(watch: BaseWatch) {
         },
       })
     );
-    // TODO: Redirect back to /watches page
+    // TODO: Not correctly redirecting back to /watches route
+    kbnUrl.change('/management/elasticsearch/watcher/watches', {});
   } catch (error) {
-    toastNotifications.addDanger(error.data.message);
+    return licenseService
+      .checkValidity()
+      .then(() => toastNotifications.addDanger(error.data.message));
   }
 }
 
-export async function validateActionsAndSaveWatch(watch: BaseWatch) {
+export async function validateActionsAndSaveWatch(
+  watch: BaseWatch,
+  kbnUrl: any,
+  licenseService: any
+) {
   const { warning } = watch.validate();
   if (warning) {
     return {
@@ -81,15 +88,19 @@ export async function validateActionsAndSaveWatch(watch: BaseWatch) {
     };
   }
   // client validation passed, make request to create watch
-  saveWatch(watch);
+  saveWatch(watch, kbnUrl, licenseService);
 }
 
-export async function onWatchSave(watch: BaseWatch): Promise<any> {
+export async function onWatchSave(
+  watch: BaseWatch,
+  kbnUrl: any,
+  licenseService: any
+): Promise<any> {
   const watchActions = watch.watch && watch.watch.actions;
   const watchData = watchActions ? createActionsForWatch(watch) : watch;
 
   if (!watchData.isNew) {
-    return validateActionsAndSaveWatch(watch);
+    return validateActionsAndSaveWatch(watch, kbnUrl, licenseService);
   }
 
   try {
@@ -122,11 +133,12 @@ export async function onWatchSave(watch: BaseWatch): Promise<any> {
       };
     }
   } catch (error) {
-    // TODO: Need to check for license validity first?
     // Confirms watcher does not already exist
-    if (error.status === 404) {
-      return validateActionsAndSaveWatch(watchData);
-    }
-    return toastNotifications.addDanger(error.data.message);
+    return licenseService.checkValidity().then(() => {
+      if (error.status === 404) {
+        return validateActionsAndSaveWatch(watchData, kbnUrl, licenseService);
+      }
+      return toastNotifications.addDanger(error.data.message);
+    });
   }
 }
