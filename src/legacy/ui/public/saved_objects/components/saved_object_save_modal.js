@@ -166,74 +166,77 @@ export class SavedObjectSaveModal extends React.Component {
           className="dshSaveModal"
           onClose={this.props.onClose}
         >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.saveTitle"
-                defaultMessage="Save {objectType}"
-                values={{ objectType: this.props.objectType }}
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-
-            {this.renderDuplicateTitleCallout()}
-
-            <EuiForm>
-
-              {this.renderCopyOnSave()}
-
-              <EuiFormRow
-                label={(<FormattedMessage
-                  id="common.ui.savedObjects.saveModal.titleLabel"
-                  defaultMessage="Title"
-                />)}
-              >
-                <EuiFieldText
-                  autoFocus
-                  data-test-subj="savedObjectTitle"
-                  value={this.state.title}
-                  onChange={this.onTitleChange}
-                  isInvalid={this.state.hasTitleDuplicate || this.state.title.length === 0}
+          <form>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <FormattedMessage
+                  id="common.ui.savedObjects.saveModal.saveTitle"
+                  defaultMessage="Save {objectType}"
+                  values={{ objectType: this.props.objectType }}
                 />
-              </EuiFormRow>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
 
-              {this.props.options}
+            <EuiModalBody>
 
-            </EuiForm>
+              {this.renderDuplicateTitleCallout()}
 
-          </EuiModalBody>
+              <EuiForm>
 
-          <EuiModalFooter>
-            <EuiButton
-              data-test-subj="saveCancelButton"
-              onClick={this.props.onClose}
-            >
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
+                {this.renderCopyOnSave()}
 
-            <EuiButton
-              fill
-              data-test-subj="confirmSaveSavedObjectButton"
-              onClick={this.saveSavedObject}
-              isLoading={this.state.isLoading}
-              isDisabled={this.state.title.length === 0}
-            >
-              {this.props.confirmButtonLabel
-                ? this.props.confirmButtonLabel
-                : (
-                  <FormattedMessage
-                    id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
-                    defaultMessage="Confirm Save"
+                <EuiFormRow
+                  label={(<FormattedMessage
+                    id="common.ui.savedObjects.saveModal.titleLabel"
+                    defaultMessage="Title"
+                  />)}
+                >
+                  <EuiFieldText
+                    autoFocus
+                    data-test-subj="savedObjectTitle"
+                    value={this.state.title}
+                    onChange={this.onTitleChange}
+                    isInvalid={this.state.hasTitleDuplicate || this.state.title.length === 0}
                   />
-                )
-              }
-            </EuiButton>
-          </EuiModalFooter>
+                </EuiFormRow>
+
+                {this.props.options}
+
+              </EuiForm>
+
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButton
+                data-test-subj="saveCancelButton"
+                onClick={this.props.onClose}
+              >
+                <FormattedMessage
+                  id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButton>
+
+              <EuiButton
+                fill
+                data-test-subj="confirmSaveSavedObjectButton"
+                onClick={this.saveSavedObject}
+                isLoading={this.state.isLoading}
+                isDisabled={this.state.title.length === 0}
+                type="submit"
+              >
+                {this.props.confirmButtonLabel
+                  ? this.props.confirmButtonLabel
+                  : (
+                    <FormattedMessage
+                      id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+                      defaultMessage="Confirm Save"
+                    />
+                  )
+                }
+              </EuiButton>
+            </EuiModalFooter>
+          </form>
         </EuiModal>
       </EuiOverlayMask>
     );
