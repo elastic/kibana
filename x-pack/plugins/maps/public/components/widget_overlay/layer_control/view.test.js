@@ -11,7 +11,7 @@ jest.mock('./layer_toc', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { LayerControl } from './view';
 
@@ -21,7 +21,7 @@ const defaultProps = {
 
 describe('LayerControl', () => {
   test('is rendered', () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerControl
         {...defaultProps}
       />
@@ -33,7 +33,7 @@ describe('LayerControl', () => {
 
   describe('props', () => {
     test('isReadOnly', () => {
-      const component = shallow(
+      const component = shallowWithIntl(
         <LayerControl
           {...defaultProps}
           isReadOnly={true}

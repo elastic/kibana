@@ -20,7 +20,8 @@
 import _ from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import '../../validate_date_interval';
+import '../directives/validate_date_interval';
+import '../directives/input_number';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
@@ -79,7 +80,7 @@ export const histogramBucketAgg = new BucketAggType({
       modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
-          ? { script: { inline: field.script, lang: field.lang } }
+          ? { script: { source: field.script, lang: field.lang } }
           : { field: field.name };
 
         return searchSource

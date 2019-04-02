@@ -23,7 +23,6 @@ export const advancedFilter: RendererFactory = () => ({
     );
 
     handlers.onDestroy(() => {
-      handlers.setFilter('');
       ReactDOM.unmountComponentAtNode(domNode);
     });
   },

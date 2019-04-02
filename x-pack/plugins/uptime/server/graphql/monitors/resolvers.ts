@@ -15,6 +15,7 @@ import {
   GetMonitorPageTitleQueryArgs,
   GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
+  MonitorChart,
   MonitorPageTitle,
   Ping,
   Snapshot,
@@ -113,8 +114,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       resolver,
       { monitorId, dateRangeStart, dateRangeEnd },
       { req }
-    ): Promise<any> {
-      return libs.monitors.getMonitorChartsData(req, monitorId, dateRangeStart, dateRangeEnd);
+    ): Promise<MonitorChart> {
+      return await libs.monitors.getMonitorChartsData(req, monitorId, dateRangeStart, dateRangeEnd);
     },
     async getLatestMonitors(
       resolver,

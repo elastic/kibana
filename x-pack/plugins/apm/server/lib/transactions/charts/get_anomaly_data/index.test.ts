@@ -26,7 +26,8 @@ describe('getAnomalySeries', () => {
         end: 500000,
         client: clientSpy,
         config: {
-          get: () => 'myIndex' as any
+          get: () => 'myIndex' as any,
+          has: () => true
         }
       }
     })) as AnomalyTimeSeriesResponse;

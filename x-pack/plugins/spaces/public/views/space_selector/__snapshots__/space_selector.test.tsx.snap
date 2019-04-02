@@ -58,12 +58,8 @@ exports[`it renders without crashing 1`] = `
     >
       <EuiFlexGroup
         alignItems="center"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       />
       <EuiSpacer
         size="xl"
@@ -72,9 +68,7 @@ exports[`it renders without crashing 1`] = `
         onSpaceSelect={[Function]}
         spaces={Array []}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiText
         color="subdued"
         grow={true}

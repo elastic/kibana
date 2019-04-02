@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
@@ -38,12 +39,22 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiOutsideClickDetector,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 
 // @ts-ignore
-import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiSuperUpdateButton } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { documentationLinks } from 'ui/documentation_links';
+import { Toast, toastNotifications } from 'ui/notify';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -85,7 +96,8 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  customSubmitButton?: any;
 }
 
 interface State {
@@ -368,16 +380,21 @@ export class QueryBarUI extends Component<Props, State> {
     start,
     end,
     isInvalid,
+    isQuickSelection,
   }: {
     start: string;
     end: string;
     isInvalid: boolean;
+    isQuickSelection: boolean;
   }) => {
-    this.setState({
-      dateRangeFrom: start,
-      dateRangeTo: end,
-      isDateRangeInvalid: isInvalid,
-    });
+    this.setState(
+      {
+        dateRangeFrom: start,
+        dateRangeTo: end,
+        isDateRangeInvalid: isInvalid,
+      },
+      () => isQuickSelection && this.onSubmit()
+    );
   };
 
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -461,6 +478,8 @@ export class QueryBarUI extends Component<Props, State> {
     if (preventDefault) {
       preventDefault();
     }
+
+    this.handleLuceneSyntaxWarning();
 
     if (this.persistedLog) {
       this.persistedLog.add(this.state.query.query);
@@ -621,7 +640,9 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderUpdateButton() {
-    const button = (
+    const button = this.props.customSubmitButton ? (
+      React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
+    ) : (
       <EuiSuperUpdateButton
         needsUpdate={this.isDirty()}
         isDisabled={this.state.isDateRangeInvalid}
@@ -629,16 +650,17 @@ export class QueryBarUI extends Component<Props, State> {
         data-test-subj="querySubmitButton"
       />
     );
-    if (this.props.showDatePicker) {
-      return (
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          {this.renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else {
+
+    if (!this.props.showDatePicker) {
       return button;
     }
+
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        {this.renderDatePicker()}
+        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   private renderDatePicker() {
@@ -682,6 +704,56 @@ export class QueryBarUI extends Component<Props, State> {
         />
       </EuiFlexItem>
     );
+  }
+
+  private handleLuceneSyntaxWarning() {
+    const { intl, store } = this.props;
+    const { query, language } = this.state.query;
+    if (
+      language === 'kuery' &&
+      !store.get('kibana.luceneSyntaxWarningOptOut') &&
+      doesKueryExpressionHaveLuceneSyntaxError(query)
+    ) {
+      const toast = toastNotifications.addWarning({
+        title: intl.formatMessage({
+          id: 'common.ui.queryBar.luceneSyntaxWarningTitle',
+          defaultMessage: 'Lucene syntax warning',
+        }),
+        text: (
+          <div>
+            <p>
+              <FormattedMessage
+                id="common.ui.queryBar.luceneSyntaxWarningMessage"
+                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
+               have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
+                values={{
+                  link: (
+                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                      <FormattedMessage
+                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                        defaultMessage="here"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={() => this.onLuceneSyntaxWarningOptOut(toast)}>
+                  Don't show again
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ),
+      });
+    }
+  }
+
+  private onLuceneSyntaxWarningOptOut(toast: Toast) {
+    this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    toastNotifications.remove(toast);
   }
 }
 

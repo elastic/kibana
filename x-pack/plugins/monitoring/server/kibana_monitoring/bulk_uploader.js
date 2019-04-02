@@ -48,7 +48,7 @@ export class BulkUploader {
       warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
+    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
@@ -121,7 +121,7 @@ export class BulkUploader {
   }
 
   _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload);
+    return sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*

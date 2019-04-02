@@ -70,16 +70,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
       totalItemCount={6}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -96,7 +89,6 @@ exports[`EditFilterList adds new items to filter list 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -105,6 +97,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -191,16 +184,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -217,7 +203,6 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -226,6 +211,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -307,16 +293,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
       totalItemCount={3}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -333,7 +312,6 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -342,6 +320,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -407,16 +386,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       totalItemCount={0}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -433,7 +405,6 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -442,6 +413,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -507,16 +479,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       totalItemCount={0}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -533,7 +498,6 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -542,6 +506,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -624,16 +589,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -650,7 +608,6 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -659,6 +616,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -741,16 +699,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -767,7 +718,6 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -776,6 +726,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -858,16 +809,9 @@ exports[`EditFilterList updates the items per page 1`] = `
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -884,7 +828,6 @@ exports[`EditFilterList updates the items per page 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -893,6 +836,7 @@ exports[`EditFilterList updates the items per page 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -60,7 +60,6 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
             end: $scope.formConfig.end
           },
           fields: [],
-          filters: $scope.formConfig.filters,
           index: $scope.formConfig.indexPattern.title,
           query: $scope.formConfig.combinedQuery,
           splitField: $scope.formConfig.splitField && $scope.formConfig.splitField.name,

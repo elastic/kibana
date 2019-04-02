@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { BasePathStartContract } from '../base_path';
-import { HttpStartContract } from '../http';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { NotificationsStartContract } from '../notifications';
+import { BasePathSetup } from '../base_path';
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { NotificationsSetup } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
@@ -28,17 +28,17 @@ import { UiSettingsClient } from './ui_settings_client';
 import { i18n } from '@kbn/i18n';
 
 interface Deps {
-  notifications: NotificationsStartContract;
-  http: HttpStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  basePath: BasePathStartContract;
+  notifications: NotificationsSetup;
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  basePath: BasePathSetup;
 }
 
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public start({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsStartContract {
+  public setup({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
@@ -73,4 +73,4 @@ export class UiSettingsService {
   }
 }
 
-export type UiSettingsStartContract = UiSettingsClient;
+export type UiSettingsSetup = UiSettingsClient;

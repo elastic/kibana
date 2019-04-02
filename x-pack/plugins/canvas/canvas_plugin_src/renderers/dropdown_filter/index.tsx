@@ -63,7 +63,6 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
     );
 
     handlers.onDestroy(() => {
-      handlers.setFilter('');
       ReactDOM.unmountComponentAtNode(domNode);
     });
   },

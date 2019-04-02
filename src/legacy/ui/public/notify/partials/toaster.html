@@ -29,7 +29,7 @@
           <button
             type="button"
             ng-if="notif.stack && !notif.showStack"
-            class="kuiButton"
+            class="kuiButton kuiButton--small"
             ng-class="notif.getButtonClass()"
             ng-click="notif.cancelTimer(); notif.showStack = true"
             i18n-id="common.ui.notify.toaster.moreInfoButtonLabel"
@@ -39,7 +39,7 @@
           <button
             type="button"
             ng-if="notif.stack && notif.showStack"
-            class="kuiButton"
+            class="kuiButton kuiButton--small"
             ng-class="notif.getButtonClass()"
             ng-click="notif.showStack = false"
             i18n-id="common.ui.notify.toaster.lessInfoButtonLabel"
@@ -50,7 +50,7 @@
             data-test-subj="notifierDismissButton"
             type="button"
             ng-if="notif.accept"
-            class="kuiButton"
+            class="kuiButton kuiButton--small"
             ng-class="notif.getButtonClass()"
             ng-click="notif.accept()"
             i18n-id="common.ui.notify.toaster.okButtonLabel"
@@ -60,7 +60,7 @@
           <button
             type="button"
             ng-if="notif.address"
-            class="kuiButton"
+            class="kuiButton kuiButton--small"
             ng-class="notif.getButtonClass()"
             ng-click="notif.address()"
             i18n-id="common.ui.notify.toaster.fixItButtonLabel"
@@ -69,7 +69,7 @@
           </button>
           <button
             type="button"
-            class="kuiButton"
+            class="kuiButton kuiButton--small"
             ng-repeat="action in notif.customActions"
             ng-class="action.getButtonClass()"
             ng-click="action.callback()"

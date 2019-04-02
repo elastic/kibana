@@ -5,6 +5,7 @@
  */
 
 import { AbstractStyle } from './abstract_style';
+import { i18n } from '@kbn/i18n';
 
 export class TileStyle extends AbstractStyle {
 
@@ -29,6 +30,8 @@ export class TileStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return 'Tile style';
+    return i18n.translate('xpack.maps.style.tile.displayNameLabel', {
+      defaultMessage: 'Tile style'
+    });
   }
 }

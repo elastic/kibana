@@ -34,6 +34,7 @@ import {
   updateDescription,
   updateHidePanelTitles,
   updateTimeRange,
+  updateRefreshConfig,
   clearStagedFilters,
   updateFilters,
   updateQuery,
@@ -148,6 +149,13 @@ export class DashboardStateManager {
     store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
+    }));
+  }
+
+  handleRefreshConfigChange({ pause, value }) {
+    store.dispatch(updateRefreshConfig({
+      isPaused: pause,
+      interval: value,
     }));
   }
 
@@ -275,14 +283,14 @@ export class DashboardStateManager {
 
   getPanelIndexPatterns() {
     const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
-    return _.uniq(indexPatterns);
+    return _.uniq(indexPatterns, 'id');
   }
 
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
   resetState() {
-    // In order to show the correct warning for the saved-object-save-as-check-box we have to store the unsaved
+    // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
     this.savedDashboard.title = this.savedDashboard.lastSavedTitle;
@@ -333,9 +341,6 @@ export class DashboardStateManager {
 
   setTitle(title) {
     this.appState.title = title;
-    // The saved-object-save-as-check-box shows a warning if the current object title is different then
-    // the existing object title. It calculates this difference by comparing this.dashboard.title to
-    // this.dashboard.lastSavedTitle, so we need to push the temporary, unsaved title, onto the dashboard.
     this.savedDashboard.title = title;
     this.saveState();
   }

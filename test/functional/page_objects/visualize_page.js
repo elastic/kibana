@@ -19,9 +19,9 @@
 
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export function VisualizePageProvider({ getService, getPageObjects }) {
+export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
@@ -29,10 +29,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const inspector = getService('inspector');
+  const screenshot = getService('screenshots');
   const table = getService('table');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
+  const comboBox = getService('comboBox');
 
   class VisualizePage {
 
@@ -384,7 +386,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getGaugeValue() {
       const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text.split('\n');
+      }));
+      // .flat() replacement
+      return values.reduce((acc, val) => [...acc, ...val], []);
     }
 
     async clickMetricEditor() {
@@ -397,7 +404,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
-      await testSubjects.click('savedSearchesTab');
       await testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -431,19 +437,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
-      const selector = `
+      const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .agg-select
-      `;
+        [data-test-subj="defaultEditorAggSelect"]
+      `);
 
-      await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(myString);
-        await input.pressKeys(browser.keys.RETURN);
-      });
+      await comboBox.setElement(comboBoxElement, myString);
       await PageObjects.common.sleep(500);
     }
 
@@ -481,13 +482,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // So to modify a metric or aggregation tests need to keep track of the
       // order they are added.
       await this.toggleOpenEditor(index);
-      const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
-      // open agg selection list
-      await aggSelect.click();
+
       // select our agg
-      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
-      await aggItem.click();
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+      await comboBox.setElement(aggSelect, agg);
+
       const fieldSelect = await find
         .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
       // open field selection list
@@ -499,7 +499,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setCustomLabel(label, index = 1) {
-      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
+      const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
 
@@ -738,13 +738,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
-      let isOpen = await testSubjects.exists('savedObjectSaveModal');
-      await retry.try(async () => {
-        while (!isOpen) {
-          await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('savedObjectSaveModal');
-        }
-      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+      if (!isOpen) {
+        await testSubjects.click('visualizeSaveButton');
+      }
     }
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
@@ -824,6 +822,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxis = await find.byCssSelector('.visAxis__column--y.visAxis__column--left');
       const $ = await yAxis.parseDomContent();
       return $('.y > g > text').toArray().map(tick => $(tick).text().trim());
+    }
+
+    /**
+     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
+     * @param {string} name The name of the baseline image.
+     * @param {object} opts Options object.
+     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
+     */
+    async expectVisToMatchScreenshot(name, opts = { threshold: 0.05 }) {
+      log.debug(`expectVisToMatchScreenshot(${name})`);
+
+      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      await browser.execute(`
+        var el = document.createElement('style');
+        el.id = '__data-test-style';
+        el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
+        document.body.appendChild(el);
+      `);
+
+      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+
+      // Reset the chart to its original state
+      await browser.execute(`
+        var el = document.getElementById('__data-test-style');
+        document.body.removeChild(el);
+      `);
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      expect(percentDifference).to.be.lessThan(opts.threshold);
     }
 
     /*

@@ -59,4 +59,10 @@ Use the time selector to focus on a specific timeframe.
 Set auto-refresh to keep up-to-date information coming in, or stop
 refreshing to focus on historical data without new distractions.
 
+[float]
+[[infra-configure-source]]
+=== Adapt to your metric source
 
+Using a custom index pattern to store the metrics, or want to limit the entries
+presented in a space? Use configure source to change the index pattern and
+other settings.

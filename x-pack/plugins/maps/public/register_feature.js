@@ -8,14 +8,18 @@ import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory
 } from 'ui/registry/feature_catalogue';
-
+import { i18n } from '@kbn/i18n';
+import { APP_ID, APP_ICON } from '../common/constants';
+import { getAppTitle } from '../common/i18n_getters';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'maps',
-    title: 'Maps',
-    description: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
-    icon: 'gisApp',
+    id: APP_ID,
+    title: getAppTitle(),
+    description: i18n.translate('xpack.maps.feature.appDescription', {
+      defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service'
+    }),
+    icon: APP_ICON,
     path: '/app/maps',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA

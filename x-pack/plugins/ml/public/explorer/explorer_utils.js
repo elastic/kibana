@@ -11,7 +11,8 @@
 import { chain, each, get, union, uniq } from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 
-import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
+import { getEntityFieldList } from '../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
@@ -65,7 +66,14 @@ export function mapScopeToProps(scope) {
   };
 }
 
-export async function getFilteredTopInfluencers(jobIds, earliestMs, latestMs, records, influencers, noInfluencersConfigured) {
+export async function getFilteredTopInfluencers(
+  jobIds,
+  earliestMs,
+  latestMs,
+  records,
+  influencers,
+  noInfluencersConfigured,
+  influencersFilterQuery) {
   // Filter the Top Influencers list to show just the influencers from
   // the records in the selected time range.
   const recordInfluencersByName = {};
@@ -117,20 +125,18 @@ export async function getFilteredTopInfluencers(jobIds, earliestMs, latestMs, re
     }
   });
 
-  return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured);
+  return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured, influencersFilterQuery);
 }
 
-export function selectedJobsHaveInfluencers(selectedJobs = []) {
-  let hasInfluencers = false;
-  selectedJobs.forEach((selectedJob) => {
+export function getInfluencers(selectedJobs = []) {
+  const influencers = [];
+  selectedJobs.forEach(selectedJob => {
     const job = mlJobService.getJob(selectedJob.id);
-    let influencers = [];
-    if (job !== undefined) {
-      influencers = job.analysis_config.influencers || [];
+    if (job !== undefined && job.analysis_config && job.analysis_config.influencers) {
+      influencers.push(...job.analysis_config.influencers);
     }
-    hasInfluencers = hasInfluencers || influencers.length > 0;
   });
-  return hasInfluencers;
+  return influencers;
 }
 
 export function getFieldsByJob() {
@@ -195,7 +201,14 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
 }
 
 // Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
-export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFieldName) {
+export function getViewBySwimlaneOptions({
+  currentSwimlaneViewByFieldName,
+  filterActive,
+  filteredFields,
+  isAndOperator,
+  selectedCells,
+  selectedJobs
+}) {
   const selectedJobIds = selectedJobs.map(d => d.id);
 
   // Unique influencers for the selected job(s).
@@ -211,7 +224,7 @@ export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFiel
     .value();
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
-  const viewBySwimlaneOptions = viewByOptions;
+  let viewBySwimlaneOptions = viewByOptions;
 
   let swimlaneViewByFieldName = undefined;
 
@@ -274,6 +287,23 @@ export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFiel
             : undefined;
         }
       }
+    }
+  }
+
+  // filter View by options to relevant filter fields
+  // If it's an AND filter only show job Id view by as the rest will have no results
+  if (filterActive === true && isAndOperator === true && selectedCells === null) {
+    viewBySwimlaneOptions = [VIEW_BY_JOB_LABEL];
+  } else if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
+    const filteredOptions = viewBySwimlaneOptions.filter(option => {
+      return (
+        filteredFields.includes(option) ||
+        option === VIEW_BY_JOB_LABEL ||
+        (selectedCells && selectedCells.viewByFieldName === option));
+    });
+    // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
+    if (filteredOptions.length > 1) {
+      viewBySwimlaneOptions = filteredOptions;
     }
   }
 
@@ -379,7 +409,7 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
+export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -388,35 +418,53 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
     return Promise.resolve([]);
   }
 
-  const resp = await ml.annotations.getAnnotations({
-    jobIds,
-    earliestMs: timeRange.earliestMs,
-    latestMs: timeRange.latestMs,
-    maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-  });
+  return new Promise((resolve) => {
+    ml.annotations.getAnnotations({
+      jobIds,
+      earliestMs: timeRange.earliestMs,
+      latestMs: timeRange.latestMs,
+      maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+    }).then((resp) => {
+      if (resp.error !== undefined || resp.annotations === undefined) {
+        return resolve([]);
+      }
 
-  const annotationsData = [];
-  jobIds.forEach((jobId) => {
-    const jobAnnotations = resp.annotations[jobId];
-    if (jobAnnotations !== undefined) {
-      annotationsData.push(...jobAnnotations);
-    }
-  });
+      const annotationsData = [];
+      jobIds.forEach((jobId) => {
+        const jobAnnotations = resp.annotations[jobId];
+        if (jobAnnotations !== undefined) {
+          annotationsData.push(...jobAnnotations);
+        }
+      });
 
-  return Promise.resolve(
-    annotationsData
-      .sort((a, b) => {
-        return a.timestamp - b.timestamp;
-      })
-      .map((d, i) => {
-        d.key = String.fromCharCode(65 + i);
-        return d;
-      })
-  );
+      return resolve(
+        annotationsData
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          })
+      );
+    }).catch((resp) => {
+      console.log('Error loading list of annotations for jobs list:', resp);
+      // Silently fail and just return an empty array for annotations to not break the UI.
+      return resolve([]);
+    });
+  });
 }
 
 export async function loadAnomaliesTableData(
-  selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName, tableInterval, tableSeverity
+  selectedCells,
+  selectedJobs,
+  dateFormatTz,
+  interval,
+  bounds,
+  fieldName,
+  tableInterval,
+  tableSeverity,
+  influencersFilterQuery
 ) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
@@ -434,7 +482,8 @@ export async function loadAnomaliesTableData(
       timeRange.latestMs,
       dateFormatTz,
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-      MAX_CATEGORY_EXAMPLES
+      MAX_CATEGORY_EXAMPLES,
+      influencersFilterQuery
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -455,7 +504,17 @@ export async function loadAnomaliesTableData(
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
-        anomaly.isTimeSeriesViewDetector = isTimeSeriesViewDetector(mlJobService.getJob(jobId), anomaly.detectorIndex);
+        const job = mlJobService.getJob(jobId);
+        let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
+        if (isChartable === false) {
+          // Check if model plot is enabled for this job.
+          // Need to check the entity fields for the record in case the model plot config has a terms list.
+          // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.
+          const entityFields = getEntityFieldList(anomaly.source);
+          isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
+        }
+        anomaly.isTimeSeriesViewRecord = isChartable;
+
         if (mlJobService.customUrlsByJob[jobId] !== undefined) {
           anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
         }
@@ -478,11 +537,11 @@ export async function loadAnomaliesTableData(
 // track the request to be able to ignore out of date requests
 // and avoid race conditions ending up with the wrong charts.
 let requestCount = 0;
-export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells) {
+export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells, influencersFilterQuery) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
     // is called without the minimum required data.
-    if (selectedCells === null && influencers.length === 0) {
+    if (selectedCells === null && influencers.length === 0 && influencersFilterQuery === undefined) {
       resolve([]);
     }
 
@@ -491,7 +550,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
 
     // Load the top anomalies (by record_score) which will be displayed in the charts.
     mlResultsService.getRecordsForInfluencer(
-      jobIds, influencers, 0, earliestMs, latestMs, 500
+      jobIds, influencers, 0, earliestMs, latestMs, 500, influencersFilterQuery
     )
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
@@ -499,7 +558,8 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
           resolve(undefined);
         }
 
-        if (selectedCells !== null && Object.keys(selectedCells).length > 0) {
+        if ((selectedCells !== null && Object.keys(selectedCells).length > 0) ||
+          influencersFilterQuery !== undefined) {
           console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
         }
@@ -509,7 +569,14 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
   });
 }
 
-export async function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, influencers = [], noInfluencersConfigured) {
+export async function loadTopInfluencers(
+  selectedJobIds,
+  earliestMs,
+  latestMs,
+  influencers = [],
+  noInfluencersConfigured,
+  influencersFilterQuery
+) {
   return new Promise((resolve) => {
     if (noInfluencersConfigured !== true) {
       mlResultsService.getTopInfluencers(
@@ -517,7 +584,8 @@ export async function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, i
         earliestMs,
         latestMs,
         MAX_INFLUENCER_FIELD_VALUES,
-        influencers
+        influencers,
+        influencersFilterQuery
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         console.log('Explorer top influencers data set:', resp.influencers);

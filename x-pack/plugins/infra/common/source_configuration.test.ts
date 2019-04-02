@@ -15,6 +15,7 @@ const initialConfiguration: InfraSourceConfiguration = {
   fields: {
     container: 'INITIAL_CONTAINER_FIELD',
     host: 'INITIAL_HOST_FIELD',
+    message: ['INITIAL_MESSAGE_FIELD'],
     pod: 'INITIAL_POD_FIELD',
     tiebreaker: 'INITIAL_TIEBREAKER_FIELD',
     timestamp: 'INITIAL_TIMESTAMP_FIELD',
@@ -163,6 +164,7 @@ describe('infrastructure source configuration', () => {
         expect(updateConfiguration(initialConfiguration)).toEqual({
           ...initialConfiguration,
           fields: {
+            ...initialConfiguration.fields,
             container: 'CHANGED_CONTAINER',
             host: 'CHANGED_HOST',
             pod: 'CHANGED_POD',
