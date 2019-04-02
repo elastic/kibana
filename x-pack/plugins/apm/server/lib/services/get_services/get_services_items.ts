@@ -6,13 +6,13 @@
 
 import { BucketAgg } from 'elasticsearch';
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../../common/idx';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 

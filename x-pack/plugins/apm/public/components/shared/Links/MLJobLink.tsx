@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
-import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
+import { getMlJobId } from '../../../../common/ml_job_constants';
 import { getRisonHref } from './rison_helpers';
 
 interface Props {
