@@ -13,7 +13,7 @@ import {
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
 import moment from 'moment';
-import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 
 function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;

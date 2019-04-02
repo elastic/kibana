@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { idx } from '../../../../../common/idx';
 import { ESResponse } from './fetcher';
 
 export interface IBucket {
