@@ -10,6 +10,9 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 
+// @public (undocumented)
+export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
+
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 // Warning: (ae-internal-missing-underscore) The name bootstrap should be prefixed with an underscore because the declaration is marked as "@internal"
 // 
@@ -27,7 +30,6 @@ export class ClusterClient {
     // 
     // (undocumented)
     constructor(config: ElasticsearchClientConfig, log: Logger);
-    // Warning: (ae-forgotten-export) The symbol "ScopedClusterClient" needs to be exported by the entry point index.d.ts
     asScoped(req?: {
         headers?: Headers;
     }): ScopedClusterClient;
@@ -46,14 +48,15 @@ export interface DiscoveredPlugin {
     readonly requiredPlugins: ReadonlyArray<PluginName>;
 }
 
+// @public (undocumented)
+export type Headers = Record<string, string | string[] | undefined>;
+
 // @public
 export interface Logger {
     debug(message: string, meta?: LogMeta): void;
     error(errorOrMessage: string | Error, meta?: LogMeta): void;
     fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
     info(message: string, meta?: LogMeta): void;
-    // Warning: (ae-forgotten-export) The symbol "LogRecord" needs to be exported by the entry point index.d.ts
-    // 
     // @internal (undocumented)
     log(record: LogRecord): void;
     trace(message: string, meta?: LogMeta): void;
@@ -65,10 +68,60 @@ export interface LoggerFactory {
     get(...contextParts: string[]): Logger;
 }
 
+// Warning: (ae-internal-missing-underscore) The name LogLevel should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal
+export class LogLevel {
+    // (undocumented)
+    static readonly All: LogLevel;
+    // (undocumented)
+    static readonly Debug: LogLevel;
+    // (undocumented)
+    static readonly Error: LogLevel;
+    // (undocumented)
+    static readonly Fatal: LogLevel;
+    static fromId(level: LogLevelId): LogLevel;
+    // Warning: (ae-forgotten-export) The symbol "LogLevelId" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    readonly id: LogLevelId;
+    // (undocumented)
+    static readonly Info: LogLevel;
+    // (undocumented)
+    static readonly Off: LogLevel;
+    supports(level: LogLevel): boolean;
+    // (undocumented)
+    static readonly Trace: LogLevel;
+    // (undocumented)
+    readonly value: number;
+    // (undocumented)
+    static readonly Warn: LogLevel;
+}
+
 // @public
 export interface LogMeta {
     // (undocumented)
     [key: string]: any;
+}
+
+// Warning: (ae-internal-missing-underscore) The name LogRecord should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal
+export interface LogRecord {
+    // (undocumented)
+    context: string;
+    // (undocumented)
+    error?: Error;
+    // (undocumented)
+    level: LogLevel;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    meta?: {
+        [name: string]: any;
+    };
+    // (undocumented)
+    timestamp: Date;
 }
 
 // @public
@@ -98,10 +151,17 @@ export interface PluginSetupContext {
     };
 }
 
+// @public
+export class ScopedClusterClient {
+    // (undocumented)
+    constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Record<string, string | string[] | undefined> | undefined);
+    callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
+    callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
+    }
+
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/elasticsearch/cluster_client.ts:95:6 - (ae-forgotten-export) The symbol "Headers" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugin_context.ts:35:9 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugin_context.ts:39:9 - (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
 

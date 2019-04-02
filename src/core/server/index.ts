@@ -18,8 +18,14 @@
  */
 
 export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
-export { Logger, LoggerFactory, LogMeta } from './logging';
+export {
+  CallAPIOptions,
+  ClusterClient,
+  Headers,
+  ScopedClusterClient,
+  APICaller,
+} from './elasticsearch';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   PluginInitializerContext,

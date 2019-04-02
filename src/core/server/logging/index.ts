@@ -19,6 +19,8 @@
 
 export { Logger, LogMeta } from './logger';
 export { LoggerFactory } from './logger_factory';
+export { LogRecord } from './log_record';
+export { LogLevel } from './log_level';
 /** @internal */
 export { LoggingConfig } from './logging_config';
 /** @internal */
