@@ -7,23 +7,32 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ColorManager } from '../color_manager';
+import { ColorPickerPopover } from '../color_picker_popover';
 
-class Interactive extends React.Component<{}, { hasButtons: boolean; value: string }> {
+const THREE_COLORS = ['#fff', '#666', '#000'];
+const SIX_COLORS = ['#fff', '#666', '#000', '#abc', '#def', '#abcdef'];
+
+class Interactive extends React.Component<
+  {},
+  { hasButtons: boolean; value: string; colors: string[] }
+> {
   public state = {
-    hasButtons: true,
     value: '',
+    colors: SIX_COLORS,
+    hasButtons: true,
   };
 
   public render() {
     return (
       <div>
-        <ColorManager
-          hasButtons={this.state.hasButtons}
+        <ColorPickerPopover
+          colors={this.state.colors}
+          onChange={value => this.setState({ value })}
           onAddColor={action('onAddColor')}
           onRemoveColor={action('onRemoveColor')}
-          onChange={value => this.setState({ value })}
           value={this.state.value}
+          anchorPosition="downCenter"
+          hasButtons={this.state.hasButtons}
         />
         <p style={{ marginTop: 20 }}>
           <label>
@@ -43,7 +52,7 @@ class Interactive extends React.Component<{}, { hasButtons: boolean; value: stri
   }
 }
 
-storiesOf('components/ColorManager', module)
+storiesOf('components/ColorPickerPopover', module)
   .addParameters({
     info: {
       inline: true,
@@ -58,39 +67,30 @@ storiesOf('components/ColorManager', module)
       },
     },
   })
-  .add('default', () => [
-    <ColorManager key="1" onChange={action('onChange')} value="#abcdef" />,
-    <ColorManager key="2" onChange={action('onChange')} value="#abc" />,
-    <ColorManager key="3" onChange={action('onChange')} value="rgba(50, 100, 150, .5)" />,
-  ])
-  .add('invalid colors', () => [
-    <ColorManager key="1" onChange={action('onChange')} value="#abcd" />,
-    <ColorManager key="2" onChange={action('onChange')} value="canvas" />,
-  ])
-  .add('with buttons', () => [
-    <ColorManager
-      hasButtons={true}
-      key="1"
-      onAddColor={action('onAddColor')}
+  .add('three colors', () => (
+    <ColorPickerPopover
+      value="#fff"
+      anchorPosition="downCenter"
       onChange={action('onChange')}
-      value="#abcdef"
-    />,
-    <ColorManager
-      hasButtons={true}
-      key="2"
+      colors={THREE_COLORS}
+    />
+  ))
+  .add('six colors', () => (
+    <ColorPickerPopover
+      value="#fff"
+      anchorPosition="downCenter"
       onChange={action('onChange')}
-      onRemoveColor={action('onRemoveColor')}
-      value="#abcdef"
-    />,
-    <ColorManager
-      hasButtons={true}
-      key="3"
-      onAddColor={action('onAddColor')}
+      colors={SIX_COLORS}
+    />
+  ))
+  .add('six colors, value missing', () => (
+    <ColorPickerPopover
+      value="#a1b2c3"
+      anchorPosition="downCenter"
       onChange={action('onChange')}
-      onRemoveColor={action('onRemoveColor')}
-      value="#abcdef"
-    />,
-  ])
+      colors={SIX_COLORS}
+    />
+  ))
   .add('interactive', () => <Interactive />, {
     info: {
       inline: true,
