@@ -18,21 +18,3 @@ export enum REPOSITORY_DOC_PATHS {
   gcs = 'repository-gcs.html',
   plugins = 'repository.html',
 }
-
-export const getHomeBreadcrumb = (translate: any) => {
-  return {
-    text: translate('xpack.snapshotRestore.home.breadcrumbTitle', {
-      defaultMessage: 'Snapshot and Restore',
-    }),
-    href: `#${BASE_PATH}`,
-  };
-};
-
-export const getRepositoryAddBreadcrumb = (translate: any) => {
-  return {
-    text: translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
-      defaultMessage: 'Add repository',
-    }),
-    href: `#${BASE_PATH}/add_repository`,
-  };
-};

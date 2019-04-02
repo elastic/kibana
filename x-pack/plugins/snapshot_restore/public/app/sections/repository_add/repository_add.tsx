@@ -10,29 +10,28 @@ import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError } from '../../components';
-import { BASE_PATH, getHomeBreadcrumb, getRepositoryAddBreadcrumb, Section } from '../../constants';
+import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
+import { breadcrumbService } from '../../services/breadcrumb';
 import { sendRequest } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
-    core: { i18n, http, chrome },
-    plugins: { management },
+    core: {
+      i18n: { FormattedMessage },
+      http,
+      chrome,
+    },
   } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
 
   // Set breadcrumb
   useEffect(() => {
-    chrome.breadcrumbs.set([
-      management.constants.BREADCRUMB,
-      getHomeBreadcrumb(i18n.translate),
-      getRepositoryAddBreadcrumb(i18n.translate),
-    ]);
+    breadcrumbService.setBreadcrumbs('repositoryAdd');
   }, []);
 
   const onSave = async (newRepository: Repository) => {

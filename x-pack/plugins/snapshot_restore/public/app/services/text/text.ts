@@ -7,12 +7,13 @@ import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryType } from '../../../../common/types';
 
 class TextService {
+  public breadcrumbs: { [key: string]: string } = {};
   private i18n: any;
-  private repositoryTypeNameMap: { [key in RepositoryType]: string } = {};
+  private repositoryTypeNames: { [key in RepositoryType]: string } = {};
 
   public init(i18n: any): void {
     this.i18n = i18n;
-    this.repositoryTypeNameMap = {
+    this.repositoryTypeNames = {
       [REPOSITORY_TYPES.fs]: i18n.translate(
         'xpack.snapshotRestore.repositoryType.fileSystemTypeName',
         {
@@ -47,11 +48,22 @@ class TextService {
         }
       ),
     };
+    this.breadcrumbs = {
+      home: i18n.translate('xpack.snapshotRestore.home.breadcrumbTitle', {
+        defaultMessage: 'Snapshot and Restore',
+      }),
+      repositoryAdd: i18n.translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
+        defaultMessage: 'Add repository',
+      }),
+      repositoryEdit: i18n.translate('xpack.snapshotRestore.editRepository.breadcrumbTitle', {
+        defaultMessage: 'Edit repository',
+      }),
+    };
   }
 
   public getRepositoryTypeName(type: RepositoryType, delegateType?: RepositoryType) {
     const getTypeName = (repositoryType: RepositoryType): string => {
-      return this.repositoryTypeNameMap[repositoryType] || type || '';
+      return this.repositoryTypeNames[repositoryType] || type || '';
     };
 
     if (type === REPOSITORY_TYPES.source && delegateType) {

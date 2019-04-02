@@ -34,9 +34,6 @@ export interface AppCore {
 export interface AppPlugins {
   management: {
     sections: typeof management;
-    constants: {
-      BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
-    };
   };
 }
 
@@ -52,7 +49,14 @@ export interface Core extends AppCore {
   };
 }
 
-export interface Plugins extends AppPlugins {} // tslint:disable-line no-empty-interface
+export interface Plugins extends AppPlugins {
+  management: {
+    sections: typeof management;
+    constants: {
+      BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
+    };
+  };
+}
 
 export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern

@@ -10,8 +10,9 @@ import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
-import { BASE_PATH, getHomeBreadcrumb, getRepositoryAddBreadcrumb, Section } from '../../constants';
+import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
+import { breadcrumbService } from '../../services/breadcrumb';
 import { sendRequest } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -30,7 +31,6 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
 }) => {
   const {
     core: { i18n, chrome, http },
-    plugins: { management },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
@@ -50,11 +50,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
 
   // Set breadcrumb
   useEffect(() => {
-    chrome.breadcrumbs.set([
-      management.constants.BREADCRUMB,
-      getHomeBreadcrumb(i18n.translate),
-      getRepositoryAddBreadcrumb(i18n.translate),
-    ]);
+    breadcrumbService.setBreadcrumbs('repositoryEdit');
   }, []);
 
   // Load repository information

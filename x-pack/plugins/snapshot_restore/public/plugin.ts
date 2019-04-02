@@ -11,6 +11,7 @@ import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
+import { breadcrumbService } from './app/services/breadcrumb';
 import { documentationLinksService } from './app/services/documentation';
 import { textService } from './app/services/text';
 
@@ -33,8 +34,9 @@ export class Plugin {
     });
 
     // Initialize services
-    documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
     textService.init(i18n);
+    breadcrumbService.init(chrome, management.constants.BREADCRUMB);
+    documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);
@@ -80,7 +82,7 @@ export class Plugin {
             renderReact(
               elem,
               { i18n, chrome, notification, http } as AppCore,
-              { management } as AppPlugins
+              { management: { sections: management.sections } } as AppPlugins
             );
           }
         });

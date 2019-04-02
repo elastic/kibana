@@ -9,8 +9,9 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
-import { BASE_PATH, getHomeBreadcrumb, Section } from '../../constants';
+import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
+import { breadcrumbService } from '../../services/breadcrumb';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -30,11 +31,10 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
   const [activeSection, setActiveSection] = useState<Section>(section);
 
   const {
-    core: { i18n, chrome },
-    plugins: { management },
+    core: {
+      i18n: { FormattedMessage },
+    },
   } = useAppDependencies();
-
-  const { FormattedMessage } = i18n;
 
   const tabs = [
     {
@@ -66,7 +66,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
 
   // Set breadcrumb
   useEffect(() => {
-    chrome.breadcrumbs.set([management.constants.BREADCRUMB, getHomeBreadcrumb(i18n.translate)]);
+    breadcrumbService.setBreadcrumbs('home');
   }, []);
 
   return (
