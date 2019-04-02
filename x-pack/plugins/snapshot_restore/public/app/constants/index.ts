@@ -16,6 +16,7 @@ export enum REPOSITORY_DOC_PATHS {
   hdfs = 'repository-hdfs.html',
   azure = 'repository-azure.html',
   gcs = 'repository-gcs.html',
+  plugins = 'repository.html',
 }
 
 export const getHomeBreadcrumb = (translate: any) => {

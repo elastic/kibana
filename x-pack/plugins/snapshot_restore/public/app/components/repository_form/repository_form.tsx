@@ -14,6 +14,7 @@ import {
 import { Repository, RepositoryType } from '../../../../common/types';
 
 import { useAppDependencies } from '../../index';
+import { getRepositoryPluginDocUrl, getRepositoryTypeDocUrl } from '../../services/documentation';
 import { useRequest } from '../../services/http';
 import { RepositoryTypeName } from '../repository_type_name';
 import { SectionError } from '../section_error';
@@ -28,6 +29,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
@@ -57,6 +59,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       http,
       chrome,
       i18n: { FormattedMessage },
+      documentation: { esDocBasePath, esPluginDocBasePath },
     },
   } = useAppDependencies();
   const {
@@ -160,72 +163,96 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     />
   );
 
-  const renderTypeField = () => (
-    <EuiDescribedFormGroup
-      title={
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
-              defaultMessage="Repository type"
-            />
-          </h3>
-        </EuiTitle>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryForm.fields.typeDescription"
-          defaultMessage="Repository storage type."
-        />
-      }
-      idAria="repositoryTypeDescription"
-      fullWidth
-    >
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.fields.typeLabel"
-            defaultMessage="Type"
-          />
+  const renderTypeField = () => {
+    const typeValue = availableRepositoryTypes.includes(repository.type)
+      ? repository.type
+      : REPOSITORY_TYPES.fs;
+
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
+                defaultMessage="Repository type"
+              />
+            </h3>
+          </EuiTitle>
         }
-        describedByIds={['repositoryTypeDescription']}
+        description={
+          <Fragment>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.typeDescription"
+              defaultMessage="Repository storage type. Elasticsearch supports a few types by default, additional repository types require plugins."
+            />
+            <EuiSpacer size="m" />
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMore"
+              defaultMessage="Learn more about {pluginsDocLink}."
+              values={{
+                pluginsDocLink: (
+                  <EuiLink href={getRepositoryPluginDocUrl(esPluginDocBasePath)}>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMoreLink"
+                      defaultMessage="Snapshot and Restore repository plugins"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </Fragment>
+        }
+        idAria="repositoryTypeDescription"
         fullWidth
       >
-        {repositoryTypesError ? (
-          renderLoadingRepositoryTypesError()
-        ) : (
-          <EuiSelect
-            disabled={isEditing}
-            isLoading={repositoryTypesLoading}
-            options={availableRepositoryTypes.map(type => {
-              return {
-                value: type,
-                text: ReactDOMServer.renderToString(<RepositoryTypeName type={type} />),
-              };
-            })}
-            value={
-              availableRepositoryTypes.includes(repository.type)
-                ? repository.type
-                : REPOSITORY_TYPES.fs
-            }
-            onChange={e => {
-              onRepositoryChange({
-                ...repository,
-                type: e.target.value,
-                settings: {},
-              });
-            }}
-            fullWidth
-          />
-        )}
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.typeLabel"
+              defaultMessage="Type"
+            />
+          }
+          describedByIds={['repositoryTypeDescription']}
+          fullWidth
+          helpText={renderTypeHelp(typeValue)}
+        >
+          {repositoryTypesError ? (
+            renderLoadingRepositoryTypesError()
+          ) : (
+            <EuiSelect
+              disabled={isEditing}
+              isLoading={repositoryTypesLoading}
+              options={availableRepositoryTypes.map(type => {
+                return {
+                  value: type,
+                  text: ReactDOMServer.renderToString(<RepositoryTypeName type={type} />),
+                };
+              })}
+              value={typeValue}
+              onChange={e => {
+                onRepositoryChange({
+                  ...repository,
+                  type: e.target.value,
+                  settings: {},
+                });
+              }}
+              fullWidth
+            />
+          )}
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
 
   const renderDelegateTypeField = () => {
     if (repository.type !== REPOSITORY_TYPES.source) {
       return null;
     }
+    const typeValue = availableRepositoryTypes.includes(repository.settings.delegate_type)
+      ? repository.settings.delegate_type
+      : REPOSITORY_TYPES.fs;
+
     return (
       <EuiDescribedFormGroup
         title={
@@ -256,6 +283,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           }
           describedByIds={['repositoryDelegateTypeDescription']}
           fullWidth
+          helpText={renderTypeHelp(typeValue)}
         >
           {repositoryTypesError ? (
             renderLoadingRepositoryTypesError()
@@ -270,11 +298,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                     text: ReactDOMServer.renderToString(<RepositoryTypeName type={type} />),
                   };
                 })}
-              value={
-                availableRepositoryTypes.includes(repository.settings.delegate_type)
-                  ? repository.settings.delegate_type
-                  : REPOSITORY_TYPES.fs
-              }
+              value={typeValue}
               onChange={e => {
                 onRepositoryChange({
                   ...repository,
@@ -290,6 +314,23 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
     );
   };
+
+  const renderTypeHelp = (repositoryType: RepositoryType) => (
+    <FormattedMessage
+      id="xpack.snapshotRestore.repositoryForm.fields.typeHelpText"
+      defaultMessage="Learn more about the {repositoryType} repository type."
+      values={{
+        repositoryType: (
+          <EuiLink
+            href={getRepositoryTypeDocUrl(repositoryType, esDocBasePath, esPluginDocBasePath)}
+            target="_blank"
+          >
+            <RepositoryTypeName type={repositoryType} />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
 
   const renderSettings = () => (
     <Fragment>

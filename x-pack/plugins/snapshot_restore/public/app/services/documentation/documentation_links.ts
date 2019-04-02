@@ -7,6 +7,10 @@ import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryType } from '../../../../common/types';
 import { REPOSITORY_DOC_PATHS } from '../../constants';
 
+export const getRepositoryPluginDocUrl = (esPluginDocBasePath: string): string => {
+  return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.plugins}`;
+};
+
 export const getRepositoryTypeDocUrl = (
   type: RepositoryType,
   esDocBasePath: string,
