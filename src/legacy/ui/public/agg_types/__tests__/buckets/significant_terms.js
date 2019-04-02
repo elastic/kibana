@@ -32,8 +32,8 @@ describe('Significant Terms Agg', function () {
       // function init({ responseValueAggs = [], aggParams = {} }) {
       function init({ aggParams = {} }) {
         ngMock.module('kibana');
-        ngMock.inject(function (Private, $controller, _$rootScope_) {
-        // ngMock.inject(function (_$rootScope_) {
+        // ngMock.inject(function (Private, $controller, _$rootScope_) {
+        ngMock.inject(function (_$rootScope_) {
           const significantTerms = aggTypes.byName.significant_terms;
           // const orderAggController = aggTypes.byName.terms.params.byName.orderAgg.controller;
 
@@ -41,10 +41,11 @@ describe('Significant Terms Agg', function () {
           $rootScope.agg = {
             id: 'test',
             params: aggParams,
-            type: significantTerms,
-            vis: {
-              aggs: []
-            }
+            type: significantTerms
+            // ,
+            // vis: {
+            //   aggs: []
+            // }
           };
           // $rootScope.responseValueAggs = responseValueAggs;
           // $controller(orderAggController, { $scope: $rootScope });
