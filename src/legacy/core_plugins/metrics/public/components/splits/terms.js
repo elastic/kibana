@@ -60,7 +60,7 @@ const SplitByTermsUi = props => {
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('group')}
@@ -95,7 +95,7 @@ const SplitByTermsUi = props => {
 
       <EuiSpacer />
 
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('top')}
@@ -150,7 +150,7 @@ const SplitByTermsUi = props => {
 
       <EuiSpacer />
 
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('include')}
