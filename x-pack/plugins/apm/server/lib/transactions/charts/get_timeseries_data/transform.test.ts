@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'lodash';
 import { timeseriesResponse } from './mock-responses/timeseries_response';
 import {
   ApmTimeSeriesResponse,
@@ -19,15 +18,6 @@ describe('timeseriesTransformer', () => {
       timeseriesResponse,
       bucketSize: 12
     });
-  });
-
-  it('should remove first bucket', () => {
-    const mockDates = timeseriesResponse.aggregations.transaction_results.buckets[0].timeseries.buckets.map(
-      bucket => bucket.key
-    );
-
-    expect(first(res.responseTimes.avg).x).not.toBe(first(mockDates));
-    expect(first(res.tpmBuckets[0].dataPoints).x).not.toBe(first(mockDates));
   });
 
   it('should have correct order', () => {
@@ -108,11 +98,21 @@ describe('getTpmBuckets', () => {
     const bucketSize = 10;
     expect(getTpmBuckets(buckets, bucketSize)).toEqual([
       {
-        dataPoints: [{ x: 1, y: 1200 }, { x: 2, y: 1800 }, { x: 3, y: 2400 }],
+        dataPoints: [
+          { x: 0, y: 0 },
+          { x: 1, y: 1200 },
+          { x: 2, y: 1800 },
+          { x: 3, y: 2400 }
+        ],
         key: 'HTTP 4xx'
       },
       {
-        dataPoints: [{ x: 1, y: 3000 }, { x: 2, y: 600 }, { x: 3, y: 1800 }],
+        dataPoints: [
+          { x: 0, y: 0 },
+          { x: 1, y: 3000 },
+          { x: 2, y: 600 },
+          { x: 3, y: 1800 }
+        ],
         key: 'HTTP 5xx'
       }
     ]);
