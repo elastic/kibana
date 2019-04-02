@@ -5,11 +5,8 @@
  */
 
 import { Server } from 'hapi';
-import {
-  APM_TELEMETRY_DOC_ID,
-  createApmTelementry,
-  getSavedObjectsClient
-} from './apm_telemetry';
+import { getSavedObjectsClient } from '../saved_objects/client';
+import { APM_TELEMETRY_DOC_ID, createApmTelementry } from './apm_telemetry';
 
 // TODO this type should be defined by the platform
 interface KibanaHapiServer extends Server {
