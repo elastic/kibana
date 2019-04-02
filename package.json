@@ -97,7 +97,7 @@
     "@babel/core": "^7.3.4",
     "@babel/polyfill": "^7.2.5",
     "@babel/register": "^7.0.0",
-    "@elastic/charts": "^3.4.4",
+    "@elastic/charts": "^3.5.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "9.7.1",
     "@elastic/filesaver": "1.1.2",

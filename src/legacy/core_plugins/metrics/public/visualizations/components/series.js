@@ -59,6 +59,7 @@ export const Series = ({
     <Component
       id={specId}
       groupId={getGroupId(groupId)}
+      name={label}
       xScaleType={ScaleType.Time}
       yScaleType={yScaleType}
       xAccessor={0}

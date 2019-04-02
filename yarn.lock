@@ -772,14 +772,7 @@
   dependencies:
     regenerator-runtime "^0.12.0"
 
-"@babel/runtime@^7.3.1":
 "@babel/runtime@^7.3.1", "@babel/runtime@^7.3.4":
-  version "7.4.2"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.4.2.tgz#f5ab6897320f16decd855eed70b705908a313fe8"
-  integrity sha512-7Bl2rALb7HpvXFL7TETNzKSAeBVCPHELzc0C//9FCxN8nsiueWSJBqaF+2oIJScyILStASR/Cx5WMkXGYTiJFA==
-  dependencies:
-    regenerator-runtime "^0.13.2"
-
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.3.4.tgz#73d12ba819e365fcf7fd152aed56d6df97d21c83"
   integrity sha512-IvfvnMdSaLBateu0jfsYIpZTxAc2cKEXEMiezGGN75QcBcecDUKd3PgLAncT0oOgxKy8dd8hrJKj9MfzgfZd6g==
@@ -826,10 +819,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.4.4.tgz#4dc424be87b4688c835176d141fb0be5b3f14b36"
-  integrity sha512-jIf/FWtS21l7xnYjXhODsW5pyCOwcUEsJsCYo5wrWSIKuGCGAbZfjVh73NT8Fu0vfbpdqcqB6xGrUTmZwE7g9Q==
+"@elastic/charts@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.5.0.tgz#d5df9664bbe2b3a2edd68062fdeb61c751495511"
+  integrity sha512-ykzzgHziKKJxMkb/omTCi+Faf8RnvE0JPsfe53/Iopqq8ImegsEDMPy7R+0SvgSfRzSk/3HQ/u27/B8XoivCHg==
   dependencies:
     classnames "^2.2.6"
     d3-array "^2.0.3"
