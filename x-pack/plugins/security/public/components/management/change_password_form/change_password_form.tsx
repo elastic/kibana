@@ -285,11 +285,13 @@ export class ChangePasswordForm extends Component<Props, State> {
   };
 
   private handleChangePasswordSuccess = () => {
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.security.account.changePasswordSuccess', {
+    toastNotifications.addSuccess({
+      text: i18n.translate('xpack.security.account.changePasswordSuccess', {
         defaultMessage: 'Your password has been changed',
-      })
-    );
+      }),
+      'data-test-subj': 'passwordUpdateSuccess',
+    });
+
     this.setState({
       currentPasswordError: false,
       shouldValidate: false,

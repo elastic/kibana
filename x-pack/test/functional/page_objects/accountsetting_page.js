@@ -25,11 +25,10 @@ export function AccountSettingProvider({ getService }) {
     }
 
     async changePassword(currentPassword, newPassword) {
-      await testSubjects.click('changePasswordLink');
-      await testSubjects.setValue('newPasswordInput', newPassword);
-      await testSubjects.setValue('currentPasswordInput', currentPassword);
-      await testSubjects.setValue('confirmPasswordInput', newPassword);
-      await testSubjects.click('saveChangesButton');
+      await testSubjects.setValue('currentPassword', currentPassword);
+      await testSubjects.setValue('newPassword', newPassword);
+      await testSubjects.setValue('confirmNewPassword', newPassword);
+      await testSubjects.click('changePasswordButton');
       await testSubjects.existOrFail('passwordUpdateSuccess');
     }
   }
