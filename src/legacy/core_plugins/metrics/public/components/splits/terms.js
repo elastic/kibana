@@ -27,14 +27,14 @@ import MetricSelect from '../aggs/metric_select';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer, EuiFieldText } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-const SplitByTermsUi = props => {
+const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
+
+const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(props.onChange);
-  const handleSelectChange = createSelectHandler(props.onChange);
-  const { indexPattern, intl } = props;
-  const defaults = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
-  const model = { ...defaults, ...props.model };
-  const { metrics } = model;
+  const handleTextChange = createTextHandler(onChange);
+  const handleSelectChange = createSelectHandler(onChange);
+  const defaultModel = { ...DEFAULTS, ...model };
+  const { metrics } = defaultModel;
   const defaultCount = {
     value: '_count',
     label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
@@ -55,7 +55,7 @@ const SplitByTermsUi = props => {
     },
   ];
   const selectedDirectionOption = dirOptions.find(option => {
-    return model.terms_direction === option.value;
+    return defaultModel.terms_direction === option.value;
   });
 
   return (
@@ -70,7 +70,7 @@ const SplitByTermsUi = props => {
             />)}
           >
             <GroupBySelect
-              value={model.split_mode}
+              value={defaultModel.split_mode}
               onChange={handleSelectChange('split_mode')}
             />
           </EuiFormRow>
@@ -86,8 +86,8 @@ const SplitByTermsUi = props => {
             <FieldSelect
               indexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
-              value={model.terms_field}
-              fields={props.fields}
+              value={defaultModel.terms_field}
+              fields={fields}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -106,7 +106,7 @@ const SplitByTermsUi = props => {
           >
             <EuiFieldNumber
               placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.sizePlaceholder', defaultMessage: 'Size' })}
-              value={Number(model.terms_size)}
+              value={Number(defaultModel.terms_size)}
               onChange={handleTextChange('terms_size')}
             />
           </EuiFormRow>
@@ -125,7 +125,7 @@ const SplitByTermsUi = props => {
               additionalOptions={[defaultCount, terms]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
-              value={model.terms_order_by}
+              value={defaultModel.terms_order_by}
             />
           </EuiFormRow>
         </EuiFlexItem>
