@@ -13,6 +13,7 @@ import {
   AggregationResults,
   JobTypes,
   KeyCountBucket,
+  RangeAggregationResults,
   UsageObject,
 } from './types';
 
@@ -34,13 +35,17 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-function getAggStats(aggs: AggregationResults) {
+type FeatureSet = 'csv' | 'printable_pdf' | 'PNG';
+type FeatureAvailabilitySet = { [F in FeatureSet]: boolean };
+
+function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySet) {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
+    const feature = key as FeatureSet;
     return {
       ...accum,
-      [key]: {
-        available: true, // FIXME: determine if available per license
+      [feature]: {
+        available: featureSet[feature],
         total: count,
       },
     };
@@ -65,18 +70,17 @@ function getAggStats(aggs: AggregationResults) {
 }
 
 async function handleResponse(server: any, response: AggregationResults) {
-  /*
   const xpackInfo = server.plugins.xpack_main.info;
   const exportTypesHandler = await getExportTypesHandler(server);
-  const availability = exportTypesHandler.getAvailability(xpackInfo);
-  */
+  const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilitySet;
 
-  const { all, last1, last7 } = get(response, 'aggregations.ranges.buckets');
+  const buckets = get(response, 'aggregations.ranges.buckets');
+  const { all, last1, last7 } = buckets as RangeAggregationResults;
 
   return {
-    lastDay: getAggStats(last1),
-    last7Days: getAggStats(last7),
-    ...getAggStats(all),
+    lastDay: getAggStats(last1, availability),
+    last7Days: getAggStats(last7, availability),
+    ...getAggStats(all, availability),
   };
 }
 

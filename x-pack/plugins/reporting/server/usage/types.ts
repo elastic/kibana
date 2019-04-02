@@ -30,7 +30,12 @@ export interface AggregationBuckets {
  */
 
 type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes';
-export type AggregationSet = { [K in AggregationKeys]: AggregationBuckets } & { doc_count: number };
+export type AggregationResults = { [K in AggregationKeys]: AggregationBuckets } & {
+  doc_count: number;
+};
+
+type RangeAggregationKeys = 'all' | 'last1' | 'last7';
+export type RangeAggregationResults = { [K in RangeAggregationKeys]: AggregationResults };
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
 export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {

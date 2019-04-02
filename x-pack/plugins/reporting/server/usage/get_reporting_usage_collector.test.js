@@ -55,19 +55,56 @@ function getServerMock(customization) {
   return Object.assign(defaultServerMock, customization);
 }
 
-test('sets enabled to false when reporting is turned off', async () => {
-  const mockConfigGet = jest.fn(key => {
-    if (key === 'xpack.reporting.enabled') {
-      return false;
-    } else if (key.indexOf('xpack.reporting') >= 0) {
-      throw new Error('Unknown config key!');
-    }
-  });
-  const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
-  const callClusterMock = jest.fn();
-  const { fetch: getReportingUsage } = getReportingUsageCollector(serverMock);
-  const usageStats = await getReportingUsage(callClusterMock);
-  expect(usageStats.enabled).toBe(false);
+const getResponseMock = () => ({
+  aggregations: {
+    ranges: {
+      meta: {},
+      buckets: {
+        all: {
+          doc_count: 22,
+          layoutTypes: {
+            doc_count: 7,
+            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
+          },
+          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
+          statusTypes: {
+            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
+          },
+          jobTypes: {
+            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
+          },
+        },
+        last1: {
+          doc_count: 22,
+          layoutTypes: {
+            doc_count: 7,
+            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
+          },
+          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
+          statusTypes: {
+            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
+          },
+          jobTypes: {
+            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
+          },
+        },
+        last7: {
+          doc_count: 22,
+          layoutTypes: {
+            doc_count: 7,
+            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
+          },
+          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
+          statusTypes: {
+            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
+          },
+          jobTypes: {
+            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
+          },
+        },
+      },
+    },
+  },
 });
 
 describe('with a basic license', async () => {
@@ -77,7 +114,7 @@ describe('with a basic license', async () => {
     serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
       .stub()
       .returns('basic');
-    const callClusterMock = jest.fn(() => Promise.resolve({}));
+    const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
     const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithBasicLicenseMock);
     usageStats = await getReportingUsage(callClusterMock);
   });
@@ -100,7 +137,7 @@ describe('with no license', async () => {
   beforeAll(async () => {
     const serverWithNoLicenseMock = getServerMock();
     serverWithNoLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('none');
-    const callClusterMock = jest.fn(() => Promise.resolve({}));
+    const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
     const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithNoLicenseMock);
     usageStats = await getReportingUsage(callClusterMock);
   });
@@ -125,7 +162,7 @@ describe('with platinum license', async () => {
     serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
       .stub()
       .returns('platinum');
-    const callClusterMock = jest.fn(() => Promise.resolve({}));
+    const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
     const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithPlatinumLicenseMock);
     usageStats = await getReportingUsage(callClusterMock);
   });
