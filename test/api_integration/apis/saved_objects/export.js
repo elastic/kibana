@@ -94,7 +94,7 @@ export default function ({ getService }) {
           await supertest
             .post('/api/saved_objects/_export')
             .send({
-              includeNestedDependencies: true,
+              includeReferencesDeep: true,
               objects: [
                 {
                   type: 'dashboard',
@@ -119,7 +119,7 @@ export default function ({ getService }) {
           await supertest
             .post('/api/saved_objects/_export')
             .send({
-              includeNestedDependencies: true,
+              includeReferencesDeep: true,
               type: ['dashboard'],
             })
             .expect(200)

@@ -32,7 +32,7 @@ interface ExportObjectsOptions {
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
-  includeNestedDependencies: boolean;
+  includeReferencesDeep: boolean;
 }
 
 export async function getSortedObjectsForExport({
@@ -40,7 +40,7 @@ export async function getSortedObjectsForExport({
   objects,
   savedObjectsClient,
   exportSizeLimit,
-  includeNestedDependencies,
+  includeReferencesDeep,
 }: ExportObjectsOptions) {
   let objectsToExport: SavedObject[] = [];
   if (objects) {
@@ -68,7 +68,7 @@ export async function getSortedObjectsForExport({
     }
     ({ saved_objects: objectsToExport } = findResponse);
   }
-  if (includeNestedDependencies) {
+  if (includeReferencesDeep) {
     objectsToExport = await injectNestedDependencies(objectsToExport, savedObjectsClient);
   }
   return sortObjects(objectsToExport);

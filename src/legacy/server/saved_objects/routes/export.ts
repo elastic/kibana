@@ -36,7 +36,7 @@ interface ExportRequest extends Hapi.Request {
       type: string;
       id: string;
     }>;
-    includeNestedDependencies: boolean;
+    includeReferencesDeep: boolean;
   };
 }
 
@@ -61,7 +61,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
             .optional(),
-          includeNestedDependencies: Joi.boolean().default(false),
+          includeReferencesDeep: Joi.boolean().default(false),
         })
         .xor('type', 'objects')
         .default(),
@@ -73,7 +73,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
         types: request.payload.type,
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
-        includeNestedDependencies: request.payload.includeNestedDependencies,
+        includeReferencesDeep: request.payload.includeReferencesDeep,
       });
       return h
         .response(docsToExport.map(doc => stringify(doc)).join('\n'))

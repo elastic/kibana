@@ -16,8 +16,8 @@ Note: You cannot access this endpoint via the Console in Kibana.
   (array|string) The saved object type(s) that the export should be limited to
 `objects` (optional)::
   (array) A list of objects to export
-`includeNestedDependencies`::
-  (boolean) Include nested dependencies in the export
+`includeReferencesDeep`::
+  (boolean) Include all nested references in the export
 
 Note: At least `type` or `objects` must be passed in.
 

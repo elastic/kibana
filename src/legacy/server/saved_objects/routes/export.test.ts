@@ -64,7 +64,7 @@ describe('POST /api/saved_objects/_export', () => {
       url: '/api/saved_objects/_export',
       payload: {
         type: 'search',
-        includeNestedDependencies: true,
+        includeReferencesDeep: true,
       },
     };
     savedObjectsClient.find.mockResolvedValueOnce({
