@@ -20,7 +20,7 @@
 const path = require('path');
 const Lint = require('tslint');
 
-const KIBANA_ROOT = path.dirname(path.resolve(__dirname, '../../..'));
+const KIBANA_ROOT = path.resolve(__dirname, '../../../..');
 
 class ModuleMigrationWalker extends Lint.RuleWalker {
   visitImportDeclaration(node) {
