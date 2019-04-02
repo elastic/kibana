@@ -17,5 +17,4 @@ export interface APMBaseDoc {
   labels?: {
     [key: string]: string | number | boolean;
   };
-  [key: string]: unknown;
 }

@@ -11,7 +11,7 @@ import {
   SearchParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
-import { merge } from 'lodash';
+import { cloneDeep, has, set } from 'lodash';
 import moment from 'moment';
 import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 
@@ -19,9 +19,13 @@ function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
+export interface APMSearchParams extends SearchParams {
+  omitLegacyData?: boolean;
+}
+
 export type ESClient = <T = void, U = void>(
   type: string,
-  params: SearchParams
+  params: APMSearchParams
 ) => Promise<AggregationSearchResponse<T, U>>;
 
 export interface Setup {
@@ -39,13 +43,21 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-function addFilterForLegacyData(params: SearchParams) {
-  // ensure a filter exists
-  const nextParams = merge({}, params, {
-    body: { query: { bool: { filter: [] } } }
-  });
+function addFilterForLegacyData({
+  omitLegacyData = true,
+  ...params
+}: APMSearchParams): SearchParams {
+  // search across all data (including data)
+  if (!omitLegacyData) {
+    return params;
+  }
 
-  // add to filter
+  const nextParams = cloneDeep(params);
+  if (!has(nextParams, 'body.query.bool.filter')) {
+    set(nextParams, 'body.query.bool.filter', []);
+  }
+
+  // add filter for omitting pre-7.x data
   nextParams.body.query.bool.filter.push({
     range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
   });
