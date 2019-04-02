@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InjectedMetadataStartContract } from '../injected_metadata';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { deepFreeze } from '../utils/deep_freeze';
 
 interface StartDeps {
-  injectedMetadata: InjectedMetadataStartContract;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
 export interface UICapabilities {
@@ -36,7 +36,7 @@ export interface UICapabilities {
  * Service that is responsible for UI Capabilities.
  */
 export class UICapabilitiesService {
-  public start({ injectedMetadata }: StartDeps) {
+  public setup({ injectedMetadata }: StartDeps) {
     return {
       getUICapabilities: () =>
         deepFreeze<UICapabilities>(injectedMetadata.getInjectedVar(
@@ -44,10 +44,6 @@ export class UICapabilitiesService {
         ) as UICapabilities),
     };
   }
-
-  public stop() {
-    // nothing to do here currently
-  }
 }
 
-export type UICapabilitiesStartContract = ReturnType<UICapabilitiesService['start']>;
+export type UICapabilitiesSetup = ReturnType<UICapabilitiesService['setup']>;

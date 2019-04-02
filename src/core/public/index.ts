@@ -24,6 +24,7 @@ import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
 import { InjectedMetadataSetup } from './injected_metadata';
 import { NotificationsSetup } from './notifications';
+import { UICapabilitiesSetup } from './ui_capabilities';
 import { UiSettingsSetup } from './ui_settings';
 
 export { CoreSystem } from './core_system';
@@ -35,6 +36,7 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   http: HttpSetup;
   basePath: BasePathSetup;
+  uiCapabilities: UICapabilitiesSetup;
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
 }

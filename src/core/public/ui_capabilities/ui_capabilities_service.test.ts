@@ -32,7 +32,7 @@ describe('#start', () => {
       } as any,
     });
     const service = new UICapabilitiesService();
-    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
+    const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
     expect(startContract.getUICapabilities()).toEqual({
       foo: 'bar',
       bar: 'baz',
@@ -51,7 +51,7 @@ describe('#start', () => {
       } as any,
     });
     const service = new UICapabilitiesService();
-    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
+    const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
     const capabilities = startContract.getUICapabilities();
 
     // @ts-ignore TypeScript knows this shouldn't be possible
