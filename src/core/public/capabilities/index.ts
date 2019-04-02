@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { CapabilitiesSetup, UICapabilities } from '../../../../core/public/capabilities';
-
-export { UICapabilities } from '../../../../core/public/capabilities';
-export let uiCapabilities: UICapabilities = null!;
-
-export function __newPlatformInit__(uiCapabililitiesService: CapabilitiesSetup) {
-  if (uiCapabilities) {
-    throw new Error('ui/capabilities already initialized with new platform apis');
-  }
-
-  uiCapabilities = uiCapabililitiesService.getCapabilities();
-}
+export { UICapabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';

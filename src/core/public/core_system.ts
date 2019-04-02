@@ -20,6 +20,7 @@
 import './core.css';
 
 import { BasePathService } from './base_path';
+import { CapabilitiesService } from './capabilities';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
 import { HttpService } from './http';
@@ -27,7 +28,6 @@ import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
-import { UICapabilitiesService } from './ui_capabilities';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -56,7 +56,7 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
-  private readonly uiCapabilities: UICapabilitiesService;
+  private readonly capabilities: CapabilitiesService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -87,7 +87,7 @@ export class CoreSystem {
       },
     });
 
-    this.uiCapabilities = new UICapabilitiesService();
+    this.capabilities = new CapabilitiesService();
 
     this.notificationsTargetDomElement = document.createElement('div');
     this.notifications = new NotificationsService({
@@ -120,7 +120,7 @@ export class CoreSystem {
       const fatalErrors = this.fatalErrors.setup({ i18n });
       const http = this.http.setup({ fatalErrors });
       const basePath = this.basePath.setup({ injectedMetadata });
-      const uiCapabilities = this.uiCapabilities.setup({ injectedMetadata });
+      const capabilities = this.capabilities.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
         notifications,
         http,
@@ -139,7 +139,7 @@ export class CoreSystem {
         notifications,
         http,
         basePath,
-        uiCapabilities,
+        capabilities,
         uiSettings,
         chrome,
       });

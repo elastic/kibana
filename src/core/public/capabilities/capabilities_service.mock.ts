@@ -16,9 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CapabilitiesService, CapabilitiesSetup, UICapabilities } from './capabilities_service';
 
-export {
-  UICapabilities,
-  UICapabilitiesService,
-  UICapabilitiesSetup,
-} from './ui_capabilities_service';
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<CapabilitiesSetup> = {
+    getCapabilities: jest.fn(),
+  };
+  setupContract.getCapabilities.mockReturnValue({
+    catalogue: {},
+    management: {},
+    navLinks: {},
+  } as UICapabilities);
+  return setupContract;
+};
+
+type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
+const createMock = () => {
+  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
+
+export const capabilitiesServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

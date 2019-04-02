@@ -44,7 +44,7 @@ export class LegacyPlatformService {
       notifications,
       http,
       basePath,
-      uiCapabilities,
+      capabilities,
       uiSettings,
       chrome,
     } = core;
@@ -55,7 +55,7 @@ export class LegacyPlatformService {
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
-    require('ui/capabilities').__newPlatformInit__(uiCapabilities);
+    require('ui/capabilities').__newPlatformInit__(capabilities);
     require('ui/chrome/api/loading_count').__newPlatformInit__(http);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);

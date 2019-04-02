@@ -17,10 +17,10 @@
  * under the License.
  */
 import { InjectedMetadataService } from '../injected_metadata';
-import { UICapabilitiesService } from './ui_capabilities_service';
+import { CapabilitiesService } from './capabilities_service';
 
 describe('#start', () => {
-  it('returns a service with getUICapabilities', () => {
+  it('returns a service with getCapabilities', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
@@ -31,15 +31,15 @@ describe('#start', () => {
         },
       } as any,
     });
-    const service = new UICapabilitiesService();
+    const service = new CapabilitiesService();
     const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
-    expect(startContract.getUICapabilities()).toEqual({
+    expect(startContract.getCapabilities()).toEqual({
       foo: 'bar',
       bar: 'baz',
     });
   });
 
-  it(`does not allow UICapabilities to be modified`, () => {
+  it(`does not allow Capabilities to be modified`, () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
@@ -50,9 +50,9 @@ describe('#start', () => {
         },
       } as any,
     });
-    const service = new UICapabilitiesService();
+    const service = new CapabilitiesService();
     const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
-    const capabilities = startContract.getUICapabilities();
+    const capabilities = startContract.getCapabilities();
 
     // @ts-ignore TypeScript knows this shouldn't be possible
     expect(() => (capabilities.foo = 'foo')).toThrowErrorMatchingInlineSnapshot(

@@ -35,10 +35,10 @@ export interface UICapabilities {
 /**
  * Service that is responsible for UI Capabilities.
  */
-export class UICapabilitiesService {
+export class CapabilitiesService {
   public setup({ injectedMetadata }: StartDeps) {
     return {
-      getUICapabilities: () =>
+      getCapabilities: () =>
         deepFreeze<UICapabilities>(injectedMetadata.getInjectedVar(
           'uiCapabilities'
         ) as UICapabilities),
@@ -46,4 +46,4 @@ export class UICapabilitiesService {
   }
 }
 
-export type UICapabilitiesSetup = ReturnType<UICapabilitiesService['setup']>;
+export type CapabilitiesSetup = ReturnType<CapabilitiesService['setup']>;

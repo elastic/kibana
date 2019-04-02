@@ -150,13 +150,13 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
 });
 
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { uiCapabilitiesServiceMock } from '../ui_capabilities/ui_capabilities_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 
@@ -167,7 +167,7 @@ const httpSetup = httpServiceMock.createSetupContract();
 const i18nSetup = i18nServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
-const uiCapabilitiesSetup = uiCapabilitiesServiceMock.createSetupContract();
+const capabilitiesSetup = capabilitiesServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
 
 const defaultParams = {
@@ -184,7 +184,7 @@ const defaultSetupDeps = {
   notifications: notificationsSetup,
   http: httpSetup,
   basePath: basePathSetup,
-  uiCapabilities: uiCapabilitiesSetup,
+  capabilities: capabilitiesSetup,
   uiSettings: uiSettingsSetup,
   chrome: chromeSetup,
 };
@@ -231,7 +231,7 @@ describe('#setup()', () => {
       legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockUICapabilitiesInit).toHaveBeenCalledTimes(1);
-      expect(mockUICapabilitiesInit).toHaveBeenCalledWith(uiCapabilitiesSetup);
+      expect(mockUICapabilitiesInit).toHaveBeenCalledWith(capabilitiesSetup);
     });
 
     it('passes fatalErrors service to ui/notify/fatal_errors', () => {
