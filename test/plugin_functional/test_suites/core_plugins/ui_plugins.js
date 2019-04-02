@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
   describe('ui plugin loading', function describeIndexTests() {
