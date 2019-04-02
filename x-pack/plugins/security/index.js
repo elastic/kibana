@@ -127,6 +127,20 @@ export const security = (kibana) => new kibana.Plugin({
     }
   },
 
+  async postInit(server) {
+    const plugin = this;
+
+    const xpackMainPlugin = server.plugins.xpack_main;
+
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
+      if (license.allowRbac) {
+        const { security } = server.plugins;
+        await validateFeaturePrivileges(security.authorization.actions, xpackMainPlugin.getFeatures());
+        await registerPrivilegesWithCluster(server);
+      }
+    });
+  },
+
   async init(server) {
     const plugin = this;
 
@@ -158,13 +172,6 @@ export const security = (kibana) => new kibana.Plugin({
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
-
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
-      if (license.allowRbac) {
-        await validateFeaturePrivileges(authorization.actions, xpackMainPlugin.getFeatures());
-        await registerPrivilegesWithCluster(server);
-      }
-    });
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
