@@ -23,7 +23,7 @@ interface AggParam {
   type: string;
   name: string;
   displayName?: string;
-  onChange?: (agg: AggConfig) => void;
+  onChange?(agg: AggConfig): void;
   disabled?(agg: AggConfig): boolean;
 }
 
