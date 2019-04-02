@@ -202,11 +202,7 @@ export const JsonWatchEditForm = ({
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={() => {
-              // TODO: Redirect back to /watches page
-            }}
-          >
+          <EuiButtonEmpty href={'#/management/elasticsearch/watcher/watches'}>
             {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}

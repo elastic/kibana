@@ -43,7 +43,6 @@ interface TableDataRow {
 
 interface TableData extends Array<TableDataRow> {}
 
-// todo if the user doesn't make changes, is it going to send zero back?
 const EXECUTE_DETAILS_INITIAL_STATE = {
   triggeredTimeValue: 0,
   triggeredTimeUnit: TIME_UNITS.MILLISECOND,
