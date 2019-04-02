@@ -9,9 +9,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -24,45 +22,43 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
-    <React.Fragment>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        size="m"
-        title={
-          <FormattedMessage
-            defaultMessage="Index Pattern Conflicts"
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
-            values={Object {}}
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
-            values={
-              Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
-                  href=""
-                  type="button"
-                >
-                  <FormattedMessage
-                    defaultMessage="create a new index pattern"
-                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCallOut
+      color="warning"
+      iconType="help"
+      size="m"
+      title={
+        <FormattedMessage
+          defaultMessage="Index Pattern Conflicts"
+          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+          values={
+            Object {
+              "indexPatternLink": <EuiLink
+                color="primary"
+                href=""
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="create a new index pattern"
+                  id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
             }
-          />
-        </p>
-      </EuiCallOut>
-    </React.Fragment>
+          }
+        />
+      </p>
+    </EuiCallOut>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiInMemoryTable
@@ -93,6 +89,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -123,16 +120,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -150,7 +140,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -203,9 +192,7 @@ exports[`Flyout should render import step 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -232,6 +219,7 @@ exports[`Flyout should render import step 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFilePicker
           compressed={false}
@@ -249,6 +237,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
+        labelType="label"
       >
         <EuiSwitch
           checked={true}
@@ -268,16 +257,9 @@ exports[`Flyout should render import step 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -295,7 +277,6 @@ exports[`Flyout should render import step 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton

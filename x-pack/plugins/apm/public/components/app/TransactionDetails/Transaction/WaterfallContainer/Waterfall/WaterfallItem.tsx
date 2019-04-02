@@ -7,17 +7,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon } from '@elastic/eui';
-import {
-  colors,
-  fontFamily,
-  fontFamilyCode,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../../../../style/variables';
+import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
+import { isRumAgentName } from '../../../../../../../common/agent_name';
+import { px, unit, units } from '../../../../../../style/variables';
+import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
@@ -40,15 +35,16 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   display: block;
   user-select: none;
   padding-top: ${px(units.half)};
-  padding-bottom: ${props =>
-    px(props.type === 'span' ? units.plus + units.quarter : units.plus)};
+  padding-bottom: ${px(units.plus)};
   margin-right: ${props => px(props.timelineMargins.right)};
   margin-left: ${props => px(props.timelineMargins.left)};
-  border-top: 1px solid ${colors.gray4};
-  background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
+  border-top: 1px solid ${theme.euiColorLightShade};
+  background-color: ${props =>
+    props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
+
   &:hover {
-    background-color: ${colors.gray5};
+    background-color: ${theme.euiColorLightestShade};
   }
 `;
 
@@ -60,30 +56,18 @@ const ItemBar = styled<IBarStyleProps, any>('div')`
   background-color: ${props => props.color};
 `;
 
-const ItemLabel = styled.div`
-  white-space: nowrap;
+const ItemText = styled.span`
   position: absolute;
   right: 0;
-  width: auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  text-align: left;
-  margin: 0;
-`;
+  display: flex;
+  align-items: center;
+  height: ${px(units.plus)};
 
-const SpanLabel = styled(ItemLabel)`
-  font-weight: normal;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
-  bottom: ${px(units.half)};
-`;
-
-const TransactionLabel = styled(ItemLabel)`
-  font-weight: 600;
-  font-family: ${fontFamily};
-  font-size: ${fontSize};
-  bottom: ${px(units.quarter)};
+  /* add margin to all direct descendants */
+  & > * {
+    margin-right: ${px(units.half)};
+    white-space: nowrap;
+  }
 `;
 
 interface ITimelineMargins {
@@ -99,18 +83,62 @@ interface IWaterfallItemProps {
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
-  onClick: () => any;
+  errorCount: number;
+  onClick: () => unknown;
 }
 
-function Prefix({ item }: { item: IWaterfallItem }) {
-  if (item.docType !== 'transaction') {
+function PrefixIcon({ item }: { item: IWaterfallItem }) {
+  if (item.docType === 'span') {
+    // icon for database spans
+    const isDbType = item.span.span.type.startsWith('db');
+    if (isDbType) {
+      return <EuiIcon type="database" />;
+    }
+
+    // omit icon for other spans
     return null;
   }
 
+  // icon for RUM agent transactions
+  if (isRumAgentName(item.transaction.agent.name)) {
+    return <EuiIcon type="globe" />;
+  }
+
+  // icon for other transactions
+  return <EuiIcon type="merge" />;
+}
+
+function Duration({ item }: { item: IWaterfallItem }) {
   return (
-    <React.Fragment>
-      <EuiIcon type="merge" />{' '}
-    </React.Fragment>
+    <EuiText color="subdued" size="xs">
+      {asTime(item.duration)}
+    </EuiText>
+  );
+}
+
+function HttpStatusCode({ item }: { item: IWaterfallItem }) {
+  // http status code for transactions of type 'request'
+  const httpStatusCode =
+    item.docType === 'transaction' &&
+    item.transaction.transaction.type === 'request'
+      ? item.transaction.transaction.result
+      : undefined;
+
+  if (!httpStatusCode) {
+    return null;
+  }
+
+  return <EuiText size="xs">{httpStatusCode}</EuiText>;
+}
+
+function NameLabel({ item }: { item: IWaterfallItem }) {
+  if (item.docType === 'span') {
+    return <EuiText size="s">{item.name}</EuiText>;
+  }
+  return (
+    <EuiTitle size="xxs">
+      <h5>{item.name}</h5>
+    </EuiTitle>
   );
 }
 
@@ -120,6 +148,7 @@ export function WaterfallItem({
   item,
   color,
   isSelected,
+  errorCount,
   onClick
 }: IWaterfallItemProps) {
   if (!totalDuration) {
@@ -128,7 +157,6 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
-  const Label = item.docType === 'span' ? SpanLabel : TransactionLabel;
 
   return (
     <Container
@@ -142,11 +170,20 @@ export function WaterfallItem({
         color={color}
         type={item.docType}
       />
-      <Label // using inline styles instead of props to avoid generating a css class for each item
+      <ItemText // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
-        <Prefix item={item} /> {item.name}
-      </Label>
+        <PrefixIcon item={item} />
+        <HttpStatusCode item={item} />
+        <NameLabel item={item} />
+        {errorCount > 0 && item.docType === 'transaction' ? (
+          <ErrorCountBadge
+            errorCount={errorCount}
+            transaction={item.transaction}
+          />
+        ) : null}
+        <Duration item={item} />
+      </ItemText>
     </Container>
   );
 }

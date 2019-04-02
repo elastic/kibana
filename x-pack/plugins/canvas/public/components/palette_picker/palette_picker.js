@@ -26,6 +26,7 @@ export const PalettePicker = ({ onChange, value, anchorPosition }) => {
       anchorPosition={anchorPosition}
       panelClassName="canvasPalettePicker__swatchesPanel"
       className="canvasPalettePicker__swatchesPopover"
+      anchorClassName="canvasPalettePicker__swatchesPopoverAnchor"
     >
       {() => (
         <div className="canvas canvasPalettePicker__swatches">

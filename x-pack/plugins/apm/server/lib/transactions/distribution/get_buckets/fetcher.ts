@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, SearchResponse } from 'elasticsearch';
 import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchResponse
+} from 'elasticsearch';
+import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_DURATION,
@@ -13,9 +18,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { rangeFilter } from '../../../helpers/range_filter';
 
 interface Bucket {
   key: number;
@@ -41,32 +47,33 @@ export function bucketFetcher(
   transactionName: string,
   transactionType: string,
   transactionId: string,
+  traceId: string,
   bucketSize: number,
   setup: Setup
 ): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [TRANSACTION_NAME]: transactionName } },
+    { range: rangeFilter(start, end) }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ],
+          filter,
           should: [
+            { term: { [TRACE_ID]: traceId } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRANSACTION_SAMPLED]: true } }
           ]
@@ -95,10 +102,6 @@ export function bucketFetcher(
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   return client<void, Aggs>('search', params);
 }

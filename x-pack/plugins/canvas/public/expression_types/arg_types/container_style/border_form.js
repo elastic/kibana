@@ -34,12 +34,18 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   const radiusVal = radius ? radius.replace('px', '') : '';
 
   const namedChange = name => val => {
-    if (name === 'borderWidth') return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
+    if (name === 'borderWidth') {
+      return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
+    }
     if (name === 'borderStyle') {
-      if (val === '') return onChange('border', `0px`);
+      if (val === '') {
+        return onChange('border', `0px`);
+      }
       return onChange('border', `${borderWidth} ${val} ${borderColor}`);
     }
-    if (name === 'borderRadius') return onChange('borderRadius', `${val}px`);
+    if (name === 'borderRadius') {
+      return onChange('borderRadius', `${val}px`);
+    }
 
     onChange(name, val);
   };

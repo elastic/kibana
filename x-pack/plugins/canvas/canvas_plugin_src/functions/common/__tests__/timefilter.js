@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { timefilter } from '../timefilter';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
@@ -88,7 +88,7 @@ describe('timefilter', () => {
 
       it('throws when provided an invalid date string', () => {
         expect(() => fn(emptyFilter, { from: '2018-13-42T15:00:00.950Z' })).to.throwException(e => {
-          expect(e.message).to.be.equal('Invalid date/time string 2018-13-42T15:00:00.950Z');
+          expect(e.message).to.be.equal(`Invalid date/time string: '2018-13-42T15:00:00.950Z'`);
         });
       });
     });

@@ -31,6 +31,7 @@ import { getTestUrl } from '../../../jobs/components/custom_url_editor/utils';
 
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 
 function isValidTimeRange(timeRange) {
@@ -43,7 +44,12 @@ function isValidTimeRange(timeRange) {
   return (interval !== null);
 }
 
-export class CustomUrlList extends Component {
+export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
+  static propTypes = {
+    job: PropTypes.object.isRequired,
+    customUrls: PropTypes.array.isRequired,
+    setCustomUrls: PropTypes.func.isRequired,
+  }
 
   constructor(props) {
     super(props);
@@ -105,13 +111,19 @@ export class CustomUrlList extends Component {
         })
         .catch((resp) => {
           console.log('Error obtaining URL for test:', resp);
-          toastNotifications.addDanger('An error occurred obtaining the URL to test the configuration');
+          toastNotifications.addDanger(
+            this.props.intl.formatMessage({
+              id: 'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
+              defaultMessage: 'An error occurred obtaining the URL to test the configuration'
+            })
+          );
         });
     }
   };
 
   render() {
     const customUrls = this.props.customUrls;
+    const { intl } = this.props;
 
     // TODO - swap URL input to a textarea on focus / blur.
     const customUrlRows = customUrls.map((customUrl, index) => {
@@ -121,18 +133,31 @@ export class CustomUrlList extends Component {
       const otherUrls = [...customUrls];
       otherUrls.splice(index, 1);   // Don't compare label with itself.
       const isInvalidLabel = !isValidLabel(label, otherUrls);
-      const invalidLabelError = (isInvalidLabel === true) ? ['A unique label must be supplied'] : [];
+      const invalidLabelError = (isInvalidLabel === true) ? [
+        intl.formatMessage({
+          id: 'xpack.ml.customUrlEditorList.labelIsNotUniqueErrorMessage',
+          defaultMessage: 'A unique label must be supplied'
+        })
+      ] : [];
 
       // Validate the time range.
       const timeRange = customUrl.time_range;
       const isInvalidTimeRange = !(isValidTimeRange(timeRange));
-      const invalidIntervalError = (isInvalidTimeRange === true) ? ['Invalid format'] : [];
+      const invalidIntervalError = (isInvalidTimeRange === true) ? [
+        intl.formatMessage({
+          id: 'xpack.ml.customUrlEditorList.invalidTimeRangeFormatErrorMessage',
+          defaultMessage: 'Invalid format'
+        })
+      ] : [];
 
       return (
         <EuiFlexGroup key={`url_${index}`}>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              label="Label"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlEditorList.labelLabel"
+                defaultMessage="Label"
+              />}
               isInvalid={isInvalidLabel}
               error={invalidLabelError}
             >
@@ -144,7 +169,12 @@ export class CustomUrlList extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="URL">
+            <EuiFormRow
+              label={<FormattedMessage
+                id="xpack.ml.customUrlEditorList.urlLabel"
+                defaultMessage="URL"
+              />}
+            >
               <EuiFieldText
                 value={customUrl.url_value}
                 onChange={(e) => this.onUrlValueChange(e, index)}
@@ -153,7 +183,10 @@ export class CustomUrlList extends Component {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              label="Time range"
+              label={<FormattedMessage
+                id="xpack.ml.customUrlEditorList.timeRangeLabel"
+                defaultMessage="Time range"
+              />}
               error={invalidIntervalError}
               isInvalid={isInvalidTimeRange}
             >
@@ -168,14 +201,20 @@ export class CustomUrlList extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiToolTip
-                content="Test custom URL"
+                content={<FormattedMessage
+                  id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+                  defaultMessage="Test custom URL"
+                />}
               >
                 <EuiButtonIcon
                   size="s"
                   color="primary"
                   onClick={() => this.onTestButtonClick(index)}
                   iconType="popout"
-                  aria-label="Test custom URL"
+                  aria-label={intl.formatMessage({
+                    id: 'xpack.ml.customUrlEditorList.testCustomUrlAriaLabel',
+                    defaultMessage: 'Test custom URL'
+                  })}
                 />
               </EuiToolTip>
             </EuiFormRow>
@@ -183,14 +222,20 @@ export class CustomUrlList extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiToolTip
-                content="Delete custom URL"
+                content={<FormattedMessage
+                  id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+                  defaultMessage="Delete custom URL"
+                />}
               >
                 <EuiButtonIcon
                   size="s"
                   color="danger"
                   onClick={() => this.onDeleteButtonClick(index)}
                   iconType="trash"
-                  aria-label="Delete custom URL"
+                  aria-label={intl.formatMessage({
+                    id: 'xpack.ml.customUrlEditorList.deleteCustomUrlAriaLabel',
+                    defaultMessage: 'Delete custom URL'
+                  })}
                 />
               </EuiToolTip>
             </EuiFormRow>
@@ -205,11 +250,4 @@ export class CustomUrlList extends Component {
       </React.Fragment>
     );
   }
-
-}
-CustomUrlList.propTypes = {
-  job: PropTypes.object.isRequired,
-  customUrls: PropTypes.array.isRequired,
-  setCustomUrls: PropTypes.func.isRequired,
-};
-
+});

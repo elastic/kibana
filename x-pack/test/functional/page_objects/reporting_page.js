@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
 
   class ReportingPage {
     async initTests() {
@@ -24,7 +24,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
       await esArchiver.load('historic');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
@@ -127,7 +126,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
-      await Promise.all(toasts.map(t => t.click()));
+      await Promise.all(toasts.map(async t => await t.click()));
     }
 
     async getQueueReportError() {
@@ -135,7 +134,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async getGenerateReportButton() {
-      return await retry.try(() => testSubjects.find('generateReportButton'));
+      return await retry.try(async () => await testSubjects.find('generateReportButton'));
     }
 
     async checkUsePrintLayout() {
@@ -147,14 +146,20 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async clickGenerateReportButton() {
-      await retry.try(() => testSubjects.click('generateReportButton'));
+      await testSubjects.click('generateReportButton');
     }
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
-      const isToastPresent = await testSubjects.exists('completeReportSuccess', 60000);
+      const isToastPresent = await testSubjects.exists('completeReportSuccess', {
+        allowHidden: true,
+        timeout: 90000
+      });
       // Close toast so it doesn't obscure the UI.
-      await testSubjects.click('completeReportSuccess toastCloseButton');
+      if (isToastPresent) {
+        await testSubjects.click('completeReportSuccess toastCloseButton');
+      }
+
       return isToastPresent;
     }
 
@@ -162,14 +167,14 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('Reporting:setTimepickerInDataRange');
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
       const fromTime = '1999-09-19 06:31:44.000';
       const toTime = '1999-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
 

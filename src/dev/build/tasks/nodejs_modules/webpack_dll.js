@@ -18,7 +18,7 @@
  */
 
 import { deleteAll, read, write } from '../../lib';
-import { dirname, sep } from 'path';
+import { dirname, sep, relative } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
 
@@ -77,13 +77,16 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   // NOTE: We can't use cwd option with globby
   // until the following issue gets closed
   // https://github.com/sindresorhus/globby/issues/87
-  const deletePatterns = await globby([
+  const filesToDelete = await globby([
     `${moduleDir}/**`,
     `!${moduleDir}/**/*.+(css)`,
     `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
-    `!${modulePkgPath}`,
   ]);
-  await deleteAll(logger, deletePatterns);
+
+  await deleteAll(filesToDelete.filter(path => {
+    const relativePath = relative(moduleDir, path);
+    return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
+  }));
 
   // Mark this module as cleaned
   modulePkg.cleaned = true;

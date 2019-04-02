@@ -39,6 +39,27 @@ const MANIFEST_FILE_NAME = 'kibana.json';
 const ALWAYS_COMPATIBLE_VERSION = 'kibana';
 
 /**
+ * Names of the known manifest fields.
+ */
+const KNOWN_MANIFEST_FIELDS = (() => {
+  // We use this trick to have type safety around the keys we use, if we forget to
+  // add a new key here or misspell existing one, TypeScript compiler will complain.
+  // We do this once at run time, so performance impact is negligible.
+  const manifestFields: { [P in keyof PluginManifest]: boolean } = {
+    id: true,
+    kibanaVersion: true,
+    version: true,
+    configPath: true,
+    requiredPlugins: true,
+    optionalPlugins: true,
+    ui: true,
+    server: true,
+  };
+
+  return new Set(Object.keys(manifestFields));
+})();
+
+/**
  * Tries to load and parse the plugin manifest file located at the provided plugin
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
@@ -77,6 +98,15 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  // Plugin id can be used as a config path or as a logger context and having dots
+  // in there may lead to various issues, so we forbid that.
+  if (manifest.id.includes('.')) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error('Plugin "id" must not include `.` characters.')
+    );
+  }
+
   if (!manifest.version || typeof manifest.version !== 'string') {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -112,6 +142,31 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  const includesServerPlugin = typeof manifest.server === 'boolean' ? manifest.server : false;
+  const includesUiPlugin = typeof manifest.ui === 'boolean' ? manifest.ui : false;
+  if (!includesServerPlugin && !includesUiPlugin) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${
+          manifest.id
+        }", but at least one of these must be set to "true".`
+      )
+    );
+  }
+
+  const unknownManifestKeys = Object.keys(manifest).filter(key => !KNOWN_MANIFEST_FIELDS.has(key));
+  if (unknownManifestKeys.length > 0) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `Manifest for plugin "${
+          manifest.id
+        }" contains the following unrecognized properties: ${unknownManifestKeys}.`
+      )
+    );
+  }
+
   return {
     id: manifest.id,
     version: manifest.version,
@@ -119,7 +174,8 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     configPath: manifest.configPath || manifest.id,
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-    ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
+    ui: includesUiPlugin,
+    server: includesServerPlugin,
   };
 }
 

@@ -9,38 +9,45 @@ import { asPercent, asTime } from '../formatters';
 describe('formatters', () => {
   describe('asTime', () => {
     it('formats correctly with defaults', () => {
-      expect(asTime(null)).toBe('N/A');
-      expect(asTime(undefined)).toBe('N/A');
-      expect(asTime(0)).toBe('0 μs');
-      expect(asTime(1)).toBe('1 μs');
-      expect(asTime(1000)).toBe('1,000 μs');
-      expect(asTime(1000 * 1000)).toBe('1,000 ms');
-      expect(asTime(1000 * 1000 * 10)).toBe('10,000 ms');
-      expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
+      expect(asTime(null)).toEqual('N/A');
+      expect(asTime(undefined)).toEqual('N/A');
+      expect(asTime(0)).toEqual('0 μs');
+      expect(asTime(1)).toEqual('1 μs');
+      expect(asTime(1000)).toEqual('1,000 μs');
+      expect(asTime(1000 * 1000)).toEqual('1,000 ms');
+      expect(asTime(1000 * 1000 * 10)).toEqual('10,000 ms');
+      expect(asTime(1000 * 1000 * 20)).toEqual('20.0 s');
     });
 
     it('formats without unit', () => {
-      expect(asTime(1000, { withUnit: false })).toBe('1,000');
+      expect(asTime(1000, { withUnit: false })).toEqual('1,000');
     });
 
     it('falls back to default value', () => {
-      expect(asTime(undefined, { defaultValue: 'nope' })).toBe('nope');
+      expect(asTime(undefined, { defaultValue: 'nope' })).toEqual('nope');
     });
   });
 
   describe('asPercent', () => {
-    it('should format item as percent', () => {
-      expect(asPercent(3725, 10000, 'n/a')).toBe('37.25%');
+    it('should divide and format item as percent', () => {
+      expect(asPercent(3725, 10000, 'n/a')).toEqual('37.3%');
+    });
+
+    it('should format when numerator is 0', () => {
+      expect(asPercent(0, 1, 'n/a')).toEqual('0.0%');
+    });
+
+    it('should return fallback when denominator is undefined', () => {
+      expect(asPercent(3725, undefined, 'n/a')).toEqual('n/a');
     });
 
     it('should return fallback when denominator is 0 ', () => {
-      expect(asPercent(3725, 0, 'n/a')).toBe('n/a');
-      expect(asPercent(3725, 0)).toBe('');
+      expect(asPercent(3725, 0, 'n/a')).toEqual('n/a');
     });
 
-    it('should return fallback when denominator is undefined ', () => {
-      expect(asPercent(3725, undefined, 'n/a')).toBe('n/a');
-      expect(asPercent(3725)).toBe('');
+    it('should return fallback when numerator or denominator is NaN', () => {
+      expect(asPercent(3725, NaN, 'n/a')).toEqual('n/a');
+      expect(asPercent(NaN, 10000, 'n/a')).toEqual('n/a');
     });
   });
 });

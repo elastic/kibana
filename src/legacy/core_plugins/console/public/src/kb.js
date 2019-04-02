@@ -22,7 +22,8 @@ import {
   IndexAutocompleteComponent,
   FieldAutocompleteComponent,
   ListComponent,
-  TemplateAutocompleteComponent
+  TemplateAutocompleteComponent,
+  UsernameAutocompleteComponent
 } from './autocomplete/components';
 
 import $ from 'jquery';
@@ -60,6 +61,12 @@ const parametrizedComponentFactories = {
   },
   id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
+  },
+  username: function (name, parent) {
+    return new UsernameAutocompleteComponent(name, parent);
+  },
+  user: function (name, parent) {
+    return new UsernameAutocompleteComponent(name, parent);
   },
   template: function (name, parent) {
     return new TemplateAutocompleteComponent(name, parent);

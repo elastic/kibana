@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { axisConfig } from '../axisConfig';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from '../__tests__/fixtures/test_tables';
@@ -59,7 +59,7 @@ describe('axisConfig', () => {
         expect(fn)
           .withArgs(testTable, { position: 'foo' })
           .to.throwException(e => {
-            expect(e.message).to.be('Invalid position foo');
+            expect(e.message).to.be(`Invalid position: 'foo'`);
           });
       });
     });
@@ -83,7 +83,7 @@ describe('axisConfig', () => {
           .withArgs(testTable, { min: 'foo' })
           .to.throwException(e => {
             expect(e.message).to.be(
-              `Invalid date string 'foo' found. 'min' must be a number, date in ms, or ISO8601 date string`
+              `Invalid date string: 'foo'. 'min' must be a number, date in ms, or ISO8601 date string`
             );
           });
       });
@@ -108,7 +108,7 @@ describe('axisConfig', () => {
           .withArgs(testTable, { max: '20/02/17' })
           .to.throwException(e => {
             expect(e.message).to.be(
-              `Invalid date string '20/02/17' found. 'max' must be a number, date in ms, or ISO8601 date string`
+              `Invalid date string: '20/02/17'. 'max' must be a number, date in ms, or ISO8601 date string`
             );
           });
       });

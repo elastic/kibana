@@ -6,12 +6,12 @@
 
 import Boom from 'boom';
 
-export async function callEsSearchApi({ callCluster, index, body }) {
+export async function callEsSearchApi({ callCluster, index, body, queryParams }) {
   try {
     return {
       ok: true,
       resp: await callCluster('search', {
-        rest_total_hits_as_int: true,
+        ...queryParams,
         index,
         body
       })

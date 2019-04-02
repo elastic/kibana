@@ -38,7 +38,7 @@ export abstract class Type<V> {
    */
   protected readonly internalSchema: AnySchema;
 
-  constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -62,7 +62,7 @@ export abstract class Type<V> {
     // only the last error handler is counted.
     const schemaFlags = (schema.describe().flags as Record<string, any>) || {};
     if (schemaFlags.error === undefined) {
-      schema = schema.error!(([error]) => this.onError(error));
+      schema = schema.error(([error]) => this.onError(error));
     }
 
     this.internalSchema = schema;

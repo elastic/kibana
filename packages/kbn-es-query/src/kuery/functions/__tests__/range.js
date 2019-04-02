@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as range from '../range';
 import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
@@ -83,6 +83,28 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
+
+      it('should return an ES range query without an index pattern', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  bytes: {
+                    gt: 1000,
+                    lt: 8000
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(node);
         expect(result).to.eql(expected);
       });
 

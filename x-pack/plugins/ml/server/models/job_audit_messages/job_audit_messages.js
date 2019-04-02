@@ -103,29 +103,50 @@ export function jobAuditMessagesProvider(callWithRequest) {
   }
 
   // search highest, most recent audit messages for all jobs for the last 24hrs.
-  async function getAuditMessagesSummary() {
+  async function getAuditMessagesSummary(jobIds) {
+    // TODO This is the current default value of the cluster setting `search.max_buckets`.
+    // This should possibly consider the real settings in a future update.
+    const maxBuckets = 10000;
+    let levelsPerJobAggSize = maxBuckets;
+
     try {
+      const query = {
+        bool: {
+          filter: [
+            {
+              range: {
+                timestamp: {
+                  gte: 'now-1d'
+                }
+              }
+            }
+          ]
+        }
+      };
+
+      // If the jobIds arg is supplied, add a query filter
+      // to only include those jobIds in the aggregations.
+      if (Array.isArray(jobIds) && jobIds.length > 0) {
+        query.bool.filter.push({
+          terms: {
+            job_id: jobIds
+          }
+        });
+        levelsPerJobAggSize = jobIds.length;
+      }
+
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
         size: 0,
         body: {
-          query: {
-            bool: {
-              filter: {
-                range: {
-                  timestamp: {
-                    gte: 'now-1d'
-                  }
-                }
-              }
-            }
-          },
+          query,
           aggs: {
             levelsPerJob: {
               terms: {
                 field: 'job_id',
+                size: levelsPerJobAggSize
               },
               aggs: {
                 levels: {

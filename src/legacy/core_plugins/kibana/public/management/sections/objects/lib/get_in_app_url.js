@@ -28,7 +28,7 @@ export function getInAppUrl(id, type) {
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
-      return `/management/kibana/indices/${id}`;
+      return `/management/kibana/index_patterns/${id}`;
     case 'dashboard':
     case 'dashboards':
       return `/dashboard/${id}`;

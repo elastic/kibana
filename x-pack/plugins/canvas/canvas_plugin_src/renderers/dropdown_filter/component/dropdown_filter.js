@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon } from '@elastic/eui';
-import './dropdown_filter.scss';
 
 export const DropdownFilter = ({ value, onChange, commit, choices }) => {
   const options = [{ value: '%%CANVAS_MATCH_ALL%%', text: '-- ANY --' }];

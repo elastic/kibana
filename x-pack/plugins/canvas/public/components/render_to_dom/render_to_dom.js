@@ -21,7 +21,9 @@ export class RenderToDom extends React.Component {
 
   componentDidUpdate() {
     // Calls render function once we have the reference to the DOM element to render into
-    if (this.props.domNode) this.props.render(this.props.domNode);
+    if (this.props.domNode) {
+      this.props.render(this.props.domNode);
+    }
   }
 
   render() {

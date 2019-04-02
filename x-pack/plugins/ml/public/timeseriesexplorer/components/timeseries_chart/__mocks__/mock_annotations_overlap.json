@@ -1,0 +1,54 @@
+[
+  {
+    "timestamp": 1454810815950,
+    "end_timestamp": 1455060155890,
+    "annotation": "Still learning the model.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1546530633618,
+    "create_username": "<user unknown>",
+    "modified_time": 1546530633618,
+    "modified_username": "<user unknown>",
+    "_id": "6bpoFGgBrdsAtoAOt0WT",
+    "key": "A"
+  },
+  {
+    "timestamp": 1455020901845,
+    "end_timestamp": 1455075725930,
+    "annotation": "Overlapping annotation.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1546530659999,
+    "create_username": "<user unknown>",
+    "modified_time": 1546530659999,
+    "modified_username": "<user unknown>",
+    "_id": "6rppFGgBrdsAtoAOHkWg",
+    "key": "B"
+  },
+  {
+    "timestamp": 1455027864892,
+    "end_timestamp": 1455042003613,
+    "annotation": "Massive spike.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1546512778313,
+    "create_username": "<user unknown>",
+    "modified_time": 1546512778313,
+    "modified_username": "<user unknown>",
+    "_id": "Gl5YE2gBBwRksc9URChP",
+    "key": "C"
+  },
+  {
+    "timestamp": 1455063006742,
+    "end_timestamp": 1455230768443,
+    "annotation": "Learned the model.",
+    "job_id": "farequote",
+    "type": "annotation",
+    "create_time": 1546530615480,
+    "create_username": "<user unknown>",
+    "modified_time": 1546530615480,
+    "modified_username": "<user unknown>",
+    "_id": "6LpoFGgBrdsAtoAOcEW7",
+    "key": "D"
+  }
+]

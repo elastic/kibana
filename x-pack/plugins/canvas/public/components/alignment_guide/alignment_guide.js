@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import aero from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const AlignmentGuide = ({ transformMatrix, width, height }) => {
   const newStyle = {
@@ -16,7 +16,7 @@ export const AlignmentGuide = ({ transformMatrix, width, height }) => {
     marginTop: -height / 2,
     background: 'magenta',
     position: 'absolute',
-    transform: aero.dom.matrixToCSS(transformMatrix),
+    transform: matrixToCSS(transformMatrix),
   };
   return (
     <div

@@ -21,7 +21,7 @@ function getDates(apmTimeseries: ApmTimeSeriesResponse) {
 
 export async function getChartsData(options: {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   transactionName?: string;
   setup: Setup;
 }): Promise<TimeSeriesAPIResponse> {

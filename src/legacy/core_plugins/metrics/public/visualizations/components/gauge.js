@@ -20,6 +20,8 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import classNames from 'classnames';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import getLastValue from '../../../common/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import GaugeVis from './gauge_vis';
@@ -96,8 +98,8 @@ class Gauge extends Component {
     }, this.props);
 
     const gaugeProps = {
-      reversed: this.props.reversed,
       value,
+      reversed: isBackgroundDark(this.props.backgroundColor),
       gaugeLine: this.props.gaugeLine,
       innerLine: this.props.innerLine,
       innerColor: this.props.innerColor,
@@ -158,10 +160,15 @@ class Gauge extends Component {
         </div>
       );
     }
-    let className = type === 'half' ? 'tvbVisHalfGauge' : 'tvbVisCircleGauge';
-    if (this.props.reversed) className = `${className} tvbVisGauge--reversed`;
+
+    const classes = classNames({
+      'tvbVisHalfGauge': type === 'half',
+      'tvbVisCircleGauge': type === 'circle',
+      'tvbVisGauge--reversed': isBackgroundInverted(this.props.backgroundColor),
+    });
+
     return (
-      <div className={className}>
+      <div className={classes}>
         <div
           ref={(el) => this.resize = el}
           className={`tvbVisGauge__resize`}
@@ -187,7 +194,7 @@ Gauge.propTypes = {
   innerLine: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric: PropTypes.object,
-  reversed: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   type: PropTypes.oneOf(['half', 'circle']),
   valueColor: PropTypes.string,
   additionalLabel: PropTypes.string

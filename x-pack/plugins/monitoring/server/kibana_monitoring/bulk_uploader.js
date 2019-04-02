@@ -48,7 +48,7 @@ export class BulkUploader {
       warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
+    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
@@ -66,7 +66,13 @@ export class BulkUploader {
 
     // this is internal bulk upload, so filter out API-only collectors
     const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.ignoreForInternalUploader !== true);
-    this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+
+    if (this._timer) {
+      clearInterval(this._timer);
+    } else {
+      this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+    }
+
     this._timer = setInterval(() => {
       this._fetchAndUpload(filterThem(collectorSet));
     }, this._interval);
@@ -103,7 +109,8 @@ export class BulkUploader {
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(payload);
+        await this._onPayload(payload);
+        this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
@@ -114,7 +121,7 @@ export class BulkUploader {
   }
 
   _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload);
+    return sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*

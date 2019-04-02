@@ -19,7 +19,7 @@
 
 import { buildQueryFromKuery } from '../from_kuery';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 
 describe('build query', function () {
@@ -56,7 +56,7 @@ describe('build query', function () {
       const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
 
       expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery], true).to.throwError(
-        /It looks like you're using an outdated Kuery syntax./
+        /OutdatedKuerySyntaxError/
       );
     });
 

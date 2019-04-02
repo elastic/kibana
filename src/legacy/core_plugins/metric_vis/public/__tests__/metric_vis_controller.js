@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MetricVisComponent } from '../metric_vis_controller';
 
 describe('metric vis controller', function () {
@@ -29,52 +29,45 @@ describe('metric vis controller', function () {
         colorsRange: [
           { from: 0, to: 1000 }
         ],
-        style: {}
+        style: {},
+      }, dimensions: {
+        metrics: [{ accessor: 0 }],
+        bucket: null,
       }
     }
-  };
-
-  const formatter = function (value) {
-    return value.toFixed(3);
-  };
-
-  const aggConfig = {
-    fieldFormatter: () => {
-      return formatter;
-    },
-    type: {}
   };
 
   let metricController;
 
   beforeEach(() => {
-    metricController = new MetricVisComponent({ vis: vis });
+    metricController = new MetricVisComponent({ vis: vis, visParams: vis.params });
   });
 
   it('should set the metric label and value', function () {
     const metrics = metricController._processTableGroups({
-      columns: [{ id: 'col-0', title: 'Count', aggConfig: { ...aggConfig, makeLabel: () => 'Count' } }],
+      columns: [{ id: 'col-0', name: 'Count' }],
       rows: [{ 'col-0': 4301021 }]
     });
 
     expect(metrics.length).to.be(1);
     expect(metrics[0].label).to.be('Count');
-    expect(metrics[0].value).to.be('4301021.000');
+    expect(metrics[0].value).to.be(4301021);
   });
 
   it('should support multi-value metrics', function () {
+    vis.params.dimensions.metrics.push({ accessor: 1 });
     const metrics = metricController._processTableGroups({
       columns: [
-        { id: 'col-0', aggConfig: { ...aggConfig, makeLabel: () => '1st percentile of bytes' } },
-        { id: 'col-1', aggConfig: { ...aggConfig, makeLabel: () => '99th percentile of bytes' } }
+        { id: 'col-0', name: '1st percentile of bytes' },
+        { id: 'col-1', name: '99th percentile of bytes' }
       ],
       rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }]
     });
 
     expect(metrics.length).to.be(2);
     expect(metrics[0].label).to.be('1st percentile of bytes');
-    expect(metrics[0].value).to.be('182.000');
+    expect(metrics[0].value).to.be(182);
     expect(metrics[1].label).to.be('99th percentile of bytes');
-    expect(metrics[1].value).to.be('445842.463');
+    expect(metrics[1].value).to.be(445842.4634666484);
   });
 });

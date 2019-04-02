@@ -16,6 +16,7 @@ import React from 'react';
 import {
   EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function AddToFilterListLink({
   fieldValue,
@@ -27,7 +28,11 @@ export function AddToFilterListLink({
     <EuiLink
       onClick={() => addItemToFilterList(fieldValue, filterId, true)}
     >
-      Add {fieldValue} to {filterId}
+      <FormattedMessage
+        id="xpack.ml.ruleEditor.addValueToFilterListLinkText"
+        defaultMessage="Add {fieldValue} to {filterId}"
+        values={{ fieldValue, filterId }}
+      />
     </EuiLink>
   );
 }

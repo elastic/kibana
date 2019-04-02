@@ -17,7 +17,9 @@ export const gt = () => ({
     },
   },
   fn: (context, args) => {
-    if (typeof context !== typeof args.value) return false;
+    if (typeof context !== typeof args.value) {
+      return false;
+    }
     return context > args.value;
   },
 });

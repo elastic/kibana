@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { sort } from '../sort';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from './fixtures/test_tables';
@@ -13,7 +13,9 @@ describe('sort', () => {
   const fn = functionWrapper(sort);
 
   const isSorted = (rows, column, reverse) => {
-    if (reverse) return !rows.some((row, i) => rows[i + 1] && row[column] < rows[i + 1][column]);
+    if (reverse) {
+      return !rows.some((row, i) => rows[i + 1] && row[column] < rows[i + 1][column]);
+    }
     return !rows.some((row, i) => rows[i + 1] && row[column] > rows[i + 1][column]);
   };
 

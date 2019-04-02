@@ -47,8 +47,9 @@ export class Router extends React.PureComponent {
 
       if (!component) {
         // TODO: render some kind of 404 page, maybe from a prop?
-        if (process.env.NODE_ENV !== 'production')
+        if (process.env.NODE_ENV !== 'production') {
           console.warn(`No component defined on route: ${route.name}`);
+        }
 
         return;
       }
@@ -73,8 +74,9 @@ export class Router extends React.PureComponent {
 
   render() {
     // show loading
-    if (this.props.showLoading)
+    if (this.props.showLoading) {
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
+    }
 
     // show the activeComponent
     return isClassComponent(this.state.activeComponent)

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as is from '../is';
 import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
@@ -140,6 +140,21 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
         const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
+
+      it('should return an ES match query when a concrete fieldName and value are provided without an index pattern', function () {
+        const expected = {
+          bool: {
+            should: [
+              { match: { extension: 'jpg' } },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const result = is.toElasticsearchQuery(node);
         expect(result).to.eql(expected);
       });
 

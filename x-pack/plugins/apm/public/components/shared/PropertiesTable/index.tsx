@@ -5,26 +5,17 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import _ from 'lodash';
+import { EuiLink } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-
+import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/ui/fields/Agent';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
-import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-// @ts-ignore
-import { ExternalLink } from '../../../utils/url';
-import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
-import PROPERTY_CONFIG from './propertyConfig.json';
-
-const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
+import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
+import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';
+import { NestedKeyValueTable } from './NestedKeyValueTable';
+import { PropertyTabKey } from './tabConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -34,45 +25,60 @@ const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   line-height: 1.5;
 `;
 
 const TableInfoHeader = styled(TableInfo)`
   font-size: ${fontSizes.large};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
 `;
 
 const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export function getPropertyTabNames(selected: string[]): string[] {
-  return PROPERTY_CONFIG.filter(
-    ({ key, required }: { key: string; required: boolean }) =>
-      required || selected.includes(key)
-  ).map(({ key }: { key: string }) => key);
-}
-
-function getAgentFeatureText(featureName: string) {
-  switch (featureName) {
+function getTabHelpText(tabKey: PropertyTabKey) {
+  switch (tabKey) {
     case 'user':
-      return 'You can configure your agent to add contextual information about your users.';
-    case 'tags':
-      return 'You can configure your agent to add filterable tags on transactions.';
-    case 'custom':
-      return 'You can configure your agent to add custom contextual information on transactions.';
+      return i18n.translate(
+        'xpack.apm.propertiesTable.userTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add contextual information about your users.'
+        }
+      );
+    case 'labels':
+      return i18n.translate(
+        'xpack.apm.propertiesTable.labelsTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add filterable tags on transactions.'
+        }
+      );
+    case 'transaction.custom':
+    case 'error.custom':
+      return i18n.translate(
+        'xpack.apm.propertiesTable.customTab.agentFeatureText',
+        {
+          defaultMessage:
+            'You can configure your agent to add custom contextual information on transactions.'
+        }
+      );
   }
 }
 
-export function AgentFeatureTipMessage({
-  featureName,
+export function TabHelpMessage({
+  tabKey,
   agentName
 }: {
-  featureName: string;
-  agentName?: string;
+  tabKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
-  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!tabKey) {
+    return null;
+  }
+  const docsUrl = getAgentDocUrlForTab(tabKey, agentName);
   if (!docsUrl) {
     return null;
   }
@@ -80,47 +86,40 @@ export function AgentFeatureTipMessage({
   return (
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
-      {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
-        Learn more in the documentation.
-      </ExternalLink>
+      {getTabHelpText(tabKey)}{' '}
+      <EuiLink target="_blank" rel="noopener" href={docsUrl}>
+        {i18n.translate(
+          'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
+          { defaultMessage: 'Learn more in the documentation.' }
+        )}
+      </EuiLink>
     </TableInfo>
   );
 }
-
-export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const presorted = _.get(
-    indexedPropertyConfig,
-    `${currentKey}.presortedKeys`,
-    []
-  );
-  return _.uniq([...presorted, ...Object.keys(object).sort()]);
-};
 
 export function PropertiesTable({
   propData,
   propKey,
   agentName
 }: {
-  propData: StringMap<any>;
-  propKey: string;
-  agentName?: string;
+  propData?: StringMap;
+  propKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
-  const hasPropData = !_.isEmpty(propData);
-
   return (
     <TableContainer>
-      {hasPropData ? (
-        <NestedKeyValueTable
-          data={propData}
-          parentKey={propKey}
-          keySorter={sortKeysByConfig}
-          depth={1}
-        />
+      {propData ? (
+        <NestedKeyValueTable data={propData} parentKey={propKey} depth={1} />
       ) : (
-        <TableInfoHeader>No data available</TableInfoHeader>
+        <TableInfoHeader>
+          {i18n.translate(
+            'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+            { defaultMessage: 'No data available' }
+          )}
+        </TableInfoHeader>
       )}
-      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
+
+      <TabHelpMessage tabKey={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

@@ -33,7 +33,7 @@ async function fetchPolicies(callWithRequest) {
 
   return await callWithRequest('transport.request', params);
 }
-async function addCoveredIndices(policiesMap, callWithRequest) {
+async function addLinkedIndices(policiesMap, callWithRequest) {
   if (policiesMap.status === 404) {
     return policiesMap;
   }
@@ -46,9 +46,9 @@ async function addCoveredIndices(policiesMap, callWithRequest) {
 
   const policyExplanation = await callWithRequest('transport.request', params);
   Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
-    if (policy) {
-      policiesMap[policy].coveredIndices = policiesMap[policy].coveredIndices || [];
-      policiesMap[policy].coveredIndices.push(indexName);
+    if (policy && policiesMap[policy]) {
+      policiesMap[policy].linkedIndices = policiesMap[policy].linkedIndices || [];
+      policiesMap[policy].linkedIndices.push(indexName);
     }
   });
 }
@@ -66,7 +66,7 @@ export function registerFetchRoute(server) {
       try {
         const policiesMap = await fetchPolicies(callWithRequest);
         if (withIndices) {
-          await addCoveredIndices(policiesMap, callWithRequest);
+          await addLinkedIndices(policiesMap, callWithRequest);
         }
         return formatPolicies(policiesMap);
       } catch (err) {

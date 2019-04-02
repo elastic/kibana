@@ -12,10 +12,15 @@ export const timeDuration = (time, format) => {
   const hours = minutes / 60;
   const days = hours / 24;
 
-  if (format === 'days' || days >= 1) return { length: days, format: getLabel('day', days) };
-  if (format === 'hours' || hours >= 1) return { length: hours, format: getLabel('hour', hours) };
-  if (format === 'minutes' || minutes >= 1)
+  if (format === 'days' || days >= 1) {
+    return { length: days, format: getLabel('day', days) };
+  }
+  if (format === 'hours' || hours >= 1) {
+    return { length: hours, format: getLabel('hour', hours) };
+  }
+  if (format === 'minutes' || minutes >= 1) {
     return { length: seconds / 60, format: getLabel('minute', minutes) };
+  }
   return { length: seconds, format: getLabel('second', seconds) };
 };
 

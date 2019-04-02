@@ -1,3 +1,4 @@
+[role="xpack"]
 [[visualize-rollup-data]]
 === Create a visualization using rolled up data
 
@@ -15,10 +16,15 @@ an item for creating a rollup index pattern, if a rollup index is detected in th
 image::images/management_create_rollup_menu.png[Create index pattern menu]
 
 You can match an index pattern to only rolled up data, or mix both rolled up 
-and raw data to visualize all data together.  An index 
-pattern can match only one rolled up index, not multiple. There is no restriction 
-on the number of standard indices that an index pattern can match. To match multiple indices, use a comma 
-to separate the names, with no space after the comma. 
+and raw data to visualize all data together.  An index pattern can match only one 
+rolled up index, not multiple. There is no restriction on the number of standard 
+indices that an index pattern can match. 
+
+Combination index patterns use the same 
+notation as other multiple indices in {es}. To match multiple indices to create a 
+combination index pattern, use a comma to separate the names, with no space after the comma. 
+The notation for wildcards (`*`) and the ability to "exclude" (`-`) also apply 
+(for example, `test*,-test3`).
 
 When creating an index pattern, you’re asked to set a time field for filtering.  
 With a rollup index, the time filter field is the same field used for 

@@ -20,6 +20,7 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
+import { fromRoot } from '../legacy/utils';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -29,7 +30,7 @@ export default async (kbnServer, server, config) => {
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* and dlls/*
+  // on the watch setup managed by the cli. It proxies all bundles/* and built_assets/dlls/*
   // requests to the other server. The server on 5602 is long running, in order
   // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
@@ -41,7 +42,8 @@ export default async (kbnServer, server, config) => {
   server.route(createBundlesRoute({
     regularBundlesPath: uiBundles.getWorkingDir(),
     dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-    basePublicPath: config.get('server.basePath')
+    basePublicPath: config.get('server.basePath'),
+    builtCssPath: fromRoot('built_assets/css'),
   }));
 
   // in prod, only bundle when something is missing or invalid
@@ -62,10 +64,11 @@ export default async (kbnServer, server, config) => {
 
   // only require the FsOptimizer when we need to
   const optimizer = new FsOptimizer({
-    log: (tags, data) => server.log(tags, data),
+    logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
+    workers: config.get('optimize.workers'),
   });
 
   server.log(

@@ -11,15 +11,15 @@ import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { ThemeProvider } from 'styled-components';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
+import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
+import { ApolloClientContext } from '../utils/apollo_context';
 
 export async function startApp(libs: InfraFrontendLibs) {
   const history = createHashHistory();
@@ -31,18 +31,20 @@ export async function startApp(libs: InfraFrontendLibs) {
   });
 
   libs.framework.render(
-    <I18nProvider>
+    <I18nContext>
       <EuiErrorBoundary>
         <ConstateProvider devtools>
           <ReduxStoreProvider store={store}>
             <ApolloProvider client={libs.apolloClient}>
-              <ThemeProvider theme={{ eui: euiVars }}>
-                <PageRouter history={history} />
-              </ThemeProvider>
+              <ApolloClientContext.Provider value={libs.apolloClient}>
+                <EuiThemeProvider darkMode={libs.framework.darkMode}>
+                  <PageRouter history={history} />
+                </EuiThemeProvider>
+              </ApolloClientContext.Provider>
             </ApolloProvider>
           </ReduxStoreProvider>
         </ConstateProvider>
       </EuiErrorBoundary>
-    </I18nProvider>
+    </I18nContext>
   );
 }

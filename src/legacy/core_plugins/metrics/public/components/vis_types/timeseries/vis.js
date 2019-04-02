@@ -19,12 +19,15 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { toastNotifications } from 'ui/notify';
+import { MarkdownSimple } from 'ui/markdown';
+
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
-import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
+import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
 function hasSeparateAxis(row) {
@@ -33,20 +36,10 @@ function hasSeparateAxis(row) {
 
 class TimeseriesVisualization extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   getInterval = () => {
     const { visData, model } = this.props;
-    const series = _.get(visData, `${model.id}.series`, []);
-    return series.reduce((currentInterval, item) => {
-      if (item.data.length > 1) {
-        const seriesInterval = item.data[1][0] - item.data[0][0];
-        if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
-      }
-      return currentInterval;
-    }, 0);
+
+    return getInterval(visData, model);
   }
 
   xaxisFormatter = (val) => {
@@ -54,12 +47,35 @@ class TimeseriesVisualization extends Component {
     if (!scaledDataFormat || !dateFormat) return val;
     const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
     return formatter(val);
+  };
+
+  componentDidUpdate() {
+    if (this.showToastNotification && this.notificationReason !== this.showToastNotification.reason) {
+      if (this.notification) {
+        toastNotifications.remove(this.notification);
+      }
+
+      this.notificationReason = this.showToastNotification.reason;
+      this.notification = toastNotifications.addDanger({
+        title: this.showToastNotification.title,
+        text: <MarkdownSimple>{this.showToastNotification.reason}</MarkdownSimple>,
+      });
+    }
+
+    if (!this.showToastNotification && this.notification) {
+      toastNotifications.remove(this.notification);
+      this.notificationReason = null;
+      this.notification = null;
+    }
   }
 
   render() {
     const { backgroundColor, model, visData } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
+
+    this.showToastNotification = null;
+
     if (model.annotations && Array.isArray(model.annotations)) {
       annotations = model.annotations.map(annotation => {
         const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
@@ -70,7 +86,15 @@ class TimeseriesVisualization extends Component {
           icon: annotation.icon,
           series: data.map(s => {
             return [s[0], s[1].map(doc => {
-              return replaceVars(annotation.template, null, doc);
+              const vars = replaceVars(annotation.template, null, doc);
+
+              if (vars instanceof Error) {
+                this.showToastNotification = vars.error.caused_by;
+
+                return annotation.template;
+              }
+
+              return vars;
             })];
           })
         };
@@ -175,15 +199,18 @@ class TimeseriesVisualization extends Component {
       });
     }
 
+    const panelBackgroundColor = model.background_color || backgroundColor;
+    const style = { backgroundColor: panelBackgroundColor };
+
     const params = {
       dateFormat: this.props.dateFormat,
       crosshair: true,
       tickFormatter: formatter,
       legendPosition: model.legend_position || 'right',
+      backgroundColor: panelBackgroundColor,
       series,
       annotations,
       yaxes,
-      reversed: this.props.reversed,
       showGrid: Boolean(model.show_grid),
       legend: Boolean(model.show_legend),
       xAxisFormatter: this.xaxisFormatter,
@@ -191,15 +218,11 @@ class TimeseriesVisualization extends Component {
         if (this.props.onBrush) this.props.onBrush(ranges);
       }
     };
+
     if (interval) {
       params.xaxisLabel = getAxisLabelString(interval);
     }
-    const style = { };
-    const panelBackgroundColor = model.background_color || backgroundColor;
-    if (panelBackgroundColor) {
-      style.backgroundColor = panelBackgroundColor;
-      params.reversed = color(panelBackgroundColor || backgroundColor).luminosity() < 0.45;
-    }
+
     return (
       <div className="tvbVis" style={style}>
         <Timeseries {...params}/>
@@ -216,9 +239,9 @@ TimeseriesVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
 };
 
 export default TimeseriesVisualization;

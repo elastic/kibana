@@ -9,6 +9,7 @@ import moment from 'moment';
 import { get, groupBy } from 'lodash';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 function getBucketScript(max, min) {
   return {
@@ -185,7 +186,7 @@ export function ccrRoute(server) {
     async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

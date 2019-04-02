@@ -19,6 +19,7 @@
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
+  const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.header.clickGlobalNavigationLink('Embedding Vis');
+      await appsMenu.clickLink('Embedding Vis');
     });
 
     loadTestFile(require.resolve('./embed_by_id'));

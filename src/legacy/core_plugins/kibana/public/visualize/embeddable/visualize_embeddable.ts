@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { Filters, Query, TimeRange } from 'ui/embeddable/types';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
@@ -33,6 +34,7 @@ import {
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedVisualization: VisSavedObject;
+  indexPatterns?: StaticIndexPattern[];
   editUrl?: string;
   loader: VisualizeLoader;
 }
@@ -52,15 +54,14 @@ export class VisualizeEmbeddable extends Embeddable {
   constructor({
     onEmbeddableStateChanged,
     savedVisualization,
+    indexPatterns,
     editUrl,
     loader,
   }: VisualizeEmbeddableConfiguration) {
     super({
-      metadata: {
-        title: savedVisualization.title,
-        editUrl,
-        indexPattern: savedVisualization.vis.indexPattern,
-      },
+      title: savedVisualization.title,
+      editUrl,
+      indexPatterns,
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
@@ -189,6 +190,12 @@ export class VisualizeEmbeddable extends Embeddable {
     if (this.handler) {
       this.handler.destroy();
       this.handler.getElement().remove();
+    }
+  }
+
+  public reload() {
+    if (this.handler) {
+      this.handler.reload();
     }
   }
 

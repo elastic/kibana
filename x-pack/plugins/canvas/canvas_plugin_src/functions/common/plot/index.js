@@ -88,7 +88,9 @@ export const plot = () => ({
             set(flotStyle, 'bubbles.size.min', seriesStyle.points);
           }
 
-          if (point.text != null) attrs.text = point.text;
+          if (point.text != null) {
+            attrs.text = point.text;
+          }
 
           return [x, y, attrs];
         }),

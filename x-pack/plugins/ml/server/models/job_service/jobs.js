@@ -5,6 +5,7 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -89,14 +90,19 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsSummary(jobIds = []) {
     const fullJobsList = await createFullJobsList();
-    const auditMessages = await getAuditMessagesSummary();
+    const fullJobsIds = fullJobsList.map(job => job.job_id);
+    const auditMessages = await getAuditMessagesSummary(fullJobsIds);
     const auditMessagesByJob = auditMessages.reduce((p, c) => {
       p[c.job_id] = c;
       return p;
     }, {});
 
+    const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
+      defaultMessage: 'deleting',
+    });
+
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const {
         earliest: earliestTimestampMs,
         latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
@@ -107,20 +113,22 @@ export function jobsProvider(callWithRequest) {
         groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
         processed_record_count: job.data_counts.processed_record_count,
         memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
-        jobState: job.state,
+        jobState: (job.deleting === true) ? deletingStr : job.state,
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
+        datafeedIndices: (hasDatafeed && job.datafeed_config.indices) ? job.datafeed_config.indices : [],
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimestampMs,
         earliestTimestampMs,
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
+        deleting: (job.deleting || undefined),
       };
       if (jobIds.find(j => (j === tempJob.id))) {
         tempJob.fullJob = job;
       }
       const auditMessage = auditMessagesByJob[tempJob.id];
-      if (auditMessage !== undefined) {
+      if (auditMessage !== undefined && job.create_time <= auditMessage.msgTime) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
           text: auditMessage.highestLevelText
@@ -139,13 +147,19 @@ export function jobsProvider(callWithRequest) {
     const groups = {};
     const datafeeds = {};
     const calendarsByJobId = {};
-    const results = await Promise.all([
+    const requests = (jobIds.length > 0) ? [
       callWithRequest('ml.jobs', { jobId: jobIds }),
-      callWithRequest('ml.jobStats', { jobId: jobIds }),
+      callWithRequest('ml.jobStats', { jobId: jobIds })
+    ] : [
+      callWithRequest('ml.jobs'),
+      callWithRequest('ml.jobStats'),
+    ];
+    requests.push(
       callWithRequest('ml.datafeeds'),
       callWithRequest('ml.datafeedStats'),
-      calMngr.getAllCalendars(),
-    ]);
+      calMngr.getAllCalendars());
+
+    const results = await Promise.all(requests);
 
     if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
       results[DATAFEEDS].datafeeds.forEach((datafeed) => {
@@ -258,11 +272,33 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
+  async function deletingJobTasks() {
+    const actions = ['cluster:admin/xpack/ml/job/delete'];
+    const detailed = true;
+    const jobIds = [];
+    try {
+      const tasksList =  await callWithRequest('tasks.list', { actions, detailed });
+      Object.keys(tasksList.nodes).forEach((nodeId) => {
+        const tasks = tasksList.nodes[nodeId].tasks;
+        Object.keys(tasks).forEach((taskId) => {
+          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
+        });
+      });
+    } catch (e) {
+      // if the user doesn't have permission to load the task list,
+      // use the jobs list to get the ids of deleting jobs
+      const { jobs } = await callWithRequest('ml.jobs');
+      jobIds.push(...jobs.filter(j => j.deleting === true).map(j => j.job_id));
+    }
+    return { jobIds };
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
     jobsSummary,
     createFullJobsList,
+    deletingJobTasks,
   };
 }

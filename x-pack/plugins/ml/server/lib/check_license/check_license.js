@@ -6,6 +6,7 @@
 
 
 import { LICENSE_TYPE } from '../../../common/constants/license';
+import { i18n } from '@kbn/i18n';
 
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
@@ -15,7 +16,9 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: 'You cannot use Machine Learning because license information is not available at this time.'
+      message: i18n.translate('xpack.ml.checkLicense.licenseInformationNotAvailableThisTimeMessage', {
+        defaultMessage: 'You cannot use Machine Learning because license information is not available at this time.'
+      })
     };
   }
 
@@ -25,7 +28,9 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: false,
       enableLinks: false,
-      message: 'Machine Learning is unavailable'
+      message: i18n.translate('xpack.ml.checkLicense.mlIsUnavailableMessage', {
+        defaultMessage: 'Machine Learning is unavailable'
+      })
     };
   }
 
@@ -47,7 +52,10 @@ export function checkLicense(xpackLicenseInfo) {
       enableLinks: true,
       hasExpired: true,
       licenseType,
-      message: `Your ${licenseTypeName} Machine Learning license has expired.`
+      message: i18n.translate('xpack.ml.checkLicense.licenseHasExpiredMessage', {
+        defaultMessage: 'Your {licenseTypeName} Machine Learning license has expired.',
+        values: { licenseTypeName }
+      })
     };
   }
 

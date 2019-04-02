@@ -26,13 +26,19 @@ import {
 import { has } from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { SelectSeverity } from '../../../../../components/controls/select_severity/select_severity';
 import { mlCreateWatchService } from './create_watch_service';
 const STATUS = mlCreateWatchService.STATUS;
 
-export class CreateWatch extends Component {
+export const CreateWatch = injectI18n(class CreateWatch extends Component {
+  static propTypes = {
+    jobId: PropTypes.string.isRequired,
+    bucketSpan: PropTypes.string.isRequired
+  };
+
   constructor(props) {
     super(props);
     mlCreateWatchService.reset();
@@ -111,6 +117,7 @@ export class CreateWatch extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     const mlSelectSeverityService = {
       state: {
         set: (name, threshold) => {
@@ -136,13 +143,22 @@ export class CreateWatch extends Component {
                   htmlFor="selectInterval"
                   className="euiFormLabel"
                 >
-                  Time range
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.createWatchView.timeRangeLabel"
+                    defaultMessage="Time range"
+                  />
                 </label>
               </div>
-              Now - <EuiFieldText
-                id="selectInterval"
-                value={this.state.interval}
-                onChange={this.onIntervalChange}
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.createWatchView.nowLabel"
+                defaultMessage="Now - {selectInterval}"
+                values={{ selectInterval: (
+                  <EuiFieldText
+                    id="selectInterval"
+                    value={this.state.interval}
+                    onChange={this.onIntervalChange}
+                  />
+                ) }}
               />
             </div>
 
@@ -152,7 +168,10 @@ export class CreateWatch extends Component {
                   htmlFor="selectSeverity"
                   className="euiFormLabel"
                 >
-                Severity threshold
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.createWatchView.severityThresholdLabel"
+                    defaultMessage="Severity threshold"
+                  />
                 </label>
               </div>
               <div className="dropdown-group">
@@ -169,7 +188,10 @@ export class CreateWatch extends Component {
             <div className="form-group">
               <EuiCheckbox
                 id="includeEmail"
-                label="Send email"
+                label={<FormattedMessage
+                  id="xpack.ml.newJob.simple.createWatchView.sendEmailLabel"
+                  defaultMessage="Send email"
+                />}
                 checked={this.state.includeEmail}
                 onChange={this.onIncludeEmailChanged}
               />
@@ -179,8 +201,14 @@ export class CreateWatch extends Component {
                   <EuiFieldText
                     value={this.state.email}
                     onChange={this.onEmailChange}
-                    placeholder="email address"
-                    aria-label="Watch email address"
+                    placeholder={intl.formatMessage({
+                      id: 'xpack.ml.newJob.simple.createWatchView.emailAddressPlaceholder',
+                      defaultMessage: 'email address'
+                    })}
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.ml.newJob.simple.createWatchView.watchEmailAddressAriaLabel',
+                      defaultMessage: 'Watch email address'
+                    })}
                   />
                 </div>
               }
@@ -189,21 +217,28 @@ export class CreateWatch extends Component {
           {
             this.state.watchAlreadyExists &&
             <EuiCallOut
-              title={`Warning, watch ml-${this.state.jobId} already exists, clicking apply will overwrite the original.`}
+              title={<FormattedMessage
+                id="xpack.ml.newJob.simple.createWatchView.watchAlreadyExistsWarningMessage"
+                defaultMessage="Warning, watch ml-{jobId} already exists, clicking apply will overwrite the original."
+                values={{
+                  jobId: this.state.jobId
+                }}
+              />}
             />
           }
         </div>
       );
     } else if (status === STATUS.SAVED) {
       return (
-        <div>Success</div>
+        <div>
+          <FormattedMessage
+            id="xpack.ml.newJob.simple.createWatchView.successLabel"
+            defaultMessage="Success"
+          />
+        </div>
       );
     } else {
       return (<div />);
     }
   }
-}
-CreateWatch.propTypes = {
-  jobId: PropTypes.string.isRequired,
-  bucketSpan: PropTypes.string.isRequired,
-};
+});

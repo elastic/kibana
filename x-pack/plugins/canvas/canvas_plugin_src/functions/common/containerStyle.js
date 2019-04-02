@@ -67,8 +67,9 @@ export const containerStyle = () => ({
     };
 
     if (backgroundImage) {
-      if (!isValidUrl(backgroundImage))
+      if (!isValidUrl(backgroundImage)) {
         throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
+      }
       style.backgroundImage = `url(${backgroundImage})`;
       style.backgroundSize = backgroundSize;
       style.backgroundRepeat = backgroundRepeat;

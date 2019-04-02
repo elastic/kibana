@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,6 +39,9 @@ export default function ({ getService }) {
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
               version: resp.body.version,
+              migrationVersion: {
+                visualization: '7.1.0',
+              },
               attributes: {
                 title: 'Count of requests',
                 description: '',
@@ -47,7 +50,12 @@ export default function ({ getService }) {
                 visState: resp.body.attributes.visState,
                 uiStateJSON: resp.body.attributes.uiStateJSON,
                 kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta
-              }
+              },
+              references: [{
+                type: 'index-pattern',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+              }],
             });
           })
       ));

@@ -23,36 +23,58 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import chrome from 'ui/chrome';
-import { checkPermission } from '../../../privilege/check_privilege';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 
-function UsedByIcon({ usedBy }) {
+
+const UsedByIcon = injectI18n(function ({ usedBy, intl }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
   // the filter list is in use in a detectors in any jobs.
   let icon;
   if (usedBy !== undefined && usedBy.jobs.length > 0) {
-    icon = <EuiIcon type="check" aria-label="In use"/>;
+    icon = (
+      <EuiIcon
+        type="check"
+        aria-label={intl.formatMessage({
+          id: 'xpack.ml.settings.filterLists.table.inUseAriaLabel',
+          defaultMessage: 'In use',
+        })}
+      />
+    );
   } else {
-    icon = <EuiIcon type="cross" aria-label="Not in use"/>;
+    icon = (
+      <EuiIcon
+        type="cross"
+        aria-label={intl.formatMessage({
+          id: 'xpack.ml.settings.filterLists.table.notInUseAriaLabel',
+          defaultMessage: 'Not in use',
+        })}
+      />
+    );
   }
 
   return icon;
-}
-UsedByIcon.propTypes = {
+});
+
+UsedByIcon.WrappedComponent.propTypes = {
   usedBy: PropTypes.object
 };
 
-function NewFilterButton() {
-  const canCreateFilter = checkPermission('canCreateFilter');
+function NewFilterButton({ canCreateFilter }) {
   return (
     <EuiButton
       key="new_filter_list"
       href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
       isDisabled={(canCreateFilter === false)}
     >
-      New
+      <FormattedMessage
+        id="xpack.ml.settings.filterLists.table.newButtonLabel"
+        defaultMessage="New"
+      />
     </EuiButton>
   );
 }
@@ -62,7 +84,9 @@ function getColumns() {
   const columns = [
     {
       field: 'filter_id',
-      name: 'ID',
+      name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
+        defaultMessage: 'ID',
+      }),
       render: (id) => (
         <EuiLink href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/edit_filter_list/${id}`} >
           {id}
@@ -72,17 +96,23 @@ function getColumns() {
     },
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate('xpack.ml.settings.filterLists.table.descriptionColumnName', {
+        defaultMessage: 'Description',
+      }),
       sortable: true
     },
     {
       field: 'item_count',
-      name: 'Item count',
+      name: i18n.translate('xpack.ml.settings.filterLists.table.itemCountColumnName', {
+        defaultMessage: 'Item count',
+      }),
       sortable: true
     },
     {
       field: 'used_by',
-      name: 'In use',
+      name: i18n.translate('xpack.ml.settings.filterLists.table.inUseColumnName', {
+        defaultMessage: 'In use',
+      }),
       render: (usedBy) => (
         <UsedByIcon
           usedBy={usedBy}
@@ -95,15 +125,22 @@ function getColumns() {
   return columns;
 }
 
-function renderToolsRight(selectedFilterLists, refreshFilterLists) {
+function renderToolsRight(
+  canCreateFilter,
+  canDeleteFilter,
+  selectedFilterLists,
+  refreshFilterLists
+) {
   return [
     (
       <NewFilterButton
         key="new_filter_list"
+        canCreateFilter={canCreateFilter}
       />
     ),
     (
       <DeleteFilterListModal
+        canDeleteFilter={canDeleteFilter}
         selectedFilterLists={selectedFilterLists}
         refreshFilterLists={refreshFilterLists}
       />
@@ -112,6 +149,8 @@ function renderToolsRight(selectedFilterLists, refreshFilterLists) {
 
 
 export function FilterListsTable({
+  canCreateFilter,
+  canDeleteFilter,
   filterLists,
   selectedFilterLists,
   setSelectedFilterLists,
@@ -126,7 +165,12 @@ export function FilterListsTable({
   };
 
   const search = {
-    toolsRight: renderToolsRight(selectedFilterLists, refreshFilterLists),
+    toolsRight: renderToolsRight(
+      canCreateFilter,
+      canDeleteFilter,
+      selectedFilterLists,
+      refreshFilterLists
+    ),
     box: {
       incremental: true,
     },
@@ -152,7 +196,12 @@ export function FilterListsTable({
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h4>No filters have been created</h4>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.table.noFiltersCreatedTitle"
+                    defaultMessage="No filters have been created"
+                  />
+                </h4>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -177,8 +226,12 @@ export function FilterListsTable({
 
 }
 FilterListsTable.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
+  canDeleteFilter: PropTypes.bool.isRequired,
   filterLists: PropTypes.array,
   selectedFilterLists: PropTypes.array,
   setSelectedFilterLists: PropTypes.func.isRequired,
   refreshFilterLists: PropTypes.func.isRequired
 };
+
+UsedByIcon.displayName = 'UsedByIcon';

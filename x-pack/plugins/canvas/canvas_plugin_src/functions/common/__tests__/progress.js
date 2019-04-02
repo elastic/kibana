@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { progress } from '../progress';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { fontStyle } from './fixtures/test_styles';
@@ -29,7 +29,7 @@ describe('progress', () => {
     expect(fn)
       .withArgs(3)
       .to.throwException(e => {
-        expect(e.message).to.be('Context must be between 0 and 1');
+        expect(e.message).to.be(`Invalid value: '3'. Value must be between 0 and 1`);
       });
   });
 
@@ -65,7 +65,7 @@ describe('progress', () => {
         expect(fn)
           .withArgs(value, { max: -0.5 })
           .to.throwException(e => {
-            expect(e.message).to.be(`'max' must be greater than 0`);
+            expect(e.message).to.be(`Invalid max value: '-0.5'. 'max' must be greater than 0`);
           });
       });
     });

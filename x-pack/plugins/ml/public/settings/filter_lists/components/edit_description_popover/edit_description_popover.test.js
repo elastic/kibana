@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditDescriptionPopover } from './edit_description_popover';
@@ -14,11 +14,12 @@ function prepareTest(updateDescriptionFn) {
 
   const props = {
     description: 'A list of known safe domains',
-    updateDescription: updateDescriptionFn
+    updateDescription: updateDescriptionFn,
+    canCreateFilter: true
   };
 
-  const wrapper = shallow(
-    <EditDescriptionPopover {...props} />
+  const wrapper = shallowWithIntl(
+    <EditDescriptionPopover.WrappedComponent {...props} />
   );
 
   return wrapper;
@@ -30,11 +31,12 @@ describe('FilterListUsagePopover', () => {
     const updateDescription = jest.fn(() => {});
 
     const props = {
-      updateDescription
+      updateDescription,
+      canCreateFilter: true
     };
 
-    const component = shallow(
-      <EditDescriptionPopover {...props} />
+    const component = shallowWithIntl(
+      <EditDescriptionPopover.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();

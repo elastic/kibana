@@ -27,7 +27,7 @@ export function resolveApi(senseVersion, apis, h) {
     {
       if (KNOWN_APIS.includes(name)) {
         // for now we ignore sense_version. might add it in the api name later
-        const api = require('./' + name);
+        const api = require('./' + name); // eslint-disable-line import/no-dynamic-require
         result[name] = api.asJson();
       }
     }

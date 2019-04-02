@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -31,14 +31,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       statusCode: 403,
       error: 'Forbidden',
       message: 'Unauthorized to update spaces',
-    });
-  };
-
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
     });
   };
 
@@ -134,7 +126,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   updateTest.only = makeUpdateTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectNotFound,

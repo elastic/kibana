@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export { Breadcrumb, ChromeService, ChromeStartContract, Brand } from './chrome_service';
+export {
+  ChromeBreadcrumb,
+  ChromeService,
+  ChromeSetup,
+  ChromeBrand,
+  ChromeHelpExtension,
+} from './chrome_service';

@@ -26,78 +26,35 @@ import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { get } from 'lodash';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import { fetchFields } from '../lib/fetch_fields';
-import chrome from 'ui/chrome';
-import { I18nProvider } from '@kbn/i18n/react';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
     this.appState = vis.API.getAppState();
-    const reversed = get(this.appState, 'options.darkTheme', false);
     this.state = {
-      model: props.vis.params,
+      model: props.visParams,
       dirty: false,
       autoApply: true,
-      reversed,
-      visFields: {},
+      visFields: props.visFields
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
-    this.handleUiState = this.handleUiState.bind(this, props.vis);
-    this.handleAppStateChange = this.handleAppStateChange.bind(this);
-    this.getConfig = (...args) => props.config.get(...args);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
-  handleUiState(vis, ...args) {
-    vis.uiStateVal(...args);
+  get uiState() {
+    return this.props.vis.getUiState();
   }
 
-  componentWillMount() {
-    if (this.appState) {
-      this.appState.on('save_with_changes', this.handleAppStateChange);
-    }
-  }
+  getConfig = (...args) => {
+    return this.props.config.get(...args);
+  };
 
-  handleAppStateChange() {
-    const reversed = get(this.appState, 'options.darkTheme', false);
-    this.setState({ reversed });
-  }
-
-  componentWillUnmount() {
-    if (this.appState) {
-      this.appState.off('save_with_changes', this.handleAppStateChange);
-    }
-  }
-
-  fetchIndexPatternFields = async () => {
-    const { params } = this.props.vis;
-    const { visFields } = this.state;
-    const indexPatterns = extractIndexPatterns(params, visFields);
-    const fields = await fetchFields(indexPatterns);
-    this.setState((previousState) => {
-      return {
-        visFields: {
-          ...previousState.visFields,
-          ...fields,
-        }
-      };
-    });
-  }
-
-  setDefaultIndexPattern = async () => {
-    if (this.props.vis.params.index_pattern === '') {
-      // set the default index pattern if none is defined.
-      const savedObjectsClient = chrome.getSavedObjectsClient();
-      const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
-      const defaultIndexPattern = indexPattern.attributes.title;
-      this.props.vis.params.index_pattern = defaultIndexPattern;
-    }
-  }
+  handleUiState = (field, value) =>  {
+    this.props.vis.uiStateVal(field, value);
+  };
 
   handleChange = async (partialModel) => {
     const nextModel = { ...this.state.model, ...partialModel };
@@ -107,44 +64,42 @@ class VisEditor extends Component {
     }
     this.setState({
       model: nextModel,
-      dirty: !this.state.autoApply,
+      dirty: !this.state.autoApply
     });
-    this.fetchIndexPatternFields();
-  }
+    const { params, fields } = this.props.vis;
+    fetchIndexPatternFields(params, fields).then(visFields => {
+      this.setState({ visFields });
+    });
+  };
 
   handleCommit = () => {
     this.props.vis.updateState();
     this.setState({ dirty: false });
-  }
+  };
 
   handleAutoApplyToggle = (event) => {
     this.setState({ autoApply: event.target.checked });
-  }
+  };
 
-  onDataChange = (data) => {
-    this.visDataSubject.next(data);
-  }
+  onDataChange = ({ visData }) => {
+    this.visDataSubject.next(visData);
+  };
 
   render() {
     if (!this.props.isEditorMode) {
-      if (!this.props.vis.params || !this.props.visData) {
+      if (!this.props.visParams || !this.props.visData) {
         return null;
       }
-      const reversed = this.state.reversed;
       return (
-        <I18nProvider>
-          <Visualization
-            dateFormat={this.props.config.get('dateFormat')}
-            reversed={reversed}
-            onBrush={this.onBrush}
-            onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
-            fields={this.state.visFields}
-            model={this.props.vis.params}
-            visData={this.props.visData}
-            getConfig={this.getConfig}
-          />
-        </I18nProvider>
+        <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
+          onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.uiState}
+          model={this.props.visParams}
+          visData={this.props.visData}
+          getConfig={this.getConfig}
+        />
       );
     }
 
@@ -163,15 +118,11 @@ class VisEditor extends Component {
             appState={this.appState}
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
-            onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
-            onBrush={this.onBrush}
+            uiState={this.uiState}
             onCommit={this.handleCommit}
             onToggleAutoApply={this.handleAutoApplyToggle}
-            onChange={this.handleChange}
             title={this.props.vis.title}
             description={this.props.vis.description}
-            dateFormat={this.props.config.get('dateFormat')}
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
@@ -191,9 +142,7 @@ class VisEditor extends Component {
     return null;
   }
 
-  async componentDidMount() {
-    await this.setDefaultIndexPattern();
-    await this.fetchIndexPatternFields();
+  componentDidMount() {
     this.props.renderComplete();
   }
 
@@ -209,6 +158,7 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
+  visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
   isEditorMode: PropTypes.bool,

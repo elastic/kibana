@@ -17,28 +17,21 @@
  * under the License.
  */
 
-import url from 'url';
 import Promise from 'bluebird';
-import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-const NoConnections = elasticsearch.errors.NoConnections;
-
-export default function (plugin, server) {
-  const config = server.config();
-  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
+export default function (plugin, server, requestDelay) {
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  const NoConnections = adminCluster.errors.NoConnections;
+  const callAdminAsKibanaUser = adminCluster.callWithInternalUser;
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, elasticsearchUrl) {
+  function waitForPong(callWithInternalUser) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-
-      const displayUrl = url.format({ ...url.parse(elasticsearchUrl), auth: undefined });
-      plugin.status.red(`Unable to connect to Elasticsearch at ${displayUrl}.`);
-
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
+      plugin.status.red(`Unable to connect to Elasticsearch.`);
+      return Promise.delay(requestDelay).then(waitForPong.bind(null, callWithInternalUser));
     });
   }
 
@@ -51,7 +44,7 @@ export default function (plugin, server) {
   function waitForEsVersion() {
     return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
-      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
+      return Promise.delay(requestDelay).then(waitForEsVersion);
     });
   }
 
@@ -61,7 +54,7 @@ export default function (plugin, server) {
 
   function check() {
     const healthCheck =
-      waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
+      waitForPong(callAdminAsKibanaUser)
         .then(waitForEsVersion);
 
     return healthCheck
@@ -85,7 +78,7 @@ export default function (plugin, server) {
   }
 
   function startorRestartChecking() {
-    scheduleCheck(stopChecking() ? REQUEST_DELAY : 1);
+    scheduleCheck(stopChecking() ? requestDelay : 1);
   }
 
   function stopChecking() {

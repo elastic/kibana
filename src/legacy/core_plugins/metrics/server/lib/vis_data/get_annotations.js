@@ -16,56 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
+import { getAnnotationRequestParams } from './annorations/get_request_params';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
     annotation.time_field &&
     annotation.fields &&
     annotation.icon &&
-    annotation.template;
+    annotation.template &&
+    !annotation.hidden;
 }
 
-export default async (req, panel) => {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const bodies = panel.annotations
-    .filter(validAnnotation)
-    .map(annotation => {
+export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
+  const panelIndexPattern = panel.index_pattern;
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const annotations = panel.annotations.filter(validAnnotation);
 
-      const indexPattern = annotation.index_pattern;
-      const bodies = [];
+  const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
+  const body = (await Promise.all(bodiesPromises))
+    .reduce((acc, items) => acc.concat(items), []);
 
-      bodies.push({
-        index: indexPattern,
-        ignoreUnavailable: true,
-      });
+  if (!body.length) return { responses: [] };
 
-      const body = buildAnnotationRequest(req, panel, annotation);
-      body.timeout = '90s';
-      bodies.push(body);
-      return bodies;
-    });
-
-  if (!bodies.length) return { responses: [] };
   try {
-    const resp = await callWithRequest(req, 'msearch', {
-      rest_total_hits_as_int: true,
-      body: bodies.reduce((acc, item) => acc.concat(item), [])
-    });
-    const results = {};
-    panel.annotations
-      .filter(validAnnotation)
-      .forEach((annotation, index) => {
-        const data = resp.responses[index];
-        results[annotation.id] = handleAnnotationResponse(data, annotation);
-      });
-    return results;
+    const responses = await searchRequest.search({ body });
+
+    return annotations
+      .reduce((acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
+
+        return acc;
+      }, {});
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-
-};
-
+}

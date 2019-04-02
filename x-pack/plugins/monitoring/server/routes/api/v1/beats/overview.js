@@ -10,6 +10,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getLatestStats, getStats } from '../../../../lib/beats';
 import { handleError } from '../../../../lib/errors';
 import { metricSet } from './metric_set_overview';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function beatsOverviewRoute(server) {
   server.route({
@@ -34,7 +35,7 @@ export function beatsOverviewRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
         const [

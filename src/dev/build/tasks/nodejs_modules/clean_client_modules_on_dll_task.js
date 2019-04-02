@@ -46,7 +46,7 @@ export const CleanClientModulesOnDLLTask = {
       `!${baseDir}/src/legacy/core_plugins/**/public`
     ]);
     const discoveredPluginEntries = await globby([
-      `${baseDir}/src/plugins/*/index.js`,
+      `${baseDir}/src/plugins/*/server/index.js`,
       `!${baseDir}/src/plugins/**/public`
     ]);
 
@@ -64,7 +64,7 @@ export const CleanClientModulesOnDLLTask = {
     ];
 
     // Resolve the client vendors dll manifest path
-    const dllManifestPath = `${baseDir}/dlls/vendors.manifest.dll.json`;
+    const dllManifestPath = `${baseDir}/built_assets/dlls/vendors.manifest.dll.json`;
 
     // Get dll entries filtering out the ones
     // from any whitelisted module

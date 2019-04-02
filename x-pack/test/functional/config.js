@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable kibana-custom/no-default-export */
+/* eslint-disable import/no-default-export */
 
 import { resolve } from 'path';
 
@@ -19,7 +19,12 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
+  GisPageProvider,
   StatusPagePageProvider,
+  UpgradeAssistantProvider,
+  RollupPageProvider,
+  UptimePageProvider,
+
 } from './page_objects';
 
 import {
@@ -49,6 +54,9 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  UserMenuProvider,
+  UptimeProvider,
+
 } from './services';
 
 // the default export of config files must be a config provider
@@ -77,7 +85,11 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
+      resolve(__dirname, './apps/rollup_job'),
+      resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -112,6 +124,9 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      userMenu: UserMenuProvider,
+      uptime: UptimeProvider,
+      rollup: RollupPageProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -128,7 +143,11 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
+      upgradeAssistant: UpgradeAssistantProvider,
+      uptime: UptimePageProvider,
+      rollup: RollupPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -146,6 +165,7 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
@@ -170,6 +190,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/logstash/pipelines',
       },
+      maps: {
+        pathname: '/app/maps',
+      },
       graph: {
         pathname: '/app/graph',
       },
@@ -187,6 +210,13 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      uptime: {
+        pathname: '/app/uptime',
+      },
+      rollupJob: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/rollup_jobs/'
+      }
     },
 
     // choose where esArchiver should load archives from
@@ -201,7 +231,7 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'X-Pack Functional Tests',
-      rootDirectory: resolve(__dirname, '../../'),
     },
   };
+
 }

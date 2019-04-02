@@ -5,15 +5,18 @@
  */
 
 import {
-  // @ts-ignore types for EuiTabs not currently available
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTab,
   // @ts-ignore types for EuiTab not currently available
   EuiTabs,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Subscribe } from 'unstated';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { BeatsContainer } from '../../containers/beats';
@@ -25,7 +28,7 @@ interface MainPagesState {
   enrollBeat?: {
     enrollmentToken: string;
   } | null;
-  beats: CMPopulatedBeat[];
+  beats: CMBeat[];
   loadedBeatsAtLeastOnce: boolean;
 }
 
@@ -45,7 +48,22 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
 
   public render() {
     return (
-      <PrimaryLayout title="Beats" hideBreadcrumbs={this.props.libs.framework.info.k7Design}>
+      <PrimaryLayout
+        title={
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>{'Beats'}</EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.beatsManagement.overview.betaBadgeText', {
+                  defaultMessage: 'Beta',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
+      >
         {(renderAction: any) => (
           <Subscribe to={[BeatsContainer, TagsContainer]}>
             {(beats: BeatsContainer, tags: TagsContainer) => (

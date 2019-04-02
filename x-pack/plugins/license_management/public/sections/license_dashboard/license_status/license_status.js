@@ -87,7 +87,7 @@ export class LicenseStatus extends React.PureComponent {
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
+                <EuiTitle size="m">
                   <h2 data-test-subj="licenseText">{title}</h2>
                 </EuiTitle>
               </EuiFlexItem>

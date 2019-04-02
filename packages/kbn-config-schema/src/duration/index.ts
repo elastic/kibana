@@ -48,7 +48,7 @@ function numberToDuration(numberMs: number) {
   return momentDuration(numberMs);
 }
 
-export function ensureDuration(value?: Duration | string | number) {
+export function ensureDuration(value: Duration | string | number) {
   if (typeof value === 'string') {
     return stringToDuration(value);
   }

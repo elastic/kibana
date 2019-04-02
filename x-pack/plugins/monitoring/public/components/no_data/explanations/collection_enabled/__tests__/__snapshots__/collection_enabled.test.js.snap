@@ -11,7 +11,16 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   }
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -43,6 +52,26 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -67,15 +96,6 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -93,7 +113,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   }
   property="xpack.monitoring.collection.enabled"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -137,9 +157,8 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
@@ -174,6 +193,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             <EuiCodeBlockImpl
               fontSize="s"
               inline={true}
+              isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
             >
@@ -194,6 +214,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             <EuiCodeBlockImpl
               fontSize="s"
               inline={true}
+              isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
             >
@@ -223,27 +244,20 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -255,6 +269,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             fill={true}
             iconSide="left"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

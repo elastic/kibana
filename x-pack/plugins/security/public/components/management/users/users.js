@@ -10,8 +10,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiTitle,
   EuiPageContentHeader,
@@ -21,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { ConfirmDelete } from './confirm_delete';
-import { injectI18n, FormattedMessage } from "@kbn/i18n/react";
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 class UsersUI extends Component {
   constructor(props) {
@@ -56,8 +54,8 @@ class UsersUI extends Component {
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.management.users.fetchingUsersErrorMessage",
-            defaultMessage: "Error fetching users: {message}"
+            id: 'xpack.security.management.users.fetchingUsersErrorMessage',
+            defaultMessage: 'Error fetching users: {message}'
           }, { message: e.data.message })
         );
       }
@@ -93,37 +91,35 @@ class UsersUI extends Component {
     const { apiClient, intl } = this.props;
     if (permissionDenied) {
       return (
-        <EuiPage className="mgtUsersListingPage">
-          <EuiPageBody>
-            <EuiPageContent horizontalPosition="center">
-              <EuiEmptyPrompt
-                iconType="securityApp"
-                iconColor={null}
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.security.management.users.deniedPermissionTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  </h2>}
-                body={
-                  <p data-test-subj="permissionDeniedMessage">
-                    <FormattedMessage
-                      id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
-                      defaultMessage="You do not have permission to manage users."
-                    />
-                  </p>}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        <div className="mgtUsersListingPage">
+          <EuiPageContent horizontalPosition="center">
+            <EuiEmptyPrompt
+              iconType="securityApp"
+              iconColor={null}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.security.management.users.deniedPermissionTitle"
+                    defaultMessage="Permission denied"
+                  />
+                </h2>}
+              body={
+                <p data-test-subj="permissionDeniedMessage">
+                  <FormattedMessage
+                    id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
+                    defaultMessage="You do not have permission to manage users."
+                  />
+                </p>}
+            />
+          </EuiPageContent>
+        </div>
       );
     }
     const path = '#/management/security/';
     const columns = [
       {
         field: 'full_name',
-        name: intl.formatMessage({ id: "xpack.security.management.users.fullNameColumnName", defaultMessage: "Full Name" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.fullNameColumnName', defaultMessage: 'Full Name' }),
         sortable: true,
         truncateText: true,
         render: fullName => {
@@ -132,7 +128,7 @@ class UsersUI extends Component {
       },
       {
         field: 'username',
-        name: intl.formatMessage({ id: "xpack.security.management.users.userNameColumnName", defaultMessage: "User Name" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.userNameColumnName', defaultMessage: 'User Name' }),
         sortable: true,
         truncateText: true,
         render: username => (
@@ -144,15 +140,18 @@ class UsersUI extends Component {
       {
         field: 'email',
         name: intl.formatMessage({
-          id: "xpack.security.management.users.emailAddressColumnName",
-          defaultMessage: "Email Address"
+          id: 'xpack.security.management.users.emailAddressColumnName',
+          defaultMessage: 'Email Address'
         }),
         sortable: true,
         truncateText: true,
+        render: email => {
+          return <div data-test-subj="userRowEmail">{email}</div>;
+        },
       },
       {
         field: 'roles',
-        name: intl.formatMessage({ id: "xpack.security.management.users.rolesColumnName", defaultMessage: "Roles" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.rolesColumnName', defaultMessage: 'Roles' }),
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
@@ -167,14 +166,14 @@ class UsersUI extends Component {
       },
       {
         field: 'metadata._reserved',
-        name: intl.formatMessage({ id: "xpack.security.management.users.reservedColumnName", defaultMessage: "Reserved" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.reservedColumnName', defaultMessage: 'Reserved' }),
         sortable: false,
         width: '100px',
         align: 'right',
         description:
           intl.formatMessage({
-            id: "xpack.security.management.users.reservedColumnDescription",
-            defaultMessage: "Reserved users are built-in and cannot be removed. Only the password can be changed."
+            id: 'xpack.security.management.users.reservedColumnDescription',
+            defaultMessage: 'Reserved users are built-in and cannot be removed. Only the password can be changed.'
           }),
         render: reserved =>
           reserved ? (
@@ -222,60 +221,58 @@ class UsersUI extends Component {
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;
     return (
-      <EuiPage className="mgtUsersListingPage">
-        <EuiPageBody>
-          <EuiPageContent className="mgtUsersListingPage__content">
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.security.management.users.usersTitle"
-                      defaultMessage="Users"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiButton
-                  data-test-subj="createUserButton"
-                  href="#/management/security/users/edit"
-                >
+      <div className="mgtUsersListingPage">
+        <EuiPageContent className="mgtUsersListingPage__content">
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle>
+                <h2>
                   <FormattedMessage
-                    id="xpack.security.management.users.createNewUserButtonLabel"
-                    defaultMessage="Create new user"
+                    id="xpack.security.management.users.usersTitle"
+                    defaultMessage="Users"
                   />
-                </EuiButton>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-
-              {showDeleteConfirmation ? (
-                <ConfirmDelete
-                  onCancel={this.onCancelDelete}
-                  apiClient={apiClient}
-                  usersToDelete={selection.map((user) => user.username)}
-                  callback={this.handleDelete}
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiButton
+                data-test-subj="createUserButton"
+                href="#/management/security/users/edit"
+              >
+                <FormattedMessage
+                  id="xpack.security.management.users.createNewUserButtonLabel"
+                  defaultMessage="Create new user"
                 />
-              ) : null}
+              </EuiButton>
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
+          <EuiPageContentBody>
 
-              <EuiInMemoryTable
-                itemId="username"
-                columns={columns}
-                selection={selectionConfig}
-                pagination={pagination}
-                items={usersToShow}
-                loading={users.length === 0}
-                search={search}
-                sorting={sorting}
-                rowProps={rowProps}
-                isSelectable
+            {showDeleteConfirmation ? (
+              <ConfirmDelete
+                onCancel={this.onCancelDelete}
+                apiClient={apiClient}
+                usersToDelete={selection.map((user) => user.username)}
+                callback={this.handleDelete}
               />
+            ) : null}
 
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+            <EuiInMemoryTable
+              itemId="username"
+              columns={columns}
+              selection={selectionConfig}
+              pagination={pagination}
+              items={usersToShow}
+              loading={users.length === 0}
+              search={search}
+              sorting={sorting}
+              rowProps={rowProps}
+              isSelectable
+            />
+
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </div>
     );
   }
 }

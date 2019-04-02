@@ -143,7 +143,7 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
-              inline: 'doc["bytes"].value',
+              source: 'doc["bytes"].value',
               lang: 'painless'
             }
           }
@@ -198,7 +198,22 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
+      it('sets the timeout on the request', () => {
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
+        expect(request.timeout).to.equal('30000ms');
+      });
+
+      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields, 0);
+
+        expect(request).to.not.have.property('timeout');
+      });
+    });
+
+    describe('frozen indices', () => {
       let sandbox;
 
       beforeEach(() => {
@@ -209,19 +224,20 @@ describe(filename, () => {
         sandbox.restore();
       });
 
-      it('sets the timeout on the request', () => {
+      it('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
+        tlConfig.settings['search:includeFrozen'] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.timeout).to.equal('30000ms');
+        expect(request.ignore_throttled).to.equal(true);
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
+        tlConfig.settings['search:includeFrozen'] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request).to.not.have.property('timeout');
+        expect(request.ignore_throttled).to.equal(false);
       });
     });
 
@@ -264,9 +280,9 @@ describe(filename, () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({ range: { '@timestamp': {
-          lte: 5,
-          gte: 1,
-          format: 'epoch_millis'
+          format: 'strict_date_optional_time',
+          gte: '1970-01-01T00:00:00.001Z',
+          lte: '1970-01-01T00:00:00.005Z'
         } } });
 
         config.kibana = true;
@@ -311,14 +327,14 @@ describe(filename, () => {
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({
-          inline: 'doc["beer"].value',
+          source: 'doc["beer"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.terms.size).to.eql(5);
 
         expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
-          inline: 'doc["wine"].value',
+          source: 'doc["wine"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);

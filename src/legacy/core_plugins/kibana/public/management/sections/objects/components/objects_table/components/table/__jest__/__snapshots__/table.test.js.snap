@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSearchBar
     box={
       Object {
@@ -33,6 +33,7 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -48,6 +49,7 @@ exports[`Table should render normally 1`] = `
           iconType="exportAction"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -136,5 +138,5 @@ exports[`Table should render normally 1`] = `
       }
     />
   </div>
-</React.Fragment>
+</Fragment>
 `;

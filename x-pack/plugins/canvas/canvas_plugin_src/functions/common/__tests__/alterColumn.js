@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { alterColumn } from '../alterColumn';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';
@@ -79,7 +79,7 @@ describe('alterColumn', () => {
 
       it('throws when converting to an invalid type', () => {
         expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Cannot convert to foo');
+          expect(e.message).to.be(`Cannot convert to 'foo'`);
         });
       });
     });

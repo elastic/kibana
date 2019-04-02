@@ -25,6 +25,7 @@ import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
+import calculateFillColor from '../lib/calculate_fill_color';
 import colors from '../lib/colors';
 
 class FlotChart extends Component {
@@ -99,7 +100,7 @@ class FlotChart extends Component {
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
-      if (!_.isEqual(this.props.series, series)) this.handleDraw(this.plot);
+      if (!_.isEqual(this.props.series, newProps.series)) this.handleDraw(this.plot);
     } else {
       this.renderChart();
     }
@@ -119,7 +120,11 @@ class FlotChart extends Component {
       .filter(this.filterByShow(show))
       .map(set => {
         if (_.isPlainObject(set)) {
-          return set;
+          return {
+            ...set,
+            lines: this.computeColor(set.lines, set.color),
+            bars: this.computeColor(set.bars, set.color),
+          };
         }
         return {
           color: '#990000',
@@ -130,6 +135,18 @@ class FlotChart extends Component {
       .value();
   }
 
+  computeColor(style, color) {
+    if (style && style.show) {
+      const { fill, fillColor } = calculateFillColor(color, style.fill);
+      return {
+        ...style,
+        fill,
+        fillColor,
+      };
+    }
+    return style;
+  }
+
   handleDraw(plot) {
     if (this.props.onDraw) this.props.onDraw(plot);
   }
@@ -137,7 +154,7 @@ class FlotChart extends Component {
   getOptions(props) {
     const yaxes = props.yaxes || [{}];
 
-    const lineColor = props.reversed ? colors.lineColorReversed : colors.lineColor;
+    const lineColor = colors.lineColor;
     const textColor = props.reversed ? colors.textColorReversed : colors.textColor;
 
     const borderWidth = { bottom: 1, top: 0, left: 0, right: 0 };
@@ -159,7 +176,7 @@ class FlotChart extends Component {
       }),
       yaxis: {
         color: lineColor,
-        font: { color: textColor },
+        font: { color: textColor, size: 11 },
         tickFormatter: props.tickFormatter
       },
       xaxis: {
@@ -167,7 +184,7 @@ class FlotChart extends Component {
         color: lineColor,
         timezone: 'browser',
         mode: 'time',
-        font: { color: textColor },
+        font: { color: textColor, size: 11 },
         ticks: this.calculateTicks()
       },
       series: {
@@ -185,7 +202,7 @@ class FlotChart extends Component {
     if (props.crosshair) {
       _.set(opts, 'crosshair', {
         mode: 'x',
-        color: props.reversed ? '#FFF' : '#000',
+        color: '#C66',
         lineWidth: 1
       });
     }

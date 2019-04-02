@@ -20,9 +20,11 @@
 import React from 'react';
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
+import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 
 import chrome from 'ui/chrome';
@@ -35,7 +37,14 @@ interface TypeSelectionProps {
   editorParams?: string[];
 }
 
-class NewVisModal extends React.Component<TypeSelectionProps> {
+interface TypeSelectionState {
+  showSearchVisModal: boolean;
+  visType?: VisType;
+}
+
+const baseUrl = `#${VisualizeConstants.CREATE_PATH}?`;
+
+class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
     editorParams: [],
   };
@@ -45,6 +54,10 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
   constructor(props: TypeSelectionProps) {
     super(props);
     this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
+
+    this.state = {
+      showSearchVisModal: false,
+    };
   }
 
   public render() {
@@ -52,26 +65,63 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
       return null;
     }
 
-    return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.props.onClose} maxWidth={'100vw'} className="visNewVisDialog">
+    const visNewVisDialogAriaLabel = i18n.translate(
+      'kbn.visualize.newVisWizard.helpTextAriaLabel',
+      {
+        defaultMessage:
+          'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
+      }
+    );
+
+    const selectionModal =
+      this.state.showSearchVisModal && this.state.visType ? (
+        <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
+          <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
+        </EuiModal>
+      ) : (
+        <EuiModal
+          onClose={this.onCloseModal}
+          className="visNewVisDialog"
+          aria-label={visNewVisDialogAriaLabel}
+          role="menu"
+        >
           <TypeSelection
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
           />
         </EuiModal>
-      </EuiOverlayMask>
-    );
+      );
+
+    return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
   }
 
-  private onVisTypeSelected = (visType: VisType) => {
-    const baseUrl =
-      visType.requiresSearch && visType.options.showIndexSelection
-        ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
-        : `#${VisualizeConstants.CREATE_PATH}?`;
-    const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
+  private onCloseModal = () => {
+    this.setState({ showSearchVisModal: false });
     this.props.onClose();
+  };
+
+  private onVisTypeSelected = (visType: VisType) => {
+    if (visType.requiresSearch && visType.options.showIndexSelection) {
+      this.setState({
+        showSearchVisModal: true,
+        visType,
+      });
+    } else {
+      const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
+      this.props.onClose();
+      location.assign(`${baseUrl}${params.join('&')}`);
+    }
+  };
+
+  private onSearchSelected = (searchId: string, searchType: string) => {
+    this.props.onClose();
+
+    const params = [
+      `type=${encodeURIComponent(this.state.visType!.name)}`,
+      `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
+      ...this.props.editorParams!,
+    ];
     location.assign(`${baseUrl}${params.join('&')}`);
   };
 }

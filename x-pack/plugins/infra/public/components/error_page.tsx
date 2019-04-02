@@ -12,9 +12,10 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../common/eui_styled_components';
 import { FlexPage } from './page';
 
 interface Props {
@@ -32,13 +33,25 @@ export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessa
         panelPaddingSize="none"
       >
         <EuiPageContentBody>
-          <EuiCallOut color="danger" iconType="cross" title="An error occurred">
+          <EuiCallOut
+            color="danger"
+            iconType="cross"
+            title={
+              <FormattedMessage
+                id="xpack.infra.errorPage.errorOccurredTitle"
+                defaultMessage="An error occurred"
+              />
+            }
+          >
             <EuiFlexGroup>
               <EuiFlexItem>{shortMessage}</EuiFlexItem>
               {retry ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={retry} iconType="refresh">
-                    Try again
+                    <FormattedMessage
+                      id="xpack.infra.errorPage.tryAgainButtonLabel"
+                      defaultMessage="Try again"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               ) : null}
@@ -51,6 +64,6 @@ export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessa
   </FlexPage>
 );
 
-const MinimumPageContent = styled(EuiPageContent)`
+const MinimumPageContent = euiStyled(EuiPageContent)`
   min-width: 50vh;
 `;

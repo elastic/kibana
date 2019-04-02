@@ -24,28 +24,28 @@ function ClusterStatusUi({ stats, intl }) {
         id: 'xpack.monitoring.logstash.clusterStatus.nodesLabel', defaultMessage: 'Nodes'
       }),
       value: nodeCount,
-      dataTestSubj: 'node_count'
+      'data-test-subj': 'node_count'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.clusterStatus.memoryLabel', defaultMessage: 'Memory'
       }),
       value: formatMetric(avgMemoryUsed, 'byte') + ' / ' + formatMetric(avgMemory, 'byte'),
-      dataTestSubj: 'memory_used'
+      'data-test-subj': 'memory_used'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
       }),
       value: formatMetric(eventsInTotal, '0.[0]a'),
-      dataTestSubj: 'events_in_total'
+      'data-test-subj': 'events_in_total'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
       }),
       value: formatMetric(eventsOutTotal, '0.[0]a'),
-      dataTestSubj: 'events_out_total'
+      'data-test-subj': 'events_out_total'
     }
   ];
 

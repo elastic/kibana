@@ -243,8 +243,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(20)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
@@ -265,8 +265,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(10)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {

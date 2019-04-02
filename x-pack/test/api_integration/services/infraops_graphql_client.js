@@ -10,7 +10,7 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import introspectionQueryResultData from '../../../plugins/infra/common/graphql/introspection.json';
+import introspectionQueryResultData from '../../../plugins/infra/public/graphql/introspection.json';
 
 export function InfraOpsGraphQLProvider({ getService }) {
   const config = getService('config');

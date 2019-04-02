@@ -1,0 +1,10 @@
+{
+  "ml.delete_filter": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/filters/{filter_id}"
+    ]
+  }
+}

@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
-import sinon from 'sinon';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
 import blues from './blues.png';
 import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
+import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -50,30 +52,6 @@ function mockRawData() {
 }
 mockRawData();
 
-
-const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
-const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
-const manifest = {
-  'services': [{
-    'id': 'tiles_v2',
-    'name': 'Elastic Tile Service',
-    'manifest': tmsManifestUrl,
-    'type': 'tms'
-  }
-  ]
-};
-
-const tmsManifest = {
-  'services': [{
-    'id': 'road_map',
-    'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-    'minZoom': 0,
-    'maxZoom': 10,
-    'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-  }]
-};
-
-
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
 
@@ -88,6 +66,7 @@ describe('CoordinateMapsVisualizationTest', function () {
   let imageComparator;
 
 
+  let getManifestStub;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
 
@@ -97,20 +76,21 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
     const serviceSettings = $injector.get('serviceSettings');
-    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
-      let contents = null;
-      if (url.startsWith(tmsManifestUrl)) {
-        contents = tmsManifest;
-      } else if (url.startsWith(manifestUrl)) {
-        contents = manifest;
+    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
+      //simulate network calls
+      if (url.startsWith('https://foobar')) {
+        return EMS_CATALOGUE;
+      } else if (url.startsWith('https://tiles.foobar')) {
+        return EMS_TILES;
+      } else if (url.startsWith('https://files.foobar')) {
+        return EMS_FILES;
       }
-      return {
-        data: contents
-      };
     });
-
-
   }));
+
+  afterEach(() => {
+    getManifestStub.removeStub();
+  });
 
   describe('CoordinateMapsVisualization - basics', function () {
 
@@ -162,7 +142,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
     it('should initialize OK', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -180,7 +160,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to Heatmap OK', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -190,7 +170,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -207,7 +187,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle back&forth OK between mapTypes', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -216,7 +196,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -225,7 +205,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Scaled Circle Markers';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -242,7 +222,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to different color schema ok', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -252,7 +232,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
       vis.params.colorSchema = 'Blues';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -269,7 +249,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to different color schema and maptypes ok', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -280,7 +260,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
       vis.params.colorSchema = 'Greens';
       vis.params.mapType = 'Shaded Geohash Grid';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,

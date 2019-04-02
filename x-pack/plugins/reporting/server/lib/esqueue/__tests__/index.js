@@ -5,7 +5,7 @@
  */
 
 import events from 'events';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { noop, times } from 'lodash';
@@ -36,27 +36,11 @@ describe('Esqueue class', function () {
       const init = () => new Esqueue();
       expect(init).to.throwException(/must.+specify.+index/i);
     });
-
-    it('should throw with an invalid host', function () {
-      const init = () => new Esqueue('esqueue', {
-        client: { host: 'nope://nope' }
-      });
-
-      expect(init).to.throwException(/invalid.+protocol/i);
-    });
-
-    it('should throw with invalid hosts', function () {
-      const init = () => new Esqueue('esqueue', {
-        client: { hosts: [{ host: 'localhost', protocol: 'nope' }] }
-      });
-
-      expect(init).to.throwException(/invalid.+protocol/i);
-    });
   });
 
   describe('Queue construction', function () {
     it('should ping the ES server', function () {
-      const pingSpy = sinon.spy(client, 'ping');
+      const pingSpy = sinon.spy(client, 'callWithInternalUser').withArgs('ping');
       new Esqueue('esqueue', { client });
       sinon.assert.calledOnce(pingSpy);
     });
@@ -93,7 +77,6 @@ describe('Esqueue class', function () {
       const job = queue.addJob(jobType, payload);
       const options = job.getProp('options');
       expect(options).to.have.property('timeout', constants.DEFAULT_SETTING_TIMEOUT);
-      expect(options).to.have.property('doctype', constants.DEFAULT_SETTING_DOCTYPE);
     });
 
     it('should pass queue index settings', function () {
@@ -149,14 +132,12 @@ describe('Esqueue class', function () {
     it('should pass worker options', function () {
       const workerOptions = {
         size: 12,
-        doctype: 'tests'
       };
 
       queue = new Esqueue('esqueue', { client });
       const worker = queue.registerWorker('type', noop, workerOptions);
       const options = worker.getProp('options');
       expect(options.size).to.equal(workerOptions.size);
-      expect(options.doctype).to.equal(workerOptions.doctype);
     });
   });
 

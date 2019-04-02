@@ -9,10 +9,14 @@ export const hexToRgb = hex => {
   const hexColor = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 
   const shorthandMatches = shorthandHexColor.exec(hex);
-  if (shorthandMatches) return shorthandMatches.slice(1, 4).map(hex => parseInt(hex + hex, 16));
+  if (shorthandMatches) {
+    return shorthandMatches.slice(1, 4).map(hex => parseInt(hex + hex, 16));
+  }
 
   const hexMatches = hexColor.exec(hex);
-  if (hexMatches) return hexMatches.slice(1, 4).map(hex => parseInt(hex, 16));
+  if (hexMatches) {
+    return hexMatches.slice(1, 4).map(hex => parseInt(hex, 16));
+  }
 
   return null;
 };

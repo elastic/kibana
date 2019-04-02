@@ -14,11 +14,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { first, sortByOrder } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ChildRoutes } from '../../components/navigation/child_routes';
@@ -28,7 +27,7 @@ interface PageProps extends AppPageProps {
   intl: InjectedIntl;
 }
 interface PageState {
-  beat: CMPopulatedBeat | undefined;
+  beat: CMBeat | undefined;
   beatId: string;
   isLoading: boolean;
 }
@@ -51,7 +50,7 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
     });
   };
 
-  public renderActionSection(beat?: CMPopulatedBeat) {
+  public renderActionSection(beat?: CMBeat) {
     return beat ? (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -72,20 +71,14 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
             />
           </EuiText>
         </EuiFlexItem>
-        {beat.full_tags && beat.full_tags.length > 0 && (
+        {beat.last_updated && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
                 defaultMessage="Last Config Update: {lastUpdateTime}."
                 values={{
-                  lastUpdateTime: (
-                    <strong>
-                      {moment(
-                        first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
-                      ).fromNow()}
-                    </strong>
-                  ),
+                  lastUpdateTime: <strong>{moment(beat.last_updated).fromNow()}</strong>,
                 }}
               />
             </EuiText>
@@ -136,7 +129,7 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
       <PrimaryLayout
         title={title}
         actionSection={this.renderActionSection(beat)}
-        hideBreadcrumbs={this.props.libs.framework.info.k7Design}
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
       >
         <React.Fragment>
           <Breadcrumb title={`Enrolled Beats`} path={`/overview/enrolled_beats`} />

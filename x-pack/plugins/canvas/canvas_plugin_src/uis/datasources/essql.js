@@ -13,8 +13,11 @@ import { templateFromReactComponent } from '../../../public/lib/template_from_re
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
     const query = this.getQuery();
-    if (typeof query !== 'string') this.setArg(this.getArgName(), this.defaultQuery);
-    else this.props.setInvalid(!query.trim());
+    if (typeof query !== 'string') {
+      this.setArg(this.getArgName(), this.defaultQuery);
+    } else {
+      this.props.setInvalid(!query.trim());
+    }
   }
 
   defaultQuery = 'SELECT * FROM "logstash*"';
@@ -25,8 +28,12 @@ class EssqlDatasource extends PureComponent {
   // and set them for the data source UI.
   getArgName = () => {
     const { args } = this.props;
-    if (getSimpleArg('_', args)[0]) return '_';
-    if (getSimpleArg('q', args)[0]) return 'q';
+    if (getSimpleArg('_', args)[0]) {
+      return '_';
+    }
+    if (getSimpleArg('q', args)[0]) {
+      return 'q';
+    }
     return 'query';
   };
 

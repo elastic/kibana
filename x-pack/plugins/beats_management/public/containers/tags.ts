@@ -22,7 +22,7 @@ export class TagsContainer extends Container<ContainerState> {
   }
   public reload = async (kuery?: string) => {
     if (kuery) {
-      this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+      this.query = kuery;
     } else {
       this.query = undefined;
     }
@@ -38,8 +38,16 @@ export class TagsContainer extends Container<ContainerState> {
     const tagIds = tags.map((tag: BeatTag) => tag.id);
     const success = await this.libs.tags.delete(tagIds);
     if (success) {
-      this.reload(this.query);
+      this.setState({
+        list: this.state.list.filter(tag => tagIds.includes(tag.id)),
+      });
     }
     return success;
+  };
+
+  public upsertTag = async (tag: BeatTag) => {
+    const beatTag = await this.libs.tags.upsertTag(tag);
+    await this.reload();
+    return beatTag !== null;
   };
 }

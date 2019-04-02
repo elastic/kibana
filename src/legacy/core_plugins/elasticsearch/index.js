@@ -17,109 +17,91 @@
  * under the License.
  */
 
-import { compact, get, has, set } from 'lodash';
-import { unset } from '../../../utils';
-
+import { combineLatest } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
-import { createDataCluster } from './lib/create_data_cluster';
-import { createAdminCluster } from './lib/create_admin_cluster';
-import { clientLogger } from './lib/client_logger';
-import { createClusters } from './lib/create_clusters';
-import filterHeaders from './lib/filter_headers';
-
+import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
 
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
-
 export default function (kibana) {
+  let defaultVars;
+
   return new kibana.Plugin({
     require: ['kibana'],
-    config(Joi) {
-      const sslSchema = Joi.object({
-        verificationMode: Joi.string().valid('none', 'certificate', 'full').default('full'),
-        certificateAuthorities: Joi.array().single().items(Joi.string()),
-        certificate: Joi.string(),
-        key: Joi.string(),
-        keyPassphrase: Joi.string(),
-        alwaysPresentCertificate: Joi.boolean().default(false),
-      }).default();
 
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
-        preserveHost: Joi.boolean().default(true),
-        username: Joi.string(),
-        password: Joi.string(),
-        shardTimeout: Joi.number().default(30000),
-        requestTimeout: Joi.number().default(30000),
-        requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
-        customHeaders: Joi.object().default({}),
-        pingTimeout: Joi.number().default(Joi.ref('requestTimeout')),
-        startupTimeout: Joi.number().default(5000),
-        logQueries: Joi.boolean().default(false),
-        ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
-        healthCheck: Joi.object({
-          delay: Joi.number().default(2500)
-        }).default(),
-      }).default();
-    },
+    uiExports: { injectDefaultVars: () => defaultVars },
 
-    deprecations({ rename }) {
-      const sslVerify = (basePath) => {
-        const getKey = (path) => {
-          return compact([basePath, path]).join('.');
-        };
+    async init(server) {
+      // All methods that ES plugin exposes are synchronous so we should get the first
+      // value from all observables here to be able to synchronously return and create
+      // cluster clients afterwards.
+      const [esConfig, adminCluster, dataCluster] = await combineLatest(
+        server.newPlatform.setup.core.elasticsearch.legacy.config$,
+        server.newPlatform.setup.core.elasticsearch.adminClient$,
+        server.newPlatform.setup.core.elasticsearch.dataClient$
+      ).pipe(
+        first(),
+        map(([config, adminClusterClient, dataClusterClient]) => [
+          config,
+          new Cluster(adminClusterClient),
+          new Cluster(dataClusterClient)
+        ])
+      ).toPromise();
 
-        return (settings, log) => {
-          const sslSettings = get(settings, getKey('ssl'));
-
-          if (!has(sslSettings, 'verify')) {
-            return;
-          }
-
-          const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
-          set(sslSettings, 'verificationMode', verificationMode);
-          unset(sslSettings, 'verify');
-
-          log(`Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with "${getKey('ssl.verificationMode')}"`);
-        };
+      defaultVars = {
+        esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
+        esShardTimeout: esConfig.shardTimeout.asMilliseconds(),
+        esApiVersion: esConfig.apiVersion,
       };
 
-      return [
-        rename('ssl.ca', 'ssl.certificateAuthorities'),
-        rename('ssl.cert', 'ssl.certificate'),
-        sslVerify(),
-      ];
-    },
+      const clusters = new Map();
+      server.expose('getCluster', (name) => {
+        if (name === 'admin') {
+          return adminCluster;
+        }
 
-    uiExports: {
-      injectDefaultVars(server, options) {
-        return {
-          esRequestTimeout: options.requestTimeout,
-          esShardTimeout: options.shardTimeout,
-          esApiVersion: options.apiVersion,
-        };
-      }
-    },
+        if (name === 'data') {
+          return dataCluster;
+        }
 
-    init(server) {
-      const clusters = createClusters(server);
+        return clusters.get(name);
+      });
 
-      server.expose('getCluster', clusters.get);
-      server.expose('createCluster', clusters.create);
+      server.expose('createCluster', (name, clientConfig = {}) => {
+        // NOTE: Not having `admin` and `data` clients provided by the core in `clusters`
+        // map implicitly allows to create custom `data` and `admin` clients. This is
+        // allowed intentionally to support custom `admin` cluster client created by the
+        // x-pack/monitoring bulk uploader. We should forbid that as soon as monitoring
+        // bulk uploader is refactored, see https://github.com/elastic/kibana/issues/31934.
+        if (clusters.has(name)) {
+          throw new Error(`cluster '${name}' already exists`);
+        }
 
-      server.expose('filterHeaders', filterHeaders);
-      server.expose('ElasticsearchClientLogging', clientLogger(server));
+        // We fill all the missing properties in the `clientConfig` using the default
+        // Elasticsearch config so that we don't depend on default values set and
+        // controlled by underlying Elasticsearch JS client.
+        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, {
+          ...esConfig,
+          ...clientConfig,
+        }));
 
-      createDataCluster(server);
-      createAdminCluster(server);
+        clusters.set(name, cluster);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+        return cluster;
+      });
+
+      server.events.on('stop', () => {
+        for (const cluster of clusters.values()) {
+          cluster.close();
+        }
+
+        clusters.clear();
+      });
+
+      createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server);
+      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
       server.expose('waitUntilReady', waitUntilReady);
       start();
     }

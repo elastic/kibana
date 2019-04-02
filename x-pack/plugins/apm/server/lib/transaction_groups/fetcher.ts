@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
-} from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
+} from '../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {
@@ -43,7 +43,7 @@ export function transactionGroupsFetcher(
   bodyQuery: StringMap
 ): Promise<ESResponse> {
   const { esFilterQuery, client, config } = setup;
-  const params = {
+  const params: SearchParams = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
@@ -51,7 +51,7 @@ export function transactionGroupsFetcher(
       aggs: {
         transactions: {
           terms: {
-            field: `${TRANSACTION_NAME}.keyword`,
+            field: TRANSACTION_NAME,
             order: { sum: 'desc' },
             size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },

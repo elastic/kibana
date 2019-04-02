@@ -1,0 +1,25 @@
+#indexPatternListReact {
+  display: flex;
+
+  .indexPatternList__headerWrapper {
+    padding-bottom: $euiSizeS;
+  }
+
+  .euiButtonEmpty__content {
+    justify-content: left;
+    padding: 0;
+
+    span {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  .indexPatternListPrompt__descList {
+    text-align: left;
+  }
+}
+
+.indexPatternList__badge {
+  margin-left: $euiSizeS;
+}

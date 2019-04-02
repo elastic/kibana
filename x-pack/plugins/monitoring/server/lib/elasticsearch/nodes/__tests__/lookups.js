@@ -5,7 +5,7 @@
  */
 
 import { nodeTypeClass, nodeTypeLabel } from '../lookups';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 
 describe('Node Types Lookups', () => {

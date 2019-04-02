@@ -4,35 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraResponseResolvers, InfraSourceResolvers } from '../../../common/graphql/types';
-import {
-  InfraResolvedResult,
-  InfraResolverOf,
-  InfraResolverWithoutFields,
-} from '../../lib/adapters/framework';
+import { InfraResponseResolvers, InfraSourceResolvers } from '../../graphql/types';
 import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
 import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
-import { InfraContext } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { ChildResolverOf, InfraResolverOf, ResultOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type InfraSourceMapResolver = InfraResolverWithoutFields<
-  InfraSourceResolvers.MapResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext,
-  'nodes'
+type InfraSourceMapResolver = ChildResolverOf<
+  InfraResolverOf<
+    InfraSourceResolvers.MapResolver<
+      {
+        source: ResultOf<QuerySourceResolver>;
+      } & InfraSourceResolvers.MapArgs
+    >
+  >,
+  QuerySourceResolver
 >;
 
-interface QueryMapResponse extends InfraSourceResolvers.MapArgs {
-  source: InfraResolvedResult<QuerySourceResolver>;
-}
-
-type InfraNodesResolver = InfraResolverOf<
-  InfraResponseResolvers.NodesResolver,
-  QueryMapResponse,
-  InfraContext
+type InfraNodesResolver = ChildResolverOf<
+  InfraResolverOf<InfraResponseResolvers.NodesResolver>,
+  InfraSourceMapResolver
 >;
 
 interface NodesResolversDeps {

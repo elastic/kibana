@@ -22,8 +22,10 @@ import {
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_REPLICA_COUNT,
-  WARM_PHASE_ON_ROLLOVER
-} from '../constants';
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_INDEX_PRIORITY,
+  PHASE_ROLLOVER_MAX_DOCUMENTS
+} from '../../constants';
 import {
   getPhase,
   getPhases,
@@ -34,6 +36,7 @@ import {
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
+import { getPolicyByName } from './policies';
 export const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
   defaultMessage: 'A number is required.'
 });
@@ -46,6 +49,10 @@ export const maximumAgeRequiredMessage = i18n.translate('xpack.indexLifecycleMgm
 export const maximumSizeRequiredMessage =
   i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
     defaultMessage: 'A maximum index size is required.'
+  });
+export const maximumDocumentsRequiredMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError', {
+    defaultMessage: 'Maximum documents is required.'
   });
 export const positiveNumbersAboveZeroErrorMessage =
   i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
@@ -60,8 +67,9 @@ export const validatePhase = (type, phase, errors) => {
 
   for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE) {
     if (phase.hasOwnProperty(numberedAttribute)) {
-      // If WARM_PHASE_ON_ROLLOVER there is no need to validate this
-      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE && phase[WARM_PHASE_ON_ROLLOVER]) {
+      // If WARM_PHASE_ON_ROLLOVER or PHASE_HOT there is no need to validate this
+      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE
+          && (phase[WARM_PHASE_ON_ROLLOVER] || type === PHASE_HOT)) {
         continue;
       }
       // If shrink is disabled, there is no need to validate this
@@ -72,8 +80,12 @@ export const validatePhase = (type, phase, errors) => {
       if (numberedAttribute === PHASE_FORCE_MERGE_SEGMENTS && !phase[PHASE_FORCE_MERGE_ENABLED]) {
         continue;
       }
-      // PHASE_REPLICA_COUNT is optional
+      // PHASE_REPLICA_COUNT is optional and can be zero
       if (numberedAttribute === PHASE_REPLICA_COUNT && !phase[numberedAttribute]) {
+        continue;
+      }
+      // PHASE_INDEX_PRIORITY is optional and can be zero
+      if (numberedAttribute === PHASE_INDEX_PRIORITY && !phase[numberedAttribute]) {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {
@@ -90,14 +102,33 @@ export const validatePhase = (type, phase, errors) => {
   }
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     if (
-      !isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) &&
-      !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
+      !isNumber(phase[PHASE_ROLLOVER_MAX_AGE])
+      && !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
+      && !isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
         maximumAgeRequiredMessage
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
         maximumSizeRequiredMessage
+      ];
+      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [
+        maximumDocumentsRequiredMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) && phase[PHASE_ROLLOVER_MAX_AGE] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED]) && phase[PHASE_ROLLOVER_MAX_SIZE_STORED] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS]) && phase[PHASE_ROLLOVER_MAX_DOCUMENTS] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [
+        positiveNumbersAboveZeroErrorMessage
       ];
     }
   }
@@ -172,7 +203,7 @@ export const validateLifecycle = state => {
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
     errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
-  } else {
+  } else if (getSelectedOriginalPolicyName(state) !== getSelectedPolicyName(state)) {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
       errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
@@ -193,15 +224,17 @@ export const validateLifecycle = state => {
 };
 
 export const getLifecycle = state => {
+  const policyName = getSelectedPolicyName(state);
   const phases = Object.entries(getPhases(state)).reduce(
     (accum, [phaseName, phase]) => {
       // Hot is ALWAYS enabled
       if (phaseName === PHASE_HOT) {
         phase[PHASE_ENABLED] = true;
       }
-
+      const esPolicy = getPolicyByName(state, policyName).policy || {};
+      const esPhase = esPolicy.phases ? esPolicy.phases[phaseName] : {};
       if (phase[PHASE_ENABLED]) {
-        accum[phaseName] = phaseToES(state, phase);
+        accum[phaseName] = phaseToES(phase, esPhase);
 
         // These seem to be constants
         if (phaseName === PHASE_DELETE) {

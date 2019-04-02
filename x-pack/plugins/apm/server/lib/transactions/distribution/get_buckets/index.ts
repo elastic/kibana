@@ -13,6 +13,7 @@ export async function getBuckets(
   transactionName: string,
   transactionType: string,
   transactionId: string,
+  traceId: string,
   bucketSize: number,
   setup: Setup
 ) {
@@ -21,6 +22,7 @@ export async function getBuckets(
     transactionName,
     transactionType,
     transactionId,
+    traceId,
     bucketSize,
     setup
   );

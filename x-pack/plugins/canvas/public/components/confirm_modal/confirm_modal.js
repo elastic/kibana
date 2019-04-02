@@ -31,7 +31,9 @@ export const ConfirmModal = props => {
   };
 
   // render nothing if this component isn't open
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <EuiOverlayMask>

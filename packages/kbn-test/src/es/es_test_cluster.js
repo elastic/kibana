@@ -36,6 +36,7 @@ export function createEsTestCluster(options = {}) {
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    dataArchive,
   } = options;
 
   const randomHash = Math.random()
@@ -74,11 +75,15 @@ export function createEsTestCluster(options = {}) {
         throw new Error(`unknown option esFrom "${esFrom}"`);
       }
 
+      if (dataArchive) {
+        await cluster.extractDataDirectory(installPath, dataArchive);
+      }
+
       await cluster.start(installPath, {
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
-          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          'discovery.type=single-node',
           ...esArgs,
         ],
       });

@@ -18,9 +18,9 @@
  */
 
 import { toArray } from 'rxjs/operators';
-import { buildAll } from '../../../server/sass/build_all';
-import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
-import { collectUiExports } from '../../../ui/ui_exports/collect_ui_exports';
+import { buildAll } from '../../../legacy/server/sass/build_all';
+import { findPluginSpecs } from '../../../legacy/plugin_discovery/find_plugin_specs';
+import { collectUiExports } from '../../../legacy/ui/ui_exports/collect_ui_exports';
 
 export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
@@ -34,8 +34,14 @@ export const TranspileScssTask = {
     const uiExports = collectUiExports(enabledPlugins);
 
     try {
-      const bundles = await buildAll(uiExports.styleSheetPaths);
-      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.source}`));
+      const bundles = await buildAll({
+        styleSheets: uiExports.styleSheetPaths,
+        log,
+        buildDir: build.resolvePath('built_assets/css'),
+        outputStyle: 'compressed',
+        sourceMap: false
+      });
+      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.sourcePath} (theme=${bundle.theme})`));
     } catch (error) {
       const { message, line, file } = error;
       throw new Error(`${message} on line ${line} of ${file}`);

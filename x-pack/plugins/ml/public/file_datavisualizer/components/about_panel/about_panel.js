@@ -5,7 +5,7 @@
  */
 
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
+  EuiPageContent,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
@@ -23,13 +23,15 @@ import {
 
 import { WelcomeContent } from './welcome_content';
 
-export function AboutPanel({ onFilePickerChange }) {
+export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, intl }) {
   return (
     <EuiPage restrictWidth={1000}>
       <EuiPageBody>
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={true}>
-            <EuiPanel paddingSize="l">
+        <EuiPageContent
+          className="file-datavisualizer-about-panel__content"
+        >
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={true}>
               <WelcomeContent />
 
               <EuiHorizontalRule margin="l" />
@@ -37,48 +39,46 @@ export function AboutPanel({ onFilePickerChange }) {
               <div style={{ textAlign: 'center' }} >
                 <EuiFilePicker
                   id="filePicker"
-                  initialPromptText={
-                    <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription"
-                      defaultMessage="Select or drag and drop a file"
-                    />
-                  }
+                  initialPromptText={intl.formatMessage({
+                    id: 'xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                    defaultMessage: 'Select or drag and drop a file',
+                  })}
                   onChange={files => onFilePickerChange(files)}
                   className="file-datavisualizer-file-picker"
                 />
               </div>
-            </EuiPanel>
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
-}
+});
 
 export function LoadingPanel() {
   return (
     <EuiPage restrictWidth={400}>
       <EuiPageBody>
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="l" style={{ textAlign: 'center' }} >
-              <EuiTitle size="s">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
-                    defaultMessage="Analyzing data"
-                  />
-                </h3>
-              </EuiTitle>
+        <EuiPageContent
+          className="file-datavisualizer-about-panel__content"
+          paddingSize="l"
+        >
+          <div style={{ textAlign: 'center' }}>
+            <EuiTitle size="s">
+              <h3 role="alert">
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
+                  defaultMessage="Analyzing data"
+                />
+              </h3>
+            </EuiTitle>
 
-              <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
 
-              <EuiLoadingSpinner size="xl"/>
-
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiLoadingSpinner size="xl"/>
+          </div>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );

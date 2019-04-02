@@ -52,7 +52,7 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * with the pseudo localization function.
  * @param child I18nProvider child component.
  */
-function wrapIntlFormatMessage(child: React.ReactNode) {
+function wrapIntlFormatMessage(child: React.ReactElement) {
   return React.createElement(
     injectI18n(({ intl }) => {
       const formatMessage = intl.formatMessage;
@@ -78,11 +78,10 @@ export class I18nProvider extends React.PureComponent {
         locale={i18n.getLocale()}
         messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getTranslation().formats}
-        defaultFormats={i18n.getFormats()}
+        formats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {isPseudoLocale(i18n.getLocale())
+        {isPseudoLocale(i18n.getLocale()) && React.isValidElement(this.props.children)
           ? wrapIntlFormatMessage(this.props.children)
           : this.props.children}
       </IntlProvider>

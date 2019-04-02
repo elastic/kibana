@@ -13,17 +13,19 @@ import { registerOpenRoute } from './register_open_route';
 import { registerRefreshRoute } from './register_refresh_route';
 import { registerReloadRoute } from './register_reload_route';
 import { registerDeleteRoute } from './register_delete_route';
-import { registerShardsRoute } from './register_shards_route';
+import { registerFreezeRoute } from './register_freeze_route';
+import { registerUnfreezeRoute } from './register_unfreeze_route';
 
-export function registerIndicesRoutes(server) {
-  registerClearCacheRoute(server);
-  registerCloseRoute(server);
-  registerFlushRoute(server);
-  registerForcemergeRoute(server);
-  registerListRoute(server);
-  registerOpenRoute(server);
-  registerRefreshRoute(server);
-  registerReloadRoute(server);
-  registerDeleteRoute(server);
-  registerShardsRoute(server);
+export function registerIndicesRoutes(router) {
+  registerClearCacheRoute(router);
+  registerCloseRoute(router);
+  registerFlushRoute(router);
+  registerForcemergeRoute(router);
+  registerListRoute(router);
+  registerOpenRoute(router);
+  registerRefreshRoute(router);
+  registerReloadRoute(router);
+  registerDeleteRoute(router);
+  registerFreezeRoute(router);
+  registerUnfreezeRoute(router);
 }

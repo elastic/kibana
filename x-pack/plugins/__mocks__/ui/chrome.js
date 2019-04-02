@@ -15,8 +15,12 @@ function getUiSettingsClient() {
         default:
           throw new Error(`Unexpected config key: ${key}`);
       }
-    }
+    },
   };
+}
+
+function getBasePath() {
+  return '/some/base/path';
 }
 
 function addBasePath(path) {
@@ -29,13 +33,21 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'isCloudEnabled':
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
 }
 
+function getXsrfToken() {
+  return 'kbn';
+}
+
 export default {
   getInjected,
   addBasePath,
-  getUiSettingsClient
+  getBasePath,
+  getUiSettingsClient,
+  getXsrfToken,
 };

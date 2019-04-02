@@ -5,8 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, children }) => {
@@ -40,8 +39,8 @@ export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, chi
   );
 
   return (
-    <Tooltip text={tipText} placement="bottom" trigger="hover">
+    <EuiToolTip content={tipText} position="bottom">
       <EuiLink>{children}</EuiLink>
-    </Tooltip>
+    </EuiToolTip>
   );
 };

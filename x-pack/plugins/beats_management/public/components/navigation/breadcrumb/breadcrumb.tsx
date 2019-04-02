@@ -11,7 +11,7 @@ import { Breadcrumb as BreadcrumbData, BreadcrumbContext } from './types';
 
 interface BreadcrumbManagerProps extends RouteProps {
   text: string;
-  href: string;
+  href?: string;
   parents?: BreadcrumbData[];
   context: BreadcrumbContext;
 }
@@ -44,7 +44,7 @@ class BreadcrumbManager extends Component<BreadcrumbManagerProps, {}, Breadcrumb
 
 interface BreadcrumbProps extends RouteProps {
   title: string;
-  path: string;
+  path?: string;
   parentBreadcrumbs?: BreadcrumbData[];
 }
 

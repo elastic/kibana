@@ -132,7 +132,7 @@ class DataFormatPicker extends Component {
                 options={options}
                 selectedOptions={selectedOption ? [selectedOption] : []}
                 onChange={this.handleChange}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -149,7 +149,7 @@ class DataFormatPicker extends Component {
                 options={durationInputOptions}
                 selectedOptions={selectedFrom ? [selectedFrom] : []}
                 onChange={this.handleDurationChange('from')}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -166,7 +166,7 @@ class DataFormatPicker extends Component {
                 options={durationOutputOptions}
                 selectedOptions={selectedTo ? [selectedTo] : []}
                 onChange={this.handleDurationChange('to')}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -224,7 +224,7 @@ class DataFormatPicker extends Component {
               options={options}
               selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>

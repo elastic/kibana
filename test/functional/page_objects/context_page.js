@@ -44,6 +44,8 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
       });
 
+      log.debug(`browser.get(${appUrl})`);
+
       await browser.get(appUrl);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await this.waitUntilContextLoadingHasFinished();
@@ -91,8 +93,8 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
-        if (!(successorLoadMoreButton.isEnabled() && successorLoadMoreButton.isDisplayed() &&
-              predecessorLoadMoreButton.isEnabled() && predecessorLoadMoreButton.isDisplayed())) {
+        if (!(await successorLoadMoreButton.isEnabled() && await successorLoadMoreButton.isDisplayed() &&
+              await predecessorLoadMoreButton.isEnabled() && await predecessorLoadMoreButton.isDisplayed())) {
           throw new Error('loading context rows');
         }
       });

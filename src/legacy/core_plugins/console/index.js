@@ -18,11 +18,14 @@
  */
 
 import Boom from 'boom';
-import { resolveApi } from './api_server/server';
+import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
-import { has, isEmpty } from 'lodash';
-import setHeaders from '../elasticsearch/lib/set_headers';
+import url from 'url';
+import { has, isEmpty, head, pick } from 'lodash';
+
+import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
+import { setHeaders } from './server/set_headers';
 
 import {
   ProxyConfigCollection,
@@ -30,14 +33,30 @@ import {
   createProxyRoute
 } from './server';
 
+function filterHeaders(originalHeaders, headersToKeep) {
+  const normalizeHeader = function (header) {
+    if (!header) {
+      return '';
+    }
+    header = header.toString();
+    return header.trim().toLowerCase();
+  };
+
+  // Normalize list of headers we want to allow in upstream request
+  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
+
+  return pick(originalHeaders, headersToKeepNormalized);
+}
+
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
   const src = resolve(__dirname, 'public/src/');
 
+  let defaultVars;
   const apps = [];
   return new kibana.Plugin({
     id: 'console',
-    require: [ 'elasticsearch' ],
+    require: ['elasticsearch'],
 
     config: function (Joi) {
       return Joi.object({
@@ -77,24 +96,29 @@ export default function (kibana) {
       ];
     },
 
-    init: function (server, options) {
+    async init(server, options) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const { filterHeaders } = server.plugins.elasticsearch;
+      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
+      defaultVars = {
+        elasticsearchUrl: url.format(
+          Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
+        )
+      };
+
       server.route(createProxyRoute({
-        baseUrl: config.get('elasticsearch.url'),
+        baseUrl: head(legacyEsConfig.hosts),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
-          const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
-          const filteredHeaders = filterHeaders(req.headers, whitelist);
-          const headers = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
+          const filteredHeaders = filterHeaders(req.headers, legacyEsConfig.requestHeadersWhitelist);
+          const headers = setHeaders(filteredHeaders, legacyEsConfig.customHeaders);
 
           if (!isEmpty(config.get('console.proxyConfig'))) {
             return {
@@ -104,7 +128,7 @@ export default function (kibana) {
           }
 
           return {
-            ...getElasticsearchProxyConfig(server),
+            ...getElasticsearchProxyConfig(legacyEsConfig),
             headers,
           };
         }
@@ -128,13 +152,9 @@ export default function (kibana) {
       apps: apps,
       hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 
-      injectDefaultVars(server) {
-        return {
-          elasticsearchUrl: server.config().get('elasticsearch.url')
-        };
-      },
+      injectDefaultVars: () => defaultVars,
 
       noParse: [
         join(modules, 'ace' + sep),

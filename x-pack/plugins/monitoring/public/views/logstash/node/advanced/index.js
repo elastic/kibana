@@ -7,12 +7,17 @@
 /*
  * Logstash Node Advanced View
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { MonitoringViewBaseController } from '../../../base_controller';
+import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { MonitoringTimeseriesContainer } from '../../../../components/chart';
+import { I18nContext } from 'ui/i18n';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -46,32 +51,63 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope, i18n) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      super({
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringLogstashNodeAdvancedApp',
+        $scope,
+        $injector
+      });
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.nodeSummary) {
+          return;
+        }
 
-    const title = $injector.get('title');
-    const routeTitle = i18n('xpack.monitoring.logstash.node.advanced.routeTitle', {
-      defaultMessage: 'Logstash - {nodeName} - Advanced',
-      values: {
-        nodeName: $scope.pageData.nodeSummary.name
-      }
-    });
-    title($scope.cluster, routeTitle);
+        this.setTitle(i18n('xpack.monitoring.logstash.node.advanced.routeTitle', {
+          defaultMessage: 'Logstash - {nodeName} - Advanced',
+          values: {
+            nodeName: data.nodeSummary.name
+          }
+        }));
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
+        const metricsToShow = [
+          data.metrics.logstash_node_cpu_utilization,
+          data.metrics.logstash_queue_events_count,
+          data.metrics.logstash_node_cgroup_cpu,
+          data.metrics.logstash_pipeline_queue_size,
+          data.metrics.logstash_node_cgroup_stats,
+        ];
 
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
+        this.renderReact(
+          <I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <DetailStatus stats={data.nodeSummary}/>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
+                    {metricsToShow.map((metric, index) => (
+                      <EuiFlexItem key={index}>
+                        <MonitoringTimeseriesContainer
+                          series={metric}
+                          onBrush={this.onBrush}
+                          {...data}
+                        />
+                        <EuiSpacer />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGrid>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nContext>
+        );
+      });
+    }
   }
 });

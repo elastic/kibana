@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 
-import 'plugins/spaces/views/space_selector/space_selector.less';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Space } from '../../../common/model/space';
@@ -28,9 +27,9 @@ module.controller(
     const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
     render(
-      <I18nProvider>
+      <I18nContext>
         <SpaceSelector spaces={spaces} spacesManager={spacesManager} />
-      </I18nProvider>,
+      </I18nContext>,
       domNode
     );
 

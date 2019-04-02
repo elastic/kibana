@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { ml } from './ml_api_service';
@@ -23,6 +24,11 @@ let datafeedIds = {};
 
 class JobService {
   constructor() {
+    // currentJob -> used to pass a job object between the job management page and
+    // and the advanced wizard.
+    // if populated when loading the advanced wizard, the job is used for cloning.
+    // if populated when loading the job management page, the start datafeed modal
+    // is automatically opened.
     this.currentJob = undefined;
     this.jobs = [];
 
@@ -33,12 +39,24 @@ class JobService {
     this.detectorsByJob = {};
     this.customUrlsByJob = {};
     this.jobStats = {
-      activeNodes: { label: 'Active ML Nodes', value: 0, show: true },
-      total: { label: 'Total jobs', value: 0, show: true },
-      open: { label: 'Open jobs', value: 0, show: true },
-      closed: { label: 'Closed jobs', value: 0, show: true },
-      failed: { label: 'Failed jobs', value: 0, show: false },
-      activeDatafeeds: { label: 'Active datafeeds', value: 0, show: true }
+      activeNodes: { label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
+        defaultMessage: 'Active ML Nodes'
+      }), value: 0, show: true },
+      total: { label: i18n.translate('xpack.ml.jobService.totalJobsLabel', {
+        defaultMessage: 'Total jobs'
+      }), value: 0, show: true },
+      open: { label: i18n.translate('xpack.ml.jobService.openJobsLabel', {
+        defaultMessage: 'Open jobs'
+      }), value: 0, show: true },
+      closed: { label: i18n.translate('xpack.ml.jobService.closedJobsLabel', {
+        defaultMessage: 'Closed jobs'
+      }), value: 0, show: true },
+      failed: { label: i18n.translate('xpack.ml.jobService.failedJobsLabel', {
+        defaultMessage: 'Failed jobs'
+      }), value: 0, show: false },
+      activeDatafeeds: { label: i18n.translate('xpack.ml.jobService.activeDatafeedsLabel', {
+        defaultMessage: 'Active datafeeds'
+      }), value: 0, show: true }
     };
     this.jobUrls = {};
   }
@@ -127,7 +145,9 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        msgs.error('Jobs list could not be retrieved');
+        msgs.error(i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
+          defaultMessage: 'Jobs list could not be retrieved'
+        }));
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -200,7 +220,9 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        msgs.error('Jobs list could not be retrieved');
+        msgs.error(i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
+          defaultMessage: 'Jobs list could not be retrieved'
+        }));
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -242,7 +264,9 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        msgs.error('datafeeds list could not be retrieved');
+        msgs.error(i18n.translate('xpack.ml.jobService.datafeedsListCouldNotBeRetrievedErrorMessage', {
+          defaultMessage: 'datafeeds list could not be retrieved'
+        }));
         msgs.error('', err);
         reject({ jobs, err });
       }
@@ -349,7 +373,10 @@ class JobService {
         console.log('update job', resp);
         return { success: true };
       }).catch((err) => {
-        msgs.error('Could not update job: ' + jobId);
+        msgs.error(i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
+          defaultMessage: 'Could not update job: {jobId}',
+          values: { jobId },
+        }));
         console.log('update job', err);
         return { success: false, message: err.message };
       });
@@ -362,7 +389,10 @@ class JobService {
         console.log('validate job', messages);
         return { success: true, messages };
       }).catch((err) => {
-        msgs.error('Job Validation Error: ' + err.message);
+        msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
+          defaultMessage: 'Job Validation Error: {errorMessage}',
+          values: { errorMessage: err.message },
+        }));
         console.log('validate job', err);
         return {
           success: false,
@@ -556,7 +586,10 @@ class JobService {
         return { success: true };
       })
       .catch((err) => {
-        msgs.error('Could not update datafeed: ' + datafeedId);
+        msgs.error(i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
+          defaultMessage: 'Could not update datafeed: {datafeedId}',
+          values: { datafeedId },
+        }));
         console.log('update datafeed', err);
         return { success: false, message: err.message };
       });
@@ -583,7 +616,10 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error starting datafeed:', err);
-          msgs.error('Could not start datafeed for ' + jobId, err);
+          msgs.error(i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
+            defaultMessage: 'Could not start datafeed for {jobId}',
+            values: { jobId },
+          }), err);
           reject(err);
         });
     });
@@ -601,11 +637,18 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error stopping datafeed:', err);
+          const couldNotStopDatafeedErrorMessage = i18n.translate('xpack.ml.jobService.couldNotStopDatafeedErrorMessage', {
+            defaultMessage: 'Could not stop datafeed for {jobId}',
+            values: { jobId },
+          });
+
           if (err.statusCode === 500) {
-            msgs.error('Could not stop datafeed for ' + jobId);
-            msgs.error('Request may have timed out and may still be running in the background.');
+            msgs.error(couldNotStopDatafeedErrorMessage);
+            msgs.error(i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
+              defaultMessage: 'Request may have timed out and may still be running in the background.',
+            }));
           } else {
-            msgs.error('Could not stop datafeed for ' + jobId, err);
+            msgs.error(couldNotStopDatafeedErrorMessage, err);
           }
           reject(err);
         });
@@ -837,7 +880,7 @@ function createResultsUrl(jobIds, start, end, resultsPage) {
   path += `?_g=(ml:(jobIds:!(${idString}))`;
   path += `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${from}'`;
   path += `,mode:absolute,to:'${to}'`;
-  path += '))&_a=(filters:!(),query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
+  path += '))&_a=(query:(query_string:(analyze_wildcard:!t,query:\'*\')))';
 
   return path;
 }

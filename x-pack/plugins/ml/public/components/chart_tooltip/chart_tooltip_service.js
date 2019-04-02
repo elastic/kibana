@@ -32,30 +32,27 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
   this.element.html(contents);
 
   // side bar width
-  const navOffset = $('.global-nav').width();
-  const contentWidth = $('body').width() - navOffset - 10;
+  const navOffset = $('.euiNavDrawer').width() || 0;  // Offset by width of side navbar
+  const contentWidth = $('body').width() - navOffset;
   const tooltipWidth = this.element.width();
-  const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
 
   const pos = target.getBoundingClientRect();
-  const x = (pos.left + (offset.x) + 4) - navOffset;
-  const y = pos.top + (offset.y) + scrollTop;
-
-  if (x + tooltipWidth > contentWidth) {
+  let left = (pos.left + (offset.x) + 4) - navOffset;
+  if (left + tooltipWidth > contentWidth) {
     // the tooltip is hanging off the side of the page,
     // so move it to the other side of the target
-    this.element.css({
-      left: x - (tooltipWidth + offset.x + 22),
-      top: (y - 28)
-    });
-  } else {
-    this.element.css({
-      left: x,
-      top: (y - 28)
-    });
+    const markerWidthAdjustment = 22;
+    left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
   }
 
+  // Calculate top offset
+  const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+  const topNavHeightAdjustment = 75;
+  const top = pos.top + (offset.y) + scrollTop - topNavHeightAdjustment;
+
   this.element.css({
+    left,
+    top,
     opacity: '0.9',
     display: 'block'
   });

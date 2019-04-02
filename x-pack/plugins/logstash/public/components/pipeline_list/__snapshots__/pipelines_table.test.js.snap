@@ -55,6 +55,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     ]
   }
   data-test-subj="pipelineTable"
+  executeQueryOptions={Object {}}
   isSelectable={true}
   itemId="id"
   items={
@@ -79,6 +80,11 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   responsive={true}
+  rowProps={
+    Object {
+      "data-test-subj": "row",
+    }
+  }
   search={
     Object {
       "box": Object {
@@ -112,6 +118,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         iconSide="left"
         isDisabled={false}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
         <FormattedMessage

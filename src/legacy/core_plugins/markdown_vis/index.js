@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
 
   return new kibana.Plugin({
@@ -25,7 +27,8 @@ export default function (kibana) {
       visTypes: [
         'plugins/markdown_vis/markdown_vis'
       ],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      interpreter: ['plugins/markdown_vis/markdown_fn'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
 
   });

@@ -5,18 +5,18 @@
  */
 
 import React from 'react';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { render } from 'enzyme';
 import { Download } from '../';
 
 describe('<Download />', () => {
-  it('has canvas_download class', () => {
+  it('has canvasDownload class', () => {
     const wrapper = render(
       <Download fileName="hello" content="world">
         <button>Download it</button>
       </Download>
     );
 
-    expect(wrapper.hasClass('canvas_download')).to.be.ok;
+    expect(wrapper.hasClass('canvasDownload')).to.be.ok;
   });
 });

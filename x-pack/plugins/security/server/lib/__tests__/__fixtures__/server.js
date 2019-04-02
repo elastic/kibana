@@ -13,6 +13,7 @@ export function serverFixture() {
     expose: stub(),
     log: stub(),
     route: stub(),
+    decorate: stub(),
 
     info: {
       protocol: 'protocol'
@@ -36,14 +37,6 @@ export function serverFixture() {
         getUser: stub(),
         authenticate: stub(),
         deauthenticate: stub(),
-        authorization: {
-          mode: {
-            useRbacForRequest: stub(),
-          },
-          actions: {
-            login: 'stub-login-action',
-          },
-        },
       },
 
       xpack_main: {

@@ -43,7 +43,23 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
   }
 
   public async hasIndices(request: InfraFrameworkRequest, indexNames: string) {
-    return (await this.getIndexNames(request, indexNames)).length > 0;
+    return await this.framework
+      .callWithRequest(request, 'search', {
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        index: indexNames,
+        size: 0,
+        terminate_after: 1,
+      })
+      .then(
+        response => response._shards.total > 0,
+        err => {
+          if (err.status === 404) {
+            return false;
+          }
+          throw err;
+        }
+      );
   }
 }
 

@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
 
 interface Params {
   targetDomElement: HTMLElement;
+}
+
+interface Deps {
+  i18n: I18nSetup;
 }
 
 export class NotificationsService {
@@ -35,11 +40,11 @@ export class NotificationsService {
     });
   }
 
-  public start() {
+  public setup({ i18n }: Deps) {
     this.params.targetDomElement.appendChild(this.toastsContainer);
 
     return {
-      toasts: this.toasts.start(),
+      toasts: this.toasts.setup({ i18n }),
     };
   }
 
@@ -50,4 +55,4 @@ export class NotificationsService {
   }
 }
 
-export type NotificationsStartContract = ReturnType<NotificationsService['start']>;
+export type NotificationsSetup = ReturnType<NotificationsService['setup']>;

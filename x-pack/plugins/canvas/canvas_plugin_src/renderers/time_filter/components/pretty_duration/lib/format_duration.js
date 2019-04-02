@@ -43,7 +43,9 @@ export function formatDuration(from, to) {
       if (to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
         const rounded = fromParts[1].split('/');
         text = 'Last ' + rounded[0];
-        if (rounded[1]) text = text + ' rounded to the ' + timeUnits[rounded[1]];
+        if (rounded[1]) {
+          text = text + ' rounded to the ' + timeUnits[rounded[1]];
+        }
 
         return text;
       } else {

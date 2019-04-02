@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
@@ -41,18 +41,10 @@ describe('TagCloudVisualizationTest', function () {
   const dummyTableGroup = {
     columns: [{
       id: 'col-0',
-      'aggConfig': {
-        'id': '2',
-        'enabled': true,
-        'type': 'terms',
-        'schema': 'segment',
-        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' },
-        fieldFormatter: () => (x => x)
-      }, 'title': 'geo.dest: Descending'
+      title: 'geo.dest: Descending'
     }, {
       id: 'col-1',
-      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-      'title': 'Count'
+      title: 'Count'
     }],
     rows: [
       { 'col-0': 'CN', 'col-1': 26 },
@@ -76,7 +68,11 @@ describe('TagCloudVisualizationTest', function () {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
-        type: 'tagcloud'
+        type: 'tagcloud',
+        params: {
+          bucket: { accessor: 0, format: {} },
+          metric: { accessor: 0, format: {} },
+        },
       });
 
     });
@@ -89,7 +85,7 @@ describe('TagCloudVisualizationTest', function () {
     it('simple draw', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
 
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -105,7 +101,7 @@ describe('TagCloudVisualizationTest', function () {
     it('with resize', async function () {
 
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -115,7 +111,7 @@ describe('TagCloudVisualizationTest', function () {
 
       domNode.style.width = '256px';
       domNode.style.height = '368px';
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -131,7 +127,7 @@ describe('TagCloudVisualizationTest', function () {
     it('with param change', async function () {
 
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -143,7 +139,7 @@ describe('TagCloudVisualizationTest', function () {
       domNode.style.height = '368px';
       vis.params.orientation = 'right angled';
       vis.params.minFontSize = 70;
-      await tagcloudVisualization.render(dummyTableGroup, {
+      await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: true,
         aggs: false,

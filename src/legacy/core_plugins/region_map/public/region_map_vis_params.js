@@ -22,7 +22,7 @@ import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
-import { ORIGIN } from 'ui/vis/map/origin';
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {
@@ -66,28 +66,13 @@ uiModules.get('kibana/region_map')
               setTimeout(function () {
                 $scope.dirty = false;
               }, 0);
-              $scope.collections.vectorLayers = newVectorLayers;
-
-              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
-                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
-                onLayerChange();
-              }
-
-
-              //the dirty flag is set to true because the change in vector layers config causes an update of the scope.params
-              //temp work-around. addressing this issue with the visualize refactor for 6.0
-              setTimeout(function () {
-                $scope.dirty = false;
-              }, 0);
-
-
             })
             .catch(function (error) {
               toastNotifications.addWarning(error.message);
             });
         }
 
-        function onLayerChange() {
+        async function onLayerChange() {
 
           if (!$scope.editorState.params.selectedLayer) {
             return;
@@ -96,7 +81,9 @@ uiModules.get('kibana/region_map')
           $scope.editorState.params.selectedJoinField = $scope.editorState.params.selectedLayer.fields[0];
 
           if ($scope.editorState.params.selectedLayer.isEMS) {
-            $scope.editorState.params.emsHotLink = serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+            $scope.editorState.params.emsHotLink = null;
+            $scope.editorState.params.emsHotLink = await serviceSettings.getEMSHotLink($scope.editorState.params.selectedLayer);
+            $scope.$digest();
           } else {
             $scope.editorState.params.emsHotLink = null;
           }

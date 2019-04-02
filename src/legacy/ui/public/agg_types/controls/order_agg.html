@@ -1,0 +1,49 @@
+<div ng-controller="aggParam.controller">
+  <div class="form-group">
+    <label
+      for="visEditorOrder{{agg.id}}"
+      i18n-id="common.ui.aggTypes.orderAgg.orderByLabel"
+      i18n-default-message="Order By"
+    ></label>
+    <select
+      id="visEditorOrder{{agg.id}}"
+      name="orderBy"
+      ng-model="agg.params.orderBy"
+      required
+      class="form-control">
+      <option
+        ng-repeat="respAgg in responseValueAggs track by respAgg.id"
+        value="{{respAgg.id}}"
+        data-test-subj="visEditorOrder{{agg.id}}-{{respAgg.id}}"
+        ng-disabled="rejectAgg(respAgg)"
+        ng-selected="agg.params.orderBy === respAgg.id"
+        i18n-id="common.ui.aggTypes.orderAgg.metricLabel"
+        i18n-default-message="metric: {metric}"
+        i18n-values="{ metric: safeMakeLabel(respAgg) }"
+      >
+      </option>
+      <option
+        value="custom"
+        data-test-subj="visEditorOrder{{agg.id}}-custom"
+        ng-selected="agg.params.orderBy === 'custom'"
+        i18n-id="common.ui.aggTypes.orderAgg.customMetricLabel"
+        i18n-default-message="Custom Metric"
+      ></option>
+       <option
+        value="_key"
+        data-test-subj="visEditorOrder{{agg.id}}-key"
+        ng-selected="agg.params.orderBy === '_key'"
+        i18n-id="common.ui.aggTypes.orderAgg.alphabeticalLabel"
+        i18n-default-message="Alphabetical"
+      ></option>
+    </select>
+  </div>
+  <div ng-show="agg.params.orderAgg" class="visEditorAgg__subAgg">
+    <vis-editor-agg-params
+      index-pattern="agg.getIndexPattern()"
+      agg="agg.params.orderAgg"
+      ng-if="agg.params.orderAgg"
+      group-name="'metrics'">
+    </vis-editor-agg-params>
+  </div>
+</div>

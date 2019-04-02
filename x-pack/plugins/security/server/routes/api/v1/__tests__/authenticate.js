@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Boom from 'boom';
 import Joi from 'joi';
 import sinon from 'sinon';
@@ -36,7 +36,6 @@ describe('Authentication routes', () => {
     let loginRoute;
     let request;
     let authenticateStub;
-    let authorizationModeStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -44,15 +43,14 @@ describe('Authentication routes', () => {
         .firstCall
         .args[0];
 
-      request = {
+      request = requestFixture({
         headers: {},
         payload: { username: 'user', password: 'password' }
-      };
+      });
 
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
-        sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
+        sinon.match(BasicCredentials.decorateRequest(request, 'user', 'password'))
       );
-      authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });
 
     it('correctly defines route.', async () => {
@@ -117,34 +115,15 @@ describe('Authentication routes', () => {
     });
 
     describe('authentication succeeds', () => {
-      const getDeprecationMessage = username =>
-        `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
 
-      it(`returns user data and doesn't log deprecation warning if authorization.mode.useRbacForRequest returns true.`, async () => {
+      it(`returns user data`, async () => {
         const user = { username: 'user' };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
         );
-        authorizationModeStub.useRbacForRequest.returns(true);
 
         await loginRoute.handler(request, hStub);
 
-        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
-        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.response);
-      });
-
-      it(`returns user data and logs deprecation warning if authorization.mode.useRbacForRequest returns false.`, async () => {
-        const user = { username: 'user' };
-        authenticateStub.returns(
-          Promise.resolve(AuthenticationResult.succeeded(user))
-        );
-        authorizationModeStub.useRbacForRequest.returns(false);
-
-        await loginRoute.handler(request, hStub);
-
-        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
-        sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.calledOnce(hStub.response);
       });
     });

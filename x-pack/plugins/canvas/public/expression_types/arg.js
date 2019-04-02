@@ -12,8 +12,12 @@ import { argTypeRegistry } from './arg_type';
 export class Arg {
   constructor(props) {
     const argType = argTypeRegistry.get(props.argType);
-    if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
-    if (!props.name) throw new Error('Args must have a name property');
+    if (!argType) {
+      throw new Error(`Invalid arg type: ${props.argType}`);
+    }
+    if (!props.name) {
+      throw new Error('Args must have a name property');
+    }
 
     // properties that can be overridden
     const defaultProps = {

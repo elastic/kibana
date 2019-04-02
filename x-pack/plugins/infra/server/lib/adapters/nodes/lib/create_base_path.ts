@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraPathInput } from '../../../../../common/graphql/types';
+import { InfraPathInput } from '../../../../graphql/types';
 export const createBasePath = (groupBy: InfraPathInput[]) => {
   const basePath = ['aggs', 'waffle', 'aggs', 'nodes', 'aggs'];
   return groupBy.reduce((acc, group, index) => {

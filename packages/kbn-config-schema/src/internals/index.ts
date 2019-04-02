@@ -275,6 +275,54 @@ export const internals = Joi.extend([
     ],
   },
   {
+    name: 'record',
+    pre(value: any, state: State, options: ValidationOptions) {
+      if (!isPlainObject(value)) {
+        return this.createError('record.base', { value }, state, options);
+      }
+
+      return value as any;
+    },
+    rules: [
+      anyCustomRule,
+      {
+        name: 'entries',
+        params: { key: Joi.object().schema(), value: Joi.object().schema() },
+        validate(params, value, state, options) {
+          const result = {} as Record<string, any>;
+          for (const [entryKey, entryValue] of Object.entries(value)) {
+            const { value: validatedEntryKey, error: keyError } = Joi.validate(
+              entryKey,
+              params.key
+            );
+
+            if (keyError) {
+              return this.createError('record.key', { entryKey, reason: keyError }, state, options);
+            }
+
+            const { value: validatedEntryValue, error: valueError } = Joi.validate(
+              entryValue,
+              params.value
+            );
+
+            if (valueError) {
+              return this.createError(
+                'record.value',
+                { entryKey, reason: valueError },
+                state,
+                options
+              );
+            }
+
+            result[validatedEntryKey] = validatedEntryValue;
+          }
+
+          return result as any;
+        },
+      },
+    ],
+  },
+  {
     name: 'array',
 
     base: Joi.array(),

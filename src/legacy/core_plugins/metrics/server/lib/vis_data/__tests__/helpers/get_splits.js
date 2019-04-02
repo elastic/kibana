@@ -35,7 +35,7 @@ describe('getSplits(resp, panel, series)', () => {
     const panel = { type: 'timeseries' };
     const series = {
       id: 'SERIES',
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       split_mode: 'everything',
       metrics: [
         { id: 'AVG', type: 'avg', field: 'cpu' },
@@ -47,7 +47,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
         meta: { bucketSize: 10 },
-        color: '#FF0000',
+        color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
       }
@@ -92,7 +92,7 @@ describe('getSplits(resp, panel, series)', () => {
         key: 'example-01',
         label: 'example-01',
         meta: { bucketSize: 10 },
-        color: '#FF0000',
+        color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
       },
@@ -101,7 +101,7 @@ describe('getSplits(resp, panel, series)', () => {
         key: 'example-02',
         label: 'example-02',
         meta: { bucketSize: 10 },
-        color: '#FF0000',
+        color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
       }
@@ -146,7 +146,7 @@ describe('getSplits(resp, panel, series)', () => {
         key: 'example-01',
         label: 'example-01',
         meta: { bucketSize: 10 },
-        color: '#FF0000',
+        color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
       },
@@ -155,7 +155,7 @@ describe('getSplits(resp, panel, series)', () => {
         key: 'example-02',
         label: 'example-02',
         meta: { bucketSize: 10 },
-        color: '#930000',
+        color: 'rgb(147, 0, 0)',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
       }
@@ -180,7 +180,7 @@ describe('getSplits(resp, panel, series)', () => {
     };
     const series = {
       id: 'SERIES',
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       split_mode: 'filters',
       split_filters: [
         { id: 'filter-1', color: '#F00', filter: 'status_code:[* TO 200]', label: '200s' },

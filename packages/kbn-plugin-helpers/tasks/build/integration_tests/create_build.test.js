@@ -42,7 +42,7 @@ describe('creating the build', () => {
 
     await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
-    const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
+    const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json')); // eslint-disable-line import/no-dynamic-require
     expect(pkg).not.toHaveProperty('scripts');
     expect(pkg).not.toHaveProperty('devDependencies');
   });
@@ -52,7 +52,7 @@ describe('creating the build', () => {
 
     await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
-    const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
+    const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json')); // eslint-disable-line import/no-dynamic-require
     expect(pkg).toHaveProperty('build');
     expect(pkg.build.git).not.toBeUndefined();
     expect(pkg.build.date).not.toBeUndefined();

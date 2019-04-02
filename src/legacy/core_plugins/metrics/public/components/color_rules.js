@@ -142,7 +142,7 @@ class ColorRules extends Component {
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleChange(model, 'operator')}
-            singleSelection={true}
+            singleSelection={{ asPlainText: true }}
             fullWidth
           />
         </EuiFlexItem>

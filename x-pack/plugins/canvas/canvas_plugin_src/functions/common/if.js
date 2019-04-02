@@ -27,10 +27,14 @@ export const ifFn = () => ({
   },
   fn: async (context, args) => {
     if (args.condition) {
-      if (typeof args.then === 'undefined') return context;
+      if (typeof args.then === 'undefined') {
+        return context;
+      }
       return await args.then();
     } else {
-      if (typeof args.else === 'undefined') return context;
+      if (typeof args.else === 'undefined') {
+        return context;
+      }
       return await args.else();
     }
   },

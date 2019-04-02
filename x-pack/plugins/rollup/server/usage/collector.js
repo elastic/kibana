@@ -1,10 +1,12 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { get } from 'lodash';
+import { fetchUiMetrics } from '../../../../server/lib/ui_metric';
+import { UIM_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -102,8 +104,9 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
     index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: [
-      'hits.hits._source.visualization.savedSearchId',
+      'hits.hits._source.visualization.savedSearchRefName',
       'hits.hits._source.visualization.kibanaSavedObjectMeta',
+      'hits.hits._source.references',
     ],
     body: {
       query: {
@@ -128,19 +131,21 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
     const {
       _source: {
         visualization: {
-          savedSearchId,
+          savedSearchRefName,
           kibanaSavedObjectMeta: {
             searchSourceJSON,
           },
         },
+        references = [],
       },
     } = visualization;
 
     const searchSource = JSON.parse(searchSourceJSON);
 
-    if (savedSearchId) {
+    if (savedSearchRefName) {
       // This visualization depends upon a saved search.
-      if (rollupSavedSearchesToFlagMap[savedSearchId]) {
+      const savedSearch = references.find(ref => ref.name === savedSearchRefName);
+      if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
         rollupVisualizations++;
         rollupVisualizationsFromSavedSearches++;
       }
@@ -177,6 +182,8 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
+      const uiMetrics = await fetchUiMetrics(server, UIM_APP_NAME, USER_ACTIONS);
+
       return {
         index_patterns: {
           total: rollupIndexPatterns.length,
@@ -190,6 +197,7 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
+        ui_metrics: uiMetrics,
       };
     },
   });

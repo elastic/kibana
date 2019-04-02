@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function kafkaLogsSpecProvider(server, context) {
   const moduleName = 'kafka';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'kafkaLogs',
@@ -46,7 +44,7 @@ export function kafkaLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3',
+          id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.kafkaLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Kafka logs dashboard',
           }),
@@ -59,7 +57,7 @@ export function kafkaLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/kafka_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

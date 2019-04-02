@@ -8,7 +8,6 @@ import { EuiIcon } from '@elastic/eui';
 import { tint } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-
 // @ts-ignore
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
@@ -37,9 +36,7 @@ export class SuggestionItem extends React.Component<SuggestionItemProps> {
           <EuiIcon type={getEuiIconType(suggestion.type)} />
         </SuggestionItemIconField>
         <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField
-          dangerouslySetInnerHTML={{ __html: suggestion.description }}
-        />
+        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
       </SuggestionItemContainer>
     );
   }
@@ -50,11 +47,11 @@ const SuggestionItemContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.euiFontSizeS};
-  height: ${props => props.theme.eui.euiSizeXl};
+  font-size: ${props => props.theme.eui.default.euiFontSizeS};
+  height: ${props => props.theme.eui.default.euiSizeXl};
   white-space: nowrap;
   background-color: ${props =>
-    props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
+    props.isSelected ? props.theme.eui.default.euiColorLightestShade : 'transparent'};
 `;
 
 const SuggestionItemField = styled.div`
@@ -62,21 +59,25 @@ const SuggestionItemField = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.euiSizeXl};
-  padding: ${props => props.theme.eui.euiSizeXs};
+  height: ${props => props.theme.eui.default.euiSizeXl};
+  padding: ${props => props.theme.eui.default.euiSizeXs};
 `;
 
 const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
-  background-color: ${props => tint(0.1, getEuiIconColor(props.theme, props.suggestionType))};
-  color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
+  background-color: ${props => {
+    return tint(0.1, getEuiIconColor(props.theme, props.suggestionType));
+  }};
+  color: ${props => {
+    return getEuiIconColor(props.theme, props.suggestionType);
+  }};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.euiSizeXl};
+  width: ${props => props.theme.eui.default.euiSizeXl};
 `;
 
 const SuggestionItemTextField = SuggestionItemField.extend`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
 `;
 
 const SuggestionItemDescriptionField = SuggestionItemField.extend`
@@ -84,7 +85,7 @@ const SuggestionItemDescriptionField = SuggestionItemField.extend`
   p {
     display: inline;
     span {
-      font-family: ${props => props.theme.eui.euiCodeFontFamily};
+      font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
     }
   }
 `;
@@ -109,15 +110,15 @@ const getEuiIconType = (suggestionType: string) => {
 const getEuiIconColor = (theme: any, suggestionType: string): string => {
   switch (suggestionType) {
     case 'field':
-      return theme.eui.euiColorVis7;
+      return theme.eui.default.euiColorVis7;
     case 'value':
-      return theme.eui.euiColorVis0;
+      return theme.eui.default.euiColorVis0;
     case 'operator':
-      return theme.eui.euiColorVis1;
+      return theme.eui.default.euiColorVis1;
     case 'conjunction':
-      return theme.eui.euiColorVis2;
+      return theme.eui.default.euiColorVis2;
     case 'recentSearch':
     default:
-      return theme.eui.euiColorMediumShade;
+      return theme.eui.default.euiColorMediumShade;
   }
 };

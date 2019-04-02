@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
-import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
@@ -31,18 +30,11 @@ export function initAuthenticateApi(server) {
       const { username, password } = request.payload;
 
       try {
-        const authenticationResult = await server.plugins.security.authenticate(
-          BasicCredentials.decorateRequest(request, username, password)
-        );
+        request.loginAttempt().setCredentials(username, password);
+        const authenticationResult = await server.plugins.security.authenticate(request);
 
         if (!authenticationResult.succeeded()) {
           throw Boom.unauthorized(authenticationResult.error);
-        }
-
-        const { authorization } = server.plugins.security;
-        if (!authorization.mode.useRbacForRequest(request)) {
-          const msg = `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
-          server.log(['warning', 'deprecated', 'security'], msg);
         }
 
         return h.response();

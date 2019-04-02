@@ -12,7 +12,9 @@ export const ESFieldSelect = compose(
   withState('fields', 'setFields', []),
   lifecycle({
     componentDidMount() {
-      if (this.props.index) getFields(this.props.index).then(this.props.setFields);
+      if (this.props.index) {
+        getFields(this.props.index).then(this.props.setFields);
+      }
     },
     componentDidUpdate({ index }) {
       const { value, onChange, setFields } = this.props;
@@ -22,7 +24,9 @@ export const ESFieldSelect = compose(
         });
       }
 
-      if (value && !this.props.fields.includes(value)) onChange(null);
+      if (value && !this.props.fields.includes(value)) {
+        onChange(null);
+      }
     },
   })
 )(Component);

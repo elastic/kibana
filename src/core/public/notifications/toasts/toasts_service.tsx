@@ -21,27 +21,31 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Toast } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nSetup } from '../../i18n';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsStartContract } from './toasts_start_contract';
+import { ToastsSetup } from './toasts_start';
 
 interface Params {
   targetDomElement: HTMLElement;
 }
 
+interface Deps {
+  i18n: I18nSetup;
+}
+
 export class ToastsService {
   constructor(private readonly params: Params) {}
 
-  public start() {
-    const toasts = new ToastsStartContract();
+  public setup({ i18n }: Deps) {
+    const toasts = new ToastsSetup();
 
     render(
-      <I18nProvider>
+      <i18n.Context>
         <GlobalToastList
           dismissToast={(toast: Toast) => toasts.remove(toast)}
           toasts$={toasts.get$()}
         />
-      </I18nProvider>,
+      </i18n.Context>,
       this.params.targetDomElement
     );
 

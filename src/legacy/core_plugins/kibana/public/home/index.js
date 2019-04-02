@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import './home.less';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
-  return reactDirective(HomeApp);
+  return reactDirective(wrapInI18nContext(HomeApp));
 });
 
 const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });

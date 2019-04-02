@@ -28,8 +28,12 @@ const TimelionDatasource = ({ args, updateArgs }) => {
   };
 
   const getArgName = () => {
-    if (getSimpleArg('_', args)[0]) return '_';
-    if (getSimpleArg('q', args)[0]) return 'q';
+    if (getSimpleArg('_', args)[0]) {
+      return '_';
+    }
+    if (getSimpleArg('q', args)[0]) {
+      return 'q';
+    }
     return 'query';
   };
 

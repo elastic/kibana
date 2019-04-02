@@ -21,71 +21,76 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiFlyoutBody,
   EuiTitle,
-  EuiButton,
 } from '@elastic/eui';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
-export class OpenSearchPanel extends React.Component {
-
-  renderMangageSearchesButton() {
-    return (
-      <EuiButton
-        onClick={this.props.onClose}
-        href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
-      >
-        <FormattedMessage
-          id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-          defaultMessage="Manage searches"
+export function OpenSearchPanel(props) {
+  return (
+    <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+              defaultMessage="Open search"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <SavedObjectFinder
+          noItemsMessage={
+            <FormattedMessage
+              id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+              defaultMessage="No matching searches found."
+            />
+          }
+          savedObjectMetaData={[
+            {
+              type: SEARCH_OBJECT_TYPE,
+              getIconForSavedObject: () => 'search',
+              name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+                defaultMessage: 'Saved search',
+              }),
+            },
+          ]}
+          onChoose={id => {
+            window.location.assign(props.makeUrl(id));
+            props.onClose();
+          }}
         />
-      </EuiButton>
-    );
-  }
-
-  render() {
-    return (
-      <EuiFlyout
-        ownFocus
-        onClose={this.props.onClose}
-        data-test-subj="loadSearchForm"
-      >
-        <EuiFlyoutBody>
-
-          <EuiTitle size="s">
-            <h1>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={props.onClose}
+              href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
+            >
               <FormattedMessage
-                id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
-                defaultMessage="Open Search"
+                id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+                defaultMessage="Manage searches"
               />
-            </h1>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <SavedObjectFinder
-            noItemsMessage={
-              <FormattedMessage
-                id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
-                defaultMessage="No matching searches found."
-              />
-            }
-            savedObjectType={SEARCH_OBJECT_TYPE}
-            makeUrl={this.props.makeUrl}
-            onChoose={this.props.onClose}
-            callToActionButton={this.renderMangageSearchesButton()}
-          />
-
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    );
-  }
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
 }
 
 OpenSearchPanel.propTypes = {

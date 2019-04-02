@@ -9,15 +9,15 @@ import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { InfraNodeType } from 'x-pack/plugins/infra/common/graphql/types';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { WithSource } from '../../containers/with_source';
-import { getTimeFromLocation } from './query_params';
+import { InfraNodeType } from '../../graphql/types';
+import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
-  nodeName: string;
+  nodeId: string;
   nodeType: InfraNodeType;
 }>;
 
@@ -28,14 +28,14 @@ interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
 export const RedirectToNodeLogs = injectI18n(
   ({
     match: {
-      params: { nodeName, nodeType },
+      params: { nodeId, nodeType },
     },
     location,
     intl,
   }: RedirectToNodeLogsProps) => (
     <WithSource>
-      {({ configuredFields }) => {
-        if (!configuredFields) {
+      {({ configuration, isLoading }) => {
+        if (isLoading) {
           return (
             <LoadingPage
               message={intl.formatMessage(
@@ -51,8 +51,16 @@ export const RedirectToNodeLogs = injectI18n(
           );
         }
 
+        if (!configuration) {
+          return null;
+        }
+
+        const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+        const userFilter = getFilterFromLocation(location);
+        const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+
         const searchString = compose(
-          replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeName}`),
+          replaceLogFilterInQueryString(filter),
           replaceLogPositionInQueryString(getTimeFromLocation(location))
         )('');
 
@@ -63,11 +71,11 @@ export const RedirectToNodeLogs = injectI18n(
 );
 
 export const getNodeLogsUrl = ({
-  nodeName,
+  nodeId,
   nodeType,
   time,
 }: {
-  nodeName: string;
+  nodeId: string;
   nodeType: InfraNodeType;
   time?: number;
-}) => [`#/link-to/${nodeType}-logs/`, nodeName, ...(time ? [`?time=${time}`] : [])].join('');
+}) => [`#/link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');

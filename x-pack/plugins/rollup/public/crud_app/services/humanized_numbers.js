@@ -21,8 +21,8 @@ const dayOrdinalToDayNameMap = {
 const monthOrdinalToMonthNameMap = {
   0: i18n.translate('xpack.rollupJobs.util.month.january', { defaultMessage: 'January' }),
   1: i18n.translate('xpack.rollupJobs.util.month.february', { defaultMessage: 'February' }),
-  2: i18n.translate('xpack.rollupJobs.util.month.march', { defaultMessage: 'April' }),
-  3: i18n.translate('xpack.rollupJobs.util.month.april', { defaultMessage: 'March' }),
+  2: i18n.translate('xpack.rollupJobs.util.month.march', { defaultMessage: 'March' }),
+  3: i18n.translate('xpack.rollupJobs.util.month.april', { defaultMessage: 'April' }),
   4: i18n.translate('xpack.rollupJobs.util.month.may', { defaultMessage: 'May' }),
   5: i18n.translate('xpack.rollupJobs.util.month.june', { defaultMessage: 'June' }),
   6: i18n.translate('xpack.rollupJobs.util.month.july', { defaultMessage: 'July' }),
@@ -40,6 +40,7 @@ export function getOrdinalValue(number) {
   //   defaultMessage: '{number, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}',
   //   values: { number },
   // });
+  // TODO: https://github.com/elastic/kibana/issues/27136
 
   // Protects against falsey (including 0) values
   const num = number && number.toString();

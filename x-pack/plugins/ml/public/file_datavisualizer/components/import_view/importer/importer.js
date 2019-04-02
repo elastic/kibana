@@ -8,6 +8,7 @@
 import { ml } from '../../../../services/ml_api_service';
 import { chunk } from 'lodash';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
@@ -51,7 +52,9 @@ export class Importer {
     if (!id || !index) {
       return {
         success: false,
-        error: 'no ID or index supplied'
+        error: i18n.translate('xpack.ml.fileDatavisualizer.importView.noIdOrIndexSuppliedErrorMessage', {
+          defaultMessage: 'no ID or index supplied'
+        })
       };
     }
 

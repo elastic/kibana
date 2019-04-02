@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { BulkUploader } from '../bulk_uploader';
 
 const FETCH_INTERVAL = 300;
@@ -32,18 +32,18 @@ describe('BulkUploader', () => {
   describe('registers a collector set and runs lifecycle events', () => {
     let server;
     beforeEach(() => {
+      const cluster = {
+        callWithInternalUser: sinon.stub().withArgs('monitoring.bulk').callsFake(() => {
+          return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+        }),
+      };
+
       server = {
         log: sinon.spy(),
         plugins: {
           elasticsearch: {
-            getCluster: () => ({
-              createClient: () => ({
-                monitoring: {
-                  bulk: sinon.spy(),
-                },
-              }),
-              callWithInternalUser: sinon.spy(), // this tests internal collection and bulk upload, not HTTP API
-            }),
+            createCluster: () => cluster,
+            getCluster: () => cluster,
           },
         },
         usage: {},
@@ -72,15 +72,15 @@ describe('BulkUploader', () => {
         const loggingCalls = server.log.getCalls();
         expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
         expect(loggingCalls[0].args).to.eql([
-          ['info', 'monitoring-ui', 'kibana-monitoring'],
+          ['info', 'monitoring', 'kibana-monitoring'],
           'Starting monitoring stats collection',
         ]);
         expect(loggingCalls[1].args).to.eql([
-          ['debug', 'monitoring-ui', 'kibana-monitoring'],
+          ['debug', 'monitoring', 'kibana-monitoring'],
           'Skipping bulk uploading of an empty stats payload',
         ]);
         expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
-          ['info', 'monitoring-ui', 'kibana-monitoring'],
+          ['info', 'monitoring', 'kibana-monitoring'],
           'Monitoring stats collection is stopped',
         ]);
 
@@ -106,13 +106,15 @@ describe('BulkUploader', () => {
         uploader.stop();
 
         const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
+        // If we are properly awaiting the bulk upload call, we shouldn't see
+        // the last 2 logs as the call takes longer than this timeout (see the above mock)
+        expect(loggingCalls.length).to.be(4);
         expect(loggingCalls[0].args).to.eql([
-          ['info', 'monitoring-ui', 'kibana-monitoring'],
+          ['info', 'monitoring', 'kibana-monitoring'],
           'Starting monitoring stats collection',
         ]);
         expect(loggingCalls[1].args).to.eql([
-          ['debug', 'monitoring-ui', 'kibana-monitoring'],
+          ['debug', 'monitoring', 'kibana-monitoring'],
           'Uploading bulk stats payload to the local cluster',
         ]);
 

@@ -9,7 +9,9 @@
 */
 
 export function time(filter) {
-  if (!filter.column) throw new Error('column is required for Elasticsearch range filters');
+  if (!filter.column) {
+    throw new Error('column is required for Elasticsearch range filters');
+  }
   return {
     range: {
       [filter.column]: { gte: filter.from, lte: filter.to },

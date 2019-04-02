@@ -34,7 +34,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
   const conf = {
     name,
     displayName: def.name || name,
-    ariaName: getAriaName(name),
+    ariaName: def.name || getAriaName(name),
     value,
     category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
@@ -44,6 +44,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
     type: getValType(def, value),
     description: def.description,
     options: def.options,
+    optionLabels: def.optionLabels,
   };
 
   return conf;

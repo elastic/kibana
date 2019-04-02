@@ -15,12 +15,12 @@ describe('Summary Status Component', () => {
         {
           label: 'Free Disk Space',
           value: '173.9 GB',
-          dataTestSubj: 'freeDiskSpace'
+          'data-test-subj': 'freeDiskSpace'
         },
         {
           label: 'Documents',
           value: '24.8k',
-          dataTestSubj: 'documentCount'
+          'data-test-subj': 'documentCount'
         },
       ],
       status: 'green'
@@ -34,12 +34,12 @@ describe('Summary Status Component', () => {
       metrics: [
         {
           value: '127.0.0.1:9300',
-          dataTestSubj: 'transportAddress'
+          'data-test-subj': 'transportAddress'
         },
         {
           label: 'Documents',
           value: '24.8k',
-          dataTestSubj: 'documentCount'
+          'data-test-subj': 'documentCount'
         },
       ],
       status: 'yellow'
@@ -54,12 +54,12 @@ describe('Summary Status Component', () => {
         {
           label: 'Free Disk Space',
           value: '173.9 GB',
-          dataTestSubj: 'freeDiskSpace'
+          'data-test-subj': 'freeDiskSpace'
         },
         {
           label: 'Documents',
           value: '24.8k',
-          dataTestSubj: 'documentCount'
+          'data-test-subj': 'documentCount'
         },
       ]
     };

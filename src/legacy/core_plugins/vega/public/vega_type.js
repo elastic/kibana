@@ -31,6 +31,7 @@ import { VegaVisualizationProvider } from './vega_visualization';
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
 import './vega_editor_controller';
+import './help_menus/vega_help_menu_directives';
 import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
@@ -41,11 +42,10 @@ VisTypesRegistryProvider.register((Private) => {
 
   return VisFactory.createBaseVisualization({
     name: 'vega',
-    title: i18n.translate('vega.type.vegaTitle', {
-      defaultMessage: 'Vega',
-    }),
-    description: i18n.translate('vega.type.vegaВescription', {
+    title: 'Vega',
+    description: i18n.translate('vega.type.vegaDescription', {
       defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+      description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
     visConfig: { defaults: { spec: defaultSpec } },

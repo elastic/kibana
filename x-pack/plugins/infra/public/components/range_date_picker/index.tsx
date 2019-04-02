@@ -255,6 +255,7 @@ export const RangeDatePicker = injectI18n(
           id="QuickSelectPopover"
           button={quickSelectButton}
           isOpen={this.state.isPopoverOpen}
+          // @ts-ignore
           closePopover={this.closePopover.bind(this)}
           anchorPosition="downLeft"
           ownFocus
@@ -274,7 +275,6 @@ export const RangeDatePicker = injectI18n(
           <EuiDatePickerRange
             className="euiDatePickerRange--inGroup"
             iconType={false}
-            disabled={disabled}
             fullWidth
             startDateControl={
               <EuiDatePicker

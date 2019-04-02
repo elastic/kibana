@@ -19,29 +19,105 @@ describe('setupRequest', () => {
         config: () => 'myConfig',
         plugins: {
           elasticsearch: {
-            getCluster: () => ({
-              callWithRequest: callWithRequestSpy
-            })
+            getCluster: () => ({ callWithRequest: callWithRequestSpy })
           }
         }
-      }
+      },
+      getUiSettingsService: jest.fn(() => ({
+        get: jest.fn(() => Promise.resolve(false))
+      }))
     };
+  });
 
+  it('should call callWithRequest with default args', async () => {
     const setup = setupRequest(mockReq);
-    setup.client('myType', { body: 'foo' });
-  });
-
-  it('should call callWithRequest with correct args', () => {
+    await setup.client('myType', { body: { foo: 'bar' } });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
-      body: 'foo',
+      body: {
+        foo: 'bar',
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      },
+      ignore_throttled: true,
       rest_total_hits_as_int: true
     });
   });
 
-  it('should update params with rest_total_hits_as_int', () => {
-    expect(callWithRequestSpy.mock.calls[0][2]).toEqual({
-      body: 'foo',
-      rest_total_hits_as_int: true
+  describe('omitLegacyData', () => {
+    it('should add `observer.version_major` filter if `omitLegacyData=true` ', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        omitLegacyData: true,
+        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+      });
+      expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              { range: { 'observer.version_major': { gte: 7 } } }
+            ]
+          }
+        }
+      });
     });
+
+    it('should not add `observer.version_major` filter if `omitLegacyData=false` ', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        omitLegacyData: false,
+        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+      });
+      expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+        query: { bool: { filter: [{ term: 'someTerm' }] } }
+      });
+    });
+
+    it('should set filter if none exists', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      });
+    });
+
+    it('should have `omitLegacyData=true` as default and merge boolean filters', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        body: {
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
+        }
+      });
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              { range: { 'observer.version_major': { gte: 7 } } }
+            ]
+          }
+        }
+      });
+    });
+  });
+
+  it('should set ignore_throttled to false if includeFrozen is true', async () => {
+    // mock includeFrozen to return true
+    mockReq.getUiSettingsService.mockImplementation(() => ({
+      get: jest.fn(() => Promise.resolve(true))
+    }));
+    const setup = setupRequest(mockReq);
+    await setup.client('myType', {});
+    const params = callWithRequestSpy.mock.calls[0][2];
+    expect(params.ignore_throttled).toBe(false);
   });
 });

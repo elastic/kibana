@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { find } from 'lodash';
 import { Fields } from '../fields';
 
@@ -15,38 +15,38 @@ describe('fields', () => {
     let upstreamJson;
     beforeEach(() => {
       upstreamJson = {
-        "fields": {
-          "field-foo": {
-            "text": {
-              "type": "text",
-              "searchable": true,
-              "aggregatable": false
+        'fields': {
+          'field-foo': {
+            'text': {
+              'type': 'text',
+              'searchable': true,
+              'aggregatable': false
             }
           },
-          "field-bar": {
-            "boolean": {
-              "type": "boolean",
-              "searchable": true,
-              "aggregatable": true
+          'field-bar': {
+            'boolean': {
+              'type': 'boolean',
+              'searchable': true,
+              'aggregatable': true
             },
-            "integer": {
-              "type": "integer",
-              "searchable": true,
-              "aggregatable": true
+            'integer': {
+              'type': 'integer',
+              'searchable': true,
+              'aggregatable': true
             }
           },
-          "field-baz": {
-            "_footype": {
-              "type": "_footype",
-              "searchable": true,
-              "aggregatable": true
+          'field-baz': {
+            '_footype': {
+              'type': '_footype',
+              'searchable': true,
+              'aggregatable': true
             }
           },
-          "field-bop": {
-            "integer": {
-              "type": "integer",
-              "searchable": true,
-              "aggregatable": true
+          'field-bop': {
+            'integer': {
+              'type': 'integer',
+              'searchable': true,
+              'aggregatable': true
             }
           },
         }

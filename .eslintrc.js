@@ -34,6 +34,7 @@ const ELASTIC_LICENSE_HEADER = `
 
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
+  plugins: ['@kbn/eslint-plugin-eslint'],
 
   settings: {
     'import/resolver': {
@@ -41,15 +42,52 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
+    '@kbn/eslint/no-restricted-paths': [
+      'error',
+      {
+        basePath: __dirname,
+        zones: [
+          {
+            target: [
+              'src/legacy/**/*',
+              'x-pack/**/*',
+              '!x-pack/**/*.test.*',
+              'src/plugins/**/(public|server)/**/*',
+              'src/core/(public|server)/**/*',
+            ],
+            from: [
+              'src/core/public/**/*',
+              '!src/core/public/index*',
+              '!src/core/public/utils/**/*',
+
+              'src/core/server/**/*',
+              '!src/core/server/index*',
+
+              'src/plugins/**/public/**/*',
+              '!src/plugins/**/public/index*',
+
+              'src/plugins/**/server/**/*',
+              '!src/plugins/**/server/index*',
+            ],
+            allowSameFolder: true,
+          },
+        ],
+      },
+    ],
+    '@kbn/eslint/module_migration': [
+      'error',
+      [
+        {
+          from: 'expect.js',
+          to: '@kbn/expect',
+        },
+      ],
+    ],
   },
 
   overrides: [
@@ -59,7 +97,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/eslint-plugin-kibana-custom/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
@@ -71,7 +109,9 @@ module.exports = {
         'packages/kbn-test-subj-selector/**/*',
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
+        'src/legacy/server/saved_objects/**/*',
         'x-pack/plugins/apm/**/*',
+        'x-pack/plugins/canvas/**/*',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -89,7 +129,7 @@ module.exports = {
     {
       files: ['x-pack/test/functional/apps/**/*', 'x-pack/plugins/apm/**/*'],
       rules: {
-        'kibana-custom/no-default-export': 'off',
+        'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -108,7 +148,7 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'ui', 'uiExports'],
+        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -157,6 +197,7 @@ module.exports = {
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
+        'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],
@@ -203,6 +244,36 @@ module.exports = {
     },
 
     /**
+     * Files that run in the browser with only node-level transpilation
+     */
+    {
+      files: [
+        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        '**/browser_exec_scripts/**/*',
+      ],
+      rules: {
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-var': 'off',
+        'prefer-const': 'off',
+        'prefer-destructuring': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ArrowFunctionExpression',
+          'AwaitExpression',
+          'ClassDeclaration',
+          'ImportDeclaration',
+          'RestElement',
+          'SpreadElement',
+          'YieldExpression',
+          'VariableDeclaration[kind="const"]',
+          'VariableDeclaration[kind="let"]',
+          'VariableDeclarator[id.type="ArrayPattern"]',
+          'VariableDeclarator[id.type="ObjectPattern"]',
+        ],
+      },
+    },
+
+    /**
      * Files that run AFTER node version check
      * and are not also transpiled with babel
      */
@@ -213,7 +284,7 @@ module.exports = {
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
-        'packages/kbn-eslint-plugin-license-header/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*',
@@ -238,15 +309,14 @@ module.exports = {
      */
     {
       files: ['**/*.js'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: APACHE_2_0_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [ELASTIC_LICENSE_HEADER],
@@ -256,29 +326,18 @@ module.exports = {
     },
 
     /**
-     * X-Pack global overrides
-     */
-    {
-      files: ['x-pack/**/*'],
-      rules: {
-        quotes: 'off',
-      },
-    },
-
-    /**
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
       files: ['x-pack/**/*.js'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: ELASTIC_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [APACHE_2_0_LICENSE_HEADER],
@@ -295,6 +354,16 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+
+    /**
+     * GIS overrides
+     */
+    {
+      files: ['x-pack/plugins/maps/**/*'],
+      rules: {
+        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
     },
 
@@ -327,7 +396,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/ml/**/*'],
       rules: {
-        quotes: 'error',
         'no-shadow': 'error',
       },
     },
@@ -341,6 +409,7 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/anchor-has-content': 'off',
         'jsx-a11y/tabindex-no-positive': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
         'jsx-a11y/aria-role': 'off',
       },
     },
@@ -367,43 +436,30 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/canvas/**/*'],
-      plugins: ['prettier'],
       rules: {
-        // preferences
-        'comma-dangle': [2, 'always-multiline'],
-        'no-multiple-empty-lines': [2, { max: 1, maxEOF: 1 }],
-        'no-multi-spaces': 2,
-        radix: 2,
-        curly: [2, 'multi-or-nest', 'consistent'],
-
-        // annoying rules that conflict with prettier
-        'space-before-function-paren': 0,
-        indent: 0,
-        'wrap-iife': 0,
-        'max-len': 0,
+        radix: 'error',
+        curly: ['error', 'all'],
 
         // module importing
         'import/order': [
-          2,
-          { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] },
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          },
         ],
-        'import/extensions': [2, 'never', { json: 'always', less: 'always', svg: 'always' }],
-
-        // prettier
-        'prettier/prettier': 2,
+        'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
 
         // react
-        'jsx-quotes': 2,
-        'react/no-did-mount-set-state': 2,
-        'react/no-did-update-set-state': 2,
-        'react/no-multi-comp': [2, { ignoreStateless: true }],
-        'react/self-closing-comp': 2,
-        'react/sort-comp': 2,
-        'react/jsx-boolean-value': 2,
-        'react/jsx-wrap-multilines': 2,
-        'react/no-unescaped-entities': [2, { forbid: ['>', '}'] }],
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-multi-comp': ['error', { ignoreStateless: true }],
+        'react/self-closing-comp': 'error',
+        'react/sort-comp': 'error',
+        'react/jsx-boolean-value': 'error',
+        'react/jsx-wrap-multilines': 'error',
+        'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
-          2,
+          'error',
           {
             forbid: [
               {

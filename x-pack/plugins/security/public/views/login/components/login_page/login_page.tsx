@@ -6,8 +6,7 @@
 
 import React, { Component } from 'react';
 
-// @ts-ignore
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   // @ts-ignore
@@ -47,40 +46,38 @@ export class LoginPage extends Component<Props, {}> {
     });
 
     return (
-      <I18nProvider>
-        <div className="loginWelcome login-form">
-          <header className="loginWelcome__header">
-            <div className={contentHeaderClasses}>
-              <EuiSpacer size="xxl" />
-              <span className="loginWelcome__logo">
-                <EuiIcon type="logoKibana" size="xxl" />
-              </span>
-              <EuiTitle size="l" className="loginWelcome__title">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.security.loginPage.welcomeTitle"
-                    defaultMessage="Welcome to Kibana"
-                  />
-                </h1>
-              </EuiTitle>
-              <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.loginPage.welcomeDescription"
-                    defaultMessage="Your window into the Elastic Stack"
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="xl" />
-            </div>
-          </header>
-          <div className={contentBodyClasses}>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>{this.getLoginForm()}</EuiFlexItem>
-            </EuiFlexGroup>
+      <div className="loginWelcome login-form">
+        <header className="loginWelcome__header">
+          <div className={contentHeaderClasses}>
+            <EuiSpacer size="xxl" />
+            <span className="loginWelcome__logo">
+              <EuiIcon type="logoKibana" size="xxl" />
+            </span>
+            <EuiTitle size="l" className="loginWelcome__title">
+              <h1>
+                <FormattedMessage
+                  id="xpack.security.loginPage.welcomeTitle"
+                  defaultMessage="Welcome to Kibana"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.loginPage.welcomeDescription"
+                  defaultMessage="Your window into the Elastic Stack"
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="xl" />
           </div>
+        </header>
+        <div className={contentBodyClasses}>
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>{this.getLoginForm()}</EuiFlexItem>
+          </EuiFlexGroup>
         </div>
-      </I18nProvider>
+      </div>
     );
   }
 

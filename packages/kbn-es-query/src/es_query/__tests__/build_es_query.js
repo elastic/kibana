@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { buildEsQuery } from '../build_es_query';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
@@ -65,6 +65,34 @@ describe('build query', function () {
           filter: [
             toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
           ],
+          should: [],
+          must_not: [],
+        }
+      };
+
+      const result = buildEsQuery(indexPattern, queries, filters, config);
+
+      expect(result).to.eql(expectedResult);
+    });
+
+    it('should accept queries and filters as either single objects or arrays', function () {
+      const queries = { query: 'extension:jpg', language: 'lucene' };
+      const filters = {
+        match_all: {},
+        meta: { type: 'match_all' },
+      };
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+      };
+
+      const expectedResult = {
+        bool: {
+          must: [
+            decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions),
+            { match_all: {} },
+          ],
+          filter: [],
           should: [],
           must_not: [],
         }

@@ -1,14 +1,25 @@
-<kbn-management-app section="elasticsearch/watcher">
-  <div class="kuiViewContent">
+<kbn-management-app section="elasticsearch/watcher" class="watcherWatchList">
+  <div class="euiPanel euiPanel--paddingLarge euiPageContent" style="flex-grow: 0">
     <forbidden-message ng-if="watchList.forbidden">
       {{ 'xpack.watcher.sections.watchList.noPermissionToManageWatchesText' | i18n: { defaultMessage: 'You do not have permission to manage watches.' } }}
     </forbidden-message>
 
     <div
       ng-if="!watchList.forbidden"
-      class="kuiViewContentItem kuiVerticalRhythm"
     >
-      <div class="kuiVerticalRhythm">
+      <h1 class="euiTitle euiTitle--medium"
+        i18n-id="xpack.watcher.sections.watchList.header"
+        i18n-default-message="Create threshold alert"
+      >
+        Watcher
+      </h1>
+      <div class="euiText euiTextColor--subdued euiText--small">
+        <p
+          i18n-id="xpack.watcher.sections.watchList.subhead"
+          i18n-default-message="Send out emails, slack messages and log events when specific parameters are hit"></p>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
+      <div>
         <button
           class="kuiButton kuiButton--primary"
           ng-click="watchList.onClickCreateThresholdAlert()"
@@ -27,6 +38,8 @@
           i18n-default-message="Create advanced watch"
         ></button>
       </div>
+
+      <div class="euiSpacer euiSpacer--l"></div>
 
       <div class="kuiControlledTable kuiVerticalRhythm">
         <div class="kuiToolBar">

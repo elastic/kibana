@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
 
   return new kibana.Plugin({
@@ -25,7 +27,8 @@ export default function (kibana) {
       visTypes: [
         'plugins/metric_vis/metric_vis'
       ],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      interpreter: ['plugins/metric_vis/metric_vis_fn'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
 
   });

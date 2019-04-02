@@ -9,7 +9,7 @@ import React from 'react';
 import { StringMap } from '../../../../typings/common';
 
 // TODO: extend from EUI's EuiProgress prop interface
-export interface ImpactBarProps extends StringMap<any> {
+export interface ImpactBarProps extends StringMap {
   value: number;
   max?: number;
 }

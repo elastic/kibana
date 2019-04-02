@@ -18,33 +18,25 @@
  */
 
 import { DllCompiler } from './dll_compiler';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { notInNodeModulesOrWebpackShims, inPluginNodeModules } from './dll_allowed_modules';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { dllEntryTemplate } from './dll_entry_template';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
 import normalizePosixPath from 'normalize-path';
 import fs from 'fs';
 import { promisify } from 'util';
-import { parseSingleFileSync, dependenciesVisitorsGenerator } from '@kbn/babel-code-parser';
 
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
-function inNodeModulesOrWebpackShims(checkPath) {
-  return checkPath.includes(`${path.sep}node_modules${path.sep}`)
-    || checkPath.includes(`${path.sep}webpackShims${path.sep}`);
-}
-
-function inPluginNodeModules(checkPath) {
-  return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
-}
-
 export class DynamicDllPlugin {
-  constructor({ uiBundles, log, maxCompilations = 1 }) {
-    this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, log);
-    this.entryPaths = '';
-    this.afterCompilationEntryPaths = '';
+  constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
+    this.logWithMetadata = logWithMetadata || (() => null);
+    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
+    this.entryPaths = dllEntryTemplate();
+    this.afterCompilationEntryPaths = dllEntryTemplate();
     this.maxCompilations = maxCompilations;
     this.performedCompilations = 0;
     this.forceDLLCreationFlag = !!(process && process.env && process.env.FORCE_DLL_CREATION);
@@ -92,7 +84,7 @@ export class DynamicDllPlugin {
   }
 
   registerTasksHooks(compiler) {
-    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
+    this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
     this.registerBeforeCompileHook(compiler);
     this.registerCompilationHook(compiler);
     this.registerDoneHook(compiler);
@@ -161,10 +153,8 @@ export class DynamicDllPlugin {
         const dllContext = rawDllConfig.context;
         const dllOutputPath = rawDllConfig.outputPath;
         const requiresMap = {};
-        const resolvedShimsDependenciesMap = {};
 
         for (const module of compilation.modules) {
-          let requiredModulePath = null;
 
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
@@ -172,49 +162,19 @@ export class DynamicDllPlugin {
             if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
               // NOTE: normalizePosixPath is been used as we only want to have posix
               // paths inside our final dll entry file
-              requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, absoluteResource))}');`] = true;
-              requiredModulePath = absoluteResource;
+              requiresMap[normalizePosixPath(path.relative(dllOutputPath, absoluteResource))] = true;
             }
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, module.stubResource))}');`] = true;
-            requiredModulePath = module.stubResource;
-          }
-
-          // read new requires for modules that reaches the compilation,
-          // aren't already being handled by dll and were not also
-          // in the entry paths before. The majority should come
-          // from webpackShims, otherwise we should throw
-          if (requiredModulePath && !requiredModulePath.includes('node_modules')) {
-            if (!requiredModulePath.includes('webpackShims')) {
-              throw new Error(
-                `The following module is reaching the compilation and ins\'t  either a node_module or webpackShim:
-                 ${requiredModulePath}
-                 `
-              );
-            }
-
-            // Get dependencies found in each webpack shim entry and just
-            // adds them to the global map for the resolvedShimsDependencies
-            Object.assign(
-              resolvedShimsDependenciesMap,
-              this.getDependenciesFromShim(requiredModulePath, compilation)
-            );
+            requiresMap[normalizePosixPath(path.relative(dllOutputPath, module.stubResource))] = true;
           }
         }
 
-        // Adds the discovered dep modules in webpackShims
-        // to the final require results
-        Object.assign(
-          requiresMap,
-          this.getRequireEntriesFromShimsDependencies(resolvedShimsDependenciesMap, dllOutputPath)
-        );
-
         // Sort and join all the discovered require deps
         // in order to create a consistent entry file
-        this.afterCompilationEntryPaths = Object.keys(requiresMap).sort().join('\n');
+        this.afterCompilationEntryPaths = dllEntryTemplate(Object.keys(requiresMap));
         // The dll compilation will run if on of the following conditions return true:
         // 1 - the new generated entry paths are different from the
         // old ones
@@ -231,7 +191,7 @@ export class DynamicDllPlugin {
         // Only run this info log in the first performed dll compilation
         // per each execution run
         if (this.performedCompilations === 0) {
-          this.log(
+          this.logWithMetadata(
             ['info', 'optimize:dynamic_dll_plugin'],
             compilation.needsDLLCompilation
               ? 'Need to compile the client vendors dll'
@@ -247,19 +207,19 @@ export class DynamicDllPlugin {
   registerDoneHook(compiler) {
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        // Logic to run the max compilation requirements.
-        // Only enable this for CI builds in order to ensure
-        // we have an healthy dll ecosystem.
-        if (IS_KIBANA_DISTRIBUTABLE && (this.performedCompilations === this.maxCompilations)) {
-          throw new Error(
-            'All the allowed dll compilations were already performed and one more is needed which is not possible'
-          );
-        }
-
         // Run the dlls compiler and increment
         // the performed compilations
-        await this.runDLLCompiler(compiler);
-        this.performedCompilations++;
+        //
+        // NOTE: check the need for this extra try/catch after upgrading
+        // past webpack v4.29.3. For now it is needed so we can log the error
+        // otherwise the error log we'll get will be something like: [fatal] [object Object]
+        try {
+          await this.runDLLCompiler(compiler);
+        } catch (error) {
+          this.logWithMetadata(['error', 'optimize:dynamic_dll_plugin'], error.message);
+          throw error;
+        }
+
         return;
       }
 
@@ -269,127 +229,8 @@ export class DynamicDllPlugin {
       if (this.forceDLLCreationFlag) {
         this.forceDLLCreationFlag = false;
       }
-      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
-  }
-
-  getDependenciesFromShim(requiredModulePath, compilation) {
-    // NOTE: is possible we are able to do this reading and searching
-    // through the compilation's webpack modules, however
-    // for a sake of simplicity, and as the webpackShims
-    // should be really small files, we are parsing them
-    // manually and getting the requires
-
-    // Internal map to keep track of the dependencies found for the
-    // current webpackShim file
-    const resolvedShimDependencies = {};
-
-    // Discover the requires inside the webpackShims
-    const shimsDependencies = parseSingleFileSync(requiredModulePath, dependenciesVisitorsGenerator);
-
-    // Resolve webpackShims dependencies with alias
-    shimsDependencies.forEach((dep) => {
-      const isRelative = dep && dep.charAt(0) === '.';
-      let absoluteResource = null;
-
-      // check if the dependency value is relative
-      if (isRelative) {
-        absoluteResource = path.resolve(path.dirname(requiredModulePath), dep);
-      } else {
-        // get the imports and search for alias in the dependency
-        const alias = compilation.compiler.options.resolve.alias;
-        const aliasFound = Object.keys(alias).find((aliasKey) => {
-          return dep.search(`${aliasKey}/`) !== -1;
-        });
-        // search for imports with webpack-loaders
-        const webpackLoaderFoundIdx = dep.search('!');
-
-        if (webpackLoaderFoundIdx !== -1) {
-          // get the loader
-          const loader = dep.substring(0, webpackLoaderFoundIdx);
-          // get the rest of the dependency require value
-          // after the webpack loader char (!)
-          const restImport = dep.substring(webpackLoaderFoundIdx + 1);
-          // build the first part with the loader resolved
-          const absoluteResourceFirstPart = require.resolve(loader);
-          // check if we have a relative path in the script require
-          // path being passed to the loader
-          const isRestImportRelative = restImport && restImport.charAt(0) === '.';
-          // resolve the relative script dependency path
-          // in case we have one
-          const sanitizedRestImport = isRestImportRelative
-            ? path.resolve(path.dirname(requiredModulePath), restImport)
-            : restImport;
-          // replace the alias in the script dependency require path
-          // in case we have found the alias
-          const absoluteResourceSecondPart = aliasFound
-            ? require.resolve(`${alias[aliasFound]}${sanitizedRestImport.substring(aliasFound.length)}`)
-            : require.resolve(sanitizedRestImport);
-
-          // finally build our absolute entry path again in the
-          // original loader format `webpack-loader!script_path`
-          absoluteResource = `${absoluteResourceFirstPart}!${absoluteResourceSecondPart}`;
-        } else {
-          // in case we don't have any webpack loader in the
-          // dependency require value, just replace the alias
-          // if we have one and then resolve the result,
-          // or just resolve the dependency path if we don't
-          // have any alias
-          absoluteResource = aliasFound
-            ? require.resolve(`${alias[aliasFound]}${dep.substring(aliasFound.length)}`)
-            : require.resolve(dep);
-        }
-      }
-
-      // Only consider found js entries
-      if (!absoluteResource.includes('.js') || absoluteResource.includes('json')) {
-        return;
-      }
-
-      // add the absolute built resource to the list of
-      // entry paths found inside the webpackShims
-      // to be merged with the general requiresMap
-      // in the end
-      resolvedShimDependencies[absoluteResource] = true;
-    });
-
-    return resolvedShimDependencies;
-  }
-
-  getRequireEntriesFromShimsDependencies(resolvedShimsDependenciesMap, dllOutputPath) {
-    const internalRequiresMap = {};
-    const resolvedShimsDependencies = Object.keys(resolvedShimsDependenciesMap);
-
-    resolvedShimsDependencies.forEach((resolvedDep) => {
-      if (resolvedDep) {
-        // check if this is a require shim dependency with
-        // an webpack-loader
-        const webpackLoaderFoundIdx = resolvedDep.search('!');
-
-        if (webpackLoaderFoundIdx !== -1) {
-          // get the webpack-loader
-          const loader = resolvedDep.substring(0, webpackLoaderFoundIdx);
-          // get the rest of the dependency require value
-          // after the webpack-loader char (!)
-          const restImport = resolvedDep.substring(webpackLoaderFoundIdx + 1);
-          // resolve the loader and the restImport parts separately
-          const resolvedDepToRequireFirstPart = normalizePosixPath(path.relative(dllOutputPath, loader));
-          const resolvedDepToRequireSecondPart = normalizePosixPath(path.relative(dllOutputPath, restImport));
-
-          // rebuild our final webpackShim entry path in the original
-          // webpack loader format `webpack-loader!script_path`
-          // but right now resolved relatively to the dll output path
-          internalRequiresMap[`require('${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}');`] = true;
-        } else {
-          // in case we didn't have any webpack-loader in the require path
-          // resolve the dependency path relative to the dllOutput path
-          // to get our final entry path
-          internalRequiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, resolvedDep))}');`] = true;
-        }
-      }
-    });
-
-    return internalRequiresMap;
   }
 
   isToForceDLLCreation() {
@@ -412,13 +253,13 @@ export class DynamicDllPlugin {
     }
 
     // ignore files that are not in node_modules
-    if (!inNodeModulesOrWebpackShims(module.resource)) {
+    if (notInNodeModulesOrWebpackShims(module.resource)) {
       return;
     }
 
     // also ignore files that are symlinked into node_modules, but only
     // do the `realpath` call after checking the plain resource path
-    if (!inNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
+    if (notInNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
       return;
     }
 
@@ -456,12 +297,41 @@ export class DynamicDllPlugin {
     return stubModule;
   }
 
+  async assertMaxCompilations() {
+    // Logic to run the max compilation requirements.
+    // Only enable this for CI builds in order to ensure
+    // we have an healthy dll ecosystem.
+    if (this.performedCompilations === this.maxCompilations) {
+      throw new Error('All the allowed dll compilations were already performed and one more is needed which is not possible');
+    }
+  }
+
   async runDLLCompiler(mainCompiler) {
-    await this.dllCompiler.run(this.entryPaths);
+    const runCompilerErrors = [];
+
+    try {
+      await this.dllCompiler.run(this.entryPaths);
+    } catch (e) {
+      runCompilerErrors.push(e);
+    }
+
+    try {
+      await this.assertMaxCompilations();
+    } catch (e) {
+      runCompilerErrors.push(e);
+    }
 
     // We need to purge the cache into the inputFileSystem
     // for every single built in previous compilation
     // that we rely in next ones.
     mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
+
+    this.performedCompilations++;
+
+    if (!runCompilerErrors.length) {
+      return;
+    }
+
+    throw new Error(runCompilerErrors.join('\n-'));
   }
 }

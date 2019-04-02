@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { exportAsCsv } from './lib/export_csv';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class DataDownloadOptions extends Component {
 
@@ -64,7 +65,10 @@ class DataDownloadOptions extends Component {
         size="s"
         onClick={this.exportCsv}
       >
-        Download CSV
+        <FormattedMessage
+          id="inspectorViews.data.downloadCSVButtonLabel"
+          defaultMessage="Download CSV"
+        />
       </EuiButton>
     );
   }
@@ -77,25 +81,40 @@ class DataDownloadOptions extends Component {
         size="s"
         onClick={this.onTogglePopover}
       >
-        Download CSV
+        <FormattedMessage
+          id="inspectorViews.data.downloadCSVToggleButtonLabel"
+          defaultMessage="Download CSV"
+        />
       </EuiButton>
     );
     const items = [
       <EuiContextMenuItem
         key="csv"
         onClick={this.exportFormattedCsv}
-        toolTipContent="Download the data in table format"
+        toolTipContent={<FormattedMessage
+          id="inspectorViews.data.formattedCSVButtonTooltip"
+          defaultMessage="Download the data in table format"
+        />}
         toolTipPosition="left"
       >
-        Formatted CSV
+        <FormattedMessage
+          id="inspectorViews.data.formattedCSVButtonLabel"
+          defaultMessage="Formatted CSV"
+        />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="rawCsv"
         onClick={this.exportFormattedAsRawCsv}
-        toolTipContent={`Download the data as provided, for example, dates as timestamps`}
+        toolTipContent={<FormattedMessage
+          id="inspectorViews.data.rawCSVButtonTooltip"
+          defaultMessage="Download the data as provided, for example, dates as timestamps"
+        />}
         toolTipPosition="left"
       >
-        Raw CSV
+        <FormattedMessage
+          id="inspectorViews.data.rawCSVButtonLabel"
+          defaultMessage="Raw CSV"
+        />
       </EuiContextMenuItem>
     ];
 

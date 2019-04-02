@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -75,7 +75,7 @@ export class MonitoringViewBaseController {
 
     titleService($scope.cluster, title);
 
-    this.data = { ...defaultData };
+    $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
 
@@ -96,12 +96,22 @@ export class MonitoringViewBaseController {
       timefilter.enableAutoRefreshSelector();
     }
 
+    this.updateDataPromise = null;
     this.updateData = () => {
+      if (this.updateDataPromise) {
+        // Do not sent another request if one is inflight
+        // See https://github.com/elastic/kibana/issues/24082
+        return this.updateDataPromise;
+      }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      return _getPageData($injector, _api)
+      return this.updateDataPromise = _getPageData($injector, _api)
         .then(pageData => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
-          this.data = pageData; // update the view's data with the fetch result
+          $scope.pageData = this.data = pageData; // update the view's data with the fetch result
+          this.updateDataPromise = null;
+        })
+        .catch(() => {
+          this.updateDataPromise = null;
         });
     };
     this.updateData();
@@ -126,11 +136,13 @@ export class MonitoringViewBaseController {
         mode: 'absolute'
       });
     };
+
+    this.setTitle = title => titleService($scope.cluster, title);
   }
 
   renderReact(component) {
     if (this._isDataInitialized === false) {
-      render(<I18nProvider><PageLoading /></I18nProvider>, document.getElementById(this.reactNodeId));
+      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }

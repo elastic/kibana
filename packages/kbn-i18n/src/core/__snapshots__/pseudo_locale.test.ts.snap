@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`translateUsingPseudoLocale() should translate @I18N@ placeholders with wrong reference name 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà @Î18Ñ@ññôñ-ššîñĝĝļé-ŵŵôŕðð@Î18Ñ@ þþļàççéĥôôļðééŕ."`;
+
+exports[`translateUsingPseudoLocale() shouldn't translate @I18N@ placeholders 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà @I18N@value@I18N@ þļààçéĥĥôļððéŕ."`;
+
+exports[`translateUsingPseudoLocale() shouldn't translate @I18N@ placeholders with underscore 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà @I18N@snake_case_value@I18N@ þļààçéĥĥôļððéŕ."`;

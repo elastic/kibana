@@ -5,7 +5,6 @@
  */
 
 import last from 'lodash/fp/last';
-import { oc } from 'ts-optchain';
 
 export interface InProgressStatus<O extends Operation<string, any>> {
   operation: O;
@@ -43,13 +42,22 @@ export interface Operation<Name extends string, Parameters> {
 export const createStatusSelectors = <S extends {}>(
   selectStatusHistory: (state: S) => Array<OperationStatus<any>>
 ) => ({
-  getIsInProgress: () => (state: S) =>
-    oc(last(selectStatusHistory(state))).status() === 'in-progress',
-  getHasSucceeded: () => (state: S) =>
-    oc(last(selectStatusHistory(state))).status() === 'succeeded',
-  getHasFailed: () => (state: S) => oc(last(selectStatusHistory(state))).status() === 'failed',
-  getLastFailureMessage: () => (state: S) =>
-    oc(last(selectStatusHistory(state).filter(isFailedStatus))).message(),
+  getIsInProgress: () => (state: S) => {
+    const lastStatus = last(selectStatusHistory(state));
+    return lastStatus ? lastStatus.status === 'in-progress' : false;
+  },
+  getHasSucceeded: () => (state: S) => {
+    const lastStatus = last(selectStatusHistory(state));
+    return lastStatus ? lastStatus.status === 'succeeded' : false;
+  },
+  getHasFailed: () => (state: S) => {
+    const lastStatus = last(selectStatusHistory(state));
+    return lastStatus ? lastStatus.status === 'failed' : false;
+  },
+  getLastFailureMessage: () => (state: S) => {
+    const lastStatus = last(selectStatusHistory(state).filter(isFailedStatus));
+    return lastStatus ? lastStatus.message : undefined;
+  },
 });
 
 export type StatusHistoryUpdater<Operations extends Operation<string, any>> = (

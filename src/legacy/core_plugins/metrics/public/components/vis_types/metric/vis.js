@@ -24,7 +24,7 @@ import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Metric from '../../../visualizations/components/metric';
 import getLastValue from '../../../../common/get_last_value';
-import color from 'color';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -34,7 +34,8 @@ function getColors(props) {
   if (model.background_color_rules) {
     model.background_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
-        const value = series[0] && getLastValue(series[0].data) || 0;
+        const value = (series[0] && getLastValue(series[0].data)) ||
+          series[1] && getLastValue(series[1].data) || 0;
         if (_[rule.operator](value, rule.value)) {
           background = rule.background_color;
           color = rule.color;
@@ -59,22 +60,19 @@ function MetricVisualization(props) {
       if (i === 0 && colors.color) newProps.color = colors.color;
       return _.assign({}, _.pick(row, ['label', 'data']), newProps);
     });
+
+  const panelBackgroundColor = colors.background || backgroundColor;
+  const style = { backgroundColor: panelBackgroundColor };
+
   const params = {
     metric: series[0],
-    reversed: props.reversed,
-    additionalLabel: props.additionalLabel
+    additionalLabel: props.additionalLabel,
+    reversed: isBackgroundInverted(panelBackgroundColor),
   };
+
   if (series[1]) {
     params.secondary = series[1];
   }
-
-  const panelBackgroundColor = colors.background || backgroundColor;
-
-  if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
-  }
-  const style = { backgroundColor: panelBackgroundColor };
-  params.backgroundColor = panelBackgroundColor;
 
   return (
     <div className="tvbVis" style={style}>
@@ -91,8 +89,8 @@ MetricVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  getConfig: PropTypes.func
 };
 
 export default visWithSplits(MetricVisualization);

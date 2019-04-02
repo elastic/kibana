@@ -18,15 +18,23 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 
-export default function buildRequest(config, tlConfig, scriptedFields) {
+export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
 
   const bool = { must: [] };
 
-  const timeFilter = { range: {} };
-  timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
+  const timeFilter = {
+    range: {
+      [config.timefield]: {
+        gte: moment(tlConfig.time.from).toISOString(),
+        lte: moment(tlConfig.time.to).toISOString(),
+        format: 'strict_date_optional_time'
+      }
+    }
+  };
   bool.must.push(timeFilter);
 
   // Use the kibana filter bar filters
@@ -68,6 +76,7 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const request = {
     index: config.index,
+    ignore_throttled: !tlConfig.settings['search:includeFrozen'],
     body: {
       query: {
         bool: bool
@@ -77,7 +86,6 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
     }
   };
 
-  const timeout = tlConfig.server.config().get('elasticsearch.shardTimeout');
   if (timeout) {
     request.timeout = `${timeout}ms`;
   }

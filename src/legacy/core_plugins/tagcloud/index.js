@@ -17,12 +17,15 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
 
   return new kibana.Plugin({
     uiExports: {
       visTypes: ['plugins/tagcloud/tag_cloud_vis'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      interpreter: ['plugins/tagcloud/tag_cloud_fn'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
   });
 }

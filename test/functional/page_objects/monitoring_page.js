@@ -32,14 +32,13 @@ export function MonitoringPageProvider({ getService }) {
     }
 
     async getToasterContents() {
-      const el = await find.byCssSelector('div.toaster-container');
+      const el = await find.byCssSelector('div.kbnToaster__container');
       return await el.getVisibleText();
     }
 
     async clickOptOut() {
       return find.clickByLinkText('Opt out here');
     }
-
   }
 
   return new MonitoringPage();

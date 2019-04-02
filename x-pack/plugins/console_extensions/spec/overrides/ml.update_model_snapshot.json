@@ -1,0 +1,8 @@
+{
+  "ml.update_model_snapshot": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "retain": [true, false]
+    }
+  }
+}

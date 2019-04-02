@@ -5,7 +5,6 @@
  */
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component, ComponentClass } from 'react';
 import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
 import { Space } from '../../../common/model/space';
@@ -71,18 +70,17 @@ export class NavControlPopover extends Component<Props, State> {
       );
     } else {
       element = (
-        <I18nProvider>
-          <SpacesMenu
-            spaces={this.state.spaces}
-            onSelectSpace={this.onSelectSpace}
-            userProfile={this.props.userProfile}
-            onManageSpacesClick={this.toggleSpaceSelector}
-          />
-        </I18nProvider>
+        <SpacesMenu
+          spaces={this.state.spaces}
+          onSelectSpace={this.onSelectSpace}
+          userProfile={this.props.userProfile}
+          onManageSpacesClick={this.toggleSpaceSelector}
+        />
       );
     }
 
     return (
+      // @ts-ignore repositionOnScroll doesn't exist on EuiPopover
       <EuiPopover
         id={'spcMenuPopover'}
         data-test-subj={`spacesNavSelector`}
@@ -91,7 +89,6 @@ export class NavControlPopover extends Component<Props, State> {
         closePopover={this.closeSpaceSelector}
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
-        // @ts-ignore
         repositionOnScroll={true}
         withTitle={this.props.anchorPosition.includes('down')}
         ownFocus

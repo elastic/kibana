@@ -26,7 +26,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
@@ -36,6 +35,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiTitle,
+  EuiCodeEditor,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -48,8 +48,8 @@ class MarkdownEditor extends Component {
 
   componentDidMount() {
     if(this.props.visData$) {
-      this.subscription = this.props.visData$.subscribe((data) => {
-        this.setState({ visData: data });
+      this.subscription = this.props.visData$.subscribe(visData => {
+        this.setState({ visData });
       });
     }
   }
@@ -137,7 +137,7 @@ class MarkdownEditor extends Component {
     return (
       <div className="tvbMarkdownEditor">
         <div className="tvbMarkdownEditor__editor">
-          <KuiCodeEditor
+          <EuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
             theme="github"
@@ -169,7 +169,7 @@ class MarkdownEditor extends Component {
               />
             </p>
           </EuiText>
-          <table className="table">
+          <table className="table" data-test-subj="tsvbMarkdownVariablesTable">
             <thead>
               <tr>
                 <th scope="col">
@@ -190,7 +190,7 @@ class MarkdownEditor extends Component {
           </table>
 
           {rows.length === 0 && (
-            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
+            <EuiTitle size="xxs" className="tsvbMarkdownVariablesTable__noVariables" data-test-subj="tvbMarkdownEditor__noVariables">
               <span>
                 <FormattedMessage
                   id="tsvb.markdownEditor.noVariablesAvailableDescription"

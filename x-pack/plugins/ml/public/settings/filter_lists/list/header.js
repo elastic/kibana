@@ -11,6 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiSpacer,
@@ -36,12 +37,25 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h1>Filter Lists</h1>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
+                    defaultMessage="Filter Lists"
+                  />
+                </h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
-                <p>{totalCount} in total</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.listHeader.filterListsDescription"
+                    defaultMessage="{totalCount} in total"
+                    values={{
+                      totalCount,
+                    }}
+                  />
+                </p>
               </EuiTextColor>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -54,7 +68,10 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
                 iconType="refresh"
                 onClick={() => refreshFilterLists()}
               >
-                Refresh
+                <FormattedMessage
+                  id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
+                  defaultMessage="Refresh"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -64,10 +81,22 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
       <EuiText>
         <p>
           <EuiTextColor color="subdued">
-            Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
-            You can use the same filter list in multiple jobs.
-            <br/>
-            <EuiLink href={docsUrl} target="_blank">Learn more</EuiLink>
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription"
+              defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
+You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
+              values={{
+                br: <br />,
+                learnMoreLink: (
+                  <EuiLink href={docsUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiTextColor>
         </p>
       </EuiText>

@@ -10,8 +10,10 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiHealth,
@@ -21,61 +23,65 @@ import {
 } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
-const OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
-];
+const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
+const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
+const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' });
+const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' });
 
 const optionsMap = {
-  'warning': 0,
-  'minor': 25,
-  'major': 50,
-  'critical': 75,
+  [warningLabel]: 0,
+  [minorLabel]: 25,
+  [majorLabel]: 50,
+  [criticalLabel]: 75,
 };
+
+export const SEVERITY_OPTIONS = [
+  {
+    val: 0,
+    display: warningLabel,
+    color: getSeverityColor(0)
+  },
+  {
+    val: 25,
+    display: minorLabel,
+    color: getSeverityColor(25)
+  },
+  {
+    val: 50,
+    display: majorLabel,
+    color: getSeverityColor(50)
+  },
+  {
+    val: 75,
+    display: criticalLabel,
+    color: getSeverityColor(75)
+  },
+];
 
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = OPTIONS.find(opt => (opt.val === value));
+  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {
-    threshold = OPTIONS[0];
+    threshold = SEVERITY_OPTIONS[0];
   }
 
   return threshold;
 }
 
-class SelectSeverity extends Component {
-  constructor(props) {
-    super(props);
+export const severity$ = new BehaviorSubject(SEVERITY_OPTIONS[0]);
 
-    // Restore the threshold from the state, or default to warning.
-    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
-    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-    const thresholdValue = _.get(thresholdState, 'val', 0);
-    const threshold = optionValueToThreshold(thresholdValue);
-    // set initial selected option equal to threshold value
-    const selectedOption = OPTIONS.find(opt => (opt.val === threshold.val));
-    this.mlSelectSeverityService.state.set('threshold', threshold);
-
-    this.state = {
-      valueDisplay: selectedOption.display,
-    };
-  }
-
+class SelectSeverityUnwrapped extends Component {
   onChange = (valueDisplay) => {
-    this.setState({
-      valueDisplay: valueDisplay,
-    });
     const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
-    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
+    severity$.next(threshold);
   }
 
   getOptions = () =>
-    OPTIONS.map(({ color, display, val }) => ({
+    SEVERITY_OPTIONS.map(({ color, display, val }) => ({
       value: display,
       inputDisplay: (
         <Fragment>
@@ -91,29 +97,45 @@ class SelectSeverity extends Component {
           </EuiHealth>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
+                defaultMessage="score {value} and above"
+                values={{ value: val }}
+              />
+            </p>
           </EuiText>
         </Fragment>
       ),
     }));
 
   render() {
-    const { valueDisplay } = this.state;
+    const { severity } = this.props;
     const options = this.getOptions();
 
     return (
       <EuiSuperSelect
+        className={this.props.classNames}
         hasDividers
         options={options}
-        valueOfSelected={valueDisplay}
+        valueOfSelected={severity.display}
         onChange={this.onChange}
       />
     );
   }
 }
 
-SelectSeverity.propTypes = {
-  mlSelectSeverityService: PropTypes.object.isRequired,
+SelectSeverityUnwrapped.propTypes = {
+  classNames: PropTypes.string
 };
+
+SelectSeverityUnwrapped.defaultProps = {
+  classNames: ''
+};
+
+const SelectSeverity = injectObservablesAsProps(
+  { severity: severity$ },
+  SelectSeverityUnwrapped
+);
 
 export { SelectSeverity };

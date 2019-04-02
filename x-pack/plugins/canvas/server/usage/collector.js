@@ -20,7 +20,9 @@ const collectFns = (ast, cb) => {
       // recurse the argumetns and update the set along the way
       Object.keys(cArguments).forEach(argName => {
         cArguments[argName].forEach(subAst => {
-          if (subAst != null) collectFns(subAst, cb);
+          if (subAst != null) {
+            collectFns(subAst, cb);
+          }
         });
       });
     });
@@ -29,7 +31,9 @@ const collectFns = (ast, cb) => {
 
 export function handleResponse({ hits }) {
   const workpadDocs = get(hits, 'hits', null);
-  if (workpadDocs == null) return;
+  if (workpadDocs == null) {
+    return;
+  }
 
   const functionSet = new Set();
 
@@ -142,7 +146,9 @@ export function registerCanvasUsageCollector(server) {
       };
 
       const esResponse = await callCluster('search', searchParams);
-      if (get(esResponse, 'hits.hits.length') > 0) return handleResponse(esResponse);
+      if (get(esResponse, 'hits.hits.length') > 0) {
+        return handleResponse(esResponse);
+      }
     },
   });
 

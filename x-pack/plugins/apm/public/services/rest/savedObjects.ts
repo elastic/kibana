@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, isEmpty, memoize } from 'lodash';
+import { memoize } from 'lodash';
 import chrome from 'ui/chrome';
 import { callApi } from './callApi';
 
@@ -17,7 +17,7 @@ export interface ISavedObject {
 }
 
 interface ISavedObjectAPIResponse {
-  savedObjects: ISavedObject[];
+  saved_objects: ISavedObject[];
 }
 
 export const getAPMIndexPattern = memoize(async () => {
@@ -34,15 +34,7 @@ export const getAPMIndexPattern = memoize(async () => {
     }
   });
 
-  if (isEmpty(res.savedObjects)) {
-    return;
-  }
-
-  const apmSavedObject = first(
-    res.savedObjects.filter(
-      savedObject => savedObject.attributes.title === apmIndexPatternTitle
-    )
+  return res.saved_objects.find(
+    savedObject => savedObject.attributes.title === apmIndexPatternTitle
   );
-
-  return apmSavedObject;
 });

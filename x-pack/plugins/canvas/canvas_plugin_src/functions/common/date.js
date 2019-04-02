@@ -8,7 +8,9 @@ import moment from 'moment';
 
 const getInputDate = input => {
   // return current date if no input
-  if (!input) return new Date();
+  if (!input) {
+    return new Date();
+  }
 
   // return the input
   return input;
@@ -40,7 +42,9 @@ export const date = () => ({
     const useMoment = date && format;
     const outputDate = useMoment ? moment.utc(date, format).toDate() : new Date(getInputDate(date));
 
-    if (isNaN(outputDate.getTime())) throw new Error(`Invalid date input: ${date}`);
+    if (isNaN(outputDate.getTime())) {
+      throw new Error(`Invalid date input: ${date}`);
+    }
 
     return outputDate.valueOf();
   },

@@ -1,13 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StickyProperties should render 1`] = `
+exports[`StickyProperties should render entire component 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="none"
-  justifyContent="flexStart"
-  responsive={true}
   style={
     Object {
       "marginBottom": "-1em",
@@ -17,8 +12,6 @@ exports[`StickyProperties should render 1`] = `
   wrap={true}
 >
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="0"
     style={
       Object {
@@ -27,7 +20,7 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <styled.div>
+    <PropertyLabel>
       <EuiToolTip
         content={
           <styled.span>
@@ -41,14 +34,12 @@ exports[`StickyProperties should render 1`] = `
           Timestamp
         </span>
       </EuiToolTip>
-    </styled.div>
+    </PropertyLabel>
     <TimestampValue
       timestamp={1536405447640}
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="1"
     style={
       Object {
@@ -57,11 +48,11 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <styled.div>
+    <PropertyLabel>
       <EuiToolTip
         content={
           <styled.span>
-            context.request.url.full
+            url.full
           </styled.span>
         }
         delay="regular"
@@ -71,7 +62,7 @@ exports[`StickyProperties should render 1`] = `
           URL
         </span>
       </EuiToolTip>
-    </styled.div>
+    </PropertyLabel>
     <EuiToolTip
       content="https://www.elastic.co/test"
       delay="regular"
@@ -83,8 +74,6 @@ exports[`StickyProperties should render 1`] = `
     </EuiToolTip>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="2"
     style={
       Object {
@@ -93,11 +82,11 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <styled.div>
+    <PropertyLabel>
       <EuiToolTip
         content={
           <styled.span>
-            context.request.method
+            http.request.method
           </styled.span>
         }
         delay="regular"
@@ -107,14 +96,12 @@ exports[`StickyProperties should render 1`] = `
           Request method
         </span>
       </EuiToolTip>
-    </styled.div>
-    <styled.div>
+    </PropertyLabel>
+    <PropertyValue>
       GET
-    </styled.div>
+    </PropertyValue>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="3"
     style={
       Object {
@@ -123,7 +110,7 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <styled.div>
+    <PropertyLabel>
       <EuiToolTip
         content={
           <styled.span>
@@ -137,14 +124,12 @@ exports[`StickyProperties should render 1`] = `
           Handled
         </span>
       </EuiToolTip>
-    </styled.div>
-    <styled.div>
+    </PropertyLabel>
+    <PropertyValue>
       true
-    </styled.div>
+    </PropertyValue>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="4"
     style={
       Object {
@@ -153,11 +138,11 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <styled.div>
+    <PropertyLabel>
       <EuiToolTip
         content={
           <styled.span>
-            context.user.id
+            user.id
           </styled.span>
         }
         delay="regular"
@@ -167,10 +152,16 @@ exports[`StickyProperties should render 1`] = `
           User ID
         </span>
       </EuiToolTip>
-    </styled.div>
-    <styled.div>
+    </PropertyLabel>
+    <PropertyValue>
       1337
-    </styled.div>
+    </PropertyValue>
   </EuiFlexItem>
 </EuiFlexGroup>
+`;
+
+exports[`StickyProperties values should render timestamp when fieldName is \`@timestamp\` 1`] = `
+<TimestampValue
+  timestamp={1536405447640}
+/>
 `;

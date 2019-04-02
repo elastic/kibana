@@ -25,8 +25,8 @@ a gold license, you can send data from multiple clusters to the same monitoring
 cluster and view them all through the same instance of {kib}. 
 
 By default, data is retrieved from the cluster specified in the 
-`elasticsearch.url` value in the `kibana.yml` file. If you want to retrieve it 
-from a different cluster, set `xpack.monitoring.elasticsearch.url`. 
+`elasticsearch.hosts` value in the `kibana.yml` file. If you want to retrieve it
+from a different cluster, set `xpack.monitoring.elasticsearch.hosts`.
 
 To learn more about typical monitoring architectures, 
 see {stack-ov}/how-monitoring-works.html[How monitoring works] and 

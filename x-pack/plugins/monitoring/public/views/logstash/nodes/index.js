@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { I18nContext } from 'ui/i18n';
+import { Listing } from '../../../components/logstash/listing';
 
 uiRoutes.when('/logstash/nodes', {
   template,
@@ -21,23 +22,34 @@ uiRoutes.when('/logstash/nodes', {
     pageData: getPageData
   },
   controllerAs: 'lsNodes',
-  controller: class LsNodesList extends MonitoringViewBaseTableController {
+  controller: class LsNodesList extends MonitoringViewBaseEuiTableController {
 
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
+      const kbnUrl = $injector.get('kbnUrl');
+
       super({
-        title: i18n('xpack.monitoring.logstash.nodes.routeTitle', {
-          defaultMessage: 'Logstash - Nodes'
-        }),
+        title: 'Logstash - Nodes',
         storageKey: 'logstash.nodes',
         getPageData,
+        reactNodeId: 'monitoringLogstashNodesApp',
         $scope,
         $injector
       });
 
-      const $route = $injector.get('$route');
-      this.data = $route.current.locals.pageData;
-      const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(
+          <I18nContext>
+            <Listing
+              data={data.nodes}
+              stats={data.clusterStatus}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
+              angular={{ kbnUrl, scope: $scope }}
+            />
+          </I18nContext>
+        );
+      });
     }
   }
 });

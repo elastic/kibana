@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
+
 export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -54,10 +56,18 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   return new class ClusterOverview {
 
     async isOnClusterOverview() {
-      const pageId = await retry.try(() => testSubjects.find(SUBJ_CLUSTER_OVERVIEW));
-      return pageId !== null;
+      await retry.try(async () =>  {
+        const clusterHeadingElement  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(await clusterHeadingElement.isDisplayed()).to.be(true);
+      });
+      await retry.try(async () =>  {
+        const clusterHeading  = await testSubjects.find(SUBJ_CLUSTER_NAME);
+        expect(await clusterHeading.getVisibleText()).not.to.be.empty();
+      });
+      return true;
     }
-    getClusterName() {
+
+    async getClusterName() {
       return testSubjects.getVisibleText(SUBJ_CLUSTER_NAME);
     }
 

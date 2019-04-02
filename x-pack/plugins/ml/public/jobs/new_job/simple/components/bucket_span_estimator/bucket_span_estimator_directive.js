@@ -11,10 +11,12 @@ import { BucketSpanEstimator } from './bucket_span_estimator_view';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
+import { I18nContext } from 'ui/i18n';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlBucketSpanEstimator', function () {
+module.directive('mlBucketSpanEstimator', function (i18n) {
   return {
     restrict: 'AE',
     replace: false,
@@ -37,12 +39,16 @@ module.directive('mlBucketSpanEstimator', function () {
       const errorHandler = (error) => {
         console.log('Bucket span could not be estimated', error);
         $scope.ui.bucketSpanEstimator.status = STATUS.FAILED;
-        $scope.ui.bucketSpanEstimator.message = 'Bucket span could not be estimated';
+        $scope.ui.bucketSpanEstimator.message = i18n('xpack.ml.newJob.simple.bucketSpanEstimator.bucketSpanCouldNotBeEstimatedMessage', {
+          defaultMessage: 'Bucket span could not be estimated'
+        });
+        $scope.$applyAsync();
       };
 
       $scope.guessBucketSpan = function () {
         $scope.ui.bucketSpanEstimator.status = STATUS.RUNNING;
         $scope.ui.bucketSpanEstimator.message = '';
+        $scope.$applyAsync();
 
         // we need to create a request object here because $scope.formConfig
         // includes objects with methods which might break the required
@@ -54,7 +60,6 @@ module.directive('mlBucketSpanEstimator', function () {
             end: $scope.formConfig.end
           },
           fields: [],
-          filters: $scope.formConfig.filters,
           index: $scope.formConfig.indexPattern.title,
           query: $scope.formConfig.combinedQuery,
           splitField: $scope.formConfig.splitField && $scope.formConfig.splitField.name,
@@ -89,6 +94,7 @@ module.directive('mlBucketSpanEstimator', function () {
             if (notify && typeof $scope.bucketSpanFieldChange === 'function') {
               $scope.bucketSpanFieldChange();
             }
+            $scope.$applyAsync();
           })
           .catch(errorHandler);
       };
@@ -115,7 +121,13 @@ module.directive('mlBucketSpanEstimator', function () {
           $scope.ui.bucketSpanEstimator.status === STATUS.RUNNING
         );
         const estimatorRunning = ($scope.ui.bucketSpanEstimator.status === STATUS.RUNNING);
-        const buttonText = (estimatorRunning) ? 'Estimating bucket span' : 'Estimate bucket span';
+        const buttonText = (estimatorRunning)
+          ? i18n('xpack.ml.newJob.simple.bucketSpanEstimator.estimatingBucketSpanButtonLabel', {
+            defaultMessage: 'Estimating bucket span'
+          })
+          : i18n('xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonLabel', {
+            defaultMessage: 'Estimate bucket span'
+          });
 
         const props = {
           buttonDisabled,
@@ -125,7 +137,9 @@ module.directive('mlBucketSpanEstimator', function () {
         };
 
         ReactDOM.render(
-          React.createElement(BucketSpanEstimator, props),
+          <I18nContext>
+            {React.createElement(BucketSpanEstimator, props)}
+          </I18nContext>,
           $element[0]
         );
       }

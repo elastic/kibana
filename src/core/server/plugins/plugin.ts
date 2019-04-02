@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { join } from 'path';
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -72,12 +73,62 @@ export interface PluginManifest {
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
   readonly ui: boolean;
+
+  /**
+   * Specifies whether plugin includes some server-side specific functionality.
+   */
+  readonly server: boolean;
 }
 
-type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
+/**
+ * Small container object used to expose information about discovered plugins that may
+ * or may not have been started.
+ * @internal
+ */
+export interface DiscoveredPlugin {
+  /**
+   * Identifier of the plugin.
+   */
+  readonly id: PluginName;
+
+  /**
+   * Root configuration path used by the plugin, defaults to "id".
+   */
+  readonly configPath: ConfigPath;
+
+  /**
+   * An optional list of the other plugins that **must be** installed and enabled
+   * for this plugin to function properly.
+   */
+  readonly requiredPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * An optional list of the other plugins that if installed and enabled **may be**
+   * leveraged by this plugin for some additional functionality but otherwise are
+   * not required for this plugin to work properly.
+   */
+  readonly optionalPlugins: ReadonlyArray<PluginName>;
+}
+
+/**
+ * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
+ * be exposed to client-side code.
+ * @internal
+ */
+export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+  /**
+   * Path on the filesystem where plugin was loaded from.
+   */
+  readonly path: string;
+}
+
+type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginName, unknown>> = (
   coreContext: PluginInitializerContext
 ) => {
-  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposedContract;
+  setup: (
+    pluginSetupContext: PluginSetupContext,
+    dependencies: TDependenciesSetup
+  ) => TExposedSetup;
   stop?: () => void;
 };
 
@@ -87,21 +138,23 @@ type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName
  * @internal
  */
 export class Plugin<
-  TStartContract = unknown,
-  TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TSetup = unknown,
+  TDependenciesSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredDependencies: PluginManifest['requiredPlugins'];
   public readonly optionalDependencies: PluginManifest['optionalPlugins'];
+  public readonly includesServerPlugin: PluginManifest['server'];
+  public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
 
-  private instance?: ReturnType<PluginInitializer<TStartContract, TDependencies>>;
+  private instance?: ReturnType<PluginInitializer<TSetup, TDependenciesSetup>>;
 
   constructor(
     public readonly path: string,
-    private readonly manifest: PluginManifest,
+    public readonly manifest: PluginManifest,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();
@@ -109,21 +162,23 @@ export class Plugin<
     this.configPath = manifest.configPath;
     this.requiredDependencies = manifest.requiredPlugins;
     this.optionalDependencies = manifest.optionalPlugins;
+    this.includesServerPlugin = manifest.server;
+    this.includesUiPlugin = manifest.ui;
   }
 
   /**
-   * Instantiates plugin and calls `start` function exposed by the plugin initializer.
-   * @param startContext Context that consists of various core services tailored specifically
-   * for the `start` lifecycle event.
+   * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
+   * @param setupContext Context that consists of various core services tailored specifically
+   * for the `setup` lifecycle event.
    * @param dependencies The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `start` function.
+   * is the contract returned by the dependency's `setup` function.
    */
-  public async start(startContext: PluginStartContext, dependencies: TDependencies) {
+  public async setup(setupContext: PluginSetupContext, dependencies: TDependenciesSetup) {
     this.instance = this.createPluginInstance();
 
-    this.log.info('Starting plugin');
+    this.log.info('Setting up plugin');
 
-    return await this.instance.start(startContext, dependencies);
+    return await this.instance.setup(setupContext, dependencies);
   }
 
   /**
@@ -131,7 +186,7 @@ export class Plugin<
    */
   public async stop() {
     if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't started.`);
+      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
     this.log.info('Stopping plugin');
@@ -146,13 +201,13 @@ export class Plugin<
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
 
-    const pluginDefinition = require(this.path);
+    const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TStartContract, TDependencies>;
+      plugin: PluginInitializer<TSetup, TDependenciesSetup>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
@@ -167,8 +222,8 @@ export class Plugin<
       );
     }
 
-    if (typeof instance.start !== 'function') {
-      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
+    if (typeof instance.setup !== 'function') {
+      throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
     return instance;

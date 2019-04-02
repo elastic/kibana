@@ -4,32 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelizeKeys } from 'humps';
+import { ErrorDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/distribution/get_distribution';
+import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
+import { ErrorGroupListAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_groups';
+import { MissingArgumentsError } from '../../../hooks/useFetcher';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
-
-interface ErrorGroupListParams extends IUrlParams {
-  size: number;
-  sortField: string;
-  sortDirection: string;
-}
 
 export async function loadErrorGroupList({
   serviceName,
   start,
   end,
   kuery,
-  size,
   sortField,
   sortDirection
-}: ErrorGroupListParams) {
-  return callApi({
+}: IUrlParams) {
+  if (!(serviceName && start && end)) {
+    throw new MissingArgumentsError();
+  }
+  return callApi<ErrorGroupListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
       start,
       end,
-      size,
       sortField,
       sortDirection,
       esFilterQuery: await getEncodedEsQuery(kuery)
@@ -44,25 +42,17 @@ export async function loadErrorGroupDetails({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  // TODO: add types when error section is converted to ts
-  const res = await callApi<any>(
-    {
-      pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
-      query: {
-        start,
-        end,
-        esFilterQuery: await getEncodedEsQuery(kuery)
-      }
-    },
-    {
-      camelcase: false
-    }
-  );
-  const camelizedRes: any = camelizeKeys(res);
-  if (res.error.context) {
-    camelizedRes.error.context = res.error.context;
+  if (!(serviceName && start && end && errorGroupId)) {
+    throw new MissingArgumentsError();
   }
-  return camelizedRes;
+  return callApi<ErrorGroupAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
+    }
+  });
 }
 
 export async function loadErrorDistribution({
@@ -72,8 +62,16 @@ export async function loadErrorDistribution({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  return callApi({
-    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
+  if (!(serviceName && start && end)) {
+    throw new MissingArgumentsError();
+  }
+
+  const pathname = errorGroupId
+    ? `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`
+    : `/api/apm/services/${serviceName}/errors/distribution`;
+
+  return callApi<ErrorDistributionAPIResponse>({
+    pathname,
     query: {
       start,
       end,

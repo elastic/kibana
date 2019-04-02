@@ -23,15 +23,19 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
+import 'ui/search_bar';
+import 'ui/apply_filters';
+import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { migrateAppState } from './lib';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import editorTemplate from './editor.html';
@@ -42,7 +46,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
-import { getVisualizeLoader } from '../../../../../../ui/public/visualize/loader';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -54,13 +58,17 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private, i18n) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
         if (shouldHaveIndex && !hasIndex) {
-          throw new Error('You must provide either an indexPattern or a savedSearchId');
+          throw new Error(
+            i18n('kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage', {
+              defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
+            })
+          );
         }
 
         return savedVisualizations.get($route.current.params)
@@ -112,13 +120,16 @@ function VisEditor(
   $route,
   AppState,
   $window,
+  $injector,
+  indexPatterns,
   kbnUrl,
   redirectWhenMissing,
   Private,
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  i18n
 ) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -127,7 +138,7 @@ function VisEditor(
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
-  // vis is instance of src/ui/public/vis/vis.js.
+  // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
 
@@ -138,15 +149,19 @@ function VisEditor(
   };
 
   $scope.topNavMenu = [{
-    key: 'save',
-    description: 'Save Visualization',
+    key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
+    description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
+      defaultMessage: 'Save Visualization',
+    }),
     testId: 'visualizeSaveButton',
     disableButton() {
       return Boolean(vis.dirty);
     },
     tooltip() {
       if (vis.dirty) {
-        return 'Apply or Discard your changes before saving';
+        return i18n('kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip', {
+          defaultMessage: 'Apply or Discard your changes before saving'
+        });
       }
     },
     run: async () => {
@@ -168,6 +183,13 @@ function VisEditor(
         });
       };
 
+      const confirmButtonLabel = $scope.isAddToDashMode() ? (
+        <FormattedMessage
+          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+          defaultMessage="Save and add to dashboard"
+        />
+      ) : null;
+
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
@@ -175,12 +197,15 @@ function VisEditor(
           title={savedVis.title}
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
+          confirmButtonLabel={confirmButtonLabel}
         />);
       showSaveModal(saveModal);
     }
   }, {
-    key: 'share',
-    description: 'Share Visualization',
+    key: i18n('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
+    description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+      defaultMessage: 'Share Visualization',
+    }),
     testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
@@ -199,8 +224,10 @@ function VisEditor(
       });
     }
   }, {
-    key: 'inspect',
-    description: 'Open Inspector for visualization',
+    key: i18n('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
+    description: i18n('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
+      defaultMessage: 'Open Inspector for visualization',
+    }),
     testId: 'openInspectorButton',
     disableButton() {
       return !vis.hasInspector || !vis.hasInspector();
@@ -210,12 +237,16 @@ function VisEditor(
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {
-        return 'This visualization doesn\'t support any inspectors.';
+        return i18n('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+          defaultMessage: `This visualization doesn't support any inspectors.`,
+        });
       }
     }
   }, {
-    key: 'refresh',
-    description: 'Refresh',
+    key: i18n('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
+    description: i18n('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
+      defaultMessage: 'Refresh',
+    }),
     run: function () {
       vis.forceReload();
     },
@@ -247,6 +278,12 @@ function VisEditor(
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
+    // Initializing appState does two things - first it translates the defaults into AppState,
+    // second it updates appState based on the url (the url trumps the defaults). This means if
+    // we update the state format at all and want to handle BWC, we must not only migrate the
+    // data stored with saved vis, but also any old state in the url.
+    migrateAppState(appState);
+
     // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
     // defaults applied. If the url was from a previous session which included modifications to the
     // appState then they won't be equal.
@@ -262,10 +299,39 @@ function VisEditor(
     return appState;
   }());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.onCancelApplyFilters = () => {
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.onApplyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.onApplyFilters(filters);
+    }
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.indexPattern = vis.indexPattern;
+    if (vis.indexPattern) {
+      $scope.indexPattern = vis.indexPattern;
+    } else {
+      indexPatterns.getDefault().then(defaultIndexPattern => {
+        $scope.indexPattern = defaultIndexPattern;
+      });
+    }
+
     $scope.searchSource = searchSource;
     $scope.state = $state;
 
@@ -278,6 +344,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showQueryBar = () => {
+      return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
@@ -286,24 +356,37 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (newQuery) => {
+      const query = migrateLegacyQuery(newQuery);
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
-
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
-    };
 
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-    ], function ([index, requiresTimePicker]) {
+      $scope.showQueryBar,
+    ], function ([index, requiresTimePicker, showQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-      } else {
+      if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
+      }
+      else if (showTimeFilter) {
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else {
+        timefilter.disableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
 
@@ -318,11 +401,16 @@ function VisEditor(
       }
     };
 
-    timefilter.enableAutoRefreshSelector();
+    const updateRefreshInterval = () => {
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+    };
+
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      $scope.filters = queryFilter.getFilters();
       $scope.fetch();
     });
 
@@ -355,9 +443,17 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
-    $state.query = migrateLegacyQuery(query);
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
+    $state.query = query;
     $scope.fetch();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   /**
@@ -377,7 +473,12 @@ function VisEditor(
 
           if (id) {
             toastNotifications.addSuccess({
-              title: `Saved '${savedVis.title}'`,
+              title: i18n('kbn.visualize.topNavMenu.saveVisualization.successNotificationText', {
+                defaultMessage: `Saved '{visTitle}'`,
+                values: {
+                  visTitle: savedVis.title,
+                },
+              }),
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
@@ -400,6 +501,7 @@ function VisEditor(
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
+              chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }
@@ -410,7 +512,12 @@ function VisEditor(
         // eslint-disable-next-line
         console.error(error);
         toastNotifications.addDanger({
-          title: `Error on saving '${savedVis.title}'`,
+          title: i18n('kbn.visualize.topNavMenu.saveVisualization.failureNotificationText', {
+            defaultMessage: `Error on saving '{visTitle}'`,
+            values: {
+              visTitle: savedVis.title,
+            },
+          }),
           text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
@@ -434,14 +541,26 @@ function VisEditor(
     searchSource.setField('index', searchSourceParent.getField('index'));
     searchSource.setParent(searchSourceGrandparent);
 
-    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
+    toastNotifications.addSuccess(
+      i18n('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
+        defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+        values: {
+          searchTitle: savedVis.savedSearch.title
+        }
+      })
+    );
 
     $scope.fetch();
   };
 
 
   $scope.getAdditionalMessage = () => {
-    return `<i class="kuiIcon fa-flask"></i> This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
+    return (
+      '<i class="kuiIcon fa-flask"></i>' +
+      i18n('kbn.visualize.experimentalVisInfoText', { defaultMessage: 'This visualization is marked as experimental.' }) +
+      ' ' +
+      vis.type.feedbackMessage
+    );
   };
 
   init();

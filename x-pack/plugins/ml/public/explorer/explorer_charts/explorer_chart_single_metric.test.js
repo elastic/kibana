@@ -28,7 +28,7 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
@@ -49,7 +49,7 @@ describe('ExplorerChart', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
-    const wrapper = mount(<ExplorerChartSingleMetric mlSelectSeverityService={mlSelectSeverityServiceMock} />);
+    const wrapper = mountWithIntl(<ExplorerChartSingleMetric.WrappedComponent mlSelectSeverityService={mlSelectSeverityServiceMock} />);
 
     // without setting any attributes and corresponding data
     // the directive just ends up being empty.
@@ -63,7 +63,9 @@ describe('ExplorerChart', () => {
       loading: true
     };
 
-    const wrapper = mount(<ExplorerChartSingleMetric seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />);
+    const wrapper = mountWithIntl(
+      <ExplorerChartSingleMetric.WrappedComponent seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
+    );
 
     // test if the loading indicator is shown
     expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(1);
@@ -83,9 +85,9 @@ describe('ExplorerChart', () => {
     };
 
     // We create the element including a wrapper which sets the width:
-    return mount(
+    return mountWithIntl(
       <div style={{ width: '500px' }}>
-        <ExplorerChartSingleMetric seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
+        <ExplorerChartSingleMetric.WrappedComponent seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
       </div>
     );
   }
@@ -133,8 +135,8 @@ describe('ExplorerChart', () => {
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
     const chartMarkers = wrapper.getDOMNode().querySelector('.chart-markers').querySelectorAll('circle');
-    expect([...chartMarkers]).toHaveLength(3);
-    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7]);
+    expect([...chartMarkers]).toHaveLength(4);
+    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
   });
 
   it('Anomaly Explorer Chart with single data point', () => {

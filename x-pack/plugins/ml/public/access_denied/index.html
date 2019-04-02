@@ -10,17 +10,37 @@
         </defs>
         <use fill-rule="nonzero" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#cross-a"></use>
       </svg>
-      <span class="euiCallOutHeader__title">You need permission to access Machine Learning</span>
+      <span
+        class="euiCallOutHeader__title"
+        i18n-id="xpack.ml.accessDenied.noPermissionToAccessMLLabel"
+        i18n-default-message="You need permission to access Machine Learning"
+      ></span>
     </div>
     <div class="euiText euiText--small">
-      <p>You must have the privileges granted in the <span class="text-monospace">kibana_user</span> and <span class="text-monospace">machine_learning_user</span> roles.<br/>
-      Your system admin can set these roles on the Management User page.
-      </p>
+      <p
+        i18n-id="xpack.ml.accessDenied.noGrantedPrivilegesDescription"
+        i18n-default-message="You must have the privileges granted in the {kibanaUserParam} and {machineLearningUserParam} roles.{br}Your system admin can set these roles on the Management User page."
+        i18n-values="{
+          html_kibanaUserParam: '<span class=\'text-monospace\'>kibana_user</span>',
+          html_machineLearningUserParam: '<span class=\'text-monospace\'>machine_learning_user</span>',
+          html_br: '<br />',
+        }"
+      ></p>
     </div>
   </div>
 
   <div style='margin-top:20px;'>
-    <button ng-click="accessDenied.goToKibana();" class="kuiButton kuiButton--primary">Back to Kibana home</button>
-    <button ng-click="accessDenied.retry();" class="kuiButton kuiButton--basic">Retry</button>
+    <button
+      ng-click="accessDenied.goToKibana();"
+      class="kuiButton kuiButton--primary"
+      i18n-id="xpack.ml.accessDenied.backToKibanaHomeButtonLabel"
+      i18n-default-message="Back to Kibana home"
+    ></button>
+    <button
+      ng-click="accessDenied.retry();"
+      class="kuiButton kuiButton--basic"
+      i18n-id="xpack.ml.accessDenied.retryButtonLabel"
+      i18n-default-message="Retry"
+    ></button>
   </div>
 </div>

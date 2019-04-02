@@ -4,85 +4,116 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
 import { Route } from 'react-router-dom';
-import { ShowJson } from './show_json';
-import { Summary } from './summary';
-import { EditSettingsJson } from './edit_settings_json';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTabs,
   EuiTab,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
-import { IndexActionsContextMenu } from '../../components';
+import { renderBadges } from '../../../../lib/render_badges';
 import { INDEX_OPEN } from '../../../../../common/constants';
+import {
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../../../constants';
+import { IndexActionsContextMenu } from '../../components';
+import { ShowJson } from './show_json';
+import { Summary } from './summary';
+import { EditSettingsJson } from './edit_settings_json';
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+const tabToHumanizedMap = {
+  [TAB_SUMMARY]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabSummaryLabel"
+      defaultMessage="Summary"
+    />
+  ),
+  [TAB_SETTINGS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabSettingsLabel"
+      defaultMessage="Settings"
+    />
+  ),
+  [TAB_MAPPING]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabMappingLabel"
+      defaultMessage="Mapping"
+    />
+  ),
+  [TAB_STATS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabStatsLabel"
+      defaultMessage="Stats"
+    />
+  ),
+  [TAB_EDIT_SETTINGS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabEditSettingsLabel"
+      defaultMessage="Edit settings"
+    />
+  ),
+};
 
-const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
+const tabs = [
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+];
+
 export class DetailPanel extends Component {
   renderTabs() {
-    const { panelType, indexName, indexStatus, openDetailPanel } = this.props;
-
-    return tabs.map((tab, index) => {
+    const { panelType, indexName, index, openDetailPanel } = this.props;
+    return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (
         <EuiTab
           onClick={() => openDetailPanel({ panelType: tab, indexName })}
           isSelected={isSelected}
-          data-test-subj={`detailPanelTab${isSelected ? "Selected" : ""}`}
-          disabled={tab === 'stats' && indexStatus !== INDEX_OPEN}
-          key={index}
+          data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
+          disabled={tab === TAB_STATS && index.status !== INDEX_OPEN}
+          key={i}
         >
-          {capitalizeFirstLetter(tab)}
+          {tabToHumanizedMap[tab]}
         </EuiTab>
       );
     });
   }
-
   render() {
-    const { panelType, indexName, closeDetailPanel } = this.props;
+    const { panelType, indexName, index, closeDetailPanel } = this.props;
     if (!panelType) {
       return null;
     }
     let component = null;
     switch (panelType) {
-      case 'Edit settings':
+      case TAB_EDIT_SETTINGS:
         component = <EditSettingsJson />;
         break;
-      case 'Mapping':
-      case 'Settings':
-      case 'Stats':
+      case TAB_MAPPING:
+      case TAB_SETTINGS:
+      case TAB_STATS:
         component = <ShowJson />;
         break;
       default:
         component = <Summary />;
     }
-    return (
-      <EuiFlyout
-        data-test-subj="indexDetailFlyout"
-        onClose={closeDetailPanel}
-        aria-labelledby="indexDetailsFlyoutTitle"
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
-            <h2>{indexName}</h2>
-          </EuiTitle>
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-        </EuiFlyoutHeader>
-
+    const content = index ? (
+      <Fragment>
         <EuiFlyoutBody>{component}</EuiFlyoutBody>
-
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -95,13 +126,53 @@ export class DetailPanel extends Component {
                     anchorPosition="upRight"
                     detailPanel={true}
                     iconType="arrowUp"
-                    label={<FormattedMessage id="xpack.idxMgmt.detailPanel.manageContextMenuLabel" defaultMessage="Manage" />}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
+                        defaultMessage="Manage"
+                      />
+                    }
                   />
                 )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+      </Fragment>
+    ) : (
+      <EuiFlyoutBody>
+        <EuiSpacer size="l" />
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.detailPanel.missingIndexTitle"
+              defaultMessage="Missing index"
+            />
+          }
+          color="danger"
+          iconType="cross"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.detailPanel.missingIndexMessage"
+            defaultMessage="This index does not exist.
+              It might have been deleted by a running job or another system."
+          />
+        </EuiCallOut>
+      </EuiFlyoutBody>
+    );
+    return (
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={closeDetailPanel}
+        aria-labelledby="indexDetailsFlyoutTitle"
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
+            <h2>{indexName}{renderBadges(index)}</h2>
+          </EuiTitle>
+          {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null }
+        </EuiFlyoutHeader>
+        {content}
       </EuiFlyout>
     );
   }

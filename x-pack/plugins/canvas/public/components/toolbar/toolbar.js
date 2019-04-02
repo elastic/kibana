@@ -41,7 +41,9 @@ export const Toolbar = props => {
   const done = () => setTray(null);
 
   const showHideTray = exp => {
-    if (tray && tray === exp) return done();
+    if (tray && tray === exp) {
+      return done();
+    }
     setTray(exp);
   };
 

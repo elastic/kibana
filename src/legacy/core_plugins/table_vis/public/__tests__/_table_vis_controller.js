@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
@@ -73,12 +73,22 @@ describe('Table Vis Controller', function () {
     );
   }
 
+  const dimensions = {
+    buckets: [{
+      accessor: 0,
+    }], metrics: [{
+      accessor: 1,
+      format: { id: 'range' },
+    }]
+  };
+
   // basically a parameterized beforeEach
   function initController(vis) {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
+    $rootScope.visParams = vis.params;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
     $rootScope.newScope = function (scope) { $scope = scope; };
@@ -110,7 +120,7 @@ describe('Table Vis Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.hasSomeRows).to.be(true);
     expect($scope.tableGroups).to.have.property('tables');
@@ -123,7 +133,7 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
     removeEsResponseFromScope();
 
     expect(!$scope.hasSomeRows).to.be.ok();
@@ -138,7 +148,7 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis({ sort: sortObj });
     initController(vis);
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
     expect($scope.sort.direction).to.equal(sortObj.direction);
@@ -150,7 +160,7 @@ describe('Table Vis Controller', function () {
 
     tabifiedResponse.rows = [];
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.hasSomeRows).to.be(false);
     expect(!$scope.tableGroups).to.be.ok();

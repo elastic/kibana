@@ -4,57 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-import { oc } from 'ts-optchain';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../../common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
-export type TransactionAPIResponse = Transaction | null;
+export type TransactionAPIResponse = Transaction | undefined;
+
+export interface TransactionWithErrorCountAPIResponse {
+  transaction: TransactionAPIResponse;
+  errorCount: number;
+}
 
 export async function getTransaction(
   transactionId: string,
-  traceId: string | undefined,
+  traceId: string,
   setup: Setup
 ): Promise<TransactionAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [TRANSACTION_ID]: transactionId } },
+    { term: { [TRACE_ID]: traceId } },
+    { range: rangeFilter(start, end) }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
+  const params = {
+    index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 1,
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [TRANSACTION_ID]: transactionId } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       }
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
-  if (traceId) {
-    params.body.query.bool.filter.push({ term: { [TRACE_ID]: traceId } });
-  }
-
   const resp = await client<Transaction>('search', params);
-  return oc(resp).hits.hits[0]._source() || null;
+  return idx(resp, _ => _.hits.hits[0]._source);
 }

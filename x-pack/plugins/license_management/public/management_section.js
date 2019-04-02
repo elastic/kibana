@@ -13,7 +13,7 @@ management.getSection('elasticsearch').register('license_management', {
   display: i18n.translate('xpack.licenseMgmt.managementSectionDisplayName', {
     defaultMessage: 'License Management',
   }),
-  order: 4,
+  order: 99,
   url: `#${BASE_PATH}home`
 });
 

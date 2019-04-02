@@ -4,7 +4,16 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -36,6 +45,26 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -60,15 +89,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -113,30 +133,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -155,263 +151,677 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               <div
                 className="euiPageContentBody"
               >
-                <EuiOverlayMask>
-                  <EuiConfirmModal
-                    buttonColor="primary"
-                    cancelButtonText={
-                      <FormattedMessage
-                        defaultMessage="Cancel"
-                        id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-                        values={Object {}}
-                      />
-                    }
-                    confirmButtonText={
-                      <FormattedMessage
-                        defaultMessage="Confirm"
-                        id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-                        values={Object {}}
-                      />
-                    }
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                    title={
-                      <FormattedMessage
-                        defaultMessage="Confirm License Upload"
-                        id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-                        values={Object {}}
-                      />
-                    }
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
                   >
-                    <EuiModal
-                      className="euiModal--confirmation"
-                      maxWidth={true}
-                      onClose={[Function]}
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
                     >
-                      <Component
-                        focusTrapOptions={
-                          Object {
-                            "fallbackFocus": [Function],
-                            "initialFocus": undefined,
-                          }
-                        }
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <EuiOverlayMask>
+                  <Portal
+                    containerInfo={
+                      <div
+                        class="euiOverlayMask"
                       >
-                        <div>
+                        <div
+                          data-focus-guard="true"
+                          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                          tabindex="0"
+                        />
+                        <div
+                          data-focus-guard="true"
+                          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                          tabindex="1"
+                        />
+                        <div
+                          data-focus-lock-disabled="false"
+                        >
                           <div
-                            className="euiModal euiModal--maxWidth-default euiModal--confirmation"
-                            onKeyDown={[Function]}
-                            tabIndex={0}
+                            class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                            tabindex="0"
                           >
-                            <EuiButtonIcon
+                            <button
                               aria-label="Closes this modal window"
-                              className="euiModal__closeIcon"
-                              color="text"
-                              iconSize="m"
-                              iconType="cross"
-                              onClick={[Function]}
+                              class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
                               type="button"
                             >
-                              <button
-                                aria-label="Closes this modal window"
-                                className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
-                                onClick={[Function]}
-                                type="button"
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  size="m"
-                                  type="cross"
-                                >
-                                  <cross
-                                    aria-hidden="true"
-                                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                                  >
-                                    <svg
-                                      aria-hidden="true"
-                                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                                      focusable="false"
-                                      height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                    >
-                                      <defs>
-                                        <path
-                                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
-                                          id="cross-a"
-                                        />
-                                      </defs>
-                                      <use
-                                        fillRule="nonzero"
-                                        xlinkHref="#cross-a"
-                                      />
-                                    </svg>
-                                  </cross>
-                                </EuiIcon>
-                              </button>
-                            </EuiButtonIcon>
+                                <path
+                                  d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                />
+                              </svg>
+                            </button>
                             <div
-                              className="euiModal__flex"
+                              class="euiModal__flex"
                             >
-                              <EuiModalHeader>
+                              <div
+                                class="euiModalHeader"
+                              >
                                 <div
-                                  className="euiModalHeader"
+                                  class="euiModalHeader__title"
+                                  data-test-subj="confirmModalTitleText"
                                 >
-                                  <EuiModalHeaderTitle
-                                    data-test-subj="confirmModalTitleText"
-                                  >
+                                  Confirm License Upload
+                                </div>
+                              </div>
+                              <div
+                                class="euiModalBody"
+                              >
+                                <div
+                                  class="euiText euiText--medium"
+                                  data-test-subj="confirmModalBodyText"
+                                >
+                                  <div>
                                     <div
-                                      className="euiModalHeader__title"
-                                      data-test-subj="confirmModalTitleText"
+                                      class="euiText euiText--medium"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Confirm License Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-                                        values={Object {}}
-                                      >
-                                        Confirm License Upload
-                                      </FormattedMessage>
+                                      Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
                                     </div>
-                                  </EuiModalHeaderTitle>
-                                </div>
-                              </EuiModalHeader>
-                              <EuiModalBody>
-                                <div
-                                  className="euiModalBody"
-                                >
-                                  <EuiText
-                                    data-test-subj="confirmModalBodyText"
-                                    grow={true}
-                                    size="m"
-                                  >
                                     <div
-                                      className="euiText euiText--medium"
-                                      data-test-subj="confirmModalBodyText"
+                                      class="euiText euiText--medium"
                                     >
-                                      <div>
-                                        <EuiText
-                                          grow={true}
-                                          size="m"
-                                        >
-                                          <div
-                                            className="euiText euiText--medium"
-                                          >
-                                            Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                          </div>
-                                        </EuiText>
-                                        <EuiText
-                                          grow={true}
-                                          size="m"
-                                        >
-                                          <div
-                                            className="euiText euiText--medium"
-                                          >
-                                            <ul>
-                                              <li
-                                                key="Watcher will be disabled"
-                                              >
-                                                Watcher will be disabled
-                                              </li>
-                                            </ul>
-                                          </div>
-                                        </EuiText>
-                                      </div>
+                                      <ul>
+                                        <li>
+                                          Watcher will be disabled
+                                        </li>
+                                      </ul>
                                     </div>
-                                  </EuiText>
+                                  </div>
                                 </div>
-                              </EuiModalBody>
-                              <EuiModalFooter>
-                                <div
-                                  className="euiModalFooter"
+                              </div>
+                              <div
+                                class="euiModalFooter"
+                              >
+                                <button
+                                  class="euiButtonEmpty euiButtonEmpty--primary"
+                                  data-test-subj="confirmModalCancelButton"
+                                  type="button"
                                 >
-                                  <EuiButtonEmpty
-                                    buttonRef={[Function]}
-                                    color="primary"
-                                    data-test-subj="confirmModalCancelButton"
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    type="button"
+                                  <span
+                                    class="euiButtonEmpty__content"
                                   >
-                                    <button
-                                      className="euiButtonEmpty euiButtonEmpty--primary"
-                                      data-test-subj="confirmModalCancelButton"
-                                      onClick={[Function]}
-                                      type="button"
+                                    <span
+                                      class="euiButtonEmpty__text"
                                     >
-                                      <span
-                                        className="euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          <FormattedMessage
-                                            defaultMessage="Cancel"
-                                            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-                                            values={Object {}}
-                                          >
-                                            Cancel
-                                          </FormattedMessage>
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                  <EuiButton
-                                    buttonRef={[Function]}
-                                    color="primary"
-                                    data-test-subj="confirmModalConfirmButton"
-                                    fill={true}
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    type="button"
+                                      Cancel
+                                    </span>
+                                  </span>
+                                </button>
+                                <button
+                                  class="euiButton euiButton--primary euiButton--fill"
+                                  data-test-subj="confirmModalConfirmButton"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButton__content"
                                   >
-                                    <button
-                                      className="euiButton euiButton--primary euiButton--fill"
-                                      data-test-subj="confirmModalConfirmButton"
-                                      onClick={[Function]}
-                                      type="button"
+                                    <span
+                                      class="euiButton__text"
                                     >
-                                      <span
-                                        className="euiButton__content"
-                                      >
-                                        <span
-                                          className="euiButton__text"
-                                        >
-                                          <FormattedMessage
-                                            defaultMessage="Confirm"
-                                            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-                                            values={Object {}}
-                                          >
-                                            Confirm
-                                          </FormattedMessage>
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButton>
-                                </div>
-                              </EuiModalFooter>
+                                      Confirm
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </Component>
-                    </EuiModal>
-                  </EuiConfirmModal>
+                        <div
+                          data-focus-guard="true"
+                          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                          tabindex="0"
+                        />
+                      </div>
+                    }
+                  >
+                    <EuiConfirmModal
+                      buttonColor="primary"
+                      cancelButtonText={
+                        <FormattedMessage
+                          defaultMessage="Cancel"
+                          id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                          values={Object {}}
+                        />
+                      }
+                      confirmButtonText={
+                        <FormattedMessage
+                          defaultMessage="Confirm"
+                          id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                          values={Object {}}
+                        />
+                      }
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                      title={
+                        <FormattedMessage
+                          defaultMessage="Confirm License Upload"
+                          id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                          values={Object {}}
+                        />
+                      }
+                    >
+                      <EuiModal
+                        className="euiModal--confirmation"
+                        maxWidth={true}
+                        onClose={[Function]}
+                      >
+                        <EuiFocusTrap
+                          clickOutsideDisables={false}
+                          disabled={false}
+                          returnFocus={true}
+                        >
+                          <FocusLock
+                            as="div"
+                            autoFocus={true}
+                            disabled={false}
+                            lockProps={Object {}}
+                            noFocusGuards={false}
+                            persistentFocus={false}
+                            returnFocus={true}
+                          >
+                            <div
+                              data-focus-guard={true}
+                              key="guard-first"
+                              style={
+                                Object {
+                                  "height": "0px",
+                                  "left": "1px",
+                                  "overflow": "hidden",
+                                  "padding": 0,
+                                  "position": "fixed",
+                                  "top": "1px",
+                                  "width": "1px",
+                                }
+                              }
+                              tabIndex={0}
+                            />
+                            <div
+                              data-focus-guard={true}
+                              key="guard-nearest"
+                              style={
+                                Object {
+                                  "height": "0px",
+                                  "left": "1px",
+                                  "overflow": "hidden",
+                                  "padding": 0,
+                                  "position": "fixed",
+                                  "top": "1px",
+                                  "width": "1px",
+                                }
+                              }
+                              tabIndex={1}
+                            />
+                            <div
+                              data-focus-lock-disabled={false}
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                            >
+                              <SideEffect(FocusWatcher)
+                                autoFocus={true}
+                                disabled={false}
+                                observed={
+                                  <div
+                                    data-focus-lock-disabled="false"
+                                  >
+                                    <div
+                                      class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                      tabindex="0"
+                                    >
+                                      <button
+                                        aria-label="Closes this modal window"
+                                        class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                        type="button"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                          />
+                                        </svg>
+                                      </button>
+                                      <div
+                                        class="euiModal__flex"
+                                      >
+                                        <div
+                                          class="euiModalHeader"
+                                        >
+                                          <div
+                                            class="euiModalHeader__title"
+                                            data-test-subj="confirmModalTitleText"
+                                          >
+                                            Confirm License Upload
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiModalBody"
+                                        >
+                                          <div
+                                            class="euiText euiText--medium"
+                                            data-test-subj="confirmModalBodyText"
+                                          >
+                                            <div>
+                                              <div
+                                                class="euiText euiText--medium"
+                                              >
+                                                Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                              </div>
+                                              <div
+                                                class="euiText euiText--medium"
+                                              >
+                                                <ul>
+                                                  <li>
+                                                    Watcher will be disabled
+                                                  </li>
+                                                </ul>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          class="euiModalFooter"
+                                        >
+                                          <button
+                                            class="euiButtonEmpty euiButtonEmpty--primary"
+                                            data-test-subj="confirmModalCancelButton"
+                                            type="button"
+                                          >
+                                            <span
+                                              class="euiButtonEmpty__content"
+                                            >
+                                              <span
+                                                class="euiButtonEmpty__text"
+                                              >
+                                                Cancel
+                                              </span>
+                                            </span>
+                                          </button>
+                                          <button
+                                            class="euiButton euiButton--primary euiButton--fill"
+                                            data-test-subj="confirmModalConfirmButton"
+                                            type="button"
+                                          >
+                                            <span
+                                              class="euiButton__content"
+                                            >
+                                              <span
+                                                class="euiButton__text"
+                                              >
+                                                Confirm
+                                              </span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                }
+                                onActivation={[Function]}
+                                onDeactivation={[Function]}
+                                persistentFocus={false}
+                              >
+                                <FocusWatcher
+                                  autoFocus={true}
+                                  disabled={false}
+                                  observed={
+                                    <div
+                                      data-focus-lock-disabled="false"
+                                    >
+                                      <div
+                                        class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                        tabindex="0"
+                                      >
+                                        <button
+                                          aria-label="Closes this modal window"
+                                          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                          type="button"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                            focusable="false"
+                                            height="16"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                            />
+                                          </svg>
+                                        </button>
+                                        <div
+                                          class="euiModal__flex"
+                                        >
+                                          <div
+                                            class="euiModalHeader"
+                                          >
+                                            <div
+                                              class="euiModalHeader__title"
+                                              data-test-subj="confirmModalTitleText"
+                                            >
+                                              Confirm License Upload
+                                            </div>
+                                          </div>
+                                          <div
+                                            class="euiModalBody"
+                                          >
+                                            <div
+                                              class="euiText euiText--medium"
+                                              data-test-subj="confirmModalBodyText"
+                                            >
+                                              <div>
+                                                <div
+                                                  class="euiText euiText--medium"
+                                                >
+                                                  Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                </div>
+                                                <div
+                                                  class="euiText euiText--medium"
+                                                >
+                                                  <ul>
+                                                    <li>
+                                                      Watcher will be disabled
+                                                    </li>
+                                                  </ul>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div
+                                            class="euiModalFooter"
+                                          >
+                                            <button
+                                              class="euiButtonEmpty euiButtonEmpty--primary"
+                                              data-test-subj="confirmModalCancelButton"
+                                              type="button"
+                                            >
+                                              <span
+                                                class="euiButtonEmpty__content"
+                                              >
+                                                <span
+                                                  class="euiButtonEmpty__text"
+                                                >
+                                                  Cancel
+                                                </span>
+                                              </span>
+                                            </button>
+                                            <button
+                                              class="euiButton euiButton--primary euiButton--fill"
+                                              data-test-subj="confirmModalConfirmButton"
+                                              type="button"
+                                            >
+                                              <span
+                                                class="euiButton__content"
+                                              >
+                                                <span
+                                                  class="euiButton__text"
+                                                >
+                                                  Confirm
+                                                </span>
+                                              </span>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  }
+                                  onActivation={[Function]}
+                                  onDeactivation={[Function]}
+                                  persistentFocus={false}
+                                />
+                              </SideEffect(FocusWatcher)>
+                              <div
+                                className="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                onKeyDown={[Function]}
+                                tabIndex={0}
+                              >
+                                <EuiI18n
+                                  default="Closes this modal window"
+                                  token="euiModal.closeModal"
+                                >
+                                  <EuiButtonIcon
+                                    aria-label="Closes this modal window"
+                                    className="euiModal__closeIcon"
+                                    color="text"
+                                    iconSize="m"
+                                    iconType="cross"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <button
+                                      aria-label="Closes this modal window"
+                                      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        size="m"
+                                        type="cross"
+                                      >
+                                        <cross
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                            focusable="false"
+                                            height="16"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                            />
+                                          </svg>
+                                        </cross>
+                                      </EuiIcon>
+                                    </button>
+                                  </EuiButtonIcon>
+                                </EuiI18n>
+                                <div
+                                  className="euiModal__flex"
+                                >
+                                  <EuiModalHeader>
+                                    <div
+                                      className="euiModalHeader"
+                                    >
+                                      <EuiModalHeaderTitle
+                                        data-test-subj="confirmModalTitleText"
+                                      >
+                                        <div
+                                          className="euiModalHeader__title"
+                                          data-test-subj="confirmModalTitleText"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Confirm License Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                                            values={Object {}}
+                                          >
+                                            Confirm License Upload
+                                          </FormattedMessage>
+                                        </div>
+                                      </EuiModalHeaderTitle>
+                                    </div>
+                                  </EuiModalHeader>
+                                  <EuiModalBody>
+                                    <div
+                                      className="euiModalBody"
+                                    >
+                                      <EuiText
+                                        data-test-subj="confirmModalBodyText"
+                                        grow={true}
+                                        size="m"
+                                      >
+                                        <div
+                                          className="euiText euiText--medium"
+                                          data-test-subj="confirmModalBodyText"
+                                        >
+                                          <div>
+                                            <EuiText
+                                              grow={true}
+                                              size="m"
+                                            >
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                              </div>
+                                            </EuiText>
+                                            <EuiText
+                                              grow={true}
+                                              size="m"
+                                            >
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                <ul>
+                                                  <li
+                                                    key="Watcher will be disabled"
+                                                  >
+                                                    Watcher will be disabled
+                                                  </li>
+                                                </ul>
+                                              </div>
+                                            </EuiText>
+                                          </div>
+                                        </div>
+                                      </EuiText>
+                                    </div>
+                                  </EuiModalBody>
+                                  <EuiModalFooter>
+                                    <div
+                                      className="euiModalFooter"
+                                    >
+                                      <EuiButtonEmpty
+                                        buttonRef={[Function]}
+                                        color="primary"
+                                        data-test-subj="confirmModalCancelButton"
+                                        iconSide="left"
+                                        onClick={[Function]}
+                                        type="button"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary"
+                                          data-test-subj="confirmModalCancelButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Cancel"
+                                                id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                                                values={Object {}}
+                                              >
+                                                Cancel
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                      <EuiButton
+                                        buttonRef={[Function]}
+                                        color="primary"
+                                        data-test-subj="confirmModalConfirmButton"
+                                        fill={true}
+                                        iconSide="left"
+                                        onClick={[Function]}
+                                        size="m"
+                                        type="button"
+                                      >
+                                        <button
+                                          className="euiButton euiButton--primary euiButton--fill"
+                                          data-test-subj="confirmModalConfirmButton"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButton__content"
+                                          >
+                                            <span
+                                              className="euiButton__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Confirm"
+                                                id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                                                values={Object {}}
+                                              >
+                                                Confirm
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButton>
+                                    </div>
+                                  </EuiModalFooter>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              data-focus-guard={true}
+                              style={
+                                Object {
+                                  "height": "0px",
+                                  "left": "1px",
+                                  "overflow": "hidden",
+                                  "padding": 0,
+                                  "position": "fixed",
+                                  "top": "1px",
+                                  "width": "1px",
+                                }
+                              }
+                              tabIndex={0}
+                            />
+                          </FocusLock>
+                        </EuiFocusTrap>
+                      </EuiModal>
+                    </EuiConfirmModal>
+                  </Portal>
                 </EuiOverlayMask>
                 <EuiText
                   grow={true}
@@ -448,9 +858,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
+                <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
                   />
@@ -481,78 +889,85 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           }
                           onChange={[Function]}
                         >
-                          <div
-                            className="euiFilePicker"
+                          <EuiI18n
+                            defaults={
+                              Array [
+                                "Clear selected files",
+                                "files selected",
+                              ]
+                            }
+                            tokens={
+                              Array [
+                                "euiFilePicker.clearSelectedFiles",
+                                "euiFilePicker.filesSelected",
+                              ]
+                            }
                           >
                             <div
-                              className="euiFilePicker__wrap"
+                              className="euiFilePicker"
                             >
-                              <input
-                                className="euiFilePicker__input"
-                                id="licenseFile"
-                                onChange={[Function]}
-                                onDragLeave={[Function]}
-                                onDragOver={[Function]}
-                                onDrop={[Function]}
-                                type="file"
-                              />
                               <div
-                                className="euiFilePicker__prompt"
+                                className="euiFilePicker__wrap"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFilePicker__icon"
-                                  size="l"
-                                  type="importAction"
+                                <input
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                                <div
+                                  className="euiFilePicker__prompt"
                                 >
-                                  <importAction
+                                  <EuiIcon
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--large euiFilePicker__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="euiFilePicker__icon"
+                                    size="l"
+                                    type="importAction"
                                   >
-                                    <svg
+                                    <importAction
                                       aria-hidden="true"
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <path
-                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                      />
-                                    </svg>
-                                  </importAction>
-                                </EuiIcon>
-                                <div
-                                  className="euiFilePicker__promptText"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Select or drag your license file"
-                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                    values={Object {}}
+                                      <svg
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--large euiFilePicker__icon"
+                                        focusable="false"
+                                        height="16"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                        />
+                                      </svg>
+                                    </importAction>
+                                  </EuiIcon>
+                                  <div
+                                    className="euiFilePicker__promptText"
                                   >
-                                    Select or drag your license file
-                                  </FormattedMessage>
+                                    <FormattedMessage
+                                      defaultMessage="Select or drag your license file"
+                                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                      values={Object {}}
+                                    >
+                                      Select or drag your license file
+                                    </FormattedMessage>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </EuiI18n>
                         </EuiFilePicker>
                       </div>
                     </EuiText>
@@ -572,19 +987,12 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -620,7 +1028,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -633,6 +1040,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -678,7 +1086,16 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -710,6 +1127,26 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -734,15 +1171,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -779,30 +1207,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -821,6 +1225,27 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -856,9 +1281,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
+                <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
                   />
@@ -874,43 +1297,48 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                   <div
                     className="euiForm"
                   >
-                    <EuiCallOut
-                      className="euiForm__errors"
-                      color="danger"
-                      size="m"
-                      title="Please address the errors in your form."
+                    <EuiI18n
+                      default="Please address the errors in your form."
+                      token="euiForm.addressFormErrors"
                     >
-                      <div
-                        className="euiCallOut euiCallOut--danger euiForm__errors"
+                      <EuiCallOut
+                        className="euiForm__errors"
+                        color="danger"
+                        size="m"
+                        title="Please address the errors in your form."
                       >
                         <div
-                          className="euiCallOutHeader"
-                        >
-                          <span
-                            className="euiCallOutHeader__title"
-                          >
-                            Please address the errors in your form.
-                          </span>
-                        </div>
-                        <EuiText
-                          grow={true}
-                          size="s"
+                          className="euiCallOut euiCallOut--danger euiForm__errors"
                         >
                           <div
-                            className="euiText euiText--small"
+                            className="euiCallOutHeader"
                           >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="The supplied license has expired."
-                              >
-                                The supplied license has expired.
-                              </li>
-                            </ul>
+                            <span
+                              className="euiCallOutHeader__title"
+                            >
+                              Please address the errors in your form.
+                            </span>
                           </div>
-                        </EuiText>
-                      </div>
-                    </EuiCallOut>
+                          <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <ul>
+                                <li
+                                  className="euiForm__error"
+                                  key="The supplied license has expired."
+                                >
+                                  The supplied license has expired.
+                                </li>
+                              </ul>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiCallOut>
+                    </EuiI18n>
                     <EuiText
                       grow={true}
                       size="m"
@@ -930,104 +1358,111 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                           }
                           onChange={[Function]}
                         >
-                          <div
-                            className="euiFilePicker euiFilePicker-hasFiles"
+                          <EuiI18n
+                            defaults={
+                              Array [
+                                "Clear selected files",
+                                "files selected",
+                              ]
+                            }
+                            tokens={
+                              Array [
+                                "euiFilePicker.clearSelectedFiles",
+                                "euiFilePicker.filesSelected",
+                              ]
+                            }
                           >
                             <div
-                              className="euiFilePicker__wrap"
+                              className="euiFilePicker euiFilePicker-hasFiles"
                             >
-                              <input
-                                className="euiFilePicker__input"
-                                id="licenseFile"
-                                onChange={[Function]}
-                                onDragLeave={[Function]}
-                                onDragOver={[Function]}
-                                onDrop={[Function]}
-                                type="file"
-                              />
                               <div
-                                className="euiFilePicker__prompt"
+                                className="euiFilePicker__wrap"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFilePicker__icon"
-                                  size="l"
-                                  type="importAction"
+                                <input
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                                <div
+                                  className="euiFilePicker__prompt"
                                 >
-                                  <importAction
+                                  <EuiIcon
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--large euiFilePicker__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="euiFilePicker__icon"
+                                    size="l"
+                                    type="importAction"
                                   >
-                                    <svg
+                                    <importAction
                                       aria-hidden="true"
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <path
-                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                      />
-                                    </svg>
-                                  </importAction>
-                                </EuiIcon>
-                                <div
-                                  className="euiFilePicker__promptText"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Select or drag your license file"
-                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                    values={Object {}}
+                                      <svg
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--large euiFilePicker__icon"
+                                        focusable="false"
+                                        height="16"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                        />
+                                      </svg>
+                                    </importAction>
+                                  </EuiIcon>
+                                  <div
+                                    className="euiFilePicker__promptText"
                                   >
-                                    Select or drag your license file
-                                  </FormattedMessage>
-                                </div>
-                                <EuiButtonEmpty
-                                  aria-label="Clear selected files"
-                                  className="euiFilePicker__clearButton"
-                                  color="primary"
-                                  iconSide="left"
-                                  onClick={[Function]}
-                                  size="xs"
-                                  type="button"
-                                >
-                                  <button
+                                    <FormattedMessage
+                                      defaultMessage="Select or drag your license file"
+                                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                      values={Object {}}
+                                    >
+                                      Select or drag your license file
+                                    </FormattedMessage>
+                                  </div>
+                                  <EuiButtonEmpty
                                     aria-label="Clear selected files"
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    className="euiFilePicker__clearButton"
+                                    color="primary"
+                                    iconSide="left"
                                     onClick={[Function]}
+                                    size="xs"
                                     type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__content"
+                                    <button
+                                      aria-label="Clear selected files"
+                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
+                                        className="euiButtonEmpty__content"
                                       >
-                                        Remove
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          Remove
+                                        </span>
                                       </span>
-                                    </span>
-                                  </button>
-                                </EuiButtonEmpty>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          </EuiI18n>
                         </EuiFilePicker>
                       </div>
                     </EuiText>
@@ -1047,19 +1482,12 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1095,7 +1523,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1108,6 +1535,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -1153,7 +1581,16 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1185,6 +1622,26 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -1209,15 +1666,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -1254,30 +1702,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -1296,6 +1720,27 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -1331,9 +1776,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
+                <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
                   />
@@ -1349,43 +1792,48 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                   <div
                     className="euiForm"
                   >
-                    <EuiCallOut
-                      className="euiForm__errors"
-                      color="danger"
-                      size="m"
-                      title="Please address the errors in your form."
+                    <EuiI18n
+                      default="Please address the errors in your form."
+                      token="euiForm.addressFormErrors"
                     >
-                      <div
-                        className="euiCallOut euiCallOut--danger euiForm__errors"
+                      <EuiCallOut
+                        className="euiForm__errors"
+                        color="danger"
+                        size="m"
+                        title="Please address the errors in your form."
                       >
                         <div
-                          className="euiCallOutHeader"
-                        >
-                          <span
-                            className="euiCallOutHeader__title"
-                          >
-                            Please address the errors in your form.
-                          </span>
-                        </div>
-                        <EuiText
-                          grow={true}
-                          size="s"
+                          className="euiCallOut euiCallOut--danger euiForm__errors"
                         >
                           <div
-                            className="euiText euiText--small"
+                            className="euiCallOutHeader"
                           >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="The supplied license is not valid for this product."
-                              >
-                                The supplied license is not valid for this product.
-                              </li>
-                            </ul>
+                            <span
+                              className="euiCallOutHeader__title"
+                            >
+                              Please address the errors in your form.
+                            </span>
                           </div>
-                        </EuiText>
-                      </div>
-                    </EuiCallOut>
+                          <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <ul>
+                                <li
+                                  className="euiForm__error"
+                                  key="The supplied license is not valid for this product."
+                                >
+                                  The supplied license is not valid for this product.
+                                </li>
+                              </ul>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiCallOut>
+                    </EuiI18n>
                     <EuiText
                       grow={true}
                       size="m"
@@ -1405,104 +1853,111 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                           }
                           onChange={[Function]}
                         >
-                          <div
-                            className="euiFilePicker euiFilePicker-hasFiles"
+                          <EuiI18n
+                            defaults={
+                              Array [
+                                "Clear selected files",
+                                "files selected",
+                              ]
+                            }
+                            tokens={
+                              Array [
+                                "euiFilePicker.clearSelectedFiles",
+                                "euiFilePicker.filesSelected",
+                              ]
+                            }
                           >
                             <div
-                              className="euiFilePicker__wrap"
+                              className="euiFilePicker euiFilePicker-hasFiles"
                             >
-                              <input
-                                className="euiFilePicker__input"
-                                id="licenseFile"
-                                onChange={[Function]}
-                                onDragLeave={[Function]}
-                                onDragOver={[Function]}
-                                onDrop={[Function]}
-                                type="file"
-                              />
                               <div
-                                className="euiFilePicker__prompt"
+                                className="euiFilePicker__wrap"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFilePicker__icon"
-                                  size="l"
-                                  type="importAction"
+                                <input
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                                <div
+                                  className="euiFilePicker__prompt"
                                 >
-                                  <importAction
+                                  <EuiIcon
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--large euiFilePicker__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="euiFilePicker__icon"
+                                    size="l"
+                                    type="importAction"
                                   >
-                                    <svg
+                                    <importAction
                                       aria-hidden="true"
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <path
-                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                      />
-                                    </svg>
-                                  </importAction>
-                                </EuiIcon>
-                                <div
-                                  className="euiFilePicker__promptText"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Select or drag your license file"
-                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                    values={Object {}}
+                                      <svg
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--large euiFilePicker__icon"
+                                        focusable="false"
+                                        height="16"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                        />
+                                      </svg>
+                                    </importAction>
+                                  </EuiIcon>
+                                  <div
+                                    className="euiFilePicker__promptText"
                                   >
-                                    Select or drag your license file
-                                  </FormattedMessage>
-                                </div>
-                                <EuiButtonEmpty
-                                  aria-label="Clear selected files"
-                                  className="euiFilePicker__clearButton"
-                                  color="primary"
-                                  iconSide="left"
-                                  onClick={[Function]}
-                                  size="xs"
-                                  type="button"
-                                >
-                                  <button
+                                    <FormattedMessage
+                                      defaultMessage="Select or drag your license file"
+                                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                      values={Object {}}
+                                    >
+                                      Select or drag your license file
+                                    </FormattedMessage>
+                                  </div>
+                                  <EuiButtonEmpty
                                     aria-label="Clear selected files"
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    className="euiFilePicker__clearButton"
+                                    color="primary"
+                                    iconSide="left"
                                     onClick={[Function]}
+                                    size="xs"
                                     type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__content"
+                                    <button
+                                      aria-label="Clear selected files"
+                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
+                                        className="euiButtonEmpty__content"
                                       >
-                                        Remove
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          Remove
+                                        </span>
                                       </span>
-                                    </span>
-                                  </button>
-                                </EuiButtonEmpty>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          </EuiI18n>
                         </EuiFilePicker>
                       </div>
                     </EuiText>
@@ -1522,19 +1977,12 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1570,7 +2018,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -1583,6 +2030,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -1628,7 +2076,16 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -1660,6 +2117,26 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -1684,15 +2161,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -1729,30 +2197,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -1771,6 +2215,27 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -1806,9 +2271,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
+                <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
                   />
@@ -1824,43 +2287,48 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                   <div
                     className="euiForm"
                   >
-                    <EuiCallOut
-                      className="euiForm__errors"
-                      color="danger"
-                      size="m"
-                      title="Please address the errors in your form."
+                    <EuiI18n
+                      default="Please address the errors in your form."
+                      token="euiForm.addressFormErrors"
                     >
-                      <div
-                        className="euiCallOut euiCallOut--danger euiForm__errors"
+                      <EuiCallOut
+                        className="euiForm__errors"
+                        color="danger"
+                        size="m"
+                        title="Please address the errors in your form."
                       >
                         <div
-                          className="euiCallOutHeader"
-                        >
-                          <span
-                            className="euiCallOutHeader__title"
-                          >
-                            Please address the errors in your form.
-                          </span>
-                        </div>
-                        <EuiText
-                          grow={true}
-                          size="s"
+                          className="euiCallOut euiCallOut--danger euiForm__errors"
                         >
                           <div
-                            className="euiText euiText--small"
+                            className="euiCallOutHeader"
                           >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="Error encountered uploading license: Check your license file."
-                              >
-                                Error encountered uploading license: Check your license file.
-                              </li>
-                            </ul>
+                            <span
+                              className="euiCallOutHeader__title"
+                            >
+                              Please address the errors in your form.
+                            </span>
                           </div>
-                        </EuiText>
-                      </div>
-                    </EuiCallOut>
+                          <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <ul>
+                                <li
+                                  className="euiForm__error"
+                                  key="Error encountered uploading license: Check your license file."
+                                >
+                                  Error encountered uploading license: Check your license file.
+                                </li>
+                              </ul>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiCallOut>
+                    </EuiI18n>
                     <EuiText
                       grow={true}
                       size="m"
@@ -1880,104 +2348,111 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                           }
                           onChange={[Function]}
                         >
-                          <div
-                            className="euiFilePicker euiFilePicker-hasFiles"
+                          <EuiI18n
+                            defaults={
+                              Array [
+                                "Clear selected files",
+                                "files selected",
+                              ]
+                            }
+                            tokens={
+                              Array [
+                                "euiFilePicker.clearSelectedFiles",
+                                "euiFilePicker.filesSelected",
+                              ]
+                            }
                           >
                             <div
-                              className="euiFilePicker__wrap"
+                              className="euiFilePicker euiFilePicker-hasFiles"
                             >
-                              <input
-                                className="euiFilePicker__input"
-                                id="licenseFile"
-                                onChange={[Function]}
-                                onDragLeave={[Function]}
-                                onDragOver={[Function]}
-                                onDrop={[Function]}
-                                type="file"
-                              />
                               <div
-                                className="euiFilePicker__prompt"
+                                className="euiFilePicker__wrap"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFilePicker__icon"
-                                  size="l"
-                                  type="importAction"
+                                <input
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                                <div
+                                  className="euiFilePicker__prompt"
                                 >
-                                  <importAction
+                                  <EuiIcon
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--large euiFilePicker__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="euiFilePicker__icon"
+                                    size="l"
+                                    type="importAction"
                                   >
-                                    <svg
+                                    <importAction
                                       aria-hidden="true"
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <path
-                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                      />
-                                    </svg>
-                                  </importAction>
-                                </EuiIcon>
-                                <div
-                                  className="euiFilePicker__promptText"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Select or drag your license file"
-                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                    values={Object {}}
+                                      <svg
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--large euiFilePicker__icon"
+                                        focusable="false"
+                                        height="16"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                        />
+                                      </svg>
+                                    </importAction>
+                                  </EuiIcon>
+                                  <div
+                                    className="euiFilePicker__promptText"
                                   >
-                                    Select or drag your license file
-                                  </FormattedMessage>
-                                </div>
-                                <EuiButtonEmpty
-                                  aria-label="Clear selected files"
-                                  className="euiFilePicker__clearButton"
-                                  color="primary"
-                                  iconSide="left"
-                                  onClick={[Function]}
-                                  size="xs"
-                                  type="button"
-                                >
-                                  <button
+                                    <FormattedMessage
+                                      defaultMessage="Select or drag your license file"
+                                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                      values={Object {}}
+                                    >
+                                      Select or drag your license file
+                                    </FormattedMessage>
+                                  </div>
+                                  <EuiButtonEmpty
                                     aria-label="Clear selected files"
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    className="euiFilePicker__clearButton"
+                                    color="primary"
+                                    iconSide="left"
                                     onClick={[Function]}
+                                    size="xs"
                                     type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__content"
+                                    <button
+                                      aria-label="Clear selected files"
+                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
+                                        className="euiButtonEmpty__content"
                                       >
-                                        Remove
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          Remove
+                                        </span>
                                       </span>
-                                    </span>
-                                  </button>
-                                </EuiButtonEmpty>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          </EuiI18n>
                         </EuiFilePicker>
                       </div>
                     </EuiText>
@@ -1997,19 +2472,12 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2045,7 +2513,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2058,6 +2525,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button
@@ -2103,7 +2571,16 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
 <Provider
   intl={
     Object {
-      "defaultFormats": Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -2135,6 +2612,26 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             "style": "percent",
           },
         },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -2159,15 +2656,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           },
         },
       },
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
         "getMessageFormat": [Function],
@@ -2204,30 +2692,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -2246,6 +2710,27 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -2281,9 +2766,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
+                <EuiSpacer>
                   <div
                     className="euiSpacer euiSpacer--l"
                   />
@@ -2299,43 +2782,48 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                   <div
                     className="euiForm"
                   >
-                    <EuiCallOut
-                      className="euiForm__errors"
-                      color="danger"
-                      size="m"
-                      title="Please address the errors in your form."
+                    <EuiI18n
+                      default="Please address the errors in your form."
+                      token="euiForm.addressFormErrors"
                     >
-                      <div
-                        className="euiCallOut euiCallOut--danger euiForm__errors"
+                      <EuiCallOut
+                        className="euiForm__errors"
+                        color="danger"
+                        size="m"
+                        title="Please address the errors in your form."
                       >
                         <div
-                          className="euiCallOutHeader"
-                        >
-                          <span
-                            className="euiCallOutHeader__title"
-                          >
-                            Please address the errors in your form.
-                          </span>
-                        </div>
-                        <EuiText
-                          grow={true}
-                          size="s"
+                          className="euiCallOut euiCallOut--danger euiForm__errors"
                         >
                           <div
-                            className="euiText euiText--small"
+                            className="euiCallOutHeader"
                           >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
-                              >
-                                Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                              </li>
-                            </ul>
+                            <span
+                              className="euiCallOutHeader__title"
+                            >
+                              Please address the errors in your form.
+                            </span>
                           </div>
-                        </EuiText>
-                      </div>
-                    </EuiCallOut>
+                          <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <ul>
+                                <li
+                                  className="euiForm__error"
+                                  key="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
+                                >
+                                  Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                                </li>
+                              </ul>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiCallOut>
+                    </EuiI18n>
                     <EuiText
                       grow={true}
                       size="m"
@@ -2355,104 +2843,111 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                           }
                           onChange={[Function]}
                         >
-                          <div
-                            className="euiFilePicker euiFilePicker-hasFiles"
+                          <EuiI18n
+                            defaults={
+                              Array [
+                                "Clear selected files",
+                                "files selected",
+                              ]
+                            }
+                            tokens={
+                              Array [
+                                "euiFilePicker.clearSelectedFiles",
+                                "euiFilePicker.filesSelected",
+                              ]
+                            }
                           >
                             <div
-                              className="euiFilePicker__wrap"
+                              className="euiFilePicker euiFilePicker-hasFiles"
                             >
-                              <input
-                                className="euiFilePicker__input"
-                                id="licenseFile"
-                                onChange={[Function]}
-                                onDragLeave={[Function]}
-                                onDragOver={[Function]}
-                                onDrop={[Function]}
-                                type="file"
-                              />
                               <div
-                                className="euiFilePicker__prompt"
+                                className="euiFilePicker__wrap"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFilePicker__icon"
-                                  size="l"
-                                  type="importAction"
+                                <input
+                                  className="euiFilePicker__input"
+                                  id="licenseFile"
+                                  onChange={[Function]}
+                                  onDragLeave={[Function]}
+                                  onDragOver={[Function]}
+                                  onDrop={[Function]}
+                                  type="file"
+                                />
+                                <div
+                                  className="euiFilePicker__prompt"
                                 >
-                                  <importAction
+                                  <EuiIcon
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--large euiFilePicker__icon"
-                                    focusable="false"
-                                    height="16"
-                                    style={
-                                      Object {
-                                        "fill": undefined,
-                                      }
-                                    }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="euiFilePicker__icon"
+                                    size="l"
+                                    type="importAction"
                                   >
-                                    <svg
+                                    <importAction
                                       aria-hidden="true"
                                       className="euiIcon euiIcon--large euiFilePicker__icon"
                                       focusable="false"
                                       height="16"
-                                      style={
-                                        Object {
-                                          "fill": undefined,
-                                        }
-                                      }
+                                      style={null}
                                       viewBox="0 0 16 16"
                                       width="16"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <path
-                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                      />
-                                    </svg>
-                                  </importAction>
-                                </EuiIcon>
-                                <div
-                                  className="euiFilePicker__promptText"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Select or drag your license file"
-                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                                    values={Object {}}
+                                      <svg
+                                        aria-hidden="true"
+                                        className="euiIcon euiIcon--large euiFilePicker__icon"
+                                        focusable="false"
+                                        height="16"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                        />
+                                      </svg>
+                                    </importAction>
+                                  </EuiIcon>
+                                  <div
+                                    className="euiFilePicker__promptText"
                                   >
-                                    Select or drag your license file
-                                  </FormattedMessage>
-                                </div>
-                                <EuiButtonEmpty
-                                  aria-label="Clear selected files"
-                                  className="euiFilePicker__clearButton"
-                                  color="primary"
-                                  iconSide="left"
-                                  onClick={[Function]}
-                                  size="xs"
-                                  type="button"
-                                >
-                                  <button
+                                    <FormattedMessage
+                                      defaultMessage="Select or drag your license file"
+                                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                      values={Object {}}
+                                    >
+                                      Select or drag your license file
+                                    </FormattedMessage>
+                                  </div>
+                                  <EuiButtonEmpty
                                     aria-label="Clear selected files"
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    className="euiFilePicker__clearButton"
+                                    color="primary"
+                                    iconSide="left"
                                     onClick={[Function]}
+                                    size="xs"
                                     type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__content"
+                                    <button
+                                      aria-label="Clear selected files"
+                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
+                                        className="euiButtonEmpty__content"
                                       >
-                                        Remove
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          Remove
+                                        </span>
                                       </span>
-                                    </span>
-                                  </button>
-                                </EuiButtonEmpty>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          </EuiI18n>
                         </EuiFilePicker>
                       </div>
                     </EuiText>
@@ -2472,19 +2967,12 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       />
                     </EuiSpacer>
                     <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="l"
                       justifyContent="spaceBetween"
-                      responsive={true}
-                      wrap={false}
                     >
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2520,7 +3008,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                           </div>
                         </EuiFlexItem>
                         <EuiFlexItem
-                          component="div"
                           grow={false}
                         >
                           <div
@@ -2533,6 +3020,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
+                              size="m"
                               type="button"
                             >
                               <button

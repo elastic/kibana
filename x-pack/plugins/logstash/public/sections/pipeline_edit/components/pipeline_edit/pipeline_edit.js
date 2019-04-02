@@ -9,7 +9,7 @@ import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier, toastNotifications } from 'ui/notify';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
@@ -37,7 +37,7 @@ app.directive('pipelineEdit', function ($injector) {
         : null;
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <PipelineEditor
             kbnUrl={kbnUrl}
             close={close}
@@ -51,7 +51,7 @@ app.directive('pipelineEdit', function ($injector) {
             licenseService={licenseService}
             notifier={new Notifier({ location: 'Logstash' })}
           />
-        </I18nProvider>,
+        </I18nContext>,
         el[0]
       );
     },

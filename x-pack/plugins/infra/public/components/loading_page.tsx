@@ -16,7 +16,7 @@ import React from 'react';
 import { FlexPage } from './page';
 
 interface LoadingPageProps {
-  message?: string;
+  message?: string | JSX.Element;
 }
 
 export const LoadingPage = ({ message }: LoadingPageProps) => (

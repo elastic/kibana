@@ -52,7 +52,7 @@ jest.mock('../../privilege/check_privilege', () => ({
   checkPermission: () => true
 }));
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { RuleEditorFlyout } from './rule_editor_flyout';
@@ -84,10 +84,10 @@ function prepareTest() {
   };
 
   const component = (
-    <RuleEditorFlyout {...requiredProps} />
+    <RuleEditorFlyout.WrappedComponent {...requiredProps} />
   );
 
-  const wrapper = shallow(component);
+  const wrapper = shallowWithIntl(component);
 
   return { wrapper };
 }

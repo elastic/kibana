@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelizeKeys } from 'humps';
-import 'isomorphic-fetch';
-import { startsWith } from 'lodash';
+import { FetchOptions } from 'apollo-link-http';
+import { isString, startsWith } from 'lodash';
+import LRU from 'lru-cache';
+import hash from 'object-hash';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
+import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 
 function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   const debugEnabled =
@@ -27,11 +29,49 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   };
 }
 
+const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
+
+export function _clearCache() {
+  cache.reset();
+}
+
 export async function callApi<T = void>(
   fetchOptions: KFetchOptions,
-  { camelcase = true, prependBasePath = true } = {}
+  options?: KFetchKibanaOptions
 ): Promise<T> {
+  const cacheKey = getCacheKey(fetchOptions);
+  const cacheResponse = cache.get(cacheKey);
+  if (cacheResponse) {
+    return cacheResponse;
+  }
+
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  const res = await kfetch(combinedFetchOptions, { prependBasePath });
-  return camelcase ? camelizeKeys(res) : res;
+  const res = await kfetch(combinedFetchOptions, options);
+
+  if (isCachable(fetchOptions)) {
+    cache.set(cacheKey, res);
+  }
+
+  return res;
+}
+
+// only cache items that has a time range with `start` and `end` params,
+// and where `end` is not a timestamp in the future
+function isCachable(fetchOptions: KFetchOptions) {
+  if (
+    !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
+  ) {
+    return false;
+  }
+
+  return (
+    isString(fetchOptions.query.end) &&
+    new Date(fetchOptions.query.end).getTime() < Date.now()
+  );
+}
+
+// order the options object to make sure that two objects with the same arguments, produce produce the
+// same cache key regardless of the order of properties
+function getCacheKey(options: FetchOptions) {
+  return hash(options);
 }

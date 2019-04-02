@@ -17,7 +17,9 @@ export const pie = () => ({
   help: 'Render a pie chart from data',
   reuseDomNode: false,
   render(domNode, config, handlers) {
-    if (!includes($.plot.plugins, piePlugin)) $.plot.plugins.push(piePlugin);
+    if (!includes($.plot.plugins, piePlugin)) {
+      $.plot.plugins.push(piePlugin);
+    }
 
     config.options.legend.labelBoxBorderColor = 'transparent';
 
@@ -49,12 +51,17 @@ export const pie = () => ({
 
     let plot;
     function draw() {
-      if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
+      if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {
+        return;
+      }
 
       try {
         $(domNode).empty();
-        if (!config.data || !config.data.length) $(domNode).empty();
-        else plot = $.plot($(domNode), config.data, config.options);
+        if (!config.data || !config.data.length) {
+          $(domNode).empty();
+        } else {
+          plot = $.plot($(domNode), config.data, config.options);
+        }
       } catch (e) {
         console.log(e);
         // Nope
@@ -62,7 +69,9 @@ export const pie = () => ({
     }
 
     function destroy() {
-      if (plot) plot.shutdown();
+      if (plot) {
+        plot.shutdown();
+      }
     }
 
     handlers.onDestroy(destroy);

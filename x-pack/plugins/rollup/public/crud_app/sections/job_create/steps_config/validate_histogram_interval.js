@@ -22,7 +22,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
     )];
   }
 
-  if (Math.round(histogramInterval) !== histogramInterval) {
+  if (Math.round(histogramInterval) !== Number(histogramInterval)) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalWholeNumber"

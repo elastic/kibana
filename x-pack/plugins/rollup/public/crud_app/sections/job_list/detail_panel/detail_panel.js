@@ -27,6 +27,15 @@ import {
 } from '@elastic/eui';
 
 import {
+  UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
+  UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
+  UIM_DETAIL_PANEL_JSON_TAB_CLICK,
+} from '../../../../../common';
+import { trackUiMetric } from '../../../services';
+
+import {
   JobActionMenu,
   JobDetails,
   JOB_DETAILS_TAB_SUMMARY,
@@ -37,7 +46,7 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
-const JOB_DETAILS_TABS = [
+export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
@@ -45,11 +54,20 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_JSON,
 ];
 
+const tabToUiMetricMap = {
+  [JOB_DETAILS_TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  [JOB_DETAILS_TAB_TERMS]: UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
+  [JOB_DETAILS_TAB_HISTOGRAM]: UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  [JOB_DETAILS_TAB_METRICS]: UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
+  [JOB_DETAILS_TAB_JSON]: UIM_DETAIL_PANEL_JSON_TAB_CLICK,
+};
+
 export class DetailPanelUi extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
     job: PropTypes.object,
+    jobId: PropTypes.string,
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
@@ -95,7 +113,10 @@ export class DetailPanelUi extends Component {
       const isSelected = tab === panelType;
       renderedTabs.push(
         <EuiTab
-          onClick={() => openDetailPanel({ panelType: tab, jobId: id })}
+          onClick={() => {
+            trackUiMetric(tabToUiMetricMap[tab]);
+            openDetailPanel({ panelType: tab, jobId: id });
+          }}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}
@@ -137,7 +158,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <Fragment>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody data-test-subj="rollupJobDetailTabContent">
           <EuiErrorBoundary>
             <JobDetails
               tab={panelType}
@@ -186,7 +207,9 @@ export class DetailPanelUi extends Component {
 
     if (isLoading) {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailLoading"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
@@ -213,7 +236,9 @@ export class DetailPanelUi extends Component {
       content = this.renderJob();
     } else {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailJobNotFound"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
@@ -240,14 +265,18 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="indexDetailFlyout"
+        data-test-subj="rollupJobDetailFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
+          <EuiTitle
+            size="m"
+            id="rollupJobDetailsFlyoutTitle"
+            data-test-subj="rollupJobDetailsFlyoutTitle"
+          >
             <h2>{jobId}</h2>
           </EuiTitle>
 

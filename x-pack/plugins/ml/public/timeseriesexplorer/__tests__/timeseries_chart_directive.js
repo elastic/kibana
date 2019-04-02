@@ -5,10 +5,10 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChart } from '../components/timeseries_chart/timeseries_chart';
 
 describe('ML - <ml-timeseries-chart>', () => {
   let $scope;
@@ -38,7 +38,7 @@ describe('ML - <ml-timeseries-chart>', () => {
     // spy the TimeseriesChart component's unmount method to be able to test if it was called
     const componentWillUnmountSpy = sinon.spy(TimeseriesChart.prototype, 'componentWillUnmount');
 
-    $element = $compile('<ml-timeseries-chart show-forecast="true" />')($scope);
+    $element = $compile('<ml-timeseries-chart show-forecast="true" model-plot-enabled="false" show-model-bounds="false" />')($scope);
     const scope = $element.isolateScope();
 
     // sanity test to check if directive picked up the attribute for its scope

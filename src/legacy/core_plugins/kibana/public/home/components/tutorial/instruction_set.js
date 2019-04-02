@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import classNames from 'classnames';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  KuiBar,
-  KuiBarSection,
-} from '@kbn/ui-framework/components';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
 import { Content } from './content';
@@ -37,6 +32,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
@@ -131,7 +128,12 @@ class InstructionSetUi extends React.Component {
       case StatusCheckStates.ERROR:
         return 'danger';
       default:
-        throw new Error(`Unexpected status check state ${statusCheckState}`);
+        throw new Error(this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.unexpectedStatusCheckStateErrorDescription',
+          defaultMessage: 'Unexpected status check state {statusCheckState}'
+        }, {
+          statusCheckState
+        }));
     }
   }
 
@@ -217,46 +219,47 @@ class InstructionSetUi extends React.Component {
   renderHeader = () => {
     let paramsVisibilityToggle;
     if (this.props.params) {
-      const visibilityToggleClasses = classNames('kuiIcon kuiSideBarCollapsibleTitle__caret', {
-        'fa-caret-right': !this.state.isParamFormVisible,
-        'fa-caret-down': this.state.isParamFormVisible
-      });
       const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.toggleAriaLabel',
         defaultMessage: 'toggle command parameters visibility'
       });
       paramsVisibilityToggle = (
-        <div className="kuiSideBarCollapsibleTitle" style={{ cursor: 'pointer' }}>
-          <div
-            aria-label={ariaLabel}
-            className="kuiSideBarCollapsibleTitle__label"
-            onClick={this.handleToggleVisibility}
-          >
-            <span className={visibilityToggleClasses} />
-            <span className="kuiSideBarCollapsibleTitle__text">
-              <FormattedMessage
-                id="kbn.home.tutorial.instructionSet.customizeLabel"
-                defaultMessage="Customize your code snippets"
-              />
-            </span>
-          </div>
-        </div>
+        <EuiButtonEmpty
+          iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
+          aria-label={ariaLabel}
+          onClick={this.handleToggleVisibility}
+        >
+          <FormattedMessage
+            id="kbn.home.tutorial.instructionSet.customizeLabel"
+            defaultMessage="Customize your code snippets"
+          />
+        </EuiButtonEmpty>
       );
     }
 
     return (
-      <KuiBar className="kuiVerticalRhythm">
-        <KuiBarSection>
-          <div className="kuiTitle">
-            {this.props.title}
-          </div>
-        </KuiBarSection>
+      <EuiFlexGroup responsive={false} wrap justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h2>
+              {this.props.title}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-        <KuiBarSection>
+        <EuiFlexItem grow={false}>
           {paramsVisibilityToggle}
-        </KuiBarSection>
-      </KuiBar>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
+
+  renderCallOut = () => {
+    if(!this.props.callOut) {
+      return null;
+    }
+
+    return <EuiCallOut title={this.props.callOut.title} children={this.props.callOut.message} iconType={this.props.callOut.iconType} />;
+  }
 
   render() {
     let paramsForm;
@@ -271,13 +274,15 @@ class InstructionSetUi extends React.Component {
     }
 
     return (
-      <div className="kuiVerticalRhythmLarge">
+      <div>
 
         {this.renderHeader()}
 
+        {this.renderCallOut()}
+
         {paramsForm}
 
-        <EuiTabs className="kuiVerticalRhythm">
+        <EuiTabs>
           {this.renderTabs()}
         </EuiTabs>
 
@@ -312,6 +317,7 @@ const statusCheckConfigShape = PropTypes.shape({
 
 InstructionSetUi.propTypes = {
   title: PropTypes.string.isRequired,
+  callOut: PropTypes.object,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheckConfig: statusCheckConfigShape,
   statusCheckState: PropTypes.oneOf([

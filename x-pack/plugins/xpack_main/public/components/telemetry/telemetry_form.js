@@ -16,9 +16,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from 'ui/management';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -78,7 +79,12 @@ export class TelemetryForm extends Component {
             <EuiText>
               <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem grow={false}>
-                  <h2>Usage Data</h2>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.main.telemetry.usageDataTitle"
+                      defaultMessage="Usage Data"
+                    />
+                  </h2>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiText>
@@ -110,7 +116,22 @@ export class TelemetryForm extends Component {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>This setting applies to <strong>all of Kibana.</strong></p>
+          <p>
+            <FormattedMessage
+              id="xpack.main.telemetry.callout.appliesSettingTitle"
+              defaultMessage="This setting applies to {allOfKibanaText}"
+              values={{
+                allOfKibanaText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.main.telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                      defaultMessage="all of Kibana."
+                    />
+                  </strong>
+                )
+              }}
+            />
+          </p>
         }
       />
     );
@@ -118,11 +139,21 @@ export class TelemetryForm extends Component {
 
   renderDescription = () => (
     <Fragment>
-      <p>{CONFIG_TELEMETRY_DESC}</p>
-      <p><EuiLink onClick={this.toggleExample}>See an example of what we collect</EuiLink></p>
+      <p>{getConfigTelemetryDesc()}</p>
+      <p>
+        <EuiLink onClick={this.toggleExample}>
+          <FormattedMessage
+            id="xpack.main.telemetry.seeExampleOfWhatWeCollectLinkText"
+            defaultMessage="See an example of what we collect"
+          />
+        </EuiLink>
+      </p>
       <p>
         <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-          Read our usage data privacy statement
+          <FormattedMessage
+            id="xpack.main.telemetry.readOurUsageDataPrivacyStatementLinkText"
+            defaultMessage="Read our usage data privacy statement"
+          />
         </EuiLink>
       </p>
     </Fragment>

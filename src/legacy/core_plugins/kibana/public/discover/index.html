@@ -5,46 +5,52 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
-          <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
-            <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle" ng-hide="k7design"></span>
+        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
+          <span class="kuiLocalBreadcrumb__emphasis">
             <span
               id="reload_saved_search"
-              aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
-              tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
+              aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
+              tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload saved search'} }}"
+              tooltip-placement="right"
+              tooltip-append-to-body="1"
               ng-click="resetQuery()"
               kbn-accessible-click
               class="kuiIcon fa-undo small"
             ></span>&nbsp;
           </span>
+        </h1>
+        <div class="kuiLocalBreadcrumb">
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <span
             i18n-id="kbn.discover.hitsPluralTitle"
             i18n-default-message="{hits, plural, one {hit} other {hits}}"
             i18n-values="{ hits }"
           ></span>
-        </h1>
+        </div>
       </div>
 
       <!-- Search. -->
       <div data-transclude-slot="bottomRow" class="fullWidth">
-        <query-bar
+        <search-bar
           query="state.query"
-          on-submit="updateQueryAndFetch"
+          on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
-        ></query-bar>
+          filters="filters"
+          on-filters-updated="onFiltersUpdated"
+          show-date-picker="enableTimeRangeSelector"
+          date-range-from="time.from"
+          date-range-to="time.to"
+          is-refresh-paused="refreshInterval.pause"
+          refresh-interval="refreshInterval.value"
+          on-refresh-change="onRefreshChange"
+          watch-depth="reference"
+        ></search-bar>
       </div>
     </div>
   </kbn-top-nav>
 
   <main class="container-fluid">
-    <div class="row">
-      <filter-bar
-        state="state"
-        index-patterns="[indexPattern]"
-      ></filter-bar>
-    </div>
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
@@ -71,8 +77,6 @@
 
           <discover-no-results
             ng-show="resultState === 'none'"
-            top-nav-toggle="kbnTopNav.toggle"
-            is-time-picker-open="kbnTopNav.isCurrent('filter')"
             shard-failures="failures"
             time-field-name="opts.timefield"
             query-language="state.query.language"
@@ -90,14 +94,13 @@
               ng-hide="fetchError"
               class="dscOverlay"
             >
-              <div class="euiTitle" >
-                <h2
-                  i18n-id="kbn.discover.searchingTitle"
-                  i18n-default-message="Searching"
-                ></h2>
-              </div>
+              <h2
+                i18n-id="kbn.discover.searchingTitle"
+                i18n-default-message="Searching"
+                class="euiTitle euiTitle--small"
+              ></h2>
               <div class="euiSpacer euiSpacer--m"></div>
-              <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+              <div class="euiLoadingSpinner euiLoadingSpinner--large"></div>
             </div>
           </div>
 
@@ -116,10 +119,18 @@
               </span>
             </button>
 
-            <section aria-label="Histogram of found documents" class="dscTimechart" ng-if="opts.timefield">
+            <section
+              aria-label="{{::'kbn.discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+              class="dscTimechart"
+              ng-if="opts.timefield"
+            >
               <header class="dscTimechart__header">
                 <div class="small">
-                  <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
+                  <span
+                    tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
+                  >
+                    {{timeRange.from | moment}} - {{timeRange.to | moment}}
+                  </span>
 
                   &mdash;
 
@@ -130,7 +141,7 @@
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       ng-blur="toggleInterval()"
                       data-test-subj="discoverIntervalSelect"
-                      >
+                    >
                     </select>
                     <span ng-if="bucketInterval.scaled">
                       <icon-tip
@@ -151,13 +162,17 @@
               </header>
 
               <div id="discoverHistogram"
-                 ng-show="vis && rows.length !== 0"
-                 style="display: flex; height: 200px"
-                >
+                ng-show="vis && rows.length !== 0"
+                style="display: flex; height: 200px"
+              >
               </div>
             </section>
 
-            <section class="dscTable" fixed-scroll aria-label="Documents">
+            <section
+              class="dscTable"
+              fixed-scroll
+              aria-label="{{::'kbn.discover.documentsAriaLabel' | i18n: {defaultMessage: 'Documents'} }}"
+            >
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"

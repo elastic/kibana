@@ -94,6 +94,7 @@
       fill: none;
       stroke: $euiBorderColor;
       shape-rendering: crispEdges;
+      pointer-events: none;
     }
 
     .axis text {
@@ -125,16 +126,19 @@
 
     .area.bounds {
       fill: rgba(50, 167, 194, 0.25); // Needs variable
+      pointer-events: none;
     }
 
     .values-line {
       fill: none;
       stroke: #32a7c2; // Needs variable
       stroke-width: 2;
+      pointer-events: none;
     }
 
     .values-line.forecast {
       stroke: #cca300; // Needs variable
+      pointer-events: none;
     }
 
     .values-dots circle {
@@ -148,6 +152,7 @@
 
     .area.forecast {
       fill: rgba(204, 163, 0, 0.25); // Needs variable
+      pointer-events: none;
     }
 
     .metric-value {

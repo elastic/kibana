@@ -3,41 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './beats';
+import { ConfigBlocksLib } from './configuration_blocks';
 import { ElasticsearchLib } from './elasticsearch';
 import { FrameworkLib } from './framework';
 import { TagsLib } from './tags';
 
-export interface FrontendDomainLibs {
+export interface FrontendLibs {
+  elasticsearch: ElasticsearchLib;
+  framework: FrameworkLib;
   beats: BeatsLib;
   tags: TagsLib;
   tokens: CMTokensAdapter;
-}
-
-export interface FrontendLibs extends FrontendDomainLibs {
-  elasticsearch: ElasticsearchLib;
-  framework: FrameworkLib;
-}
-
-export interface YamlConfigSchema {
-  id: string;
-  ui: {
-    label: string;
-    type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
-    helpText?: string;
-    placeholder?: string;
-  };
-  options?: Array<{ value: string; text: string }>;
-  validations?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
-  error: string;
-  defaultValue?: string;
-  required?: boolean;
-  parseValidResult?: (value: any) => any;
+  configBlocks: ConfigBlocksLib;
 }
 
 export interface FramworkAdapterConstructable {

@@ -22,43 +22,46 @@ function DetailStatusUi({ stats, intl }) {
 
   const firstMetrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.transportAddressLabel', defaultMessage: 'Transport Address'
+      }),
       value: httpAddress,
-      dataTestSubj: 'httpAddress'
+      'data-test-subj': 'httpAddress'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
       }),
       value: formatMetric(events.in, '0.[0]a'),
-      dataTestSubj: 'eventsIn'
+      'data-test-subj': 'eventsIn'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
       }),
       value: formatMetric(events.out, '0.[0]a'),
-      dataTestSubj: 'eventsOut'
+      'data-test-subj': 'eventsOut'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.configReloadsLabel', defaultMessage: 'Config Reloads'
       }),
       value: reloads.successes,
-      dataTestSubj: 'numReloads'
+      'data-test-subj': 'numReloads'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.pipelineWorkersLabel', defaultMessage: 'Pipeline Workers'
       }),
       value: pipeline.workers,
-      dataTestSubj: 'pipelineWorkers'
+      'data-test-subj': 'pipelineWorkers'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.batchSizeLabel', defaultMessage: 'Batch Size'
       }),
       value: pipeline.batch_size,
-      dataTestSubj: 'pipelineBatchSize'
+      'data-test-subj': 'pipelineBatchSize'
     }
   ];
 
@@ -68,14 +71,14 @@ function DetailStatusUi({ stats, intl }) {
         id: 'xpack.monitoring.logstash.detailStatus.versionLabel', defaultMessage: 'Version'
       }),
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
       label: intl.formatMessage({
         id: 'xpack.monitoring.logstash.detailStatus.uptimeLabel', defaultMessage: 'Uptime'
       }),
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     }
   ];
 
@@ -87,7 +90,7 @@ function DetailStatusUi({ stats, intl }) {
         id: 'xpack.monitoring.logstash.detailStatus.queueTypeLabel', defaultMessage: 'Queue Type'
       }),
       value: queueType,
-      dataTestSubj: 'queueType'
+      'data-test-subj': 'queueType'
     });
   }
   metrics.push(...lastMetrics);

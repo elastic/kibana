@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { withHandlers } from 'recompose';
-
-const ancestorElement = element => {
-  if (!element) return element;
-  // IE11 has no classList on SVG elements, but we're not interested in SVG elements
-  do if (element.classList && element.classList.contains('canvasPage')) return element;
-  while ((element = element.parentElement || element.parentNode)); // no IE11 SVG parentElement
-};
-
-const localMousePosition = (box, clientX, clientY) => {
+const localMousePosition = (canvasOrigin, clientX, clientY) => {
+  const { left, top } = canvasOrigin();
   return {
-    x: clientX - box.left,
-    y: clientY - box.top,
+    x: clientX - left,
+    y: clientY - top,
   };
 };
 
@@ -25,15 +17,20 @@ const resetHandler = () => {
   window.onmouseup = null;
 };
 
-const setupHandler = (commit, target) => {
+const setupHandler = (commit, canvasOrigin) => {
   // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
   // DOM elements that had been removed: kibana-canvas github issue #1093
-  const canvasPage = ancestorElement(target);
-  if (!canvasPage) return;
-  const canvasOrigin = canvasPage.getBoundingClientRect();
-  window.onmousemove = ({ clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
+
+  window.onmousemove = ({ buttons, clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    // only commits the cursor position if there's a way to latch onto x/y calculation (canvasOrigin is knowable)
+    // or if left button is being held down (i.e. an element is being dragged)
+    if (buttons === 1 || canvasOrigin) {
+      commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    } else {
+      // clears cursorPosition
+      commit('cursorPosition', {});
+    }
   };
   window.onmouseup = e => {
     e.stopPropagation();
@@ -46,88 +43,38 @@ const setupHandler = (commit, target) => {
 
 const handleMouseMove = (
   commit,
-  { target, clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
-  isEditable
+  { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
+  isEditable,
+  canvasOrigin
 ) => {
-  // mouse move must be handled even before an initial click
-  if (!window.onmousemove && isEditable) {
-    const { x, y } = localMousePosition(target, clientX, clientY);
-    setupHandler(commit, target);
+  if (isEditable) {
+    const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
     commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
   }
 };
 
-const handleMouseDown = (commit, e, isEditable) => {
+const handleMouseLeave = (commit, { buttons }) => {
+  if (buttons !== 1) {
+    commit('cursorPosition', {}); // reset hover only if we're not holding down left key (ie. drag in progress)
+  }
+};
+
+const handleMouseDown = (commit, e, isEditable, canvasOrigin) => {
   e.stopPropagation();
-  const { target, clientX, clientY, button, altKey, metaKey, shiftKey, ctrlKey } = e;
-  if (button !== 0 || !isEditable) {
+  const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
+  if (buttons !== 1 || !isEditable) {
     resetHandler();
     return; // left-click and edit mode only
   }
-  const ancestor = ancestorElement(target);
-  if (!ancestor) return;
-  const { x, y } = localMousePosition(ancestor, clientX, clientY);
-  setupHandler(commit, ancestor);
+  setupHandler(commit, canvasOrigin);
+  const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
   commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });
 };
 
-const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());
-
-const isNotTextInput = ({ tagName, type }) => {
-  // input types that aren't variations of text input
-  const nonTextInputs = [
-    'button',
-    'checkbox',
-    'color',
-    'file',
-    'image',
-    'radio',
-    'range',
-    'reset',
-    'submit',
-  ];
-
-  switch (tagName.toLowerCase()) {
-    case 'input':
-      return nonTextInputs.includes(type);
-    case 'textarea':
-      return false;
-    default:
-      return true;
-  }
-};
-
-const modifierKey = key => ['KeyALT', 'KeyCONTROL'].indexOf(keyCode(key)) > -1;
-
-const handleKeyDown = (commit, e, isEditable, remove) => {
-  const { key, target } = e;
-
-  if (isEditable) {
-    if (isNotTextInput(target) && (key === 'Backspace' || key === 'Delete')) {
-      e.preventDefault();
-      remove();
-    } else if (!modifierKey(key)) {
-      commit('keyboardEvent', {
-        event: 'keyDown',
-        code: keyCode(key), // convert to standard event code
-      });
-    }
-  }
-};
-
-const handleKeyUp = (commit, { key }, isEditable) => {
-  if (isEditable && !modifierKey(key)) {
-    commit('keyboardEvent', {
-      event: 'keyUp',
-      code: keyCode(key), // convert to standard event code
-    });
-  }
-};
-
-export const withEventHandlers = withHandlers({
-  onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
-  onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
-  onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
-  onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
+export const eventHandlers = {
+  onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable, props.canvasOrigin),
+  onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
+  onMouseLeave: props => e => handleMouseLeave(props.commit, e),
+  onWheel: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
-});
+};

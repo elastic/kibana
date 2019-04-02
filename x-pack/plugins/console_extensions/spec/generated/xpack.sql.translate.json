@@ -5,7 +5,7 @@
       "GET"
     ],
     "patterns": [
-      "_xpack/sql/translate"
+      "_sql/translate"
     ],
     "documentation": "Translate SQL into Elasticsearch queries"
   }

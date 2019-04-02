@@ -2,25 +2,39 @@
 
 exports[`Home component should render 1`] = `
 <div>
-  <styled.div>
-    <h1>
-      APM
-    </h1>
-    <SetupInstructionsLink />
-  </styled.div>
-  <Connect(KueryBarView) />
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem>
+      <EuiTitle
+        size="l"
+        textTransform="none"
+      >
+        <h1>
+          APM
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <SetupInstructionsLink />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <FilterBar />
   <withRouter(HistoryTabsWithoutRouter)
     tabs={
       Array [
         Object {
-          "component": [Function],
           "name": "Services",
           "path": "/services",
+          "render": [Function],
         },
         Object {
-          "component": [Function],
           "name": "Traces",
           "path": "/traces",
+          "render": [Function],
         },
       ]
     }

@@ -9,11 +9,17 @@
 import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
+import { mlLog } from '../../client/log';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
 const INDEX_PATTERN_ID = 'INDEX_PATTERN_ID';
 const INDEX_PATTERN_NAME = 'INDEX_PATTERN_NAME';
+export const SAVED_OBJECT_TYPES = {
+  DASHBOARD: 'dashboard',
+  SEARCH: 'search',
+  VISUALIZATION: 'visualization'
+};
 
 export class DataRecognizer {
   constructor(callWithRequest) {
@@ -57,11 +63,24 @@ export class DataRecognizer {
     const configs = [];
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(dirs.map(async (dir) => {
-      const file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
-      configs.push({
-        dirName: dir,
-        json: JSON.parse(file)
-      });
+      let file;
+      try {
+        file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
+      } catch (error) {
+        mlLog('warning', `Data recognizer skipping folder ${dir} as manifest.json cannot be read`);
+      }
+
+      if (file !== undefined) {
+        try {
+          configs.push({
+            dirName: dir,
+            json: JSON.parse(file)
+          });
+        } catch (error) {
+          mlLog('warning', `Data recognizer error parsing ${dir}/manifest.json. ${error}`);
+        }
+      }
+
     }));
 
     return configs;
@@ -80,8 +99,14 @@ export class DataRecognizer {
 
     await Promise.all(manifestFiles.map(async (i) => {
       const moduleConfig = i.json;
-      const match = await this.searchForFields(moduleConfig, indexPattern);
-      if (match) {
+      let match = false;
+      try {
+        match = await this.searchForFields(moduleConfig, indexPattern);
+      } catch (error) {
+        mlLog('warning', `Data recognizer error running query defined for module ${moduleConfig.id}. ${error}`);
+      }
+
+      if (match === true) {
         let logo = null;
         if (moduleConfig.logoFile) {
           try {
@@ -121,6 +146,7 @@ export class DataRecognizer {
       size,
       body
     });
+
     return (resp.hits.total !== 0);
   }
 
@@ -145,25 +171,33 @@ export class DataRecognizer {
     const kibana = {};
     // load all of the job configs
     await Promise.all(manifestJSON.jobs.map(async (job) => {
-      const jobConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${job.file}`);
-      // use the file name for the id
-      jobs.push({
-        id: `${prefix}${job.id}`,
-        config: JSON.parse(jobConfig)
-      });
+      try {
+        const jobConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${job.file}`);
+        // use the file name for the id
+        jobs.push({
+          id: `${prefix}${job.id}`,
+          config: JSON.parse(jobConfig)
+        });
+      } catch (error) {
+        mlLog('warning', `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`);
+      }
     }));
 
     // load all of the datafeed configs
     await Promise.all(manifestJSON.datafeeds.map(async (datafeed) => {
-      const datafeedConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`);
-      const config = JSON.parse(datafeedConfig);
-      // use the job id from the manifestFile
-      config.job_id = `${prefix}${datafeed.job_id}`;
+      try {
+        const datafeedConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`);
+        const config = JSON.parse(datafeedConfig);
+        // use the job id from the manifestFile
+        config.job_id = `${prefix}${datafeed.job_id}`;
 
-      datafeeds.push({
-        id: prefixDatafeedId(datafeed.id, prefix),
-        config
-      });
+        datafeeds.push({
+          id: prefixDatafeedId(datafeed.id, prefix),
+          config
+        });
+      } catch (error) {
+        mlLog('warning', `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`);
+      }
     }));
 
     // load all of the kibana saved objects
@@ -172,15 +206,19 @@ export class DataRecognizer {
       await Promise.all(kKeys.map(async (key) => {
         kibana[key] = [];
         await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
-          const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
-          // use the file name for the id
-          const kId = obj.file.replace('.json', '');
-          const config = JSON.parse(kConfig);
-          kibana[key].push({
-            id: kId,
-            title: config.title,
-            config
-          });
+          try {
+            const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
+            // use the file name for the id
+            const kId = obj.file.replace('.json', '');
+            const config = JSON.parse(kConfig);
+            kibana[key].push({
+              id: kId,
+              title: config.title,
+              config
+            });
+          } catch (error) {
+            mlLog('warning', `Data recognizer error loading config for ${key} ${obj.id} for module ${id}. ${error}`);
+          }
         }));
       }));
     }
@@ -208,6 +246,7 @@ export class DataRecognizer {
     end,
     request
   ) {
+
     this.savedObjectsClient = request.getSavedObjectsClient();
     this.indexPatterns = await this.loadIndexPatterns();
 
@@ -375,7 +414,11 @@ export class DataRecognizer {
     let results = { saved_objects: [] };
     const filteredSavedObjects = objectExistResults.filter(o => o.exists === false).map(o => o.savedObject);
     if (filteredSavedObjects.length) {
-      results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);
+      results = await this.savedObjectsClient.bulkCreate(
+        // Add an empty migrationVersion attribute to each saved object to ensure
+        // it is automatically migrated to the 7.0+ format with a references attribute.
+        filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }))
+      );
     }
     return results.saved_objects;
   }
@@ -572,8 +615,8 @@ export class DataRecognizer {
     }
   }
 
-  // loop through each kibana saved objects and replace the INDEX_PATTERN_ID
-  // marker for the id of the specified index pattern
+  // loop through each kibana saved object and replace any INDEX_PATTERN_ID and
+  // INDEX_PATTERN_NAME markers for the id or name of the specified index pattern
   updateSavedObjectIndexPatterns(moduleConfig) {
     if (moduleConfig.kibana) {
       Object.keys(moduleConfig.kibana).forEach((category) => {
@@ -582,6 +625,16 @@ export class DataRecognizer {
           if (jsonString.match(INDEX_PATTERN_ID)) {
             jsonString = jsonString.replace(new RegExp(INDEX_PATTERN_ID, 'g'), this.indexPatternId);
             item.config.kibanaSavedObjectMeta.searchSourceJSON = jsonString;
+          }
+
+          if (category === SAVED_OBJECT_TYPES.VISUALIZATION) {
+            // Look for any INDEX_PATTERN_NAME tokens in visualization visState,
+            // as e.g. Vega visualizations reference the Elasticsearch index pattern directly.
+            let visStateString = item.config.visState;
+            if (visStateString !== undefined && visStateString.match(INDEX_PATTERN_NAME)) {
+              visStateString = visStateString.replace(new RegExp(INDEX_PATTERN_NAME, 'g'), this.indexPatternName);
+              item.config.visState = visStateString;
+            }
           }
         });
       });

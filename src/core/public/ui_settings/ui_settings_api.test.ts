@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import fetchMock from 'fetch-mock';
+// @ts-ignore
+import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const basePath: any = {
-    addToPath: jest.fn(path => `/foo/bar${path}`),
-  };
+  const basePath = basePathServiceMock.createSetupContract();
+  basePath.addToPath.mockImplementation(path => `/foo/bar${path}`);
 
   const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');
 
@@ -142,10 +143,16 @@ describe('#batchSet', () => {
     fetchMock.once('*', {
       body: { settings: {} },
     });
-    fetchMock.once('*', {
-      status: 400,
-      body: 'invalid',
-    });
+    fetchMock.once(
+      '*',
+      {
+        status: 400,
+        body: 'invalid',
+      },
+      {
+        overwriteRoutes: false,
+      }
+    );
 
     const { uiSettingsApi } = setup();
     // trigger the initial sync request, which enabled buffering
@@ -161,7 +168,7 @@ describe('#batchSet', () => {
     ).resolves.toMatchSnapshot('promise rejections');
 
     // ensure only two requests were sent
-    expect(fetchMock.calls().matched).toHaveLength(2);
+    expect(fetchMock.calls()).toHaveLength(2);
   });
 });
 
@@ -191,10 +198,16 @@ describe('#getLoadingCount$()', () => {
     fetchMock.once('*', {
       body: { settings: {} },
     });
-    fetchMock.once('*', {
-      status: 400,
-      body: 'invalid',
-    });
+    fetchMock.once(
+      '*',
+      {
+        status: 400,
+        body: 'invalid',
+      },
+      {
+        overwriteRoutes: false,
+      }
+    );
 
     const { uiSettingsApi } = setup();
     const done$ = new Rx.Subject();

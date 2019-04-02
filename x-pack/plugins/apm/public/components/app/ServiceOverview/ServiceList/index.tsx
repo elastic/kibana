@@ -5,16 +5,18 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { RelativeLink } from '../../../../utils/url';
-import { ManagedTable } from '../../../shared/ManagedTable';
+import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
-  items: IServiceListItem[];
+  items?: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
 }
 
@@ -29,23 +31,27 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return value || 'N/A';
+  return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(RelativeLink)`
+const AppLink = styled(KibanaLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS = [
+export const SERVICE_COLUMNS: Array<
+  ITableColumn<ServiceListAPIResponse['items'][0]>
+> = [
   {
     field: 'serviceName',
-    name: 'Name',
+    name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
+      defaultMessage: 'Name'
+    }),
     width: '50%',
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
+        <AppLink hash={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>
@@ -53,30 +59,53 @@ export const SERVICE_COLUMNS = [
   },
   {
     field: 'agentName',
-    name: 'Agent',
+    name: i18n.translate('xpack.apm.servicesTable.agentColumnLabel', {
+      defaultMessage: 'Agent'
+    }),
     sortable: true,
     render: (agentName: string) => formatString(agentName)
   },
   {
     field: 'avgResponseTime',
-    name: 'Avg. response time',
+    name: i18n.translate('xpack.apm.servicesTable.avgResponseTimeColumnLabel', {
+      defaultMessage: 'Avg. response time'
+    }),
     sortable: true,
     dataType: 'number',
     render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',
-    name: 'Trans. per minute',
+    name: i18n.translate(
+      'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
+      {
+        defaultMessage: 'Trans. per minute'
+      }
+    ),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} tpm`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'tpm'
+        }
+      )}`
   },
   {
     field: 'errorsPerMinute',
-    name: 'Errors per minute',
+    name: i18n.translate('xpack.apm.servicesTable.errorsPerMinuteColumnLabel', {
+      defaultMessage: 'Errors per minute'
+    }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} err.`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'err.'
+        }
+      )}`
   }
 ];
 

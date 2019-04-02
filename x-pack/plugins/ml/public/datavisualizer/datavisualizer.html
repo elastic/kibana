@@ -7,7 +7,7 @@
         <h1>{{indexPattern.title}}</h1>
       </div>
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
-          <ml-full-time-range-selector index-pattern='indexPattern' query='searchQuery' />
+          <ml-full-time-range-selector ng-if="showSidebar" index-pattern='indexPattern' query='searchQuery' />
       </div>
     </div>
 
@@ -29,14 +29,20 @@
               type="text"
               class="kuiLocalSearchInput"
               ng-model="searchQueryText"
-              placeholder="Search... (e.g. status:200 AND extension:PHP)"
-              aria-label="Search input"
+              placeholder="{{ ::'xpack.ml.datavisualizer.searchFieldPlaceholder' | i18n: {
+                defaultMessage: 'Search… (e.g. status:200 AND extension:PHP)'
+              } }}"
+              aria-label="{{ ::'xpack.ml.datavisualizer.searchFieldAriaLabel' | i18n: {
+                defaultMessage: 'Search input'
+              } }}"
               autocomplete="off"
             >
             <button
               class="kuiLocalSearchButton"
               type="submit"
-              aria-label="Search"
+              aria-label="{{ ::'xpack.ml.datavisualizer.searchButtonAriaLabel' | i18n: {
+                defaultMessage: 'Search'
+              } }}"
             >
               <span aria-hidden="true" class="kuiIcon fa-search"></span>
             </button>
@@ -44,48 +50,86 @@
         </form>
 
         <div class="document-count-container">
-          <label for="sampleShardSize">Sample</label>
+          <label
+            for="sampleShardSize"
+            i18n-id="xpack.ml.datavisualizer.sampleLabel"
+            i18n-default-message="Sample"
+          ></label>
           <select id="sampleShardSize" class="kuiSelect type-input" ng-model="samplerShardSize" ng-change="samplerShardSizeChanged(samplerShardSize)">
             <option ng-value="1000">1000</option>
             <option ng-value="5000">5000</option>
             <option ng-value="10000">10000</option>
             <option ng-value="100000">100000</option>
-            <option ng-value="-1">all</option>
+            <option
+              ng-value="-1"
+              i18n-id="xpack.ml.datavisualizer.allOptionLabel"
+              i18n-default-message="all"
+            ></option>
           </select>
-          <span>documents per shard from a total of</span>
-          <span class="field-emphasis">{{ overallStats.totalCount }}</span>
-          <ng-pluralize count="overallStats.totalCount" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
-          <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="right"
-            tooltip="Selecting a smaller sample size will reduce query run times and the load on the cluster."></i>
+          <span
+            i18n-id="xpack.ml.datavisualizer.documentsPerShardDescription"
+            i18n-default-message="documents per shard from a total of {wrappedTotalCount} {totalCount, plural, one {document} other {documents}}"
+            i18n-values="{
+              html_wrappedTotalCount: '<span class=\'field-emphasis\'>' + overallStats.totalCount + '</span>',
+              totalCount: overallStats.totalCount
+            }"
+          ></span>
+          <i
+            aria-hidden="true"
+            class="fa fa-info-circle"
+            tooltip-placement="right"
+            tooltip="{{ ::'xpack.ml.datavisualizer.documentsPerShardTooltip' | i18n: {
+              defaultMessage: 'Selecting a smaller sample size will reduce query run times and the load on the cluster.'
+            } }}"
+          ></i>
         </div>
 
       </div>
 
-      <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
+      <div ng-show="metricCards.length > 0" class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
       	<div class="euiText">
-          <h2 class="kuiSubTitle kuiVerticalRhythm">Metrics</h2>
+          <h2
+            class="kuiSubTitle kuiVerticalRhythm"
+            i18n-id="xpack.ml.datavisualizer.metricsTitle"
+            i18n-default-message="Metrics"
+          ></h2>
         </div>
 
         <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive euiFlexGroup--wrap">
           <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
             <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
               <div ng-if="showAllMetrics === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ metricCards.length }}</span>
-                <ng-pluralize count="metricCards.length" when="{'1':'field exists', 'other':'fields exist'}">fields exist</ng-pluralize> in documents (
-                <span class="field-emphasis">{{ totalMetricFieldCount }}</span> in total)
+                <span
+                  i18n-id="xpack.ml.datavisualizer.showMetricsDescription"
+                  i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalMetricFieldCount} in total)"
+                  i18n-values="{
+                      html_wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
+                      metricCardsCount: metricCards.length,
+                      html_totalMetricFieldCount: '<span class=\'field-emphasis\'>' + totalMetricFieldCount + '</span>'
+                  }"
+                ></span>
               </div>
 
               <div ng-if="showAllMetrics === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ metricCards.length }}</span>
-                <ng-pluralize count="metricCards.length" when="{'1':'field', 'other':'fields'}">fields</ng-pluralize>
-                (
-                <span class="field-emphasis">{{ populatedMetricFieldCount }}</span>
-                <ng-pluralize count="populatedMetricFieldCount" when="{'1':'exists', 'other':'exist'}">exist</ng-pluralize> in documents)
+                <span
+                  i18n-id="xpack.ml.datavisualizer.showAllMetricsDescription"
+                  i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedMetricFieldCount} {populatedMetricFieldCount, plural, one {exists} other {exist}} in documents)"
+                  i18n-values="{
+                    html_wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
+                    metricCardsCount: metricCards.length,
+                    html_wrappedPopulatedMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedMetricFieldCount + '</span>',
+                    populatedMetricFieldCount
+                  }"
+                ></span>
               </div>
 
               <div ng-hide="populatedMetricFieldCount === totalMetricFieldCount" class="field-group-input euiFlexItem euiFlexItem--flexGrowZero">
                 <input id="toggleAllMetricsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllMetrics()" ng-checked="showAllMetrics === true">
-                <label for="toggleAllMetricsCheckbox">show empty fields</label>
+                <label
+                  for="toggleAllMetricsCheckbox"
+                  i18n-id="xpack.ml.datavisualizer.showEmptyFieldsLabel"
+                  i18n-default-message="show empty fields"
+                ></label>
               </div>
             </div>
           </div>
@@ -112,28 +156,49 @@
 
       <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
         <div class="euiText">
-          <h2 class="kuiSubTitle kuiVerticalRhythm">Fields</h2>
+          <h2
+            class="kuiSubTitle kuiVerticalRhythm"
+            i18n-id="xpack.ml.datavisualizer.fieldsTitle"
+            i18n-default-message="Fields"
+          ></h2>
         </div>
 
         <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive euiFlexGroup--wrap">
           <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
             <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
               <div ng-if="showAllFields === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ fieldCards.length }}</span>
-                <ng-pluralize count="fieldCards.length" when="{'1':'field exists', 'other':'fields exist'}">fields exist</ng-pluralize> in documents
-                (<span class="field-emphasis">{{ totalNonMetricFieldCount }}</span> in total)
+                <span
+                  i18n-id="xpack.ml.datavisualizer.showMFieldDescription"
+                  i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalNonMetricFieldCount} in total)"
+                  i18n-values="{
+                      html_wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
+                      fieldCardsCount: fieldCards.length,
+                      html_totalNonMetricFieldCount: '<span class=\'field-emphasis\'>' + totalNonMetricFieldCount + '</span>'
+                  }"
+                ></span>
               </div>
 
+
               <div ng-if="showAllFields === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ fieldCards.length }}</span>
-                <ng-pluralize count="fieldCards.length" when="{'1':'field', 'other':'fields'}">fields</ng-pluralize>
-                (<span class="field-emphasis">{{ populatedNonMetricFieldCount }}</span>
-                <ng-pluralize count="populatedNonMetricFieldCount" when="{'1':'exists', 'other':'exist'}">exist</ng-pluralize> in documents)
+                <span
+                  i18n-id="xpack.ml.datavisualizer.showAllFieldsDescription"
+                  i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedNonMetricFieldCount} {populatedNonMetricFieldCount, plural, one {exists} other {exist}} in documents)"
+                  i18n-values="{
+                    html_wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
+                    fieldCardsCount: fieldCards.length,
+                    html_wrappedPopulatedNonMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedNonMetricFieldCount +'</span>',
+                    populatedNonMetricFieldCount
+                  }"
+                ></span>
               </div>
 
               <div ng-hide="populatedNonMetricFieldCount === totalNonMetricFieldCount" class="field-group-input euiFlexItem euiFlexItem--flexGrowZero">
                 <input id="toggleAllFieldsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllFields()" ng-checked="showAllFields === true">
-                <label for="toggleAllFieldsCheckbox">show empty fields</label>
+                <label
+                  for="toggleAllFieldsCheckbox"
+                  i18n-id="xpack.ml.datavisualizer.showEmptyFieldsLabel"
+                  i18n-default-message="show empty fields"
+                ></label>
               </div>
             </div>
           </div>
@@ -143,9 +208,22 @@
                 <select class="kuiSelect type-input"
                   ng-model="filterFieldType"
                   ng-change="filterFieldTypeChanged(filterFieldType)"
-                  aria-label="Select field types">
-                  <option value="*">All field types</option>
-                  <option ng-repeat="type in indexedFieldTypes" value="{{type}}">{{type}} types</option>
+                  aria-label="{{ ::'xpack.ml.datavisualizer.selectFieldTypesAriaLabel' | i18n: {
+                    defaultMessage: 'Select field types'
+                  } }}"
+                >
+                  <option
+                    value="*"
+                    i18n-id="xpack.ml.datavisualizer.allFieldsTypeOptionLabel"
+                    i18n-default-message="All field types"
+                  ></option>
+                  <option
+                    ng-repeat="type in indexedFieldTypes"
+                    value="{{type}}"
+                    i18n-id="xpack.ml.datavisualizer.typesOptionLabel"
+                    i18n-default-message="{type} types"
+                    i18n-values="{ type }"
+                  ></option>
                 </select>
               </div>
               <div class="euiFlexItem euiFlexItem--flexGrowZero">

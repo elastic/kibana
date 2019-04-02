@@ -52,11 +52,17 @@ import { getPartitioningFieldNames } from '../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { metadata } from 'ui/metadata';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 // metadata.branch corresponds to the version used in documentation links.
 const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
 
-export class RuleEditorFlyout extends Component {
+export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Component {
+  static propTypes = {
+    setShowFunction: PropTypes.func.isRequired,
+    unsetShowFunction: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -90,12 +96,17 @@ export class RuleEditorFlyout extends Component {
 
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
+    const { intl } = this.props;
     const job = mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
       toastNotifications.addDanger(
-        `Unable to configure rules as an error occurred obtaining details for job ID ${anomaly.jobId}`);
+        intl.formatMessage({
+          id: 'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
+          defaultMessage: 'Unable to configure rules as an error occurred obtaining details for job ID {jobId}'
+        }, { jobId: anomaly.jobId })
+      );
       this.setState({
         job,
         isFlyoutVisible: false
@@ -139,7 +150,12 @@ export class RuleEditorFlyout extends Component {
         })
         .catch((resp) => {
           console.log('Error loading list of filters:', resp);
-          toastNotifications.addDanger('Error loading the filter lists used in the rule scope');
+          toastNotifications.addDanger(
+            intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
+              defaultMessage: 'Error loading the filter lists used in the rule scope'
+            })
+          );
         });
     }
   }
@@ -312,6 +328,7 @@ export class RuleEditorFlyout extends Component {
   }
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
+    const { intl } = this.props;
     const {
       job,
       anomaly,
@@ -325,24 +342,41 @@ export class RuleEditorFlyout extends Component {
         if (resp.success) {
           toastNotifications.add(
             {
-              title: `Changes to ${jobId} detector rules saved`,
+              title: intl.formatMessage({
+                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageTitle',
+                defaultMessage: 'Changes to {jobId} detector rules saved'
+              }, { jobId }),
               color: 'success',
               iconType: 'check',
-              text: 'Note that changes will take effect for new results only.'
+              text: intl.formatMessage({
+                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.changesToJobDetectorRulesSavedNotificationMessageDescription',
+                defaultMessage: 'Note that changes will take effect for new results only.'
+              })
             }
           );
           this.closeFlyout();
         } else {
-          toastNotifications.addDanger(`Error saving changes to ${jobId} detector rules`);
+          toastNotifications.addDanger(
+            intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
+              defaultMessage: 'Error saving changes to {jobId} detector rules'
+            }, { jobId })
+          );
         }
       })
       .catch((error) => {
         console.error(error);
-        toastNotifications.addDanger(`Error saving changes to ${jobId} detector rules`);
+        toastNotifications.addDanger(
+          intl.formatMessage({
+            id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
+            defaultMessage: 'Error saving changes to {jobId} detector rules'
+          }, { jobId })
+        );
       });
   }
 
   deleteRuleAtIndex = (index) => {
+    const { intl } = this.props;
     const {
       job,
       anomaly
@@ -353,15 +387,28 @@ export class RuleEditorFlyout extends Component {
     deleteJobRule(job, detectorIndex, index)
       .then((resp) => {
         if (resp.success) {
-          toastNotifications.addSuccess(`Rule deleted from ${jobId} detector`);
+          toastNotifications.addSuccess(
+            intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.ruleDeletedFromJobDetectorNotificationMessage',
+              defaultMessage: 'Rule deleted from {jobId} detector'
+            }, { jobId })
+          );
           this.closeFlyout();
         } else {
-          toastNotifications.addDanger(`Error deleting rule from ${jobId} detector`);
+          toastNotifications.addDanger(
+            intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+              defaultMessage: 'Error deleting rule from {jobId} detector'
+            }, { jobId })
+          );
         }
       })
       .catch((error) => {
         console.error(error);
-        let errorMessage = `Error deleting rule from ${jobId} detector`;
+        let errorMessage = intl.formatMessage({
+          id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+          defaultMessage: 'Error deleting rule from {jobId} detector'
+        }, { jobId });
         if (error.message) {
           errorMessage += ` : ${error.message}`;
         }
@@ -370,15 +417,22 @@ export class RuleEditorFlyout extends Component {
   }
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
+    const { intl } = this.props;
     addItemToFilter(item, filterId)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
           toastNotifications.add(
             {
-              title: `Added ${item} to ${filterId}`,
+              title: intl.formatMessage({
+                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageTitle',
+                defaultMessage: 'Added {item} to {filterId}'
+              }, { item, filterId }),
               color: 'success',
               iconType: 'check',
-              text: 'Note that changes will take effect for new results only.'
+              text: intl.formatMessage({
+                id: 'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageDescription',
+                defaultMessage: 'Note that changes will take effect for new results only.'
+              })
             }
           );
           this.closeFlyout();
@@ -386,11 +440,17 @@ export class RuleEditorFlyout extends Component {
       })
       .catch((error) => {
         console.log(`Error adding ${item} to filter ${filterId}:`, error);
-        toastNotifications.addDanger(`An error occurred adding ${item} to filter ${filterId}`);
+        toastNotifications.addDanger(
+          intl.formatMessage({
+            id: 'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
+            defaultMessage: 'An error occurred adding {item} to filter {filterId}'
+          }, { item, filterId })
+        );
       });
   }
 
   render() {
+    const { intl } = this.props;
     const {
       isFlyoutVisible,
       job,
@@ -417,7 +477,10 @@ export class RuleEditorFlyout extends Component {
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="l">
               <h1 id="flyoutTitle">
-                Edit Rules
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
+                  defaultMessage="Edit Rules"
+                />
               </h1>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -441,7 +504,10 @@ export class RuleEditorFlyout extends Component {
                   onClick={this.closeFlyout}
                   flush="left"
                 >
-                  Close
+                  <FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -456,8 +522,10 @@ export class RuleEditorFlyout extends Component {
 
       const hasPartitioningFields = (this.partitioningFieldNames && this.partitioningFieldNames.length > 0);
       const conditionSupported = (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1);
-      const conditionsText = 'Add numeric conditions for when the rule applies. ' +
-        'Multiple conditions are combined using AND.';
+      const conditionsText = intl.formatMessage({
+        id: 'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
+        defaultMessage: 'Add numeric conditions for when the rule applies. Multiple conditions are combined using AND.'
+      });
 
       flyout = (
         <EuiFlyout
@@ -468,7 +536,17 @@ export class RuleEditorFlyout extends Component {
           <EuiFlyoutHeader hasBorder={true}>
             <EuiTitle size="l">
               <h1 id="flyoutTitle">
-                {(isCreate === true) ? 'Create Rule' : 'Edit Rule'}
+                {(isCreate === true) ? (
+                  <FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
+                    defaultMessage="Create Rule"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
+                    defaultMessage="Edit Rule"
+                  />
+                )}
               </h1>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -482,16 +560,35 @@ export class RuleEditorFlyout extends Component {
             <EuiSpacer size="m" />
             <EuiText>
               <p>
-                Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide.
-                When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are
-                satisfied, its actions are triggered. <EuiLink href={docsUrl} target="_blank">Learn more</EuiLink>
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+                  defaultMessage="Rules instruct anomaly detectors to change their behavior
+                    based on domain-specific knowledge that you provide.
+                    When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are
+                    satisfied, its actions are triggered. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={docsUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    )
+                  }}
+                />
               </p>
             </EuiText>
 
             <EuiSpacer />
 
             <EuiTitle>
-              <h2>Action</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+                  defaultMessage="Action"
+                />
+              </h2>
             </EuiTitle>
             <ActionsSection
               actions={rule.actions}
@@ -502,7 +599,12 @@ export class RuleEditorFlyout extends Component {
             <EuiSpacer size="xl" />
 
             <EuiTitle>
-              <h2>Conditions</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+                  defaultMessage="Conditions"
+                />
+              </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             {(conditionSupported === true) ?
@@ -517,7 +619,11 @@ export class RuleEditorFlyout extends Component {
                 />
               ) : (
                 <EuiCallOut
-                  title={`Conditions are not supported for detectors using the ${anomaly.source.function} function`}
+                  title={<FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsNotSupportedTitle"
+                    defaultMessage="Conditions are not supported for detectors using the {functionName} function"
+                    values={{ functionName: anomaly.source.function }}
+                  />}
                   iconType="iInCircle"
                 />
               )
@@ -543,17 +649,26 @@ export class RuleEditorFlyout extends Component {
             />
 
             <EuiCallOut
-              title="Rerun job"
+              title={<FormattedMessage
+                id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+                defaultMessage="Rerun job"
+              />}
               color="warning"
               iconType="help"
             >
               <p>
-                Changes to rules take effect for new results only.
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+                  defaultMessage="Changes to rules take effect for new results only."
+                />
               </p>
               <p>
-                To apply these changes to existing results you must clone and rerun the job.
-                Note rerunning the job may take some time and should only be done once
-                you have completed all your changes to the rules for this job.
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+                  defaultMessage="To apply these changes to existing results you must clone and rerun the job.
+                  Note rerunning the job may take some time and should only be done once
+                  you have completed all your changes to the rules for this job."
+                />
               </p>
             </EuiCallOut>
 
@@ -567,7 +682,10 @@ export class RuleEditorFlyout extends Component {
                   onClick={this.closeFlyout}
                   flush="left"
                 >
-                  Close
+                  <FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -576,7 +694,10 @@ export class RuleEditorFlyout extends Component {
                   isDisabled={!isValidRule(rule)}
                   fill
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -593,8 +714,4 @@ export class RuleEditorFlyout extends Component {
     );
 
   }
-}
-RuleEditorFlyout.propTypes = {
-  setShowFunction: PropTypes.func.isRequired,
-  unsetShowFunction: PropTypes.func.isRequired,
-};
+});

@@ -8,15 +8,10 @@ exports[`it renders without blowing up 1`] = `
 >
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -35,7 +30,6 @@ exports[`it renders without blowing up 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiLink
@@ -51,13 +45,9 @@ exports[`it renders without blowing up 1`] = `
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
-    <p>
-      child
-    </p>
-  </React.Fragment>
+  <EuiSpacer />
+  <p>
+    child
+  </p>
 </EuiPanel>
 `;

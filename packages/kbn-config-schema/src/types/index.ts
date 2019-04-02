@@ -29,5 +29,7 @@ export { MaybeType } from './maybe_type';
 export { MapOfOptions, MapOfType } from './map_type';
 export { NumberOptions, NumberType } from './number_type';
 export { ObjectType, Props, TypeOf } from './object_type';
+export { RecordOfOptions, RecordOfType } from './record_type';
 export { StringOptions, StringType } from './string_type';
 export { UnionType } from './union_type';
+export { URIOptions, URIType } from './uri_type';

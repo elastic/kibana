@@ -7,9 +7,9 @@
 
 import 'ngreact';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 
-import { injectI18nProvider } from '@kbn/i18n/react';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';
@@ -18,11 +18,15 @@ import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_priv
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { loadIndexPatterns } from '../util/index_utils';
-import { initPromise } from 'plugins/ml/util/promise';
+import { FileDataVisualizerPage } from './file_datavisualizer';
 
 import uiRoutes from 'ui/routes';
 
-const template = '<ml-nav-menu name="datavisualizer" /><file-datavisualizer-page />';
+const template = `
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
+  <file-datavisualizer-page />
+`;
 
 uiRoutes
   .when('/filedatavisualizer/?', {
@@ -34,18 +38,13 @@ uiRoutes
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
-
-
-
-import { FileDataVisualizerPage } from './file_datavisualizer';
 
 module.directive('fileDatavisualizerPage', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
   const indexPatterns = $injector.get('indexPatterns');
   const kibanaConfig = $injector.get('config');
 
-  return reactDirective(injectI18nProvider(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
+  return reactDirective(wrapInI18nContext(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
 });

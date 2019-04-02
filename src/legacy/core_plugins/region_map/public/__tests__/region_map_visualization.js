@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import { RegionMapsVisualizationProvider } from '../region_map_visualization';
@@ -25,8 +25,10 @@ import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
-import sinon from 'sinon';
 import worldJson from './world.json';
+import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -35,61 +37,6 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-
-const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
-const tmsManifestUrl = `https://tiles-maps-stage.elastic.co/v2/manifest`;
-const vectorManifestUrl = `https://vector-staging.maps.elastic.co/v2/manifest`;
-const manifest = {
-  'services': [{
-    'id': 'tiles_v2',
-    'name': 'Elastic Tile Service',
-    'manifest': tmsManifestUrl,
-    'type': 'tms'
-  },
-  {
-    'id': 'geo_layers',
-    'name': 'Elastic Layer Service',
-    'manifest': vectorManifestUrl,
-    'type': 'file'
-  }
-  ]
-};
-
-const tmsManifest = {
-  'services': [{
-    'id': 'road_map',
-    'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-    'minZoom': 0,
-    'maxZoom': 10,
-    'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-  }]
-};
-
-const vectorManifest = {
-  'layers': [{
-    'attribution': '',
-    'name': 'US States',
-    'format': 'geojson',
-    'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI?elastic_tile_service_tos=agree',
-    'fields': [{ 'name': 'postal', 'description': 'Two letter abbreviation' }, {
-      'name': 'name',
-      'description': 'State name'
-    }],
-    'created_at': '2017-04-26T19:45:22.377820',
-    'id': 5086441721823232
-  }, {
-    'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-maps-service)',
-    'name': 'World Countries',
-    'format': 'geojson',
-    'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree',
-    'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
-      'name': 'name',
-      'description': 'Country name'
-    }, { 'name': 'iso3', 'description': 'Three letter abbreviation' }],
-    'created_at': '2017-04-26T17:12:15.978370',
-    'id': 5659313586569216
-  }]
-};
 
 
 const THRESHOLD = 0.45;
@@ -132,6 +79,8 @@ describe('RegionMapsVisualizationTests', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
+
+  let getManifestStub;
   beforeEach(ngMock.inject((Private, $injector) => {
 
     Vis = Private(visModule.VisProvider);
@@ -148,27 +97,23 @@ describe('RegionMapsVisualizationTests', function () {
     };
 
     const serviceSettings = $injector.get('serviceSettings');
-    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
-      let contents = null;
-      if (url.startsWith(tmsManifestUrl)) {
-        contents = tmsManifest;
-      } else if (url.startsWith(vectorManifestUrl)) {
-        contents = vectorManifest;
-      } else if (url.startsWith(manifestUrl)) {
-        contents = manifest;
+    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
+      //simulate network calls
+      if (url.startsWith('https://foobar')) {
+        return EMS_CATALOGUE;
+      } else if (url.startsWith('https://tiles.foobar')) {
+        return EMS_TILES;
+      } else if (url.startsWith('https://files.foobar')) {
+        return EMS_FILES;
       }
-      return {
-        data: contents
-      };
     });
-
-
 
   }));
 
 
   afterEach(function () {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
+    getManifestStub.removeStub();
   });
 
 
@@ -183,6 +128,13 @@ describe('RegionMapsVisualizationTests', function () {
       vis = new Vis(indexPattern, {
         type: 'region_map'
       });
+
+      vis.params.bucket = {
+        accessor: 0,
+      };
+      vis.params.metric = {
+        accessor: 1,
+      };
 
       vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
       vis.params.selectedLayer = {
@@ -208,7 +160,7 @@ describe('RegionMapsVisualizationTests', function () {
 
     it('should instantiate at zoom level 2', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -222,7 +174,7 @@ describe('RegionMapsVisualizationTests', function () {
 
     it('should update after resetting join field', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -233,7 +185,7 @@ describe('RegionMapsVisualizationTests', function () {
       //this will actually create an empty image
       vis.params.selectedJoinField = { 'name': 'iso3', 'description': 'Three letter abbreviation' };
       vis.params.isDisplayWarning = false;//so we don't get notifications
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -250,7 +202,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should resize', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -260,7 +212,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       domNode.style.width = '256px';
       domNode.style.height = '128px';
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -271,7 +223,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       domNode.style.width = '512px';
       domNode.style.height = '512px';
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -288,7 +240,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should redo data', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -299,7 +251,7 @@ describe('RegionMapsVisualizationTests', function () {
       const newTableGroup = _.cloneDeep(dummyTableGroup);
       newTableGroup.rows.pop();//remove one shape
 
-      await regionMapsVisualization.render(newTableGroup, {
+      await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: false,
         aggs: false,
@@ -313,7 +265,7 @@ describe('RegionMapsVisualizationTests', function () {
       anotherTableGroup.rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
-      await regionMapsVisualization.render(anotherTableGroup, {
+      await regionMapsVisualization.render(anotherTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -331,7 +283,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should redo data and color ramp', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -342,7 +294,7 @@ describe('RegionMapsVisualizationTests', function () {
       const newTableGroup = _.cloneDeep(dummyTableGroup);
       newTableGroup.rows.pop();//remove one shape
       vis.params.colorSchema = 'Blues';
-      await regionMapsVisualization.render(newTableGroup, {
+      await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -362,7 +314,7 @@ describe('RegionMapsVisualizationTests', function () {
       vis.params.mapZoom = 4;
       vis.params.mapCenter = [36, -85];
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,

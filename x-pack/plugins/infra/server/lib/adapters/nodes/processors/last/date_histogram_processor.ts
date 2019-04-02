@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep, set } from 'lodash';
-import moment from 'moment';
 import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
 import { createBasePath } from '../../lib/create_base_path';
 import { getBucketSizeInSeconds } from '../../lib/get_bucket_size_in_seconds';
@@ -24,10 +23,6 @@ export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => 
     const result = cloneDeep(doc);
     const { timerange, sourceConfiguration, groupBy } = options.nodeOptions;
     const bucketSizeInSeconds = getBucketSizeInSeconds(timerange.interval);
-    const boundsMin = moment
-      .utc(timerange.from)
-      .subtract(5 * bucketSizeInSeconds, 's')
-      .valueOf();
     const path = createBasePath(groupBy).concat('timeseries');
     const bucketOffset = calculateOffsetInSeconds(timerange.from, bucketSizeInSeconds);
     const offset = `${Math.floor(bucketOffset)}s`;
@@ -38,7 +33,7 @@ export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => 
         min_doc_count: 0,
         offset,
         extended_bounds: {
-          min: boundsMin,
+          min: timerange.from,
           max: timerange.to,
         },
       },

@@ -8,17 +8,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
 import Legend from '../Legend';
-import { colors, units, px } from '../../../../style/variables';
+import { units, px } from '../../../../style/variables';
 import styled from 'styled-components';
 import { asTime } from '../../../../utils/formatters';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const NameContainer = styled.div`
-  border-bottom: 1px solid ${colors.gray3};
+  border-bottom: 1px solid ${theme.euiColorMediumShade};
   padding-bottom: ${px(units.half)};
 `;
 
 const TimeContainer = styled.div`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   padding-top: ${px(units.half)};
 `;
 
@@ -42,7 +43,7 @@ export default function AgentMarker({ agentMark, x }) {
           </div>
         }
       >
-        <Legend clickable color={colors.gray3} />
+        <Legend clickable color={theme.euiColorMediumShade} />
       </EuiToolTip>
     </div>
   );

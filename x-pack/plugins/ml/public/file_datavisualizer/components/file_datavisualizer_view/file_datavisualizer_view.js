@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -28,7 +29,8 @@ import {
   createUrlOverrides,
   processResults,
   reduceData,
-} from './utils';
+  hasImportPermission,
+} from '../utils';
 
 export const MODE = {
   READ: 0,
@@ -54,11 +56,20 @@ export class FileDataVisualizerView extends Component {
       mode: MODE.READ,
       isEditFlyoutVisible: false,
       bottomBarVisible: false,
+      hasPermissionToImport: false,
     };
 
     this.overrides = {};
     this.previousOverrides = {};
     this.originalSettings = {};
+  }
+
+  async componentDidMount() {
+    // check the user has the correct permission to import data.
+    // note, calling hasImportPermission with no arguments just checks the
+    // cluster privileges, the user will still need index privileges to create and ingest
+    const hasPermissionToImport = await hasImportPermission();
+    this.setState({ hasPermissionToImport });
   }
 
   onFilePickerChange = (files) => {
@@ -129,11 +140,17 @@ export class FileDataVisualizerView extends Component {
 
       if (serverSettings.format === 'xml') {
         throw {
-          message: 'XML not currently supported'
+          message: (
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.fileDatavisualizerView.xmlNotCurrentlySupportedErrorMessage"
+              defaultMessage="XML not currently supported"
+            />
+          ),
         };
       }
 
       if (serverOverrides === undefined) {
+        // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
         Object.keys(serverOverrides).forEach((o) => {
@@ -148,7 +165,7 @@ export class FileDataVisualizerView extends Component {
         Object.keys(serverSettings).forEach((o) => {
           const value = serverSettings[o];
           if (
-            this.overrides[o] === undefined &&
+            (this.overrides[o] === undefined) &&
             (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
             (value !== this.originalSettings[o]))
           ) {
@@ -236,17 +253,15 @@ export class FileDataVisualizerView extends Component {
       mode,
       isEditFlyoutVisible,
       bottomBarVisible,
+      hasPermissionToImport,
     } = this.state;
 
     const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
 
     return (
-      <React.Fragment>
+      <div className="file-datavisualizer__content">
         {(mode === MODE.READ) &&
           <React.Fragment>
-
-
-            {/* <EuiSpacer size="l" /> */}
 
             {(!loading && !loaded) &&
               <AboutPanel
@@ -296,6 +311,7 @@ export class FileDataVisualizerView extends Component {
               mode={MODE.READ}
               changeMode={this.changeMode}
               onCancel={this.onCancel}
+              disableImport={(hasPermissionToImport === false)}
             />
 
             <BottomPadding />
@@ -323,7 +339,7 @@ export class FileDataVisualizerView extends Component {
             <BottomPadding />
           </React.Fragment>
         }
-      </React.Fragment>
+      </div>
     );
   }
 }

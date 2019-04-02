@@ -1,9 +1,9 @@
 // Font
 
-$kuiFontFamily: "Open Sans", Helvetica, Arial, sans-serif;
-$kuiFontSize: 14px;
-$kuiLineHeight: 1.5;
-$kuiSubTextFontSize: 12px;
-$kuiTitleFontSize: 18px;
-$kuiFontWeightRegular: 400;
-$kuiFontWeightBold: 700;
+$kuiFontFamily: $euiFontFamily;
+$kuiFontSize: $euiFontSize;
+$kuiLineHeight: $euiLineHeight;
+$kuiSubTextFontSize: $euiFontSizeS;
+$kuiTitleFontSize: $euiFontSizeL;
+$kuiFontWeightRegular: $euiFontWeightRegular;
+$kuiFontWeightBold: $euiFontWeightBold;

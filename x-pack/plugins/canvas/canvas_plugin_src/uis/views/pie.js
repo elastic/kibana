@@ -81,7 +81,9 @@ export const pie = () => ({
     },
   ],
   resolve({ context }) {
-    if (getState(context) !== 'ready') return { labels: [] };
+    if (getState(context) !== 'ready') {
+      return { labels: [] };
+    }
     return { labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)) };
   },
 });

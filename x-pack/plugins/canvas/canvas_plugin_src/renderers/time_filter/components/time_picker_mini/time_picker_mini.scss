@@ -1,5 +1,3 @@
-@import '../../../../lib/eui.scss';
-
 .canvasTimePickerMini {
   width: 100%;
 
@@ -15,7 +13,7 @@
     }
   }
 
-  .euiPopover__anchor {
+  .canvasTimePickerMini__anchor {
     width: 100%;
   }
 }

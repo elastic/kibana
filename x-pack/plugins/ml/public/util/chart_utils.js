@@ -24,10 +24,16 @@ export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 const MAX_LABEL_WIDTH = 100;
 
 export function chartLimits(data = []) {
-  const limits = { max: 0, min: 0 };
+  const domain = d3.extent(data, (d) => {
+    let metricValue = d.value;
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    }
+    return metricValue;
+  });
+  const limits = { max: domain[1], min: domain[0] };
 
-  limits.max = d3.max(data, (d) => d.value);
-  limits.min = d3.min(data, (d) => d.value);
   if (limits.max === limits.min) {
     limits.max = d3.max(data, (d) => {
       if (d.typical) {
@@ -134,6 +140,7 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 
 // get the chart type based on its configuration
 export function getChartType(config) {
+
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
@@ -143,7 +150,8 @@ export function getChartType(config) {
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over')
+    config.entityFields.some(f => f.fieldType === 'over') &&
+    config.metricFunction !== null  // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
     return CHART_TYPE.POPULATION_DISTRIBUTION;
   }
@@ -196,7 +204,6 @@ export function getExploreSeriesLink(series) {
       detectorIndex: series.detectorIndex,
       entities: entityCondition,
     },
-    filters: [],
     query: {
       query_string: {
         analyze_wildcard: true,

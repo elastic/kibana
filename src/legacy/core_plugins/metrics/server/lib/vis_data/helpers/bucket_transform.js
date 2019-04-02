@@ -20,7 +20,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set } from 'lodash';
+import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function checkMetric(metric, fields) {
@@ -122,17 +122,6 @@ export default {
     return body;
   },
 
-  percentile_rank: bucket => {
-    checkMetric(bucket, ['type', 'field', 'value']);
-    const body = {
-      percentile_ranks: {
-        field: bucket.field,
-        values: [bucket.value],
-      },
-    };
-    return body;
-  },
-
   avg_bucket: extendStatsBucket,
   max_bucket: extendStatsBucket,
   min_bucket: extendStatsBucket,
@@ -143,9 +132,7 @@ export default {
 
   percentile: bucket => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles
-      .filter(p => p.value != null)
-      .map(p => p.value);
+    let percents = bucket.percentiles.map(p => p.value ? Number(p.value) : 0);
     if (bucket.percentiles.some(p => p.mode === 'band')) {
       percents = percents.concat(
         bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
@@ -159,6 +146,19 @@ export default {
     };
     return agg;
   },
+
+  percentile_rank: bucket => {
+    checkMetric(bucket, ['type', 'field', 'values']);
+
+    return {
+      percentile_ranks: {
+        field: bucket.field,
+        values: (bucket.values || [])
+          .map(value => isEmpty(value) ? 0 : value),
+      },
+    };
+  },
+
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);
@@ -252,7 +252,7 @@ export default {
           value: getBucketsPath(bucket.field, metrics),
         },
         script: {
-          source: 'params.value > 0 ? params.value : 0',
+          source: 'params.value > 0.0 ? params.value : 0.0',
           lang: 'painless',
         },
         gap_policy: 'skip', // seems sane

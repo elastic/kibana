@@ -17,14 +17,13 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../static`);
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
-describe(filename, () => {
+describe('static.js', () => {
   it('returns a series in which all numbers are the same', () => {
     return invoke(fn, [5]).then((r) => {
       expect(_.unique(_.map(r.output.list[0].data, 1))).to.eql([5]);

@@ -5,7 +5,7 @@
     "baseUrl": "../../../.",
     "paths": {
       "ui/*": [
-        "src/ui/public/*"
+        "src/legacy/ui/public/*"
       ],
       "plugins/ml/*": [
         "x-pack/plugins/ml/public/*"

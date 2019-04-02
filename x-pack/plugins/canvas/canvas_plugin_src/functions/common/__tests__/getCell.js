@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getCell } from '../getCell';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';
@@ -44,7 +44,7 @@ describe('getCell', () => {
 
       it('throws when invalid column is provided', () => {
         expect(() => fn(testTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Column not found: foo');
+          expect(e.message).to.be(`Column not found: 'foo'`);
         });
       });
     });
@@ -66,15 +66,15 @@ describe('getCell', () => {
         const invalidRow = testTable.rows.length;
 
         expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: ${invalidRow}`);
+          expect(e.message).to.be(`Row not found: '${invalidRow}'`);
         });
 
         expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be('Row not found: 0');
+          expect(e.message).to.be(`Row not found: '0'`);
         });
 
         expect(() => fn(emptyTable)).to.throwException(e => {
-          expect(e.message).to.be('Row not found: 0');
+          expect(e.message).to.be(`Row not found: '0'`);
         });
       });
     });

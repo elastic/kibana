@@ -24,7 +24,9 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // redirect to home app on invalid workpad id or page number
-          if (fetchedWorkpad == null && isNaN(pageNumber)) return router.redirectTo('home');
+          if (fetchedWorkpad == null && isNaN(pageNumber)) {
+            return router.redirectTo('home');
+          }
 
           const { assets, ...workpad } = fetchedWorkpad;
           dispatch(setAssets(assets));

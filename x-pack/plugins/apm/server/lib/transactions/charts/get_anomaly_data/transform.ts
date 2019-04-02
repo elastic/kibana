@@ -5,7 +5,7 @@
  */
 
 import { first, last } from 'lodash';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   Coordinate,
   RectCoordinate
@@ -34,16 +34,16 @@ export function anomalySeriesTransform(
     return;
   }
 
-  const buckets = oc(response)
-    .aggregations.ml_avg_response_times.buckets([])
-    .map(bucket => {
-      return {
-        x: bucket.key,
-        anomalyScore: bucket.anomaly_score.value,
-        lower: bucket.lower.value,
-        upper: bucket.upper.value
-      };
-    });
+  const buckets = (
+    idx(response, _ => _.aggregations.ml_avg_response_times.buckets) || []
+  ).map(bucket => {
+    return {
+      x: bucket.key,
+      anomalyScore: bucket.anomaly_score.value,
+      lower: bucket.lower.value,
+      upper: bucket.upper.value
+    };
+  });
 
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;
 

@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -16,20 +17,24 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { checkPermission } from '../../../../privilege/check_privilege';
 import { deleteFilterLists } from './delete_filter_lists';
 
 /*
  * React modal for confirming deletion of filter lists.
  */
 export class DeleteFilterListModal extends Component {
+  static displayName = 'DeleteFilterListModal';
+  static propTypes = {
+    selectedFilterLists: PropTypes.array,
+    canDeleteFilter: PropTypes.bool.isRequired
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
       isModalVisible: false
     };
-    this.canDeleteFilter = checkPermission('canDeleteFilter');
   }
 
   closeModal = () => {
@@ -53,12 +58,18 @@ export class DeleteFilterListModal extends Component {
   }
 
   render() {
-    const { selectedFilterLists } = this.props;
+    const { selectedFilterLists, canDeleteFilter } = this.props;
     let modal;
 
     if (this.state.isModalVisible) {
-      const title = `Delete ${(selectedFilterLists.length > 1) ?
-        `${selectedFilterLists.length} filter lists` : selectedFilterLists[0].filter_id}`;
+      const title = (<FormattedMessage
+        id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
+        defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}"
+        values={{
+          selectedFilterListsLength: selectedFilterLists.length,
+          selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
+        }}
+      />);
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -66,14 +77,26 @@ export class DeleteFilterListModal extends Component {
             className="eui-textBreakWord"
             onCancel={this.closeModal}
             onConfirm={this.onConfirmDelete}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={<FormattedMessage
+              id="xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />}
+            confirmButtonText={<FormattedMessage
+              id="xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel"
+              defaultMessage="Delete"
+            />}
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
             <p>
-              Are you sure you want to delete {(selectedFilterLists.length > 1) ?
-                'these filter lists' : 'this filter list'}?
+              <FormattedMessage
+                id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage"
+                defaultMessage="Are you sure you want to delete
+{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
+                values={{
+                  selectedFilterListsLength: selectedFilterLists.length,
+                }}
+              />
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
@@ -87,9 +110,14 @@ export class DeleteFilterListModal extends Component {
           iconType="trash"
           color="danger"
           onClick={this.showModal}
-          isDisabled={(selectedFilterLists === undefined || selectedFilterLists.length === 0 || this.canDeleteFilter === false)}
+          isDisabled={(selectedFilterLists === undefined ||
+            selectedFilterLists.length === 0 ||
+            canDeleteFilter === false)}
         >
-          Delete
+          <FormattedMessage
+            id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
+            defaultMessage="Delete"
+          />
         </EuiButton>
 
         {modal}
@@ -97,8 +125,3 @@ export class DeleteFilterListModal extends Component {
     );
   }
 }
-DeleteFilterListModal.propTypes = {
-  selectedFilterLists: PropTypes.array,
-};
-
-

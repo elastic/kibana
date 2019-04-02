@@ -5,7 +5,7 @@
  */
 
 import { spy, stub } from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
 import { timefilter } from 'ui/timefilter';
 
@@ -67,6 +67,25 @@ describe('MonitoringViewBaseController', function () {
   it('starts data poller', () => {
     expect(executorService.register.calledOnce).to.be(true);
     expect(executorService.start.calledOnce).to.be(true);
+  });
+
+  it('does not allow for a new request if one is inflight', done => {
+    let counter = 0;
+    const opts = {
+      title: 'testo',
+      getPageData: () => Promise.resolve(++counter),
+      $injector,
+      $scope
+    };
+
+    const ctrl = new MonitoringViewBaseController(opts);
+    Promise.all([
+      ctrl.updateData(),
+      ctrl.updateData(),
+    ]).then(() => {
+      expect(counter).to.be(1);
+      done();
+    });
   });
 
   describe('time filter', () => {

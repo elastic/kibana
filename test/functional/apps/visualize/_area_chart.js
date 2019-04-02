@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
 
   describe('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
@@ -38,8 +39,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Click X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Click Date Histogram');
@@ -58,35 +58,24 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
     });
 
     it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Saved viz page title with umlaut is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Saved viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
-      return PageObjects.common.sleep(2000);
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart', async function () {
@@ -140,11 +129,9 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-22 21:00', '29']
       ];
 
-      await PageObjects.visualize.openInspector();
-      await PageObjects.visualize.setInspectorTablePageSize(50);
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug('getDataTableData = ' + data);
-      expect(data).to.eql(expectedTableData);
+      await inspector.open();
+      await inspector.setTablePageSize(50);
+      await inspector.expectTableData(expectedTableData);
     });
 
     it('should hide side editor if embed is set to true in url', async () => {

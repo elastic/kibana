@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default function (kibana) {
 
   return new kibana.Plugin({
@@ -24,8 +26,9 @@ export default function (kibana) {
       visTypes: [
         'plugins/table_vis/table_vis'
       ],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
-    }
+      interpreter: ['plugins/table_vis/table_vis_fn'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
   });
 
 }
