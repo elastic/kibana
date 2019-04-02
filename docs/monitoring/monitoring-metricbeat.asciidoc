@@ -1,6 +1,7 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
 === Collecting {kib} monitoring data with {metricbeat}
+[subs="attributes"]
 ++++
 <titleabbrev>Collecting monitoring data with {metricbeat}</titleabbrev>
 ++++

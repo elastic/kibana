@@ -34,7 +34,7 @@ export function initServicesApi(server: Server) {
       const services = await getServices(setup).catch(defaultErrorHandler);
 
       // Store telemetry data derived from services
-      const agentNames = services.map(
+      const agentNames = services.items.map(
         ({ agentName }) => agentName as AgentName
       );
       const apmTelemetry = createApmTelementry(agentNames);
