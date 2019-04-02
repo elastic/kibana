@@ -68,7 +68,7 @@ const prettyLogs = txt => {
   // Triming again to fit truncation notice
   bufferToFit = bufferToFit.slice(MAX_DETAIL_BYTES * -1 + prependTxt.length);
 
-  return `${truncatedTxt}${bufferToFit.toString()}`;
+  return `${prependTxt}${bufferToFit.toString()}`;
 };
 
 const logRateLimit = ({
