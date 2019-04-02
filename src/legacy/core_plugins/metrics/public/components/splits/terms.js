@@ -29,12 +29,12 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
-const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
+const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fields }) => {
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
-  const defaultModel = { ...DEFAULTS, ...model };
-  const { metrics } = defaultModel;
+  const model = { ...DEFAULTS, ...seriesModel };
+  const { metrics } = model;
   const defaultCount = {
     value: '_count',
     label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
@@ -55,7 +55,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
     },
   ];
   const selectedDirectionOption = dirOptions.find(option => {
-    return defaultModel.terms_direction === option.value;
+    return model.terms_direction === option.value;
   });
 
   return (
@@ -70,7 +70,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
             />)}
           >
             <GroupBySelect
-              value={defaultModel.split_mode}
+              value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
             />
           </EuiFormRow>
@@ -86,7 +86,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
             <FieldSelect
               indexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
-              value={defaultModel.terms_field}
+              value={model.terms_field}
               fields={fields}
             />
           </EuiFormRow>
@@ -106,7 +106,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
           >
             <EuiFieldNumber
               placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.sizePlaceholder', defaultMessage: 'Size' })}
-              value={Number(defaultModel.terms_size)}
+              value={Number(model.terms_size)}
               onChange={handleTextChange('terms_size')}
             />
           </EuiFormRow>
@@ -125,7 +125,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model, fields }) => {
               additionalOptions={[defaultCount, terms]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
-              value={defaultModel.terms_order_by}
+              value={model.terms_order_by}
             />
           </EuiFormRow>
         </EuiFlexItem>
