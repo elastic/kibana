@@ -13,7 +13,7 @@ import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, Section } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useRequest } from '../../../services/http';
+import { httpService, useRequest } from '../../../services/http';
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
@@ -34,8 +34,6 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
   const section = 'repositories' as Section;
   const {
     core: {
-      chrome,
-      http,
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
@@ -45,9 +43,8 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     data: { repositories, verification },
     request: reload,
   } = useRequest({
-    path: chrome.addBasePath(`${API_BASE_PATH}repositories`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
-    httpClient: http.getClient(),
   });
   const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
     undefined

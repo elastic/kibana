@@ -21,13 +21,8 @@ export interface AppCore {
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
   };
-  chrome: typeof chrome;
   notification: {
     fatalError: typeof fatalError;
-  };
-  http: {
-    getClient(): any;
-    setClient(client: any): void;
   };
 }
 
@@ -38,6 +33,11 @@ export interface AppPlugins {
 }
 
 export interface Core extends AppCore {
+  chrome: typeof chrome;
+  http: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
   routing: {
     registerAngularRoute(path: string, config: object): void;
     registerRouter(router: HashRouter): void;

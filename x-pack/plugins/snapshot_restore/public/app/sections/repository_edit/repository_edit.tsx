@@ -13,7 +13,7 @@ import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
-import { sendRequest } from '../../services/http';
+import { httpService, sendRequest } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -30,7 +30,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const {
-    core: { i18n, chrome, http },
+    core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
@@ -56,9 +56,8 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   // Load repository information
   useEffect(() => {
     sendRequest({
-      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
+      path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
       method: 'get',
-      httpClient: http.getClient(),
     }).then(({ data, error }) => {
       if (error) {
         setRepositoryError(error);
@@ -74,10 +73,9 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
     setIsSaving(true);
     setErrors({ ...errors, save: null });
     const { error } = await sendRequest({
-      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
+      path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
       method: 'put',
       body: editedRepository,
-      httpClient: http.getClient(),
     });
     setIsSaving(false);
     if (error) {

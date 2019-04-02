@@ -13,7 +13,7 @@ import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
-import { sendRequest } from '../../services/http';
+import { httpService, sendRequest } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -21,8 +21,6 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
   const {
     core: {
       i18n: { FormattedMessage },
-      http,
-      chrome,
     },
   } = useAppDependencies();
   const section = 'repositories' as Section;
@@ -39,10 +37,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
     setErrors({ ...errors, save: null });
     const { name } = newRepository;
     const { error } = await sendRequest({
-      path: chrome.addBasePath(`${API_BASE_PATH}repositories`),
+      path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
       method: 'put',
       body: newRepository,
-      httpClient: http.getClient(),
     });
     setIsSaving(false);
     if (error) {

@@ -13,6 +13,7 @@ import { Core, Plugins } from './shim';
 
 import { breadcrumbService } from './app/services/breadcrumb';
 import { documentationLinksService } from './app/services/documentation';
+import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
@@ -53,6 +54,7 @@ export class Plugin {
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
         http.setClient($http);
+        httpService.init(http.getClient(), chrome);
 
         // Angular Lifecycle
         const appRoute = $route.current;
@@ -81,7 +83,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, chrome, notification, http } as AppCore,
+              { i18n, notification } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

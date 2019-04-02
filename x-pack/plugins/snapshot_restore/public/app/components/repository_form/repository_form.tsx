@@ -14,7 +14,7 @@ import { Repository, RepositoryType } from '../../../../common/types';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
-import { useRequest } from '../../services/http';
+import { httpService, useRequest } from '../../services/http';
 import { textService } from '../../services/text';
 
 import { SectionError } from '../section_error';
@@ -56,8 +56,6 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
 }) => {
   const {
     core: {
-      http,
-      chrome,
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
@@ -66,9 +64,8 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     loading: repositoryTypesLoading,
     data: repositoryTypes,
   } = useRequest({
-    path: chrome.addBasePath(`${API_BASE_PATH}repository_types`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
     method: 'get',
-    httpClient: http.getClient(),
   });
 
   const [repository, setRepository] = useState<Repository>({

@@ -8,7 +8,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
-import { useRequest } from '../../../../services/http';
+import { httpService, useRequest } from '../../../../services/http';
 import { textService } from '../../../../services/text';
 
 import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../../../common/constants';
@@ -50,19 +50,19 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const {
-    core: { chrome, http, i18n },
+    core: { i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const section = 'repositories' as Section;
   const {
     error,
     loading,
     data: { repository, verification },
   } = useRequest({
-    path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(repositoryName)}`),
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(repositoryName)}`
+    ),
     method: 'get',
-    httpClient: http.getClient(),
   });
 
   const renderBody = () => {
