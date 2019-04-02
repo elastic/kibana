@@ -5,7 +5,7 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 
@@ -39,9 +39,9 @@ export default function ({ getService }) {
         refresh: true,
         body: {
           query: {
-            "simple_query_string": {
+            'simple_query_string': {
               query: REINDEX_OP_TYPE,
-              fields: ["type"]
+              fields: ['type']
             }
           }
         }
@@ -129,20 +129,20 @@ export default function ({ getService }) {
     });
 
     it('shows no warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/6.0-data`);
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/7.0-data`);
       expect(resp.body.warnings.length).to.be(0);
     });
 
-    it('reindexes old 6.0 index', async () => {
+    it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/6.0-data`)
+        .post(`/api/upgrade_assistant/reindex/7.0-data`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('6.0-data');
+      expect(body.indexName).to.equal('7.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('6.0-data');
+      const lastState = await waitForReindexToComplete('7.0-data');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });

@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
+import { DocTitleProvider } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -34,7 +35,6 @@ import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -164,26 +164,14 @@ uiRoutes
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/index_pattern'));
+          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
   });
 
-uiRoutes
-  .when('/management/kibana/index_patterns', {
-    redirectTo() {
-      const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-      if (defaultIndex) {
-        return `/management/kibana/index_patterns/${defaultIndex}`;
-      }
-
-      return '/management/kibana/index_pattern';
-    }
-  });
-
 uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
@@ -195,6 +183,7 @@ uiModules.get('apps/management')
     $scope.indexPatternListProvider = indexPatternListProvider;
     $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
+    const docTitle = Private(DocTitleProvider);
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {

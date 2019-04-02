@@ -10,13 +10,30 @@ export const UptimePageProvider = ({
   getPageObjects,
   getService,
 }: KibanaFunctionalTestDefaultProviders) => {
-  const pageObject = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
 
-  return {
-    async goToUptimeOverview() {
-      await pageObject.common.navigateToApp('uptime');
-      await uptimeService.assertExists();
-    },
-  };
+  return new class UptimePage {
+    public async goToUptimeOverviewAndLoadData(
+      datePickerStartValue: string,
+      monitorIdToCheck: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteStart(datePickerStartValue);
+      await uptimeService.monitorIdExists(monitorIdToCheck);
+    }
+
+    public async loadDataAndGoToMonitorPage(
+      datePickerStartValue: string,
+      monitorId: string,
+      monitorName: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteStart(datePickerStartValue);
+      await uptimeService.navigateToMonitorWithId(monitorId);
+      if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
+        throw new Error('Expected monitor name not found');
+      }
+    }
+  }();
 };

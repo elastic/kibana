@@ -8,6 +8,7 @@ exports[`DeleteSpacesButton renders as expected 1`] = `
     fill={false}
     iconSide="left"
     onClick={[Function]}
+    size="m"
     type="button"
   >
     <FormattedMessage

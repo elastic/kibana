@@ -24,7 +24,6 @@ import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Gauge from '../../../visualizations/components/gauge';
 import getLastValue from '../../../../common/get_last_value';
-import color from 'color';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -49,6 +48,7 @@ function getColors(props) {
 function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
+
   const series = _.get(visData, `${model.id}.series`, [])
     .filter(row => row)
     .map((row, i) => {
@@ -60,11 +60,15 @@ function GaugeVisualization(props) {
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return _.assign({}, row, newProps);
     });
+
+  const panelBackgroundColor = model.background_color || backgroundColor;
+  const style = { backgroundColor: panelBackgroundColor };
+
   const params = {
     metric: series[0],
     type: model.gauge_style || 'half',
-    reversed: props.reversed,
-    additionalLabel: props.additionalLabel
+    additionalLabel: props.additionalLabel,
+    backgroundColor: panelBackgroundColor,
   };
 
   if (colors.text) {
@@ -75,13 +79,6 @@ function GaugeVisualization(props) {
   if (model.gauge_inner_color) params.innerColor = model.gauge_inner_color;
   if (model.gauge_inner_width) params.innerLine = model.gauge_inner_width;
   if (model.gauge_max != null) params.max = model.gauge_max;
-
-  const panelBackgroundColor = model.background_color || backgroundColor;
-
-  if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
-  }
-  const style = { backgroundColor: panelBackgroundColor };
 
   return (
     <div className="tvbVis" style={style}>
@@ -97,7 +94,6 @@ GaugeVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   getConfig: PropTypes.func
 };

@@ -189,7 +189,8 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           defaultMessage: 'Experimental',
         }),
         betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.experimentalTooltip', {
-          defaultMessage: 'This visualization is experimental.',
+          defaultMessage:
+            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
       };
     }
@@ -208,6 +209,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-vis-stage={visType.stage}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
+        role="menuitem"
         {...stage}
       >
         <VisTypeIcon visType={visType} />

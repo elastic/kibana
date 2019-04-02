@@ -20,6 +20,8 @@
 import Boom from 'boom';
 
 import {
+  createBadRequestError,
+  createUnsupportedTypeError,
   decorateBadRequestError,
   isBadRequestError,
   decorateNotAuthorizedError,
@@ -39,6 +41,48 @@ import {
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {
+    describe('createUnsupportedTypeError', () => {
+      const errorObj = createUnsupportedTypeError('someType');
+
+      it('should have the unsupported type message', () => {
+        expect(errorObj).toHaveProperty(
+          'message',
+          "Unsupported saved object type: 'someType': Bad Request"
+        );
+      });
+
+      it('has boom properties', () => {
+        expect(errorObj.output.payload).toMatchObject({
+          statusCode: 400,
+          message: "Unsupported saved object type: 'someType': Bad Request",
+          error: 'Bad Request',
+        });
+      });
+
+      it("should be identified by 'isBadRequestError' method", () => {
+        expect(isBadRequestError(errorObj)).toBeTruthy();
+      });
+    });
+
+    describe('createBadRequestError', () => {
+      const errorObj = createBadRequestError('test reason message');
+      it('should create an appropriately structured error object', () => {
+        expect(errorObj.message).toEqual('test reason message: Bad Request');
+      });
+
+      it("should be identified by 'isBadRequestError' method", () => {
+        expect(isBadRequestError(errorObj)).toBeTruthy();
+      });
+
+      it('has boom properties', () => {
+        expect(errorObj.output.payload).toMatchObject({
+          statusCode: 400,
+          message: 'test reason message: Bad Request',
+          error: 'Bad Request',
+        });
+      });
+    });
+
     describe('decorateBadRequestError', () => {
       it('returns original object', () => {
         const error = new Error();

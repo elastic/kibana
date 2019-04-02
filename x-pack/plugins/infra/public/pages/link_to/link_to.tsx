@@ -7,6 +7,7 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
+import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
@@ -28,7 +29,8 @@ export class LinkToPage extends React.Component<LinkToPageProps> {
           path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
           component={RedirectToNodeDetail}
         />
-        <Redirect to="/home" />
+        <Route path={`${match.url}/logs`} component={RedirectToLogs} />
+        <Redirect to="/infrastructure" />
       </Switch>
     );
   }

@@ -34,9 +34,18 @@ $kbnDefaultFontSize: 14px;
   $kbnMarkdownSizeXXS: canvasToEm(4px);
 
   // Grayscale variables
-  $kbnMarkdownAlphaLightestShade: rgba(0,0,0,.05);
-  $kbnMarkdownAlphaLightShade: rgba(0,0,0,.15);
-  $kbnMarkdownAlphaDarkShade: rgba(0,0,0,.65);
+  $kbnMarkdownAlphaLightestShade: rgba($euiColorFullShade,.05);
+  $kbnMarkdownAlphaLightShade: rgba($euiColorFullShade,.15);
+  $kbnMarkdownAlphaDarkShade: rgba($euiColorFullShade,.65);
+
+  // Reverse grayscale for opposite of theme
+  $kbnMarkdownAlphaLightestShadeReversed: rgba($euiColorEmptyShade,.05);
+  $kbnMarkdownAlphaLightShadeReversed: rgba($euiColorEmptyShade,.15);
+  $kbnMarkdownAlphaDarkShadeReversed: rgba($euiColorEmptyShade,.65);
+
+  &--reversed {
+    color: $euiColorLightestShade;
+  }
 
   > *:first-child {
     margin-top: 0 !important;
@@ -142,6 +151,9 @@ $kbnDefaultFontSize: 14px;
     padding: 0 1em;
     border-left: $kbnMarkdownSizeXXS solid $kbnMarkdownAlphaLightShade;
   }
+  &--reversed blockquote {
+    border-left-color: $kbnMarkdownAlphaLightShadeReversed;
+  }
 
   // 5. Horizontal rules
   hr {
@@ -152,6 +164,9 @@ $kbnDefaultFontSize: 14px;
     margin: $kbnMarkdownSizeL 0;
     background-color: $kbnMarkdownAlphaLightShade;
     border: 0;
+  }
+  &--reversed hr {
+    background-color: $kbnMarkdownAlphaLightShadeReversed;
   }
 
   hr::before {
@@ -230,6 +245,9 @@ $kbnDefaultFontSize: 14px;
     border-spacing: 0;
     border-collapse: collapse;
   }
+  &--reversed table {
+    border-left-color: $kbnMarkdownAlphaLightShadeReversed;
+  }
 
   td,
   th {
@@ -246,10 +264,17 @@ $kbnDefaultFontSize: 14px;
       border-right: 1px solid $kbnMarkdownAlphaLightShade;
     }
   }
+  &--reversed table th,
+  &--reversed table td {
+    border-color: $kbnMarkdownAlphaLightShadeReversed;
+  }
 
   table tr {
     background-color: transparent;
     border-top: 1px solid $kbnMarkdownAlphaLightShade;
+  }
+  &--reversed table tr {
+    border-top-color: $kbnMarkdownAlphaLightShadeReversed;
   }
 
   // 8. Code blocks
@@ -266,6 +291,9 @@ $kbnDefaultFontSize: 14px;
     background-color: $kbnMarkdownAlphaLightestShade;
     border-radius: $kbnMarkdownSizeXXS;
   }
+  &--reversed code {
+    background-color: $kbnMarkdownAlphaLightestShadeReversed;
+  }
 
   code::before,
   code::after {
@@ -281,6 +309,9 @@ $kbnDefaultFontSize: 14px;
     background-color: $kbnMarkdownAlphaLightestShade;
     border-radius: $kbnMarkdownSizeXXS;
     word-wrap: normal;
+  }
+  &--reversed pre {
+    background-color: $kbnMarkdownAlphaLightestShadeReversed;
   }
 
   pre code {

@@ -25,6 +25,8 @@ import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
+export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
+
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
@@ -92,7 +94,7 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
-          if (['heatmap', 'gauge'].includes($scope.vis.vislibVis.visConfigArgs.type)) {
+          if (CUSTOM_LEGEND_VIS_TYPES.includes($scope.vis.vislibVis.visConfigArgs.type)) {
             return false;
           }
           const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
@@ -103,12 +105,20 @@ uiModules.get('kibana')
        * Keydown listener for a legend entry.
        * This will close the details panel of this legend entry when pressing Escape.
        */
-        $scope.onLegendEntryKeydown = function (event, scope) {
-          if (event.keyCode === keyCodes.ESCAPE && scope.showDetails) {
+        $scope.onLegendEntryKeydown = function (event) {
+          if (event.keyCode === keyCodes.ESCAPE) {
             event.preventDefault();
             event.stopPropagation();
-            scope.showDetails = false;
+            $scope.shownDetails = undefined;
           }
+        };
+
+        $scope.toggleDetails = function (label) {
+          $scope.shownDetails = $scope.shownDetails === label ? undefined : label;
+        };
+
+        $scope.areDetailsVisible = function (label) {
+          return $scope.shownDetails === label;
         };
 
         $scope.colors = [
@@ -132,7 +142,7 @@ uiModules.get('kibana')
             $scope.open = $scope.vis.params.addLegend;
           }
 
-          if (['heatmap', 'gauge'].includes(vislibVis.visConfigArgs.type)) {
+          if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
             const labels = vislibVis.getLegendLabels();
             if (labels) {
               $scope.labels = _.map(labels, label => {

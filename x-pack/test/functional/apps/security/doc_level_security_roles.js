@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          "indices": [{
-            "names": ["dlstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "query": "{\"match\": {\"region\": \"EAST\"}}"
+          'indices': [{
+            'names': ['dlstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'query': '{"match": {"region": "EAST"}}'
           }]
         },
         kibana: {

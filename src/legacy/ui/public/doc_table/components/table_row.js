@@ -21,7 +21,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import '../../doc_viewer';
-import '../../filters/trust_as_html';
+import '../../filters/uriescape';
 import '../../filters/short_dots';
 import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';

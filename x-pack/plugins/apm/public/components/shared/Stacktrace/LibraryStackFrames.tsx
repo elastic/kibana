@@ -8,9 +8,7 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import { units } from '../../../style/variables';
-// @ts-ignore
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
 import { Ellipsis } from '../../shared/Icons';
 import { Stackframe } from './Stackframe';
 
@@ -44,29 +42,17 @@ export class LibraryStackFrames extends React.Component<Props, State> {
       return null;
     }
 
-    if (stackframes.length === 1) {
-      return (
-        <Stackframe
-          isLibraryFrame
-          codeLanguage={codeLanguage}
-          stackframe={stackframes[0]}
-        />
-      );
-    }
-
     return (
       <div>
         <LibraryFrameToggle>
           <EuiLink onClick={this.onClick}>
-            <Ellipsis
-              horizontal={isVisible}
-              style={{ marginRight: units.half }}
-            />{' '}
+            <Ellipsis horizontal={isVisible} />{' '}
             {i18n.translate(
               'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
               {
-                defaultMessage: '{stackframesLength} library frames',
-                values: { stackframesLength: stackframes.length }
+                defaultMessage:
+                  '{count, plural, one {# library frame} other {# library frames}}',
+                values: { count: stackframes.length }
               }
             )}
           </EuiLink>

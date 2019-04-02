@@ -5,14 +5,15 @@
  */
 
 import { resolve } from 'path';
+import { createRouter } from '../../server/lib/create_router';
 import { registerIndicesRoutes } from './server/routes/api/indices';
 import { registerMappingRoute } from './server/routes/api/mapping';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
-import { addIndexManagementDataEnricher } from "./index_management_data";
-import { createRouter } from '../../server/lib/create_router';
+import { addIndexManagementDataEnricher } from './index_management_data';
+import { registerIndexManagementUsageCollector } from './server/usage';
 
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
@@ -29,11 +30,12 @@ export function indexManagement(kibana)  {
     init: function (server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
-      registerLicenseChecker(server, PLUGIN.ID);
+      registerLicenseChecker(server, PLUGIN.ID, PLUGIN.NAME, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       registerIndicesRoutes(router);
       registerSettingsRoutes(router);
       registerStatsRoute(router);
       registerMappingRoute(router);
+      registerIndexManagementUsageCollector(server);
     }
   });
 }

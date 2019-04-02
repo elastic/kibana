@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {
@@ -31,5 +31,6 @@ describe('makeFakeXAspect', function () {
       .and.have.property('format')
       .and.have.property('params');
 
+    expect(aspect.params).to.have.property('defaultValue', '_all');
   });
 });

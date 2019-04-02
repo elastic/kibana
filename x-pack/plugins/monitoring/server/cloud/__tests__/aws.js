@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { AWS, AWSCloudService } from '../aws';
 
 describe('AWS', () => {
@@ -116,19 +116,19 @@ describe('AWS', () => {
     it('parses object in expected format', () => {
       const body = {
         devpayProductCodes: null,
-        privateIp: "10.0.0.38",
-        availabilityZone: "us-west-2c",
-        version: "2010-08-31",
-        instanceId: "i-0c7a5b7590a4d811c",
+        privateIp: '10.0.0.38',
+        availabilityZone: 'us-west-2c',
+        version: '2010-08-31',
+        instanceId: 'i-0c7a5b7590a4d811c',
         billingProducts: null,
-        instanceType: "t2.micro",
-        accountId: "1234567890",
-        architecture: "x86_64",
+        instanceType: 't2.micro',
+        accountId: '1234567890',
+        architecture: 'x86_64',
         kernelId: null,
         ramdiskId: null,
-        imageId: "ami-6df1e514",
-        pendingTime: "2017-07-06T02:09:12Z",
-        region: "us-west-2"
+        imageId: 'ami-6df1e514',
+        pendingTime: '2017-07-06T02:09:12Z',
+        region: 'us-west-2'
       };
 
       const response = AWS._parseBody(body);
@@ -137,17 +137,17 @@ describe('AWS', () => {
       expect(response.isConfirmed()).to.eql(true);
       expect(response.toJSON()).to.eql({
         name: 'aws',
-        id: "i-0c7a5b7590a4d811c",
-        vm_type: "t2.micro",
-        region: "us-west-2",
-        zone: "us-west-2c",
+        id: 'i-0c7a5b7590a4d811c',
+        vm_type: 't2.micro',
+        region: 'us-west-2',
+        zone: 'us-west-2c',
         metadata: {
-          version: "2010-08-31",
-          architecture: "x86_64",
+          version: '2010-08-31',
+          architecture: 'x86_64',
           kernelId: null,
           ramdiskId: null,
-          imageId: "ami-6df1e514",
-          pendingTime: "2017-07-06T02:09:12Z"
+          imageId: 'ami-6df1e514',
+          pendingTime: '2017-07-06T02:09:12Z'
         }
       });
     });

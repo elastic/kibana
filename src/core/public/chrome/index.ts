@@ -18,9 +18,9 @@
  */
 
 export {
-  Breadcrumb,
+  ChromeBreadcrumb,
   ChromeService,
-  ChromeStartContract,
-  Brand,
-  HelpExtension,
+  ChromeSetup,
+  ChromeBrand,
+  ChromeHelpExtension,
 } from './chrome_service';

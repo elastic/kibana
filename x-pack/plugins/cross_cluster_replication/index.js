@@ -22,7 +22,10 @@ export function crossClusterReplication(kibana) {
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          ccrUiEnabled: config.get('xpack.ccr.ui.enabled'),
+          ccrUiEnabled: (
+            config.get('xpack.ccr.ui.enabled')
+              && config.get('xpack.remote_clusters.ui.enabled')
+          ),
         };
       },
     },
@@ -38,7 +41,13 @@ export function crossClusterReplication(kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-
+    isEnabled(config) {
+      return (
+        config.get('xpack.ccr.enabled') &&
+        config.get('xpack.index_management.enabled') &&
+        config.get('xpack.remote_clusters.enabled')
+      );
+    },
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);

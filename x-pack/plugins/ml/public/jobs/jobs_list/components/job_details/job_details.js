@@ -59,6 +59,7 @@ class JobDetailsUI extends Component {
         general,
         customUrl,
         node,
+        calendars,
         detectors,
         influencers,
         analysisConfig,
@@ -77,7 +78,7 @@ class JobDetailsUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
           defaultMessage: 'Job settings'
         }),
-        content: <JobDetailsPane sections={[general, customUrl, node]} />,
+        content: <JobDetailsPane sections={[general, customUrl, node, calendars]} />,
         time: job.open_time
       }, {
         id: 'job-config',

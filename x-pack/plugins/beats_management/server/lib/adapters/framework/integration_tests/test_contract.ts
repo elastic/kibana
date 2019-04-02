@@ -13,7 +13,7 @@ interface ContractConfig {
 
 export const contractTests = (testName: string, config: ContractConfig) => {
   describe(testName, () => {
-    let frameworkAdapter: any;
+    let frameworkAdapter: BackendFrameworkAdapter;
     beforeAll(config.before);
     afterAll(config.after);
     beforeEach(async () => {
@@ -21,9 +21,9 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
 
     it('Should have tests here', () => {
+      expect(frameworkAdapter.info).toHaveProperty('server');
+
       expect(frameworkAdapter).toHaveProperty('server');
-      expect(frameworkAdapter.server).toHaveProperty('plugins');
-      expect(frameworkAdapter.server.plugins).toHaveProperty('security');
     });
   });
 };

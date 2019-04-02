@@ -1,10 +1,12 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { get } from 'lodash';
+import { fetchUiMetrics } from '../../../../server/lib/ui_metric';
+import { UIM_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -180,6 +182,8 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
+      const uiMetrics = await fetchUiMetrics(server, UIM_APP_NAME, USER_ACTIONS);
+
       return {
         index_patterns: {
           total: rollupIndexPatterns.length,
@@ -193,6 +197,7 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
+        ui_metrics: uiMetrics,
       };
     },
   });

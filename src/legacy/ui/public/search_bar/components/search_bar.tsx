@@ -60,7 +60,7 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 interface State {
@@ -135,7 +135,7 @@ class SearchBarUI extends Component<Props, State> {
         onClick={this.toggleFiltersVisible}
         isSelected={this.state.isFiltersVisible}
         hasActiveFilters={this.state.isFiltersVisible}
-        numFilters={this.props.filters.length > 0 ? this.props.filters.length : null}
+        numFilters={this.props.filters.length > 0 ? this.props.filters.length : undefined}
         aria-controls="GlobalFilterGroup"
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${this.props.filters.length} ${filtersAppliedText} ${clickToShowOrHideText}`}

@@ -8,11 +8,10 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
-import styled from 'styled-components';
 
-import { RangeDatePicker, RecentlyUsed } from '../range_date_picker';
-
+import euiStyled from '../../../../../common/eui_styled_components';
 import { metricTimeActions } from '../../store';
+import { RangeDatePicker, RecentlyUsed } from '../range_date_picker';
 
 interface MetricsTimeControlsProps {
   currentTimeRange: metricTimeActions.MetricRangeTimeState;
@@ -219,7 +218,8 @@ export class MetricsTimeControls extends React.Component<
     }
   };
 }
-const MetricsTimeControlsContainer = styled.div`
+
+const MetricsTimeControlsContainer = euiStyled.div`
   display: flex;
   justify-content: right;
   flex-flow: row wrap;

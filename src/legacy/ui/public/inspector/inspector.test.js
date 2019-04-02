@@ -26,6 +26,8 @@ jest.mock('./view_registry', () => ({
 jest.mock('./ui/inspector_panel', () => ({
   InspectorPanel: () => 'InspectorPanel',
 }));
+jest.mock('ui/i18n', () => ({ I18nContext: ({ children }) => children }));
+
 import { viewRegistry } from './view_registry';
 
 function setViews(views) {

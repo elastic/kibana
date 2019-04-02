@@ -9,6 +9,7 @@ export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
+export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
@@ -18,10 +19,11 @@ export const FLYOUT_STATE = {
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
+  isReadOnly: false,
 };
 
 // Reducer
-function ui(state = INITIAL_STATE, action) {
+export function ui(state = INITIAL_STATE, action) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
@@ -31,6 +33,8 @@ function ui(state = INITIAL_STATE, action) {
       return { ...state, isSetViewOpen: true };
     case SET_FULL_SCREEN:
       return { ...state, isFullScreen: action.isFullScreen };
+    case SET_READ_ONLY:
+      return { ...state, isReadOnly: action.isReadOnly };
     default:
       return state;
   }
@@ -65,11 +69,16 @@ export function enableFullScreen() {
     isFullScreen: true
   };
 }
+export function setReadOnly(isReadOnly) {
+  return {
+    type: SET_READ_ONLY,
+    isReadOnly
+  };
+}
 
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }) => _.get(ui, 'isSetViewOpen', false);
 export const getIsFullScreen = ({ ui }) => _.get(ui, 'isFullScreen', false);
-
-export default ui;
+export const getIsReadOnly = ({ ui }) => _.get(ui, 'isReadOnly', true);

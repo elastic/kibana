@@ -42,43 +42,22 @@ describe('#getInjected()', () => {
     chrome.getInjected();
     chrome.getInjected('foo');
     chrome.getInjected('foo', 'bar');
-
-    expect(newPlatformInjectedMetadata).toMatchInlineSnapshot(`
-Object {
-  "getInjectedVar": [MockFunction] {
-    "calls": Array [
-      Array [
-        "foo",
-        undefined,
-      ],
-      Array [
-        "foo",
-        "bar",
-      ],
-    ],
-    "results": Array [
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-    ],
-  },
-  "getInjectedVars": [MockFunction] {
-    "calls": Array [
-      Array [],
-    ],
-    "results": Array [
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-    ],
-  },
-}
+    expect(newPlatformInjectedMetadata.getInjectedVars.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [],
+]
+`);
+    expect(newPlatformInjectedMetadata.getInjectedVar.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "foo",
+    undefined,
+  ],
+  Array [
+    "foo",
+    "bar",
+  ],
+]
 `);
   });
 

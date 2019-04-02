@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export { SavedObjectsService } from './create_saved_objects_service';
+import { ScopedSavedObjectsClientProvider } from './lib';
+import { SavedObjectsClient } from './saved_objects_client';
+
+export interface SavedObjectsService<Request = any> {
+  // ATTENTION: these types are incomplete
+  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
+    Request
+  >['addClientWrapperFactory'];
+  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+  SavedObjectsClient: typeof SavedObjectsClient;
+  types: string[];
+  getSavedObjectsRepository(...rest: any[]): any;
+}
+
 export { SavedObjectsClientWrapperFactory } from './lib';
 export {
   FindOptions,

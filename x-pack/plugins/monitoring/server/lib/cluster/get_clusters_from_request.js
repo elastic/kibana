@@ -21,7 +21,7 @@ import { CLUSTER_ALERTS_SEARCH_SIZE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
-import { standaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
+import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -41,7 +41,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   let clusters = [];
 
   if (isStandaloneCluster) {
-    clusters.push(standaloneClusterDefinition);
+    clusters.push(getStandaloneClusterDefinition());
   }
   else {
     // get clusters with stats and cluster state
@@ -56,7 +56,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     ];
 
     if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
-      clusters.push(standaloneClusterDefinition);
+      clusters.push(getStandaloneClusterDefinition());
     }
   }
 
@@ -112,6 +112,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   }
 
   // add kibana data
+
   const kibanas = isStandaloneCluster ? [] : await getKibanasForClusters(req, kbnIndexPattern, clusters);
   // add the kibana data to each cluster
   kibanas.forEach(kibana => {

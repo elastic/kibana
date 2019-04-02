@@ -12,7 +12,7 @@ import {
   PHASE_ROLLOVER_ALIAS,
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
-} from '../constants';
+} from '../../constants';
 
 export const defaultColdPhase = {
   [PHASE_ENABLED]: false,
@@ -23,4 +23,8 @@ export const defaultColdPhase = {
   [PHASE_REPLICA_COUNT]: '',
   [PHASE_FREEZE_ENABLED]: false,
   [PHASE_INDEX_PRIORITY]: 0
+};
+export const defaultEmptyColdPhase = {
+  ...defaultColdPhase,
+  [PHASE_INDEX_PRIORITY]: ''
 };
