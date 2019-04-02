@@ -100,7 +100,7 @@ export class CodeFileTree extends React.Component<Props> {
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (
-          <div className="codeFileTree__group">
+          <div className="codeFileTree__node">
             <div
               data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
@@ -127,7 +127,7 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Submodule: {
         return (
-          <div className="codeFileTree__group">
+          <div className="codeFileTree__node">
             <div
               data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
               tabIndex={0}
@@ -149,7 +149,7 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Link: {
         return (
-          <div className="codeFileTree__group">
+          <div className="codeFileTree__node">
             <div
               data-test-subj={`codeFileTreeNode-Link-${node.path}`}
               tabIndex={0}
@@ -171,7 +171,7 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.File: {
         return (
-          <div className="codeFileTree__group">
+          <div className="codeFileTree__node">
             <div
               data-test-subj={`codeFileTreeNode-File-${node.path}`}
               tabIndex={0}

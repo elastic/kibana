@@ -115,7 +115,7 @@ class AdminPage extends React.PureComponent<Props, State> {
   public render() {
     return (
       <EuiFlexGroup direction="row">
-        <EuiFlexItem className="codeContainer__admin-wrapper">
+        <EuiFlexItem className="codeContainer__adminWrapper">
           {this.renderTabs()}
           {this.renderTabContent()}
         </EuiFlexItem>

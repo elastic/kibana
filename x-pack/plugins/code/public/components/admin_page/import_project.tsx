@@ -93,7 +93,7 @@ class CodeImportProject extends React.PureComponent<
             {/*
   // @ts-ignore */}
             <EuiButton
-              className="codeButton__import-project"
+              className="codeButton__projectImport"
               onClick={this.submitImportProject}
               data-test-subj="importRepositoryButton"
             >

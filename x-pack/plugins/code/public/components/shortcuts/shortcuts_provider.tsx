@@ -179,7 +179,7 @@ class ShortcutsComponent extends React.Component<Props> {
         <div key={'shortcuts_' + idx}>
           {this.renderModifier(s)}
           <span className="codeShortcuts__key">{s.key}</span>
-          <span className="codeShortcuts__help-text">{s.help}</span>
+          <span className="codeShortcuts__helpText">{s.help}</span>
         </div>
       );
     });
