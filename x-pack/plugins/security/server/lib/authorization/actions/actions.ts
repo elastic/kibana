@@ -22,17 +22,17 @@ export class Actions {
    */
   public readonly allHack = 'allHack:';
 
-  public readonly api = new ApiActions();
+  public readonly api = new ApiActions(this.versionNumber);
 
-  public readonly app = new AppActions();
+  public readonly app = new AppActions(this.versionNumber);
 
   public readonly login = 'login:';
 
-  public readonly savedObject = new SavedObjectActions();
+  public readonly savedObject = new SavedObjectActions(this.versionNumber);
 
-  public readonly space = new SpaceActions();
+  public readonly space = new SpaceActions(this.versionNumber);
 
-  public readonly ui = new UIActions();
+  public readonly ui = new UIActions(this.versionNumber);
 
   public readonly version = `version:${this.versionNumber}`;
 

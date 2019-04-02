@@ -6,32 +6,34 @@
 
 import { SavedObjectActions } from './saved_object';
 
+const version = '1.0.0-zeta1';
+
 describe('#all', () => {
   test(`returns saved_object:*`, () => {
-    const savedObjectActions = new SavedObjectActions();
-    expect(savedObjectActions.all).toBe('saved_object:*');
+    const savedObjectActions = new SavedObjectActions(version);
+    expect(savedObjectActions.all).toBe('saved_object:1.0.0-zeta1:*');
   });
 });
 
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {
-      const savedObjectActions = new SavedObjectActions();
+      const savedObjectActions = new SavedObjectActions(version);
       expect(() => savedObjectActions.get(type, 'foo-action')).toThrowErrorMatchingSnapshot();
     });
   });
 
   [null, undefined, '', 1, true, {}].forEach((operation: any) => {
     test(`operation of ${JSON.stringify(operation)} throws error`, () => {
-      const savedObjectActions = new SavedObjectActions();
+      const savedObjectActions = new SavedObjectActions(version);
       expect(() => savedObjectActions.get('foo-type', operation)).toThrowErrorMatchingSnapshot();
     });
   });
 
   test('returns `saved_object:${type}/${operation}`', () => {
-    const savedObjectActions = new SavedObjectActions();
+    const savedObjectActions = new SavedObjectActions(version);
     expect(savedObjectActions.get('foo-type', 'bar-operation')).toBe(
-      'saved_object:foo-type/bar-operation'
+      'saved_object:1.0.0-zeta1:foo-type/bar-operation'
     );
   });
 });

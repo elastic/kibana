@@ -6,13 +6,29 @@
 import { isString } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { uiCapabilitiesRegex } from 'x-pack/plugins/xpack_main/types';
-const prefix = 'ui:';
 
 export class UIActions {
-  public all = `${prefix}*`;
-  public allNavLinks = `${prefix}navLinks/*`;
-  public allCatalogueEntries = `${prefix}catalogue/*`;
-  public allManagementLinks = `${prefix}management/*`;
+  private readonly prefix: string;
+
+  constructor(versionNumber: string) {
+    this.prefix = `ui:${versionNumber}:`;
+  }
+
+  public get all(): string {
+    return `${this.prefix}*`;
+  }
+
+  public get allNavLinks(): string {
+    return `${this.prefix}navLinks/*`;
+  }
+
+  public get allCatalogueEntries(): string {
+    return `${this.prefix}catalogue/*`;
+  }
+
+  public get allManagmentLinks(): string {
+    return `${this.prefix}management/*`;
+  }
 
   public get(featureId: keyof UICapabilities, ...uiCapabilityParts: string[]) {
     if (!featureId || !isString(featureId)) {
@@ -34,6 +50,6 @@ export class UIActions {
       );
     }
 
-    return `${prefix}${featureId}/${uiCapabilityParts.join('/')}`;
+    return `${this.prefix}${featureId}/${uiCapabilityParts.join('/')}`;
   }
 }
