@@ -7,40 +7,34 @@
 import { first, last } from 'lodash';
 import { idx } from '../../../../../common/idx';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
-import { ESResponse } from './fetcher';
+import { ESBucket, ESResponse } from './fetcher';
 
-interface IBucket {
-  x: number;
-  anomalyScore: number | null;
-  lower: number | null;
-  upper: number | null;
+type IBucket = ReturnType<typeof getBucket>;
+function getBucket(bucket: ESBucket) {
+  return {
+    x: bucket.key,
+    anomalyScore: bucket.anomaly_score.value,
+    lower: bucket.lower.value,
+    upper: bucket.upper.value
+  };
 }
 
-export interface AnomalyTimeSeriesResponse {
-  anomalyScore: RectCoordinate[];
-  anomalyBoundaries: Coordinate[];
-}
-
+export type AnomalyTimeSeriesResponse = ReturnType<
+  typeof anomalySeriesTransform
+>;
 export function anomalySeriesTransform(
-  response: ESResponse | undefined,
+  response: ESResponse,
   mlBucketSize: number,
   bucketSize: number,
   timeSeriesDates: number[]
-): AnomalyTimeSeriesResponse | undefined {
+) {
   if (!response) {
     return;
   }
 
   const buckets = (
     idx(response, _ => _.aggregations.ml_avg_response_times.buckets) || []
-  ).map(bucket => {
-    return {
-      x: bucket.key,
-      anomalyScore: bucket.anomaly_score.value,
-      lower: bucket.lower.value,
-      upper: bucket.upper.value
-    };
-  });
+  ).map(getBucket);
 
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;
 

@@ -14,12 +14,7 @@ import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export type TraceItem = Transaction | Span;
-
-export async function getTraceItems(
-  traceId: string,
-  setup: Setup
-): Promise<TraceItem[]> {
+export async function getTraceItems(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
 
   const params: SearchParams = {
@@ -41,6 +36,6 @@ export async function getTraceItems(
     }
   };
 
-  const resp = await client<TraceItem>('search', params);
+  const resp = await client<Transaction | Span>('search', params);
   return resp.hits.hits.map(hit => hit._source);
 }
