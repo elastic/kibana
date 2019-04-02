@@ -28,7 +28,7 @@ setHttpClient(axios.create(), $q);
 
 const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
   const userActions = {
-    // Follower indices user actions
+    // Follower indices LIST
     followerIndicesList() {
       const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
 
@@ -70,7 +70,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickFollowerIndexAt,
       };
     },
-    // Auto-follow patterns user actions
+    // Auto-follow patterns LIST
     autoFollowPatternList() {
       const { rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable');
 
@@ -118,6 +118,16 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickConfirmModalDeleteAutoFollowPattern,
         clickRowActionButtonAt,
         clickAutoFollowPatternAt
+      };
+    },
+    // Auto-follow pattern FORM
+    autoFollowPatternForm() {
+      const clickSaveForm = () => {
+        find('ccrAutoFollowPatternFormSubmitButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
       };
     }
   };
@@ -185,10 +195,23 @@ export const registerHttpRequestMockHelpers = server => {
     );
   };
 
+  const setLoadRemoteClusteresResponse = (response = [], error) => {
+    if (error) {
+      server.respondWith('GET', '/api/remote_clusters',
+        [error.status || 400, { 'Content-Type': 'application/json' }, JSON.stringify(error.body)]
+      );
+    } else {
+      server.respondWith('GET', '/api/remote_clusters',
+        [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]
+      );
+    }
+  };
+
   return {
     setLoadFollowerIndicesResponse,
     setLoadAutoFollowPatternsResponse,
     setDeleteAutoFollowPatternResponse,
     setAutoFollowStatsResponse,
+    setLoadRemoteClusteresResponse,
   };
 };

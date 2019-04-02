@@ -223,7 +223,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
       return (
         <Fragment>
-          <SectionError title={title} error={apiError} />
+          <SectionError title={title} error={apiError} data-test-subj="autoFollowPatternFormApiError" />
           <EuiSpacer size="l" />
         </Fragment>
       );
@@ -576,6 +576,7 @@ export class AutoFollowPatternForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
+            data-test-subj="autoFollowPatternFormError"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -643,7 +644,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
+        <EuiForm data-test-subj="ccrAutoFollowPatternForm">
           {renderAutoFollowPatternName()}
           {renderRemoteClusterField()}
           {renderLeaderIndexPatterns()}

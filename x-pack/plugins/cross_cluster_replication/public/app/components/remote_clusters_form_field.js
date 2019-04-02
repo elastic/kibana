@@ -137,23 +137,21 @@ export class RemoteClustersFormField extends PureComponent {
         { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
         { errorMessage }
 
-        <Fragment>
-          <EuiSpacer size="s" />
-          <div> {/* Break out of EuiFormRow's flexbox layout */}
-            <EuiButtonEmpty
-              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
-              size="s"
-              iconType="plusInCircle"
-              flush="left"
-              data-test-subj="ccrRemoteClusterInlineAddButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
-                defaultMessage="Add remote cluster"
-              />
-            </EuiButtonEmpty>
-          </div>
-        </Fragment>
+        <EuiSpacer size="s" />
+        <div> {/* Break out of EuiFormRow's flexbox layout */}
+          <EuiButtonEmpty
+            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
+            size="s"
+            iconType="plusInCircle"
+            flush="left"
+            data-test-subj="ccrRemoteClusterInlineAddButton"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
+              defaultMessage="Add remote cluster"
+            />
+          </EuiButtonEmpty>
+        </div>
       </Fragment>
     );
   };
@@ -170,6 +168,7 @@ export class RemoteClustersFormField extends PureComponent {
           title={title}
           color="danger"
           iconType="cross"
+          data-test-subj="remoteClusterFieldNoClusterFoundError"
         >
           <p>
             { this.errorMessages.noClusterFound() }
@@ -207,6 +206,7 @@ export class RemoteClustersFormField extends PureComponent {
         title={title}
         color={fatal ? 'danger' : 'warning'}
         iconType="cross"
+        data-test-subj="remoteClusterFieldCallOutError"
       >
         <p>
           { description }
@@ -318,9 +318,7 @@ export class RemoteClustersFormField extends PureComponent {
         isInvalid={isInvalid}
         fullWidth
       >
-        <Fragment>
-          {field}
-        </Fragment>
+        {field}
       </EuiFormRow>
     );
   }
