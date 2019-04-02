@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
+import { has } from 'lodash';
 import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
@@ -66,10 +67,16 @@ class VisEditor extends Component {
       model: nextModel,
       dirty: !this.state.autoApply
     });
+
     const { params, fields } = this.props.vis;
-    fetchIndexPatternFields(params, fields).then(visFields => {
-      this.setState({ visFields });
-    });
+
+    // We should update visFields only if "index_pattern" was changed
+    // and only in Editor mode
+    if (this.props.isEditorMode && has(partialModel, 'index_pattern')) {
+      fetchIndexPatternFields(params, fields).then(visFields => {
+        this.setState({ visFields });
+      });
+    }
   };
 
   handleCommit = () => {

@@ -20,44 +20,76 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
+import { kfetchAbortable } from 'ui/kfetch';
+
+const ABORT_REQUEST_CODE = 20;
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
   const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
+  const requestsMap = new Map();
 
   return {
     name: 'metrics',
     handler: function ({ uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const panel = visParams;
         const uiStateObj = uiState.get(panel.type, {});
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
         const dateFormat = config.get('dateFormat');
+
         if (panel && panel.id) {
-          const params = {
-            timerange: { timezone, ...parsedTimeRange },
-            query,
-            filters,
-            panels: [panel],
-            state: uiStateObj
-          };
+          const requestId = `${panel.id}:${panel.title}`;
+
+          if (requestsMap.has(requestId)) {
+            requestsMap.get(requestId)();
+            requestsMap.delete(requestId);
+          }
 
           try {
             const maxBuckets = config.get('metrics:max_buckets');
             validateInterval(parsedTimeRange, panel, maxBuckets);
-            const httpResult = $http.post('../api/metrics/vis/data', params)
-              .then(resp => ({ dateFormat, scaledDataFormat, timezone, ...resp.data }))
-              .catch(resp => { throw resp.data; });
 
-            return httpResult
-              .then(resolve)
+            const {
+              fetching,
+              abort,
+            } = kfetchAbortable({
+              pathname: '../api/metrics/vis/data',
+              method: 'POST',
+              body: JSON.stringify({
+                timerange: { timezone, ...parsedTimeRange },
+                query,
+                filters,
+                panels: [panel],
+                state: uiStateObj
+              })
+            });
+
+            requestsMap.set(requestId, abort);
+
+            fetching
+              .then(resp => {
+                requestsMap.delete(requestId);
+
+                resolve({
+                  dateFormat,
+                  scaledDataFormat,
+                  timezone,
+                  ...resp
+                });
+              })
               .catch(resp => {
-                resolve({});
-                const err = new Error(resp.message);
-                err.stack = resp.stack;
-                notify.error(err);
+                if (resp.code !== ABORT_REQUEST_CODE) {
+                  const err = new Error(resp.message);
+
+                  err.stack = resp.stack;
+                  notify.error(err);
+                }
+
+                resolve();
               });
+
           } catch (e) {
             notify.error(e);
             return resolve();

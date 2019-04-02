@@ -21,6 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
+import { get } from 'lodash';
 import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 function ReactEditorControllerProvider(Private, config) {
@@ -35,21 +36,28 @@ function ReactEditorControllerProvider(Private, config) {
     setDefaultIndexPattern = async () => {
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+
       this.vis.params.default_index_pattern = indexPattern.attributes.title;
+    };
+
+    setVisFields = async () => {
+      this.vis.fields = await fetchIndexPatternFields(this.vis.params, this.vis.fields);
     };
 
     async render(params) {
       const Component = this.vis.type.editorConfig.component;
 
-      await this.setDefaultIndexPattern();
-      const visFields = await fetchIndexPatternFields(this.vis.params, this.vis.fields);
+      if (!get(this.vis, 'params.default_index_pattern')) {
+        await this.setDefaultIndexPattern();
+        await this.setVisFields();
+      }
 
       render(
         <I18nContext>
           <Component
             config={config}
             vis={this.vis}
-            visFields={visFields}
+            visFields={this.vis.fields}
             visParams={this.vis.params}
             savedObj={this.savedObj}
             timeRange={params.timeRange}

@@ -51,7 +51,7 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
-type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
+type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams, vis?: Vis) => VisParams;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -330,6 +330,11 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
+  metrics: (schemas, visConfig, vis) => {
+    return {
+      title: vis.title,
+    };
+  },
 };
 
 export const buildVislibDimensions = async (
@@ -376,7 +381,7 @@ export const getVisParams = async (
   if (buildVisConfig[vis.type.name]) {
     visConfig = {
       ...visConfig,
-      ...buildVisConfig[vis.type.name](schemas, visConfig),
+      ...buildVisConfig[vis.type.name](schemas, visConfig, vis),
     };
   } else if (vislibCharts.includes(vis.type.name)) {
     visConfig.dimensions = await buildVislibDimensions(vis, params);
