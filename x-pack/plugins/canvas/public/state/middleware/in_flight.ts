@@ -5,8 +5,17 @@
  */
 
 import { Dispatch, Middleware } from 'redux';
-import { loadingIndicator } from '../../lib/loading_indicator';
+import {
+  loadingIndicator as defaultLoadingIndicator,
+  LoadingIndicatorInterface,
+} from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';
+
+interface InFlightMiddlewareOptions {
+  pendingCache: string[];
+  loadingIndicator: LoadingIndicatorInterface;
+}
+
 import {
   Action as AnyAction,
   inFlightActive,
@@ -19,28 +28,38 @@ import {
 
 const pathToKey = (path: any[]) => convert(path).join('/');
 
-export const inFlight: Middleware = ({ dispatch }) => (next: Dispatch) => {
-  const pendingCache = [];
-
-  return (action: AnyAction) => {
-    if (action.type === setLoadingActionType) {
-      const cacheKey = pathToKey(action.payload.path);
-      pendingCache.push(cacheKey);
-      dispatch(inFlightActive());
-    } else if (action.type === setValueActionType) {
-      const cacheKey = pathToKey(action.payload.path);
-      const idx = pendingCache.indexOf(cacheKey);
-      pendingCache.splice(idx, 1);
-      if (pendingCache.length === 0) {
-        dispatch(inFlightComplete());
+export const inFlightMiddlewareFactory = ({
+  loadingIndicator,
+  pendingCache,
+}: InFlightMiddlewareOptions): Middleware => {
+  return ({ dispatch }) => (next: Dispatch) => {
+    return (action: AnyAction) => {
+      if (action.type === setLoadingActionType) {
+        const cacheKey = pathToKey(action.payload.path);
+        pendingCache.push(cacheKey);
+        dispatch(inFlightActive());
+      } else if (action.type === setValueActionType) {
+        const cacheKey = pathToKey(action.payload.path);
+        const idx = pendingCache.indexOf(cacheKey);
+        if (idx >= 0) {
+          pendingCache.splice(idx, 1);
+        }
+        if (pendingCache.length === 0) {
+          dispatch(inFlightComplete());
+        }
+      } else if (action.type === inFlightActiveActionType) {
+        loadingIndicator.show();
+      } else if (action.type === inFlightCompleteActionType) {
+        loadingIndicator.hide();
       }
-    } else if (action.type === inFlightActiveActionType) {
-      loadingIndicator.show();
-    } else if (action.type === inFlightCompleteActionType) {
-      loadingIndicator.hide();
-    }
 
-    // execute the action
-    next(action);
+      // execute the action
+      next(action);
+    };
   };
 };
+
+export const inFlight = inFlightMiddlewareFactory({
+  loadingIndicator: defaultLoadingIndicator,
+  pendingCache: [],
+});
