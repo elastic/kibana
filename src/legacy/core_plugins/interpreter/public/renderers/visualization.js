@@ -49,7 +49,7 @@ export const visualization = () => ({
 
     handlers.onDestroy(() => visualizationLoader.destroy());
 
-    await visualizationLoader.render(domNode, handlers.vis, visData, visConfig || handlers.vis.params, uiState, params).then(() => {
+    await visualizationLoader.render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params).then(() => {
       if (handlers.done) handlers.done();
     });
   },

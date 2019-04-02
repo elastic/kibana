@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { RootState } from '../../reducers';
 
 const Root = styled.div`
-  padding: ${theme.euiSizeXxl} 0;
+  padding: ${theme.euiSizeXXL} 0;
   margin: 0 auto;
   & > div {
     margin-top: ${theme.euiSizeL};

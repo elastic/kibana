@@ -68,7 +68,7 @@ describe('code in multiple nodes', () => {
       },
     };
     nonCodeNode = createRootWithCorePlugins(setting);
-    await nonCodeNode.start();
+    await nonCodeNode.setup();
   }
   // @ts-ignore
   before(startServers);
@@ -98,7 +98,7 @@ describe('code in multiple nodes', () => {
   it('Non-code node setup should fail if code node is shutdown', async () => {
     await codeNode.shutdown();
     await request.get(nonCodeNode, '/api/code/setup').expect(502);
-    await codeNode.start();
+    await codeNode.setup();
     await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
     // @ts-ignore

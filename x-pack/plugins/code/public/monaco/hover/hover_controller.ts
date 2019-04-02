@@ -5,14 +5,11 @@
  */
 
 import { editor as Editor, IDisposable, IKeyboardEvent } from 'monaco-editor';
-import IEditorContribution = Editor.IEditorContribution;
-import ICodeEditor = Editor.ICodeEditor;
-import IEditorMouseEvent = Editor.IEditorMouseEvent;
 import { EditorActions } from '../../components/editor/editor';
 import { monaco } from '../monaco';
 import { ContentHoverWidget } from './content_hover_widget';
 
-export class HoverController implements IEditorContribution {
+export class HoverController implements Editor.IEditorContribution {
   public static ID = 'code.editor.contrib.hover';
   public static get(editor: any): HoverController {
     return editor.getContribution(HoverController.ID);
@@ -20,9 +17,9 @@ export class HoverController implements IEditorContribution {
   private contentWidget: ContentHoverWidget;
   private disposables: IDisposable[];
 
-  constructor(readonly editor: ICodeEditor) {
+  constructor(readonly editor: Editor.ICodeEditor) {
     this.disposables = [
-      this.editor.onMouseMove((e: IEditorMouseEvent) => this.onEditorMouseMove(e)),
+      this.editor.onMouseMove((e: Editor.IEditorMouseEvent) => this.onEditorMouseMove(e)),
       this.editor.onKeyDown((e: IKeyboardEvent) => this.onKeyDown(e)),
     ];
     this.contentWidget = new ContentHoverWidget(editor);
@@ -40,7 +37,7 @@ export class HoverController implements IEditorContribution {
     this.contentWidget.setHoverResultAction(actions.hoverResult);
   }
 
-  private onEditorMouseMove(mouseEvent: IEditorMouseEvent) {
+  private onEditorMouseMove(mouseEvent: Editor.IEditorMouseEvent) {
     const targetType = mouseEvent.target.type;
     const { MouseTargetType } = monaco.editor;
 

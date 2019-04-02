@@ -50,7 +50,20 @@ export const treeCommitsSelector = (state: RootState) => {
 
 export const hasMoreCommitsSelector = (state: RootState) => {
   const path = state.file.currentPath;
-  return !state.file.commitsFullyLoaded[path];
+  const isLoading = state.file.loadingCommits;
+  if (isLoading) {
+    return false;
+  }
+  if (state.file.commitsFullyLoaded[path]) {
+    return false;
+  }
+  const commits = path === '' ? state.file.commits : state.file.treeCommits[path];
+  if (!commits) {
+    // To avoid infinite loops in component `InfiniteScroll`,
+    // here we set hasMore to false before we receive the first batch.
+    return false;
+  }
+  return true;
 };
 
 function find(tree: FileTree, paths: string[]): FileTree | null {

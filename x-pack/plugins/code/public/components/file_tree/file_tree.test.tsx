@@ -10,14 +10,14 @@ import { match } from 'react-router-dom';
 import renderer from 'react-test-renderer';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { createHistory, createLocation, createMatch, mockFunction } from '../../utils/test_utils';
+import props from './__fixtures__/props.json';
 import { CodeFileTree } from './file_tree';
-import props from './props.json';
 
 const location: Location = createLocation({
   pathname: '/github.com/google/guava/tree/master/guava/src/com/google',
 });
 
-const match: match<MainRouteParams> = createMatch({
+const m: match<MainRouteParams> = createMatch({
   path: '/:resource/:org/:repo/:pathType(blob|tree)/:revision/:path*:goto(!.*)?',
   url: '/github.com/google/guava/tree/master/guava/src/com/google',
   isExact: true,
@@ -40,7 +40,7 @@ test('render correctly', () => {
         node={props.node}
         openedPaths={props.openedPaths}
         history={history}
-        match={match}
+        match={m}
         location={location}
         closeTreePath={mockFunction}
         openTreePath={mockFunction}

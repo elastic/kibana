@@ -63,7 +63,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 // import 'monaco-editor/esm/vs/basic-languages/css/css.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/dockerfile/dockerfile.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/fsharp/fsharp.contribution.js';
-// import 'monaco-editor/esm/vs/basic-languages/go/go.contribution.js';
+import 'monaco-editor/esm/vs/basic-languages/go/go.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/handlebars/handlebars.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/ini/ini.contribution.js';
@@ -98,25 +98,6 @@ import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution'
 import chrome from 'ui/chrome';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-
-// @ts-ignore
-/*self.MonacoEnvironment = {
-  getWorkerUrl(moduleId: string, label: string) {
-    // if (label === 'json') {
-    // 	return './json.worker.bundle.js';
-    // }
-    // if (label === 'css') {
-    // 	return './css.worker.bundle.js';
-    // }
-    // if (label === 'html') {
-    // 	return './html.worker.bundle.js';
-    // }
-    // if (label === 'typescript' || label === 'javascript') {
-    // 	return './ts.worker.bundle.js';
-    // }
-    return './editor.worker.bundle.js';
-  },
-};*/
 
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 

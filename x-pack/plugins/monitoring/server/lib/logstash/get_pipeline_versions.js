@@ -10,8 +10,9 @@ import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 
 function fetchPipelineVersions(...args) {
-  const [ callWithRequest, req, config, logstashIndexPattern, clusterUuid, pipelineId ] = args;
+  const [ req, config, logstashIndexPattern, clusterUuid, pipelineId ] = args;
   checkParam(logstashIndexPattern, 'logstashIndexPattern in getPipelineVersions');
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const filters = [
     {

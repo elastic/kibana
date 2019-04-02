@@ -42,9 +42,9 @@ export class LspIndexer extends AbstractIndexer {
     this.batchIndexHelper = new BatchIndexHelper(client, log);
   }
 
-  public async start(progressReporter?: ProgressReporter) {
+  public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIndexRequest) {
     try {
-      return await super.start(progressReporter);
+      return await super.start(progressReporter, checkpointReq);
     } finally {
       if (!this.isCancelled()) {
         // Flush all the index request still in the cache for bulk index.
@@ -180,7 +180,7 @@ export class LspIndexer extends AbstractIndexer {
         reference: this.options.enableGlobalReference,
       });
 
-      if (response && response.result.length > 0) {
+      if (response && response.result && response.result.length > 0 && response.result[0]) {
         const { symbols, references } = response.result[0];
         for (const symbol of symbols) {
           await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);

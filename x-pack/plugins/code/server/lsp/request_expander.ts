@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
 import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
@@ -33,13 +33,7 @@ interface Workspace {
   initPromise?: Promise<any>;
 }
 
-const InitializingError = {
-  id: -1,
-  error: {
-    code: ServerNotInitialized,
-    message: 'Server is initializing',
-  },
-};
+export const InitializingError = new ResponseError(ServerNotInitialized, 'Server is initializing');
 
 export class RequestExpander implements ILanguageServerHandler {
   public lastAccess: number = 0;

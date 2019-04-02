@@ -6,9 +6,18 @@
 
 import moment from 'moment';
 
-import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
+import {
+  IndexProgress,
+  IndexRequest,
+  IndexStats,
+  IndexWorkerProgress,
+  IndexWorkerResult,
+  RepositoryUri,
+  WorkerProgress,
+  WorkerReservedProgress,
+} from '../../model';
 import { GitOperations } from '../git_operations';
-import { IndexerFactory, IndexProgress } from '../indexer';
+import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -40,6 +49,40 @@ export class IndexWorker extends AbstractWorker {
     const { uri, revision } = payload;
     const indexerNumber = this.indexerFactories.length;
 
+    const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
+      uri
+    )) as IndexWorkerProgress;
+    let checkpointReq: IndexRequest | undefined;
+    if (workerProgress) {
+      // There exist an ongoing index process
+      const {
+        uri: currentUri,
+        revision: currentRevision,
+        indexProgress: currentIndexProgress,
+        progress,
+      } = workerProgress;
+
+      checkpointReq = currentIndexProgress && currentIndexProgress.checkpoint;
+      if (
+        !checkpointReq &&
+        progress > WorkerReservedProgress.INIT &&
+        progress < WorkerReservedProgress.COMPLETED &&
+        currentUri === uri &&
+        currentRevision === revision
+      ) {
+        // If
+        // * no checkpoint exist (undefined or empty string)
+        // * index progress is ongoing
+        // * the uri and revision match the current job
+        // Then we can safely dedup this index job request.
+        this.log.info(`Index job skipped for ${uri} at revision ${revision}`);
+        return {
+          uri,
+          revision,
+        };
+      }
+    }
+
     // Binding the index cancellation logic
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
@@ -52,7 +95,7 @@ export class IndexWorker extends AbstractWorker {
           this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
         const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        return indexer.start(progressReporter);
+        return indexer.start(progressReporter, checkpointReq);
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
@@ -69,7 +112,7 @@ export class IndexWorker extends AbstractWorker {
     const { uri, revision } = job.payload;
     const progress: WorkerProgress = {
       uri,
-      progress: 0,
+      progress: WorkerReservedProgress.INIT,
       timestamp: new Date(),
       revision,
     };
@@ -77,11 +120,24 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async updateProgress(uri: RepositoryUri, progress: number) {
-    const p: WorkerProgress = {
+    let p: any = {
       uri,
       progress,
       timestamp: new Date(),
     };
+    if (
+      progress === WorkerReservedProgress.COMPLETED ||
+      progress === WorkerReservedProgress.ERROR ||
+      progress === WorkerReservedProgress.TIMEOUT
+    ) {
+      // Reset the checkpoint if necessary.
+      p = {
+        ...p,
+        indexProgress: {
+          checkpoint: null,
+        },
+      };
+    }
     try {
       return await this.objectClient.updateRepositoryLspIndexStatus(uri, p);
     } catch (error) {
@@ -116,11 +172,12 @@ export class IndexWorker extends AbstractWorker {
     total: number
   ) {
     return async (progress: IndexProgress) => {
-      const p: WorkerProgress = {
+      const p: IndexWorkerProgress = {
         uri: repoUri,
         progress: progress.percentage,
         timestamp: new Date(),
         revision,
+        indexProgress: progress,
       };
       return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
     };

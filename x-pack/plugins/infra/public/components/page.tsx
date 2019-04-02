@@ -5,22 +5,23 @@
  */
 
 import { EuiPage } from '@elastic/eui';
-import styled from 'styled-components';
 
-export const ColumnarPage = styled.div`
+import euiStyled from '../../../../common/eui_styled_components';
+
+export const ColumnarPage = euiStyled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex: 1 0 0%;
 `;
 
-export const PageContent = styled.div`
+export const PageContent = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: row;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
 `;
 
-export const FlexPage = styled(EuiPage)`
+export const FlexPage = euiStyled(EuiPage)`
   flex: 1 0 0%;
 `;

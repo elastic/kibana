@@ -13,10 +13,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import classname from 'classnames';
 import { IPosition } from 'monaco-editor';
 import queryString from 'querystring';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileReferences, GroupedRepoReferences } from '../../actions';
 import { history } from '../../utils/url';
@@ -34,7 +34,6 @@ interface State {
 }
 
 export class ReferencesPanel extends React.Component<Props, State> {
-  private node: Element | undefined = undefined;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -45,9 +44,6 @@ export class ReferencesPanel extends React.Component<Props, State> {
   public close = () => {
     this.props.onClose();
   };
-  public componentDidMount(): void {
-    this.node = ReactDOM.findDOMNode(this) as Element;
-  }
 
   public toggleExpand = () => {
     this.setState({ expanded: !this.state.expanded });
@@ -57,20 +53,12 @@ export class ReferencesPanel extends React.Component<Props, State> {
     const body = this.props.isLoading ? <EuiLoadingKibana size="xl" /> : this.renderGroupByRepo();
     const styles: any = {};
     const expanded = this.state.expanded;
-    if (expanded) {
-      styles.position = 'absolute';
-      styles.bottom = 0;
-      styles.right = 0;
-      if (this.node) {
-        const parent = this.node.parentNode as Element;
-        styles.width = parent.clientWidth;
-        styles.height = parent.clientHeight - 75;
-        styles.maxHeight = styles.height;
-        styles.zIndex = 1000;
-      }
-    }
     return (
-      <EuiPanel grow={false} className="code-editor-references-panel" style={styles}>
+      <EuiPanel
+        grow={false}
+        className={classname(['code-editor-references-panel', expanded ? 'expanded' : ''])}
+        style={styles}
+      >
         <EuiButtonIcon
           size="s"
           onClick={this.toggleExpand}
@@ -90,7 +78,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
         <EuiTitle size="s">
           <h3>{this.props.title}</h3>
         </EuiTitle>
-
+        <EuiSpacer size="m" />
         <div className="code-auto-overflow-y">{body}</div>
       </EuiPanel>
     );
@@ -103,12 +91,19 @@ export class ReferencesPanel extends React.Component<Props, State> {
   }
 
   private renderReferenceRepo({ repo, files }: GroupedRepoReferences) {
+    const [org, name] = repo.split('/').slice(1);
+    const buttonContent = (
+      <span>
+        <span>{org}</span>/<b>{name}</b>
+      </span>
+    );
+
     return (
       <EuiAccordion
         id={repo}
         key={repo}
         buttonContentClassName="code-editor-reference-accordion-button"
-        buttonContent={repo}
+        buttonContent={buttonContent}
         paddingSize="s"
         initialIsOpen={true}
       >

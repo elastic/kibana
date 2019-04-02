@@ -7,6 +7,13 @@
   0px -6px 12px rgba(0, 0, 0, 0.05), 0px -12px 24px rgba(0, 0, 0, 0.05);
 }
 
+.code-editor-references-panel.expanded {
+  position: relative;
+  flex-grow: 10;
+  max-height: 95%;
+  height: 95%;
+}
+
 .code-editor-reference-accordion-button {
   font-size: 13px;
 }

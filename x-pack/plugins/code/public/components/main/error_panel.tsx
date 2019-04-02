@@ -20,24 +20,16 @@ export const ErrorPanel = (props: { title: ReactNode; content: string }) => {
     <Root>
       <EuiPanel>
         <EuiSpacer />
-        {/*
-              // @ts-ignore */}
         <EuiText textAlign="center">
           <ErrorIcon />
         </EuiText>
-        {/*
-              // @ts-ignore */}
         <EuiText textAlign="center">{props.title}</EuiText>
         <EuiSpacer />
-        {/*
-              // @ts-ignore */}
         <EuiText textAlign="center">
           <EuiTextColor>{props.content}</EuiTextColor>
         </EuiText>
         <EuiSpacer />
         <EuiSpacer />
-        {/*
-              // @ts-ignore */}
         <EuiText textAlign="center">
           <EuiButton fill={true} onClick={history.goBack}>
             Go Back

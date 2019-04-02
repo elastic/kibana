@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import {
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiGlobalToastList,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -30,9 +29,10 @@ import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { Repository } from '../../../model';
-import { importRepo } from '../../actions';
+import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
-import { CallOutType } from '../../reducers/repository';
+import { ToastType } from '../../reducers/repository';
+import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
 
@@ -79,22 +79,24 @@ interface Props {
   isAdmin: boolean;
   importRepo: (repoUrl: string) => void;
   importLoading: boolean;
-  callOutMessage?: string;
-  showCallOut: boolean;
-  callOutType: CallOutType;
+  toastMessage?: string;
+  showToast: boolean;
+  toastType: ToastType;
+  closeToast: () => void;
 }
 interface State {
   showImportProjectModal: boolean;
   importLoading: boolean;
   settingModal: { url?: string; uri?: string; show: boolean };
   repoURL: string;
+  isInvalid: boolean;
   sortOption: SortOptionsValue;
 }
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
   public static getDerivedStateFromProps(props: Readonly<Props>, state: State) {
     if (state.importLoading && !props.importLoading) {
-      return { showImportProjectModal: false, importLoading: props.importLoading };
+      return { showImportProjectModal: false, importLoading: props.importLoading, repoURL: '' };
     }
     return { importLoading: props.importLoading };
   }
@@ -107,11 +109,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       settingModal: { show: false },
       repoURL: '',
       sortOption: SortOptionsValue.alphabetical_asc,
+      isInvalid: false,
     };
   }
 
   public closeModal = () => {
-    this.setState({ showImportProjectModal: false, repoURL: '' });
+    this.setState({ showImportProjectModal: false, repoURL: '', isInvalid: false });
   };
 
   public openModal = () => {
@@ -129,12 +132,20 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   public onChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       repoURL: e.target.value,
+      isInvalid: isImportRepositoryURLInvalid(e.target.value),
     });
   };
 
   public submitImportProject = () => {
-    this.props.importRepo(this.state.repoURL);
-    this.setState({ repoURL: '' });
+    if (!isImportRepositoryURLInvalid(this.state.repoURL)) {
+      this.props.importRepo(this.state.repoURL);
+    } else if (!this.state.isInvalid) {
+      this.setState({ isInvalid: true });
+    }
+  };
+
+  public updateIsInvalid = () => {
+    this.setState({ isInvalid: isImportRepositoryURLInvalid(this.state.repoURL) });
   };
 
   public renderImportModal = () => {
@@ -149,15 +160,17 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
               <h3>Repository URL</h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow>
+              <EuiFormRow isInvalid={this.state.isInvalid} error="This field shouldn't be empty.">
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
+                  onBlur={this.updateIsInvalid}
                   placeholder="https://github.com/elastic/elasticsearch"
                   aria-label="input project url"
                   data-test-subj="importRepositoryUrlInputBox"
                   isLoading={this.props.importLoading}
                   fullWidth={true}
+                  isInvalid={this.state.isInvalid}
                 />
               </EuiFormRow>
             </EuiForm>
@@ -178,7 +191,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { projects, isAdmin, status, callOutMessage, showCallOut, callOutType } = this.props;
+    const { projects, isAdmin, status, toastMessage, showToast, toastType } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
@@ -208,10 +221,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
     return (
       <div className="code-sidebar" data-test-subj="codeRepositoryList">
-        {showCallOut && (
-          <EuiCallOut color={callOutType} title="">
-            {callOutMessage}
-          </EuiCallOut>
+        {showToast && (
+          <EuiGlobalToastList
+            toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
+            dismissToast={this.props.closeToast}
+            toastLifeTimeMs={6000}
+          />
         )}
         <EuiSpacer />
         <EuiFlexGroup>
@@ -256,13 +271,14 @@ const mapStateToProps = (state: RootState) => ({
   status: state.status.status,
   isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
-  callOutMessage: state.repository.callOutMessage,
-  callOutType: state.repository.callOutType,
-  showCallOut: state.repository.showCallOut,
+  toastMessage: state.repository.toastMessage,
+  toastType: state.repository.toastType,
+  showToast: state.repository.showToast,
 });
 
 const mapDispatchToProps = {
   importRepo,
+  closeToast,
 };
 
 export const ProjectTab = connect(

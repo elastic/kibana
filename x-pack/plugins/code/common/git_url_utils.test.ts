@@ -30,7 +30,7 @@ test('Git url validation', () => {
 
   // An url without protocol
   expect(isValidGitUrl('/Users/elastic/elasticsearch')).toBeFalsy();
-  expect(isValidGitUrl('github.com/elastic/elasticsearch')).toBeFalsy();
+  expect(isValidGitUrl('github.com/elastic/elasticsearch')).toBeTruthy();
 
   // An valid git url but without whitelisted host
   expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git', ['gitlab.com'])).toBeFalsy();

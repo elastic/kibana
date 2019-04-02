@@ -34,15 +34,6 @@ const Header = styled.div`
   justify-content: space-between;
 `;
 
-const CommitId = styled.div`
-  height: calc(20rem / 14);
-  margin: auto 0;
-  text-align: center;
-  flex-shrink: 0;
-`;
-
-const CommitContainer = styled.div``;
-
 const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) => {
   const { date, commit } = props;
   const { message, committer, id } = commit;
@@ -52,19 +43,19 @@ const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) =>
     .join('');
   return (
     <EuiPanel className="code-timeline__commit--root">
-      <CommitContainer>
+      <div className="eui-textTruncate">
         <EuiText size="s">
-          <p>{message}</p>
+          <p className="eui-textTruncate">{message}</p>
         </EuiText>
         <EuiText size="xs">
           <EuiTextColor color="subdued">
             {committer} · {date}
           </EuiTextColor>
         </EuiText>
-      </CommitContainer>
-      <CommitId>
+      </div>
+      <div className="code-commit-id">
         <CommitLink repoUri={props.repoUri} commit={commitId} />
-      </CommitId>
+      </div>
     </EuiPanel>
   );
 };

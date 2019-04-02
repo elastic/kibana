@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexRequest } from './search';
+
 export type RepositoryUri = string;
 
 export interface Repository {
@@ -124,4 +126,17 @@ export interface CloneProgress {
 
 export interface CloneWorkerProgress extends WorkerProgress {
   cloneProgress?: CloneProgress;
+}
+
+export interface IndexProgress {
+  type: string;
+  total: number;
+  success: number;
+  fail: number;
+  percentage: number;
+  checkpoint?: IndexRequest;
+}
+
+export interface IndexWorkerProgress extends WorkerProgress {
+  indexProgress?: IndexProgress;
 }

@@ -12,11 +12,10 @@ import {
   closeTreePath,
   fetchDirectory,
   fetchDirectorySuccess,
-  fetchFile,
   fetchFileFailed,
-  FetchFilePayload,
   FetchFileResponse,
   fetchFileSuccess,
+  fetchMoreCommits,
   fetchRepoBranchesSuccess,
   fetchRepoCommitsSuccess,
   fetchRepoTree,
@@ -155,22 +154,24 @@ export const file = handleActions(
       }),
     [String(closeTreePath)]: (state: FileState, action: Action<any>) =>
       produce<FileState>(state, (draft: FileState) => {
-        draft.openedPaths = state.openedPaths.filter(p => !p.startsWith(action.payload!));
+        const path = action.payload!;
+        const isSubFolder = (p: string) => p.startsWith(path + '/');
+        draft.openedPaths = state.openedPaths.filter(p => !(p === path || isSubFolder(p)));
       }),
     [String(fetchRepoCommitsSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.commits = action.payload;
         draft.loadingCommits = false;
       }),
+    [String(fetchMoreCommits)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.loadingCommits = true;
+      }),
     [String(fetchRepoBranchesSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, (draft: FileState) => {
         const references = action.payload as ReferenceInfo[];
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
-      }),
-    [String(fetchFile)]: (state: FileState, action: any) =>
-      produce<FileState>(state, draft => {
-        draft.file = { payload: action.payload as FetchFilePayload };
       }),
     [String(fetchFileSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {

@@ -191,7 +191,7 @@ export class DiffPage extends React.Component<Props> {
       <Difference repoUri={repoUri} revision={commit.commit.id} fileDiff={file} key={file.path} />
     ));
     return (
-      <div>
+      <div className="diff">
         <SearchBar
           repoScope={this.props.repoScope}
           query={this.props.query}

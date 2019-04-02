@@ -17,6 +17,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
+import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 const ImportButton = styled(EuiButton)`
   margin-top: 1.5rem;
@@ -32,21 +33,30 @@ class CodeImportProject extends React.PureComponent<
     importRepo: (p: string) => void;
     importLoading: boolean;
   },
-  { value: string }
+  { value: string; isInvalid: boolean }
 > {
   public state = {
     value: '',
+    isInvalid: false,
   };
 
   public onChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       value: e.target.value,
+      isInvalid: isImportRepositoryURLInvalid(e.target.value),
     });
   };
 
   public submitImportProject = () => {
-    this.props.importRepo(this.state.value);
-    this.setState({ value: '' });
+    if (!isImportRepositoryURLInvalid(this.state.value)) {
+      this.props.importRepo(this.state.value);
+    } else if (!this.state.isInvalid) {
+      this.setState({ isInvalid: true });
+    }
+  };
+
+  public updateIsInvalid = () => {
+    this.setState({ isInvalid: isImportRepositoryURLInvalid(this.state.value) });
   };
 
   public render() {
@@ -59,6 +69,8 @@ class CodeImportProject extends React.PureComponent<
               label="Repository URL"
               helpText="e.g. https://github.com/elastic/elasticsearch"
               fullWidth
+              isInvalid={this.state.isInvalid}
+              error="This field shouldn't be empty."
             >
               <EuiFieldText
                 value={this.state.value}
@@ -67,12 +79,14 @@ class CodeImportProject extends React.PureComponent<
                 data-test-subj="importRepositoryUrlInputBox"
                 isLoading={this.props.importLoading}
                 fullWidth={true}
+                onBlur={this.updateIsInvalid}
+                isInvalid={this.state.isInvalid}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {/* 
-  // @ts-ignore */}
+            {/*
+            // @ts-ignore */}
             <ImportButton
               onClick={this.submitImportProject}
               data-test-subj="importRepositoryButton"

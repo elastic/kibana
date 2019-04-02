@@ -39,6 +39,7 @@
     flex-shrink: 0;
   }
   div[role="tabpanel"] {
+    @include euiScrollBar;
     width: 100%;
     flex-grow: 1;
     flex-shrink: 1;
@@ -63,8 +64,7 @@
 
 .code-directory__node {
   width: calc(200rem / 14);
-  margin: 0 $euiSizeS $euiSizeS;
-  padding: $euiSizeXS;
+  padding: $euiSizeXS $euiSizeS;
   border-radius: $euiBorderRadius;
   white-space: nowrap;
   color: $euiColorFullShade;
@@ -248,10 +248,10 @@
 }
 
 .code-link {
+  margin: 0 $euiSizeS $euiSizeS;
+  border-radius: $euiBorderRadius;
   &:focus {
-    box-shadow: none;
-    outline: none;
-    animation: none;
+    text-decoration: underline;
   }
 }
 
@@ -270,4 +270,12 @@
 
 .code-no-min-width {
   min-width: unset !important;
+}
+
+.code-commit-id {
+  @include euiCodeFont;
+  height: calc(20rem / 14);
+  margin: auto 0 auto $euiSizeM;
+  text-align: center;
+  flex-shrink: 0;
 }

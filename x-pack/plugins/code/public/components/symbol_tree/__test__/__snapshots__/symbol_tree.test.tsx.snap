@@ -472,6 +472,106 @@ exports[`render symbol tree correctly 1`] = `
                     </div>
                   </div>
                   <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        className="sc-bwzfXH jYpsNE"
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        >
+                          <a
+                            className="code-link"
+                            href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
+                            onClick={[Function]}
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                            >
+                              <div
+                                className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                              >
+                                <svg
+                                  className="euiIcon euiIcon--medium"
+                                  focusable="false"
+                                  height="16"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
+                                    fillRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                className="euiText euiText--small"
+                                data-test-subj="codeStructureTreeNode-Unit"
+                              >
+                                Unit
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        className="sc-bwzfXH jYpsNE"
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        >
+                          <a
+                            className="code-link"
+                            href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
+                            onClick={[Function]}
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                            >
+                              <div
+                                className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                              >
+                                <svg
+                                  className="euiIcon euiIcon--medium"
+                                  focusable="false"
+                                  height="16"
+                                  style={null}
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M9.414 3.757l2.829 2.829a2 2 0 0 1 0 2.828l-2.829 2.829a2 2 0 0 1-2.828 0L3.757 9.414a2 2 0 0 1 0-2.828l2.829-2.829a2 2 0 0 1 2.828 0zm-1.747 2.91a1 1 0 0 0-1 1v.666a1 1 0 0 0 1 1h.666a1 1 0 0 0 1-1v-.666a1 1 0 0 0-1-1h-.666z"
+                                    fillRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                className="euiText euiText--small"
+                                data-test-subj="codeStructureTreeNode-datemath"
+                              >
+                                datemath
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
                     className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
                   >
                     <div

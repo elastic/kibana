@@ -4,6 +4,7 @@ exports[`render correctly with empty query string 1`] = `
 <CodeQueryBar
   appName="mockapp"
   disableAutoFocus={false}
+  enableSubmitWhenOptionsChanged={false}
   onSearchScopeChanged={[Function]}
   onSelect={[Function]}
   onSubmit={[Function]}
@@ -200,8 +201,11 @@ exports[`render correctly with empty query string 1`] = `
                 >
                   <div
                     className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
-                    onClick={[Function]}
                     onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor euiSuperSelect__popoverAnchor"
@@ -531,7 +535,10 @@ exports[`render correctly with empty query string 1`] = `
               aria-expanded={false}
               aria-haspopup="true"
               aria-owns="typeahead-items"
-              onClick={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
               role="combobox"
               style={
                 Object {
@@ -721,6 +728,7 @@ exports[`render correctly with input query string changed 1`] = `
     <CodeQueryBar
       appName="mockapp"
       disableAutoFocus={false}
+      enableSubmitWhenOptionsChanged={false}
       onSearchScopeChanged={[Function]}
       onSelect={[Function]}
       onSubmit={[Function]}
@@ -929,8 +937,11 @@ exports[`render correctly with input query string changed 1`] = `
                     >
                       <div
                         className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
-                        onClick={[Function]}
                         onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
                       >
                         <div
                           className="euiPopover__anchor euiSuperSelect__popoverAnchor"
@@ -1260,7 +1271,10 @@ exports[`render correctly with input query string changed 1`] = `
                   aria-expanded={true}
                   aria-haspopup="true"
                   aria-owns="typeahead-items"
-                  onClick={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
                   role="combobox"
                   style={
                     Object {

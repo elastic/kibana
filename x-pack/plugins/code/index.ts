@@ -53,14 +53,20 @@ export const code = (kibana: any) =>
         repos: Joi.array().default([]),
         security: Joi.object({
           enableMavenImport: Joi.boolean().default(true),
-          enableGradleImport: Joi.boolean().default(true),
+          enableGradleImport: Joi.boolean().default(false),
           installNodeDependency: Joi.boolean().default(true),
           gitHostWhitelist: Joi.array()
             .items(Joi.string())
-            .default([]),
+            .default([
+              'github.com',
+              'gitlab.com',
+              'bitbucket.org',
+              'gitbox.apache.org',
+              'eclipse.org',
+            ]),
           gitProtocolWhitelist: Joi.array()
             .items(Joi.string())
-            .default([]),
+            .default(['https', 'git']),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.

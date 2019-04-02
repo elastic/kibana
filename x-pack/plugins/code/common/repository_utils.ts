@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import crypto from 'crypto';
 import GitUrlParse from 'git-url-parse';
 import path from 'path';
 import { Location } from 'vscode-languageserver';
@@ -35,9 +36,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[1];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // From uri 'origin/org/name' to 'name'
@@ -45,9 +46,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[2];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // From uri 'origin/org/name' to 'org/name'
@@ -55,9 +56,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[1] + '/' + segs[2];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // Return the local data path of a given repository.
@@ -66,10 +67,15 @@ export class RepositoryUtils {
   }
 
   public static normalizeRepoUriToIndexName(repoUri: RepositoryUri) {
-    return repoUri
-      .split('/')
-      .join('-')
-      .toLowerCase();
+    const hash = crypto
+      .createHash('md5')
+      .update(repoUri)
+      .digest('hex')
+      .substring(0, 8);
+    const segs: string[] = repoUri.split('/');
+    segs.push(hash);
+    // Elasticsearch index name is case insensitive
+    return segs.join('-').toLowerCase();
   }
 
   public static locationToUrl(loc: Location) {

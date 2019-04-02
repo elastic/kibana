@@ -223,7 +223,7 @@ CalendarForm.WrappedComponent.propTypes = {
   calendarId: PropTypes.string.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
   canDeleteCalendar: PropTypes.bool.isRequired,
-  description: PropTypes.string.isRequired,
+  description: PropTypes.string,
   groupIds: PropTypes.array.isRequired,
   isEdit: PropTypes.bool.isRequired,
   isNewCalendarIdValid: PropTypes.bool.isRequired,

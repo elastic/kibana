@@ -17,4 +17,44 @@
  * under the License.
  */
 
+import { BasePathSetup } from './base_path';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
+import { FatalErrorsSetup } from './fatal_errors';
+import { HttpSetup } from './http';
+import { I18nSetup } from './i18n';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+
 export { CoreSystem } from './core_system';
+
+export interface CoreSetup {
+  i18n: I18nSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup;
+  notifications: NotificationsSetup;
+  http: HttpSetup;
+  basePath: BasePathSetup;
+  uiSettings: UiSettingsSetup;
+  chrome: ChromeSetup;
+}
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  ChromeSetup,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};

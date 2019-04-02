@@ -46,6 +46,7 @@ interface Props {
   suggestionProviders: SuggestionsProvider[];
   repositorySearch: (p: { query: string }) => void;
   saveSearchOptions: (searchOptions: ISearchOptions) => void;
+  enableSubmitWhenOptionsChanged: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoSearchResults: any[];
   searchLoading: boolean;
@@ -108,6 +109,8 @@ export class CodeQueryBar extends Component<Props, State> {
   }, 100);
 
   public inputRef: HTMLInputElement | null = null;
+
+  public optionFlyout: any | null = null;
 
   private componentIsUnmounting = false;
 
@@ -371,6 +374,15 @@ export class CodeQueryBar extends Component<Props, State> {
     if (prevProps.query !== this.props.query) {
       this.updateSuggestions();
     }
+
+    // When search options (e.g. repository scopes) change,
+    // submit the search query again to refresh the search result.
+    if (
+      this.props.enableSubmitWhenOptionsChanged &&
+      !_.isEqual(prevProps.searchOptions, this.props.searchOptions)
+    ) {
+      this.onSubmit();
+    }
   }
 
   public componentWillUnmount() {
@@ -381,6 +393,12 @@ export class CodeQueryBar extends Component<Props, State> {
   public focusInput() {
     if (this.inputRef) {
       this.inputRef.focus();
+    }
+  }
+
+  public toggleOptionsFlyout() {
+    if (this.optionFlyout) {
+      this.optionFlyout.toggleOptionsFlyout();
     }
   }
 
@@ -442,6 +460,7 @@ export class CodeQueryBar extends Component<Props, State> {
                       repoSearchResults={this.props.repoSearchResults}
                       searchLoading={this.props.searchLoading}
                       searchOptions={this.props.searchOptions}
+                      ref={element => (this.optionFlyout = element)}
                     />
                   </div>
                 </div>

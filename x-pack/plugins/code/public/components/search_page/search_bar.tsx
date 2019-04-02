@@ -28,7 +28,7 @@ interface Props {
 }
 
 export class SearchBar extends React.PureComponent<Props> {
-  public queryBar: any | null = null;
+  public queryBar: any = null;
 
   public onSearchChanged = (query: string) => {
     // Update the url and push to history as well.
@@ -44,6 +44,12 @@ export class SearchBar extends React.PureComponent<Props> {
       })
     );
   };
+
+  public toggleOptionsFlyout() {
+    if (this.queryBar) {
+      this.queryBar.toggleOptionsFlyout();
+    }
+  }
 
   public render() {
     const onSubmit = (q: string) => {
@@ -99,6 +105,7 @@ export class SearchBar extends React.PureComponent<Props> {
           appName="code"
           suggestionProviders={suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={true}
           ref={instance => {
             if (instance) {
               // @ts-ignore

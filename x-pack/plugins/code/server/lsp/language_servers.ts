@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as path from 'path';
 import { InstallationType } from '../../common/installation';
 import { LanguageServer } from '../../common/language_server';
 import { GoLauncher } from './go_launcher';
@@ -27,10 +26,7 @@ export const TYPESCRIPT: LanguageServerDefinition = {
   languages: ['typescript', 'javascript', 'html'],
   launcher: TypescriptServerLauncher,
   installationType: InstallationType.Embed,
-  embedPath: path.join(
-    path.dirname(require.resolve('@elastic/javascript-typescript-langserver/package.json')),
-    'lib/language-server.js'
-  ),
+  embedPath: require.resolve('@elastic/javascript-typescript-langserver/lib/language-server.js'),
 };
 export const JAVA: LanguageServerDefinition = {
   name: 'Java',

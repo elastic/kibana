@@ -17,7 +17,7 @@ module.exports = (_baseConfig, _env, config) => {
       include: /\.storybook/,
       loaders: 'babel-loader',
       options: {
-        presets: [require.resolve('babel-preset-react')],
+        presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
       },
     },
   );
@@ -55,15 +55,9 @@ module.exports = (_baseConfig, _env, config) => {
     test: /\.tsx?$/,
     use: [
       {
-        loader: 'ts-loader',
+        loader: 'babel-loader',
         options: {
-          transpileOnly: true,
-          experimentalWatchApi: true,
-          onlyCompileBundledFiles: true,
-          configFile: require.resolve('../../../../tsconfig.json'),
-          compilerOptions: {
-            sourceMap: true,
-          },
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
       },
       require.resolve('react-docgen-typescript-loader'),

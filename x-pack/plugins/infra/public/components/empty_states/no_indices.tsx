@@ -6,7 +6,8 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface NoIndicesProps {
   message: string;
@@ -24,6 +25,6 @@ export const NoIndices: React.SFC<NoIndicesProps> = ({ actions, message, title, 
   />
 );
 
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;
 `;

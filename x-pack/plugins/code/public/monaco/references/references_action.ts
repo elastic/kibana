@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { editor } from 'monaco-editor';
-import ICodeEditor = editor.ICodeEditor;
 import queryString from 'querystring';
 import { parseSchema } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -15,7 +14,7 @@ export function registerReferencesAction(e: editor.IStandaloneCodeEditor) {
     label: 'Find All References',
     contextMenuGroupId: 'navigation',
     contextMenuOrder: 1.5,
-    run(ed: ICodeEditor) {
+    run(ed: editor.ICodeEditor) {
       const position = ed.getPosition();
       const { uri } = parseSchema(ed.getModel().uri.toString());
       const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;

@@ -17,7 +17,7 @@ import { MarkedString } from 'vscode-languageserver-types';
 const Text = styled(EuiText)`
   p {
     color: #8c8c8c;
-    font-size: ${theme.euiFontSizeXs};
+    font-size: ${theme.euiFontSizeXS};
   }
 `;
 
@@ -96,8 +96,6 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   private renderInitialting() {
     return (
       <div className="hover-row">
-        {/*
-              // @ts-ignore */}
         <Text textAlign="center">
           <h4>Language Server is initializing…</h4>
           <p>Depending on the size of your repo, this could take a few minutes.</p>

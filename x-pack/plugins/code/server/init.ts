@@ -133,14 +133,18 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   log.info('Initializing Code plugin as code-node.');
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
   const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
+  const devMode: boolean = server.config().get('env.dev');
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
   // @ts-ignore
   const esClient: EsClient = adminCluster.clusterClient.client;
   const repoConfigController = new RepositoryConfigController(esClient);
 
+  server.injectUiAppVars('code', () => ({
+    enableLangserversDeveloping: devMode,
+  }));
   // Enable the developing language servers in development mode.
-  if (server.config().get('env.dev') === true) {
+  if (devMode === true) {
     LanguageServers.push(...LanguageServersDeveloping);
   }
 

@@ -61,7 +61,6 @@ export const SuggestionComponent: SFC<Props> = props => {
       onClick={click}
       // active={props.selected}
       onMouseEnter={props.onMouseEnter}
-      // @ts-ignore
       ref={props.innerRef}
       id={props.ariaId}
       aria-selected={props.selected}

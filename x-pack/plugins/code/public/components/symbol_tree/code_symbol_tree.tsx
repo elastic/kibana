@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -104,9 +105,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
               onClick={this.getClickHandler(path)}
             >
               <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
-                {/*
-                // @ts-ignore */}
-                <Token iconType={tokenType} />
+                <Token iconType={tokenType as IconType} />
                 <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
                   {name}
                 </EuiText>

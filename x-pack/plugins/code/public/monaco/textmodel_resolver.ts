@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ITextModel = Editor.ITextModel;
-import { editor as Editor, IDisposable, Uri } from 'monaco-editor';
+import { editor, IDisposable, Uri } from 'monaco-editor';
 import { ImmortalReference } from './immortal_reference';
 
 export interface IReference<T> extends IDisposable {
@@ -17,7 +16,7 @@ export interface ITextModelService {
    * Provided a resource URI, it will return a model reference
    * which should be disposed once not needed anymore.
    */
-  createModelReference(resource: Uri): Promise<IReference<ITextModel>>;
+  createModelReference(resource: Uri): Promise<IReference<editor.ITextModel>>;
 
   /**
    * Registers a specific `scheme` content provider.

@@ -26,16 +26,16 @@
     "uuid": "3.0.1"
   },
   "peerDependencies": {
-    "enzyme": "3.2.0",
-    "enzyme-adapter-react-16": "^1.1.1"
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/polyfill": "^7.2.5",
     "@elastic/eui": "0.0.23",
     "@kbn/babel-preset": "1.0.0",
     "autoprefixer": "6.5.4",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-polyfill": "^6.26.0",
+    "babel-loader": "^8.0.5",
     "brace": "0.10.0",
     "chalk": "^2.4.1",
     "chokidar": "1.6.0",
@@ -43,7 +43,7 @@
     "expose-loader": "^0.7.5",
     "file-loader": "^2.0.0",
     "grunt": "1.0.3",
-    "grunt-babel": "^7.0.0",
+    "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-copy": "^1.0.0",
     "highlight.js": "9.0.0",

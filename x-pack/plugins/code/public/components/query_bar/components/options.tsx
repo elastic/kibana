@@ -89,7 +89,12 @@ export class SearchOptions extends Component<Props, State> {
       });
 
       optionsFlyout = (
-        <EuiFlyout onClose={this.closeOptionsFlyout} size="s" aria-labelledby="flyoutSmallTitle">
+        <EuiFlyout
+          onClose={this.closeOptionsFlyout}
+          size="s"
+          aria-labelledby="flyoutSmallTitle"
+          className="code-search-settings-flyout"
+        >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
               <h2 id="flyoutSmallTitle"> Search Settings </h2>

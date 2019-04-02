@@ -121,7 +121,12 @@ export class CodeFileTree extends React.Component<Props> {
               ) : (
                 <EuiIcon type="arrowRight" size="s" className="codeFileTree--icon" />
               )}
-              <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
+              <EuiIcon
+                type={forceOpen ? 'folderOpen' : 'folderClosed'}
+                data-test-subj={`codeFileTreeNode-Directory-Icon-${node.path}-${
+                  forceOpen ? 'open' : 'closed'
+                }`}
+              />
               <DirectoryNode>
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {`${node.name}/`}
@@ -242,7 +247,7 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   private isPathOpen(path: string) {
-    return this.props.openedPaths.some(p => p.startsWith(path));
+    return this.props.openedPaths.includes(path);
   }
 }
 
