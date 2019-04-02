@@ -30,7 +30,7 @@ test('Repository url parsing', () => {
   const repo3 = RepositoryUtils.buildRepository('github.com/apache/sqoop');
   expect(repo3).toMatchObject({
     uri: 'github.com/apache/sqoop',
-    url: 'http://github.com/apache/sqoop',
+    url: 'github.com/apache/sqoop',
   });
 
   const repo4 = RepositoryUtils.buildRepository('git://a/b');
@@ -47,6 +47,22 @@ test('Repository url parsing', () => {
     url: 'git://a/b/c',
     name: 'c',
     org: 'b',
+  });
+
+  const repo6 = RepositoryUtils.buildRepository('git@github.com:foo/bar.git');
+  expect(repo6).toEqual({
+    uri: 'github.com/foo/bar',
+    url: 'git@github.com:foo/bar.git',
+    name: 'bar',
+    org: 'foo',
+  });
+
+  const repo7 = RepositoryUtils.buildRepository('ssh://git@github.com:foo/bar.git');
+  expect(repo7).toEqual({
+    uri: 'github.com/foo/bar',
+    url: 'ssh://git@github.com:foo/bar.git',
+    name: 'bar',
+    org: 'foo',
   });
 });
 
