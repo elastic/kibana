@@ -78,7 +78,7 @@ describe('EnabledFeatures', () => {
 
     // Click the "Change all" link
     wrapper
-      .find('.spcFeatureChangeAllLink')
+      .find('.spcToggleAllFeatures__changeAllLink')
       .first()
       .simulate('click');
 
@@ -113,7 +113,7 @@ describe('EnabledFeatures', () => {
 
     // Click the "Change all" link
     wrapper
-      .find('.spcFeatureChangeAllLink')
+      .find('.spcToggleAllFeatures__changeAllLink')
       .first()
       .simulate('click');
 
