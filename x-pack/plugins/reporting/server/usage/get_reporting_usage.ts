@@ -30,13 +30,13 @@ const STATUS_TYPES_FIELD = 'status';
 const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 
-// index as set by "key" property, values are doc_count
-const getKeyCount = (buckets: KeyCountBucket[]) =>
+// indexes some key/count buckets by the "key" property
+const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
 function getAggStats(aggs: AggregationResults) {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
-  const jobTypes: JobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
+  const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
     return {
       ...accum,
       [key]: {
@@ -44,13 +44,19 @@ function getAggStats(aggs: AggregationResults) {
         total: count,
       },
     };
-  }, {});
+  }, {}) as JobTypes;
 
   // merge pdf stats into pdf jobtype key
   const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
   const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
-  jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets);
-  jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets);
+  jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets) as {
+    visualization: number;
+    dashboard: number;
+  };
+  jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets) as {
+    print: number;
+    preserve_layout: number;
+  };
 
   const all = aggs.doc_count as number;
   const statusTypes = getKeyCount(get(aggs[STATUS_TYPES_KEY], 'buckets'));

@@ -13,40 +13,6 @@ interface Status {
   failed: number;
 }
 
-interface RangeStats {
-  _all: number;
-  csv: AvailableTotal;
-  PNG: AvailableTotal;
-  printable_pdf: {
-    available: boolean;
-    total: number;
-    app: {
-      visualization: number;
-      dashboard: number;
-    };
-    layout: {
-      print: number;
-      preserve_layout: number;
-    };
-  };
-  status: Status;
-}
-
-export interface UsageObject {
-  available: boolean;
-  enabled: boolean;
-  browser_type: string;
-
-  _all: number;
-  csv: AvailableTotal;
-  PNG: AvailableTotal;
-  printable_pdf: {};
-  status: Status;
-
-  lastDay: RangeStats;
-  last7Days: RangeStats;
-}
-
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
@@ -59,14 +25,36 @@ export interface AggregationBuckets {
   };
 }
 
-export interface AggregationResults {
-  [aggName: string]: AggregationBuckets | number;
-  doc_count: number;
-}
+/*
+ * Mapped Types and Intersection Types
+ */
 
-export interface JobTypes {
-  [jobType: string]: {
-    app?: any;
-    layout?: any;
+type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes';
+export type AggregationSet = { [K in AggregationKeys]: AggregationBuckets } & { doc_count: number };
+
+type BaseJobTypeKeys = 'csv' | 'PNG';
+export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
+  printable_pdf: {
+    app: {
+      visualization: number;
+      dashboard: number;
+    };
+    layout: {
+      print: number;
+      preserve_layout: number;
+    };
   };
-}
+};
+
+export type RangeStats = JobTypes & {
+  _all: number;
+  status: Status;
+};
+
+export type UsageObject = RangeStats & {
+  available: boolean;
+  enabled: boolean;
+  browser_type: string;
+  lastDay: RangeStats;
+  last7Days: RangeStats;
+};
