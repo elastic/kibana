@@ -4,35 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Dispatch, Middleware } from 'redux';
 import { loadingIndicator } from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';
-import { inFlightActive, inFlightComplete, setLoading, setValue } from '../actions/resolved_args';
+import {
+  Action as AnyAction,
+  inFlightActive,
+  inFlightActiveActionType,
+  inFlightComplete,
+  inFlightCompleteActionType,
+  setLoadingActionType,
+  setValueActionType,
+} from '../actions/resolved_args';
 
-export const inFlight = ({ dispatch }) => next => {
+const pathToKey = (path: any[]) => convert(path).join('/');
+
+export const inFlight: Middleware = ({ dispatch }) => (next: Dispatch) => {
   const pendingCache = [];
 
-  return action => {
-    const isLoading = action.type === setLoading.toString();
-    const isSetting = action.type === setValue.toString();
-    const isInFlightActive = action.type === inFlightActive.toString();
-    const isInFlightComplete = action.type === inFlightComplete.toString();
-
-    if (isLoading || isSetting) {
-      const cacheKey = convert(action.payload.path).join('/');
-
-      if (isLoading) {
-        pendingCache.push(cacheKey);
-        dispatch(inFlightActive());
-      } else if (isSetting) {
-        const idx = pendingCache.indexOf(cacheKey);
-        pendingCache.splice(idx, 1);
-        if (pendingCache.length === 0) {
-          dispatch(inFlightComplete());
-        }
+  return (action: AnyAction) => {
+    if (action.type === setLoadingActionType) {
+      const cacheKey = pathToKey(action.payload.path);
+      pendingCache.push(cacheKey);
+      dispatch(inFlightActive());
+    } else if (action.type === setValueActionType) {
+      const cacheKey = pathToKey(action.payload.path);
+      const idx = pendingCache.indexOf(cacheKey);
+      pendingCache.splice(idx, 1);
+      if (pendingCache.length === 0) {
+        dispatch(inFlightComplete());
       }
-    } else if (isInFlightActive) {
+    } else if (action.type === inFlightActiveActionType) {
       loadingIndicator.show();
-    } else if (isInFlightComplete) {
+    } else if (action.type === inFlightCompleteActionType) {
       loadingIndicator.hide();
     }
 
