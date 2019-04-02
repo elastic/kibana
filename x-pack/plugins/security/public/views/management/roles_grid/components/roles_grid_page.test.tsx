@@ -3,17 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-let simulate403 = false;
+let mockSimulate403 = false;
 jest.mock('../../../../lib/roles_api', () => {
   return {
     RolesApi: {
       async getRoles() {
-        if (simulate403) {
+        if (mockSimulate403) {
           throw {
             body: { statusCode: 403 },
           };
         }
-        return rolesToReturn;
+        return [
+          {
+            name: 'Test Role 1',
+            elasticsearch: { cluster: [], indices: [], run_as: [] },
+            kibana: { global: [], space: {} },
+          },
+          {
+            name: 'Reserved Role',
+            elasticsearch: { cluster: [], indices: [], run_as: [] },
+            kibana: { global: [], space: {} },
+            metadata: {
+              _reserved: true,
+            },
+          },
+          {
+            name: 'Disabled Role',
+            elasticsearch: { cluster: [], indices: [], run_as: [] },
+            kibana: { global: [], space: {} },
+            transient_metadata: {
+              enabled: false,
+            },
+          },
+        ];
       },
     },
   };
@@ -23,25 +45,8 @@ import { EuiIcon } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { Role } from '../../../../../common/model/role';
 import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
-
-const rolesToReturn: Role[] = [
-  {
-    name: 'Test Role 1',
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: { global: [], space: {} },
-  },
-  {
-    name: 'Reserved Role',
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: { global: [], space: {} },
-    metadata: {
-      _reserved: true,
-    },
-  },
-];
 
 const waitForRender = async (
   wrapper: ReactWrapper<any>,
@@ -65,7 +70,7 @@ const waitForRender = async (
 
 describe('<RolesGridPage />', () => {
   beforeEach(() => {
-    simulate403 = false;
+    mockSimulate403 = false;
   });
 
   it(`renders reserved roles as such`, async () => {
@@ -81,8 +86,20 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find('EuiCheckbox[title="Role is reserved"]')).toHaveLength(1);
   });
 
+  it(`renders disabled roles as such`, async () => {
+    const wrapper = mountWithIntl(<RolesGridPage />);
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, updatedWrapper => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
+    expect(wrapper.find('EuiIconTip[data-test-subj="disabledRoleTip"]')).toHaveLength(1);
+  });
+
   it('renders permission denied if required', async () => {
-    simulate403 = true;
+    mockSimulate403 = true;
     const wrapper = mountWithIntl(<RolesGridPage />);
     await waitForRender(wrapper, updatedWrapper => {
       return updatedWrapper.find(PermissionDenied).length > 0;

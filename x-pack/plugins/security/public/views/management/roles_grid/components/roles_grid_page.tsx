@@ -113,7 +113,7 @@ class RolesGridPageUI extends Component<Props, State> {
                 onSelectionChange: (selection: Role[]) => this.setState({ selection }),
               }}
               pagination={{
-                initialPageSize: 30,
+                initialPageSize: 20,
                 pageSizeOptions: [10, 20, 30, 50, 100],
               }}
               items={this.getVisibleRoles()}
@@ -169,6 +169,7 @@ class RolesGridPageUI extends Component<Props, State> {
                 type="alert"
                 size="xs"
                 color="warning"
+                data-test-subj="disabledRoleTip"
                 title={
                   <FormattedMessage
                     id="xpack.security.management.roles.disabledTooltip"
@@ -188,7 +189,6 @@ class RolesGridPageUI extends Component<Props, State> {
         defaultMessage: 'Reserved',
       }),
       sortable: false,
-      // width: '100px',
       align: 'right',
       description: intl.formatMessage({
         id: 'xpack.security.management.roles.reservedColumnDescription',
