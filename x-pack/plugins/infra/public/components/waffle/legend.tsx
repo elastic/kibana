@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';
@@ -48,7 +49,7 @@ export const Legend: React.SFC<Props> = ({ dataBounds, legend, bounds, formatter
   );
 };
 
-const LegendContainer = styled.div`
+const LegendContainer = euiStyled.div`
   position: absolute;
   bottom: 10px;
   left: 10px;
