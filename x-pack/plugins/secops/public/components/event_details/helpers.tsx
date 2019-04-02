@@ -38,15 +38,19 @@ export const search = {
   },
 };
 
+export interface ItemValues {
+  value: JSX.Element;
+  valueAsString: string;
+}
+
 /**
  * An item rendered in the table
  */
-interface Item {
+export interface Item {
   field: string;
   description: string;
   type: string;
-  value: JSX.Element;
-  valueAsString: string;
+  values: ItemValues[];
 }
 
 /** Returns example text, or an empty string if the field does not have an example */
@@ -76,45 +80,48 @@ export const getIconFromType = (type: string) => {
  * Return a draggable value for the details item view in the timeline
  */
 export const getItems = (data: DetailItem[], id: string): Item[] =>
-  data.map(item => {
-    const itemDataProvider = {
-      enabled: true,
-      id: escapeDataProviderId(`id-event-field-browser-value-for-${item.field}-${id}`),
-      name: item.field,
-      queryMatch: {
-        field: item.field,
-        value: escapeQueryValue(item.value),
-      },
-      excluded: false,
-      kqlQuery: '',
-      and: [],
-    };
-
-    return {
-      description: `${item.description || ''} ${getExampleText(item)}`,
-      field: item.field,
-      type: item.type,
-      valueAsString: item.value.toString(),
-      value: (
-        <DraggableWrapper
-          key={`event-field-browser-value-for-${item.field}-${id}`}
-          dataProvider={itemDataProvider}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              <FormattedFieldValue
-                contextId="event-details"
-                eventId={id}
-                fieldName={item.field}
-                fieldType={item.type}
-                value={parseValue(item.value)}
-              />
-            )
-          }
-        />
-      ),
-    };
-  });
+  data.map(item => ({
+    description: `${item.description || ''} ${getExampleText(item)}`,
+    field: item.field,
+    type: item.type,
+    values: item.values.map((itemValue: string) => {
+      const itemDataProvider = {
+        enabled: true,
+        id: escapeDataProviderId(
+          `id-event-field-browser-value-for-${item.field}-${id}-${itemValue}`
+        ),
+        name: item.field,
+        queryMatch: {
+          field: item.field,
+          value: escapeQueryValue(itemValue),
+        },
+        excluded: false,
+        kqlQuery: '',
+        and: [],
+      };
+      return {
+        valueAsString: itemValue,
+        value: (
+          <DraggableWrapper
+            key={`event-field-browser-value-for-${item.field}-${id}-${itemValue}`}
+            dataProvider={itemDataProvider}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                <FormattedFieldValue
+                  contextId="event-details"
+                  eventId={id}
+                  fieldName={item.field}
+                  fieldType={item.type}
+                  value={parseValue(itemValue)}
+                />
+              )
+            }
+          />
+        ),
+      };
+    }),
+  }));

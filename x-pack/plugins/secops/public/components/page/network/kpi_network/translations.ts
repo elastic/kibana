@@ -35,3 +35,11 @@ export const UNIQUE_DESTINATION_PRIVATE_IPS = i18n.translate(
 export const LOADING = i18n.translate('xpack.secops.kpiNetwork.source.loadingDescription', {
   defaultMessage: 'Loading',
 });
+
+export const DNS_QUERIES = i18n.translate('xpack.secops.kpiNetwork.source.dnsQueriesTitle', {
+  defaultMessage: 'DNS Queries',
+});
+
+export const TLS_HANDSHAKES = i18n.translate('xpack.secops.kpiNetwork.source.tlsHandshakesTitle', {
+  defaultMessage: 'TLS Handshakes',
+});

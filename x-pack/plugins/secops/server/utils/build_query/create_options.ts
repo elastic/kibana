@@ -30,7 +30,8 @@ export interface Args {
 export const createOptions = (
   source: Configuration,
   args: Args,
-  info: FieldNodes
+  info: FieldNodes,
+  fieldReplacement: string = 'edges.node.'
 ): RequestOptions => {
   const fields = getFields(getOr([], 'fieldNodes[0]', info));
   return {
@@ -39,6 +40,8 @@ export const createOptions = (
     pagination: args.pagination!,
     sortField: args.sortField!,
     filterQuery: parseFilterQuery(args.filterQuery || ''),
-    fields: fields.map(field => field.replace('edges.node.', '')),
+    fields: fields
+      .filter(field => !field.includes('__typename'))
+      .map(field => field.replace(fieldReplacement, '')),
   };
 };

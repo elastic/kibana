@@ -8,11 +8,17 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
 import { timelineDetailsQuery } from '../../../../plugins/secops/public/containers/timeline/details/index.gql_query';
-import { DetailItem, GetEventDetailsQuery } from '../../../../plugins/secops/public/graphql/types';
+import {
+  DetailItem,
+  GetTimelineDetailsQuery,
+} from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 type DetailsData = Array<
-  Pick<DetailItem, 'category' | 'description' | 'example' | 'field' | 'type' | 'value'> & {
+  Pick<
+    DetailItem,
+    'category' | 'description' | 'example' | 'field' | 'type' | 'values' | 'originalValue'
+  > & {
     __typename: string;
   }
 >;
@@ -27,7 +33,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'Y-6TfmcB0WOhS6qyMv3s',
     field: '_id',
     type: 'keyword',
-    value: 'QRhG1WgBqd-n62SwZYDT',
+    originalValue: 'QRhG1WgBqd-n62SwZYDT',
+    values: ['QRhG1WgBqd-n62SwZYDT'],
   },
   {
     category: '_index',
@@ -36,7 +43,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'auditbeat-8.0.0-2019.02.19-000001',
     field: '_index',
     type: 'keyword',
-    value: 'filebeat-7.0.0-iot-2019.06',
+    originalValue: 'filebeat-7.0.0-iot-2019.06',
+    values: ['filebeat-7.0.0-iot-2019.06'],
   },
   {
     category: '_type',
@@ -44,7 +52,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: '_type',
     type: 'keyword',
-    value: '_doc',
+    originalValue: '_doc',
+    values: ['_doc'],
   },
   {
     category: '_score',
@@ -52,7 +61,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: '_score',
     type: 'long',
-    value: 1,
+    originalValue: 1,
+    values: ['1'],
   },
   {
     category: '@timestamp',
@@ -61,7 +71,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '2016-05-23T08:05:34.853Z',
     field: '@timestamp',
     type: 'date',
-    value: '2019-02-10T02:39:44.107Z',
+    originalValue: '2019-02-10T02:39:44.107Z',
+    values: ['2019-02-10T02:39:44.107Z'],
   },
   {
     category: '@version',
@@ -69,7 +80,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: '@version',
     type: 'keyword',
-    value: '1',
+    originalValue: '1',
+    values: ['1'],
   },
   {
     category: 'agent',
@@ -78,7 +90,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '8a4f500f',
     field: 'agent.ephemeral_id',
     type: 'keyword',
-    value: '909cd6a1-527d-41a5-9585-a7fb5386f851',
+    originalValue: '909cd6a1-527d-41a5-9585-a7fb5386f851',
+    values: ['909cd6a1-527d-41a5-9585-a7fb5386f851'],
   },
   {
     category: 'agent',
@@ -86,7 +99,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'agent.hostname',
     type: 'keyword',
-    value: 'raspberrypi',
+    originalValue: 'raspberrypi',
+    values: ['raspberrypi'],
   },
   {
     category: 'agent',
@@ -95,7 +109,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '8a4f500d',
     field: 'agent.id',
     type: 'keyword',
-    value: '4d3ea604-27e5-4ec7-ab64-44f82285d776',
+    originalValue: '4d3ea604-27e5-4ec7-ab64-44f82285d776',
+    values: ['4d3ea604-27e5-4ec7-ab64-44f82285d776'],
   },
   {
     category: 'agent',
@@ -104,7 +119,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'filebeat',
     field: 'agent.type',
     type: 'keyword',
-    value: 'filebeat',
+    originalValue: 'filebeat',
+    values: ['filebeat'],
   },
   {
     category: 'agent',
@@ -112,7 +128,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '6.0.0-rc2',
     field: 'agent.version',
     type: 'keyword',
-    value: '7.0.0',
+    originalValue: '7.0.0',
+    values: ['7.0.0'],
   },
   {
     category: 'destination',
@@ -120,7 +137,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'destination.domain',
     type: 'keyword',
-    value: 's3-iad-2.cf.dash.row.aiv-cdn.net',
+    originalValue: 's3-iad-2.cf.dash.row.aiv-cdn.net',
+    values: ['s3-iad-2.cf.dash.row.aiv-cdn.net'],
   },
   {
     category: 'destination',
@@ -128,7 +146,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'destination.ip',
     type: 'ip',
-    value: '10.100.7.196',
+    originalValue: '10.100.7.196',
+    values: ['10.100.7.196'],
   },
   {
     category: 'destination',
@@ -136,7 +155,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'destination.port',
     type: 'long',
-    value: 40684,
+    originalValue: 40684,
+    values: ['40684'],
   },
   {
     category: 'ecs',
@@ -145,7 +165,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '1.0.0-beta2',
     field: 'ecs.version',
     type: 'keyword',
-    value: '1.0.0-beta2',
+    originalValue: '1.0.0-beta2',
+    values: ['1.0.0-beta2'],
   },
   {
     category: 'event',
@@ -154,7 +175,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'stats',
     field: 'event.dataset',
     type: 'keyword',
-    value: 'suricata.eve',
+    originalValue: 'suricata.eve',
+    values: ['suricata.eve'],
   },
   {
     category: 'event',
@@ -163,7 +185,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'event.end',
     type: 'date',
-    value: '2019-02-10T02:39:44.107Z',
+    originalValue: '2019-02-10T02:39:44.107Z',
+    values: ['2019-02-10T02:39:44.107Z'],
   },
   {
     category: 'event',
@@ -172,7 +195,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'state',
     field: 'event.kind',
     type: 'keyword',
-    value: 'event',
+    originalValue: 'event',
+    values: ['event'],
   },
   {
     category: 'event',
@@ -181,7 +205,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'mysql',
     field: 'event.module',
     type: 'keyword',
-    value: 'suricata',
+    originalValue: 'suricata',
+    values: ['suricata'],
   },
   {
     category: 'event',
@@ -189,7 +214,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'event.type',
     type: 'keyword',
-    value: 'fileinfo',
+    originalValue: 'fileinfo',
+    values: ['fileinfo'],
   },
   {
     category: 'file',
@@ -197,8 +223,11 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'file.path',
     type: 'keyword',
-    value:
+    originalValue:
       '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    values: [
+      '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    ],
   },
   {
     category: 'file',
@@ -206,7 +235,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'file.size',
     type: 'long',
-    value: 48277,
+    originalValue: 48277,
+    values: ['48277'],
   },
   {
     category: 'fileset',
@@ -214,7 +244,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'fileset.name',
     type: 'keyword',
-    value: 'eve',
+    originalValue: 'eve',
+    values: ['eve'],
   },
   {
     category: 'flow',
@@ -222,7 +253,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'flow.locality',
     type: 'keyword',
-    value: 'public',
+    originalValue: 'public',
+    values: ['public'],
   },
   {
     category: 'host',
@@ -230,7 +262,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'x86_64',
     field: 'host.architecture',
     type: 'keyword',
-    value: 'armv7l',
+    originalValue: 'armv7l',
+    values: ['armv7l'],
   },
   {
     category: 'host',
@@ -239,7 +272,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'host.hostname',
     type: 'keyword',
-    value: 'raspberrypi',
+    originalValue: 'raspberrypi',
+    values: ['raspberrypi'],
   },
   {
     category: 'host',
@@ -248,7 +282,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'host.id',
     type: 'keyword',
-    value: 'b19a781f683541a7a25ee345133aa399',
+    originalValue: 'b19a781f683541a7a25ee345133aa399',
+    values: ['b19a781f683541a7a25ee345133aa399'],
   },
   {
     category: 'host',
@@ -257,7 +292,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'host.name',
     type: 'keyword',
-    value: 'raspberrypi',
+    originalValue: 'raspberrypi',
+    values: ['raspberrypi'],
   },
   {
     category: 'host',
@@ -265,7 +301,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'host.os.codename',
     type: 'keyword',
-    value: 'stretch',
+    originalValue: 'stretch',
+    values: ['stretch'],
   },
   {
     category: 'host',
@@ -273,7 +310,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'debian',
     field: 'host.os.family',
     type: 'keyword',
-    value: '',
+    originalValue: '',
+    values: [''],
   },
   {
     category: 'host',
@@ -281,7 +319,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '4.4.0-112-generic',
     field: 'host.os.kernel',
     type: 'keyword',
-    value: '4.14.50-v7+',
+    originalValue: '4.14.50-v7+',
+    values: ['4.14.50-v7+'],
   },
   {
     category: 'host',
@@ -289,7 +328,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'Mac OS X',
     field: 'host.os.name',
     type: 'keyword',
-    value: 'Raspbian GNU/Linux',
+    originalValue: 'Raspbian GNU/Linux',
+    values: ['Raspbian GNU/Linux'],
   },
   {
     category: 'host',
@@ -297,7 +337,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'darwin',
     field: 'host.os.platform',
     type: 'keyword',
-    value: 'raspbian',
+    originalValue: 'raspbian',
+    values: ['raspbian'],
   },
   {
     category: 'host',
@@ -305,7 +346,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '10.14.1',
     field: 'host.os.version',
     type: 'keyword',
-    value: '9 (stretch)',
+    originalValue: '9 (stretch)',
+    values: ['9 (stretch)'],
   },
   {
     category: 'http',
@@ -314,7 +356,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'get, post, put',
     field: 'http.request.method',
     type: 'keyword',
-    value: 'get',
+    originalValue: 'get',
+    values: ['get'],
   },
   {
     category: 'http',
@@ -322,7 +365,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '887',
     field: 'http.response.body.bytes',
     type: 'long',
-    value: 48277,
+    originalValue: 48277,
+    values: ['48277'],
   },
   {
     category: 'http',
@@ -330,7 +374,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '404',
     field: 'http.response.status_code',
     type: 'long',
-    value: 206,
+    originalValue: 206,
+    values: ['206'],
   },
   {
     category: 'input',
@@ -338,7 +383,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'input.type',
     type: 'keyword',
-    value: 'log',
+    originalValue: 'log',
+    values: ['log'],
   },
   {
     category: 'labels',
@@ -346,7 +392,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'labels.pipeline',
     type: 'keyword',
-    value: 'filebeat-7.0.0-suricata-eve-pipeline',
+    originalValue: 'filebeat-7.0.0-suricata-eve-pipeline',
+    values: ['filebeat-7.0.0-suricata-eve-pipeline'],
   },
   {
     category: 'log',
@@ -354,7 +401,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'log.file.path',
     type: 'keyword',
-    value: '/var/log/suricata/eve.json',
+    originalValue: '/var/log/suricata/eve.json',
+    values: ['/var/log/suricata/eve.json'],
   },
   {
     category: 'log',
@@ -362,7 +410,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'log.offset',
     type: 'long',
-    value: 1856288115,
+    originalValue: 1856288115,
+    values: ['1856288115'],
   },
   {
     category: 'network',
@@ -370,7 +419,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'Guest Wifi',
     field: 'network.name',
     type: 'keyword',
-    value: 'iot',
+    originalValue: 'iot',
+    values: ['iot'],
   },
   {
     category: 'network',
@@ -379,7 +429,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'http',
     field: 'network.protocol',
     type: 'keyword',
-    value: 'http',
+    originalValue: 'http',
+    values: ['http'],
   },
   {
     category: 'network',
@@ -388,7 +439,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'tcp',
     field: 'network.transport',
     type: 'keyword',
-    value: 'tcp',
+    originalValue: 'tcp',
+    values: ['tcp'],
   },
   {
     category: 'service',
@@ -397,7 +449,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'elasticsearch',
     field: 'service.type',
     type: 'keyword',
-    value: 'suricata',
+    originalValue: 'suricata',
+    values: ['suricata'],
   },
   {
     category: 'source',
@@ -405,7 +458,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'source.as.num',
     type: 'long',
-    value: 16509,
+    originalValue: 16509,
+    values: ['16509'],
   },
   {
     category: 'source',
@@ -413,7 +467,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'source.as.org',
     type: 'keyword',
-    value: 'Amazon.com, Inc.',
+    originalValue: 'Amazon.com, Inc.',
+    values: ['Amazon.com, Inc.'],
   },
   {
     category: 'source',
@@ -421,7 +476,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'source.domain',
     type: 'keyword',
-    value: 'server-54-239-219-210.jfk51.r.cloudfront.net',
+    originalValue: 'server-54-239-219-210.jfk51.r.cloudfront.net',
+    values: ['server-54-239-219-210.jfk51.r.cloudfront.net'],
   },
   {
     category: 'source',
@@ -429,7 +485,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'Montreal',
     field: 'source.geo.city_name',
     type: 'keyword',
-    value: 'Seattle',
+    originalValue: 'Seattle',
+    values: ['Seattle'],
   },
   {
     category: 'source',
@@ -437,7 +494,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'North America',
     field: 'source.geo.continent_name',
     type: 'keyword',
-    value: 'North America',
+    originalValue: 'North America',
+    values: ['North America'],
   },
   {
     category: 'source',
@@ -445,7 +503,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'CA',
     field: 'source.geo.country_iso_code',
     type: 'keyword',
-    value: 'US',
+    originalValue: 'US',
+    values: ['US'],
   },
   {
     category: 'source',
@@ -453,7 +512,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'CA-QC',
     field: 'source.geo.region_iso_code',
     type: 'keyword',
-    value: 'US-WA',
+    originalValue: 'US-WA',
+    values: ['US-WA'],
   },
   {
     category: 'source',
@@ -461,7 +521,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'Quebec',
     field: 'source.geo.region_name',
     type: 'keyword',
-    value: 'Washington',
+    originalValue: 'Washington',
+    values: ['Washington'],
   },
   {
     category: 'source',
@@ -469,7 +530,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'source.ip',
     type: 'ip',
-    value: '54.239.219.210',
+    originalValue: '54.239.219.210',
+    values: ['54.239.219.210'],
   },
   {
     category: 'source',
@@ -477,7 +539,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'source.port',
     type: 'long',
-    value: 80,
+    originalValue: 80,
+    values: ['80'],
   },
   {
     category: 'suricata',
@@ -485,7 +548,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.fileinfo.state',
     type: 'keyword',
-    value: 'CLOSED',
+    originalValue: 'CLOSED',
+    values: ['CLOSED'],
   },
   {
     category: 'suricata',
@@ -493,7 +557,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.fileinfo.tx_id',
     type: 'long',
-    value: 301,
+    originalValue: 301,
+    values: ['301'],
   },
   {
     category: 'suricata',
@@ -501,7 +566,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.flow_id',
     type: 'keyword',
-    value: 196625917175466,
+    originalValue: 196625917175466,
+    values: ['196625917175466'],
   },
   {
     category: 'suricata',
@@ -509,7 +575,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.http.http_content_type',
     type: 'keyword',
-    value: 'video/mp4',
+    originalValue: 'video/mp4',
+    values: ['video/mp4'],
   },
   {
     category: 'suricata',
@@ -517,7 +584,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.http.protocol',
     type: 'keyword',
-    value: 'HTTP/1.1',
+    originalValue: 'HTTP/1.1',
+    values: ['HTTP/1.1'],
   },
   {
     category: 'suricata',
@@ -525,7 +593,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'suricata.eve.in_iface',
     type: 'keyword',
-    value: 'eth0',
+    originalValue: 'eth0',
+    values: ['eth0'],
   },
   {
     category: 'tags',
@@ -533,7 +602,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: '["production", "env2"]',
     field: 'tags',
     type: 'keyword',
-    value: ['suricata'],
+    originalValue: ['suricata'],
+    values: ['suricata'],
   },
   {
     category: 'url',
@@ -542,7 +612,8 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'www.elastic.co',
     field: 'url.domain',
     type: 'keyword',
-    value: 's3-iad-2.cf.dash.row.aiv-cdn.net',
+    originalValue: 's3-iad-2.cf.dash.row.aiv-cdn.net',
+    values: ['s3-iad-2.cf.dash.row.aiv-cdn.net'],
   },
   {
     category: 'url',
@@ -551,8 +622,11 @@ const EXPECTED_DATA: DetailItem[] = [
     example: 'https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch',
     field: 'url.original',
     type: 'keyword',
-    value:
+    originalValue:
       '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    values: [
+      '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    ],
   },
   {
     category: 'url',
@@ -560,8 +634,11 @@ const EXPECTED_DATA: DetailItem[] = [
     example: null,
     field: 'url.path',
     type: 'keyword',
-    value:
+    originalValue:
       '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    values: [
+      '/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/0a9a/bf72/e1da/4c20-919e-0cbabcf7bfe8/75f50c57-d25f-4e97-9e37-01b9f5caa293_audio_13.mp4',
+    ],
   },
 ];
 
@@ -575,7 +652,7 @@ const timelineDetailsTests: KbnTestProvider = ({ getService }) => {
 
     it('Make sure that we get Event Details data', () => {
       return client
-        .query<GetEventDetailsQuery.Query>({
+        .query<GetTimelineDetailsQuery.Query>({
           query: timelineDetailsQuery,
           variables: {
             sourceId: 'default',
@@ -584,7 +661,7 @@ const timelineDetailsTests: KbnTestProvider = ({ getService }) => {
           },
         })
         .then(resp => {
-          const detailsData: DetailsData = (resp.data.source.EventDetails.data ||
+          const detailsData: DetailsData = (resp.data.source.TimelineDetails.data ||
             []) as DetailsData;
           expect(
             sortBy(detailsData, 'name').map(item => {

@@ -9,7 +9,7 @@ import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockBrowserFields } from '../../../../containers/source/mock';
-import { mockEcsData, TestProviders } from '../../../../mock';
+import { mockTimelineData, TestProviders } from '../../../../mock';
 
 import { ZeekDetails } from './zeek_details';
 
@@ -18,7 +18,7 @@ describe('ZeekDetails', () => {
     test('it renders the default ZeekDetails', () => {
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[2]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[2].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -27,7 +27,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.connection if the data does contain zeek.connection data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[13]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[13].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -38,7 +38,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.dns if the data does contain zeek.dns data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[14]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[14].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -49,7 +49,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.http if the data does contain zeek.http data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[15]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[15].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -60,7 +60,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.notice if the data does contain zeek.notice data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[16]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[16].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -71,7 +71,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.ssl if the data does contain zeek.ssl data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[17]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[17].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -82,7 +82,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.files if the data does contain zeek.files data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[18]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[18].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -93,7 +93,7 @@ describe('ZeekDetails', () => {
     test('it returns null for text if the data contains no zeek data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <ZeekDetails data={mockEcsData[0]} browserFields={mockBrowserFields} />
+          <ZeekDetails data={mockTimelineData[0].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toBeNull();

@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { DetailItem, GetEventDetailsQuery } from '../../../graphql/types';
+import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 import { getDefaultFetchPolicy } from '../../helpers';
 
 import { timelineDetailsQuery } from './index.gql_query';
@@ -30,20 +30,16 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
   public render() {
     const { children, indexName, eventId, executeQuery, sourceId } = this.props;
     return executeQuery ? (
-      <Query<GetEventDetailsQuery.Query, GetEventDetailsQuery.Variables>
+      <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
         query={timelineDetailsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        variables={{
-          sourceId,
-          indexName,
-          eventId,
-        }}
+        variables={{ sourceId, indexName, eventId }}
       >
         {({ data, loading, refetch }) => {
           return children!({
             loading,
-            detailsData: getOr([], 'source.EventDetails.data', data),
+            detailsData: getOr([], 'source.TimelineDetails.data', data),
           });
         }}
       </Query>

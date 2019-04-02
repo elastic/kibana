@@ -7,6 +7,8 @@
 import gql from 'graphql-tag';
 
 export const ecsSchema = gql`
+  scalar ToStringArray
+
   type EventEcsFields {
     category: String
     duration: Float

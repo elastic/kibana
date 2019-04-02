@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
 
-import { Ecs } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
@@ -19,11 +19,12 @@ import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers';
 
 interface Props {
+  _id: string;
   actionsColumnWidth: number;
   associateNote: AssociateNote;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  event: Ecs;
+  data: TimelineNonEcsData[];
   eventIdToNoteIds: { [eventId: string]: string[] };
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -47,11 +48,12 @@ const emptyNotes: string[] = [];
 export class EventColumnView extends React.PureComponent<Props> {
   public render() {
     const {
+      _id,
       actionsColumnWidth,
       associateNote,
       columnHeaders,
       columnRenderers,
-      event,
+      data,
       eventIdToNoteIds,
       expanded,
       getNotesByIds,
@@ -75,18 +77,18 @@ export class EventColumnView extends React.PureComponent<Props> {
             checked={false}
             expanded={expanded}
             data-test-subj="actions"
-            eventId={event._id}
+            eventId={_id}
             eventIsPinned={eventIsPinned({
-              eventId: event._id,
+              eventId: _id,
               pinnedEventIds,
             })}
             getNotesByIds={getNotesByIds}
             loading={loading}
-            noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+            noteIds={eventIdToNoteIds[_id] || emptyNotes}
             onEventToggled={onEventToggled}
             onPinClicked={getPinOnClick({
-              allowUnpinning: !eventHasNotes(eventIdToNoteIds[event._id]),
-              eventId: event._id,
+              allowUnpinning: !eventHasNotes(eventIdToNoteIds[_id]),
+              eventId: _id,
               onPinEvent,
               onUnPinEvent,
               pinnedEventIds,
@@ -99,9 +101,10 @@ export class EventColumnView extends React.PureComponent<Props> {
 
         <EuiFlexItem data-test-subj="event-columns-item" grow={false}>
           <DataDrivenColumns
+            _id={_id}
             columnHeaders={columnHeaders}
             columnRenderers={columnRenderers}
-            ecs={event}
+            data={data}
             onColumnResized={onColumnResized}
           />
         </EuiFlexItem>

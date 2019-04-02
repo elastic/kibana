@@ -3,61 +3,73 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EcsEdges } from '../../graphql/types';
+import { EcsEdges, TimelineDetailsData, TimelineEdges } from '../../graphql/types';
 import { eventFieldsMap } from '../ecs_fields';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
-import { formatEventsData } from './elasticsearch_adapter';
+import {
+  ElasticsearchEventsAdapter,
+  formatEventsData,
+  formatTimelineData,
+} from './elasticsearch_adapter';
+import {
+  mockOptions,
+  mockRequest,
+  mockResponseMap,
+  mockResponseSearchTimelineDetails,
+  mockTimelineDetailsResult,
+} from './mock';
 import { EventHit } from './types';
 
 describe('events elasticsearch_adapter', () => {
-  describe('#formatEventsData', () => {
-    const hit: EventHit = {
-      _index: 'index-123',
-      _type: 'type-123',
-      _id: 'id-123',
-      _score: 10,
-      aggregations: {},
-      _source: {
-        '@timestamp': 'time-1',
-        host: {
-          name: 'hostname-1',
-          ip: ['hostip-1'],
-        },
-        suricata: {
-          eve: {
-            alert: {
-              category: 'suricata-category-1',
-              signature: 'suricata-signature-1',
-              signature_id: 5000,
-              severity: 1,
-            },
-            flow_id: 100,
-            proto: 'suricata-proto-1',
+  const hit: EventHit = {
+    _index: 'index-123',
+    _type: 'type-123',
+    _id: 'id-123',
+    _score: 10,
+    aggregations: {},
+    _source: {
+      '@timestamp': 'time-1',
+      host: {
+        name: 'hostname-1',
+        ip: ['hostip-1'],
+      },
+      suricata: {
+        eve: {
+          alert: {
+            category: 'suricata-category-1',
+            signature: 'suricata-signature-1',
+            signature_id: 5000,
+            severity: 1,
           },
-        },
-        source: {
-          ip: 'source-ip-1',
-          port: 100,
-        },
-        destination: {
-          ip: 'destination-ip-1',
-          port: 200,
-          geo: {
-            region_name: 'geo-region-1',
-            country_iso_code: 'geo-iso-code-1',
-          },
-        },
-        event: {
-          action: 'event-action-1',
-          module: 'event-module-1',
-          type: 'event-type-1',
-          category: 'event-category-1',
-          severity: 1,
+          flow_id: 100,
+          proto: 'suricata-proto-1',
         },
       },
-      sort: ['123567890', '1234'],
-    };
+      source: {
+        ip: 'source-ip-1',
+        port: 100,
+      },
+      destination: {
+        ip: 'destination-ip-1',
+        port: 200,
+        geo: {
+          region_name: 'geo-region-1',
+          country_iso_code: 'geo-iso-code-1',
+        },
+      },
+      event: {
+        action: 'event-action-1',
+        module: 'event-module-1',
+        type: 'event-type-1',
+        category: 'event-category-1',
+        severity: 1,
+      },
+    },
+    sort: ['123567890', '1234'],
+  };
 
+  describe('#formatEventsData', () => {
     test('it formats an event with a source of hostname correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
@@ -450,6 +462,67 @@ describe('events elasticsearch_adapter', () => {
       const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: { _id: '' } };
 
       expect(data).toEqual(expected);
+    });
+  });
+
+  describe('#formatTimelineData', () => {
+    test('it formats TimelineEdges from hit as expected ', () => {
+      const datafields: ReadonlyArray<string> = [
+        '@timestamp',
+        'host.name',
+        'suricata.eve.alert.signature_id',
+      ];
+      const ecsfields: ReadonlyArray<string> = ['host.name', 'suricata.eve.alert.signature_id'];
+      const data = formatTimelineData(datafields, ecsfields, hit, eventFieldsMap);
+      const expected: TimelineEdges = {
+        cursor: { tiebreaker: '1234', value: '123567890' },
+        node: {
+          _id: 'id-123',
+          _index: 'index-123',
+          data: [
+            { field: 'host.name', value: 'hostname-1' },
+            { field: 'suricata.eve.alert.signature_id', value: 5000 },
+            { field: '@timestamp', value: 'time-1' },
+          ],
+          ecs: {
+            _id: 'id-123',
+            _index: 'index-123',
+            host: { name: 'hostname-1' },
+            suricata: { eve: { alert: { signature_id: 5000 } } },
+          },
+        },
+      };
+      expect(data).toEqual(expected);
+    });
+  });
+
+  describe('Timeline Details', () => {
+    test('Happy Path ', async () => {
+      const mockCallWithRequest = jest.fn();
+      mockCallWithRequest.mockImplementation((req: FrameworkRequest, method: string) => {
+        if (method === 'search') {
+          return mockResponseSearchTimelineDetails;
+        }
+        return mockResponseMap;
+      });
+      const mockFramework: FrameworkAdapter = {
+        version: 'mock',
+        callWithRequest: mockCallWithRequest,
+        exposeStaticDir: jest.fn(),
+        registerGraphQLEndpoint: jest.fn(),
+        getIndexPatternsService: jest.fn(),
+      };
+      jest.mock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+
+      const EsNetworkTimelineDetail = new ElasticsearchEventsAdapter(mockFramework);
+      const data: TimelineDetailsData = await EsNetworkTimelineDetail.getTimelineDetails(
+        mockRequest as FrameworkRequest,
+        mockOptions
+      );
+
+      expect(data).toEqual(mockTimelineDetailsResult);
     });
   });
 });

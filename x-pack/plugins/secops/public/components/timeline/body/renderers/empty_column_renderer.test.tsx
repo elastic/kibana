@@ -6,27 +6,30 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep, get } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { Ecs } from '../../../../graphql/types';
-import { defaultHeaders, mockEcsData } from '../../../../mock';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { defaultHeaders, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
 import { emptyColumnRenderer } from '.';
+import { deleteItemIdx, findItem } from './helpers';
 
 describe('empty_column_renderer', () => {
-  let mockDatum: Ecs;
+  let mockDatum: TimelineNonEcsData[];
+  const _id = mockTimelineData[0]._id;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockEcsData[0]);
+    mockDatum = cloneDeep(mockTimelineData[0].data);
   });
 
   test('renders correctly against snapshot', () => {
-    delete mockDatum.source;
+    mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
+    const sourceObj = mockDatum.find(d => d.field === 'source.ip');
     const emptyColumn = emptyColumnRenderer.renderColumn({
       columnName: 'source.ip',
-      eventId: mockDatum._id,
-      value: get('source.ip', mockDatum),
+      eventId: _id,
+      values: sourceObj != null ? sourceObj.value : undefined,
       field: defaultHeaders.find(h => h.id === 'source.ip')!,
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
@@ -34,16 +37,12 @@ describe('empty_column_renderer', () => {
   });
 
   test('should return isInstance true if source is empty', () => {
-    delete mockDatum.source;
+    mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
     expect(emptyColumnRenderer.isInstance('source', mockDatum)).toBe(true);
   });
 
-  test('should return isInstance false if source is NOT empty', () => {
-    expect(emptyColumnRenderer.isInstance('source', mockDatum)).toBe(false);
-  });
-
   test('should return isInstance true if source.ip is empty', () => {
-    delete mockDatum.source!.ip;
+    mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
     expect(emptyColumnRenderer.isInstance('source.ip', mockDatum)).toBe(true);
   });
 
@@ -56,11 +55,11 @@ describe('empty_column_renderer', () => {
   });
 
   test('should return an empty value', () => {
-    delete mockDatum.source;
+    mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
     const emptyColumn = emptyColumnRenderer.renderColumn({
       columnName: 'source.ip',
-      eventId: mockDatum._id,
-      value: null,
+      eventId: _id,
+      values: null,
       field: defaultHeaders.find(h => h.id === 'source.ip')!,
     });
     const wrapper = mount(<span>{emptyColumn}</span>);

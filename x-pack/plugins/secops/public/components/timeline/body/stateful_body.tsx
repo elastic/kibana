@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../../containers/source';
-import { Ecs } from '../../../graphql/types';
+import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import {
   appActions,
@@ -39,7 +39,7 @@ import { Sort } from './sort';
 
 interface OwnProps {
   browserFields: BrowserFields;
-  data: Ecs[];
+  data: TimelineItem[];
   id: string;
   isLoading: boolean;
   height: number;

@@ -7,10 +7,10 @@
 import gql from 'graphql-tag';
 
 export const eventsSchema = gql`
-  scalar DetailItemValue
+  scalar EsValue
 
   type KpiItem {
-    value: String!
+    value: String
     count: Float!
   }
 
@@ -21,16 +21,40 @@ export const eventsSchema = gql`
     pageInfo: PageInfo!
   }
 
+  type TimelineNonEcsData {
+    field: String!
+    value: ToStringArray
+  }
+
+  type TimelineItem {
+    _id: String!
+    _index: String
+    data: [TimelineNonEcsData!]!
+    ecs: ECS!
+  }
+
+  type TimelineEdges {
+    node: TimelineItem!
+    cursor: CursorType!
+  }
+
+  type TimelineData {
+    edges: [TimelineEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+
   type DetailItem {
     category: String!
     description: String
     example: String
     field: String!
     type: String!
-    value: DetailItemValue!
+    values: ToStringArray
+    originalValue: EsValue
   }
 
-  type EventDetailsData {
+  type TimelineDetailsData {
     data: [DetailItem!]
   }
 
@@ -42,6 +66,13 @@ export const eventsSchema = gql`
       timerange: TimerangeInput
       filterQuery: String
     ): EventsData!
-    EventDetails(eventId: String!, indexName: String!): EventDetailsData!
+    Timeline(
+      pagination: PaginationInput!
+      sortField: SortField!
+      fieldRequested: [String!]!
+      timerange: TimerangeInput
+      filterQuery: String
+    ): TimelineData!
+    TimelineDetails(eventId: String!, indexName: String!): TimelineDetailsData!
   }
 `;

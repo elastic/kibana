@@ -8,8 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../graphql/types';
-import { getMappedEcsValue } from '../../../../lib/ecs';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 import { OnResize, Resizeable } from '../../../resize_handle';
 import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_handle/styled_handles';
 import { OnColumnResized } from '../../events';
@@ -18,9 +17,10 @@ import { FullHeightFlexItem } from '../column_headers/common/styles';
 import { ColumnRenderer, getColumnRenderer } from '../renderers';
 
 interface Props {
+  _id: string;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  ecs: Ecs;
+  data: TimelineNonEcsData[];
   onColumnResized: OnColumnResized;
 }
 
@@ -83,7 +83,7 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
   }
 
   private renderCell = (header: ColumnHeader, index: number) => () => {
-    const { columnRenderers, ecs } = this.props;
+    const { columnRenderers, data, _id } = this.props;
 
     return (
       <EuiFlexItem grow={false}>
@@ -92,11 +92,11 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
           index={index}
           width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}
         >
-          {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn({
+          {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
             columnName: header.id,
-            eventId: ecs._id,
-            value: getMappedEcsValue({
-              data: ecs,
+            eventId: _id,
+            values: getMappedNonEcsValue({
+              data,
               fieldName: header.id,
             }),
             field: header,
@@ -111,3 +111,17 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
     this.props.onColumnResized({ columnId: id, delta });
   };
 }
+
+const getMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  const item = data.find(d => d.field === fieldName);
+  if (item != null) {
+    return item.value;
+  }
+  return undefined;
+};

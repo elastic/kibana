@@ -11,7 +11,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock';
-import { mockEcsData } from '../../../../mock';
+import { mockTimelineData } from '../../../../mock';
 
 import {
   constructDroppedValue,
@@ -31,7 +31,7 @@ describe('ZeekSignature', () => {
   let zeek: Ecs;
 
   beforeEach(() => {
-    zeek = cloneDeep(mockEcsData[13]);
+    zeek = cloneDeep(mockTimelineData[13].ecs);
   });
 
   describe('rendering', () => {

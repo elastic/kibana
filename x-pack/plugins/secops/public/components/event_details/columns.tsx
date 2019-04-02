@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiIcon,
-  // @ts-ignore
-  EuiInMemoryTable,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -18,19 +12,8 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import { SelectableText } from '../selectable_text';
 import { WithHoverActions } from '../with_hover_actions';
 
-import { getIconFromType } from './helpers';
+import { getIconFromType, ItemValues } from './helpers';
 import * as i18n from './translations';
-
-/**
- * An item rendered in the table
- */
-interface Item {
-  field: string;
-  description: string;
-  type: string;
-  value: JSX.Element;
-  valueAsString: string;
-}
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -44,7 +27,7 @@ const HoverActionsContainer = styled(EuiPanel)`
   width: 30px;
 `;
 
-export const columns = [
+export const getColumns = (id: string) => [
   {
     field: 'type',
     name: '',
@@ -76,21 +59,27 @@ export const columns = [
     ),
   },
   {
-    field: 'value',
+    field: 'values',
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (value: JSX.Element, item: Item) => (
-      <WithHoverActions
-        hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={item.valueAsString} titleSummary={i18n.VALUE} />
-            </EuiToolTip>
-          </HoverActionsContainer>
-        }
-        render={() => value}
-      />
+    render: (values: ItemValues[]) => (
+      <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
+        {values.map(item => (
+          <EuiFlexItem grow={false} component="span" key={`${id}-value-${item.valueAsString}`}>
+            <WithHoverActions
+              hoverContent={
+                <HoverActionsContainer data-test-subj="hover-actions-container">
+                  <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
+                    <WithCopyToClipboard text={item.valueAsString} titleSummary={i18n.VALUE} />
+                  </EuiToolTip>
+                </HoverActionsContainer>
+              }
+              render={() => item.value}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     ),
   },
   {

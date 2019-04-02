@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { get, isEmpty, isNil } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -178,7 +178,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     sortable: true,
     render: (bytes: number | null | undefined) => {
-      if (!isNil(bytes)) {
+      if (bytes != null) {
         return numeral(bytes).format('0.000b');
       } else {
         return getEmptyTagValue();
@@ -192,7 +192,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     sortable: true,
     render: (packets: number | null | undefined) => {
-      if (!isNil(packets)) {
+      if (packets != null) {
         return numeral(packets).format('0,000');
       } else {
         return getEmptyTagValue();
@@ -206,7 +206,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     sortable: true,
     render: (ipCount: number | null | undefined) => {
-      if (!isNil(ipCount)) {
+      if (ipCount != null) {
         return numeral(ipCount).format('0,000');
       } else {
         return getEmptyTagValue();
@@ -214,6 +214,8 @@ export const getNetworkTopNFlowColumns = (
     },
   },
 ];
+
+// Xavier fix this stuff under DO NOT FORGET
 
 const getIpTitle = (topNFlowType: NetworkTopNFlowType) => {
   if (topNFlowType === NetworkTopNFlowType.source) {

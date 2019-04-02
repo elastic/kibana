@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { has } from 'lodash/fp';
-
-import { Ecs } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
 
 import { ColumnRenderer } from '.';
 
-export const dataNotExistsAtColumn = (columnName: string, data: Ecs): boolean =>
-  !has(columnName, data);
+export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
+  data.findIndex(item => item.field === columnName) === -1;
 
 export const emptyColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, ecs: Ecs) => dataNotExistsAtColumn(columnName, ecs),
-
+  isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
+    dataNotExistsAtColumn(columnName, data),
   renderColumn: () => getEmptyValue(),
 };

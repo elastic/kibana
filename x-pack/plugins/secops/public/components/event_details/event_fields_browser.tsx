@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 
 import { DetailItem } from '../../graphql/types';
 
-import { columns } from './columns';
+import { getColumns } from './columns';
 import { getItems, search } from './helpers';
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 export const EventFieldsBrowser = pure<Props>(({ data, id }) => (
   <EuiInMemoryTable
     items={getItems(data, id)}
-    columns={columns}
+    columns={getColumns(id)}
     pagination={false}
     search={search}
     sorting={true}

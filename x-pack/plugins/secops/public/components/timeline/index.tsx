@@ -12,6 +12,7 @@ import { WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
 import { State, timelineActions, timelineModel, timelineSelectors } from '../../store';
 
+import { ColumnHeader } from './body/column_headers/column_header';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
@@ -32,6 +33,7 @@ export interface OwnProps {
 
 interface StateReduxProps {
   activePage?: number;
+  columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -103,6 +105,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
   public render() {
     const {
+      columns,
       dataProviders,
       flyoutHeight,
       flyoutHeaderHeight,
@@ -120,6 +123,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
+            columns={columns}
             id={id}
             dataProviders={dataProviders!}
             flyoutHeaderHeight={flyoutHeaderHeight}
@@ -187,10 +191,19 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, id);
-    const { dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort, show } = timeline;
+    const {
+      columns,
+      dataProviders,
+      itemsPerPage,
+      itemsPerPageOptions,
+      kqlMode,
+      sort,
+      show,
+    } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
 
     return {
+      columns,
       dataProviders,
       id,
       itemsPerPage,

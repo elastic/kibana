@@ -15,7 +15,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'Y-6TfmcB0WOhS6qyMv3s',
     field: '_id',
     type: 'keyword',
-    value: 'pEMaMmkBUV60JmNWmWVi',
+    originalValue: 'pEMaMmkBUV60JmNWmWVi',
+    values: ['pEMaMmkBUV60JmNWmWVi'],
   },
   {
     category: '_index',
@@ -24,7 +25,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'auditbeat-8.0.0-2019.02.19-000001',
     field: '_index',
     type: 'keyword',
-    value: 'filebeat-8.0.0-2019.02.19-000001',
+    originalValue: 'filebeat-8.0.0-2019.02.19-000001',
+    values: ['filebeat-8.0.0-2019.02.19-000001'],
   },
   {
     category: '_type',
@@ -32,7 +34,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: '_type',
     type: 'keyword',
-    value: '_doc',
+    originalValue: '_doc',
+    values: ['_doc'],
   },
   {
     category: '_score',
@@ -40,7 +43,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: '_score',
     type: 'long',
-    value: 1,
+    originalValue: 1,
+    values: ['1'],
   },
   {
     category: '@timestamp',
@@ -49,7 +53,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '2016-05-23T08:05:34.853Z',
     field: '@timestamp',
     type: 'date',
-    value: '2019-02-28T16:50:54.621Z',
+    originalValue: '2019-02-28T16:50:54.621Z',
+    values: ['2019-02-28T16:50:54.621Z'],
   },
   {
     category: 'agent',
@@ -58,7 +63,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '8a4f500f',
     field: 'agent.ephemeral_id',
     type: 'keyword',
-    value: '9d391ef2-a734-4787-8891-67031178c641',
+    originalValue: '9d391ef2-a734-4787-8891-67031178c641',
+    values: ['9d391ef2-a734-4787-8891-67031178c641'],
   },
   {
     category: 'agent',
@@ -66,7 +72,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: 'agent.hostname',
     type: 'keyword',
-    value: 'siem-kibana',
+    originalValue: 'siem-kibana',
+    values: ['siem-kibana'],
   },
   {
     category: 'agent',
@@ -75,7 +82,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '8a4f500d',
     field: 'agent.id',
     type: 'keyword',
-    value: '5de03d5f-52f3-482e-91d4-853c7de073c3',
+    originalValue: '5de03d5f-52f3-482e-91d4-853c7de073c3',
+    values: ['5de03d5f-52f3-482e-91d4-853c7de073c3'],
   },
   {
     category: 'agent',
@@ -84,7 +92,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'filebeat',
     field: 'agent.type',
     type: 'keyword',
-    value: 'filebeat',
+    originalValue: 'filebeat',
+    values: ['filebeat'],
   },
   {
     category: 'agent',
@@ -92,7 +101,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '6.0.0-rc2',
     field: 'agent.version',
     type: 'keyword',
-    value: '8.0.0',
+    originalValue: '8.0.0',
+    values: ['8.0.0'],
   },
   {
     category: 'cloud',
@@ -100,7 +110,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'us-east-1c',
     field: 'cloud.availability_zone',
     type: 'keyword',
-    value: 'projects/189716325846/zones/us-east1-b',
+    originalValue: 'projects/189716325846/zones/us-east1-b',
+    values: ['projects/189716325846/zones/us-east1-b'],
   },
   {
     category: 'cloud',
@@ -108,7 +119,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'i-1234567890abcdef0',
     field: 'cloud.instance.id',
     type: 'keyword',
-    value: '5412578377715150143',
+    originalValue: '5412578377715150143',
+    values: ['5412578377715150143'],
   },
   {
     category: 'cloud',
@@ -116,7 +128,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: 'cloud.instance.name',
     type: 'keyword',
-    value: 'siem-kibana',
+    originalValue: 'siem-kibana',
+    values: ['siem-kibana'],
   },
   {
     category: 'cloud',
@@ -124,7 +137,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 't2.medium',
     field: 'cloud.machine.type',
     type: 'keyword',
-    value: 'projects/189716325846/machineTypes/n1-standard-1',
+    originalValue: 'projects/189716325846/machineTypes/n1-standard-1',
+    values: ['projects/189716325846/machineTypes/n1-standard-1'],
   },
   {
     category: 'cloud',
@@ -132,7 +146,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: 'cloud.project.id',
     type: 'keyword',
-    value: 'elastic-beats',
+    originalValue: 'elastic-beats',
+    values: ['elastic-beats'],
   },
   {
     category: 'cloud',
@@ -140,7 +155,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: 'ec2',
     field: 'cloud.provider',
     type: 'keyword',
-    value: 'gce',
+    originalValue: 'gce',
+    values: ['gce'],
   },
   {
     category: 'destination',
@@ -148,7 +164,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '184',
     field: 'destination.bytes',
     type: 'long',
-    value: 584,
+    originalValue: 584,
+    values: ['584'],
   },
   {
     category: 'destination',
@@ -156,7 +173,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: 'destination.ip',
     type: 'ip',
-    value: '10.47.8.200',
+    originalValue: '10.47.8.200',
+    values: ['10.47.8.200'],
   },
   {
     category: 'destination',
@@ -164,7 +182,8 @@ export const mockDetailItemData: DetailItem[] = [
     example: '12',
     field: 'destination.packets',
     type: 'long',
-    value: 4,
+    originalValue: 4,
+    values: ['4'],
   },
   {
     category: 'destination',
@@ -172,6 +191,7 @@ export const mockDetailItemData: DetailItem[] = [
     example: null,
     field: 'destination.port',
     type: 'long',
-    value: 902,
+    originalValue: 902,
+    values: ['902'],
   },
 ];
