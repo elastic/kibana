@@ -38,7 +38,7 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n      networkEvents\n      uniqueFlowId\n      activeAgents\n      uniqueSourcePrivateIps\n      uniqueDestinationPrivateIps\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n      networkEvents\n      uniqueFlowId\n      activeAgents\n      uniqueSourcePrivateIps\n      uniqueDestinationPrivateIps\n      dnsQueries\n      tlsHandshakes\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -69,6 +69,20 @@ export const mockResponse = {
       aggregations: { unique_private_ips: { value: 18 } },
       status: 200,
     },
+    {
+      took: 9,
+      timed_out: false,
+      _shards: { total: 38, successful: 38, skipped: 36, failed: 0 },
+      hits: { total: { value: 278, relation: 'eq' }, max_score: null, hits: [] },
+      status: 200,
+    },
+    {
+      took: 60,
+      timed_out: false,
+      _shards: { total: 38, successful: 38, skipped: 36, failed: 0 },
+      hits: { total: { value: 10000, relation: 'gte' }, max_score: null, hits: [] },
+      status: 200,
+    },
   ],
 };
 
@@ -78,4 +92,6 @@ export const mockResult = {
   activeAgents: 15,
   uniqueSourcePrivateIps: 383,
   uniqueDestinationPrivateIps: 18,
+  dnsQueries: 278,
+  tlsHandshakes: 10000,
 };

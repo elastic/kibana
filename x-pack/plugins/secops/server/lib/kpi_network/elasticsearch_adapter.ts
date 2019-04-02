@@ -11,7 +11,9 @@ import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 
+import { buildDnsQuery } from './query_dns.dsl';
 import { buildGeneralQuery } from './query_general.dsl';
+import { buildTlsHandshakeQuery } from './query_tls_handshakes.dsl';
 import { buildUniquePrvateIpQuery } from './query_unique_private_ips.dsl';
 import { KpiNetworkAdapter, KpiNetworkESMSearchBody, KpiNetworkHit } from './types';
 
@@ -31,6 +33,8 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
       'destination',
       options
     );
+    const dnsQuery: KpiNetworkESMSearchBody[] = buildDnsQuery(options);
+    const tlsHandshakesQuery: KpiNetworkESMSearchBody[] = buildTlsHandshakeQuery(options);
     const response = await this.framework.callWithRequest<KpiNetworkHit, TermAggregation>(
       request,
       'msearch',
@@ -39,6 +43,8 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
           ...generalQuery,
           ...uniqueSourcePrivateIpsQuery,
           ...uniqueDestinationPrivateIpsQuery,
+          ...dnsQuery,
+          ...tlsHandshakesQuery,
         ],
       }
     );
@@ -57,6 +63,8 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
         'responses.2.aggregations.unique_private_ips.value',
         response
       ),
+      dnsQueries: getOr(null, 'responses.3.hits.total.value', response),
+      tlsHandshakes: getOr(null, 'responses.4.hits.total.value', response),
     };
   }
 }

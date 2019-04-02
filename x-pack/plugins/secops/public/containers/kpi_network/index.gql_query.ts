@@ -16,6 +16,8 @@ export const kpiNetworkQuery = gql`
         activeAgents
         uniqueSourcePrivateIps
         uniqueDestinationPrivateIps
+        dnsQueries
+        tlsHandshakes
       }
     }
   }

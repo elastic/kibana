@@ -65,6 +65,24 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
       },
     ],
   },
+  {
+    fields: [
+      {
+        key: 'dnsQueries',
+        description: i18n.DNS_QUERIES,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'tlsHandshakes',
+        description: i18n.TLS_HANDSHAKES,
+        value: null,
+      },
+    ],
+  },
 ];
 
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {

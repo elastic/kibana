@@ -13,5 +13,7 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
     activeAgents: 60015,
     uniqueSourcePrivateIps: 383,
     uniqueDestinationPrivateIps: 18,
+    dnsQueries: 278,
+    tlsHandshakes: 10000,
   },
 };
