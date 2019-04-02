@@ -8,7 +8,7 @@ import ReactDOMServer from 'react-dom/server';
 
 import {
   API_BASE_PATH,
-  REPOSITORY_PLUGINS_MAP,
+  PLUGIN_REPOSITORY_TYPES,
   REPOSITORY_TYPES,
 } from '../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../common/types';
@@ -84,7 +84,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     () => {
       const repositoryTypeOptions = [...repositoryTypes];
       const { type } = repository;
-      if (isEditing && REPOSITORY_PLUGINS_MAP[type] && !repositoryTypes.includes(type)) {
+      if (isEditing && PLUGIN_REPOSITORY_TYPES.includes(type) && !repositoryTypes.includes(type)) {
         repositoryTypeOptions.push(type);
       }
       setAvailableRepositoryTypes(repositoryTypeOptions);

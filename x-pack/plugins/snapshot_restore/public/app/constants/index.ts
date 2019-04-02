@@ -32,6 +32,6 @@ export const getRepositoryAddBreadcrumb = (translate: any) => {
     text: translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
       defaultMessage: 'Add repository',
     }),
-    href: `#${BASE_PATH}/repositories/add`,
+    href: `#${BASE_PATH}/add_repository`,
   };
 };

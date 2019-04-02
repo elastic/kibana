@@ -65,7 +65,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     loading,
     data: { repository, verification },
   } = useRequest({
-    path: chrome.addBasePath(`${API_BASE_PATH}repositories/${repositoryName}`),
+    path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(repositoryName)}`),
     method: 'get',
     httpClient: http.getClient(),
   });
@@ -145,7 +145,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               <RepositoryTypeName type={type} />
             )}
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -258,9 +258,9 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => {
-                    history.push(`${BASE_PATH}/${section}/edit/${repositoryName}`);
-                  }}
+                  href={history.createHref({
+                    pathname: `${BASE_PATH}/edit_repository/${repositoryName}`,
+                  })}
                   fill
                   color="primary"
                 >

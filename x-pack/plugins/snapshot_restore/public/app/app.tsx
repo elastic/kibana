@@ -15,9 +15,9 @@ export const App = () => {
     <div>
       <Switch>
         <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/repositories`} />
-        <Route exact path={`${BASE_PATH}/repositories/add`} component={RepositoryAdd} />
-        <Route exact path={`${BASE_PATH}/repositories/edit/:name`} component={RepositoryEdit} />
-        <Route exact path={`${BASE_PATH}/:section/:name?`} component={SnapshotRestoreHome} />
+        <Route exact path={`${BASE_PATH}/add_repository`} component={RepositoryAdd} />
+        <Route exact path={`${BASE_PATH}/edit_repository/:name*`} component={RepositoryEdit} />
+        <Route exact path={`${BASE_PATH}/:section/:name*`} component={SnapshotRestoreHome} />
       </Switch>
     </div>
   );

@@ -102,7 +102,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           icon: 'pencil',
           type: 'icon',
           onClick: ({ name }: Repository) => {
-            history.push(`${BASE_PATH}/${section}/edit/${name}`);
+            history.push(`${BASE_PATH}/edit_repository/${name}`);
           },
         },
         {
@@ -190,7 +190,9 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            onClick={() => history.push(`${BASE_PATH}/${section}/add`)}
+            href={history.createHref({
+              pathname: `${BASE_PATH}/add_repository`,
+            })}
             fill
             iconType="plusInCircle"
             data-test-subj="srRepositoriesAddButton"

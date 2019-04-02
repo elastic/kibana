@@ -36,6 +36,13 @@ export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.source,
 ];
 
+export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [
+  REPOSITORY_TYPES.s3,
+  REPOSITORY_TYPES.hdfs,
+  REPOSITORY_TYPES.azure,
+  REPOSITORY_TYPES.gcs,
+];
+
 export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-s3': REPOSITORY_TYPES.s3,
   'repository-hdfs': REPOSITORY_TYPES.hdfs,

@@ -116,7 +116,9 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         }
         actions={
           <EuiButton
-            onClick={() => history.push(`${BASE_PATH}/${section}/add`)}
+            href={history.createHref({
+              pathname: `${BASE_PATH}/add_repository`,
+            })}
             fill
             iconType="plusInCircle"
             data-test-subj="srRepositoriesEmptyPromptAddButton"

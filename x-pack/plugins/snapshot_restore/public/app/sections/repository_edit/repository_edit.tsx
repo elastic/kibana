@@ -60,7 +60,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   // Load repository information
   useEffect(() => {
     sendRequest({
-      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${name}`),
+      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
       method: 'get',
       httpClient: http.getClient(),
     }).then(({ data, error }) => {
@@ -78,7 +78,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
     setIsSaving(true);
     setErrors({ ...errors, save: null });
     const { error } = await sendRequest({
-      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${name}`),
+      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
       method: 'put',
       body: editedRepository,
       httpClient: http.getClient(),

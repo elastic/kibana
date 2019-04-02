@@ -48,69 +48,43 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
     });
   };
 
+  const typeSettingsMap: { [key in RepositoryType]: any } = {
+    [REPOSITORY_TYPES.fs]: FSSettings,
+    [REPOSITORY_TYPES.url]: ReadonlySettings,
+    [REPOSITORY_TYPES.azure]: AzureSettings,
+    [REPOSITORY_TYPES.gcs]: GCSSettings,
+    [REPOSITORY_TYPES.hdfs]: HDFSSettings,
+    [REPOSITORY_TYPES.s3]: S3Settings,
+  };
+
   const renderTypeSettings = (repositoryType: RepositoryType) => {
-    switch (repositoryType) {
-      case REPOSITORY_TYPES.fs:
-        return (
-          <FSSettings repository={repository as FSRepository} onSettingsChange={onSettingsChange} />
-        );
-      case REPOSITORY_TYPES.url:
-        return (
-          <ReadonlySettings
-            repository={repository as ReadonlyRepository}
-            onSettingsChange={onSettingsChange}
-          />
-        );
-      case REPOSITORY_TYPES.azure:
-        return (
-          <AzureSettings
-            repository={repository as AzureRepository}
-            onSettingsChange={onSettingsChange}
-          />
-        );
-      case REPOSITORY_TYPES.gcs:
-        return (
-          <GCSSettings
-            repository={repository as GCSRepository}
-            onSettingsChange={onSettingsChange}
-          />
-        );
-      case REPOSITORY_TYPES.hdfs:
-        return (
-          <HDFSSettings
-            repository={repository as HDFSRepository}
-            onSettingsChange={onSettingsChange}
-          />
-        );
-      case REPOSITORY_TYPES.s3:
-        return (
-          <S3Settings repository={repository as S3Repository} onSettingsChange={onSettingsChange} />
-        );
-      default:
-        return (
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesTitle"
-                defaultMessage="Unknown repository type"
-              />
-            }
-            error={{
-              data: {
-                error: i18n.translate(
-                  'xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesMessage',
-                  {
-                    defaultMessage: `The repository type '{type}' is not supported.`,
-                    values: {
-                      type: repositoryType,
-                    },
-                  }
-                ),
-              },
-            }}
-          />
-        );
+    const RepositorySettings = typeSettingsMap[repositoryType];
+    if (RepositorySettings) {
+      return <RepositorySettings repository={repository} onSettingsChange={onSettingsChange} />;
     }
+    return (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesTitle"
+            defaultMessage="Unknown repository type"
+          />
+        }
+        error={{
+          data: {
+            error: i18n.translate(
+              'xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesMessage',
+              {
+                defaultMessage: `The repository type '{type}' is not supported.`,
+                values: {
+                  type: repositoryType,
+                },
+              }
+            ),
+          },
+        }}
+      />
+    );
   };
 
   return type === REPOSITORY_TYPES.source
