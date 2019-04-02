@@ -12,6 +12,6 @@ interface Props {
   indexPattern: StaticIndexPattern;
 }
 
-export const JobCreateSummary: SFC<Props> = ({ indexPattern }) => {
-  return <div>Job Create Summary Component</div>;
-};
+export const JobCreateSummary: SFC<Props> = React.memo(({ indexPattern }) => {
+  return null;
+});

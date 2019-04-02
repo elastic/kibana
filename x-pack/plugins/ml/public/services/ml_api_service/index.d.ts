@@ -17,7 +17,9 @@ declare interface Ml {
   };
 
   dataFrame: {
+    createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
+    startDataFrameTransformsJob(jobId: string): Promise<any>;
   };
   esSearch: any;
 

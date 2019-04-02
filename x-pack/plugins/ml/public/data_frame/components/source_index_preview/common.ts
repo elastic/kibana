@@ -18,8 +18,30 @@ export interface EsDoc extends Dictionary<any> {
 
 export const MAX_COLUMNS = 5;
 
+function getFlattenedFields(obj: EsDocSource) {
+  const flatDocFields: EsFieldName[] = [];
+  const newDocFields = Object.keys(obj);
+  newDocFields.forEach(f => {
+    const fieldValue = obj[f];
+    if (typeof fieldValue !== 'object' || fieldValue === null || Array.isArray(fieldValue)) {
+      flatDocFields.push(f);
+    } else {
+      const innerFields = getFlattenedFields(fieldValue);
+      const flattenedFields = innerFields.map(d => `${f}.${d}`);
+      flatDocFields.push(...flattenedFields);
+    }
+  });
+  return flatDocFields;
+}
+
+export const getSelectableFields = (docs: EsDoc[]) => {
+  const newDocFields = getFlattenedFields(docs[0]._source);
+  newDocFields.sort();
+  return newDocFields;
+};
+
 export const getDefaultSelectableFields = (docs: EsDoc[]) => {
-  const newDocFields = Object.keys(docs[0]._source);
+  const newDocFields = getFlattenedFields(docs[0]._source);
   newDocFields.sort();
   return newDocFields
     .filter(k => {

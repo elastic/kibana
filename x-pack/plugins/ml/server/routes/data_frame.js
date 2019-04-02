@@ -11,12 +11,42 @@ import { dataFrameServiceProvider } from '../models/data_frame_service';
 export function dataFrameRoutes(server, commonRouteConfig) {
 
   server.route({
+    method: 'PUT',
+    path: '/api/ml/_data_frame/transforms/{jobId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { createDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
+      const { jobId } = request.params;
+      return createDataFrameTransformsJob(jobId, request.payload)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
     method: 'POST',
     path: '/api/ml/_data_frame/transforms/_preview',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getDataFrameTransformsPreview } = dataFrameServiceProvider(callWithRequest);
       return getDataFrameTransformsPreview(request.payload)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/_data_frame/transforms/{jobId}/_start',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { createDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
+      const { jobId } = request.params;
+      return createDataFrameTransformsJob(jobId)
         .catch(resp => wrapError(resp));
     },
     config: {

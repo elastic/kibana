@@ -4,35 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+
+import { JobId, TargetIndex } from './common';
 
 export interface JobDetailsExposedState {
+  jobId: JobId;
+  targetIndex: TargetIndex;
+  touched: boolean;
   valid: boolean;
 }
 
 export function getDefaultJobDetailsState() {
   return {
+    jobId: '',
+    targetIndex: '',
+    touched: false,
     valid: false,
   } as JobDetailsExposedState;
 }
 
 interface Props {
   overrides?: JobDetailsExposedState;
-  indexPattern: StaticIndexPattern;
   onChange(s: JobDetailsExposedState): void;
 }
 
-export const JobDetailsForm: SFC<Props> = React.memo(
-  ({ overrides = {}, indexPattern, onChange }) => {
-    // const defaults = { ...getDefaultJobDetailsState(), ...overrides };
+export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const defaults = { ...getDefaultJobDetailsState(), ...overrides };
 
-    useEffect(() => {
-      const valid = true;
-      onChange({ valid });
-    }, []);
+  const [jobId, setJobId] = useState(defaults.jobId);
+  const [targetIndex, setTargetIndex] = useState(defaults.targetIndex);
 
-    return <div>Job Details Form Component</div>;
-  }
-);
+  useEffect(
+    () => {
+      const valid = jobId !== '' && targetIndex !== '';
+      onChange({ jobId, targetIndex, touched: true, valid });
+    },
+    [jobId, targetIndex]
+  );
+
+  return (
+    <Fragment>
+      <EuiFormRow label="Job id">
+        <EuiFieldText
+          placeholder="job id"
+          value={jobId}
+          onChange={e => setJobId(e.target.value)}
+          aria-label="Choose a unique job id."
+        />
+      </EuiFormRow>
+      <EuiFormRow label="Target index">
+        <EuiFieldText
+          placeholder="target index"
+          value={targetIndex}
+          onChange={e => setTargetIndex(e.target.value)}
+          aria-label="Choose a non-existant target index name."
+        />
+      </EuiFormRow>
+    </Fragment>
+  );
+});

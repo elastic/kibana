@@ -6,7 +6,11 @@
 
 import { DefaultOperator } from 'elasticsearch';
 
+import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { Dictionary } from 'x-pack/plugins/ml/common/types/common';
+
+import { DefinePivotExposedState } from './components/define_pivot/define_pivot_form';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
@@ -80,3 +84,65 @@ export const pivotSupportedAggs = [
   'sum',
   'value_count',
 ] as PivotAggSupportedAggs[];
+
+export function getPivotQuery(search: string) {
+  return {
+    query: {
+      query_string: {
+        query: search,
+        default_operator: 'AND',
+      },
+    },
+  } as SimpleQuery;
+}
+export function getDataFramePreviewRequest(
+  indexPatternTitle: StaticIndexPattern['title'],
+  query: SimpleQuery['query'],
+  groupBy: string[],
+  aggs: OptionsDataElement[]
+) {
+  const request: DataFramePreviewRequest = {
+    source: indexPatternTitle,
+    pivot: {
+      group_by: {},
+      aggregations: {},
+    },
+    query,
+  };
+
+  groupBy.forEach(g => {
+    request.pivot.group_by[g] = {
+      terms: {
+        field: g,
+      },
+    };
+  });
+
+  aggs.forEach(agg => {
+    request.pivot.aggregations[agg.formRowLabel] = {
+      [agg.agg]: {
+        field: agg.field,
+      },
+    };
+  });
+
+  return request;
+}
+
+export function getDataFrameRequest(
+  indexPatternTitle: StaticIndexPattern['title'],
+  pivotState: DefinePivotExposedState,
+  jobDetailsState: any
+) {
+  const request: DataFrameRequest = {
+    ...getDataFramePreviewRequest(
+      indexPatternTitle,
+      getPivotQuery(pivotState.search).query,
+      pivotState.groupBy,
+      pivotState.aggs
+    ),
+    dest: jobDetailsState.targetIndex,
+  };
+
+  return request;
+}

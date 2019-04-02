@@ -29,16 +29,33 @@ export interface DeleteParams {
 export type callWithRequestType = (action: string, params: any) => Promise<any>;
 
 export function dataFrameProvider(callWithRequest: callWithRequestType) {
+  async function createDataFrameTransformsJob(jobId: string, jobConfig: any) {
+    try {
+      return await callWithRequest('ml.createDataFrame', { body: jobConfig, jobId });
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
   async function getDataFrameTransformsPreview(params: any) {
     try {
-      const resp = await callWithRequest('ml.dataFramePreview', { body: params });
-      return resp;
+      return await callWithRequest('ml.dataFramePreview', { body: params });
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
+  async function startDataFrameTransformsJob(jobId: string) {
+    try {
+      return await callWithRequest('ml.startDataFrame', { jobId });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
   return {
+    createDataFrameTransformsJob,
     getDataFrameTransformsPreview,
+    startDataFrameTransformsJob,
   };
 }

@@ -24,6 +24,7 @@ import {
   JobCreateSummary,
 } from '../../components/job_create';
 
+import { getDataFrameRequest } from '../../common';
 import {
   getDefaultJobDetailsState,
   JobDetailsForm,
@@ -40,7 +41,7 @@ interface Props {
   indexPattern: StaticIndexPattern;
 }
 
-export const Wizard: SFC<Props> = ({ indexPattern }) => {
+export const Wizard: SFC<Props> = React.memo(({ indexPattern }) => {
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
 
@@ -59,22 +60,19 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   const jobDetails =
     currentStep === WIZARD_STEPS.JOB_DETAILS ? (
-      <JobDetailsForm
-        indexPattern={indexPattern}
-        onChange={setJobDetails}
-        overrides={jobDetailsState}
-      />
+      <JobDetailsForm onChange={setJobDetails} overrides={jobDetailsState} />
     ) : (
-      <JobDetailsSummary indexPattern={indexPattern} />
+      <JobDetailsSummary {...jobDetailsState} />
     );
 
   // The JOB_CREATE state
-  const [jobCreateState, setJobCreate] = useState(getDefaultJobCreateState());
+  const [jobCreateState, setJobCreate] = useState(getDefaultJobCreateState);
 
   const jobCreate =
     currentStep === WIZARD_STEPS.JOB_CREATE ? (
       <JobCreateForm
-        indexPattern={indexPattern}
+        jobId={jobDetailsState.jobId}
+        jobConfig={getDataFrameRequest(indexPattern.title, pivotState, jobDetailsState)}
         onChange={setJobCreate}
         overrides={jobCreateState}
       />
@@ -84,11 +82,13 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   const definePivotRef = useRef(null);
 
+  // scroll to the currently selected wizard step
   function scrollToRef() {
     if (definePivotRef !== null && definePivotRef.current !== null) {
       // TODO Fix types
       const dummy = definePivotRef as any;
-      window.scrollTo(0, dummy.current.offsetTop);
+      const headerOffset = 70;
+      window.scrollTo(0, dummy.current.offsetTop - headerOffset);
     }
   }
 
@@ -133,7 +133,10 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
         <Fragment>
           {jobCreate}
           {currentStep === WIZARD_STEPS.JOB_CREATE && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
+            <WizardNav
+              previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
+              previousActive={!jobCreateState.created}
+            />
           )}
         </Fragment>
       ),
@@ -142,4 +145,4 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
   ];
 
   return <EuiSteps steps={stepsConfig} />;
-};
+});

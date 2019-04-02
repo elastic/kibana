@@ -12,7 +12,7 @@ import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { DataFramePreviewRequest, OptionsDataElement, SimpleQuery } from '../../common';
+import { getDataFramePreviewRequest, OptionsDataElement, SimpleQuery } from '../../common';
 
 interface Props {
   aggs: OptionsDataElement[];
@@ -34,30 +34,7 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, indexPattern, groupBy, qu
 
       setLoading(true);
 
-      const request: DataFramePreviewRequest = {
-        source: indexPattern.title,
-        pivot: {
-          group_by: {},
-          aggregations: {},
-        },
-        query,
-      };
-
-      groupBy.forEach(g => {
-        request.pivot.group_by[g] = {
-          terms: {
-            field: g,
-          },
-        };
-      });
-
-      aggs.forEach(agg => {
-        request.pivot.aggregations[agg.formRowLabel] = {
-          [agg.agg]: {
-            field: agg.field,
-          },
-        };
-      });
+      const request = getDataFramePreviewRequest(indexPattern.title, query, groupBy, aggs);
 
       ml.dataFrame
         .getDataFrameTransformsPreview(request)
@@ -70,7 +47,7 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, indexPattern, groupBy, qu
           setLoading(false);
         });
     },
-    [aggs, indexPattern]
+    [indexPattern.title, JSON.stringify(aggs)]
   );
 
   if (dataFramePreviewData.length === 0) {

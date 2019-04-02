@@ -105,6 +105,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
+  ml.createDataFrame = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'PUT'
+  });
+
   ml.dataFramePreview = ca({
     urls: [
       {
@@ -112,6 +127,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     ],
     needBody: true,
+    method: 'POST'
+  });
+
+  ml.startDataFrame = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
     method: 'POST'
   });
 

@@ -30,14 +30,15 @@ import { Dictionary } from '../../../../common/types/common';
 import {
   DropDownLabel,
   DropDownOption,
+  getPivotQuery,
   Label,
   OptionsDataElement,
   pivotSupportedAggs,
-  SimpleQuery,
 } from '../../common';
 
 export interface DefinePivotExposedState {
   aggList: Label[];
+  aggs: OptionsDataElement[];
   groupBy: Label[];
   search: string;
   valid: boolean;
@@ -48,8 +49,8 @@ const emptySearch = '';
 
 export function getDefaultPivotState() {
   return {
-    aggList: [],
-    groupBy: [],
+    aggList: [] as Label[],
+    groupBy: [] as Label[],
     search: defaultSearch,
     valid: false,
   } as DefinePivotExposedState;
@@ -140,22 +141,14 @@ export const DefinePivotForm: SFC<Props> = React.memo(
 
     const pivotAggs = aggList.map(l => aggOptionsData[l]);
     const pivotGroupBy = groupBy;
-
-    const pivotQuery: SimpleQuery = {
-      query: {
-        query_string: {
-          query: search,
-          default_operator: 'AND',
-        },
-      },
-    };
+    const pivotQuery = getPivotQuery(search);
 
     useEffect(
       () => {
         const valid = pivotGroupBy.length > 0 && aggList.length > 0;
-        onChange({ groupBy: pivotGroupBy, aggList, search, valid });
+        onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
       },
-      [pivotGroupBy, aggList, search]
+      [JSON.stringify([aggList, pivotAggs, pivotGroupBy, search])] // TODO improve ...
     );
 
     const displaySearch = search === defaultSearch ? emptySearch : search;
