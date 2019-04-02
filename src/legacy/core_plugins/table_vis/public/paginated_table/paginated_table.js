@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import paginatedTableTemplate from './paginated_table.html';
 
-import '../directives/paginate';
+import 'ui/directives/paginate';
 
 uiModules
   .get('kibana')

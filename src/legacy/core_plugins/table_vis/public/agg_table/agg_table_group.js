@@ -20,7 +20,7 @@
 import 'angular';
 import 'angular-recursion';
 import './';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import aggTableGroupTemplate from './agg_table_group.html';
 
 uiModules

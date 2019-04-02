@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 const module = uiModules.get('kibana');

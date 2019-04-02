@@ -21,9 +21,9 @@ import 'angular';
 import 'angular-recursion';
 import '../paginated_table';
 import _ from 'lodash';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import aggTableTemplate from './agg_table.html';
-import { getFormat } from '../visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
