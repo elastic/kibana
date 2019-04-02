@@ -35,7 +35,7 @@ export type AggregationResults = { [K in AggregationKeys]: AggregationBuckets } 
 };
 
 type RangeAggregationKeys = 'all' | 'last1' | 'last7';
-export type RangeAggregationResults = { [K in RangeAggregationKeys]: AggregationResults };
+export type RangeAggregationResults = { [K in RangeAggregationKeys]?: AggregationResults };
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
 export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {

@@ -38,7 +38,11 @@ const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
 type FeatureSet = 'csv' | 'printable_pdf' | 'PNG';
 type FeatureAvailabilitySet = { [F in FeatureSet]: boolean };
 
-function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySet) {
+function getAggStats(aggs: AggregationResults | undefined, featureSet: FeatureAvailabilitySet) {
+  if (!aggs) {
+    return;
+  }
+
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
     const feature = key as FeatureSet;
@@ -52,16 +56,18 @@ function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySe
   }, {}) as JobTypes;
 
   // merge pdf stats into pdf jobtype key
-  const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
-  const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
-  jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets) as {
-    visualization: number;
-    dashboard: number;
-  };
-  jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets) as {
-    print: number;
-    preserve_layout: number;
-  };
+  if (jobTypes[PRINTABLE_PDF_JOBTYPE]) {
+    const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
+    const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
+    jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets) as {
+      visualization: number;
+      dashboard: number;
+    };
+    jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets) as {
+      print: number;
+      preserve_layout: number;
+    };
+  }
 
   const all = aggs.doc_count as number;
   const statusTypes = getKeyCount(get(aggs[STATUS_TYPES_KEY], 'buckets'));
@@ -75,6 +81,9 @@ async function handleResponse(server: any, response: AggregationResults) {
   const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilitySet;
 
   const buckets = get(response, 'aggregations.ranges.buckets');
+  if (!buckets) {
+    return {};
+  }
   const { all, last1, last7 } = buckets as RangeAggregationResults;
 
   return {
