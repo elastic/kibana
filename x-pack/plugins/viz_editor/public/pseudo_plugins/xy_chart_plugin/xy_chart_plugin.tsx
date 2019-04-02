@@ -40,8 +40,6 @@ const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChar
 
 function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyChartVisModel>) {
   if (!visModel.private.xyChart) {
-    updateXyState(visModel, {});
-
     return <>No chart configured</>;
   }
 

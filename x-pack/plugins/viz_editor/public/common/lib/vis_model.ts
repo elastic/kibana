@@ -91,8 +91,7 @@ export function getColumnIdByIndex(
 ): string | undefined {
   const queryId = Object.keys(queries).sort()[queryIndex];
   if (queryId) {
-    const query = queries[queryId];
-    return Object.keys(query.select).sort()[columnIndex];
+    return `${queryId}_${columnIndex}`;
   }
 }
 

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourceField, Query, SelectOperation, WhereOperation } from '../../../common';
-import { VisModel } from '../../common/lib';
+import { Query, WhereOperation } from '../../../common';
+import { getTypes, VisModel } from '../../../public';
 
 function isRawDocumentQuery(query: Query) {
   return query.select.every(selectOperation => selectOperation.operation === 'column');
@@ -62,34 +62,6 @@ function queryToEsAggsConfigs(query: Query): any {
             interval: 'd',
           },
         };
-    }
-  });
-}
-
-function getTypeForOperation(op: SelectOperation, fields: DatasourceField[]): string {
-  switch (op.operation) {
-    case 'count':
-    case 'cardinality':
-      return 'number';
-    case 'date_histogram':
-      return 'date';
-    case 'terms':
-    case 'avg':
-    case 'sum':
-      return fields.find(field => field.name === op.argument.field)!.type;
-    default:
-      return 'string';
-  }
-}
-
-function getTypes(query: Query, fields: DatasourceField[]): string[] {
-  return query.select.map(operation => {
-    if (operation.operation === 'column') {
-      const fieldName = operation.argument.field;
-      const fieldType = fields.find(field => field.name === fieldName)!.type;
-      return fieldType;
-    } else {
-      return getTypeForOperation(operation, fields);
     }
   });
 }
