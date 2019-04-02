@@ -54,6 +54,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
+  server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
@@ -115,6 +116,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const dllBundlePath = `${basePath}/built_assets/dlls`;
         const styleSheetPaths = [
           `${dllBundlePath}/vendors.style.dll.css`,
+          `${basePath}/node_modules/@elastic/charts/dist/style.css`,
           ...(
             darkMode ?
               [

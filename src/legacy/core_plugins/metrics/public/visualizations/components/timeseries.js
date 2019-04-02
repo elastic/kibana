@@ -32,8 +32,6 @@ import {
 import { Series } from './series';
 import { GRID_LINE_CONFIG } from '../lib/config';
 
-import '@elastic/charts/dist/style.css';
-
 export const TimeSeries = ({
   isDarkMode,
   showGrid,
