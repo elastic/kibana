@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { buildSass } from '../../sass';
-
-export const TranspileScssTask = {
-  description: 'Transpiling SCSS to CSS',
-  async run(config, log, build) {
-    await buildSass({
-      log,
-      kibanaDir: build.resolvePath('.')
-    });
-  }
-};
+export { buildSass } from './build_sass';

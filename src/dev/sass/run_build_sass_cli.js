@@ -17,14 +17,24 @@
  * under the License.
  */
 
-import { buildSass } from '../../sass';
+import { run } from '../run';
+import { REPO_ROOT } from  '../constants';
+import { buildSass } from './build_sass';
 
-export const TranspileScssTask = {
-  description: 'Transpiling SCSS to CSS',
-  async run(config, log, build) {
-    await buildSass({
-      log,
-      kibanaDir: build.resolvePath('.')
-    });
-  }
-};
+run(async ({ log, flags: { kibanaDir } }) => {
+  await buildSass({
+    log,
+    kibanaDir
+  });
+}, {
+  description: 'Simple CLI, useful for building scss files outside of the server',
+  flags: {
+    default: {
+      kibanaDir: REPO_ROOT
+    },
+    string: ['kibanaDir'],
+    help: `
+      --kibanaDir        The root of the Kibana directory to build sass files in.
+    `
+  },
+});
