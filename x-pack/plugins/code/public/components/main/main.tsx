@@ -7,7 +7,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
-import styled from 'styled-components';
 
 import chrome from 'ui/chrome';
 import { MainRouteParams } from '../../common/types';
@@ -16,21 +15,6 @@ import { Content } from './content';
 import { SideTabs } from './side_tabs';
 import { structureSelector } from '../../selectors';
 import { RootState } from '../../reducers';
-
-const Root = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  height: 100%;
-`;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
@@ -60,8 +44,8 @@ class CodeMain extends React.Component<Props> {
   public render() {
     const { loadingFileTree, loadingStructureTree, hasStructure } = this.props;
     return (
-      <Root>
-        <Container>
+      <div className="codeContainer__root">
+        <div className="codeContainer__root--inner">
           <React.Fragment>
             <SideTabs
               loadingFileTree={loadingFileTree}
@@ -70,9 +54,9 @@ class CodeMain extends React.Component<Props> {
             />
             <Content />
           </React.Fragment>
-        </Container>
+        </div>
         <ShortcutsProvider />
-      </Root>
+      </div>
     );
   }
 }
