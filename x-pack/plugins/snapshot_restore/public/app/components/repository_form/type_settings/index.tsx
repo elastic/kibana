@@ -54,7 +54,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
         return (
           <FSSettings repository={repository as FSRepository} onSettingsChange={onSettingsChange} />
         );
-        break;
       case REPOSITORY_TYPES.url:
         return (
           <ReadonlySettings
@@ -62,7 +61,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
             onSettingsChange={onSettingsChange}
           />
         );
-        break;
       case REPOSITORY_TYPES.azure:
         return (
           <AzureSettings
@@ -70,7 +68,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
             onSettingsChange={onSettingsChange}
           />
         );
-        break;
       case REPOSITORY_TYPES.gcs:
         return (
           <GCSSettings
@@ -78,7 +75,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
             onSettingsChange={onSettingsChange}
           />
         );
-        break;
       case REPOSITORY_TYPES.hdfs:
         return (
           <HDFSSettings
@@ -86,12 +82,10 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
             onSettingsChange={onSettingsChange}
           />
         );
-        break;
       case REPOSITORY_TYPES.s3:
         return (
           <S3Settings repository={repository as S3Repository} onSettingsChange={onSettingsChange} />
         );
-        break;
       default:
         return (
           <SectionError

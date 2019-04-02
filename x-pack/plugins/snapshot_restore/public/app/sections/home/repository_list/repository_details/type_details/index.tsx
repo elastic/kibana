@@ -33,10 +33,8 @@ export const TypeDetails: React.FunctionComponent<Props> = ({ repository }) => {
   switch (type) {
     case REPOSITORY_TYPES.fs:
       return <FSDetails repository={repository as FSRepository} />;
-      break;
     case REPOSITORY_TYPES.url:
       return <ReadonlyDetails repository={repository as ReadonlyRepository} />;
-      break;
     case REPOSITORY_TYPES.source:
       const { delegate_type } = settings;
       const delegatedRepository = {
@@ -44,21 +42,15 @@ export const TypeDetails: React.FunctionComponent<Props> = ({ repository }) => {
         type: delegate_type,
       };
       return <TypeDetails repository={delegatedRepository} />;
-      break;
     case REPOSITORY_TYPES.azure:
       return <AzureDetails repository={repository as AzureRepository} />;
-      break;
     case REPOSITORY_TYPES.gcs:
       return <GCSDetails repository={repository as GCSRepository} />;
-      break;
     case REPOSITORY_TYPES.hdfs:
       return <HDFSDetails repository={repository as HDFSRepository} />;
-      break;
     case REPOSITORY_TYPES.s3:
       return <S3Details repository={repository as S3Repository} />;
-      break;
     default:
       return <DefaultDetails repository={repository} />;
-      break;
   }
 };
