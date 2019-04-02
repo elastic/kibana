@@ -7,7 +7,8 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 
@@ -71,6 +72,6 @@ export const InvalidNodeError: React.SFC<InvalidNodeErrorProps> = ({ nodeName })
   </WithKibanaChrome>
 );
 
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;
 `;
