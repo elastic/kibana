@@ -113,6 +113,7 @@ export async function getReportingUsage(server: any, callCluster: any) {
   const params = {
     rest_total_hits_as_int: true,
     index: `${reportingIndex}-*`,
+    filterPath: 'aggregations.*.buckets',
     body: {
       size: 0,
       aggs: {
