@@ -15,16 +15,16 @@ trap report EXIT
 
 export TEST_BROWSER_HEADLESS=1
 
-echo " -> Skipping Running mocha tests (for secops only)"
+echo " -> Skipping Running mocha tests (for siem only)"
 cd "$XPACK_DIR"
 # yarn test
 echo ""
 echo ""
 
 
-echo " -> Running jest tests (for secops only)"
+echo " -> Running jest tests (for siem only)"
 cd "$XPACK_DIR"
-node scripts/jest --ci --no-cache --verbose secops
+node scripts/jest --ci --no-cache --verbose siem
 echo ""
 echo ""
 
