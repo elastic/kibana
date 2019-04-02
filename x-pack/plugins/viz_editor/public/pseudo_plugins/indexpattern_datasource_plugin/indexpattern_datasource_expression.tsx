@@ -20,6 +20,29 @@ import { IndexPatternsProvider } from 'ui/index_patterns';
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
+function columnTypesFunction() {
+  return {
+    name: 'column_types',
+    type: 'kibana_datatable',
+    args: {
+      types: {
+        types: ['string'],
+      },
+    },
+    context: { types: ['kibana_datatable'] },
+    async fn(context: any, args: any) {
+      const types = JSON.parse(args.types);
+      return {
+        ...context,
+        columns: context.columns.map((column: any, index: number) => ({
+          ...column,
+          type: types[index],
+        })),
+      };
+    },
+  };
+}
+
 function esDocsFunction() {
   return {
     name: 'client_esdocs',
@@ -70,6 +93,6 @@ function esDocsFunction() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [esDocsFunction],
+    browserFunctions: [esDocsFunction, columnTypesFunction],
   });
 };

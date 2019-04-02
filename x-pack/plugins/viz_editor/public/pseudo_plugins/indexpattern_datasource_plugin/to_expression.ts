@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, WhereOperation } from '../../../common';
+import { DatasourceField, Query, SelectOperation, WhereOperation } from '../../../common';
 import { VisModel } from '../../common/lib';
 
 function isRawDocumentQuery(query: Query) {
@@ -66,6 +66,34 @@ function queryToEsAggsConfigs(query: Query): any {
   });
 }
 
+function getTypeForOperation(op: SelectOperation, fields: DatasourceField[]): string {
+  switch (op.operation) {
+    case 'count':
+    case 'cardinality':
+      return 'number';
+    case 'date_histogram':
+      return 'date';
+    case 'terms':
+    case 'avg':
+    case 'sum':
+      return fields.find(field => field.name === op.argument.field)!.type;
+    default:
+      return 'string';
+  }
+}
+
+function getTypes(query: Query, fields: DatasourceField[]): string[] {
+  return query.select.map(operation => {
+    if (operation.operation === 'column') {
+      const fieldName = operation.argument.field;
+      const fieldType = fields.find(field => field.name === fieldName)!.type;
+      return fieldType;
+    } else {
+      return getTypeForOperation(operation, fields);
+    }
+  });
+}
+
 function whereClauseToFilter(where?: WhereOperation) {
   // TODO build something which maps this
   return {};
@@ -88,5 +116,5 @@ export function toExpression(viewState: VisModel) {
   }
   return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${
     viewState.datasource.id
-  }'`;
+  }' | column_types types='${JSON.stringify(getTypes(firstQuery, viewState.datasource.fields))}'`;
 }

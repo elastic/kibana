@@ -32,17 +32,6 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
-function inferColumnType(agg) {
-  // TODO there is a lot missing here
-  if (agg.type === 'metric') {
-    return 'number';
-  } else if (agg.fieldIsTimeField()) {
-    return 'date';
-  } else {
-    return 'string';
-  }
-}
-
 export const esaggs = () => ({
   name: 'esaggs',
   type: 'kibana_datatable',
@@ -103,10 +92,9 @@ export const esaggs = () => ({
     return {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map((column, index) => ({
+      columns: response.columns.map(column => ({
         id: column.id,
         name: column.name,
-        type: inferColumnType(aggs[index])
       })),
     };
   },
