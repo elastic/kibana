@@ -1238,11 +1238,7 @@ export namespace SourceResolvers {
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, Context>;
 
-    OverviewNetwork?: OverviewNetworkResolver<
-      OverviewNetworkData | null,
-      TypeParent,
-      Context
-    >;
+    OverviewNetwork?: OverviewNetworkResolver<OverviewNetworkData | null, TypeParent, Context>;
 
     OverviewHost?: OverviewHostResolver<OverviewHostData | null, TypeParent, Context>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
@@ -4196,7 +4192,7 @@ export namespace OverviewNetworkDataResolvers {
 
 export namespace OverviewHostDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditResolver<number, TypeParent, Context>;
+    auditbeatAuditd?: AuditbeatAuditdResolver<number, TypeParent, Context>;
 
     auditbeatFIM?: AuditbeatFimResolver<number, TypeParent, Context>;
 
@@ -4209,7 +4205,7 @@ export namespace OverviewHostDataResolvers {
     auditbeatUser?: AuditbeatUserResolver<number | null, TypeParent, Context>;
   }
 
-  export type AuditbeatAuditResolver<
+  export type AuditbeatAuditdResolver<
     R = number,
     Parent = OverviewHostData,
     Context = SecOpsContext
