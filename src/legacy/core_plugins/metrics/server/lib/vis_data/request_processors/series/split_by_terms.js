@@ -26,11 +26,19 @@ export default function splitByTerm(req, panel, series) {
   return next => doc => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const direction = series.terms_direction || 'desc';
-      set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
-      set(doc, `aggs.${series.id}.terms.include`, series.terms_include);
-      set(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
-      set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       const metric = series.metrics.find(item => item.id === series.terms_order_by);
+      set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
+      set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
+      if (series.terms_include) {
+        set(doc, `aggs.${series.id}.terms.include`, series.terms_include);
+      } else {
+        delete doc.aggs[series.id].terms.include;
+      }
+      if (series.terms_exclude) {
+        set(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
+      } else {
+        delete doc.aggs[series.id].terms.exclude;
+      }
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${series.terms_order_by}-SORT`;
         const fn = bucketTransform[metric.type];

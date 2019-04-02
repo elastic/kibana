@@ -159,7 +159,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fiel
               defaultMessage="Include"
             />)}
           >
-            <EuiFieldText onChange={handleTextChange('terms_include')} />
+            <EuiFieldText value={model.terms_include} onChange={handleTextChange('terms_include')} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -170,7 +170,7 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fiel
               defaultMessage="Exclude"
             />)}
           >
-            <EuiFieldText onChange={handleTextChange('terms_exclude')} />
+            <EuiFieldText value={model.terms_exclude} onChange={handleTextChange('terms_exclude')} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
