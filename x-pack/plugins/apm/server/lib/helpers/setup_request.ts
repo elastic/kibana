@@ -47,13 +47,17 @@ function getApmIndices(config: Legacy.KibanaConfig) {
   return [
     config.get<string>('apm_oss.errorIndices'),
     config.get<string>('apm_oss.metricsIndices'),
+    config.get<string>('apm_oss.onboardingIndices'),
     config.get<string>('apm_oss.sourcemapIndices'),
+    config.get<string>('apm_oss.spanIndices'),
     config.get<string>('apm_oss.transactionIndices')
   ];
 }
 
-function isApmIndex(apmIndices: string[], indexParam: SearchParams['index']) {
-  console.log({ apmIndices, indexParam });
+export function isApmIndex(
+  apmIndices: string[],
+  indexParam: SearchParams['index']
+) {
   if (isString(indexParam)) {
     return apmIndices.includes(indexParam);
   } else if (Array.isArray(indexParam)) {
