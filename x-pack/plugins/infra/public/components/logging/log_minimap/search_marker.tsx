@@ -6,8 +6,8 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
-import styled, { keyframes } from 'styled-components';
 
+import euiStyled, { keyframes } from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
@@ -102,11 +102,11 @@ const fadeInAnimation = keyframes`
   }
 `;
 
-const SearchMarkerGroup = styled.g`
+const SearchMarkerGroup = euiStyled.g`
   animation: ${fadeInAnimation} ${props => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
 `;
 
-const SearchMarkerBackgroundRect = styled.rect`
+const SearchMarkerBackgroundRect = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorSecondary};
   opacity: 0;
   transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease-in;
@@ -116,6 +116,6 @@ const SearchMarkerBackgroundRect = styled.rect`
   }
 `;
 
-const SearchMarkerForegroundRect = styled.rect`
+const SearchMarkerForegroundRect = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorSecondary};
 `;

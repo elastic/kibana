@@ -6,8 +6,8 @@
 
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
 // import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
@@ -116,11 +116,11 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
   }
 }
 
-const MinimapBackground = styled.rect`
+const MinimapBackground = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorLightestShade};
 `;
 
-const MinimapBorder = styled.line`
+const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
 `;
