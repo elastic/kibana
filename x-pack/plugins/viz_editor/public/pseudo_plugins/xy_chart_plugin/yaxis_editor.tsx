@@ -6,9 +6,10 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
+import { DatasourceField } from '../../../common';
+import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { columnSummary } from '../../common/components/config_panel';
 import { Draggable } from '../../common/components/draggable';
-import { Field, selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function YAxisEditor({
   col,
@@ -21,7 +22,7 @@ export function YAxisEditor({
 }) {
   const currentOperation: any = selectColumn(col, visModel) || { operation: 'count' };
   const fieldName = currentOperation.argument && currentOperation.argument.field;
-  const onDropField = (field: Field) => {
+  const onDropField = (field: DatasourceField) => {
     const operation = fieldName
       ? { ...currentOperation, argument: { ...currentOperation.argument, field: field.name } }
       : { operation: 'sum', argument: { field: field.name } };
@@ -55,7 +56,10 @@ export function YAxisEditor({
   ];
 
   return (
-    <Draggable canHandleDrop={(f: Field) => f && f.type === 'number'} onDrop={onDropField}>
+    <Draggable
+      canHandleDrop={(f: DatasourceField) => f && f.type === 'number'}
+      onDrop={onDropField}
+    >
       {fieldName ? (
         <EuiSelect
           options={options}

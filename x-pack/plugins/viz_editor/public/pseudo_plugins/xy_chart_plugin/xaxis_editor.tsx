@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { SelectOperation } from '../../../common';
+import { DatasourceField, SelectOperation } from '../../../common';
+import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { columnSummary } from '../../common/components/config_panel';
 import { Draggable } from '../../common/components/draggable';
-import { Field, selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function XAxisEditor({
   col,
@@ -19,7 +19,7 @@ export function XAxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const onDropField = (field: Field) => {
+  const onDropField = (field: DatasourceField) => {
     const operation: SelectOperation =
       field.type === 'date'
         ? { operation: 'date_histogram', argument: { field: field.name, interval: '1m' } }
@@ -30,7 +30,7 @@ export function XAxisEditor({
 
   return (
     <Draggable
-      canHandleDrop={(f: Field) => f && (f.type === 'string' || f.type === 'date')}
+      canHandleDrop={(f: DatasourceField) => f && (f.type === 'string' || f.type === 'date')}
       onDrop={onDropField}
     >
       {columnSummary(selectColumn(col, visModel))}

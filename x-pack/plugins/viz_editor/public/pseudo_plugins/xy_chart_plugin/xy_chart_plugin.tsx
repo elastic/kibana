@@ -17,14 +17,12 @@ import {
   getColumnIdByIndex,
   getOperationsForField,
   operationToName,
-  // selectColumn,
   Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
-// import { columnSummary } from '../../common/components/config_panel';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
