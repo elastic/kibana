@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loadingIndicator } from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';
-import { setLoading, setValue, inFlightActive, inFlightComplete } from '../actions/resolved_args';
+import { inFlightActive, inFlightComplete, setLoading, setValue } from '../actions/resolved_args';
 
 export const inFlight = ({ dispatch }) => next => {
   const pendingCache = [];
@@ -13,6 +14,8 @@ export const inFlight = ({ dispatch }) => next => {
   return action => {
     const isLoading = action.type === setLoading.toString();
     const isSetting = action.type === setValue.toString();
+    const isInFlightActive = action.type === inFlightActive.toString();
+    const isInFlightComplete = action.type === inFlightComplete.toString();
 
     if (isLoading || isSetting) {
       const cacheKey = convert(action.payload.path).join('/');
@@ -27,6 +30,10 @@ export const inFlight = ({ dispatch }) => next => {
           dispatch(inFlightComplete());
         }
       }
+    } else if (isInFlightActive) {
+      loadingIndicator.show();
+    } else if (isInFlightComplete) {
+      loadingIndicator.hide();
     }
 
     // execute the action
