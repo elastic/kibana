@@ -18,11 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { idx } from '../../../../common/idx';
-import { StringMap } from '../../../../typings/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
 import { getRisonHref } from '../Links/rison_helpers';
+import { getKibanaHref } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -118,7 +118,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         ),
         target: traceId,
         hash: `/link-to/logs`,
-        query: { filter: `trace.id:${traceId}` }
+        query: { time, filter: `trace.id:${traceId}` }
       },
       {
         icon: 'infraApp',
@@ -153,12 +153,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     ]
       .filter(({ target }) => Boolean(target))
       .map(({ icon, label, hash, query }, index) => {
-        const href = getRisonHref({
-          location,
-          pathname,
-          hash,
-          query: query as StringMap // TODO: differentiate between APM ui query args, and external query args
-        });
+        const href = getKibanaHref({ location, pathname, hash, query });
 
         return (
           <EuiContextMenuItem icon={icon} href={href} key={index}>
