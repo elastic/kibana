@@ -24,29 +24,16 @@ const App = require('@octokit/app');
 const request = require('@octokit/request');
 const stripAnsi = require('strip-ansi');
 
-/*
-const getInstallation = async function (jwt) {
-  return await request('GET /repos/:owner/:repo/installation', {
-    owner: 'elastic',
-    repo: 'kibana',
-    headers: {
-      authorization: `Bearer ${jwt}`,
-      accept: 'application/vnd.github.machine-man-preview+json'
-    }
-  });
-};
-*/
+const MAX_DETAIL_BYTES = 65535;
 
 const getClientWithAuth = async function () {
-  console.log('hi from script');
-  console.log('length', process.env.GITHUB_TOKEN.length);
   const app = new App({
     id: 26774,
     privateKey: process.env.KIBANA_CI_REPORTER_KEY
   });
 
   const jwt = app.getSignedJsonWebToken();
-  const { data } = await request('GET /repos/:owner/:repo/installation', {
+  const { data: { id: installationId } } = await request('GET /repos/:owner/:repo/installation', {
     owner: 'elastic',
     repo: 'kibana',
     headers: {
@@ -55,13 +42,36 @@ const getClientWithAuth = async function () {
     }
   });
 
-  const installationId = data.id;
   const installationAccessToken = await app.getInstallationAccessToken({ installationId });
 
   return new Octokit({ auth: `token ${installationAccessToken}` });
 };
 
 // -------------
+
+const prettyLogs = txt => {
+  const truncatedTxt = `[truncated]\n`;
+
+  const noAnsi = stripAnsi(txt.toString()).trim();
+
+  if(noAnsi.length === 0) {
+    return 'no output';
+  }
+
+  let bufferToFit = Buffer.from(noAnsi).slice(MAX_DETAIL_BYTES * -1);
+
+  const prependTxt = bufferToFit.length === MAX_DETAIL_BYTES ? truncatedTxt : '';
+
+  bufferToFit = bufferToFit.slice(MAX_DETAIL_BYTES * -1 + prependTxt.length);
+
+  return `${truncatedTxt}${bufferToFit.toString()}`;
+};
+
+const logRateLimit = ({
+  headers: {
+    'x-ratelimit-limit': limit,
+    'x-ratelimit-remaining': remaining
+  } }) => console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`);
 
 const start = async function () {
   const [owner, repo] = process.env.ghprbGhRepository.split('/');
@@ -71,7 +81,7 @@ const start = async function () {
   const cmdSpawnConfig = {
     stdio: ['inherit', 'pipe', 'inherit']
   };
-  let cmdLogs = '';
+  let cmdLogs;
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
@@ -86,44 +96,40 @@ const start = async function () {
     details_url: process.env.BUILD_URL,
   };
 
+  const outputTitle = `${cmd} ${cmdArgs.join(' ')}`;
+
   clientWithAuth.checks.create({
     ...commonArgs,
     started_at: new Date().toISOString(),
     status: 'in_progress',
     output: {
-      title: `${cmd} ${cmdArgs.join(' ')}`,
+      outputTitle,
       summary: `in progress`,
     },
-  }).then(({
-    headers: {
-      'x-ratelimit-limit': limit,
-      'x-ratelimit-remaining': remaining
-    } }) => console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`));
+  }).then(logRateLimit);
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
   for await (const data of ls.stdout) {
-    cmdLogs += stripAnsi(data.toString());
+    cmdLogs += data;
   }
 
   ls.on('close', (code) => {
-    console.log('******************TASK COMPLETE');
+    const logs = prettyLogs(cmdLogs);
+
     clientWithAuth.checks.create({
       ...commonArgs,
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: new Date().toISOString(),
       output: {
-        title: `${cmd} ${cmdArgs.join(' ')}`,
+        outputTitle,
         summary: `.`,
-        // length is limited to 65535 bytes
-        // text: `\`\`\`${cmdLogs.trim() ? cmdLogs.slice(-65535) : 'no output'}\`\`\``
-        text: `\`\`\`${cmdLogs.trim() ? Buffer.from(cmdLogs).slice(-65535).toString() : 'no output'}\`\`\``
+        text: `\`\`\`${logs}\`\`\``
       },
-    }).then(({
-      headers: { 'x-ratelimit-limit': limit,
-        'x-ratelimit-remaining': remaining } }) => {
-      console.log(`GitHub checks API - ${remaining} remaining out of ${limit}/hour`);
-      process.exit(code);});
+    }).then((response) => {
+      logRateLimit(response);
+      process.exit(code);
+    });
   });
 };
 
