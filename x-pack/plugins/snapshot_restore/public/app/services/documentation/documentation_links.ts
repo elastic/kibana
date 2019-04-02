@@ -7,31 +7,39 @@ import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryType } from '../../../../common/types';
 import { REPOSITORY_DOC_PATHS } from '../../constants';
 
-export const getRepositoryPluginDocUrl = (esPluginDocBasePath: string): string => {
-  return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.plugins}`;
-};
+class DocumentationLinksService {
+  private esDocBasePath: string = '';
+  private esPluginDocBasePath: string = '';
 
-export const getRepositoryTypeDocUrl = (
-  type: RepositoryType,
-  esDocBasePath: string,
-  esPluginDocBasePath: string
-): string => {
-  switch (type) {
-    case REPOSITORY_TYPES.fs:
-      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.fs}`;
-    case REPOSITORY_TYPES.url:
-      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.url}`;
-    case REPOSITORY_TYPES.source:
-      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.source}`;
-    case REPOSITORY_TYPES.s3:
-      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.s3}`;
-    case REPOSITORY_TYPES.hdfs:
-      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.hdfs}`;
-    case REPOSITORY_TYPES.azure:
-      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.azure}`;
-    case REPOSITORY_TYPES.gcs:
-      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.gcs}`;
-    default:
-      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.default}`;
+  public init(esDocBasePath: string, esPluginDocBasePath: string): void {
+    this.esDocBasePath = esDocBasePath;
+    this.esPluginDocBasePath = esPluginDocBasePath;
   }
-};
+
+  public getRepositoryPluginDocUrl() {
+    return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.plugins}`;
+  }
+
+  public getRepositoryTypeDocUrl(type: RepositoryType) {
+    switch (type) {
+      case REPOSITORY_TYPES.fs:
+        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.fs}`;
+      case REPOSITORY_TYPES.url:
+        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.url}`;
+      case REPOSITORY_TYPES.source:
+        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.source}`;
+      case REPOSITORY_TYPES.s3:
+        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.s3}`;
+      case REPOSITORY_TYPES.hdfs:
+        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.hdfs}`;
+      case REPOSITORY_TYPES.azure:
+        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.azure}`;
+      case REPOSITORY_TYPES.gcs:
+        return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.gcs}`;
+      default:
+        return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.default}`;
+    }
+  }
+}
+
+export const documentationLinksService = new DocumentationLinksService();

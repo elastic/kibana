@@ -14,7 +14,7 @@ import {
 import { Repository, RepositoryType } from '../../../../common/types';
 
 import { useAppDependencies } from '../../index';
-import { getRepositoryPluginDocUrl, getRepositoryTypeDocUrl } from '../../services/documentation';
+import { documentationLinksService } from '../../services/documentation';
 import { useRequest } from '../../services/http';
 import { RepositoryTypeName } from '../repository_type_name';
 import { SectionError } from '../section_error';
@@ -59,7 +59,6 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       http,
       chrome,
       i18n: { FormattedMessage },
-      documentation: { esDocBasePath, esPluginDocBasePath },
     },
   } = useAppDependencies();
   const {
@@ -192,7 +191,10 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
               defaultMessage="Learn more about {pluginsDocLink}."
               values={{
                 pluginsDocLink: (
-                  <EuiLink href={getRepositoryPluginDocUrl(esPluginDocBasePath)}>
+                  <EuiLink
+                    href={documentationLinksService.getRepositoryPluginDocUrl()}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMoreLink"
                       defaultMessage="Snapshot and Restore repository plugins"
@@ -322,7 +324,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       values={{
         repositoryType: (
           <EuiLink
-            href={getRepositoryTypeDocUrl(repositoryType, esDocBasePath, esPluginDocBasePath)}
+            href={documentationLinksService.getRepositoryTypeDocUrl(repositoryType)}
             target="_blank"
           >
             <RepositoryTypeName type={repositoryType} />

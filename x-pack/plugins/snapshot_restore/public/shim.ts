@@ -29,10 +29,6 @@ export interface AppCore {
     getClient(): any;
     setClient(client: any): void;
   };
-  documentation: {
-    esDocBasePath: string;
-    esPluginDocBasePath: string;
-  };
 }
 
 export interface AppPlugins {
@@ -49,6 +45,10 @@ export interface Core extends AppCore {
     registerAngularRoute(path: string, config: object): void;
     registerRouter(router: HashRouter): void;
     getRouter(): HashRouter | undefined;
+  };
+  documentation: {
+    esDocBasePath: string;
+    esPluginDocBasePath: string;
   };
 }
 

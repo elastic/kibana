@@ -8,9 +8,10 @@ import { unmountComponentAtNode } from 'react-dom';
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
 import { AppCore, AppPlugins } from './app/types';
+import template from './index.html';
 import { Core, Plugins } from './shim';
 
-import template from './index.html';
+import { documentationLinksService } from './app/services/documentation';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
@@ -29,6 +30,9 @@ export class Plugin {
       order: 7,
       url: `#${CLIENT_BASE_PATH}`,
     });
+
+    // Initialize services
+    documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);
@@ -73,7 +77,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, chrome, notification, http, documentation } as AppCore,
+              { i18n, chrome, notification, http } as AppCore,
               { management } as AppPlugins
             );
           }

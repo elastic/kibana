@@ -7,7 +7,7 @@ import React, { Fragment } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { useAppDependencies } from '../../../../index';
-import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
+import { documentationLinksService } from '../../../../services/documentation';
 import { useRequest } from '../../../../services/http';
 
 import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../../../common/constants';
@@ -50,12 +50,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const {
-    core: {
-      chrome,
-      http,
-      i18n,
-      documentation: { esDocBasePath, esPluginDocBasePath },
-    },
+    core: { chrome, http, i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
@@ -149,7 +144,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getRepositoryTypeDocUrl(type, esDocBasePath, esPluginDocBasePath)}
+              href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
               iconType="help"
             >
