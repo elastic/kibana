@@ -12,8 +12,8 @@ export const metricsExplorerSchema = Joi.object({
   limit: Joi.number()
     .min(1)
     .default(9),
-  afterKey: Joi.string(),
-  groupBy: Joi.string(),
+  afterKey: Joi.string().allow(null),
+  groupBy: Joi.string().allow(null),
   indexPattern: Joi.string().required(),
   metrics: Joi.array()
     .items(
@@ -26,6 +26,7 @@ export const metricsExplorerSchema = Joi.object({
       })
     )
     .required(),
+  filterQuery: Joi.string(),
   timerange: Joi.object()
     .keys({
       field: Joi.string().required(),

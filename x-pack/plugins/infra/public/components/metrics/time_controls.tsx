@@ -15,6 +15,7 @@ import { RangeDatePicker, RecentlyUsed } from '../range_date_picker';
 
 interface MetricsTimeControlsProps {
   currentTimeRange: metricTimeActions.MetricRangeTimeState;
+  disableLiveStreaming?: boolean;
   isLiveStreaming?: boolean;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   startLiveStreaming?: () => void;
@@ -40,10 +41,10 @@ export class MetricsTimeControls extends React.Component<
     recentlyUsed: [],
   };
   public render() {
-    const { currentTimeRange, isLiveStreaming } = this.props;
+    const { currentTimeRange, isLiveStreaming, disableLiveStreaming } = this.props;
     const { showGoButton, to, from, recentlyUsed } = this.state;
 
-    const liveStreamingButton = (
+    const liveStreamingButton = disableLiveStreaming ? null : (
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           {isLiveStreaming ? (

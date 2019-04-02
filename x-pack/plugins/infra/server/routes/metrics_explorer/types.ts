@@ -34,6 +34,7 @@ export interface MetricsExplorerRequest {
   groupBy?: string;
   afterKey?: string;
   limit?: number;
+  filterQuery?: string;
 }
 
 export type MetricsExplorerWrappedRequest = InfraWrappableRequest<MetricsExplorerRequest>;

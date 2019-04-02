@@ -5,28 +5,106 @@
  */
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useContext, useState } from 'react';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { SourceFields } from 'x-pack/plugins/infra/common/graphql/types';
+import { MetricsExplorerMetric } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
 import { DocumentTitle } from '../../../components/document_title';
+import { MetricsExplorerCharts } from '../../../components/metrics_exploerer/charts';
+import { MetricsExplorerToolbar } from '../../../components/metrics_exploerer/toolbar';
+import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
+import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
+  source: SourceFields.Configuration | undefined;
+  derivedIndexPattern: StaticIndexPattern;
 }
 
-export const MetricsExplorerPage = injectI18n(({ intl }: MetricsExplorerPageProps) => (
-  <div>
-    <DocumentTitle
-      title={(previousTitle: string) =>
-        intl.formatMessage(
-          {
-            id: 'xpack.infra.infrastructureMetricsExplorerPage.documentTitle',
-            defaultMessage: '{previousTitle} | Metrics explorer',
-          },
-          {
-            previousTitle,
+export const MetricsExplorerPage = injectI18n(
+  ({ intl, source, derivedIndexPattern }: MetricsExplorerPageProps) => {
+    if (!source) {
+      return null;
+    }
+
+    const [refreshSignal, setRefreshSignal] = useState(0);
+    const { options, currentTimerange, setTimeRange, setOptions } = useContext(
+      MetricsExplorerOptionsContainer.Context
+    );
+    const { loading, error, data } = useMetricsExplorerData(
+      options,
+      source,
+      derivedIndexPattern,
+      currentTimerange,
+      refreshSignal
+    );
+
+    const handleRefresh = () => {
+      setRefreshSignal(refreshSignal + 1);
+    };
+
+    const handleTimeChange = (start: string, end: string) => {
+      setOptions({ ...options, afterKey: null });
+      setTimeRange({ ...currentTimerange, from: start, to: end });
+    };
+
+    const handleGroupByChange = (groupBy: string | null) => {
+      setOptions({
+        ...options,
+        groupBy: groupBy || void 0,
+      });
+    };
+
+    const handleFilterQuerySubmit = (query: string) => {
+      setOptions({
+        ...options,
+        filterQuery: query,
+      });
+    };
+
+    const handleMetricsChange = (metrics: MetricsExplorerMetric[]) => {
+      setOptions({
+        ...options,
+        metrics,
+      });
+    };
+
+    return (
+      <div>
+        <DocumentTitle
+          title={(previousTitle: string) =>
+            intl.formatMessage(
+              {
+                id: 'xpack.infra.infrastructureMetricsExplorerPage.documentTitle',
+                defaultMessage: '{previousTitle} | Metrics explorer',
+              },
+              {
+                previousTitle,
+              }
+            )
           }
-        )
-      }
-    />
-    Metrics Explorer
-  </div>
-));
+        />
+        <MetricsExplorerToolbar
+          source={source}
+          derivedIndexPattern={derivedIndexPattern}
+          currentTimerange={currentTimerange}
+          options={options}
+          onRefresh={handleRefresh}
+          onTimeChange={handleTimeChange}
+          onGroupByChange={handleGroupByChange}
+          onFilterQuerySubmit={handleFilterQuerySubmit}
+          onMetricsChange={handleMetricsChange}
+        />
+        {(error && error.message) || (
+          <MetricsExplorerCharts
+            loading={loading}
+            data={data}
+            options={options}
+            onLoadMore={(afterKey: string | null) => setOptions({ ...options, afterKey })}
+            onRefetch={handleRefresh}
+          />
+        )}
+      </div>
+    );
+  }
+);

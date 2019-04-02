@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { isObject, set } from 'lodash';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 import { MetricsExplorerRequest, MetricsExplorerResponse } from '../types';
 
@@ -31,17 +31,24 @@ export const getGroupings = async (
     };
   }
 
+  const limit = options.limit || 9;
   const params = {
     index: options.indexPattern,
     body: {
       size: 0,
       query: {
-        range: {
-          [options.timerange.field]: {
-            gte: options.timerange.from,
-            lte: options.timerange.to,
-            format: 'epoch_millis',
-          },
+        bool: {
+          filter: [
+            {
+              range: {
+                [options.timerange.field]: {
+                  gte: options.timerange.from,
+                  lte: options.timerange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ] as object[],
         },
       },
       aggs: {
@@ -50,7 +57,7 @@ export const getGroupings = async (
         },
         groupings: {
           composite: {
-            size: options.limit || 9,
+            size: limit,
             sources: [{ groupBy: { terms: { field: options.groupBy } } }],
           },
         },
@@ -60,6 +67,22 @@ export const getGroupings = async (
 
   if (options.afterKey) {
     set(params, 'body.aggs.groupings.composite.after', { groupBy: options.afterKey });
+  }
+
+  if (options.filterQuery) {
+    try {
+      const filterObject = JSON.parse(options.filterQuery);
+      if (isObject(filterObject)) {
+        params.body.query.bool.filter.push(filterObject);
+      }
+    } catch (err) {
+      params.body.query.bool.filter.push({
+        query_string: {
+          query: options.filterQuery,
+          analyze_wildcard: true,
+        },
+      });
+    }
   }
 
   const response = await search<GroupingAggregation>(params);
@@ -74,7 +97,7 @@ export const getGroupings = async (
     }),
     pageInfo: {
       total: groupingsCount.value,
-      afterKey: afterKey ? afterKey.groupBy : null,
+      afterKey: afterKey && groupings.buckets.length === limit ? afterKey.groupBy : null,
     },
   };
 };
