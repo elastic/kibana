@@ -149,6 +149,7 @@ function getSuggestionsForField(
   }
 
   return operationNames.map(operationName => {
+    const firstOperation = fieldToOperation(field, operationName);
     const formattedNameSlice = operationToName(operationName);
     const formattedNameSize = operationToName('count');
 
@@ -160,7 +161,7 @@ function getSuggestionsForField(
         q1: {
           datasourceRef,
           select: [
-            { operation: 'column', alias: field.name, argument: { field: field.name } },
+            { ...firstOperation, alias: field.name },
             { operation: 'count', alias: 'count' },
           ],
         },

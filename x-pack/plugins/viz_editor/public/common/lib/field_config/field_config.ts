@@ -21,8 +21,8 @@ export function getOperationsForField(field: DatasourceField): SelectOperator[] 
   }
 
   if (field.type === 'string') {
-    return ['terms', 'count'];
+    return ['column'];
   }
 
-  return ['count'];
+  return ['column'];
 }

@@ -26,7 +26,7 @@ export function DroppablePane({
   // tslint:disable-next-line:no-shadowed-variable
   const initialState = {
     isOpen: false,
-    suggestions: [] as Array<Suggestion<VisModel<any, any>>>,
+    suggestions: [] as Suggestion[],
     fieldName: '',
   };
   const [state, setState] = useState(initialState);
