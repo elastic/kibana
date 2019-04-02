@@ -19,10 +19,16 @@ import {
 
 interface Props {
   repository: S3Repository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
-export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {
+export const S3Settings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepositorySettings,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -97,8 +103,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={bucket || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 bucket: e.target.value,
               });
             }}
@@ -141,8 +146,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={client || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 client: e.target.value,
               });
             }}
@@ -185,8 +189,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={base_path || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 base_path: e.target.value,
               });
             }}
@@ -231,8 +234,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             }
             checked={!(compress === false)}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 compress: e.target.checked,
               });
             }}
@@ -276,8 +278,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={chunk_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 chunk_size: e.target.value,
               });
             }}
@@ -320,8 +321,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             }
             checked={!!server_side_encryption}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 server_side_encryption: e.target.checked,
               });
             }}
@@ -367,8 +367,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={buffer_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 buffer_size: e.target.value,
               });
             }}
@@ -411,8 +410,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             options={cannedAclOptions}
             value={canned_acl || cannedAclOptions[0].value}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 canned_acl: e.target.value,
               });
             }}
@@ -458,8 +456,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({ repository, onSetti
             options={storageClassOptions}
             value={storage_class || storageClassOptions[0].value}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 storage_class: e.target.value,
               });
             }}

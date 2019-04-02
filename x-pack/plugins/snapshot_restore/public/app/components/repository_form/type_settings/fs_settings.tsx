@@ -20,10 +20,16 @@ import {
 
 interface Props {
   repository: FSRepository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
-export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {
+export const FSSettings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepositorySettings,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -87,8 +93,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={location || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 location: e.target.value,
               });
             }}
@@ -133,8 +138,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             }
             checked={!!compress}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 compress: e.target.checked,
               });
             }}
@@ -178,8 +182,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={chunk_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 chunk_size: e.target.value,
               });
             }}
@@ -222,8 +225,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={max_restore_bytes_per_sec || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 max_restore_bytes_per_sec: e.target.value,
               });
             }}
@@ -266,8 +268,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             defaultValue={max_snapshot_bytes_per_sec || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 max_snapshot_bytes_per_sec: e.target.value,
               });
             }}
@@ -310,8 +311,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             }
             checked={!!readonly}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 readonly: e.target.checked,
               });
             }}

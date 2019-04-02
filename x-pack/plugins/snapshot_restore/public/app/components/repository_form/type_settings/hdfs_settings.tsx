@@ -21,10 +21,16 @@ import {
 
 interface Props {
   repository: HDFSRepository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
-export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {
+export const HDFSSettings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepositorySettings,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -83,8 +89,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             defaultValue={uri || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 uri: e.target.value,
               });
             }}
@@ -127,8 +132,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             defaultValue={path || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 path: e.target.value,
               });
             }}
@@ -171,8 +175,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             }
             checked={!(load_defaults === false)}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 load_defaults: e.target.checked,
               });
             }}
@@ -217,8 +220,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             }
             checked={!(compress === false)}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 compress: e.target.checked,
               });
             }}
@@ -262,8 +264,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             defaultValue={chunk_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 chunk_size: e.target.value,
               });
             }}
@@ -306,8 +307,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
             defaultValue={securityPrincipal || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 'security.principal': e.target.value,
               });
             }}
@@ -393,16 +393,19 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({ repository, onSet
               try {
                 const parsedConf = JSON.parse(value);
                 setIsConfInvalid(false);
-                onSettingsChange({
-                  delegate_type,
-                  uri,
-                  path,
-                  load_defaults,
-                  compress,
-                  chunk_size,
-                  'security.principal': securityPrincipal,
-                  ...parsedConf,
-                });
+                updateRepositorySettings(
+                  {
+                    delegate_type,
+                    uri,
+                    path,
+                    load_defaults,
+                    compress,
+                    chunk_size,
+                    'security.principal': securityPrincipal,
+                    ...parsedConf,
+                  },
+                  true
+                );
               } catch (e) {
                 setIsConfInvalid(true);
               }

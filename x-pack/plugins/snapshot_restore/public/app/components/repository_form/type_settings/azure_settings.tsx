@@ -20,10 +20,16 @@ import {
 
 interface Props {
   repository: AzureRepository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
-export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {
+export const AzureSettings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepositorySettings,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -75,8 +81,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             defaultValue={client || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 client: e.target.value,
               });
             }}
@@ -119,8 +124,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             defaultValue={container || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 container: e.target.value,
               });
             }}
@@ -163,8 +167,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             defaultValue={base_path || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 base_path: e.target.value,
               });
             }}
@@ -209,8 +212,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             }
             checked={!(compress === false)}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 compress: e.target.checked,
               });
             }}
@@ -254,8 +256,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             defaultValue={chunk_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 chunk_size: e.target.value,
               });
             }}
@@ -299,8 +300,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             }
             checked={!!readonly}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 readonly: location_mode === locationModeOptions[1].value ? true : e.target.checked,
               });
             }}
@@ -346,8 +346,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({ repository, onSe
             options={locationModeOptions}
             value={location_mode || locationModeOptions[0].value}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 location_mode: e.target.value,
                 readonly: e.target.value === locationModeOptions[1].value ? true : readonly,
               });

@@ -94,7 +94,8 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     [repositoryTypes]
   );
 
-  const onRepositoryChange = (newRepository: Repository): void => {
+  const updateRepository = (updatedFields: Partial<Repository>): void => {
+    const newRepository: Repository = { ...repository, ...updatedFields };
     const { type, settings } = newRepository;
     if (type === REPOSITORY_TYPES.source && !settings.delegate_type) {
       settings.delegate_type = REPOSITORY_TYPES.fs;
@@ -140,8 +141,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           defaultValue={repository.name}
           fullWidth
           onChange={e => {
-            onRepositoryChange({
-              ...repository,
+            updateRepository({
               name: e.target.value,
             });
           }}
@@ -233,8 +233,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
               })}
               value={typeValue}
               onChange={e => {
-                onRepositoryChange({
-                  ...repository,
+                updateRepository({
                   type: e.target.value,
                   settings: {},
                 });
@@ -302,8 +301,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                 })}
               value={typeValue}
               onChange={e => {
-                onRepositoryChange({
-                  ...repository,
+                updateRepository({
                   settings: {
                     delegate_type: e.target.value,
                   },
@@ -354,7 +352,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Repository settings fields */}
-      <TypeSettings repository={repository} onRepositoryChange={onRepositoryChange} />
+      <TypeSettings repository={repository} updateRepository={updateRepository} />
     </Fragment>
   );
 

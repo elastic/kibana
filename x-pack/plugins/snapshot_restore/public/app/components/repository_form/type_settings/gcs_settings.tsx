@@ -12,10 +12,16 @@ import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } 
 
 interface Props {
   repository: GCSRepository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
-export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {
+export const GCSSettings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepositorySettings,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -62,8 +68,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
             defaultValue={bucket || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 bucket: e.target.value,
               });
             }}
@@ -106,8 +111,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
             defaultValue={client || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 client: e.target.value,
               });
             }}
@@ -150,8 +154,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
             defaultValue={base_path || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 base_path: e.target.value,
               });
             }}
@@ -196,8 +199,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
             }
             checked={!(compress === false)}
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 compress: e.target.checked,
               });
             }}
@@ -241,8 +243,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({ repository, onSett
             defaultValue={chunk_size || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 chunk_size: e.target.value,
               });
             }}

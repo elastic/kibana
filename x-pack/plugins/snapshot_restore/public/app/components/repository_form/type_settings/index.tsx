@@ -6,16 +6,7 @@
 import React from 'react';
 
 import { REPOSITORY_TYPES } from '../../../../../common/constants';
-import {
-  AzureRepository,
-  FSRepository,
-  GCSRepository,
-  HDFSRepository,
-  ReadonlyRepository,
-  Repository,
-  RepositoryType,
-  S3Repository,
-} from '../../../../../common/types';
+import { Repository, RepositoryType } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { cleanSettings } from '../../../services/utils';
 import { SectionError } from '../../index';
@@ -29,23 +20,31 @@ import { S3Settings } from './s3_settings';
 
 interface Props {
   repository: Repository;
-  onRepositoryChange: (repository: Repository) => void;
+  updateRepository: (updatedFields: Partial<Repository>) => void;
 }
 
-export const TypeSettings: React.FunctionComponent<Props> = ({
-  repository,
-  onRepositoryChange,
-}) => {
+export const TypeSettings: React.FunctionComponent<Props> = ({ repository, updateRepository }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { type, settings } = repository;
-  const onSettingsChange = (newSettings: Repository['settings']) => {
-    onRepositoryChange({
-      ...repository,
-      settings: cleanSettings(newSettings),
-    });
+  const updateRepositorySettings = (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ): void => {
+    if (replaceSettings) {
+      updateRepository({
+        settings: cleanSettings(updatedSettings),
+      });
+    } else {
+      updateRepository({
+        settings: {
+          ...settings,
+          ...cleanSettings(updatedSettings),
+        },
+      });
+    }
   };
 
   const typeSettingsMap: { [key in RepositoryType]: any } = {
@@ -60,7 +59,12 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
   const renderTypeSettings = (repositoryType: RepositoryType) => {
     const RepositorySettings = typeSettingsMap[repositoryType];
     if (RepositorySettings) {
-      return <RepositorySettings repository={repository} onSettingsChange={onSettingsChange} />;
+      return (
+        <RepositorySettings
+          repository={repository}
+          updateRepositorySettings={updateRepositorySettings}
+        />
+      );
     }
     return (
       <SectionError

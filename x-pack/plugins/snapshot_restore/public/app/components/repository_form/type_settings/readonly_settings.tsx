@@ -19,12 +19,15 @@ import {
 
 interface Props {
   repository: ReadonlyRepository;
-  onSettingsChange: (settings: Repository['settings']) => void;
+  updateRepositorySettings: (
+    updatedSettings: Partial<Repository['settings']>,
+    replaceSettings?: boolean
+  ) => void;
 }
 
 export const ReadonlySettings: React.FunctionComponent<Props> = ({
   repository,
-  onSettingsChange,
+  updateRepositorySettings,
 }) => {
   const {
     core: {
@@ -94,8 +97,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             defaultValue={url || ''}
             fullWidth
             onChange={e => {
-              onSettingsChange({
-                ...repository.settings,
+              updateRepositorySettings({
                 url: e.target.value,
               });
             }}
