@@ -38,7 +38,7 @@ import { I18nSetup } from '../i18n';
  */
 export class FlyoutRef {
   /**
-   * A promise that will be resolved once this flyout session is closed,
+   * An Observable that will emit and complete once this flyout is closed,
    * by the user or by closing it from the outside via valling {@link #close}.
    */
   public readonly onClose$: Observable<void>;
