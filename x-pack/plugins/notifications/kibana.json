@@ -1,0 +1,7 @@
+{
+    "id": "notifications",
+    "server": true,
+    "ui": false,
+    "version": "8.0.0",
+    "requiredPlugins" : ["xpack_main"]
+}

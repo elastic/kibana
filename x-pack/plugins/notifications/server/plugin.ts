@@ -7,6 +7,8 @@
 import {
   createEmailAction,
   createSlackAction,
+  LegacyConfig,
+  LegacyLogger,
   LoggerAction,
   notificationService,
   ServerFacade,
@@ -16,18 +18,21 @@ import { notificationServiceSendRoute } from './routes/api/v1/notifications';
 import { INotificationService } from './service';
 
 interface CoreSetup {
-  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
-  config: () => { get<T>(key: string): T };
-  plugins: { xpack_main: { info: { license: { isNotBasic: () => boolean } } } };
+  log: LegacyLogger;
+  config: LegacyConfig;
+  plugins: unknown;
 }
-export type NotificationPluginSetup = ReturnType<Plugin['setup']>;
+
+export interface DependenciesSetup {
+  xpack_main: unknown;
+}
 
 export class Plugin {
-  public setup(core: CoreSetup, dependencies: object) {
+  public setup(core: CoreSetup, dependencies: DependenciesSetup) {
     const server: ServerFacade = {
       log: core.log,
       config: core.config,
-      plugins: core.plugins,
+      plugins: dependencies,
     };
 
     notificationService.setAction(new LoggerAction({ server }));

@@ -15,10 +15,11 @@ export function init(server: any): void {
     ...server.newPlatform.setup.core,
     log: server.log,
     config: server.config,
-    plugins: server.plugins,
   };
 
-  const notificationSetup = new Plugin().setup(coreSetup, {});
+  const notificationSetup = new Plugin().setup(coreSetup, {
+    xpack_main: server.plugins.xpack_main,
+  });
 
   server.route(notificationSetup.getRoute());
 
