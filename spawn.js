@@ -99,6 +99,7 @@ const start = async function () {
     name,
     head_sha: process.env.ghprbActualCommit,
     details_url: process.env.BUILD_URL,
+    actions: [],
   };
 
   clientWithAuth.checks.create({
@@ -128,7 +129,7 @@ const start = async function () {
         title,
         summary: `.`,
         text: `\`\`\`\n${logs}\n\`\`\``
-      },
+      }
     }).then((response) => {
       logRateLimit(response);
       process.exit(code);
