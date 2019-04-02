@@ -16,13 +16,10 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
-import {
-  RepositoryDeleteProvider,
-  RepositoryTypeName,
-  RepositoryVerificationBadge,
-} from '../../../../components';
+import { RepositoryDeleteProvider, RepositoryVerificationBadge } from '../../../../components';
 import { BASE_PATH, Section } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
+import { textService } from '../../../../services/text';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
@@ -66,12 +63,9 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
         if (type === REPOSITORY_TYPES.source) {
-          return (
-            <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
-          );
-        } else {
-          return <RepositoryTypeName type={type} />;
+          return textService.getRepositoryTypeName(type, repository.settings.delegate_type);
         }
+        return textService.getRepositoryTypeName(type);
       },
     },
     {
@@ -223,7 +217,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         ).map(type => {
           return {
             value: type,
-            view: <RepositoryTypeName type={type as RepositoryType} />,
+            view: textService.getRepositoryTypeName(type),
           };
         }),
       },

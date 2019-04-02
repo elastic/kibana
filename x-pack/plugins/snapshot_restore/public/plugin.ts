@@ -12,6 +12,7 @@ import template from './index.html';
 import { Core, Plugins } from './shim';
 
 import { documentationLinksService } from './app/services/documentation';
+import { textService } from './app/services/text';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
@@ -33,6 +34,7 @@ export class Plugin {
 
     // Initialize services
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
+    textService.init(i18n);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

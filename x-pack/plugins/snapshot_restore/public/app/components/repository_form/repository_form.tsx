@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useEffect, useState } from 'react';
-import ReactDOMServer from 'react-dom/server';
 
 import {
   API_BASE_PATH,
@@ -16,7 +15,8 @@ import { Repository, RepositoryType } from '../../../../common/types';
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
 import { useRequest } from '../../services/http';
-import { RepositoryTypeName } from '../repository_type_name';
+import { textService } from '../../services/text';
+
 import { SectionError } from '../section_error';
 import { TypeSettings } from './type_settings';
 
@@ -228,7 +228,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
               options={availableRepositoryTypes.map(type => {
                 return {
                   value: type,
-                  text: ReactDOMServer.renderToString(<RepositoryTypeName type={type} />),
+                  text: textService.getRepositoryTypeName(type),
                 };
               })}
               value={typeValue}
@@ -297,7 +297,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                 .map(type => {
                   return {
                     value: type,
-                    text: ReactDOMServer.renderToString(<RepositoryTypeName type={type} />),
+                    text: textService.getRepositoryTypeName(type),
                   };
                 })}
               value={typeValue}
@@ -327,7 +327,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
             href={documentationLinksService.getRepositoryTypeDocUrl(repositoryType)}
             target="_blank"
           >
-            <RepositoryTypeName type={repositoryType} />
+            {textService.getRepositoryTypeName(repositoryType)}
           </EuiLink>
         ),
       }}

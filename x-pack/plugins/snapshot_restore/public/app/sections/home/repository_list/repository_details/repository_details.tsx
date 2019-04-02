@@ -9,12 +9,12 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import { useRequest } from '../../../../services/http';
+import { textService } from '../../../../services/text';
 
 import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  RepositoryTypeName,
   RepositoryVerificationBadge,
   SectionError,
   SectionLoading,
@@ -134,11 +134,9 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === REPOSITORY_TYPES.source ? (
-              <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
-            ) : (
-              <RepositoryTypeName type={type} />
-            )}
+            {type === REPOSITORY_TYPES.source
+              ? textService.getRepositoryTypeName(type, repository.settings.delegate_type)
+              : textService.getRepositoryTypeName(type)}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
