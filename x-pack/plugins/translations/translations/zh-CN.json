@@ -550,7 +550,6 @@
     "common.ui.paginateSelectableList.sortByButtonLabelScreenReaderOnly": "排序依据",
     "common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "无效的日历时间间隔：{interval}，值必须为 1",
     "common.ui.parseEsInterval.invalidEsIntervalFormatErrorMessage": "无效的时间间隔格式：{interval}",
-    "common.ui.queryBar.searchInputAriaLabel": "搜索输入",
     "common.ui.queryBar.searchInputPlaceholder": "搜索……（例如，status:200 AND extension:PHP）",
     "common.ui.queryBar.syntaxOptionsDescription": "我们的实验性自动完成功能及简单语法功能可以帮助您创建自己的查询。只需开始键入，便会看到与您的数据相关的匹配。请参阅{docsLink}的文档。",
     "common.ui.queryBar.syntaxOptionsTitle": "语法选项",

@@ -599,10 +599,10 @@ export class QueryBarUI extends Component<Props, State> {
                         {
                           id: 'common.ui.queryBar.searchInputAriaLabel',
                           defaultMessage:
-                            'You are on search box of {previousltTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
                         },
                         {
-                          previousltTranslatedPageTitle: this.props.screenTitle,
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
                           pageType: this.props.appName,
                         }
                       )}
