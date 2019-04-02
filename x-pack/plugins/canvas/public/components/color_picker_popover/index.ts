@@ -6,6 +6,7 @@
 
 import { pure } from 'recompose';
 
-import { ColorPickerMini as Component } from './color_picker_mini';
+import { ColorPickerPopover as Component } from './color_picker_popover';
 
-export const ColorPickerMini = pure(Component);
+export { Props } from './color_picker_popover';
+export const ColorPickerPopover = pure(Component);

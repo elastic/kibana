@@ -5,7 +5,7 @@
  */
 
 import { AggregationSearchResponse } from 'elasticsearch';
-import { getMlIndex } from 'x-pack/plugins/apm/common/ml_job_constants';
+import { getMlIndex } from '../../../../../common/ml_job_constants';
 import { Setup } from '../../../helpers/setup_request';
 
 export interface ESBucket {
