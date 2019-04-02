@@ -16,7 +16,7 @@ import {
   PHASE_SHRINK_ENABLED,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_INDEX_PRIORITY
-} from '../constants';
+} from '../../constants';
 
 export const defaultWarmPhase = {
   [PHASE_ENABLED]: false,
@@ -31,4 +31,9 @@ export const defaultWarmPhase = {
   [PHASE_REPLICA_COUNT]: '',
   [WARM_PHASE_ON_ROLLOVER]: true,
   [PHASE_INDEX_PRIORITY]: 50
+};
+export const defaultEmptyWarmPhase = {
+  ...defaultWarmPhase,
+  [WARM_PHASE_ON_ROLLOVER]: false,
+  [PHASE_INDEX_PRIORITY]: ''
 };

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { delay } from 'bluebird';
@@ -26,7 +26,6 @@ import { delay } from 'bluebird';
 import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
 import { SearchRequestProvider } from '../request';
-import { MergeDuplicatesRequestProvider } from '../merge_duplicate_requests';
 import { addSearchStrategy } from '../../search_strategy';
 
 describe('callClient', () => {
@@ -58,17 +57,7 @@ describe('callClient', () => {
     return searchRequest;
   };
 
-  beforeEach(ngMock.module('kibana', PrivateProvider => {
-    // We mock this so that we don't need to stub out methods for searchRequest.source, e.g. getId(),
-    // which is used by mergeDuplicateRequests.
-    function FakeMergeDuplicatesRequestProvider() {
-      return function mergeDuplicateRequests(searchRequests) {
-        return searchRequests;
-      };
-    }
-
-    PrivateProvider.swap(MergeDuplicatesRequestProvider, FakeMergeDuplicatesRequestProvider);
-  }));
+  beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.module(function stubEs($provide) {
     esRequestDelay = 0;
@@ -183,20 +172,6 @@ describe('callClient', () => {
   });
 
   describe('aborting at different points in the request lifecycle:', () => {
-    it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, () => {
-      const searchRequest = createSearchRequest(1, {
-        source: {
-          _flatten: () => { throw new Error(); },
-        },
-      });
-
-      searchRequests = [ searchRequest ];
-
-      return callClient(searchRequests).then(results => {
-        // The result is ABORTED because it was never included in the body sent to es.msearch().
-        expect(results).to.eql([ ABORTED ]);
-      });
-    });
 
     it('while the search body is being formed resolves with an ABORTED response', () => {
       const searchRequest = createSearchRequest(1, {

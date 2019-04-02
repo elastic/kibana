@@ -40,6 +40,10 @@ export const transientReducer = handleActions(
       return set(transientState, 'fullscreen', Boolean(payload));
     },
 
+    [actions.setElementStats]: (transientState, { payload }) => {
+      return set(transientState, 'elementStats', payload);
+    },
+
     [actions.selectElement]: (transientState, { payload }) => {
       return {
         ...transientState,

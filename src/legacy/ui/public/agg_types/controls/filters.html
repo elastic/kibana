@@ -34,6 +34,7 @@
 
     <div class="form-group">
       <input
+        placeholder="{{ ::'common.ui.aggTypes.filters.filterPlaceholder' | i18n: { defaultMessage: 'Lucene or Query DSL' } }}"
         data-test-subj="visEditorFilterInput_{{agg.id}}_{{$index}}"
         id="visEditorFilterInput{{agg.id}}"
         parse-query

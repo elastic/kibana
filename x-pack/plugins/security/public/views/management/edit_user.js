@@ -6,7 +6,7 @@
 import routes from 'ui/routes';
 import template from 'plugins/security/views/management/edit_user.html';
 import 'angular-resource';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { EDIT_USERS_PATH } from './management_urls';
@@ -36,7 +36,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       : getCreateUserBreadcrumbs
   ),
   controllerAs: 'editUser',
-  controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
+  controller($scope, $route, kbnUrl, $http) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('editUserReactRoot');
       if (elem) {

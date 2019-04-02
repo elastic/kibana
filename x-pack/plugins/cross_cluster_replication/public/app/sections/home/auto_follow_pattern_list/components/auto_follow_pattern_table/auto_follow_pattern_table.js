@@ -74,7 +74,10 @@ export class AutoFollowPatternTable extends PureComponent {
       truncateText: false,
       render: (name) => {
         return (
-          <EuiLink onClick={() => selectAutoFollowPattern(name)}>
+          <EuiLink
+            onClick={() => selectAutoFollowPattern(name)}
+            data-test-subj="ccrAutoFollowPatternListPatternLink"
+          >
             {name}
           </EuiLink>
         );
@@ -145,6 +148,7 @@ export class AutoFollowPatternTable extends PureComponent {
                       iconType="trash"
                       color="danger"
                       onClick={() => deleteAutoFollowPattern(name)}
+                      data-test-subj="ccrAutoFollowPatternListDeleteActionButton"
                     />
                   )}
                 </AutoFollowPatternDeleteProvider>
@@ -168,6 +172,7 @@ export class AutoFollowPatternTable extends PureComponent {
                   iconType="pencil"
                   color="primary"
                   href={routing.getAutoFollowPatternPath(name)}
+                  data-test-subj="ccrAutoFollowPatternListEditActionButton"
                 />
               </EuiToolTip>
             );
@@ -220,6 +225,7 @@ export class AutoFollowPatternTable extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+              data-test-subj="ccrAutoFollowPatternListBulkDeleteActionButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
@@ -249,6 +255,13 @@ export class AutoFollowPatternTable extends PureComponent {
           sorting={sorting}
           selection={selection}
           isSelectable={true}
+          rowProps={() => ({
+            'data-test-subj': 'ccrAutoFollowPatternListTableRow'
+          })}
+          cellProps={(item, column) => ({
+            'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
+          })}
+          data-test-subj="ccrAutoFollowPatternListTable"
         />
         {this.renderLoading()}
       </Fragment>

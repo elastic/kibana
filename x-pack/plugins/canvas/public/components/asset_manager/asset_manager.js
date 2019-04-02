@@ -33,10 +33,11 @@ import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { Loading } from '../loading';
+import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 
 export class AssetManager extends React.PureComponent {
   static propTypes = {
-    assets: PropTypes.array,
+    assetValues: PropTypes.array,
     addImageElement: PropTypes.func,
     removeAsset: PropTypes.func.isRequired,
     copyAsset: PropTypes.func.isRequired,
@@ -147,15 +148,13 @@ export class AssetManager extends React.PureComponent {
 
   render() {
     const { isModalVisible, loading } = this.state;
-    const { assets } = this.props;
-
-    const assetMaxLimit = 25000;
+    const { assetValues } = this.props;
 
     const assetsTotal = Math.round(
-      assets.reduce((total, asset) => total + asset.value.length, 0) / 1024
+      assetValues.reduce((total, { value }) => total + value.length, 0) / 1024
     );
 
-    const percentageUsed = Math.round((assetsTotal / assetMaxLimit) * 100);
+    const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
 
     const emptyAssets = (
       <EuiPanel className="canvasAssetManager__emptyPanel">
@@ -208,9 +207,9 @@ export class AssetManager extends React.PureComponent {
               </p>
             </EuiText>
             <EuiSpacer />
-            {assets.length ? (
+            {assetValues.length ? (
               <EuiFlexGrid responsive={false} columns={4}>
-                {assets.map(this.renderAsset)}
+                {assetValues.map(this.renderAsset)}
               </EuiFlexGrid>
             ) : (
               emptyAssets
@@ -221,7 +220,7 @@ export class AssetManager extends React.PureComponent {
               <EuiFlexItem>
                 <EuiProgress
                   value={assetsTotal}
-                  max={assetMaxLimit}
+                  max={ASSET_MAX_SIZE}
                   color={percentageUsed < 90 ? 'secondary' : 'danger'}
                   size="s"
                   aria-labelledby="CanvasAssetManagerLabel"

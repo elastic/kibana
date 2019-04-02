@@ -118,6 +118,7 @@ export class AutoFollowPatternList extends PureComponent {
                 {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
                 fill
                 iconType="plusInCircle"
+                data-test-subj="ccrCreateAutoFollowPatternButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
@@ -134,7 +135,7 @@ export class AutoFollowPatternList extends PureComponent {
   }
 
   renderContent(isEmpty) {
-    const { apiError, isAuthorized } = this.props;
+    const { apiError, apiStatus, isAuthorized } = this.props;
 
     if (!isAuthorized) {
       return (
@@ -171,6 +172,17 @@ export class AutoFollowPatternList extends PureComponent {
       return this.renderEmpty();
     }
 
+    if (apiStatus === API_STATUS.LOADING) {
+      return (
+        <SectionLoading dataTestSubj="ccrAutoFollowPatternLoading">
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
+            defaultMessage="Loading auto-follow patterns..."
+          />
+        </SectionLoading>
+      );
+    }
+
     return this.renderList();
   }
 
@@ -202,6 +214,7 @@ export class AutoFollowPatternList extends PureComponent {
             {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
             fill
             iconType="plusInCircle"
+            data-test-subj="ccrCreateAutoFollowPatternButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
@@ -209,6 +222,7 @@ export class AutoFollowPatternList extends PureComponent {
             />
           </EuiButton>
         }
+        data-test-subj="ccrAutoFollowPatternEmptyPrompt"
       />
     );
   }
@@ -217,21 +231,9 @@ export class AutoFollowPatternList extends PureComponent {
     const {
       selectAutoFollowPattern,
       autoFollowPatterns,
-      apiStatus,
     } = this.props;
 
     const { isDetailPanelOpen } = this.state;
-
-    if (apiStatus === API_STATUS.LOADING) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
-            defaultMessage="Loading auto-follow patterns..."
-          />
-        </SectionLoading>
-      );
-    }
 
     return (
       <Fragment>

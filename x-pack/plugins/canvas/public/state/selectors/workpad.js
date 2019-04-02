@@ -79,10 +79,51 @@ export function getAllElements(state) {
   return getPages(state).reduce((elements, page) => elements.concat(page.elements), []);
 }
 
+export function getElementCounts(state) {
+  const resolvedArgs = get(state, 'transient.resolvedArgs');
+  const results = {
+    ready: 0,
+    pending: 0,
+    error: 0,
+  };
+
+  Object.keys(resolvedArgs).forEach(resolvedArg => {
+    const arg = resolvedArgs[resolvedArg];
+    const { expressionRenderable } = arg;
+
+    if (!expressionRenderable) {
+      results.pending++;
+      return;
+    }
+
+    const { value, state } = expressionRenderable;
+
+    if (value && value.as === 'error') {
+      results.error++;
+    } else if (state === 'ready') {
+      results.ready++;
+    } else {
+      results.pending++;
+    }
+  });
+
+  return results;
+}
+
+export function getElementStats(state) {
+  return get(state, 'transient.elementStats');
+}
+
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-    .map(el => el.filter)
-    .filter(str => str != null && str.length)
+    .reduce((acc, el) => {
+      // check that a filter is defined
+      if (el.filter != null && el.filter.length) {
+        return acc.concat(el.filter);
+      }
+
+      return acc;
+    }, [])
     .join(' | ');
 }
 

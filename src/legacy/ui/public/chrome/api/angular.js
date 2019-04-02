@@ -51,7 +51,14 @@ export function initAngularApi(chrome, internals) {
       .value('esUrl', (function () {
         const a = document.createElement('a');
         a.href = chrome.addBasePath('/elasticsearch');
-        return a.href;
+        const protocolPort = /https/.test(a.protocol) ? 443 : 80;
+        const port = a.port || protocolPort;
+        return {
+          host: a.hostname,
+          port,
+          protocol: a.protocol,
+          pathname: a.pathname
+        };
       }()))
       .config($locationProvider => {
         $locationProvider.html5Mode({

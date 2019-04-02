@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 
 /*
@@ -87,6 +87,9 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
 
       expect(stats.stack_stats.xpack.graph).to.be.an('object');
+      expect(stats.stack_stats.xpack.data_frame).to.be.an('object');
+      expect(stats.stack_stats.xpack.data_frame.available).to.be.an('boolean');
+      expect(stats.stack_stats.xpack.data_frame.enabled).to.be.an('boolean');
       expect(stats.stack_stats.xpack.ilm).to.be.an('object');
       expect(stats.stack_stats.xpack.logstash).to.be.an('object');
       expect(stats.stack_stats.xpack.ml).to.be.an('object');
@@ -156,6 +159,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.versions',
         'stack_stats.kibana.visualization',
         'stack_stats.xpack.ccr',
+        'stack_stats.xpack.data_frame',
         'stack_stats.xpack.graph',
         'stack_stats.xpack.ilm',
         'stack_stats.xpack.logstash',
@@ -169,7 +173,7 @@ export default function ({ getService }) {
         'version'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(expected.every(m => actual.includes(m))).to.be.ok();
     });
 
   });

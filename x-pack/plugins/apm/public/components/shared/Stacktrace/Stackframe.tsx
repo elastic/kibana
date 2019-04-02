@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
+} from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
 import {
   borderRadius,
   fontFamilyCode,
@@ -74,5 +74,5 @@ export function Stackframe({
 function hasLineContext(
   stackframe: IStackframe
 ): stackframe is IStackframeWithLineContext {
-  return stackframe.line.context != null;
+  return stackframe.line.hasOwnProperty('context');
 }

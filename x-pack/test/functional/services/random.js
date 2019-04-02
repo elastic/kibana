@@ -19,7 +19,7 @@ export function RandomProvider({ getService }) {
     }
 
     id() {
-      return chance.word({ length: this.int() });
+      return chance.word({ length: this.int(10, 15) });
     }
 
     version() {

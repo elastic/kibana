@@ -91,7 +91,10 @@ export class FollowerIndicesTable extends PureComponent {
           return isPaused ? (
             <FollowerIndexResumeProvider>
               {(resumeFollowerIndex) => (
-                <span onClick={() => resumeFollowerIndex(name)}>
+                <span
+                  onClick={() => resumeFollowerIndex(name)}
+                  data-test-subj="ccrFollowerIndexListResumeActionButton"
+                >
                   <EuiIcon
                     aria-label={label}
                     type="play"
@@ -104,7 +107,10 @@ export class FollowerIndicesTable extends PureComponent {
           ) : (
             <FollowerIndexPauseProvider>
               {(pauseFollowerIndex) => (
-                <span onClick={() => pauseFollowerIndex(followerIndex)}>
+                <span
+                  onClick={() => pauseFollowerIndex(followerIndex)}
+                  data-test-subj="ccrFollowerIndexListPauseActionButton"
+                >
                   <EuiIcon
                     aria-label={label}
                     type="pause"
@@ -128,7 +134,10 @@ export class FollowerIndicesTable extends PureComponent {
           );
 
           return (
-            <span onClick={() => this.editFollowerIndex(name)}>
+            <span
+              onClick={() => this.editFollowerIndex(name)}
+              data-test-subj="ccrFollowerIndexListEditActionButton"
+            >
               <EuiIcon
                 aria-label={label}
                 type="pencil"
@@ -152,7 +161,10 @@ export class FollowerIndicesTable extends PureComponent {
           return (
             <FollowerIndexUnfollowProvider>
               {(unfollowLeaderIndex) => (
-                <span onClick={() => unfollowLeaderIndex(name)}>
+                <span
+                  onClick={() => unfollowLeaderIndex(name)}
+                  data-test-subj="ccrFollowerIndexListUnfollowActionButton"
+                >
                   <EuiIcon
                     aria-label={label}
                     type="indexFlush"
@@ -176,7 +188,10 @@ export class FollowerIndicesTable extends PureComponent {
       truncateText: false,
       render: (name) => {
         return (
-          <EuiLink onClick={() => selectFollowerIndex(name)}>
+          <EuiLink
+            onClick={() => selectFollowerIndex(name)}
+            data-test-subj="ccrFollowerIndexListFollowerIndexLink"
+          >
             {name}
           </EuiLink>
         );
@@ -278,6 +293,7 @@ export class FollowerIndicesTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <ContextMenu
           followerIndices={selectedItems}
+          testSubj="ccrFollowerIndexListContextMenuButton"
         />
       ) : undefined,
       onChange: this.onSearch,
@@ -297,6 +313,13 @@ export class FollowerIndicesTable extends PureComponent {
           sorting={sorting}
           selection={selection}
           isSelectable={true}
+          rowProps={() => ({
+            'data-test-subj': 'ccrFollowerIndexListTableRow'
+          })}
+          cellProps={(item, column) => ({
+            'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
+          })}
+          data-test-subj="ccrFollowerIndexListTable"
         />
         {this.renderLoading()}
       </Fragment>

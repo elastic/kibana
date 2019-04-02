@@ -5,5 +5,5 @@
  */
 
 export { hasStandaloneClusters } from './has_standalone_clusters';
-export { standaloneClusterDefinition } from './standalone_cluster_definition';
+export { getStandaloneClusterDefinition } from './get_standalone_cluster_definition';
 export { standaloneClusterFilter } from './standalone_cluster_query_filter';

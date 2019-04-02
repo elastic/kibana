@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NoServicesMessage should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the migration assistant when NO historical data is found 1`] = `
+exports[`NoServicesMessage should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the upgrade assistant when NO historical data is found 1`] = `
 <EuiEmptyPrompt
   actions={
     <SetupInstructionsLink
@@ -20,7 +20,7 @@ exports[`NoServicesMessage should show a "no services installed" message, a link
           hash="/management/elasticsearch/upgrade_assistant"
           pathname="/app/kibana"
         >
-          Learn more by visiting the Kibana Migration Assistant
+          Learn more by visiting the Kibana Upgrade Assistant
         </Connect(UnconnectedKibanaLink)>
         .
       </p>

@@ -65,29 +65,10 @@ export function workpad(server) {
     );
   }
 
-  function updateWorkpad(req) {
+  function updateWorkpad(req, newPayload) {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
-
-    const now = new Date().toISOString();
-
-    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
-      // TODO: Using create with force over-write because of version conflict issues with update
-      return savedObjectsClient.create(
-        CANVAS_TYPE,
-        {
-          ...omit(req.payload, 'id'),
-          '@timestamp': now,
-          '@created': workpad.attributes['@created'],
-        },
-        { overwrite: true, id }
-      );
-    });
-  }
-
-  function updateWorkpadAssets(req) {
-    const savedObjectsClient = req.getSavedObjectsClient();
-    const { id } = req.params;
+    const payload = newPayload ? newPayload : req.payload;
 
     const now = new Date().toISOString();
 
@@ -97,30 +78,9 @@ export function workpad(server) {
         CANVAS_TYPE,
         {
           ...workpad.attributes,
-          assets: req.payload,
-          '@timestamp': now,
-          '@created': workpad.attributes['@created'],
-        },
-        { overwrite: true, id }
-      );
-    });
-  }
-
-  function updateWorkpadStructures(req) {
-    const savedObjectsClient = req.getSavedObjectsClient();
-    const { id } = req.params;
-
-    const now = new Date().toISOString();
-
-    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
-      // TODO: Using create with force over-write because of version conflict issues with update
-      return savedObjectsClient.create(
-        CANVAS_TYPE,
-        {
-          ...workpad.attributes, // retain preexisting assets and prop order (or maybe better to call out the `assets` prop?)
-          ...req.payload,
-          '@timestamp': now,
-          '@created': workpad.attributes['@created'],
+          ...omit(payload, 'id'), // never write the id property
+          '@timestamp': now, // always update the modified time
+          '@created': workpad.attributes['@created'], // ensure created is not modified
         },
         { overwrite: true, id }
       );
@@ -196,7 +156,8 @@ export function workpad(server) {
     path: `${routePrefixAssets}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
     handler: function(request) {
-      return updateWorkpadAssets(request)
+      const payload = { assets: request.payload };
+      return updateWorkpad(request, payload)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
     },
@@ -208,7 +169,7 @@ export function workpad(server) {
     path: `${routePrefixStructures}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
     handler: function(request) {
-      return updateWorkpadStructures(request)
+      return updateWorkpad(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
     },

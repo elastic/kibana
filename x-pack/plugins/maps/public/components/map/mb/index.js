@@ -13,15 +13,18 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setLayerErrorStatus,
+  setTooltipState
 } from '../../../actions/store_actions';
-import { getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
+import { getTooltipState, getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
+import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
-    goto: getGoto(state)
+    goto: getGoto(state),
+    inspectorAdapters: getInspectorAdapters(state),
+    tooltipState: getTooltipState(state)
   };
 }
 
@@ -47,8 +50,10 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setLayerErrorStatus: (id, msg) =>
-      dispatch(setLayerErrorStatus(id, msg))
+    setTooltipState(tooltipState) {
+      dispatch(setTooltipState(tooltipState));
+    }
+
   };
 }
 

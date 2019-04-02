@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { map } from 'rxjs/operators';
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../../';
+import { map, mergeMap } from 'rxjs/operators';
+
+import { Logger, PluginInitializerContext, PluginName, PluginSetupContext } from 'kibana/server';
 import { TestBedConfig } from './config';
 
 class Plugin {
@@ -28,9 +29,9 @@ class Plugin {
     this.log = this.initializerContext.logger.get();
   }
 
-  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
+  public setup(setupContext: PluginSetupContext, deps: Record<PluginName, unknown>) {
     this.log.debug(
-      `Starting TestBed with core contract [${Object.keys(startContext)}] and deps [${Object.keys(
+      `Setting up TestBed with core contract [${Object.keys(setupContext)}] and deps [${Object.keys(
         deps
       )}]`
     );
@@ -41,6 +42,9 @@ class Plugin {
           this.log.debug(`I've got value from my config: ${config.secret}`);
           return `Some exposed data derived from config: ${config.secret}`;
         })
+      ),
+      pingElasticsearch$: setupContext.elasticsearch.adminClient$.pipe(
+        mergeMap(client => client.callAsInternalUser('ping'))
       ),
     };
   }

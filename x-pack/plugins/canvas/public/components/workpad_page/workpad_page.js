@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
@@ -14,6 +13,7 @@ import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
+import { WorkpadShortcuts } from './workpad_shortcuts';
 
 // NOTE: the data-shared-* attributes here are used for reporting
 export class WorkpadPage extends PureComponent {
@@ -39,8 +39,8 @@ export class WorkpadPage extends PureComponent {
     isEditable: PropTypes.bool.isRequired,
     onDoubleClick: PropTypes.func,
     onKeyDown: PropTypes.func,
-    onKeyUp: PropTypes.func,
     onMouseDown: PropTypes.func,
+    onMouseLeave: PropTypes.func,
     onMouseMove: PropTypes.func,
     onMouseUp: PropTypes.func,
     onAnimationEnd: PropTypes.func,
@@ -54,6 +54,8 @@ export class WorkpadPage extends PureComponent {
     bringToFront: PropTypes.func,
     sendBackward: PropTypes.func,
     sendToBack: PropTypes.func,
+    canvasOrigin: PropTypes.func,
+    saveCanvasOrigin: PropTypes.func.isRequired,
   };
 
   componentWillUnmount() {
@@ -70,63 +72,57 @@ export class WorkpadPage extends PureComponent {
       height,
       width,
       isEditable,
+      isSelected,
       onDoubleClick,
       onKeyDown,
-      onKeyPress,
-      onKeyUp,
       onMouseDown,
+      onMouseLeave,
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
       onWheel,
+      selectedElementIds,
+      selectedElements,
+      selectedPrimaryShapes,
+      selectElement,
+      insertNodes,
       removeElements,
-      copyElements,
-      cutElements,
-      duplicateElements,
-      pasteElements,
-      bringForward,
-      bringToFront,
-      sendBackward,
-      sendToBack,
+      elementLayer,
+      groupElements,
+      ungroupElements,
+      forceUpdate,
+      canvasOrigin,
+      saveCanvasOrigin,
     } = this.props;
 
-    const keyHandler = (action, event) => {
-      event.preventDefault();
-      switch (action) {
-        case 'COPY':
-          copyElements();
-          break;
-        case 'CLONE':
-          duplicateElements();
-          break;
-        case 'CUT':
-          cutElements();
-          break;
-        case 'DELETE':
-          removeElements();
-          break;
-        case 'PASTE':
-          pasteElements();
-          break;
-        case 'BRING_FORWARD':
-          bringForward();
-          break;
-        case 'BRING_TO_FRONT':
-          bringToFront();
-          break;
-        case 'SEND_BACKWARD':
-          sendBackward();
-          break;
-        case 'SEND_TO_BACK':
-          sendToBack();
-          break;
-      }
-    };
+    let shortcuts = null;
+
+    if (isEditable && isSelected) {
+      const shortcutProps = {
+        elementLayer,
+        forceUpdate,
+        groupElements,
+        insertNodes,
+        pageId: page.id,
+        removeElements,
+        selectedElementIds,
+        selectedElements,
+        selectedPrimaryShapes,
+        selectElement,
+        ungroupElements,
+      };
+      shortcuts = <WorkpadShortcuts {...shortcutProps} />;
+    }
 
     return (
       <div
         key={page.id}
         id={page.id}
+        ref={element => {
+          if (!canvasOrigin && element && element.getBoundingClientRect) {
+            saveCanvasOrigin(() => () => element.getBoundingClientRect());
+          }
+        }}
         data-test-subj="canvasWorkpadPage"
         className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
         data-shared-items-container
@@ -137,25 +133,16 @@ export class WorkpadPage extends PureComponent {
           width,
           cursor,
         }}
+        onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
-        onKeyDown={onKeyDown}
-        onKeyPress={onKeyPress}
-        onKeyUp={onKeyUp}
+        onMouseLeave={onMouseLeave}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
-        tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
-        {isEditable && (
-          <Shortcuts
-            name="ELEMENT"
-            handler={keyHandler}
-            targetNodeSelector={`#${page.id}`}
-            global
-          />
-        )}
+        {shortcuts}
         {elements
           .map(element => {
             if (element.type === 'annotation') {

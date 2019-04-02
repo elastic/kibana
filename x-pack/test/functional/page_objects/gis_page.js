@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
@@ -13,6 +15,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const find = getService('find');
   const queryBar = getService('queryBar');
+  const comboBox = getService('comboBox');
 
   class GisPage {
 
@@ -50,11 +53,38 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    // Since there are no DOM indicators that signal when map pan and zoom actions are complete,
+    // this method waits until the map view has stabilized, signaling that the panning/zooming is complete.
+    // Pass origView parameter when the new map view determinition is async
+    // so method knows when panning/zooming has started.
+    async waitForMapPanAndZoom(origView) {
+      await retry.try(async () => {
+        log.debug('Waiting for map pan and zoom to complete');
+        const prevView = await this.getView();
+        await PageObjects.common.sleep(1000);
+        const currentView = await this.getView();
+        if (origView && _.isEqual(origView, currentView)) {
+          throw new Error('Map pan and zoom has not started yet');
+        }
+        if (!_.isEqual(prevView, currentView)) {
+          throw new Error('Map is still panning and zooming');
+        }
+      });
+      await this.waitForLayersToLoad();
+    }
+
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
       const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
-        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+        await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
+      });
+    }
+
+    async waitForLayerDeleted(layerName) {
+      log.debug('Wait for layer deleted');
+      await retry.try(async () => {
+        await !this.doesLayerExist(layerName);
       });
     }
 
@@ -149,6 +179,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer TOC (table to contents) utility functions
      */
+    async clickAddLayer() {
+      log.debug('Click add layer');
+      await testSubjects.click('addLayerButton');
+    }
+
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
@@ -156,7 +191,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await this.waitForLayersToLoad();
+      await this.waitForMapPanAndZoom();
     }
 
     async getView() {
@@ -166,13 +201,25 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const lon = await testSubjects.getAttribute('longitudeInput', 'value');
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
       await testSubjects.click('toggleSetViewVisibilityButton');
-      return { lat, lon, zoom };
+      return {
+        lat: parseFloat(lat),
+        lon: parseFloat(lon),
+        zoom: parseFloat(zoom)
+      };
     }
 
     async toggleLayerVisibility(layerName) {
       log.debug(`Toggle layer visibility, layer: ${layerName}`);
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('layerVisibilityToggleButton');
+    }
+
+    async clickFitToBounds(layerName) {
+      log.debug(`Fit to bounds, layer: ${layerName}`);
+      const origView = await this.getView();
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('fitToBoundsButton');
+      await this.waitForMapPanAndZoom(origView);
     }
 
     async openLayerTocActionsPanel(layerName) {
@@ -189,6 +236,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
+      layerName = layerName.replace(' ', '_');
       log.debug(`Open layer panel, layer: ${layerName}`);
       return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
     }
@@ -196,6 +244,48 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer panel utility functions
      */
+    async isLayerAddPanelOpen() {
+      log.debug(`Is layer add panel open`);
+      return await testSubjects.exists('layerAddForm');
+    }
+
+    async cancelLayerAdd() {
+      log.debug(`Cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      if (cancelExists) {
+        await testSubjects.click('layerAddCancelButton');
+      }
+    }
+
+    async setLayerQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
+      const filterEditorContainer = await testSubjects.find('mapFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
+    }
+
+    async selectVectorSource() {
+      log.debug(`Select vector source`);
+      await testSubjects.click('vectorShapes');
+    }
+
+    // Returns first layer by default
+    async selectVectorLayer(vectorLayerName = '') {
+      log.debug(`Select vector layer ${vectorLayerName}`);
+      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
+      const selectedVectorLayer = vectorLayerName
+        ? vectorLayerName
+        : optionsStringList.trim().split('\n')[0];
+      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
+      return selectedVectorLayer;
+    }
+
     async removeLayer(layerName) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
@@ -208,37 +298,29 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText(`layerErrorMessage`);
     }
 
-    async openInspectorView(viewId) {
-      await inspector.open();
-      log.debug(`Open Inspector view ${viewId}`);
-      await testSubjects.click('inspectorViewChooser');
-      await testSubjects.click(viewId);
-    }
-
     async openInspectorMapView() {
-      await this.openInspectorView('inspectorViewChooserMap');
-    }
-
-    async openInspectorRequestsView() {
-      await this.openInspectorView('inspectorViewChooserRequests');
+      await inspector.openInspectorView('inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected
     // RequestSelector will only display inspectorRequestChooser when there is more than one request
     async openInspectorRequest(requestName) {
-      await this.openInspectorView('inspectorViewChooserRequests');
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       log.debug(`Open Inspector request ${requestName}`);
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click(`inspectorRequestChooser${requestName}`);
     }
 
     async doesInspectorHaveRequests() {
-      await this.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       return await testSubjects.exists('inspectorNoRequestsMessage');
     }
 
     async getMapboxStyle() {
       log.debug('getMapboxStyle');
+      await inspector.open();
       await this.openInspectorMapView();
       await testSubjects.click('mapboxStyleTab');
       const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');

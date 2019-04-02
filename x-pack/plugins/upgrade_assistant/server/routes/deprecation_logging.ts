@@ -12,6 +12,7 @@ import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
+import { EsVersionPrecheck } from '../lib/es_version_precheck';
 
 export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
@@ -19,6 +20,9 @@ export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
   server.route({
     path: '/api/upgrade_assistant/deprecation_logging',
     method: 'GET',
+    options: {
+      pre: [EsVersionPrecheck],
+    },
     async handler(request) {
       try {
         return await getDeprecationLoggingStatus(callWithRequest, request);
@@ -32,6 +36,7 @@ export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
     path: '/api/upgrade_assistant/deprecation_logging',
     method: 'PUT',
     options: {
+      pre: [EsVersionPrecheck],
       validate: {
         payload: Joi.object({
           isEnabled: Joi.boolean(),

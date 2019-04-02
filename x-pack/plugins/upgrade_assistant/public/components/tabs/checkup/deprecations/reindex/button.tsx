@@ -9,6 +9,7 @@ import React, { Fragment, ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { kfetch } from 'ui/kfetch';
 import { ReindexStatus, UIReindexOption } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
@@ -63,11 +64,21 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     const { flyoutVisible, reindexState } = this.state;
 
     const buttonProps: any = { size: 's', onClick: this.showFlyout };
-    let buttonContent: ReactNode = 'Reindex';
+    let buttonContent: ReactNode = (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.reindexLabel"
+        defaultMessage="Reindex"
+      />
+    );
 
     if (reindexState.loadingState === LoadingState.Loading) {
       buttonProps.disabled = true;
-      buttonContent = 'Loading…';
+      buttonContent = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.loadingLabel"
+          defaultMessage="Loading…"
+        />
+      );
     } else {
       switch (reindexState.status) {
         case ReindexStatus.inProgress:
@@ -81,24 +92,44 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
           buttonProps.color = 'secondary';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'check';
-          buttonContent = 'Done';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.doneLabel"
+              defaultMessage="Done"
+            />
+          );
           break;
         case ReindexStatus.failed:
           buttonProps.color = 'danger';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'cross';
-          buttonContent = 'Failed';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.failedLabel"
+              defaultMessage="Failed"
+            />
+          );
           break;
         case ReindexStatus.paused:
           buttonProps.color = 'warning';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'pause';
-          buttonContent = 'Paused';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.pausedLabel"
+              defaultMessage="Paused"
+            />
+          );
         case ReindexStatus.cancelled:
           buttonProps.color = 'danger';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'cross';
-          buttonContent = 'Cancelled';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.cancelledLabel"
+              defaultMessage="Cancelled"
+            />
+          );
           break;
       }
     }

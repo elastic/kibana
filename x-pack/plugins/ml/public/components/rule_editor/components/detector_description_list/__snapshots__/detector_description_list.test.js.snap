@@ -2,9 +2,7 @@
 
 exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
 <EuiDescriptionList
-  align="left"
   className="rule-detector-description-list"
-  compressed={false}
   listItems={
     Array [
       Object {
@@ -42,16 +40,13 @@ exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
       },
     ]
   }
-  textStyle="normal"
   type="column"
 />
 `;
 
 exports[`DetectorDescriptionList render for population detector with no anomaly values 1`] = `
 <EuiDescriptionList
-  align="left"
   className="rule-detector-description-list"
-  compressed={false}
   listItems={
     Array [
       Object {
@@ -72,7 +67,6 @@ exports[`DetectorDescriptionList render for population detector with no anomaly 
       },
     ]
   }
-  textStyle="normal"
   type="column"
 />
 `;

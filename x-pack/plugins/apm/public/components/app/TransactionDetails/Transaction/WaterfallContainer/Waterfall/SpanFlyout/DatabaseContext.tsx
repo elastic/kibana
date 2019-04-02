@@ -18,14 +18,16 @@ import SyntaxHighlighter, {
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
 import {
   borderRadius,
   fontFamilyCode,
+  fontSize,
   px,
   unit,
   units
 } from '../../../../../../../style/variables';
+import { TruncateHeightSection } from './TruncateHeightSection';
 
 registerLanguage('sql', sql);
 
@@ -35,10 +37,13 @@ const DatabaseStatement = styled.div`
   border-radius: ${borderRadius};
   border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 
+const dbSyntaxLineHeight = unit * 1.5;
+
 interface Props {
-  dbContext?: NonNullable<Span['context']>['db'];
+  dbContext?: NonNullable<Span['span']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {
@@ -64,20 +69,22 @@ export function DatabaseContext({ dbContext }: Props) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <DatabaseStatement>
-        <SyntaxHighlighter
-          language={'sql'}
-          style={xcode}
-          customStyle={{
-            color: null,
-            background: null,
-            padding: null,
-            lineHeight: px(unit * 1.5),
-            whiteSpace: 'pre-wrap',
-            overflowX: 'scroll'
-          }}
-        >
-          {dbContext.statement}
-        </SyntaxHighlighter>
+        <TruncateHeightSection previewHeight={10 * dbSyntaxLineHeight}>
+          <SyntaxHighlighter
+            language={'sql'}
+            style={xcode}
+            customStyle={{
+              color: null,
+              background: null,
+              padding: null,
+              lineHeight: px(dbSyntaxLineHeight),
+              whiteSpace: 'pre-wrap',
+              overflowX: 'scroll'
+            }}
+          >
+            {dbContext.statement}
+          </SyntaxHighlighter>
+        </TruncateHeightSection>
       </DatabaseStatement>
       <EuiSpacer size="l" />
     </Fragment>

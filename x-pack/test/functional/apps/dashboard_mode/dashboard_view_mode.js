@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the create dashboard button', async () => {
-        const createNewButtonExists = await testSubjects.exists('newDashboardLink');
+        const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
       });
 

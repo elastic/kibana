@@ -37,7 +37,8 @@ export class CrossClusterReplicationHome extends PureComponent {
         id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
         defaultMessage="Follower indices"
       />
-    )
+    ),
+    testSubj: 'ccrFollowerIndicesTab',
   }, {
     id: 'auto_follow_patterns',
     name: (
@@ -45,7 +46,8 @@ export class CrossClusterReplicationHome extends PureComponent {
         id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
         defaultMessage="Auto-follow patterns"
       />
-    )
+    ),
+    testSubj: 'ccrAutoFollowPatternsTab',
   }]
 
   componentDidMount() {
@@ -67,11 +69,11 @@ export class CrossClusterReplicationHome extends PureComponent {
     return (
       <EuiPageBody>
         <EuiPageContent>
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="ccrAppTitle">
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross Cluster Replication"
+                defaultMessage="Cross-Cluster Replication"
               />
             </h1>
           </EuiTitle>
@@ -84,6 +86,7 @@ export class CrossClusterReplicationHome extends PureComponent {
                 onClick={() => this.onSectionChange(tab.id)}
                 isSelected={tab.id === this.state.activeSection}
                 key={tab.id}
+                data-test-subj={tab.testSubj}
               >
                 {tab.name}
               </EuiTab>

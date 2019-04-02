@@ -17,8 +17,8 @@ A high level walk through of types of dashboard state and how dashboard and
  separation because it allows us to force some consistency in our UX. For example, we may
  not want a visualization to all of a sudden go from supporting drilldown links to
  not supporting it, as it would mean disappearing panel context menu items.
- 
-**Embeddable state** - Data the embeddable gives the dashboard throughout it's lifecycle as 
+
+**Embeddable state** - Data the embeddable gives the dashboard throughout it's lifecycle as
   things update and the user interacts with it.  This is communicated to the dashboard via the
   function `onEmbeddableStateChanged` that is passed in to the `EmbeddableFactory.create` call.
 
@@ -26,10 +26,10 @@ A high level walk through of types of dashboard state and how dashboard and
  as things update and the user interacts with Kibana. This is communicated to the embeddable via
  the function `onContainerStateChanged` which is returned from the `EmbeddableFactory.create` call
 
-**Container metadata** - State that only needs to be given to the embeddable once, 
+**Container metadata** - State that only needs to be given to the embeddable once,
  and does not change thereafter. This will contain data given to dashboard when a new embeddable is
   added to a dashboard. Currently, this is really only the saved object id.
- 
+
 **Dashboard storage data** - Data persisted in elasticsearch. Should not be coupled to the redux tree.
 
 **Dashboard redux tree** - State stored in the dashboard redux tree.
@@ -38,9 +38,9 @@ A high level walk through of types of dashboard state and how dashboard and
 I'm not sure if *any* data belongs here but we talked about it, so keeping it in here. We thought initially
  it could be supportsDrillDowns but for type visualizations, for example, this depends on the visualization
  "subtype" (e.g. input controls vs line chart).
- 
- 
- 
+
+
+
 ### Dashboard/Embeddable communication psuedocode
 ```js
 dashboard_panel.js:
@@ -59,11 +59,11 @@ class EmbeddableViewport extends Component {
         }
     }
   }
-  
+
   componentWillUnmount() {
     this.embeddable.destroy();
   }
-  
+
   // We let react/redux tell us when to tell the embeddable that some container
   // state changed.
   componentDidUpdate(prevProps) {
@@ -71,7 +71,7 @@ class EmbeddableViewport extends Component {
       this.embeddable.onContainerStateChanged(this.props.containerState);
     }
   }
-  
+
   render() {
     return (
       <div>
@@ -106,7 +106,7 @@ State communicated to the embeddable.
    embeddableCustomization: Object,
    hidePanelTitles: boolean,
    title: string,
-   
+
    // TODO:
    filters: FilterObject,
    timeRange: TimeRangeObject,
@@ -124,21 +124,21 @@ State communicated to the embeddable.
 
 ### Embeddable Metadata
 ```
-  {    
+  {
     // Index patterns used by this embeddable. This information is currently
     // used by the filter on a dashboard for which fields to show in the
     // dropdown. Otherwise we'd have to show all fields over all indexes and
     // if no embeddables use those index patterns, there really is no point
     // to filtering on them.
     indexPatterns: Array.<IndexPatterns>,
-    
+
     // Dashboard navigates to this url when the user clicks 'Edit visualization'
     // in the panel context menu.
     editUrl: string,
-    
+
     // Title to be shown in the panel. Can be overridden at the panel level.
     title: string,
-    
+
     // TODO:
     // If this is true, then dashboard will show a "configure drill down
     // links" menu option in the context menu for the panel.
@@ -156,12 +156,12 @@ Embeddable state is the data that the embeddable gives dashboard when something 
    // If a filter action was initiated by a user action (e.g. clicking on a bar chart)
    // This is how dashboard will know and update itself to match.
    stagedFilters: FilterObject,
-  
-  
-   // TODO: More possible options to go in here: 
+
+
+   // TODO: More possible options to go in here:
    error: Error,
    isLoading: boolean,
-   renderComplete: boolean,  
+   renderComplete: boolean,
    appliedtimeRange: TimeRangeObject,
    stagedTimeRange: TimeRangeObject,
    // This information will need to be exposed so other plugins (e.g. ML)

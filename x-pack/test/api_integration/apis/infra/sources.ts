@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
@@ -37,7 +37,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(sourceConfiguration.name).to.be('Default');
         expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
         expect(sourceConfiguration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(sourceConfiguration.fields.container).to.be('docker.container.id');
+        expect(sourceConfiguration.fields.container).to.be('container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
@@ -108,7 +108,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.description).to.be('');
         expect(configuration.metricAlias).to.be('metricbeat-*');
         expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(configuration.fields.container).to.be('docker.container.id');
+        expect(configuration.fields.container).to.be('container.id');
         expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
