@@ -5,7 +5,7 @@
  */
 
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFilePicker,
@@ -17,6 +17,15 @@ import { triggerIndexing } from '../util/indexing_service';
 import _ from 'lodash';
 
 export function JsonUploadAndParse({ previewFile, defaultMessage, postProcessing, boolIndexData = false }) {
+
+  const [parsedFile, setParsedFile] = useState(null);
+  const [indexedFile, setIndexedFile] = useState(null);
+
+  if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
+    triggerIndexing(parsedFile).then(() =>
+      setIndexedFile(parsedFile)
+    );
+  }
 
   return (
     <EuiFormRow
@@ -35,17 +44,18 @@ export function JsonUploadAndParse({ previewFile, defaultMessage, postProcessing
           />
         )}
         onChange={async ([fileToImport]) => {
-          const parsedFile = await parseFile(fileToImport, postProcessing);
+          const parsedFileResult = await parseFile(fileToImport, postProcessing);
           const defaultLayerName = _.get(fileToImport, 'name', 'fileToImport');
           if (fileToImport) {
             // Callback to preview file if needed
             if (previewFile) {
-              previewFile(parsedFile, defaultLayerName);
+              previewFile(parsedFileResult, defaultLayerName);
             }
             if (boolIndexData) {
-              triggerIndexing(parsedFile);
+              triggerIndexing(parsedFileResult);
             }
           }
+          setParsedFile(parsedFileResult);
         }}
       />
     </EuiFormRow>

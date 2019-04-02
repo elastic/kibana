@@ -35,12 +35,17 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   };
 
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    return (<ClientFileCreateSourceEditor
-      previewGeojsonFile={
-        GeojsonFileSource.previewGeojsonFile(onPreviewSource, inspectorAdapters)
-      }
-    />);
+  static renderEditor({ onPreviewSource, inspectorAdapters }, boolIndexData) {
+    return (
+      <ClientFileCreateSourceEditor
+        previewGeojsonFile={
+          GeojsonFileSource.previewGeojsonFile(
+            onPreviewSource, inspectorAdapters
+          )
+        }
+        boolIndexData={boolIndexData}
+      />
+    );
   }
 
   async getGeoJsonWithMeta() {

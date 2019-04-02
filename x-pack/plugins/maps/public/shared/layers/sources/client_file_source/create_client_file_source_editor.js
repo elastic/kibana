@@ -8,8 +8,8 @@
 import React from 'react';
 import { JsonUploadAndParse } from '../../../../../../file_upload/public/';
 
-export function ClientFileCreateSourceEditor({ previewGeojsonFile }) {
+export function ClientFileCreateSourceEditor({ previewGeojsonFile, boolIndexData = false }) {
   return (
-    <JsonUploadAndParse previewFile={previewGeojsonFile}/>
+    <JsonUploadAndParse previewFile={previewGeojsonFile} boolIndexData={boolIndexData}/>
   );
 }

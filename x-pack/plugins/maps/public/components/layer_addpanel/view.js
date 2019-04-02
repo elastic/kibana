@@ -21,7 +21,6 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { triggerIndexing } from '../../../../file_upload/public/';
 import { GeojsonFileSource } from '../../shared/layers/sources/client_file_source';
 import _ from 'lodash';
 
@@ -31,10 +30,11 @@ export class AddLayerPanel extends Component {
     sourceType: null,
     isLoading: false,
     hasLayerSelected: false,
-    layer: null
+    layer: null,
+    indexingTriggered: false,
   }
 
-  _previewLayer = (source) => {
+  _previewLayer = source => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
@@ -61,7 +61,7 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const {  hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
+    const { hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
     return (
       <EuiButton
         disabled={!hasLayerSelected}
@@ -73,7 +73,9 @@ export class AddLayerPanel extends Component {
           const boolIndexLayer = layerSource.shouldBeIndexed();
           this.setState({ layer: null });
           if (boolIndexLayer) {
-            triggerIndexing();
+            this.setState({
+              indexingTriggered: true
+            });
           } else {
             selectLayerAndAdd();
           }
@@ -126,7 +128,7 @@ export class AddLayerPanel extends Component {
     );
   }
 
-  _getEditorProperties() {
+  _getEditorProperties = () => {
     return {
       onPreviewSource: this._previewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
@@ -138,7 +140,7 @@ export class AddLayerPanel extends Component {
       return Source.type === this.state.sourceType;
     });
     if (!Source) {
-      throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+      throw new Error(`Unexpected source type: ${this.state.sourceType}`);
     }
 
     return (
@@ -178,7 +180,11 @@ export class AddLayerPanel extends Component {
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
         <EuiPanel>
-          {GeojsonFileSource.renderEditor(this._getEditorProperties())}
+          {
+            GeojsonFileSource.renderEditor(
+              this._getEditorProperties(), this.state.indexingTriggered
+            )
+          }
         </EuiPanel>
       </Fragment>
     );
