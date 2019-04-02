@@ -60,8 +60,10 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteTags.include'),
-    exclude: config.get('suiteTags.exclude'),
+    include: config.get('suiteTags.include')
+      .map(tag => tag.replace(/-\d+$/, '')),
+    exclude: config.get('suiteTags.exclude')
+      .map(tag => tag.replace(/-\d+$/, ''))
   });
 
   return mocha;
