@@ -24,5 +24,5 @@ export function getOperationsForField(field: DatasourceField): SelectOperator[] 
     return ['terms', 'count'];
   }
 
-  return ['count'];
+  return ['column'];
 }

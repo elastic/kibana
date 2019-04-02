@@ -15,7 +15,6 @@ import {
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
   EuiTextArea,
@@ -27,6 +26,7 @@ import { ExpressionRenderer } from '../expression_renderer';
 
 import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
 import { GetSuggestionsType, registry as editorRegistry } from '../../editor_plugin_registry';
+import { DroppablePane } from './droppable_pane';
 
 type Action =
   | { type: 'loaded' }
@@ -159,7 +159,11 @@ export function Main(props: MainProps) {
         </EuiPageSideBar>
       )}
       <EuiPageBody className="vzBody">
-        <EuiPageContent>
+        <DroppablePane
+          visModel={state.visModel}
+          getAllSuggestionsForField={getAllSuggestionsForField}
+          onChangeVisModel={onChangeVisModel}
+        >
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
@@ -206,7 +210,7 @@ export function Main(props: MainProps) {
               )}
             </EuiFlexGroup>
           </EuiPageContentBody>
-        </EuiPageContent>
+        </DroppablePane>
       </EuiPageBody>
       {!state.metadata.expressionMode && (
         <EuiPageSideBar>

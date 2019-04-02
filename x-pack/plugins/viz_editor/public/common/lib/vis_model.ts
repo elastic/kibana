@@ -44,11 +44,30 @@ export interface VisModel<K extends string = any, T = any> {
 // This type should be used if it is not known which private states exist on a VisModel
 export type UnknownVisModel = VisModel<string, unknown>;
 
+// TODO: the way the "id" works is too hacky. Need to modify this, probably should
+// use a dispatch mechanism, too, to avoid deep knowledge of VisModel everywhere...
 export function selectColumn(id: string, model: VisModel) {
   const [queryId, columnIndex] = id.split('_');
   const query = model.queries[queryId];
 
   return query ? query.select[parseInt(columnIndex, 10)] : undefined;
+}
+
+export function updateColumn(id: string, col: SelectOperation, model: VisModel) {
+  const [queryId, columnIndex] = id.split('_');
+  const query = model.queries[queryId];
+  const index = parseInt(columnIndex, 10);
+
+  return {
+    ...model,
+    queries: {
+      ...model.queries,
+      [queryId]: {
+        ...query,
+        select: query.select.map((s, i) => (i === index ? col : s)),
+      },
+    },
+  };
 }
 
 export function updatePrivateState<K extends string, T>(name: K) {
