@@ -17,12 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { getRisonHref } from 'x-pack/plugins/apm/public/components/shared/Links/rison_helpers';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { idx } from '../../../../common/idx';
+import { StringMap } from '../../../../typings/common';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
+import { getRisonHref } from '../Links/rison_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);

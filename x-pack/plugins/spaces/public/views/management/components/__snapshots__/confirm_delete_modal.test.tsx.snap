@@ -112,6 +112,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

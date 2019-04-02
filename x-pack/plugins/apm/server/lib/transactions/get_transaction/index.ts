@@ -9,9 +9,9 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+} from '../../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../../common/idx';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 

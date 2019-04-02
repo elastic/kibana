@@ -1,4 +1,8 @@
 body.canvas-isFullscreen {
+  // hide global loading indicator
+  .kbnLoadingIndicator {
+    display: none;
+  }
   // remove space for global nav elements
   .header-global-wrapper + .app-wrapper {
     left: 0;

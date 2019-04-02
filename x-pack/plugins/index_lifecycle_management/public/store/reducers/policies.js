@@ -27,7 +27,7 @@ import {
   PHASE_COLD,
   PHASE_DELETE,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-} from '../constants';
+} from '../../constants';
 
 import {
   defaultColdPhase,

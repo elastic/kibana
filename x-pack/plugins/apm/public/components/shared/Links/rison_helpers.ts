@@ -9,8 +9,8 @@ import qs from 'querystring';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
-import { TIMEPICKER_DEFAULTS } from 'x-pack/plugins/apm/public/store/urlParams';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../typings/common';
+import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 import {
   APMQueryParams,
   KibanaHrefArgs,

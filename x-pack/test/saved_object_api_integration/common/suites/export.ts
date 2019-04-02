@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -71,7 +71,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
         },
       ],
-      migrationVersion: { visualization: '7.0.0' },
+      migrationVersion: { visualization: '7.1.0' },
       updated_at: '2017-09-21T18:51:23.794Z',
     });
   };

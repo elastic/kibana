@@ -22,6 +22,7 @@ import handleErrorResponse from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -29,7 +30,9 @@ export async function getSeriesData(req, panel) {
   const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
 
-  const bodiesPromises = panel.series.map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+  const bodiesPromises = getActiveSeries(panel)
+    .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+
   const body = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 

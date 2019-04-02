@@ -3,15 +3,10 @@
 exports[`StatementListHeading component renders title and icon type 1`] = `
 <EuiFlexGroup
   alignItems="baseline"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiIcon
@@ -19,7 +14,6 @@ exports[`StatementListHeading component renders title and icon type 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiTitle

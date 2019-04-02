@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await browser.setWindowSize(1000, 500);
+      await browser.setWindowSize(1000, 700);
     });
 
     after(async function () {

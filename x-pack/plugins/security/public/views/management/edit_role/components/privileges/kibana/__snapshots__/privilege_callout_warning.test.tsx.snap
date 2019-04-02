@@ -179,9 +179,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
         >
           <p>
             <FormattedMessage
-              defaultMessage="Setting the minimum privilege to {allText} grants full access to all
-                spaces. To customize privileges for individual spaces, the minimum privilege must be
-                either {readText} or {noneText}."
+              defaultMessage="Setting the minimum privilege to {allText} grants full access to all spaces. To customize privileges for individual spaces, the minimum privilege must be either {readText} or {noneText}."
               id="xpack.security.management.editRoles.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
               values={
                 Object {
@@ -219,9 +217,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
                   all
                 </FormattedMessage>
               </strong>
-               grants full access to all
-                spaces. To customize privileges for individual spaces, the minimum privilege must be
-                either 
+               grants full access to all spaces. To customize privileges for individual spaces, the minimum privilege must be either 
               <strong>
                 <FormattedMessage
                   defaultMessage="read"

@@ -5,8 +5,8 @@
  */
 
 import moment from 'moment';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { idx } from '../../../common/idx';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { ESResponse } from './fetcher';
 
 export interface ITransactionGroup {

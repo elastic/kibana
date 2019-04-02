@@ -2,19 +2,8 @@
 
 exports[`MonitorCharts component renders the component without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="xs"
         textTransform="none"
@@ -40,7 +29,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         }
       >
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -50,7 +38,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 10,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
@@ -187,10 +174,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         </FlexibleEuiSeriesChart>
       </EuiPanel>
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiTitle
         size="xs"
         textTransform="none"
@@ -215,7 +199,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         }
       >
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -225,7 +208,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 10,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           stackBy="y"
           width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"

@@ -19,6 +19,7 @@
 
 import { relative } from 'path';
 
+import dedent from 'dedent';
 import getopts from 'getopts';
 
 import { Options } from './run';
@@ -30,23 +31,33 @@ export interface Flags {
   debug: boolean;
   help: boolean;
   _: string[];
+  unexpected: string[];
 
   [key: string]: undefined | boolean | string | string[];
 }
 
-export function getFlags(argv: string[]): Flags {
+export function getFlags(argv: string[], options: Options): Flags {
+  const unexpected: string[] = [];
+  const flagOpts = options.flags || {};
+
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
+    string: flagOpts.string,
+    boolean: [...(flagOpts.boolean || []), 'verbose', 'quiet', 'silent', 'debug', 'help'],
     alias: {
+      ...(flagOpts.alias || {}),
       v: 'verbose',
     },
-    default: {
-      verbose: false,
-      quiet: false,
-      silent: false,
-      debug: false,
-      help: false,
+    default: flagOpts.default,
+    unknown: (name: string) => {
+      unexpected.push(name);
+
+      if (options.flags && options.flags.allowUnexpected) {
+        return true;
+      }
+
+      return false;
     },
-  });
+  } as any);
 
   return {
     verbose,
@@ -55,22 +66,36 @@ export function getFlags(argv: string[]): Flags {
     debug,
     help,
     _,
+    unexpected,
     ...others,
   };
 }
 
 export function getHelp(options: Options) {
-  return `
-  node ${relative(process.cwd(), process.argv[1])}
+  const usage = options.usage || `node ${relative(process.cwd(), process.argv[1])}`;
 
-  ${options.helpDescription || 'Runs a dev task'}
+  const optionHelp = (
+    dedent((options.flags && options.flags.help) || '') +
+    '\n' +
+    dedent`
+      --verbose, -v      Log verbosely
+      --debug            Log debug messages (less than verbose)
+      --quiet            Only log errors
+      --silent           Don't log anything
+      --help             Show this message
+    `
+  )
+    .split('\n')
+    .filter(Boolean)
+    .join('\n    ');
+
+  return `
+  ${usage}
+
+  ${dedent(options.description || 'Runs a dev task')
+    .split('\n')
+    .join('\n  ')}
 
   Options:
-    --verbose, -v      Log verbosely
-    --debug            Log debug messages (less than verbose)
-    --quiet            Only log errors
-    --silent           Don't log anything
-    --help             Show this message
-
-`;
+    ${optionHelp + '\n\n'}`;
 }

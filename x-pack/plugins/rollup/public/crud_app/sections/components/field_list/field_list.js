@@ -18,6 +18,7 @@ export const FieldList = ({
   onRemoveField,
   addButton,
   emptyMessage,
+  dataTestSubj,
 }) => {
   let message;
 
@@ -72,6 +73,7 @@ export const FieldList = ({
       pagination={pagination}
       sorting={true}
       message={message}
+      data-test-subj={dataTestSubj}
     />
   );
 };
@@ -82,4 +84,5 @@ FieldList.propTypes = {
   onRemoveField: PropTypes.func,
   addButton: PropTypes.node,
   emptyMessage: PropTypes.node,
+  dataTestSubj: PropTypes.string,
 };
