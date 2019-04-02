@@ -1,4 +1,6 @@
 JOB:
+  - kibana-intake-1
+  - x-pack-intake-1
   - kibana-ciGroup1-1
   - kibana-ciGroup2-1
   - kibana-ciGroup3-1
@@ -20,6 +22,8 @@ JOB:
   - x-pack-ciGroup6-1
   - x-pack-ciGroup7-1
 
+  - kibana-intake-2
+  - x-pack-intake-2
   - kibana-ciGroup1-2
   - kibana-ciGroup2-2
   - kibana-ciGroup3-2
@@ -41,6 +45,8 @@ JOB:
   - x-pack-ciGroup6-2
   - x-pack-ciGroup7-2
 
+  - kibana-intake-3
+  - x-pack-intake-3
   - kibana-ciGroup1-3
   - kibana-ciGroup2-3
   - kibana-ciGroup3-3
@@ -62,6 +68,8 @@ JOB:
   - x-pack-ciGroup6-3
   - x-pack-ciGroup7-3
 
+  - kibana-intake-4
+  - x-pack-intake-4
   - kibana-ciGroup1-4
   - kibana-ciGroup2-4
   - kibana-ciGroup3-4
@@ -83,6 +91,8 @@ JOB:
   - x-pack-ciGroup6-4
   - x-pack-ciGroup7-4
 
+  - kibana-intake-5
+  - x-pack-intake-5
   - kibana-ciGroup1-5
   - kibana-ciGroup2-5
   - kibana-ciGroup3-5
@@ -104,6 +114,8 @@ JOB:
   - x-pack-ciGroup6-5
   - x-pack-ciGroup7-5
 
+  - kibana-intake-6
+  - x-pack-intake-6
   - kibana-ciGroup1-6
   - kibana-ciGroup2-6
   - kibana-ciGroup3-6
@@ -125,6 +137,8 @@ JOB:
   - x-pack-ciGroup6-6
   - x-pack-ciGroup7-6
 
+  - kibana-intake-7
+  - x-pack-intake-7
   - kibana-ciGroup1-7
   - kibana-ciGroup2-7
   - kibana-ciGroup3-7
@@ -146,6 +160,8 @@ JOB:
   - x-pack-ciGroup6-7
   - x-pack-ciGroup7-7
 
+  - kibana-intake-8
+  - x-pack-intake-8
   - kibana-ciGroup1-8
   - kibana-ciGroup2-8
   - kibana-ciGroup3-8
@@ -167,6 +183,8 @@ JOB:
   - x-pack-ciGroup6-8
   - x-pack-ciGroup7-8
 
+  - kibana-intake-9
+  - x-pack-intake-9
   - kibana-ciGroup1-9
   - kibana-ciGroup2-9
   - kibana-ciGroup3-9
@@ -188,6 +206,8 @@ JOB:
   - x-pack-ciGroup6-9
   - x-pack-ciGroup7-9
 
+  - kibana-intake-10
+  - x-pack-intake-10
   - kibana-ciGroup1-10
   - kibana-ciGroup2-10
   - kibana-ciGroup3-10
