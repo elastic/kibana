@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VisModel } from './common/lib';
+import { VisModel } from './common';
 
 import { config as csvPlugin } from './pseudo_plugins/csv_datasource_plugin';
 import { config as essqlPlugin } from './pseudo_plugins/essql_datasource_plugin';
 import { config as indexpatternPlugin } from './pseudo_plugins/indexpattern_datasource_plugin';
 
-export interface PanelComponentProps<S extends VisModel = VisModel> {
+export interface DatasourcePanelProps<S extends VisModel = VisModel> {
   visModel: S;
   onChangeVisModel: (newState: S) => void;
 }
@@ -18,7 +18,7 @@ export interface PanelComponentProps<S extends VisModel = VisModel> {
 export interface DatasourcePlugin<S extends VisModel = VisModel> {
   name: string;
   toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
-  DataPanel: React.ComponentType<PanelComponentProps<S>>;
+  DataPanel: React.ComponentType<DatasourcePanelProps<S>>;
   icon: string;
 }
 
@@ -29,7 +29,7 @@ const datasourceMap: { [key: string]: DatasourcePlugin } = {
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
-export const registry = {
+export const datasourceRegistry = {
   getByName(datasourceName: string) {
     if (datasourceMap[datasourceName]) {
       return datasourceMap[datasourceName];

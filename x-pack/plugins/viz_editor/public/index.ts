@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './constants';
-export * from './lib';
+export * from './app';
+export * from './common';
+export * from './datasource_plugin_registry';
+export * from './editor_plugin_registry';

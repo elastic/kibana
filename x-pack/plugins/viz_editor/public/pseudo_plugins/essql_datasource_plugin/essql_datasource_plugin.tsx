@@ -7,11 +7,10 @@
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
+import { Datasource, DatasourcePanelProps, DatasourcePlugin, VisModel } from '../../../public';
 import { FieldListPanel } from '../../common/components/field_list_panel';
-import { Datasource, VisModel } from '../../common/lib';
-import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 
-function DataPanel(props: PanelComponentProps<VisModel>) {
+function DataPanel(props: DatasourcePanelProps<VisModel>) {
   const { visModel, onChangeVisModel } = props;
   const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.sql : '');
 

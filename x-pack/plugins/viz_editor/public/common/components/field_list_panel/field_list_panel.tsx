@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButton,
   EuiFieldSearch,
   EuiIcon,
   // @ts-ignore
@@ -17,26 +16,16 @@ import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DatasourceField } from '../../../../common';
-import { PanelComponentProps, Suggestion } from '../../../editor_plugin_registry';
-import { VisualizationModal } from '../visualization_modal';
+import { VisualizationPanelProps } from '../../../../public';
+import { Draggable } from '../../components/draggable';
 
 interface State {
   fieldsFilter: string;
-  modal: {
-    isOpen: boolean;
-    suggestions: Suggestion[];
-    fieldName: string;
-  };
 }
 
 function initialState(): State {
   return {
     fieldsFilter: '',
-    modal: {
-      isOpen: false,
-      suggestions: [],
-      fieldName: '',
-    },
   };
 }
 
@@ -44,53 +33,16 @@ function sortFields(fieldA: DatasourceField, fieldB: DatasourceField) {
   return fieldA.name.toLowerCase() < fieldB.name.toLowerCase() ? -1 : 1;
 }
 
-export function FieldListPanel({
-  visModel,
-  onChangeVisModel,
-  getSuggestionsForField,
-}: PanelComponentProps) {
+export function FieldListPanel({ visModel }: VisualizationPanelProps) {
   const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
   function filterFields(field: DatasourceField) {
-    return field.name.includes(state.fieldsFilter);
+    return field.name.toLowerCase().includes(state.fieldsFilter.toLowerCase());
   }
   if (datasource === null) {
     return <div />;
   }
-
-  function closeModal() {
-    setState({
-      ...state,
-      modal: {
-        isOpen: false,
-        suggestions: [],
-        fieldName: '',
-      },
-    });
-  }
-
-  const handleFieldClick = (field: DatasourceField) => {
-    return () => {
-      if (!getSuggestionsForField) {
-        return;
-      }
-
-      const suggestions = getSuggestionsForField(datasource.id, field, visModel);
-
-      if (suggestions.length) {
-        // onChangeVisModel(suggestions[0].visModel);
-        setState({
-          ...state,
-          modal: {
-            isOpen: true,
-            suggestions,
-            fieldName: field.name,
-          },
-        });
-      }
-    };
-  };
 
   return (
     <>
@@ -115,33 +67,16 @@ export function FieldListPanel({
             .filter(filterFields)
             .sort(sortFields)
             .map(field => (
-              <div
+              <Draggable
+                draggable={true}
+                value={field}
                 key={field.name}
                 className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
               >
                 {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-                <div>
-                  <EuiButton
-                    size="s"
-                    onClick={handleFieldClick(field)}
-                    iconType="plusInCircleFilled"
-                  />
-                </div>
-              </div>
+              </Draggable>
             ))}
         </div>
-      )}
-
-      {state.modal.isOpen && (
-        <VisualizationModal
-          title={`Suggested visualizations for ${state.modal.fieldName}`}
-          suggestions={state.modal.suggestions}
-          onClose={() => closeModal()}
-          onSelect={newVisModel => {
-            closeModal();
-            onChangeVisModel(newVisModel);
-          }}
-        />
       )}
     </>
   );
