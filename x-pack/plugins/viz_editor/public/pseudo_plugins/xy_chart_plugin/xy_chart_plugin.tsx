@@ -13,14 +13,18 @@ import React from 'react';
 import { DatasourceField, fieldToOperation } from '../../../common';
 import {
   Axis,
+  EditorPlugin,
   getColumnIdByIndex,
+  getOperationsForField,
+  operationToName,
+  // selectColumn,
+  Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
-} from '../../common/lib';
-import { operationToName } from '../../common/lib';
-import { getOperationsForField } from '../../common/lib/field_config';
-import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+  VisualizationPanelProps,
+} from '../../../public';
+// import { columnSummary } from '../../common/components/config_panel';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
@@ -36,7 +40,7 @@ type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
 
 const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
 
-function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
+function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyChartVisModel>) {
   if (!visModel.private.xyChart) {
     updateXyState(visModel, {});
 
@@ -108,10 +112,6 @@ function toExpression(viewState: XyChartVisModel) {
 }
 
 function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
-  if (!visModel.private.xyChart) {
-    // visModel
-  }
-
   if (visModel.private.xyChart) {
     if (displayType) {
       return updateXyState(visModel, { displayType });

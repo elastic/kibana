@@ -21,11 +21,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useReducer } from 'react';
-import { initialState, VisModel } from '../../common/lib';
+import {
+  datasourceRegistry,
+  editorRegistry,
+  GetSuggestionsType,
+  initialState,
+  VisModel,
+} from '../../../public';
 import { ExpressionRenderer } from '../expression_renderer';
-
-import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
-import { GetSuggestionsType, registry as editorRegistry } from '../../editor_plugin_registry';
 import { DroppablePane } from './droppable_pane';
 
 type Action =

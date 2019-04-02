@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiButton, EuiSuperSelect, EuiTextArea } from '@elastic/eui';
+import {
+  EuiButton,
+  // @ts-ignore
+  EuiSuperSelect,
+  EuiTextArea,
+} from '@elastic/eui';
 import React, { useState } from 'react';
+import { Datasource, DatasourcePanelProps, DatasourcePlugin, VisModel } from '../../../public';
 import { FieldListPanel } from '../../common/components/field_list_panel';
-import { Datasource, VisModel } from '../../common/lib';
-import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 
-function DataPanel(props: PanelComponentProps<VisModel>) {
+function DataPanel(props: DatasourcePanelProps<VisModel>) {
   const { visModel, onChangeVisModel } = props;
   const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.text : '');
 
