@@ -14,6 +14,7 @@ import {
   JobTypes,
   KeyCountBucket,
   RangeAggregationResults,
+  RangeStats,
   UsageObject,
 } from './types';
 
@@ -38,11 +39,7 @@ const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
 type FeatureSet = 'csv' | 'printable_pdf' | 'PNG';
 type FeatureAvailabilitySet = { [F in FeatureSet]: boolean };
 
-function getAggStats(aggs: AggregationResults | undefined, featureSet: FeatureAvailabilitySet) {
-  if (!aggs) {
-    return;
-  }
-
+function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySet) {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
     const feature = key as FeatureSet;
@@ -70,12 +67,25 @@ function getAggStats(aggs: AggregationResults | undefined, featureSet: FeatureAv
   }
 
   const all = aggs.doc_count as number;
-  const statusTypes = getKeyCount(get(aggs[STATUS_TYPES_KEY], 'buckets'));
+  let statusTypes = {};
+  const statusBuckets = get(aggs[STATUS_TYPES_KEY], 'buckets', []);
+  if (statusBuckets) {
+    statusTypes = getKeyCount(statusBuckets) as {
+      completed: number;
+      failed: number;
+    };
+  }
 
   return { _all: all, status: statusTypes, ...jobTypes };
 }
 
-async function handleResponse(server: any, response: AggregationResults) {
+type RangeStatSets = Partial<
+  RangeStats & {
+    lastDay: RangeStats;
+    last7Days: RangeStats;
+  }
+>;
+async function handleResponse(server: any, response: AggregationResults): Promise<RangeStatSets> {
   const xpackInfo = server.plugins.xpack_main.info;
   const exportTypesHandler = await getExportTypesHandler(server);
   const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilitySet;
@@ -86,10 +96,14 @@ async function handleResponse(server: any, response: AggregationResults) {
   }
   const { all, last1, last7 } = buckets as RangeAggregationResults;
 
+  const allUsage = all ? getAggStats(all, availability) : undefined;
+  const lastDayUsage = last1 ? getAggStats(last1, availability) : undefined;
+  const last7DaysUsage = last7 ? getAggStats(last7, availability) : undefined;
+
   return {
-    lastDay: getAggStats(last1, availability),
-    last7Days: getAggStats(last7, availability),
-    ...getAggStats(all, availability),
+    last7Days: last7DaysUsage,
+    lastDay: lastDayUsage,
+    ...allUsage,
   };
 }
 

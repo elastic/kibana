@@ -75,31 +75,23 @@ const getResponseMock = () => ({
           },
         },
         last1: {
-          doc_count: 22,
-          layoutTypes: {
-            doc_count: 7,
-            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
-          },
-          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
-          statusTypes: {
-            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
-          },
+          doc_count: 15,
           jobTypes: {
-            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
+            buckets: [{ key: 'csv', doc_count: 15 }],
           },
         },
         last7: {
-          doc_count: 22,
+          doc_count: 16,
           layoutTypes: {
-            doc_count: 7,
-            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
+            doc_count: 1,
+            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 1 }] },
           },
-          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
+          objectTypes: { doc_count: 1, pdf: { buckets: [{ key: 'dashboard', doc_count: 1 }] } },
           statusTypes: {
-            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
+            buckets: [{ key: 'completed', doc_count: 16 }],
           },
           jobTypes: {
-            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
+            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 1 }],
           },
         },
       },
@@ -177,5 +169,26 @@ describe('with platinum license', async () => {
 
   test('sets pdf availability to true', async () => {
     expect(usageStats.printable_pdf.available).toBe(true);
+  });
+});
+
+describe('with no usage data', async () => {
+  let usageStats;
+  beforeAll(async () => {
+    const serverWithBasicLicenseMock = getServerMock();
+    serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
+      .stub()
+      .returns('basic');
+    const callClusterMock = jest.fn(() => Promise.resolve({}));
+    const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithBasicLicenseMock);
+    usageStats = await getReportingUsage(callClusterMock);
+  });
+
+  test('sets enables to true', async () => {
+    expect(usageStats.enabled).toBe(true);
+  });
+
+  test('sets csv available to true', async () => {
+    expect(usageStats.csv.available).toBe(true);
   });
 });

@@ -8,9 +8,9 @@ interface AvailableTotal {
   available: boolean;
   total: number;
 }
+
 interface Status {
-  completed: number;
-  failed: number;
+  [statusType: string]: number;
 }
 
 export interface KeyCountBucket {
