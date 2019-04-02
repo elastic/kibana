@@ -4,35 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupRequest } from './setup_request';
+import { Legacy } from 'kibana';
+import { isApmIndex, setupRequest } from './setup_request';
+
+function getMockRequest() {
+  const callWithRequestSpy = jest.fn();
+  const mockRequest = ({
+    params: {},
+    query: {},
+    server: {
+      config: () => ({ get: () => 'apm-*' }),
+      plugins: {
+        elasticsearch: {
+          getCluster: () => ({ callWithRequest: callWithRequestSpy })
+        }
+      }
+    },
+    getUiSettingsService: () => ({ get: async () => false })
+  } as any) as Legacy.Request;
+
+  return { callWithRequestSpy, mockRequest };
+}
 
 describe('setupRequest', () => {
-  let callWithRequestSpy: jest.Mock;
-  let mockReq: any;
-
-  beforeEach(() => {
-    callWithRequestSpy = jest.fn();
-    mockReq = {
-      params: {},
-      query: {},
-      server: {
-        config: () => 'myConfig',
-        plugins: {
-          elasticsearch: {
-            getCluster: () => ({ callWithRequest: callWithRequestSpy })
-          }
-        }
-      },
-      getUiSettingsService: jest.fn(() => ({
-        get: jest.fn(() => Promise.resolve(false))
-      }))
-    };
-  });
-
-  it('should call callWithRequest with correct args', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', { body: { foo: 'bar' } });
-    expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
+  it('should call callWithRequest with default args', async () => {
+    const { mockRequest, callWithRequestSpy } = getMockRequest();
+    const setup = setupRequest(mockRequest);
+    await setup.client('myType', { index: 'apm-*', body: { foo: 'bar' } });
+    expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'myType', {
+      index: 'apm-*',
       body: {
         foo: 'bar',
         query: {
@@ -46,45 +46,160 @@ describe('setupRequest', () => {
     });
   });
 
-  it('should set ignore_throttled to false if includeFrozen is true', async () => {
-    // mock includeFrozen to return true
-    mockReq.getUiSettingsService.mockImplementation(() => ({
-      get: jest.fn(() => Promise.resolve(true))
-    }));
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {});
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.ignore_throttled).toBe(false);
-  });
+  describe('omitLegacyData', () => {
+    describe('if index is apm-*', () => {
+      it('should add `observer.version_major` filter if `omitLegacyData=true` ', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const setup = setupRequest(mockRequest);
+        await setup.client('myType', {
+          index: 'apm-*',
+          omitLegacyData: true,
+          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+        });
+        expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+          query: {
+            bool: {
+              filter: [
+                { term: 'someTerm' },
+                { range: { 'observer.version_major': { gte: 7 } } }
+              ]
+            }
+          }
+        });
+      });
 
-  it('should set filter if none exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {});
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
-      }
-    });
-  });
+      it('should not add `observer.version_major` filter if `omitLegacyData=false` ', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const setup = setupRequest(mockRequest);
+        await setup.client('myType', {
+          index: 'apm-*',
+          omitLegacyData: false,
+          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+        });
+        expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
+        });
+      });
 
-  it('should merge filters if one exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {
-      body: {
-        query: { bool: { filter: [{ term: 'someTerm' }] } }
-      }
+      it('should add `observer.version_major` filter if none exists', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const setup = setupRequest(mockRequest);
+        await setup.client('myType', { index: 'apm-*' });
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
+          query: {
+            bool: {
+              filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+            }
+          }
+        });
+      });
+
+      it('should have `omitLegacyData=true` as default and merge boolean filters', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const setup = setupRequest(mockRequest);
+        await setup.client('myType', {
+          index: 'apm-*',
+          body: {
+            query: { bool: { filter: [{ term: 'someTerm' }] } }
+          }
+        });
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
+          query: {
+            bool: {
+              filter: [
+                { term: 'someTerm' },
+                { range: { 'observer.version_major': { gte: 7 } } }
+              ]
+            }
+          }
+        });
+      });
     });
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: {
-          filter: [
-            { term: 'someTerm' },
-            { range: { 'observer.version_major': { gte: 7 } } }
-          ]
+
+    it('if index is not an APM index, it should not add `observer.version_major` filter ', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+      const setup = setupRequest(mockRequest);
+      await setup.client('myType', {
+        index: '.ml-*',
+        body: {
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
         }
-      }
+      });
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [{ term: 'someTerm' }]
+          }
+        }
+      });
+    });
+  });
+
+  describe('ignore_throttled', () => {
+    it('should set `ignore_throttled=true` if `includeFrozen=false`', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+
+      // mock includeFrozen to return false
+      mockRequest.getUiSettingsService = () => ({ get: async () => false });
+      const setup = setupRequest(mockRequest);
+      await setup.client('myType', {});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.ignore_throttled).toBe(true);
+    });
+
+    it('should set `ignore_throttled=false` if `includeFrozen=true`', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+
+      // mock includeFrozen to return true
+      mockRequest.getUiSettingsService = () => ({ get: async () => true });
+      const setup = setupRequest(mockRequest);
+      await setup.client('myType', {});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.ignore_throttled).toBe(false);
+    });
+  });
+
+  describe('isApmIndex', () => {
+    const apmIndices = [
+      'apm-*-metric-*',
+      'apm-*-onboarding-*',
+      'apm-*-span-*',
+      'apm-*-transaction-*',
+      'apm-*-error-*'
+    ];
+    describe('when indexParam is a string', () => {
+      it('should return true if it matches any of the items in apmIndices', () => {
+        const indexParam = 'apm-*-transaction-*';
+        expect(isApmIndex(apmIndices, indexParam)).toBe(true);
+      });
+
+      it('should return false if it does not match any of the items in `apmIndices`', () => {
+        const indexParam = '.ml-anomalies-*';
+        expect(isApmIndex(apmIndices, indexParam)).toBe(false);
+      });
+    });
+
+    describe('when indexParam is an array', () => {
+      it('should return true if all values in `indexParam` matches values in `apmIndices`', () => {
+        const indexParam = ['apm-*-transaction-*', 'apm-*-span-*'];
+        expect(isApmIndex(apmIndices, indexParam)).toBe(true);
+      });
+
+      it("should return false if some of the values don't match with `apmIndices`", () => {
+        const indexParam = ['apm-*-transaction-*', '.ml-anomalies-*'];
+        expect(isApmIndex(apmIndices, indexParam)).toBe(false);
+      });
+    });
+
+    describe('when indexParam is neither a string or an array', () => {
+      it('should return false', () => {
+        [true, false, undefined].forEach(indexParam => {
+          expect(isApmIndex(apmIndices, indexParam)).toBe(false);
+        });
+      });
     });
   });
 });

@@ -140,6 +140,7 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 
 // get the chart type based on its configuration
 export function getChartType(config) {
+
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
@@ -149,7 +150,8 @@ export function getChartType(config) {
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over')
+    config.entityFields.some(f => f.fieldType === 'over') &&
+    config.metricFunction !== null  // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
     return CHART_TYPE.POPULATION_DISTRIBUTION;
   }

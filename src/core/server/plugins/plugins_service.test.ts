@@ -17,13 +17,7 @@
  * under the License.
  */
 
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
-
-const mockDiscover = jest.fn();
-jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
-
-jest.mock('./plugins_system');
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
@@ -308,6 +302,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
   expect(mockDiscover).toHaveBeenCalledTimes(1);
   expect(mockDiscover).toHaveBeenCalledWith(
     {
+      additionalPluginPaths: [],
       initialize: true,
       pluginSearchPaths: [
         resolve(process.cwd(), 'src', 'plugins'),

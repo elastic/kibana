@@ -5,15 +5,15 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../common/idx';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { ApmTimeSeriesResponse } from '../../../../server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   getAnomalyScoreSeries,
   getResponseTimeSeries,

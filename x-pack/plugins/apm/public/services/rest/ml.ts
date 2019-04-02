@@ -7,14 +7,11 @@
 import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
 import {
-  getMlJobId,
-  getMlPrefix
-} from 'x-pack/plugins/apm/common/ml_job_constants';
-import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
+import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
 
 interface MlResponseItem {

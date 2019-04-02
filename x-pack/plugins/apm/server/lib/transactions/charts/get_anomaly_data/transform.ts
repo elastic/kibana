@@ -5,11 +5,8 @@
  */
 
 import { first, last } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import {
-  Coordinate,
-  RectCoordinate
-} from 'x-pack/plugins/apm/typings/timeseries';
+import { idx } from '../../../../../common/idx';
+import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
 interface IBucket {

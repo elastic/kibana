@@ -20,6 +20,9 @@
 import _ from 'lodash';
 import { uiModules } from '../modules';
 import paginatedTableTemplate from './paginated_table.html';
+
+import '../directives/paginate';
+
 uiModules
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
