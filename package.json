@@ -113,6 +113,7 @@
     "@kbn/ui-framework": "1.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
+    "@types/recompose": "^0.30.5",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
