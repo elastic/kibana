@@ -8,7 +8,6 @@ export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/'
 export const PLUGIN_ID = 'index_lifecycle_management';
 export {
   UIM_APP_NAME,
-  USER_ACTIONS,
   UIM_APP_LOAD,
   UIM_POLICY_CREATE,
   UIM_POLICY_UPDATE,
