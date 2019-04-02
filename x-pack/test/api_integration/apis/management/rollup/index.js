@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('rollup', () => {
+  describe.only('rollup', () => {
     loadTestFile(require.resolve('./rollup'));
     loadTestFile(require.resolve('./index_patterns_extensions'));
     loadTestFile(require.resolve('./rollup_search'));
