@@ -9,18 +9,15 @@ const TSDocgenPlugin = require('react-docgen-typescript-webpack-plugin');
 
 // Extend the Storybook Webpack config with some customizations;
 module.exports = (_baseConfig, _env, config) => {
-
   // Include the React preset for Storybook JS files.
-  config.module.rules.push(
-    {
-      test: /\.js$/,
-      include: /\.storybook/,
-      loaders: 'babel-loader',
-      options: {
-        presets: [require.resolve('babel-preset-react')],
-      },
+  config.module.rules.push({
+    test: /\.js$/,
+    include: /\.storybook/,
+    loaders: 'babel-loader',
+    options: {
+      presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
     },
-  );
+  });
 
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
@@ -30,10 +27,10 @@ module.exports = (_baseConfig, _env, config) => {
     options: {
       search: '__REPLACE_WITH_PUBLIC_PATH__',
       replace: '/',
-      flags: 'g'
-    }
+      flags: 'g',
+    },
   });
-  
+
   // Configure loading LESS files from Kibana
   config.module.rules.push({
     test: /\.less$/,
@@ -55,15 +52,9 @@ module.exports = (_baseConfig, _env, config) => {
     test: /\.tsx?$/,
     use: [
       {
-        loader: 'ts-loader',
+        loader: 'babel-loader',
         options: {
-          transpileOnly: true,
-          experimentalWatchApi: true,
-          onlyCompileBundledFiles: true,
-          configFile: require.resolve('../../../../tsconfig.json'),
-          compilerOptions: {
-            sourceMap: true,
-          },
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
       },
       require.resolve('react-docgen-typescript-loader'),
@@ -72,7 +63,7 @@ module.exports = (_baseConfig, _env, config) => {
 
   // Include the TSDocgen plugin to display Typescript param comments in the stories.
   config.plugins.push(new TSDocgenPlugin());
-  
+
   // Tell Webpack about the ts/x extensions
   config.resolve.extensions.push('.ts', '.tsx');
 
