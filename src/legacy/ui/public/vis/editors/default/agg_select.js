@@ -28,7 +28,6 @@ uiModules
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
-    ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isSubAggregation',
@@ -49,7 +48,6 @@ uiModules
             agg-help-link="aggHelpLink"
             agg-type-options="aggTypeOptions"
             is-select-invalid="isSelectInvalid"
-            set-touched="setTouched"
             set-validity="setValidity"
           ></vis-agg-select-react-wrapper>`;
       },
@@ -64,6 +62,7 @@ uiModules
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
+            $scope.isSelectInvalid = !value;
           });
 
           $scope.onChange = (value) => {
@@ -74,14 +73,9 @@ uiModules
             ngModelCtrl.$setDirty();
           };
 
-          $scope.setTouched = () => {
-            ngModelCtrl.$setTouched();
-            $scope.isSelectInvalid = !$scope.paramValue;
-          };
-
           $scope.setValidity = (isValid) => {
-            // The field will be marked as invalid when the value is empty and the field is touched.
-            $scope.isSelectInvalid = ngModelCtrl.$touched ? !isValid : false;
+            // The field will be marked as invalid when the value is empty.
+            $scope.isSelectInvalid = !isValid;
             // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };

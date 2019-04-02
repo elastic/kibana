@@ -30,7 +30,6 @@ uiModules
     ['aggParam', { watchDepth: 'reference' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
-    ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid',
@@ -61,7 +60,6 @@ uiModules
             value="paramValue"
             is-invalid="isInvalid"
             set-validity="setValidity"
-            set-touched="setTouched"
             indexed-fields="indexedFields"
             field="agg.params.field"
           ></vis-agg-param-react-wrapper>`;
@@ -109,14 +107,9 @@ uiModules
             }
           };
 
-          $scope.setTouched = () => {
-            ngModelCtrl.$setTouched();
-            $scope.isInvalid = !$scope.paramValue;
-          };
-
           $scope.setValidity = (isValid) => {
             if(ngModelCtrl) {
-              $scope.isInvalid = ngModelCtrl.$touched ? !isValid : false;
+              $scope.isInvalid = !isValid;
               ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
             }
           };

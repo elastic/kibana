@@ -34,7 +34,6 @@ interface DefaultEditorAggSelectProps {
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
   isSelectInvalid: boolean;
-  setTouched: () => void;
   setValidity: (isValid: boolean) => void;
 }
 
@@ -45,7 +44,6 @@ function DefaultEditorAggSelect({
   aggTypeOptions = [],
   isSelectInvalid,
   isSubAggregation,
-  setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
   const isAggTypeDefined = value && Boolean(value.title);
@@ -91,7 +89,7 @@ function DefaultEditorAggSelect({
         setValidity(isAggTypeDefined);
       }
     },
-    [isAggTypeDefined]
+    [value]
   );
 
   return (
@@ -115,7 +113,6 @@ function DefaultEditorAggSelect({
         isClearable={false}
         isInvalid={isSelectInvalid}
         fullWidth={true}
-        onBlur={() => setTouched()}
       />
     </EuiFormRow>
   );

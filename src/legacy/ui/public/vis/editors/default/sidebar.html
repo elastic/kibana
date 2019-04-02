@@ -69,7 +69,7 @@
         <!-- controls -->
         <ul class="nav navbar-nav navbar-right">
           <li
-            ng-if="visualizeEditor.softErrorCount() > 0"
+            ng-if="visualizeEditor.errorCount() > 0"
             disabled
             tooltip="{{ visualizeEditor.describeErrors() }}"
             tooltip-placement="bottom"
@@ -115,7 +115,7 @@
             tooltip="{{::'common.ui.vis.editors.sidebar.applyChangesTooltip' | i18n: { defaultMessage: 'Apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
-            ng-hide="autoApplyEnabled || visualizeEditor.softErrorCount() > 0"
+            ng-hide="autoApplyEnabled || visualizeEditor.errorCount() > 0"
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
