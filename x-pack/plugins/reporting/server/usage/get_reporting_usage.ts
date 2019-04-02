@@ -6,7 +6,15 @@
 
 import { defaultsDeep, get } from 'lodash';
 import { getDefaultObject } from './get_default_object';
+// @ts-ignore untyped module
 import { getExportTypesHandler } from './get_export_type_handler';
+import {
+  AggregationBuckets,
+  AggregationResults,
+  JobTypes,
+  KeyCountBucket,
+  UsageObject,
+} from './types';
 
 // These keys can be anything, but they are used to bucket the aggregations so can't have periods in them
 // like the field names can (otherwise we could have just used the field names themselves).
@@ -23,15 +31,12 @@ const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 
 // index as set by "key" property, values are doc_count
-const getKeyCount = buckets =>
+const getKeyCount = (buckets: KeyCountBucket[]) =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-function getRangeStats(range) {
-  const _all = range.doc_count;
-  const statusTypes = getKeyCount(get(range[STATUS_TYPES_KEY], 'buckets'));
-
-  const jobBuckets = range[JOB_TYPES_KEY].buckets;
-  const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
+function getAggStats(aggs: AggregationResults) {
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
+  const jobTypes: JobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
     return {
       ...accum,
       [key]: {
@@ -42,29 +47,34 @@ function getRangeStats(range) {
   }, {});
 
   // merge pdf stats into pdf jobtype key
-  const pdfAppBuckets = get(range[OBJECT_TYPES_KEY], '.pdf.buckets');
-  const pdfLayoutBuckets = get(range[LAYOUT_TYPES_KEY], '.pdf.buckets');
+  const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
+  const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
   jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets);
   jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets);
 
-  return { _all, status: statusTypes, ...jobTypes };
+  const all = aggs.doc_count as number;
+  const statusTypes = getKeyCount(get(aggs[STATUS_TYPES_KEY], 'buckets'));
+
+  return { _all: all, status: statusTypes, ...jobTypes };
 }
 
-async function handleResponse(server, response) {
+async function handleResponse(server: any, response: AggregationResults) {
+  /*
   const xpackInfo = server.plugins.xpack_main.info;
   const exportTypesHandler = await getExportTypesHandler(server);
   const availability = exportTypesHandler.getAvailability(xpackInfo);
-  console.log(JSON.stringify(availability));
+  */
 
   const { all, last1, last7 } = get(response, 'aggregations.ranges.buckets');
+
   return {
-    lastDay: getRangeStats(last1, availability),
-    last7Days: getRangeStats(last7),
-    ...getRangeStats(all),
+    lastDay: getAggStats(last1),
+    last7Days: getAggStats(last7),
+    ...getAggStats(all),
   };
 }
 
-export async function getReportingUsage(server, callCluster) {
+export async function getReportingUsage(server: any, callCluster: any) {
   const config = server.config();
   const reportingIndex = config.get('xpack.reporting.index');
 
@@ -100,8 +110,8 @@ export async function getReportingUsage(server, callCluster) {
   };
 
   return callCluster('search', params)
-    .then(response => handleResponse(server, response))
-    .then(usage => {
+    .then((response: AggregationResults) => handleResponse(server, response))
+    .then((usage: UsageObject) => {
       // Allow this to explicitly throw an exception if/when this config is deprecated,
       // because we shouldn't collect browserType in that case!
       const browserType = config.get('xpack.reporting.capture.browser.type');

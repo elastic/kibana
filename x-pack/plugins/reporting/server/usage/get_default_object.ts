@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsageObject } from './types';
+
 const AVAILABLE_TOTAL_FIELDS = { available: false, total: 0 };
 const STATUS_FIELDS = { status: { completed: 0, failed: 0 } }; // these are just the common statuses
 const PDF_APP_FIELDS = { app: { visualization: 0, dashboard: 0 } };
 const PDF_LAYOUT_FIELDS = { layout: { print: 0, preserve_layout: 0 } };
 
-export const getDefaultObject = () => ({
+export const getDefaultObject = (): UsageObject => ({
   available: false,
   enabled: true,
   browser_type: 'chromium',
@@ -18,6 +20,7 @@ export const getDefaultObject = () => ({
   PNG: AVAILABLE_TOTAL_FIELDS,
   printable_pdf: { ...AVAILABLE_TOTAL_FIELDS, ...PDF_APP_FIELDS, ...PDF_LAYOUT_FIELDS },
   ...STATUS_FIELDS,
+
   lastDay: {
     _all: 0,
     csv: AVAILABLE_TOTAL_FIELDS,
