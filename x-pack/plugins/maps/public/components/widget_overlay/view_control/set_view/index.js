@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { SetView } from './set_view';
 import { setGotoWithCenter } from '../../../../actions/store_actions';
-import { getMapZoom, getMapCenter } from "../../../../selectors/map_selectors";
+import { getMapZoom, getMapCenter } from '../../../../selectors/map_selectors';
 import { closeSetView } from '../../../../store/ui';
 
 function mapStateToProps(state = {}) {

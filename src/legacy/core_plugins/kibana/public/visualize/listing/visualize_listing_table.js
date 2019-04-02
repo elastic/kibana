@@ -17,130 +17,159 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-
+import { i18n } from '@kbn/i18n';
 import { uiCapabilities } from 'ui/capabilities';
-import { Pager } from 'ui/pager';
-import { NoVisualizationsPrompt } from './no_visualizations_prompt';
+import { TableListView } from './../../table_list_view';
 
 import {
-  KuiPager,
-  KuiListingTableDeleteButton,
-  KuiListingTableCreateButton,
-  KuiListingTable,
-  KuiListingTableNoMatchesPrompt,
-  KuiListingTableLoadingPrompt
-} from '@kbn/ui-framework/components';
-
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-  SortableProperties,
   EuiIcon,
+  EuiBetaBadge,
+  EuiLink,
+  EuiButton,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 class VisualizeListingTableUi extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      selectedRowIds: [],
-      pageOfItems: [],
-      showDeleteModal: false,
-      filter: '',
-      sortedColumn: 'title',
-      pageStartNumber: 1,
-      isFetchingItems: false,
-    };
+  }
 
-    this.sortableProperties = new SortableProperties(
-      [
-        {
-          name: 'title',
-          getValue: item => item.title.toLowerCase(),
-          isAscending: true,
-        },
-        {
-          name: 'type',
-          getValue: item => item.type.title.toLowerCase(),
-          isAscending: true,
+  render() {
+    const { intl } = this.props;
+    return (
+      <TableListView
+        createItem={this.props.createItem}
+        findItems={this.props.findItems}
+        deleteItems={this.props.deleteItems}
+        editItem={this.props.editItem}
+        tableColumns={this.getTableColumns()}
+        listingLimit={100}
+        initialFilter={''}
+        hideWriteControls={!uiCapabilities.visualize.save}
+        noItemsFragment={this.getNoItemsMessage()}
+        entityName={
+          intl.formatMessage({
+            id: 'kbn.visualize.listing.table.entityName',
+            defaultMessage: 'visualization',
+          })
         }
-      ],
-      this.state.sortedColumn
+        entityNamePlural={
+          intl.formatMessage({
+            id: 'kbn.visualize.listing.table.entityNamePlural',
+            defaultMessage: 'visualizations',
+          })
+        }
+        tableListTitle={
+          intl.formatMessage({
+            id: 'kbn.visualize.listing.table.listTitle',
+            defaultMessage: 'Visualizations',
+          })
+        }
+      />
     );
-    this.items = [];
-    this.pager = new Pager(this.items.length, 20, 1);
+  }
 
-    this.debouncedFetch = _.debounce(filter => {
-      this.props.fetchItems(filter)
-        .then(items => {
-          // We need this check to handle the case where search results come back in a different
-          // order than they were sent out. Only load results for the most recent search.
-          if (filter === this.state.filter) {
-            this.setState({
-              isFetchingItems: false,
-              selectedRowIds: [],
-            });
-            this.items = items;
-            this.calculateItemsOnPage();
+  getTableColumns() {
+    const { intl } = this.props;
+    const tableColumns = [
+      {
+        field: 'title',
+        name: intl.formatMessage({
+          id: 'kbn.visualize.listing.table.titleColumnName',
+          defaultMessage: 'Title',
+        }),
+        sortable: true,
+        render: (field, record) => (
+          <EuiLink
+            href={this.props.getViewUrl(record)}
+            data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
+          >
+            {field}
+          </EuiLink>
+        )
+      },
+      {
+        field: 'type.title',
+        name: intl.formatMessage({
+          id: 'kbn.visualize.listing.table.typeColumnName',
+          defaultMessage: 'Type',
+        }),
+        sortable: true,
+        render: (field, record) =>  (
+          <span>
+            {this.renderItemTypeIcon(record)}
+            {record.type.title}
+            {this.getExperimentalBadge(record)}
+          </span>
+        )
+      }
+    ];
+
+    return tableColumns;
+  }
+
+  getNoItemsMessage() {
+    if (this.props.hideWriteControls) {
+      return (
+        <div>
+          <EuiEmptyPrompt
+            iconType="visualizeApp"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="kbn.visualize.listing.noItemsMessage"
+                  defaultMessage="Looks like you don't have any visualizations."
+                />
+              </h2>
+            }
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <EuiEmptyPrompt
+          iconType="visualizeApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="kbn.visualize.listing.createNew.title"
+                defaultMessage="Create your first visualization"
+              />
+            </h2>
           }
-        });
-    }, 300);
-  }
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="kbn.visualize.listing.createNew.description"
+                  defaultMessage="You can create different visualizations, based on your data."
+                />
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              onClick={this.props.createItem}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createVisualizationPromptButton"
+            >
+              <FormattedMessage
+                id="kbn.visualize.listing.createNew.createButtonLabel"
+                defaultMessage="Create new visualization"
+              />
+            </EuiButton>
+          }
+        />
+      </div>
+    );
 
-  componentWillUnmount() {
-    this.debouncedFetch.cancel();
-  }
-
-  calculateItemsOnPage = () => {
-    this.items = this.sortableProperties.sortItems(this.items);
-    this.pager.setTotalItems(this.items.length);
-    const pageOfItems = this.items.slice(this.pager.startIndex, this.pager.startIndex + this.pager.pageSize);
-    this.setState({ pageOfItems, pageStartNumber: this.pager.startItem });
-  };
-
-  deselectAll = () => {
-    this.setState({ selectedRowIds: [] });
-  };
-
-  isAscending = (name) => this.sortableProperties.isAscendingByName(name);
-  getSortedProperty = () => this.sortableProperties.getSortedProperty();
-
-  sortOn = function sortOn(propertyName) {
-    this.sortableProperties.sortOn(propertyName);
-    this.setState({
-      selectedRowIds: [],
-      sortedColumn: this.sortableProperties.getSortedProperty().name,
-    });
-    this.calculateItemsOnPage();
-  };
-
-  fetchItems = (filter) => {
-    this.setState({ isFetchingItems: true, filter });
-    this.debouncedFetch(filter);
-  };
-
-  componentDidMount() {
-    this.fetchItems(this.state.filter);
-  }
-
-  onNextPage = () => {
-    this.deselectAll();
-    this.pager.nextPage();
-    this.calculateItemsOnPage();
-  };
-
-  onPreviousPage = () => {
-    this.deselectAll();
-    this.pager.previousPage();
-    this.calculateItemsOnPage();
-  };
-
-  getUrlForItem(item) {
-    return `#/visualize/edit/${item.id}`;
   }
 
   renderItemTypeIcon(item) {
@@ -168,184 +197,30 @@ class VisualizeListingTableUi extends Component {
     return icon;
   }
 
-  sortByTitle = () => this.sortOn('title');
-  sortByType = () => this.sortOn('type');
-
-  renderHeader() {
-    return [
-      {
-        content: 'Title',
-        onSort: this.sortByTitle,
-        isSorted: this.state.sortedColumn === 'title',
-        isSortAscending: this.sortableProperties.isAscendingByName('title'),
-      },
-      {
-        content: 'Type',
-        onSort: this.sortByType,
-        isSorted: this.state.sortedColumn === 'type',
-        isSortAscending: this.sortableProperties.isAscendingByName('type'),
-      },
-    ];
-  }
-
-  renderRowCells(item) {
-
-    let flaskHolder;
-    if (item.type.shouldMarkAsExperimentalInUI()) {
-      flaskHolder = <span className="kuiIcon fa-flask ng-scope">&nbsp;</span>;
-    }else{
-      flaskHolder = <span />;
-    }
-
-    return [
-      <span>
-        {flaskHolder}
-        <a className="kuiLink" href={this.getUrlForItem(item)}>
-          {item.title}
-        </a>
-      </span>,
-      <span className="kuiStatusText">
-        {this.renderItemTypeIcon(item)}
-        {item.type.title}
-      </span>
-    ];
-  }
-
-  createRows() {
-    return this.state.pageOfItems.map(item => ({
-      id: item.id,
-      cells: this.renderRowCells(item)
-    }));
-  }
-
-  closeModal = () => {
-    this.setState({ showDeleteModal: false });
-  };
-
-  renderConfirmDeleteModal() {
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={this.props.intl.formatMessage({
-            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalTitle',
-            defaultMessage: 'Delete selected visualizations?',
-          })}
-          onCancel={this.closeModal}
-          onConfirm={this.deleteSelectedItems}
-          cancelButtonText={this.props.intl.formatMessage({
-            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalCancelButtonText',
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={this.props.intl.formatMessage({
-            id: 'kbn.visualize.listing.deleteVisualizations.confirmModalConfirmButtonText',
-            defaultMessage: 'Delete',
-          })}
-        >
-          <p>
-            <FormattedMessage
-              id="kbn.visualize.listing.deleteVisualizations.confirmModalText"
-              defaultMessage="You can't recover deleted visualizations."
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  }
-
-  onDelete = () => {
-    this.setState({ showDeleteModal: true });
-  };
-
-  deleteSelectedItems = () => {
-    this.props.deleteSelectedItems(this.state.selectedRowIds)
-      .then(() => this.fetchItems(this.state.filter))
-      .catch(() => {})
-      .then(() => this.deselectAll())
-      .then(() => this.closeModal());
-  };
-
-  onItemSelectionChanged = (newSelectedIds) => {
-    this.setState({ selectedRowIds: newSelectedIds });
-  };
-
-  onCreate = () => {
-    this.props.onCreateVis();
-  }
-
-  renderToolBarActions() {
-    return this.state.selectedRowIds.length > 0 ?
-      <KuiListingTableDeleteButton
-        onDelete={this.onDelete}
-        aria-label={this.props.intl.formatMessage({
-          id: 'kbn.visualize.listing.deleteVisualizationsButtonAriaLabel',
-          defaultMessage: 'Delete selected visualizations',
+  getExperimentalBadge(item) {
+    return item.type.shouldMarkAsExperimentalInUI() && (
+      <EuiBetaBadge
+        className="visListingTable__experimentalIcon"
+        label="E"
+        title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
+          defaultMessage: 'Experimental',
         })}
-      /> :
-      <KuiListingTableCreateButton
-        onCreate={this.onCreate}
-        data-test-subj="createNewVis"
-        aria-label={this.props.intl.formatMessage({
-          id: 'kbn.visualize.listing.createVisualizationButtonAriaLabel',
-          defaultMessage: 'Create new visualization',
-        })}
-      />;
-  }
-
-  renderPager() {
-    return (
-      <KuiPager
-        startNumber={this.state.pageStartNumber}
-        hasNextPage={this.pager.hasNextPage}
-        hasPreviousPage={this.pager.hasPreviousPage}
-        endNumber={this.pager.endItem}
-        totalItems={this.items.length}
-        onNextPage={this.onNextPage}
-        onPreviousPage={this.onPreviousPage}
+        tooltipContent={
+          i18n.translate('kbn.visualize.listing.experimentalTooltip', {
+            defaultMessage: 'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+          })
+        }
       />
-    );
-  }
-
-  renderPrompt() {
-    if (this.state.isFetchingItems) {
-      return <KuiListingTableLoadingPrompt />;
-    }
-
-    if (this.items.length === 0) {
-      if (this.state.filter) {
-        return <KuiListingTableNoMatchesPrompt />;
-      }
-
-      return <NoVisualizationsPrompt onCreateVis={this.onCreate}/>;
-    }
-
-    return null;
-  }
-
-  render() {
-    return (
-      <div>
-        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
-        <KuiListingTable
-          pager={this.renderPager()}
-          toolBarActions={this.renderToolBarActions()}
-          enableSelection={uiCapabilities.visualize.save}
-          selectedRowIds={this.state.selectedRowIds}
-          rows={this.createRows()}
-          header={this.renderHeader()}
-          onFilter={this.fetchItems}
-          filter={this.state.filter}
-          prompt={this.renderPrompt()}
-          onItemSelectionChanged={this.onItemSelectionChanged}
-        />
-      </div>
     );
   }
 }
 
 VisualizeListingTableUi.propTypes = {
-  deleteSelectedItems: PropTypes.func,
-  fetchItems: PropTypes.func,
-  onCreateVis: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func.isRequired,
+  findItems: PropTypes.func.isRequired,
+  createItem: PropTypes.func.isRequired,
+  getViewUrl: PropTypes.func.isRequired,
+  editItem: PropTypes.func.isRequired,
 };
 
 export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);

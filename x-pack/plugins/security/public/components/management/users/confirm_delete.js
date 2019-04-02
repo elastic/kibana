@@ -18,16 +18,16 @@ class ConfirmDeleteUI extends Component {
         await apiClient.deleteUser(username);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage({
-            id: "xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage",
-            defaultMessage: "Deleted user {username}"
+            id: 'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
+            defaultMessage: 'Deleted user {username}'
           }, { username })
         );
       } catch (e) {
         errors.push(username);
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage",
-            defaultMessage: "Error deleting user {username}"
+            id: 'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
+            defaultMessage: 'Error deleting user {username}'
           }, { username })
         );
       }
@@ -41,12 +41,12 @@ class ConfirmDeleteUI extends Component {
     const moreThanOne = usersToDelete.length > 1;
     const title = moreThanOne
       ? intl.formatMessage({
-        id: "xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle",
-        defaultMessage: "Delete {userLength} users"
+        id: 'xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle',
+        defaultMessage: 'Delete {userLength} users'
       }, { userLength: usersToDelete.length })
       : intl.formatMessage({
-        id: "xpack.security.management.users.confirmDelete.deleteOneUserTitle",
-        defaultMessage: "Delete user {userLength}"
+        id: 'xpack.security.management.users.confirmDelete.deleteOneUserTitle',
+        defaultMessage: 'Delete user {userLength}'
       }, { userLength: usersToDelete[0] });
     return (
       <EuiOverlayMask>
@@ -55,12 +55,12 @@ class ConfirmDeleteUI extends Component {
           onCancel={onCancel}
           onConfirm={this.deleteUsers}
           cancelButtonText={intl.formatMessage({
-            id: "xpack.security.management.users.confirmDelete.cancelButtonLabel",
-            defaultMessage: "Cancel"
+            id: 'xpack.security.management.users.confirmDelete.cancelButtonLabel',
+            defaultMessage: 'Cancel'
           })}
           confirmButtonText={intl.formatMessage({
-            id: "xpack.security.management.users.confirmDelete.confirmButtonLabel",
-            defaultMessage: "Delete"
+            id: 'xpack.security.management.users.confirmDelete.confirmButtonLabel',
+            defaultMessage: 'Delete'
           })}
           buttonColor="danger"
         >

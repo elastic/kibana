@@ -22,7 +22,27 @@ import { fromExpression } from '@kbn/interpreter/common';
 // @ts-ignore
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 
-export const runPipeline = async (expression: string, context: any, handlers: any) => {
+import { Adapters } from 'ui/inspector';
+import { Filters, Query, TimeRange } from 'ui/visualize';
+
+interface InitialContextObject {
+  timeRange?: TimeRange;
+  filters?: Filters;
+  query?: Query;
+}
+
+type getInitialContextFunction = () => InitialContextObject;
+
+interface RunPipelineHandlers {
+  getInitialContext: getInitialContextFunction;
+  inspectorAdapters?: Adapters;
+}
+
+export const runPipeline = async (
+  expression: string,
+  context: object,
+  handlers: RunPipelineHandlers
+) => {
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
   const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);

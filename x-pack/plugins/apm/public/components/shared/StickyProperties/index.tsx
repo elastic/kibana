@@ -16,7 +16,6 @@ import {
   fontSizes,
   px,
   truncate,
-  unit,
   units
 } from '../../../style/variables';
 
@@ -47,15 +46,16 @@ const PropertyValueDimmed = styled.span`
   color: ${theme.euiColorMediumShade};
 `;
 
+const propertyValueLineHeight = 1.2;
 const PropertyValue = styled.div`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
 `;
 PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
   ${truncate('100%')};
 `;
 

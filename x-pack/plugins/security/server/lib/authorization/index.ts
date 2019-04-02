@@ -8,7 +8,9 @@ export { Actions } from './actions';
 // @ts-ignore
 export { createAuthorizationService } from './service';
 export { disableUICapabilitesFactory } from './disable_ui_capabilities';
+export { initAPIAuthorization } from './api_authorization';
 export { PrivilegeSerializer } from './privilege_serializer';
 // @ts-ignore
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 export { ResourceSerializer } from './resource_serializer';
+export { validateFeaturePrivileges } from './validate_feature_privileges';

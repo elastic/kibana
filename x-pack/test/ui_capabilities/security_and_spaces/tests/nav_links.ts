@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { navLinksBuilder } from '../../common/nav_links_builder';
+import { NavLinksBuilder } from '../../common/nav_links_builder';
+import { FeaturesService } from '../../common/services';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
@@ -16,8 +17,15 @@ import { UserAtSpaceScenarios } from '../scenarios';
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
+  const featuresService: FeaturesService = getService('features');
 
   describe('navLinks', () => {
+    let navLinksBuilder: NavLinksBuilder;
+    before(async () => {
+      const features = await featuresService.get();
+      navLinksBuilder = new NavLinksBuilder(features);
+    });
+
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;

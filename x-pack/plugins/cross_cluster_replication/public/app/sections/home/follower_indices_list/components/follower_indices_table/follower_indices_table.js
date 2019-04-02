@@ -6,7 +6,8 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiHealth,
   EuiIcon,
@@ -24,269 +25,304 @@ import {
 import routing from '../../../../../services/routing';
 import { ContextMenu } from '../context_menu';
 
-export const FollowerIndicesTable = injectI18n(
-  class extends PureComponent {
-    static propTypes = {
-      followerIndices: PropTypes.array,
-      selectFollowerIndex: PropTypes.func.isRequired,
-    }
+export class FollowerIndicesTable extends PureComponent {
+  static propTypes = {
+    followerIndices: PropTypes.array,
+    selectFollowerIndex: PropTypes.func.isRequired,
+  }
 
-    state = {
-      selectedItems: [],
-    }
+  state = {
+    selectedItems: [],
+  }
 
-    onSearch = ({ query }) => {
-      const { text } = query;
-      const normalizedSearchText = text.toLowerCase();
-      this.setState({
-        queryText: normalizedSearchText,
+  onSearch = ({ query }) => {
+    const { text } = query;
+    const normalizedSearchText = text.toLowerCase();
+    this.setState({
+      queryText: normalizedSearchText,
+    });
+  };
+
+  editFollowerIndex = (id) => {
+    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+    routing.navigate(uri);
+  }
+
+  getFilteredIndices = () => {
+    const { followerIndices } = this.props;
+    const { queryText } = this.state;
+
+    if(queryText) {
+      return followerIndices.filter(followerIndex => {
+        const { name, shards } = followerIndex;
+
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = shards[0].remoteCluster.toLowerCase().includes(queryText);
+        const inLeaderIndex = shards[0].leaderIndex.toLowerCase().includes(queryText);
+
+        return inName || inRemoteCluster || inLeaderIndex;
       });
-    };
-
-    editFollowerIndex = (id) => {
-      const uri = routing.getFollowerIndexPath(id, '/edit', false);
-      routing.navigate(uri);
     }
 
-    getFilteredIndices = () => {
-      const { followerIndices } = this.props;
-      const { queryText } = this.state;
+    return followerIndices.slice(0);
+  };
 
-      if(queryText) {
-        return followerIndices.filter(followerIndex => {
-          const { name, shards } = followerIndex;
+  getTableColumns() {
+    const { selectFollowerIndex } = this.props;
 
-          const inName = name.toLowerCase().includes(queryText);
-          const inRemoteCluster = shards[0].remoteCluster.toLowerCase().includes(queryText);
-          const inLeaderIndex = shards[0].leaderIndex.toLowerCase().includes(queryText);
-
-          return inName || inRemoteCluster || inLeaderIndex;
-        });
-      }
-
-      return followerIndices.slice(0);
-    };
-
-    getTableColumns() {
-      const { intl, selectFollowerIndex } = this.props;
-
-      const actions = [
-        /* Pause or resume follower index */
-        {
-          render: (followerIndex) => {
-            const { name, isPaused } = followerIndex;
-            const label = isPaused
-              ? intl.formatMessage({
-                id: 'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-                defaultMessage: 'Resume replication',
-              })
-              : intl.formatMessage({
-                id: 'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-                defaultMessage: 'Pause replication',
-              });
-
-            return isPaused ? (
-              <FollowerIndexResumeProvider>
-                {(resumeFollowerIndex) => (
-                  <span onClick={() => resumeFollowerIndex(name)}>
-                    <EuiIcon
-                      aria-label={label}
-                      type="play"
-                      className="euiContextMenu__icon"
-                    />
-                    <span>{label}</span>
-                  </span>
-                )}
-              </FollowerIndexResumeProvider>
-            ) : (
-              <FollowerIndexPauseProvider>
-                {(pauseFollowerIndex) => (
-                  <span onClick={() => pauseFollowerIndex(followerIndex)}>
-                    <EuiIcon
-                      aria-label={label}
-                      type="pause"
-                      className="euiContextMenu__icon"
-                    />
-                    <span>{label}</span>
-                  </span>
-                )}
-              </FollowerIndexPauseProvider>
+    const actions = [
+      /* Pause or resume follower index */
+      {
+        render: (followerIndex) => {
+          const { name, isPaused } = followerIndex;
+          const label = isPaused
+            ? i18n.translate(
+              'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
+              {
+                defaultMessage: 'Resume replication'
+              }
+            ) : i18n.translate(
+              'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
+              {
+                defaultMessage: 'Pause replication'
+              }
             );
-          },
-        },
-        /* Edit follower index */
-        {
-          render: ({ name }) => {
-            const label = intl.formatMessage({
-              id: 'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-              defaultMessage: 'Edit follower index',
-            });
 
-            return (
-              <span onClick={() => this.editFollowerIndex(name)}>
-                <EuiIcon
-                  aria-label={label}
-                  type="pencil"
-                  className="euiContextMenu__icon"
-                />
-                <span>{label}</span>
-              </span>
-            );
-          },
-        },
-        /* Unfollow leader index */
-        {
-          render: ({ name }) => {
-            const label = intl.formatMessage({
-              id: 'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
-              defaultMessage: 'Unfollow leader index',
-            });
-
-            return (
-              <FollowerIndexUnfollowProvider>
-                {(unfollowLeaderIndex) => (
-                  <span onClick={() => unfollowLeaderIndex(name)}>
-                    <EuiIcon
-                      aria-label={label}
-                      type="indexFlush"
-                      className="euiContextMenu__icon"
-                    />
-                    <span>{label}</span>
-                  </span>
-                )}
-              </FollowerIndexUnfollowProvider>
-            );
-          },
-        },
-      ];
-
-      return [{
-        field: 'name',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle',
-          defaultMessage: 'Name',
-        }),
-        sortable: true,
-        truncateText: false,
-        render: (name) => {
-          return (
-            <EuiLink onClick={() => selectFollowerIndex(name)}>
-              {name}
-            </EuiLink>
-          );
-        }
-      }, {
-        field: 'isPaused',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
-          defaultMessage: 'Status',
-        }),
-        truncateText: true,
-        sortable: true,
-        render: (isPaused) => {
           return isPaused ? (
-            <EuiHealth color="subdued">
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
-                defaultMessage="Paused"
-              />
-            </EuiHealth>
+            <FollowerIndexResumeProvider>
+              {(resumeFollowerIndex) => (
+                <span
+                  onClick={() => resumeFollowerIndex(name)}
+                  data-test-subj="ccrFollowerIndexListResumeActionButton"
+                >
+                  <EuiIcon
+                    aria-label={label}
+                    type="play"
+                    className="euiContextMenu__icon"
+                  />
+                  <span>{label}</span>
+                </span>
+              )}
+            </FollowerIndexResumeProvider>
           ) : (
-            <EuiHealth color="success">
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexList.table.activeStatus"
-                defaultMessage="Active"
-              />
-            </EuiHealth>
+            <FollowerIndexPauseProvider>
+              {(pauseFollowerIndex) => (
+                <span
+                  onClick={() => pauseFollowerIndex(followerIndex)}
+                  data-test-subj="ccrFollowerIndexListPauseActionButton"
+                >
+                  <EuiIcon
+                    aria-label={label}
+                    type="pause"
+                    className="euiContextMenu__icon"
+                  />
+                  <span>{label}</span>
+                </span>
+              )}
+            </FollowerIndexPauseProvider>
           );
-        }
-      }, {
-        field: 'remoteCluster',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
-          defaultMessage: 'Remote cluster',
-        }),
-        truncateText: true,
-        sortable: true,
-      }, {
-        field: 'leaderIndex',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
-          defaultMessage: 'Leader index',
-        }),
-        truncateText: true,
-        sortable: true,
-      }, {
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
-          defaultMessage: 'Actions',
-        }),
-        actions,
-        width: '100px',
-      }];
-    }
+        },
+      },
+      /* Edit follower index */
+      {
+        render: ({ name }) => {
+          const label = i18n.translate(
+            'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+            {
+              defaultMessage: 'Edit follower index'
+            }
+          );
 
-    renderLoading = () => {
-      const { apiStatusDelete } = this.props;
+          return (
+            <span
+              onClick={() => this.editFollowerIndex(name)}
+              data-test-subj="ccrFollowerIndexListEditActionButton"
+            >
+              <EuiIcon
+                aria-label={label}
+                type="pencil"
+                className="euiContextMenu__icon"
+              />
+              <span>{label}</span>
+            </span>
+          );
+        },
+      },
+      /* Unfollow leader index */
+      {
+        render: ({ name }) => {
+          const label = i18n.translate(
+            'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
+            {
+              defaultMessage: 'Unfollow leader index'
+            }
+          );
 
-      if (apiStatusDelete === API_STATUS.DELETING) {
+          return (
+            <FollowerIndexUnfollowProvider>
+              {(unfollowLeaderIndex) => (
+                <span
+                  onClick={() => unfollowLeaderIndex(name)}
+                  data-test-subj="ccrFollowerIndexListUnfollowActionButton"
+                >
+                  <EuiIcon
+                    aria-label={label}
+                    type="indexFlush"
+                    className="euiContextMenu__icon"
+                  />
+                  <span>{label}</span>
+                </span>
+              )}
+            </FollowerIndexUnfollowProvider>
+          );
+        },
+      },
+    ];
+
+    return [{
+      field: 'name',
+      name: i18n.translate('xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle', {
+        defaultMessage: 'Name'
+      }),
+      sortable: true,
+      truncateText: false,
+      render: (name) => {
         return (
-          <EuiOverlayMask>
-            <EuiLoadingKibana size="xl"/>
-          </EuiOverlayMask>
+          <EuiLink
+            onClick={() => selectFollowerIndex(name)}
+            data-test-subj="ccrFollowerIndexListFollowerIndexLink"
+          >
+            {name}
+          </EuiLink>
         );
       }
-      return null;
-    };
-
-    render() {
-      const {
-        selectedItems,
-      } = this.state;
-
-      const sorting = {
-        sort: {
-          field: 'name',
-          direction: 'asc',
+    }, {
+      field: 'isPaused',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
+        {
+          defaultMessage: 'Status'
         }
-      };
+      ),
+      truncateText: true,
+      sortable: true,
+      render: (isPaused) => {
+        return isPaused ? (
+          <EuiHealth color="subdued">
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.pausedLabel"
+              defaultMessage="Paused"
+            />
+          </EuiHealth>
+        ) : (
+          <EuiHealth color="success">
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.activeLabel"
+              defaultMessage="Active"
+            />
+          </EuiHealth>
+        );
+      }
+    }, {
+      field: 'remoteCluster',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
+        {
+          defaultMessage: 'Remote cluster'
+        }
+      ),
+      truncateText: true,
+      sortable: true,
+    }, {
+      field: 'leaderIndex',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
+        {
+          defaultMessage: 'Leader index'
+        }
+      ),
+      truncateText: true,
+      sortable: true,
+    }, {
+      name: i18n.translate(
+        'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
+        {
+          defaultMessage: 'Actions'
+        }
+      ),
+      actions,
+      width: '100px',
+    }];
+  }
 
-      const pagination = {
-        initialPageSize: 20,
-        pageSizeOptions: [10, 20, 50]
-      };
+  renderLoading = () => {
+    const { apiStatusDelete } = this.props;
 
-      const selection = {
-        onSelectionChange: (selectedItems) => this.setState({ selectedItems })
-      };
-
-      const search = {
-        toolsLeft: selectedItems.length ? (
-          <ContextMenu
-            followerIndices={selectedItems}
-          />
-        ) : undefined,
-        onChange: this.onSearch,
-        box: {
-          incremental: true,
-        },
-      };
-
+    if (apiStatusDelete === API_STATUS.DELETING) {
       return (
-        <Fragment>
-          <EuiInMemoryTable
-            items={this.getFilteredIndices()}
-            itemId="name"
-            columns={this.getTableColumns()}
-            search={search}
-            pagination={pagination}
-            sorting={sorting}
-            selection={selection}
-            isSelectable={true}
-          />
-          {this.renderLoading()}
-        </Fragment>
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
       );
     }
+    return null;
+  };
+
+  render() {
+    const {
+      selectedItems,
+    } = this.state;
+
+    const sorting = {
+      sort: {
+        field: 'name',
+        direction: 'asc',
+      }
+    };
+
+    const pagination = {
+      initialPageSize: 20,
+      pageSizeOptions: [10, 20, 50]
+    };
+
+    const selection = {
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems })
+    };
+
+    const search = {
+      toolsLeft: selectedItems.length ? (
+        <ContextMenu
+          followerIndices={selectedItems}
+          testSubj="ccrFollowerIndexListContextMenuButton"
+        />
+      ) : undefined,
+      onChange: this.onSearch,
+      box: {
+        incremental: true,
+      },
+    };
+
+    return (
+      <Fragment>
+        <EuiInMemoryTable
+          items={this.getFilteredIndices()}
+          itemId="name"
+          columns={this.getTableColumns()}
+          search={search}
+          pagination={pagination}
+          sorting={sorting}
+          selection={selection}
+          isSelectable={true}
+          rowProps={() => ({
+            'data-test-subj': 'ccrFollowerIndexListTableRow'
+          })}
+          cellProps={(item, column) => ({
+            'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
+          })}
+          data-test-subj="ccrFollowerIndexListTable"
+        />
+        {this.renderLoading()}
+      </Fragment>
+    );
   }
-);
+}

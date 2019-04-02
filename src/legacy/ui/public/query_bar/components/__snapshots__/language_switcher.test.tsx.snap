@@ -12,8 +12,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       type="button"
     >
       <FormattedMessage
-        defaultMessage="Options"
-        id="common.ui.queryBar.optionsButtonLabel"
+        defaultMessage="Lucene"
+        id="common.ui.queryBar.luceneLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
@@ -47,8 +47,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
           id="common.ui.queryBar.syntaxOptionsDescription"
           values={
             Object {
@@ -59,8 +58,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="here"
-                  id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                  defaultMessage="Kibana Query Language"
+                  id="common.ui.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
               </EuiLink>,
@@ -77,6 +76,14 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Kibana Query Language"
+            id="common.ui.queryBar.kqlFullLanguageName"
+            values={Object {}}
+          />
+        }
+        labelType="label"
       >
         <EuiSwitch
           checked={false}
@@ -84,8 +91,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
           id="queryEnhancementOptIn"
           label={
             <FormattedMessage
-              defaultMessage="Turn on query features"
-              id="common.ui.queryBar.turnOnQueryFeaturesLabel"
+              defaultMessage="Off"
+              id="common.ui.queryBar.kqlOffLabel"
               values={Object {}}
             />
           }
@@ -94,37 +101,6 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
         />
       </EuiFormRow>
     </EuiForm>
-    <EuiHorizontalRule
-      margin="s"
-      size="full"
-    />
-    <EuiText
-      grow={true}
-      size="xs"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
-          id="common.ui.queryBar.luceneDocsDescription"
-          values={
-            Object {
-              "docsLink": <EuiLink
-                color="primary"
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
-                target="_blank"
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="here"
-                  id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      </p>
-    </EuiText>
   </div>
 </EuiPopover>
 `;
@@ -141,8 +117,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       type="button"
     >
       <FormattedMessage
-        defaultMessage="Options"
-        id="common.ui.queryBar.optionsButtonLabel"
+        defaultMessage="KQL"
+        id="common.ui.queryBar.kqlLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
@@ -176,8 +152,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
           id="common.ui.queryBar.syntaxOptionsDescription"
           values={
             Object {
@@ -188,8 +163,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="here"
-                  id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                  defaultMessage="Kibana Query Language"
+                  id="common.ui.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
               </EuiLink>,
@@ -206,6 +181,14 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Kibana Query Language"
+            id="common.ui.queryBar.kqlFullLanguageName"
+            values={Object {}}
+          />
+        }
+        labelType="label"
       >
         <EuiSwitch
           checked={true}
@@ -213,8 +196,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
           id="queryEnhancementOptIn"
           label={
             <FormattedMessage
-              defaultMessage="Turn on query features"
-              id="common.ui.queryBar.turnOnQueryFeaturesLabel"
+              defaultMessage="On"
+              id="common.ui.queryBar.kqlOnLabel"
               values={Object {}}
             />
           }
@@ -223,37 +206,6 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
         />
       </EuiFormRow>
     </EuiForm>
-    <EuiHorizontalRule
-      margin="s"
-      size="full"
-    />
-    <EuiText
-      grow={true}
-      size="xs"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
-          id="common.ui.queryBar.luceneDocsDescription"
-          values={
-            Object {
-              "docsLink": <EuiLink
-                color="primary"
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
-                target="_blank"
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="here"
-                  id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      </p>
-    </EuiText>
   </div>
 </EuiPopover>
 `;

@@ -19,15 +19,15 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['search'],
+          all: ['search', 'url'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'search'],
+          read: ['config', 'index-pattern', 'search', 'url'],
         },
         ui: ['show'],
       },
@@ -45,10 +45,10 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['visualization'],
+          all: ['visualization', 'url'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {
@@ -71,7 +71,7 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['dashboard'],
+          all: ['dashboard', 'url'],
           read: [
             'config',
             'index-pattern',
@@ -111,20 +111,20 @@ const kibanaFeatures: Feature[] = [
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
       all: {
-        api: ['console/execute'],
+        api: ['console'],
         savedObject: {
           all: [],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show'],
       },
       read: {
-        api: ['console/execute'],
+        api: ['console'],
         savedObject: {
           all: [],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
     privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
@@ -169,7 +169,7 @@ const kibanaFeatures: Feature[] = [
     app: ['kibana'],
     catalogue: ['index_patterns'],
     management: {
-      kibana: ['indices'],
+      kibana: ['index_patterns'],
     },
     privileges: {
       all: {
@@ -177,7 +177,7 @@ const kibanaFeatures: Feature[] = [
           all: ['index-pattern'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['createNew'],
       },
       read: {
         savedObject: {

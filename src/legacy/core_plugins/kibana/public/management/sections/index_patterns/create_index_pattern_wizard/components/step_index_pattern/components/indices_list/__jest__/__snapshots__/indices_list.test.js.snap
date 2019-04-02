@@ -11,12 +11,22 @@ exports[`IndicesList should change pages 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -25,12 +35,22 @@ exports[`IndicesList should change pages 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -41,15 +61,9 @@ exports[`IndicesList should change pages 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover
@@ -138,12 +152,22 @@ exports[`IndicesList should change per page 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -154,15 +178,9 @@ exports[`IndicesList should change per page 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover
@@ -237,7 +255,6 @@ exports[`IndicesList should change per page 1`] = `
       </EuiPopover>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPagination
@@ -261,6 +278,11 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           <span>
@@ -272,6 +294,11 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -280,12 +307,22 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -296,15 +333,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover
@@ -393,12 +424,22 @@ exports[`IndicesList should render normally 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -407,12 +448,22 @@ exports[`IndicesList should render normally 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -423,15 +474,9 @@ exports[`IndicesList should render normally 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover
@@ -520,12 +565,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -534,12 +589,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -548,12 +613,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -562,12 +637,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -576,12 +661,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -590,12 +685,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -604,12 +709,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -618,12 +733,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -632,12 +757,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           kibana
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -646,12 +781,22 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       >
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         >
           es
         </EuiTableRowCell>
         <EuiTableRowCell
           align="left"
+          mobileOptions={
+            Object {
+              "show": true,
+            }
+          }
           textOnly={true}
         />
       </EuiTableRow>
@@ -662,15 +807,9 @@ exports[`IndicesList updating props should render all new indices 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover
@@ -745,7 +884,6 @@ exports[`IndicesList updating props should render all new indices 1`] = `
       </EuiPopover>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPagination

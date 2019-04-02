@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
+import 'ui/listen';
 import 'ui/search_bar';
 import 'ui/apply_filters';
 
@@ -183,6 +184,7 @@ app.directive('dashboardApp', function ($injector) {
         courier.fetch();
       };
       dashboardStateManager.handleTimeChange(timefilter.getTime());
+      dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
 
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -241,7 +243,7 @@ app.directive('dashboardApp', function ($injector) {
           // a reload, since no state changes will cause it.
           dashboardStateManager.requestReload();
         } else {
-          $scope.model.query = migrateLegacyQuery(query);
+          $scope.model.query = query;
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }
         $scope.refresh();
@@ -281,7 +283,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (query) => {
+      $scope.$watch('model.query', (newQuery) => {
+        const query = migrateLegacyQuery(newQuery);
         $scope.updateQueryAndFetch({ query });
       });
 
@@ -291,7 +294,10 @@ app.directive('dashboardApp', function ($injector) {
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();
       });
-      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateState);
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
+        dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
+        updateState();
+      });
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateState);
 
       function updateViewMode(newMode) {
@@ -474,7 +480,7 @@ app.directive('dashboardApp', function ($injector) {
           showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
-        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, embeddableFactories);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({
@@ -493,6 +499,9 @@ app.directive('dashboardApp', function ($injector) {
         showShareContextMenu({
           anchorElement,
           allowEmbed: true,
+          // allowShortUrl is always set to true at the moment, because the share
+          // menu isn't visible when in "read-only" mode
+          allowShortUrl: true,
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',

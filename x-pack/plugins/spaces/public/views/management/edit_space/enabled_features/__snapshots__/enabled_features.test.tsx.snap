@@ -136,19 +136,8 @@ exports[`EnabledFeatures renders as expected 1`] = `
     </span>
   }
 >
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="xs"
         textTransform="none"
@@ -199,10 +188,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
         </p>
       </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <FeatureTable
         features={
           Array [

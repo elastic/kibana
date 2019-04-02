@@ -10,21 +10,33 @@ import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
 
+/** Actions are used to create the "actions" that are associated with Elasticsearch's
+ * application privileges, and are used to perform the authorization checks implemented
+ * by the various `checkPrivilegesWithRequest` derivatives
+ */
 export class Actions {
-  public api = new ApiActions();
+  /**
+   * The allHack action is used to differentiate the `all` privilege from the `read` privilege
+   * for those applications which register the same set of actions for both privileges. This is a
+   * temporary hack until we remove this assumption in the role management UI
+   */
+  public readonly allHack = 'allHack:';
 
-  public app = new AppActions();
+  public readonly api = new ApiActions();
 
-  public login = 'login:';
+  public readonly app = new AppActions();
 
-  public savedObject = new SavedObjectActions();
+  public readonly login = 'login:';
 
-  public space = new SpaceActions();
+  public readonly savedObject = new SavedObjectActions();
 
-  public ui = new UIActions();
+  public readonly space = new SpaceActions();
 
-  public version = `version:${this.versionNumber}`;
-  constructor(private versionNumber: string) {}
+  public readonly ui = new UIActions();
+
+  public readonly version = `version:${this.versionNumber}`;
+
+  constructor(private readonly versionNumber: string) {}
 }
 
 export function actionsFactory(config: any) {

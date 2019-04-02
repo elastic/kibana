@@ -51,21 +51,6 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
   );
 }
 
-test('filters out any body properties that begin with $', () => {
-  const requestFetchParams = [
-    {
-      index: ['logstash-123'],
-      type: 'blah',
-      search_type: 'blah2',
-      body: { foo: 'bar', $foo: 'bar' }
-    }
-  ];
-  return serializeFetchParamsWithDefaults({ requestFetchParams }).then(value => {
-    expect(_.includes(value, 'foo')).toBe(true);
-    expect(_.includes(value, '$foo')).toBe(false);
-  });
-});
-
 describe('when indexList is not empty', () => {
   test('includes the index', () => {
     const requestFetchParams = [

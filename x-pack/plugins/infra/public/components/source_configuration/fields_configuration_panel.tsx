@@ -14,6 +14,7 @@ interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;
   hostFieldProps: InputFieldProps;
   isLoading: boolean;
+  readOnly: boolean;
   podFieldProps: InputFieldProps;
   tiebreakerFieldProps: InputFieldProps;
   timestampFieldProps: InputFieldProps;
@@ -23,6 +24,7 @@ export const FieldsConfigurationPanel = ({
   containerFieldProps,
   hostFieldProps,
   isLoading,
+  readOnly,
   podFieldProps,
   tiebreakerFieldProps,
   timestampFieldProps,
@@ -57,7 +59,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...timestampFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...timestampFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={tiebreakerFieldProps.error}
@@ -82,6 +90,7 @@ export const FieldsConfigurationPanel = ({
       <EuiFieldText
         fullWidth
         disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...tiebreakerFieldProps}
       />
@@ -94,7 +103,7 @@ export const FieldsConfigurationPanel = ({
           id="xpack.infra.sourceConfiguration.containerFieldDescription"
           defaultMessage="Field used to identify Docker containers. The recommended value is {defaultValue}."
           values={{
-            defaultValue: <EuiCode>docker.container.id</EuiCode>,
+            defaultValue: <EuiCode>container.id</EuiCode>,
           }}
         />
       }
@@ -106,7 +115,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...containerFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...containerFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={hostFieldProps.error}
@@ -128,7 +143,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...hostFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...hostFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={podFieldProps.error}
@@ -150,7 +171,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...podFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...podFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

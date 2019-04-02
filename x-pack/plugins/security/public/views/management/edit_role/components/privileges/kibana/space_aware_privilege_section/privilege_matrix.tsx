@@ -18,6 +18,7 @@ import {
   EuiOverlayMask,
   // @ts-ignore
   EuiToolTip,
+  IconType,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
@@ -179,7 +180,11 @@ export class PrivilegeMatrix extends Component<Props, State> {
           ) : (
             <Fragment>
               {feature.icon && (
-                <EuiIcon className="secPrivilegeFeatureIcon" size="m" type={feature.icon} />
+                <EuiIcon
+                  className="secPrivilegeFeatureIcon"
+                  size="m"
+                  type={feature.icon as IconType}
+                />
               )}
               {feature.name}
             </Fragment>

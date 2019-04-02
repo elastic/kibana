@@ -36,7 +36,20 @@ export function ComboBoxProvider({ getService }) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
-      await find.clickByCssSelector('.euiComboBoxOption');
+
+      if (value !== undefined) {
+        const options = await find.allByCssSelector(`.euiComboBoxOption[title^="${value.toString().trim()}"]`);
+
+        if (options.length > 0) {
+          await options[0].click();
+        } else {
+          // if it doesn't find the item which text starts with value, it will choose the first option
+          await find.clickByCssSelector('.euiComboBoxOption');
+        }
+      } else {
+        await find.clickByCssSelector('.euiComboBoxOption');
+      }
+
       await this.closeOptionsList(comboBoxElement);
     }
 
@@ -56,16 +69,21 @@ export function ComboBoxProvider({ getService }) {
     }
 
     async _waitForOptionsListLoading(comboBoxElement) {
-      await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
+      await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
     async getOptionsList(comboBoxSelector) {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      await testSubjects.click(comboBoxSelector);
-      await this._waitForOptionsListLoading(comboBox);
-      const menu = await retry.try(
-        async () => await testSubjects.find('comboBoxOptionsList'));
+      const menu = await retry.try(async () => {
+        await testSubjects.click(comboBoxSelector);
+        await this._waitForOptionsListLoading(comboBox);
+        const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+        if (!isOptionsListOpen) {
+          throw new Error('Combo box options list did not open on click');
+        }
+        return await testSubjects.find('comboBoxOptionsList');
+      });
       const optionsText = await menu.getVisibleText();
       await this.closeOptionsList(comboBox);
       return optionsText;
@@ -80,16 +98,16 @@ export function ComboBoxProvider({ getService }) {
 
     async getComboBoxSelectedOptions(comboBoxSelector) {
       log.debug(`comboBox.getComboBoxSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
-      const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      if (selectedOptions.length === 0) {
-        return [];
-      }
-
-      const getOptionValuePromises = selectedOptions.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
+      return await retry.try(async () => {
+        const comboBox = await testSubjects.find(comboBoxSelector);
+        const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
+        if (selectedOptions.length === 0) {
+          return [];
+        }
+        return Promise.all(selectedOptions.map(async (optionElement) => {
+          return await optionElement.getVisibleText();
+        }));
       });
-      return await Promise.all(getOptionValuePromises);
     }
 
     async clear(comboBoxSelector) {

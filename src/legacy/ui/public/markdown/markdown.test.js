@@ -45,6 +45,26 @@ test('should render links with parentheses correctly', () => {
   expect(component.render().find('a').prop('href')).toBe('https://example.com/foo/bar?group=(()filters:!t)');
 });
 
+test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () => {
+  const component = shallow(
+    <Markdown
+      openLinksInNewTab={true}
+      markdown="[link](https://example.com/foo/bar?group=(()filters:!t))"
+    />
+  );
+  expect(component.render().find('a').prop('rel')).toBe('noopener noreferrer');
+});
+
+test('should only add `nooopener` to known links in new tabs', () => {
+  const component = shallow(
+    <Markdown
+      openLinksInNewTab={true}
+      markdown="[link](https://www.elastic.co/cool/path"
+    />
+  );
+  expect(component.render().find('a').prop('rel')).toBe('noopener');
+});
+
 describe('props', () => {
 
   const markdown = 'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`';

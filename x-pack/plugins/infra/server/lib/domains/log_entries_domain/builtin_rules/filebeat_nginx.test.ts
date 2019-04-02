@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getBuiltinRules } from '.';
 import { compileFormattingRules } from '../message';
-import { filebeatNginxRules } from './filebeat_nginx';
 
-const { format } = compileFormattingRules(filebeatNginxRules);
+const { format } = compileFormattingRules(getBuiltinRules([]));
 
 describe('Filebeat Rules', () => {
   describe('in ECS format', () => {
@@ -43,7 +43,15 @@ describe('Filebeat Rules', () => {
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Nginx][access] ",
+    "constant": "[",
+  },
+  Object {
+    "field": "event.module",
+    "highlights": Array [],
+    "value": "nginx",
+  },
+  Object {
+    "constant": "][access] ",
   },
   Object {
     "field": "source.ip",
@@ -123,7 +131,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Nginx]",
+    "constant": "[nginx]",
   },
   Object {
     "constant": "[",
@@ -162,7 +170,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Nginx][access] ",
+    "constant": "[nginx][access] ",
   },
   Object {
     "field": "nginx.access.remote_ip",
@@ -231,7 +239,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Nginx]",
+    "constant": "[nginx]",
   },
   Object {
     "constant": "[",

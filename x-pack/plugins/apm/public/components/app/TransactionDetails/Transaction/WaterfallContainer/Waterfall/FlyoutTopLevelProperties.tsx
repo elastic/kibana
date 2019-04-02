@@ -13,7 +13,7 @@ import {
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/Links/TransactionLink';
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 
 interface Props {
   transaction?: Transaction;

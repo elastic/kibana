@@ -24,7 +24,7 @@ export function VislibGridProvider() {
 
   const defaults = {
     style: {
-      color: '#eee'
+      color: 'rgba(105,112,125,0.2)',
     },
     categoryLines: false,
     valueAxis: undefined,

@@ -33,11 +33,7 @@ import {
 
 import { VisResponseData } from './types';
 
-// @ts-ignore No typing present
-import { isTermSizeZeroError } from '../../elasticsearch_errors';
-
-import { toastNotifications } from 'ui/notify';
-import { decorateVisObject } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { getVisParams } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 function getHandler<T extends RequestHandler | ResponseHandler>(
   from: Array<{ name: string; handler: T }>,
@@ -71,74 +67,52 @@ export class VisualizeDataLoader {
   }
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
-    this.vis.filters = { timeRange: params.timeRange };
-    this.vis.requestError = undefined;
-    this.vis.showRequestError = false;
-
     // add necessary params to vis object (dimensions, bucket, metric, etc)
-    decorateVisObject(this.vis, { timeRange: params.timeRange });
+    const visParams = await getVisParams(this.vis, {
+      searchSource: params.searchSource,
+      timeRange: params.timeRange,
+    });
 
-    try {
-      // searchSource is only there for courier request handler
-      const requestHandlerResponse = await this.requestHandler({
-        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
-        isHierarchical: this.vis.isHierarchical(),
-        visParams: this.vis.params,
-        ...params,
-        filters: params.filters
-          ? params.filters.filter(filter => !filter.meta.disabled)
-          : undefined,
-      });
+    const filters = params.filters || [];
+    const savedFilters = params.searchSource.getField('filter') || [];
 
-      // No need to call the response handler when there have been no data nor has been there changes
-      // in the vis-state (response handler does not depend on uiStat
-      const canSkipResponseHandler =
-        this.previousRequestHandlerResponse &&
-        this.previousRequestHandlerResponse === requestHandlerResponse &&
-        this.previousVisState &&
-        isEqual(this.previousVisState, this.vis.getState());
+    const query = params.query || params.searchSource.getField('query');
 
-      this.previousVisState = this.vis.getState();
-      this.previousRequestHandlerResponse = requestHandlerResponse;
+    // searchSource is only there for courier request handler
+    const requestHandlerResponse = await this.requestHandler({
+      partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
+      metricsAtAllLevels: this.vis.isHierarchical(),
+      visParams,
+      ...params,
+      query,
+      filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
+    });
 
-      if (!canSkipResponseHandler) {
-        this.visData = await Promise.resolve(
-          this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
-        );
-      }
+    // No need to call the response handler when there have been no data nor has there been changes
+    // in the vis-state (response handler does not depend on uiState)
+    const canSkipResponseHandler =
+      this.previousRequestHandlerResponse &&
+      this.previousRequestHandlerResponse === requestHandlerResponse &&
+      this.previousVisState &&
+      isEqual(this.previousVisState, this.vis.getState());
 
-      return {
-        as: 'visualization',
-        value: {
-          visType: this.vis.type.name,
-          visData: this.visData,
-          visConfig: this.vis.params,
-          params: {},
-        },
-      };
-    } catch (error) {
-      params.searchSource.cancelQueued();
+    this.previousVisState = this.vis.getState();
+    this.previousRequestHandlerResponse = requestHandlerResponse;
 
-      this.vis.requestError = error;
-      this.vis.showRequestError =
-        error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
-
-      // tslint:disable-next-line
-      console.error(error);
-
-      if (isTermSizeZeroError(error)) {
-        toastNotifications.addDanger(
-          `Your visualization ('${this.vis.title}') has an error: it has a term ` +
-            `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-            `the error.`
-        );
-        return;
-      }
-
-      toastNotifications.addDanger({
-        title: 'Error in visualization',
-        text: error.message,
-      });
+    if (!canSkipResponseHandler) {
+      this.visData = await Promise.resolve(
+        this.responseHandler(requestHandlerResponse, visParams.dimensions)
+      );
     }
+
+    return {
+      as: 'visualization',
+      value: {
+        visType: this.vis.type.name,
+        visData: this.visData,
+        visConfig: visParams,
+        params: {},
+      },
+    };
   }
 }

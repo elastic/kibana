@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
 
 // tslint:disable no-default-export
@@ -73,6 +73,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`allows a map to be created`, async () => {
         await PageObjects.maps.openNewMap();
+        await PageObjects.maps.expectExistAddLayerButton();
         await PageObjects.maps.saveMap('my test map');
       });
 
@@ -124,14 +125,28 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Maps', 'Management']);
       });
 
-      it(`does not allow a map to be created`, async () => {
-        await PageObjects.maps.openNewMap();
-        await PageObjects.maps.expectMissingSaveButton();
+      it(`does not show create new button`, async () => {
+        await PageObjects.maps.gotoMapListingPage();
+        await PageObjects.maps.expectMissingCreateNewButton();
       });
 
       it(`does not allow a map to be deleted`, async () => {
         await PageObjects.maps.gotoMapListingPage();
         await testSubjects.missingOrFail('checkboxSelectAll');
+      });
+
+      describe('existing map', () => {
+        before(async () => {
+          await PageObjects.maps.loadSavedMap('document example');
+        });
+
+        it(`can't save`, async () => {
+          await PageObjects.maps.expectMissingSaveButton();
+        });
+
+        it(`can't add layer`, async () => {
+          await PageObjects.maps.expectMissingAddLayerButton();
+        });
       });
     });
 

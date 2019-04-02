@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { SetView } from './set_view';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoordinates }) {
   const toggleSetViewVisibility = () => {
@@ -37,7 +38,10 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
         >
-          Go to
+          <FormattedMessage
+            id="xpack.maps.viewControl.goToButtonLabel"
+            defaultMessage="Go to"
+          />
         </EuiButton>)}
       isOpen={isSetViewOpen}
       closePopover={closeSetView}
@@ -57,8 +61,18 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
       <EuiPanel className="mapWidgetControl mapViewControl__coordinates" paddingSize="none">
         <EuiText size="xs">
           <p>
-            <strong>lat:</strong> {lat},{' '}
-            <strong>lon:</strong> {lon}
+            <strong>
+              <FormattedMessage
+                id="xpack.maps.viewControl.latLabel"
+                defaultMessage="lat:"
+              />
+            </strong> {lat},{' '}
+            <strong>
+              <FormattedMessage
+                id="xpack.maps.viewControl.lonLabel"
+                defaultMessage="lon:"
+              />
+            </strong> {lon}
           </p>
         </EuiText>
       </EuiPanel>

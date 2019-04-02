@@ -8,16 +8,10 @@ exports[`ImportModal Renders import modal 1`] = `
   >
     <EuiModalHeader>
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
         direction="column"
         gutterSize="none"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiModalHeaderTitle>
@@ -29,7 +23,6 @@ exports[`ImportModal Renders import modal 1`] = `
           </EuiModalHeaderTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <p>
@@ -44,16 +37,9 @@ exports[`ImportModal Renders import modal 1`] = `
     </EuiModalHeader>
     <EuiModalBody>
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiFilePicker
@@ -72,6 +58,7 @@ exports[`ImportModal Renders import modal 1`] = `
         fill={true}
         iconSide="left"
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

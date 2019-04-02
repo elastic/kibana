@@ -70,7 +70,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
     );
 
     if (exitCode > 0) {
-      throw createFailError(`[tslint] failure`, 1);
+      throw createFailError(`[tslint] failure`);
     } else {
       log.success('[tslint/%s] %d files linted successfully', project.name, filesInProject.length);
     }

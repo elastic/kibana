@@ -36,7 +36,7 @@ export const SimpleTemplate = props => {
             <span>Color&nbsp;</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => handlePlain('color', '#000000')}>
+            <EuiLink aria-label="Color: Auto" onClick={() => handlePlain('color', '#000000')}>
               Auto <EuiIcon type="bolt" />
             </EuiLink>
           </EuiFlexItem>

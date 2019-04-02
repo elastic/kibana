@@ -58,7 +58,7 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
         <EuiButton
           href={exportedFieldsUrl}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
         >
           <FormattedMessage id="kbn.home.tutorial.introduction.viewButtonLabel" defaultMessage="View exported fields"/>
         </EuiButton>

@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
+import { areActionsFullyCovered, compareActions } from '../../../common/privilege_calculator_utils';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import {
@@ -13,7 +14,6 @@ import {
   CalculatedPrivilege,
   PRIVILEGE_SOURCE,
 } from './kibana_privilege_calculator_types';
-import { areActionsFullyCovered, compareActions } from './privilege_calculator_utils';
 
 export class KibanaAllowedPrivilegesCalculator {
   // reference to the global privilege definition

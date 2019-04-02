@@ -5,9 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+
+import {
+  UA_POLICY_CREATE,
+  UA_POLICY_UPDATE,
+} from '../../../common/constants';
+
 import { showApiError } from '../../services/api_errors';
 import { saveLifecycle as saveLifecycleApi } from '../../services/api';
-
+import { trackUserAction, getUserActionsForPhases } from '../../services';
 
 export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
   try {
@@ -23,6 +29,11 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
     showApiError(err, title);
     return false;
   }
+
+  const userActions = getUserActionsForPhases(lifecycle.phases);
+  userActions.push(isNew ? UA_POLICY_CREATE : UA_POLICY_UPDATE);
+  trackUserAction(userActions.join(','));
+
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
     {
       defaultMessage: '{verb} lifecycle policy "{lifecycleName}"',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -44,40 +44,71 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should have a nodes table with correct rows with default sorting', async () => {
-        const rows = await nodesList.getRows();
-        expect(rows.length).to.be(3);
+      describe('skipCloud', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
+        this.tags(['skipCloud']);
 
-        const nodesAll = await nodesList.getNodesAll();
-        const tableData = [
-          {
-            name: 'whatever-01',
-            status: 'Status: Online',
-            cpu: '0% \n3% max\n0% min',
-            load: '3.28 \n3.71 max\n2.19 min',
-            memory: '39% \n52% max\n25% min',
-            disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
-            shards: '38',
-          },
-          {
-            name: 'whatever-02',
-            status: 'Status: Online',
-            cpu: '2% \n3% max\n0% min',
-            load: '3.28 \n3.73 max\n2.29 min',
-            memory: '25% \n49% max\n25% min',
-            disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
-            shards: '38',
-          },
-          { name: 'whatever-03', status: 'Status: Offline' },
-        ];
-        nodesAll.forEach((obj, node) => {
-          expect(nodesAll[node].name).to.be(tableData[node].name);
-          expect(nodesAll[node].status).to.be(tableData[node].status);
-          expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
-          expect(nodesAll[node].load).to.be(tableData[node].load);
-          expect(nodesAll[node].memory).to.be(tableData[node].memory);
-          expect(nodesAll[node].disk).to.be(tableData[node].disk);
-          expect(nodesAll[node].shards).to.be(tableData[node].shards);
+        it('should have a nodes table with correct rows with default sorting', async () => {
+          const rows = await nodesList.getRows();
+          expect(rows.length).to.be(3);
+
+          const nodesAll = await nodesList.getNodesAll();
+          const tableData = [
+            {
+              name: 'whatever-01',
+              status: 'Status: Online',
+              cpu: '0% \n3% max\n0% min',
+              load: '3.28 \n3.71 max\n2.19 min',
+              memory: '39% \n52% max\n25% min',
+              disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+              shards: '38',
+            },
+            {
+              name: 'whatever-02',
+              status: 'Status: Online',
+              cpu: '2% \n3% max\n0% min',
+              load: '3.28 \n3.73 max\n2.29 min',
+              memory: '25% \n49% max\n25% min',
+              disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+              shards: '38',
+            },
+            { name: 'whatever-03', status: 'Status: Offline' },
+          ];
+          nodesAll.forEach((obj, node) => {
+            expect(nodesAll[node].name).to.be(tableData[node].name);
+            expect(nodesAll[node].status).to.be(tableData[node].status);
+            expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
+            expect(nodesAll[node].load).to.be(tableData[node].load);
+            expect(nodesAll[node].memory).to.be(tableData[node].memory);
+            expect(nodesAll[node].disk).to.be(tableData[node].disk);
+            expect(nodesAll[node].shards).to.be(tableData[node].shards);
+          });
+        });
+
+        it('should sort by cpu', async () => {
+          await nodesList.clickCpuCol();
+          await nodesList.clickCpuCol();
+
+          const nodesAll = await nodesList.getNodesAll();
+          const tableData = [{ cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }, { cpu: undefined }];
+          nodesAll.forEach((obj, node) => {
+            expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
+          });
+        });
+
+        it('should sort by load average', async () => {
+          await nodesList.clickLoadCol();
+          await nodesList.clickLoadCol();
+
+          const nodesAll = await nodesList.getNodesAll();
+          const tableData = [
+            { load: '3.28 \n3.71 max\n2.19 min' },
+            { load: '3.28 \n3.73 max\n2.29 min' },
+            { load: undefined },
+          ];
+          nodesAll.forEach((obj, node) => {
+            expect(nodesAll[node].load).to.be(tableData[node].load);
+          });
         });
       });
 
@@ -108,32 +139,6 @@ export default function ({ getService, getPageObjects }) {
         ];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].status).to.be(tableData[node].status);
-        });
-      });
-
-      it('should sort by cpu', async () => {
-        await nodesList.clickCpuCol();
-        await nodesList.clickCpuCol();
-
-        const nodesAll = await nodesList.getNodesAll();
-        const tableData = [{ cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }, { cpu: undefined }];
-        nodesAll.forEach((obj, node) => {
-          expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
-        });
-      });
-
-      it('should sort by load average', async () => {
-        await nodesList.clickLoadCol();
-        await nodesList.clickLoadCol();
-
-        const nodesAll = await nodesList.getNodesAll();
-        const tableData = [
-          { load: '3.28 \n3.71 max\n2.19 min' },
-          { load: '3.28 \n3.73 max\n2.29 min' },
-          { load: undefined },
-        ];
-        nodesAll.forEach((obj, node) => {
-          expect(nodesAll[node].load).to.be(tableData[node].load);
         });
       });
 

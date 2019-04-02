@@ -18,7 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -50,6 +50,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // check for the index pattern info flyout that covers the
+      // create index pattern button on smaller screens
+      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
+      }
     }
 
     async getAdvancedSettings(propertyName) {
@@ -133,7 +141,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getCreateIndexPatternButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
+      return await testSubjects.find('createIndexPatternButton');
     }
 
     async getCreateButton() {
@@ -272,6 +280,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickIndexPatternLogstash() {
+      await find.clickByPartialLinkText('logstash-*');
+    }
+
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
@@ -289,7 +301,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -325,7 +337,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      await field.type(indexPatternName, { charByChar: true });
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
       expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
@@ -333,14 +345,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternGoToStep2Button() {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
-    }
-
-    async getCreateIndexPatternCreateButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
-    }
-
-    async clickOnOnlyIndexPattern() {
-      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {
@@ -556,6 +560,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickImportDone() {
@@ -599,6 +606,50 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
 
       return objects;
+    }
+
+    async getSavedObjectsTableSummary() {
+      const table = await testSubjects.find('savedObjectsTable');
+      const rows = await table.findAllByCssSelector('tbody tr');
+
+      const summary = [];
+      for (const row of rows) {
+        const titleCell = await row.findByCssSelector('td:nth-child(3)');
+        const title = await titleCell.getVisibleText();
+
+
+        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const canViewInApp = Boolean(viewInAppButtons.length);
+        summary.push({
+          title,
+          canViewInApp,
+        });
+      }
+
+      return summary;
+    }
+
+    async clickSavedObjectsTableSelectAll() {
+      const checkboxSelectAll = await testSubjects.find('checkboxSelectAll');
+      await checkboxSelectAll.click();
+    }
+
+    async canSavedObjectsBeDeleted() {
+      const deleteButton = await testSubjects.find('savedObjectsManagementDelete');
+      return await deleteButton.isEnabled();
+    }
+
+    async canSavedObjectBeDeleted(id) {
+      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
+      for (const checkBox of allCheckBoxes) {
+        if (await checkBox.isSelected()) {
+          await checkBox.click();
+        }
+      }
+
+      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
+      await checkBox.click();
+      return await this.canSavedObjectsBeDeleted();
     }
   }
 

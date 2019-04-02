@@ -18,7 +18,7 @@
  */
 
 import * as ast from '../ast';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { nodeTypes } from '../../node_types/index';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
@@ -416,6 +416,83 @@ describe('kuery AST API', function () {
       expect(ast.toElasticsearchQuery(unknownTypeNode)).to.eql(expected);
     });
 
+  });
+
+  describe('doesKueryExpressionHaveLuceneSyntaxError', function () {
+    it('should return true for Lucene ranges', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: [1 TO 10]');
+      expect(result).to.eql(true);
+    });
+
+    it('should return false for KQL ranges', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar < 1');
+      expect(result).to.eql(false);
+    });
+
+    it('should return true for Lucene exists', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('_exists_: bar');
+      expect(result).to.eql(true);
+    });
+
+    it('should return false for KQL exists', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar:*');
+      expect(result).to.eql(false);
+    });
+
+    it('should return true for Lucene wildcards', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: ba?');
+      expect(result).to.eql(true);
+    });
+
+    it('should return false for KQL wildcards', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: ba*');
+      expect(result).to.eql(false);
+    });
+
+    it('should return true for Lucene regex', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: /ba.*/');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene fuzziness', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: ba~');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene proximity', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: "ba"~2');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene boosting', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: ba^2');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene + operator', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('+foo: bar');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene - operators', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('-foo: bar');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene && operators', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('foo: bar && baz: qux');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for Lucene || operators', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('foo: bar || baz: qux');
+      expect(result).to.eql(true);
+    });
+
+    it('should return true for mixed KQL/Lucene queries', function () {
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('foo: bar and (baz: qux || bag)');
+      expect(result).to.eql(true);
+    });
   });
 
 });

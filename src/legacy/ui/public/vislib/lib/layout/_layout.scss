@@ -37,7 +37,7 @@
 
 .visWrapper__column {
   display: flex;
-  flex: 1 0 0px;
+  flex: 1 0 0;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
@@ -51,8 +51,8 @@
   min-width: 0;
 
   .visWrapper__chart {
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
 
@@ -64,14 +64,14 @@
   min-width: 0;
 
   .visWrapper__chart {
-    margin-left: 0px;
-    margin-right: 0px;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
 .visWrapper__chart {
   display: flex;
-  flex: 1 0 0px;
+  flex: 1 0 0;
   overflow: visible;
   margin: 5px;
   min-height: 0;
@@ -103,7 +103,7 @@
 }
 
 .visAxis__spacer--y {
-  min-height: 0px;
+  min-height: 0;
 }
 
 .visAxis__column--y {
@@ -154,6 +154,8 @@
 // At least wrapping selectors inside .visWrapper will narrow scope.
 
 
+// sass-lint:disable-block no-mergeable-selectors
+// Keep SVG and non-renamable selectors separately
 .visWrapper {
   svg {
     overflow: visible;
@@ -164,7 +166,7 @@
     opacity: 1;
 
     &:hover {
-      opacity: 0.8;
+      opacity: .8;
     }
   }
 
@@ -174,8 +176,12 @@
     &:hover {
       opacity: 1;
       stroke-width: $euiSizeS;
-      stroke-opacity: 0.8;
+      stroke-opacity: .8;
     }
+  }
+
+  .grid > path {
+    stroke: $visLineColor;
   }
 
   .label-line {
@@ -197,9 +203,9 @@
   }
 
   .x-axis-div {
-    min-height: 0px;
+    min-height: 0;
     min-width: 1px;
-    margin: 0px ($euiSizeXS + 1px);
+    margin: 0 ($euiSizeXS + 1px);
     width: 100%;
 
     svg {
@@ -209,7 +215,7 @@
 
   .tick text {
     @include fontSize($euiFontSizeXS - 1px);
-    fill: $visValueColor;
+    fill: $visTextColor;
   }
 
   .axis-title text {
@@ -259,20 +265,21 @@
 
   // Needs to come after .y-axis-div
   .visWrapper__chart--first {
-    margin-top: 0px;
-    margin-left: 0px
+    margin-top: 0;
+    margin-left: 0;
   }
 
   .visWrapper__chart--last {
-    margin-bottom: 0px;
-    margin-right: 0px;
+    margin-bottom: 0;
+    margin-right: 0;
   }
 
   .axis {
     shape-rendering: crispEdges;
     stroke-width: 1px;
 
-    line, path {
+    line,
+    path {
       stroke: $euiBorderColor;
       fill: none;
       shape-rendering: crispEdges;
@@ -282,7 +289,7 @@
   .chart-label,
   .label-text,
   .chart-text {
-    fill: $visValueColor;
+    fill: $visTextColor;
   }
 
   /* Brush Styling */
@@ -292,26 +299,27 @@
   }
 
   .visAreaChart__overlapArea {
-    opacity: 0.8;
+    opacity: .8;
   }
 
   .series > path,
   .series > rect {
-    fill-opacity: 0.8;
+    fill-opacity: .8;
     stroke-opacity: 1;
     stroke-width: 0;
   }
 
   .blur_shape {
-    opacity: 0.3 !important;
+    // sass-lint:disable-block no-important
+    opacity: .3 !important;
   }
 
   .slice {
-    stroke-width: $euiSizeXS/2;
+    stroke-width: $euiSizeXS / 2;
     stroke: $euiColorEmptyShade;
 
     &:hover {
-      opacity: 0.8
+      opacity: .8;
     }
   }
 
@@ -321,7 +329,7 @@
 
       &:hover {
         stroke-width: $euiSizeS;
-        stroke-opacity: 0.8;
+        stroke-opacity: .8;
       }
     }
   }

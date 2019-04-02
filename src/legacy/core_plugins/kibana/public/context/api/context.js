@@ -21,6 +21,7 @@
 
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier';
+import moment from 'moment';
 
 import { reverseSortDirection } from './utils/sorting';
 
@@ -63,7 +64,6 @@ function fetchContextProvider(indexPatterns, Private) {
     timeSortDirection,
     timeValue,
     tieBreakerField,
-    tieBreakerSortDirection,
     tieBreakerValue,
     size,
     filters
@@ -94,7 +94,6 @@ function fetchContextProvider(indexPatterns, Private) {
         endTimeValue,
         afterTimeValue,
         tieBreakerField,
-        tieBreakerSortDirection,
         afterTieBreakerValue,
         remainingSize
       );
@@ -111,7 +110,6 @@ function fetchContextProvider(indexPatterns, Private) {
     timeSortDirection,
     timeValue,
     tieBreakerField,
-    tieBreakerSortDirection,
     tieBreakerValue,
     size,
     filters
@@ -142,7 +140,6 @@ function fetchContextProvider(indexPatterns, Private) {
         endTimeValue,
         afterTimeValue,
         tieBreakerField,
-        reverseSortDirection(tieBreakerSortDirection),
         afterTieBreakerValue,
         remainingSize
       );
@@ -172,7 +169,7 @@ function fetchContextProvider(indexPatterns, Private) {
    * `endTimeValue` from the `searchSource` using the given `timeField` and
    * `tieBreakerField` fields up to a maximum of `maxCount` documents. The
    * documents are sorted by `(timeField, tieBreakerField)` using the
-   * respective `timeSortDirection` and `tieBreakerSortDirection`.
+   * `timeSortDirection` for both fields
    *
    * The `searchSource` is assumed to have the appropriate index pattern
    * and filters set.
@@ -184,7 +181,6 @@ function fetchContextProvider(indexPatterns, Private) {
    * @param {number | null} endTimeValue
    * @param {number} [afterTimeValue=startTimeValue]
    * @param {string} tieBreakerField
-   * @param {SortDirection} tieBreakerSortDirection
    * @param {number} tieBreakerValue
    * @param {number} maxCount
    * @returns {Promise<object[]>}
@@ -197,15 +193,14 @@ function fetchContextProvider(indexPatterns, Private) {
     endTimeValue,
     afterTimeValue,
     tieBreakerField,
-    tieBreakerSortDirection,
     tieBreakerValue,
     maxCount
   ) {
     const startRange = {
-      [timeSortDirection === 'asc' ? 'gte' : 'lte']: startTimeValue,
+      [timeSortDirection === 'asc' ? 'gte' : 'lte']: moment(startTimeValue).toISOString(),
     };
     const endRange = endTimeValue === null ? {} : {
-      [timeSortDirection === 'asc' ? 'lte' : 'gte']: endTimeValue,
+      [timeSortDirection === 'asc' ? 'lte' : 'gte']: moment(endTimeValue).toISOString(),
     };
 
     const response = await searchSource
@@ -216,7 +211,7 @@ function fetchContextProvider(indexPatterns, Private) {
             filter: {
               range: {
                 [timeField]: {
-                  format: 'epoch_millis',
+                  format: 'strict_date_optional_time',
                   ...startRange,
                   ...endRange,
                 }
@@ -232,7 +227,7 @@ function fetchContextProvider(indexPatterns, Private) {
       ])
       .setField('sort', [
         { [timeField]: timeSortDirection },
-        { [tieBreakerField]: tieBreakerSortDirection },
+        { [tieBreakerField]: timeSortDirection },
       ])
       .setField('version', true)
       .fetch();

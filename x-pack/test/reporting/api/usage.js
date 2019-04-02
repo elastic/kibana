@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import * as GenerationUrls from "./generation_urls";
+import expect from '@kbn/expect';
+import * as GenerationUrls from './generation_urls';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');

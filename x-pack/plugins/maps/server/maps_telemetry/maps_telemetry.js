@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { EMS_FILE } from '../../common/constants';
+import { EMS_FILE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 function getSavedObjectsClient(server, callCluster) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
@@ -90,7 +90,7 @@ export function buildMapsTelemetry(savedObjects) {
 
 async function getSavedObjects(savedObjectsClient) {
   const gisMapsSavedObject = await savedObjectsClient.find({
-    type: 'map'
+    type: MAP_SAVED_OBJECT_TYPE
   });
   return _.get(gisMapsSavedObject, 'saved_objects');
 }

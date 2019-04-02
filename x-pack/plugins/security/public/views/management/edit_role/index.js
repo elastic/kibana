@@ -10,7 +10,7 @@ import { uiCapabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';

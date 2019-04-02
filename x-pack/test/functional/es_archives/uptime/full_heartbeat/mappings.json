@@ -1,11 +1,11 @@
 {
   "type": "index",
   "value": {
-    "index": "heartbeat-7.0.0",
+    "index": "heartbeat-8.0.0",
     "mappings": {
       "_doc": {
         "_meta": {
-          "version": "7.0.0"
+          "version": "8.0.0"
         },
         "date_detection": false,
         "dynamic_templates": [

@@ -55,7 +55,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -164,7 +164,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -334,7 +334,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -443,7 +443,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,

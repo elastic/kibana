@@ -38,7 +38,7 @@ export function getRouter() {
  * https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/modules/Link.js.
  */
 export function getRouterLinkProps(to) {
-  const location = typeof to === "string"
+  const location = typeof to === 'string'
     ? createLocation(to, null, null, router.history.location)
     : to;
 

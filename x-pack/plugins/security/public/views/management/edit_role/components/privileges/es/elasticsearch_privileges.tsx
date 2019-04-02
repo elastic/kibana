@@ -133,6 +133,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                 isGroupLabelOption: false,
               }))}
               selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
+              onCreateOption={this.onCreateRunAsOption}
               onChange={this.onRunAsUserChange}
               isDisabled={!this.props.editable}
             />
@@ -229,6 +230,19 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       },
     };
 
+    this.props.onChange(role);
+  };
+
+  public onCreateRunAsOption = (option: any) => {
+    const newRunAsUsers = this.props.role.elasticsearch.run_as.concat(option);
+
+    const role = {
+      ...this.props.role,
+      elasticsearch: {
+        ...this.props.role.elasticsearch,
+        run_as: newRunAsUsers,
+      },
+    };
     this.props.onChange(role);
   };
 }

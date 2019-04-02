@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from './server/lib/feature_registry';
+import { Feature, FeatureWithAllOrReadPrivileges } from './server/lib/feature_registry';
 import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
+export { XPackFeature } from './server/lib/xpack_info';
 
 export interface XPackMainPlugin {
   info: XPackInfo;
   createXPackInfo(options: XPackInfoOptions): XPackInfo;
   getFeatures(): Feature[];
-  registerFeature(feature: Feature): void;
+  registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
 }

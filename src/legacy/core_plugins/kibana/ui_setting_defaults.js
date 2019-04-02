@@ -30,6 +30,26 @@ export function getUiSettingDefaults() {
     return numeralLanguage.id;
   })];
 
+  const luceneQueryLanguageLabel = i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
+    defaultMessage: 'Lucene',
+  });
+
+  const queryLanguageSettingName = i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
+    defaultMessage: 'Query language',
+  });
+
+  const requestPreferenceOptionLabels = {
+    sessionId: i18n.translate('kbn.advancedSettings.courier.requestPreferenceSessionId', {
+      defaultMessage: 'Session ID',
+    }),
+    custom: i18n.translate('kbn.advancedSettings.courier.requestPreferenceCustom', {
+      defaultMessage: 'Custom',
+    }),
+    none: i18n.translate('kbn.advancedSettings.courier.requestPreferenceNone', {
+      defaultMessage: 'None',
+    }),
+  };
+
   // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
@@ -42,16 +62,19 @@ export function getUiSettingDefaults() {
       value: '{ "analyze_wildcard": true }',
       description:
         i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
-          defaultMessage: '{optionsLink} for the lucene query string parser',
+          defaultMessage: '{optionsLink} for the lucene query string parser. Is only used when "{queryLanguage}" is set ' +
+            'to {luceneLanguage}.',
           description: 'Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + ' +
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
             optionsLink:
-              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">' +
+              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
               i18n.translate('kbn.advancedSettings.query.queryStringOptions.optionsLinkText', {
                 defaultMessage: 'Options',
               }) +
               '</a>',
+            luceneLanguage: luceneQueryLanguageLabel,
+            queryLanguage: queryLanguageSettingName,
           },
         }),
       type: 'json'
@@ -65,23 +88,27 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
           'Currently only applies when experimental query features are enabled in the query bar. ' +
-          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}',
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
         },
       }),
     },
     'search:queryLanguage': {
-      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
-        defaultMessage: 'Query language',
-      }),
+      name: queryLanguageSettingName,
       value: 'kuery',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. Kuery is a new language built specifically for Kibana.',
+          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
       }),
       type: 'select',
-      options: ['lucene', 'kuery']
+      options: ['lucene', 'kuery'],
+      optionLabels: {
+        lucene: luceneQueryLanguageLabel,
+        kuery: i18n.translate('kbn.advancedSettings.searchQueryLanguageKql', {
+          defaultMessage: 'KQL',
+        }),
+      },
     },
     'sort:options': {
       name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
@@ -94,7 +121,7 @@ export function getUiSettingDefaults() {
                      'kbn.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -238,6 +265,14 @@ export function getUiSettingDefaults() {
       }),
       value: 'desc',
       options: ['desc', 'asc'],
+      optionLabels: {
+        desc: i18n.translate('kbn.advancedSettings.discover.sortOrderDesc', {
+          defaultMessage: 'Descending',
+        }),
+        asc: i18n.translate('kbn.advancedSettings.discover.sortOrderAsc', {
+          defaultMessage: 'Ascending',
+        }),
+      },
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
         defaultMessage:
@@ -267,19 +302,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
-    'courier:maxSegmentCount': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
-        defaultMessage: 'Maximum segment count',
-      }),
-      value: 30,
-      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
-        defaultMessage:
-          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
-          'This setting attempts to prevent the list of segments from getting too long, ' +
-          'which might cause requests to take much longer to process.',
-      }),
-      category: ['search'],
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -288,8 +310,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When set to false, all filters are applied to all visualizations. ' +
-          'When set to true, filter(s) will be ignored for a visualization ' +
+          'When disabled, all filters are applied to all visualizations. ' +
+          'When enabled, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
@@ -300,19 +322,25 @@ export function getUiSettingDefaults() {
       }),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
+      optionLabels: requestPreferenceOptionLabels,
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.courier.requestPreferenceText', {
         defaultMessage:
           `Allows you to set which shards handle your search requests.
           <ul>
-            <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
+            <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
-            <li><strong>custom:</strong> allows you to define a your own preference.
+            <li><strong>{custom}:</strong> allows you to define a your own preference.
               Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
-            <li><strong>none:</strong> means do not set a preference.
+            <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
           </ul>`,
+        values: {
+          sessionId: requestPreferenceOptionLabels.sessionId,
+          custom: requestPreferenceOptionLabels.custom,
+          none: requestPreferenceOptionLabels.none,
+        },
       }),
       category: ['search'],
     },
@@ -332,7 +360,7 @@ export function getUiSettingDefaults() {
           setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText', {
               defaultMessage: 'Request Preference',
             }) +
@@ -354,7 +382,7 @@ export function getUiSettingDefaults() {
         values: {
           maxRequestsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
-            target="_blank" rel="noopener noreferrer" >max_concurrent_shard_requests</a>`
+            target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
       }),
       category: ['search'],
@@ -362,7 +390,7 @@ export function getUiSettingDefaults() {
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
-        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
       category: ['search'],
@@ -422,7 +450,7 @@ export function getUiSettingDefaults() {
         values: {
           cellDimensionsLink:
             `<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText', {
               defaultMessage: 'Explanation of cell dimensions',
             }) +
@@ -811,15 +839,15 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
           'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
-          'with each object containing "from", "to" (see {acceptedFormatsLink}), ' +
-          '"display" (the title to be displayed), and "section" (which column to put the option in).',
+          'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
+          '"display" (the title to be displayed).',
         description:
           'Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + ' +
           'kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
         values: {
           acceptedFormatsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',
             }) +
@@ -869,7 +897,7 @@ export function getUiSettingDefaults() {
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +
@@ -1014,18 +1042,6 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
-    },
-    'rollups:enableIndexPatterns': {
-      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
-        defaultMessage: 'Enable rollup index patterns',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
-        defaultMessage:
-          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
-          'visualizations based on rollup data. Refresh the page to apply the changes.',
-      }),
-      category: ['rollups'],
     },
   };
 }

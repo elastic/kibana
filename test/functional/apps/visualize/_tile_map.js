@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
@@ -162,6 +163,26 @@ export default function ({ getService, getPageObjects }) {
           await inspector.open();
           const data = await inspector.getTableData();
           await inspector.close();
+          compareTableData(data, expectedPrecision2DataTable);
+        });
+
+        it('Fit data bounds works with pinned filter data', async () => {
+          const expectedPrecision2DataTable = [
+            ['-', 'f05', '1', { lat: 45, lon: -85 }],
+            ['-', 'dpr', '1', { lat: 40, lon: -79 }],
+            ['-', '9qh', '1', { lat: 33, lon: -118 }],
+          ];
+
+          await filterBar.addFilter('bytes', 'is between', '19980', '19990');
+          await filterBar.toggleFilterPinned('bytes');
+          await PageObjects.visualize.zoomAllTheWayOut();
+          await PageObjects.visualize.clickMapFitDataBounds();
+
+          await inspector.open();
+          const data = await inspector.getTableData();
+          await inspector.close();
+
+          await filterBar.removeAllFilters();
           compareTableData(data, expectedPrecision2DataTable);
         });
 

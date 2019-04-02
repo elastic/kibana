@@ -1,3 +1,17 @@
+<div class="form-group">
+  <label>
+    <input
+      type="checkbox"
+      name="autoPrecision"
+      ng-model="agg.params.autoPrecision"
+    >
+    <span
+      i18n-id="common.ui.aggTypes.changePrecisionLabel"
+      i18n-default-message="Change precision on map zoom"
+    ></span>
+  </label>
+</div>
+
 <div class="visEditorAgg__formRow--flex" ng-controller="agg.type.params.byName.precision.controller">
   <div ng-if="!agg.params.autoPrecision" class="form-group">
     <label
@@ -23,21 +37,7 @@
   </div>
 </div>
 
-<div>
-  <label>
-    <input
-      type="checkbox"
-      name="autoPrecision"
-      ng-model="agg.params.autoPrecision"
-    >
-    <span
-      i18n-id="common.ui.aggTypes.changePrecisionLabel"
-      i18n-default-message="Change precision on map zoom"
-    ></span>
-  </label>
-</div>
-
-<div>
+<div class="form-group">
   <label>
     <input
       type="checkbox"
@@ -51,7 +51,7 @@
   </label>
 </div>
 
-<div>
+<div class="form-group">
   <label>
     <input
       type="checkbox"

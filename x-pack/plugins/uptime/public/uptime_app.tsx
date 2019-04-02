@@ -23,10 +23,11 @@ import {
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
@@ -54,6 +55,8 @@ export interface UptimePersistedState {
 }
 
 export interface UptimeAppProps {
+  // TODO: if we add a context to the Uptime UI, this should be included in it
+  basePath: string;
   darkMode: boolean;
   graphQLClient: UMGraphQLClient;
   initialDateRangeStart: string;
@@ -64,6 +67,7 @@ export interface UptimeAppProps {
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
+  renderGlobalHelpControls(): void;
 }
 
 interface UptimeAppState {
@@ -132,13 +136,17 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.setBreadcrumbs([overviewBreadcrumb]);
   }
 
+  public componentDidMount() {
+    this.props.renderGlobalHelpControls();
+  }
+
   public render() {
-    const { routerBasename, graphQLClient } = this.props;
+    const { basePath, routerBasename, graphQLClient } = this.props;
     return (
-      <I18nProvider>
+      <I18nContext>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
-            <EuiPage className="app-wrapper-panel">
+            <EuiPage className="app-wrapper-panel" data-test-subj="uptimeApp">
               <EuiHeader>
                 {/*
               // @ts-ignore TODO no typings for grow prop */}
@@ -200,26 +208,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     </div>
                   </EuiHeaderSectionItem>
                 </EuiHeaderSection>
-                <EuiHeaderSection side="right">
-                  <EuiHeaderSection>
-                    <EuiHeaderLinks>
-                      <EuiHeaderLink
-                        aria-label={i18n.translate('xpack.uptime.header.helpLinkAriaLabel', {
-                          defaultMessage: 'Go to our discuss page',
-                        })}
-                        iconType="help"
-                        href="https://discuss.elastic.co/c/beats/heartbeat"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.header.helpLinkText"
-                          defaultMessage="Discuss"
-                          description="The link is to a support form called 'Discuss', where users can submit feedback."
-                        />
-                      </EuiHeaderLink>
-                    </EuiHeaderLinks>
-                  </EuiHeaderSection>
-                </EuiHeaderSection>
               </EuiHeader>
               <EuiPageContent>
                 <Switch>
@@ -228,6 +216,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     path="/"
                     render={props => (
                       <OverviewPage
+                        basePath={basePath}
                         {...props}
                         {...this.state}
                         setBreadcrumbs={this.setBreadcrumbs}
@@ -249,7 +238,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             </EuiPage>
           </ApolloProvider>
         </Router>
-      </I18nProvider>
+      </I18nContext>
     );
   }
 

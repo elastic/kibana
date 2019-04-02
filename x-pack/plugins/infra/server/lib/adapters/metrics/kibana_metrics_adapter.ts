@@ -11,6 +11,7 @@ import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/ty
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
+import { InvalidNodeError } from './lib/errors';
 import { metricModels } from './models';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -45,7 +46,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
     if (!validNode) {
-      throw new Error(
+      throw new InvalidNodeError(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {

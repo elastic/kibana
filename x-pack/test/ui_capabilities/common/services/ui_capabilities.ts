@@ -17,8 +17,8 @@ export interface BasicCredentials {
 }
 
 export enum GetUICapabilitiesFailureReason {
-  RedirectedToRoot,
-  NotFound,
+  RedirectedToRoot = 'Redirected to Root',
+  NotFound = 'Not Found',
 }
 
 interface GetUICapabilitiesResult {

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getBuiltinRules } from '.';
 import { compileFormattingRules } from '../message';
-import { filebeatApache2Rules } from './filebeat_apache2';
 
-const { format } = compileFormattingRules(filebeatApache2Rules);
+const { format } = compileFormattingRules(getBuiltinRules([]));
 
 describe('Filebeat Rules', () => {
   describe('in ECS format', () => {
@@ -45,7 +45,15 @@ describe('Filebeat Rules', () => {
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Apache][access] ",
+    "constant": "[",
+  },
+  Object {
+    "field": "event.module",
+    "highlights": Array [],
+    "value": "apache",
+  },
+  Object {
+    "constant": "][access] ",
   },
   Object {
     "field": "source.ip",
@@ -123,7 +131,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Apache][",
+    "constant": "[apache][",
   },
   Object {
     "field": "log.level",
@@ -159,7 +167,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Apache][access] ",
+    "constant": "[apache][access] ",
   },
   Object {
     "field": "apache2.access.remote_ip",
@@ -228,7 +236,7 @@ Array [
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Apache][",
+    "constant": "[apache][",
   },
   Object {
     "field": "apache2.error.level",

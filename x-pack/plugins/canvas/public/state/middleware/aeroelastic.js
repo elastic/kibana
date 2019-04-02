@@ -18,7 +18,7 @@ import {
 } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
 import { selectElement } from '../actions/transient';
-import { addPage, removePage, duplicatePage } from '../actions/pages';
+import { addPage, removePage, duplicatePage, setPage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
@@ -37,7 +37,7 @@ const aeroelasticConfiguration = {
   hoverLift: 100,
   intraGroupManipulation: false,
   intraGroupSnapOnly: false,
-  minimumElementSize: 0,
+  minimumElementSize: 2,
   persistentGroupName: 'persistentGroup',
   resizeAnnotationConnectorOffset: 0,
   resizeAnnotationOffset: 0,
@@ -50,12 +50,16 @@ const aeroelasticConfiguration = {
   rotationEpsilon: 0.001,
   rotationHandleName: 'rotationHandle',
   rotationHandleSize: 14,
+  rotationTooltipName: 'rotationTooltip',
   shortcuts: false,
   singleSelect: false,
   snapConstraint: true,
+  tooltipZ: 1100,
 };
 
 const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
+
+const pageChangerActions = [duplicatePage.toString(), addPage.toString(), setPage.toString()];
 
 /**
  * elementToShape
@@ -257,10 +261,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
   const createStore = page =>
     aero.createStore(
       {
-        shapeAdditions: [],
         primaryUpdate: null,
-        currentScene: { shapes: [] },
-        configuration: aeroelasticConfiguration,
+        currentScene: { shapes: [], configuration: aeroelasticConfiguration },
       },
       onChangeCallback,
       page
@@ -282,6 +284,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
   const unselectShape = page => {
     aero.commit(page, 'shapeSelect', { shapes: [] });
+  };
+
+  const unhoverShape = page => {
+    aero.commit(page, 'cursorPosition', {});
   };
 
   return next => action => {
@@ -316,6 +322,15 @@ export const aeroelastic = ({ dispatch, getState }) => {
       }
 
       aero.removeStore(action.payload);
+    }
+
+    if (pageChangerActions.indexOf(action.type) >= 0) {
+      if (getSelectedElement(getState())) {
+        dispatch(selectElement(null)); // ensure sidebar etc. get updated; will update the layout engine too
+      } else {
+        unselectShape(prevPage); // deselect persistent groups as they're not currently selections in Redux
+      }
+      unhoverShape(prevPage); // ensure hover box isn't stuck on page change, no matter how action originated
     }
 
     next(action);

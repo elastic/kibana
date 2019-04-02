@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'angular-elastic/elastic';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
@@ -29,6 +30,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
+import { canViewInApp } from './lib/in_app_url';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
@@ -40,11 +42,11 @@ uiRoutes
     k7Breadcrumbs: getViewBreadcrumbs
   });
 
-uiModules.get('apps/management')
+uiModules.get('apps/management', ['monospaced.elastic'])
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -134,6 +136,11 @@ uiModules.get('apps/management')
             });
           }
         };
+
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        $scope.canEdit = canEdit;
+        $scope.canDelete = canDelete;
+        $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
 
         $scope.notFound = $routeParams.notFound;
 

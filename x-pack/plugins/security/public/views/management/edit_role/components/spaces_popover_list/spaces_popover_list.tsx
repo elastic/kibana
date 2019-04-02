@@ -145,19 +145,20 @@ export class SpacesPopoverList extends Component<Props, State> {
     const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
-        <EuiFieldSearch
-          placeholder={intl.formatMessage({
-            id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
-            defaultMessage: 'Find a space',
-          })}
-          incremental={true}
-          // FIXME needs updated typedef
-          // @ts-ignore
-          onSearch={this.onSearch}
-          onKeyDown={this.onSearchKeyDown}
-          onFocus={this.onSearchFocus}
-          compressed
-        />
+        {
+          // @ts-ignore onSearch isn't defined on the type
+          <EuiFieldSearch
+            placeholder={intl.formatMessage({
+              id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+              defaultMessage: 'Find a space',
+            })}
+            incremental={true}
+            onSearch={this.onSearch}
+            onKeyDown={this.onSearchKeyDown}
+            onFocus={this.onSearchFocus}
+            compressed
+          />
+        }
       </div>
     );
   };

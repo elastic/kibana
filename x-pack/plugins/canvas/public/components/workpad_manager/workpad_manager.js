@@ -14,12 +14,9 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
-  EuiLink,
 } from '@elastic/eui';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
-import { documentationLinks } from '../../lib/documentation_links';
 
 export const WorkpadManager = ({ onClose }) => {
   const tabs = [
@@ -50,17 +47,6 @@ export const WorkpadManager = ({ onClose }) => {
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label="Beta"
-              tooltipContent="Canvas is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={documentationLinks.canvas} target="_blank">
-              Docs
-            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>

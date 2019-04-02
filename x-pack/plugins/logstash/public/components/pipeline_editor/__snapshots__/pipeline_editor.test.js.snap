@@ -45,6 +45,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -69,6 +70,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -91,6 +93,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -123,6 +126,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -133,15 +137,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -173,15 +169,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -291,16 +279,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -310,6 +291,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -320,7 +302,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -329,6 +310,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -387,6 +369,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -411,6 +394,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -433,6 +417,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -465,6 +450,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -475,15 +461,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -515,15 +493,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -633,16 +603,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -652,6 +615,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -662,7 +626,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -671,6 +634,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -729,6 +693,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -753,6 +718,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -775,6 +741,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -807,6 +774,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -817,15 +785,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -857,15 +817,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -975,16 +927,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -994,6 +939,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1004,7 +950,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1013,6 +958,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1067,6 +1013,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1089,6 +1036,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1121,6 +1069,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1131,15 +1080,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -1171,15 +1112,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -1289,16 +1222,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1308,6 +1234,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1318,7 +1245,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1327,6 +1253,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1337,7 +1264,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -1399,6 +1325,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1423,6 +1350,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1445,6 +1373,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1477,6 +1406,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1487,15 +1417,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -1527,15 +1449,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -1645,16 +1559,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1664,6 +1571,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1674,7 +1582,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1683,6 +1590,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1737,6 +1645,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1759,6 +1668,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1791,6 +1701,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1801,15 +1712,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
           formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
@@ -1841,15 +1744,7 @@ Default value: 50ms"
           />
         </FlexItemSetting>
       </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Queue type"
           formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
@@ -1959,16 +1854,9 @@ Default value: 1024"
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1978,6 +1866,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1988,7 +1877,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -1997,6 +1885,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -2007,7 +1896,6 @@ Default value: 1024"
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty

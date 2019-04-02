@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable kibana-custom/no-default-export */
+/* eslint-disable @kbn/eslint/no-default-export */
 
 import { resolve } from 'path';
 
@@ -101,6 +101,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/saved_objects_management'),
+      resolve(__dirname, './apps/dev_tools'),
+      resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/index_patterns')
     ],
 
     // define the name and providers for services that should be
@@ -214,6 +218,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger',
       },
+      searchProfiler: {
+        pathname: '/app/kibana',
+        hash: '/dev_tools/searchprofiler',
+      },
       spaceSelector: {
         pathname: '/',
       },
@@ -230,6 +238,9 @@ export default async function ({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/'
+      },
+      apm: {
+        pathname: '/app/apm',
       }
     },
 
@@ -245,7 +256,6 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'X-Pack Functional Tests',
-      rootDirectory: resolve(__dirname, '../../'),
     },
   };
 
