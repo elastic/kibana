@@ -11,7 +11,7 @@ import {
   SearchParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
-import { cloneDeep, has, set } from 'lodash';
+import { cloneDeep, has, isString, set } from 'lodash';
 import moment from 'moment';
 import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 
@@ -43,12 +43,36 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-function addFilterForLegacyData({
-  omitLegacyData = true,
-  ...params
-}: APMSearchParams): SearchParams {
+function getApmIndices(config: Legacy.KibanaConfig) {
+  return [
+    config.get<string>('apm_oss.errorIndices'),
+    config.get<string>('apm_oss.metricsIndices'),
+    config.get<string>('apm_oss.onboardingIndices'),
+    config.get<string>('apm_oss.sourcemapIndices'),
+    config.get<string>('apm_oss.spanIndices'),
+    config.get<string>('apm_oss.transactionIndices')
+  ];
+}
+
+export function isApmIndex(
+  apmIndices: string[],
+  indexParam: SearchParams['index']
+) {
+  if (isString(indexParam)) {
+    return apmIndices.includes(indexParam);
+  } else if (Array.isArray(indexParam)) {
+    // return false if at least one of the indices is not an APM index
+    return indexParam.every(index => apmIndices.includes(index));
+  }
+  return false;
+}
+
+function addFilterForLegacyData(
+  apmIndices: string[],
+  { omitLegacyData = true, ...params }: APMSearchParams
+): SearchParams {
   // search across all data (including data)
-  if (!omitLegacyData) {
+  if (!omitLegacyData || !isApmIndex(apmIndices, params.index)) {
     return params;
   }
 
@@ -69,12 +93,14 @@ export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const uiSettings = req.getUiSettingsService();
+  const config = req.server.config();
+  const apmIndices = getApmIndices(config);
 
   const client: ESClient = async (type, params) => {
     const includeFrozen = await uiSettings.get('search:includeFrozen');
 
     const nextParams = {
-      ...addFilterForLegacyData(params), // filter out pre-7.0 data
+      ...addFilterForLegacyData(apmIndices, params), // filter out pre-7.0 data
       ignore_throttled: !includeFrozen, // whether to query frozen indices or not
       rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
     };
@@ -99,6 +125,6 @@ export function setupRequest(req: Legacy.Request): Setup {
     end: moment.utc(query.end).valueOf(),
     esFilterQuery: decodeEsQuery(query.esFilterQuery),
     client,
-    config: req.server.config()
+    config
   };
 }
