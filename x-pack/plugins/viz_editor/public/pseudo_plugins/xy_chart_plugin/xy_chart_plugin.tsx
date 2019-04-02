@@ -24,6 +24,8 @@ import { operationToName } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
+const PLUGIN_NAME = 'xy_chart';
+
 interface XyChartPrivateState {
   xAxis: Axis;
   yAxis: Axis;
@@ -145,7 +147,7 @@ function getSuggestion(
     visModel: prefilledVisModel,
     title,
     iconType: displayTypeIcon[displayType],
-    pluginName: 'xy_chart',
+    pluginName: PLUGIN_NAME,
   } as Suggestion;
 }
 
@@ -177,6 +179,7 @@ function getSuggestionsForField(
           ],
         },
       },
+      editorPlugin: PLUGIN_NAME,
       private: {
         ...visModel.private,
         xyChart: {
@@ -192,13 +195,13 @@ function getSuggestionsForField(
       visModel: prefilledVisModel,
       title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,
       iconType: displayTypeIcon.line,
-      pluginName: 'xy_chart',
+      pluginName: PLUGIN_NAME,
     };
   });
 }
 
 export const config: EditorPlugin<XyChartVisModel> = {
-  name: 'xy_chart',
+  name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
   getChartSuggestions: visModel => [

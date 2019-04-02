@@ -28,7 +28,7 @@ function sampleVisFunction() {
         types: ['string'],
       },
     },
-    context: { types: ['datatable'] },
+    context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
       const xColumn = context.columns[0].id;
       const xColumnType = context.columns[0].type;

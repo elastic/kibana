@@ -8,15 +8,15 @@
 
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
-import { kfetch } from 'ui/kfetch';
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
-function filterColumns(keep: string[], columns: Array<{ id: string; type: string }>) {
+function mapColumns(keep: string[], columns: Array<{ name: string; type: string }>) {
   return keep.map(columnId => {
-    return columns.find(column => column.id === columnId);
+    const { name, type } = columns.find(column => column.name === columnId) as any;
+    return { id: name, type };
   });
 }
 
@@ -30,33 +30,23 @@ function filterRows(keep: string[], rows: Array<{ [id: string]: any }>) {
   });
 }
 
-function essqlFunction() {
+function keepFunction() {
   return {
-    name: 'client_essql',
-    type: 'datatable',
+    name: 'remap_essql',
+    type: 'kibana_datatable',
     args: {
-      query: {
-        types: ['string'],
-      },
       keep: {
         types: ['string'],
       },
     },
-    context: { types: [] },
+    context: { types: ['datatable'] },
     async fn(context: any, args: any) {
-      const result: any = await kfetch({
-        pathname: '/api/viz_editor/sql',
-        method: 'POST',
-        body: JSON.stringify({
-          sql: args.query,
-        }),
-      });
       const keepColumns: string[] = JSON.parse(args.keep);
 
       return {
-        type: 'datatable',
-        rows: filterRows(keepColumns, result.rows),
-        columns: filterColumns(keepColumns, result.columns),
+        type: 'kibana_datatable',
+        rows: filterRows(keepColumns, context.rows),
+        columns: mapColumns(keepColumns, context.columns),
       };
     },
   };
@@ -64,7 +54,7 @@ function essqlFunction() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [essqlFunction],
+    browserFunctions: [keepFunction],
   });
 };
 

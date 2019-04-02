@@ -17,7 +17,7 @@ export function getOperationsForField(field: DatasourceField): SelectOperator[] 
   }
 
   if (field.type === 'number') {
-    return ['column', 'avg', 'sum'];
+    return ['terms', 'avg', 'sum'];
   }
 
   if (field.type === 'string') {

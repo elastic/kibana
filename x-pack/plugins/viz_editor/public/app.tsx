@@ -64,5 +64,5 @@ registerXYPipeline(registries);
 registerPiePipeline(registries);
 registerVegaPipeline(registries);
 registerCSVPipeline(registries);
-registerIndexpatternPipeline(registries);
 registerESSQLPipeline(registries);
+registerIndexpatternPipeline(registries);
