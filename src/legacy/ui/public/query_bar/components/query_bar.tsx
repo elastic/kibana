@@ -378,16 +378,21 @@ export class QueryBarUI extends Component<Props, State> {
     start,
     end,
     isInvalid,
+    isQuickSelection,
   }: {
     start: string;
     end: string;
     isInvalid: boolean;
+    isQuickSelection: boolean;
   }) => {
-    this.setState({
-      dateRangeFrom: start,
-      dateRangeTo: end,
-      isDateRangeInvalid: isInvalid,
-    });
+    this.setState(
+      {
+        dateRangeFrom: start,
+        dateRangeTo: end,
+        isDateRangeInvalid: isInvalid,
+      },
+      () => isQuickSelection && this.onSubmit()
+    );
   };
 
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
