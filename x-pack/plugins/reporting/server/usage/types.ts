@@ -9,7 +9,7 @@ interface AvailableTotal {
   total: number;
 }
 
-interface Status {
+interface StatusCounts {
   [statusType: string]: number;
 }
 
@@ -53,7 +53,7 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
 
 export type RangeStats = JobTypes & {
   _all: number;
-  status: Status;
+  status: StatusCounts;
 };
 
 export type UsageObject = RangeStats & {
