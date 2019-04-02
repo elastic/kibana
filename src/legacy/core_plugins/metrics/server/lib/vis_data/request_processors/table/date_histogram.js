@@ -23,17 +23,20 @@ import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import getTimerange from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 
-export default function dateHistogram(req, panel) {
+export default function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel);
     const { bucketSize, intervalString } = getBucketSize(req, interval);
     const { from, to }  = getTimerange(req);
+    const  timezone = capabilities.searchTimezone;
+
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
       set(doc, `${aggRoot}.timeseries.date_histogram`, {
         field: timeField,
         interval: intervalString,
         min_doc_count: 0,
+        time_zone: timezone,
         extended_bounds: {
           min: from.valueOf(),
           max: to.valueOf()
