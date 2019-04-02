@@ -15,7 +15,7 @@ import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../external_link_icon';
-import { GoogleLink, TotalVirusLink } from '../../../links';
+import { GoogleLink, VirusTotalLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -125,7 +125,7 @@ export const TotalVirusLinkSha = pure<{ value: string | null }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
-        <TotalVirusLink link={value}>{value}</TotalVirusLink>
+        <VirusTotalLink link={value}>{value}</VirusTotalLink>
         <ExternalLinkIcon />
       </div>
     </LinkFlexItem>

@@ -154,7 +154,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
 
 const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => getNetworkDnsSelector(state, type);
+  const mapStateToProps = (state: State) => getNetworkDnsSelector(state);
   return mapStateToProps;
 };
 

@@ -199,8 +199,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
 const makeMapStateToProps = () => {
   const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) =>
-    getNetworkTopNFlowSelector(state, type);
+  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
   return mapStateToProps;
 };
 

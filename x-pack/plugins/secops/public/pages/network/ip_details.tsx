@@ -12,7 +12,9 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
+import { IpOverview } from '../../components/page/network/ip_overview';
 import { GlobalTime } from '../../containers/global_time';
+import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
@@ -23,10 +25,9 @@ import { NetworkKql } from './kql';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
-const type = networkModel.NetworkType.details;
 
 interface IPDetailsComponentReduxProps {
-  filterQueryExpression: string;
+  filterQuery: string;
 }
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
@@ -36,7 +37,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     match: {
       params: { ip },
     },
-    filterQueryExpression,
+    filterQuery,
   }) => (
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
@@ -46,7 +47,23 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
-                  {({ poll, to, from, setQuery }) => <>{`Hello ${decodeIpv6(ip)}!`}</>}
+                  {({ poll, to, from, setQuery }) => (
+                    <IpOverviewQuery
+                      sourceId="default"
+                      filterQuery={filterQuery}
+                      type={networkModel.NetworkType.details}
+                      ip={decodeIpv6(ip)}
+                    >
+                      {({ ipOverviewData, loading }) => (
+                        <IpOverview
+                          ip={decodeIpv6(ip)}
+                          data={ipOverviewData}
+                          loading={loading}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </IpOverviewQuery>
+                  )}
                 </GlobalTime>
               </PageContentBody>
             </PageContent>
@@ -67,7 +84,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
 const makeMapStateToProps = () => {
   const getNetworkFilterQuery = networkSelectors.networkFilterQueryExpression();
   return (state: State) => ({
-    filterQueryExpression: getNetworkFilterQuery(state, type) || '',
+    filterQueryExpression: getNetworkFilterQuery(state) || '',
   });
 };
 

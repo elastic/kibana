@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IP Overview Select direction rendering it renders the select type for IP Overview 1`] = `
+<Component
+  id="ip-overview-select-type"
+  isLoading={false}
+  onChangeType={[MockFunction]}
+  selectedType="source"
+/>
+`;

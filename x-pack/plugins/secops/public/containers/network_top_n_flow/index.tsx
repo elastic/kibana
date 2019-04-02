@@ -135,9 +135,8 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
 }
 
 const makeMapStateToProps = () => {
-  const getNetworktopNFlowSelectorSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) =>
-    getNetworktopNFlowSelectorSelector(state, type);
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
+  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
 
   return mapStateToProps;
 };
