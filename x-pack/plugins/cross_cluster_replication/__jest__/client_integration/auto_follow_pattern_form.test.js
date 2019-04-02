@@ -9,6 +9,7 @@ import sinon from 'sinon';
 
 import { initTestBed, registerHttpRequestMockHelpers, nextTick, findTestSubject } from './test_helpers';
 import { AutoFollowPatternAdd } from '../../public/app/sections/auto_follow_pattern_add';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
 import routing from '../../public/app/services/routing';
 
 jest.mock('ui/chrome', () => ({
@@ -18,8 +19,8 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  const { validateIndexPattern } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern };
+  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
+  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
 const testBedOptions = {
@@ -222,11 +223,22 @@ describe('Create Auto-follow pattern', () => {
       });
 
       test('should not allow spaces', () => {
+        expect(getFormErrorsMessages()).toEqual([]);
+
         setIndexPatternValue('with space');
 
-        clickSaveForm();
+        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the index pattern.');
+      });
 
-        expect(getFormErrorsMessages()).toContain('At least one leader index pattern is required.');
+      test('should not allow invalid characters', () => {
+        const expectInvalidChar = (char) => {
+          setIndexPatternValue(`with${char}space`);
+          expect(getFormErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
+        };
+
+        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+          return promise.then(() => expectInvalidChar(char));
+        }, Promise.resolve());
       });
     });
   });
