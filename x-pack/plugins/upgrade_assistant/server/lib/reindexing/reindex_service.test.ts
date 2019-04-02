@@ -5,16 +5,13 @@
  */
 
 import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
-import {
   IndexGroup,
   ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { apmReindexScript } from '../apm';
 import apmMappings from '../apm/mapping.json';
 import {

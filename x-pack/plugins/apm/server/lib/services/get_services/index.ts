@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { PromiseReturnType } from 'x-pack/plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getAgentStatus } from './get_agent_status';
 import { getLegacyDataStatus } from './get_legacy_data_status';

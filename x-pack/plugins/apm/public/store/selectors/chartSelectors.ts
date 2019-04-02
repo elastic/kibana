@@ -10,15 +10,12 @@ import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
-import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
-import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import {
-  Coordinate,
-  RectCoordinate
-} from 'x-pack/plugins/apm/typings/timeseries';
+import { MetricsChartAPIResponse } from '../../../server/lib/metrics/get_all_metrics_chart_data';
+import { TimeSeriesAPIResponse } from '../../../server/lib/transactions/charts';
+import { AnomalyTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_anomaly_data/transform';
+import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
+import { StringMap } from '../../../typings/common';
+import { Coordinate, RectCoordinate } from '../../../typings/timeseries';
 import {
   asDecimal,
   asMillis,

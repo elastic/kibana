@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { MonitorPageTitle as TitleType } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
 
 interface MonitorPageTitleProps {
   pageTitle: TitleType;

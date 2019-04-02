@@ -10,7 +10,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { flatten } from 'lodash';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
+import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';

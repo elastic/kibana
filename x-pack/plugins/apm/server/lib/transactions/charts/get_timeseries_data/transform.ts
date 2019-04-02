@@ -5,9 +5,9 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { idx } from '../../../../../common/idx';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
 export interface ApmTimeSeriesResponse {
