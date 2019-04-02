@@ -6,7 +6,8 @@
 
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface InfraLoadingProps {
   text: string | JSX.Element;
@@ -32,7 +33,7 @@ export class InfraLoadingPanel extends React.PureComponent<InfraLoadingProps, {}
   }
 }
 
-export const InfraLoadingStaticPanel = styled.div`
+export const InfraLoadingStaticPanel = euiStyled.div`
   position: relative;
   overflow: hidden;
   display: flex;
@@ -40,7 +41,7 @@ export const InfraLoadingStaticPanel = styled.div`
   justify-content: center;
 `;
 
-export const InfraLoadingStaticContentPanel = styled.div`
+export const InfraLoadingStaticContentPanel = euiStyled.div`
   flex: 0 0 auto;
   align-self: center;
   text-align: center;
