@@ -24,7 +24,7 @@ import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
 import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
-import { OverlaySetup } from './overlays';
+import { FlyoutRef, OverlaySetup } from './overlays';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
 export { CoreSystem } from './core_system';
@@ -53,6 +53,8 @@ export {
   InjectedMetadataSetup,
   InjectedMetadataParams,
   NotificationsSetup,
+  OverlaySetup,
+  FlyoutRef,
   Toast,
   ToastInput,
   ToastsSetup,

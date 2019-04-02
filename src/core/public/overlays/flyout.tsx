@@ -21,23 +21,22 @@
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable, Subject } from 'rxjs';
 import { I18nSetup } from '../i18n';
-import { getOrCreateContainerElement } from './dom_utils';
-
-const CONTAINER_ID = 'flyout-container';
 
 /**
  * A FlyoutSession describes the session of one opened flyout panel. It offers
  * methods to close the flyout panel again. If you open a flyout panel you should make
- * sure you call {@link FlyoutSession#close} when it should be closed.
+ * sure you call {@link FlyoutRef#close} when it should be closed.
  * Since a flyout could also be closed without calling this method (e.g. because
  * the user closes it), you must listen to the "closed" event on this instance.
  * It will be emitted whenever the flyout will be closed and you should throw
  * away your reference to this instance whenever you receive that event.
+ *
+ * @public
  */
-class FlyoutSession {
+export class FlyoutRef {
   /**
    * A promise that will be resolved once this flyout session is closed,
    * by the user or by closing it from the outside via valling {@link #close}.
@@ -46,64 +45,67 @@ class FlyoutSession {
 
   private closeSubject = new Subject<void>();
 
-  constructor(private readonly activeSessionGetter: () => FlyoutSession | null) {
+  constructor() {
     this.onClose$ = this.closeSubject.asObservable();
   }
 
   /**
-   * Closes the opened flyout as long as it's still the open one.
-   * If this is not the active session anymore, this method won't do anything.
-   * If this session was still active and a flyout was closed, the {@link #onClose}
-   * promise will be resolved when calling this.
+   * Closes the referenced flyout if it's still open by emiting and completing
+   * the `onClose()` Observable.
+   * If the flyout had already been closed this method does nothing.
    */
   public close(): void {
-    if (this.activeSessionGetter() === this) {
-      const container = document.getElementById(CONTAINER_ID);
-      if (container) {
-        ReactDOM.unmountComponentAtNode(container);
-        this.closeSubject.next();
-        this.closeSubject.complete();
-      }
+    if (!this.closeSubject.closed) {
+      this.closeSubject.next();
+      this.closeSubject.complete();
     }
   }
 }
 
-class FlyoutService {
-  private activeSession: FlyoutSession | null = null;
+/** @internal */
+export class FlyoutService {
+  private activeFlyout: FlyoutRef | null = null;
 
   /**
    * Opens a flyout panel with the given component inside. You can use
-   * {@link FlyoutSession#close} on the return value to close the flyout.
+   * {@link FlyoutRef#close} on the return value to close the flyout.
    *
-   * @param flyoutChildren - Mounts the children inside a fly out panel
-   * @return {FlyoutSession} The session instance for the opened flyout panel.
+   * @param flyoutChildren - Mounts the children inside a flyout panel
+   * @return {FlyoutRef} A reference to the opened flyout panel.
    */
   public openFlyout = (
     i18n: I18nSetup,
+    targetDomElement: Element,
     flyoutChildren: React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
     } = {}
-  ): FlyoutSession => {
-    // If there is an active inspector session close it before opening a new one.
-    if (this.activeSession) {
-      this.activeSession.close();
+  ): FlyoutRef => {
+    // If there is an active flyout session close it before opening a new one.
+    if (this.activeFlyout) {
+      this.activeFlyout.close();
     }
-    const container = getOrCreateContainerElement(CONTAINER_ID);
-    const session = (this.activeSession = new FlyoutSession(() => this.activeSession));
 
-    ReactDOM.render(
-      <i18n.Context>
-        <EuiFlyout {...flyoutProps} onClose={() => session.close()}>
-          {flyoutChildren}
-        </EuiFlyout>
-      </i18n.Context>,
-      container
+    const flyout = (this.activeFlyout = new FlyoutRef());
+
+    flyout.onClose$.subscribe({
+      complete: () => {
+        if (this.activeFlyout === flyout) {
+          unmountComponentAtNode(targetDomElement);
+          targetDomElement.innerHTML = '';
+          this.activeFlyout = null;
+        }
+      },
+    });
+
+    render(
+      <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
+        {flyoutChildren}
+      </EuiFlyout>,
+      targetDomElement
     );
 
-    return session;
+    return flyout;
   };
 }
-
-export { FlyoutService, FlyoutSession };

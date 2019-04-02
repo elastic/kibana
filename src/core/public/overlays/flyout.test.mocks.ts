@@ -17,12 +17,9 @@
  * under the License.
  */
 
-export function getOrCreateContainerElement(id: string) {
-  let container = document.getElementById(id);
-  if (!container) {
-    container = document.createElement('div');
-    container.id = id;
-    document.body.appendChild(container);
-  }
-  return container;
-}
+export const mockReactDomRender = jest.fn();
+export const mockReactDomUnmount = jest.fn();
+jest.doMock('react-dom', () => ({
+  render: mockReactDomRender,
+  unmountComponentAtNode: mockReactDomUnmount,
+}));

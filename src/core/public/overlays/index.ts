@@ -18,4 +18,4 @@
  */
 
 export { OverlayService, OverlaySetup } from './overlay_service';
-export { FlyoutSession } from './flyout';
+export { FlyoutRef } from './flyout';

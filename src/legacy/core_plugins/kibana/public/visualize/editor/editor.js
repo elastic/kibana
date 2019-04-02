@@ -237,9 +237,7 @@ function VisEditor(
       // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
       const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
       // Remove that watch in case the user closes the inspector session herself.
-      inspectorSession.onClose.then(() => {
-        removeWatch();
-      });
+      inspectorSession.onClose$.subscribe(removeWatch);
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {

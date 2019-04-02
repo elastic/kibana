@@ -61,6 +61,7 @@ export class CoreSystem {
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
+  private readonly overlayTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const {
@@ -94,7 +95,8 @@ export class CoreSystem {
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.overlay = new OverlayService();
+    this.overlayTargetDomElement = document.createElement('div');
+    this.overlay = new OverlayService(this.overlayTargetDomElement);
     this.chrome = new ChromeService({ browserSupportsCsp });
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
@@ -112,6 +114,7 @@ export class CoreSystem {
       this.rootDomElement.classList.add('coreSystemRootDomElement');
       this.rootDomElement.appendChild(this.notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement);
 
       const i18n = this.i18n.setup();
       const notifications = this.notifications.setup({ i18n });
