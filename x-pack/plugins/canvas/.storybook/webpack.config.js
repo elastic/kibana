@@ -8,11 +8,11 @@ const path = require('path');
 const TSDocgenPlugin = require('react-docgen-typescript-webpack-plugin');
 
 // Extend the Storybook Webpack config with some customizations;
-module.exports = (_baseConfig, _env, config) => {
+module.exports = async ({ config, _mode }) => {
   // Include the React preset for Storybook JS files.
   config.module.rules.push({
     test: /\.js$/,
-    include: /\.storybook/,
+    exclude: /node_modules/,
     loaders: 'babel-loader',
     options: {
       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
