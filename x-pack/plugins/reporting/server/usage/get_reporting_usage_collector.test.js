@@ -17,21 +17,21 @@ function getServerMock(customization) {
   const defaultServerMock = {
     plugins: {
       security: {
-        isAuthenticated: sinon.stub().returns(true),
+        isAuthenticated: sinon.stub().returns(true)
       },
       xpack_main: {
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({
-            getLicenseCheckResults,
+            getLicenseCheckResults
           }),
           license: {
             isOneOf: sinon.stub().returns(false),
             getType: sinon.stub().returns('platinum'),
           },
-          toJSON: () => ({ b: 1 }),
-        },
-      },
+          toJSON: () => ({ b: 1 })
+        }
+      }
     },
     expose: () => {},
     log: () => {},
@@ -42,15 +42,15 @@ function getServerMock(customization) {
         } else if (key === 'xpack.reporting.index') {
           return '.reporting-index';
         }
-      },
+      }
     }),
     usage: {
       collectorSet: {
         makeUsageCollector: options => {
           return new MockUsageCollector(this, options);
-        },
-      },
-    },
+        }
+      }
+    }
   };
   return Object.assign(defaultServerMock, customization);
 }

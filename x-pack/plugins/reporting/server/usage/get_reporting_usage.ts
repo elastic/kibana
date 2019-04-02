@@ -18,8 +18,6 @@ import {
   UsageObject,
 } from './types';
 
-// These keys can be anything, but they are used to bucket the aggregations so can't have periods in them
-// like the field names can (otherwise we could have just used the field names themselves).
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
 const LAYOUT_TYPES_KEY = 'layoutTypes';
@@ -53,14 +51,15 @@ function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySe
   }, {}) as JobTypes;
 
   // merge pdf stats into pdf jobtype key
-  if (jobTypes[PRINTABLE_PDF_JOBTYPE]) {
+  const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
+  if (pdfJobs) {
     const pdfAppBuckets = get(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
     const pdfLayoutBuckets = get(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
-    jobTypes[PRINTABLE_PDF_JOBTYPE].app = getKeyCount(pdfAppBuckets) as {
+    pdfJobs.app = getKeyCount(pdfAppBuckets) as {
       visualization: number;
       dashboard: number;
     };
-    jobTypes[PRINTABLE_PDF_JOBTYPE].layout = getKeyCount(pdfLayoutBuckets) as {
+    pdfJobs.layout = getKeyCount(pdfLayoutBuckets) as {
       print: number;
       preserve_layout: number;
     };
