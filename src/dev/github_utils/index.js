@@ -25,10 +25,8 @@ export { markdownMetadata };
 export function getGithubClient() {
   const client = new Octokit();
   client.authenticate({
-    auth: {
-      clientId: 26774,
-      privateKey: process.env.kibana_ci_reporter_key
-    }
+    type: 'token',
+    token: process.env.GITHUB_TOKEN
   });
 
   return client;

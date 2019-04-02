@@ -24,18 +24,20 @@ const App = require('@octokit/app');
 const request = require('@octokit/request');
 const stripAnsi = require('strip-ansi');
 
-const MAX_DETAIL_BYTES = 65535;
+// removing 8 chars for markdown triple backtick wrap
+const MAX_DETAIL_BYTES = 65535 - 8;
 
-const getClientWithAuth = async function () {
+const getClientWithAuth = async function (owner, repo) {
   const app = new App({
+    // todo - move to env var
     id: 26774,
     privateKey: process.env.KIBANA_CI_REPORTER_KEY
   });
 
   const jwt = app.getSignedJsonWebToken();
   const { data: { id: installationId } } = await request('GET /repos/:owner/:repo/installation', {
-    owner: 'elastic',
-    repo: 'kibana',
+    owner,
+    repo,
     headers: {
       authorization: `Bearer ${jwt}`,
       accept: 'application/vnd.github.machine-man-preview+json'
@@ -55,13 +57,15 @@ const prettyLogs = txt => {
   const noAnsi = stripAnsi(txt.toString()).trim();
 
   if(noAnsi.length === 0) {
-    return 'no output';
+    return '[no output]';
   }
 
+  // Must use buffer to trim by number of bytes due to multibyte encoding
   let bufferToFit = Buffer.from(noAnsi).slice(MAX_DETAIL_BYTES * -1);
 
   const prependTxt = bufferToFit.length === MAX_DETAIL_BYTES ? truncatedTxt : '';
 
+  // Triming again to fit truncation notice
   bufferToFit = bufferToFit.slice(MAX_DETAIL_BYTES * -1 + prependTxt.length);
 
   return `${truncatedTxt}${bufferToFit.toString()}`;
@@ -86,7 +90,7 @@ const start = async function () {
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
-  const clientWithAuth = await getClientWithAuth();
+  const clientWithAuth = await getClientWithAuth(owner, repo);
   //todo check env vars
 
   const commonArgs = {
@@ -123,7 +127,7 @@ const start = async function () {
       output: {
         title,
         summary: `.`,
-        text: `\`\`\`${logs}\`\`\``
+        text: `\`\`\`\n${logs}\n\`\`\``
       },
     }).then((response) => {
       logRateLimit(response);
