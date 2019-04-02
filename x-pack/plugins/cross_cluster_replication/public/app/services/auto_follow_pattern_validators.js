@@ -53,32 +53,42 @@ export const validateName = (name = '') => {
 };
 
 export const validateLeaderIndexPattern = (indexPattern) => {
-  const errors = getIndexPatternErrors(indexPattern);
+  if (indexPattern) {
+    const errors = getIndexPatternErrors(indexPattern);
 
-  if (errors[ILLEGAL_CHARACTERS]) {
-    return (
-      <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
-        defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+    if (errors[ILLEGAL_CHARACTERS]) {
+      return ({
+        message: <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+          defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
           {characterList} from the index pattern."
-        values={{
-          characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong>,
-          characterListLength: errors[ILLEGAL_CHARACTERS].length,
-        }}
-      />
-    );
+          values={{
+            characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong>,
+            characterListLength: errors[ILLEGAL_CHARACTERS].length,
+          }}
+        />
+      });
+    }
+
+    if (errors[CONTAINS_SPACES]) {
+      return ({
+        message: <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
+          defaultMessage="Spaces are not allowed in the index pattern."
+        />
+      });
+    }
   }
 
-  if (errors[CONTAINS_SPACES]) {
-    return (
-      <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
-        defaultMessage="Spaces are not allowed in the index pattern."
-      />
-    );
+  if (!indexPattern || !indexPattern.trim()) {
+    return {
+      message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
+        defaultMessage: 'At least one leader index pattern is required.',
+      })
+    };
   }
 
-  return null;
+  return { message: null };
 };
 
 export const validatePrefix = (prefix) => {
@@ -174,13 +184,7 @@ export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
         break;
 
       case 'leaderIndexPatterns':
-        if (!fieldValue.length) {
-          error = {
-            message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
-              defaultMessage: 'At least one leader index pattern is required.',
-            })
-          };
-        }
+        error = validateLeaderIndexPattern(fieldValue[0]);
         break;
 
       case 'followIndexPatternPrefix':
