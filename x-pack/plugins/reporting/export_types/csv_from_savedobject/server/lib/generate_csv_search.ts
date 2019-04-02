@@ -148,7 +148,7 @@ export async function generateCsvSearch(
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
 
   const scriptFields = indexPatternSavedObject.fields
-    .filter((f: IndexPatternField) => f.scripted === true)
+    .filter((f: IndexPatternField) => f.scripted)
     .reduce((accum: any, curr: IndexPatternField) => {
       return {
         ...accum,
