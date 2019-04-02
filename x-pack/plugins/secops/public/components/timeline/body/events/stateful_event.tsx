@@ -10,7 +10,7 @@ import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
-import { Ecs } from '../../../../graphql/types';
+import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
@@ -28,7 +28,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  event: Ecs;
+  event: TimelineItem;
   eventIdToNoteIds: { [eventId: string]: string[] };
   getNotesByIds: (noteIds: string[]) => Note[];
   onColumnResized: OnColumnResized;
@@ -87,21 +87,22 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       >
         {({ detailsData, loading }) => (
           <div data-test-subj="event">
-            {getRowRenderer(event, rowRenderers).renderRow({
+            {getRowRenderer(event.ecs, rowRenderers).renderRow({
               browserFields,
-              data: event,
+              data: event.ecs,
               width,
               children: (
                 <>
                   <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
                     <EuiFlexItem data-test-subj="event-column-data" grow={false}>
                       <EventColumnView
+                        _id={event._id}
                         actionsColumnWidth={actionsColumnWidth}
                         associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
                         columnHeaders={columnHeaders}
                         columnRenderers={columnRenderers}
                         expanded={!!this.state.expanded[event._id]}
-                        event={event}
+                        data={event.data}
                         eventIdToNoteIds={eventIdToNoteIds}
                         getNotesByIds={getNotesByIds}
                         loading={loading}

@@ -44,7 +44,9 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 
 export type Date = any;
 
-export type DetailItemValue = any;
+export type ToStringArray = any;
+
+export type EsValue = any;
 
 // ====================================================
 // Types
@@ -69,7 +71,9 @@ export interface Source {
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
 
-  EventDetails: EventDetailsData;
+  Timeline: TimelineData;
+
+  TimelineDetails: TimelineDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -283,7 +287,7 @@ export interface EventsData {
 }
 
 export interface KpiItem {
-  value: string;
+  value?: string | null;
 
   count: number;
 }
@@ -694,7 +698,37 @@ export interface FileFields {
   ctime?: Date | null;
 }
 
-export interface EventDetailsData {
+export interface TimelineData {
+  edges: TimelineEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TimelineEdges {
+  node: TimelineItem;
+
+  cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
+}
+
+export interface TimelineDetailsData {
   data?: DetailItem[] | null;
 }
 
@@ -709,7 +743,9 @@ export interface DetailItem {
 
   type: string;
 
-  value: DetailItemValue;
+  values?: ToStringArray | null;
+
+  originalValue?: EsValue | null;
 }
 
 export interface HostsData {
@@ -921,7 +957,18 @@ export interface EventsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface EventDetailsSourceArgs {
+export interface TimelineSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  fieldRequested: string[];
+
+  timerange?: TimerangeInput | null;
+
+  filterQuery?: string | null;
+}
+export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
@@ -1081,7 +1128,9 @@ export namespace SourceResolvers {
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Events?: EventsResolver<EventsData, TypeParent, Context>;
 
-    EventDetails?: EventDetailsResolver<EventDetailsData, TypeParent, Context>;
+    Timeline?: TimelineResolver<TimelineData, TypeParent, Context>;
+
+    TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -1140,12 +1189,29 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type EventDetailsResolver<
-    R = EventDetailsData,
+  export type TimelineResolver<
+    R = TimelineData,
     Parent = Source,
     Context = SecOpsContext
-  > = Resolver<R, Parent, Context, EventDetailsArgs>;
-  export interface EventDetailsArgs {
+  > = Resolver<R, Parent, Context, TimelineArgs>;
+  export interface TimelineArgs {
+    pagination: PaginationInput;
+
+    sortField: SortField;
+
+    fieldRequested: string[];
+
+    timerange?: TimerangeInput | null;
+
+    filterQuery?: string | null;
+  }
+
+  export type TimelineDetailsResolver<
+    R = TimelineDetailsData,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, TimelineDetailsArgs>;
+  export interface TimelineDetailsArgs {
     eventId: string;
 
     indexName: string;
@@ -1895,16 +1961,16 @@ export namespace EventsDataResolvers {
 
 export namespace KpiItemResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = KpiItem> {
-    value?: ValueResolver<string, TypeParent, Context>;
+    value?: ValueResolver<string | null, TypeParent, Context>;
 
     count?: CountResolver<number, TypeParent, Context>;
   }
 
-  export type ValueResolver<R = string, Parent = KpiItem, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type ValueResolver<
+    R = string | null,
+    Parent = KpiItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type CountResolver<R = number, Parent = KpiItem, Context = SecOpsContext> = Resolver<
     R,
     Parent,
@@ -3275,14 +3341,111 @@ export namespace FileFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace EventDetailsDataResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = EventDetailsData> {
+export namespace TimelineDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TimelineData> {
+    edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = TimelineEdges[],
+    Parent = TimelineData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = TimelineData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = TimelineData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelineEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TimelineEdges> {
+    node?: NodeResolver<TimelineItem, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<
+    R = TimelineItem,
+    Parent = TimelineEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = TimelineEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelineItemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TimelineItem> {
+    _id?: IdResolver<string, TypeParent, Context>;
+
+    _index?: IndexResolver<string | null, TypeParent, Context>;
+
+    data?: DataResolver<TimelineNonEcsData[], TypeParent, Context>;
+
+    ecs?: EcsResolver<Ecs, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = TimelineItem, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IndexResolver<
+    R = string | null,
+    Parent = TimelineItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DataResolver<
+    R = TimelineNonEcsData[],
+    Parent = TimelineItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type EcsResolver<R = Ecs, Parent = TimelineItem, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace TimelineNonEcsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TimelineNonEcsData> {
+    field?: FieldResolver<string, TypeParent, Context>;
+
+    value?: ValueResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string,
+    Parent = TimelineNonEcsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = ToStringArray | null,
+    Parent = TimelineNonEcsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelineDetailsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TimelineDetailsData> {
     data?: DataResolver<DetailItem[] | null, TypeParent, Context>;
   }
 
   export type DataResolver<
     R = DetailItem[] | null,
-    Parent = EventDetailsData,
+    Parent = TimelineDetailsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -3299,7 +3462,9 @@ export namespace DetailItemResolvers {
 
     type?: TypeResolver<string, TypeParent, Context>;
 
-    value?: ValueResolver<DetailItemValue, TypeParent, Context>;
+    values?: ValuesResolver<ToStringArray | null, TypeParent, Context>;
+
+    originalValue?: OriginalValueResolver<EsValue | null, TypeParent, Context>;
   }
 
   export type CategoryResolver<R = string, Parent = DetailItem, Context = SecOpsContext> = Resolver<
@@ -3327,8 +3492,13 @@ export namespace DetailItemResolvers {
     Parent,
     Context
   >;
-  export type ValueResolver<
-    R = DetailItemValue,
+  export type ValuesResolver<
+    R = ToStringArray | null,
+    Parent = DetailItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type OriginalValueResolver<
+    R = EsValue | null,
     Parent = DetailItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

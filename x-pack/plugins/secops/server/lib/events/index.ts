@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventDetailsData, EventsData } from '../../graphql/types';
+import { EventsData, TimelineData, TimelineDetailsData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { EventsAdapter, RequestDetailsOptions } from './types';
+import { EventsAdapter, EventsRequestOptions, RequestDetailsOptions } from './types';
 
 export class Events {
   constructor(private readonly adapter: EventsAdapter) {}
@@ -16,10 +16,17 @@ export class Events {
     return await this.adapter.getEvents(req, options);
   }
 
-  public async getEventDetails(
+  public async getTimelineData(
+    req: FrameworkRequest,
+    options: EventsRequestOptions
+  ): Promise<TimelineData> {
+    return await this.adapter.getTimelineData(req, options);
+  }
+
+  public async getTimelineDetails(
     req: FrameworkRequest,
     options: RequestDetailsOptions
-  ): Promise<EventDetailsData> {
-    return await this.adapter.getEventDetails(req, options);
+  ): Promise<TimelineDetailsData> {
+    return await this.adapter.getTimelineDetails(req, options);
   }
 }

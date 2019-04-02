@@ -12,7 +12,7 @@ import * as React from 'react';
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
-import { mockEcsData, TestProviders } from '../../../../../mock';
+import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
 
 import {
@@ -26,8 +26,8 @@ describe('GenericRowRenderer', () => {
     let auditd: Ecs;
     let connectedToRenderer: RowRenderer;
     beforeEach(() => {
-      nonAuditd = cloneDeep(mockEcsData[0]);
-      auditd = cloneDeep(mockEcsData[26]);
+      nonAuditd = cloneDeep(mockTimelineData[0].ecs);
+      auditd = cloneDeep(mockTimelineData[26].ecs);
       connectedToRenderer = createGenericAuditRowRenderer({
         actionName: 'connected-to',
         text: 'some text',
@@ -101,8 +101,8 @@ describe('GenericRowRenderer', () => {
     let fileToRenderer: RowRenderer;
 
     beforeEach(() => {
-      nonAuditd = cloneDeep(mockEcsData[0]);
-      auditdFile = cloneDeep(mockEcsData[27]);
+      nonAuditd = cloneDeep(mockTimelineData[0].ecs);
+      auditdFile = cloneDeep(mockTimelineData[27].ecs);
       fileToRenderer = createGenericFileRowRenderer({
         actionName: 'opened-file',
         text: 'some text',

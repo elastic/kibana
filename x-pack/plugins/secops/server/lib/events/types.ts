@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventDetailsData, EventsData } from '../../graphql/types';
+import { EventsData, TimelineData, TimelineDetailsData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
   getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
-  getEventDetails(req: FrameworkRequest, options: RequestDetailsOptions): Promise<EventDetailsData>;
+  getTimelineData(req: FrameworkRequest, options: EventsRequestOptions): Promise<TimelineData>;
+  getTimelineDetails(
+    req: FrameworkRequest,
+    options: RequestDetailsOptions
+  ): Promise<TimelineDetailsData>;
+}
+
+export interface EventsRequestOptions extends RequestOptions {
+  fieldRequested: string[];
 }
 
 export interface EventSource {

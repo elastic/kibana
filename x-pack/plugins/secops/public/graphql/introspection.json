@@ -194,7 +194,70 @@
             "deprecationReason": null
           },
           {
-            "name": "EventDetails",
+            "name": "Timeline",
+            "description": "",
+            "args": [
+              {
+                "name": "pagination",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "sortField",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "SortField", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "fieldRequested",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                    }
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "timerange",
+                "description": "",
+                "type": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "filterQuery",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "TimelineData", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TimelineDetails",
             "description": "",
             "args": [
               {
@@ -221,7 +284,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "EventDetailsData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "TimelineDetailsData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1779,11 +1842,7 @@
             "name": "value",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3602,7 +3661,201 @@
       },
       {
         "kind": "OBJECT",
-        "name": "EventDetailsData",
+        "name": "TimelineData",
+        "description": "",
+        "fields": [
+          {
+            "name": "edges",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "TimelineEdges", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TimelineEdges",
+        "description": "",
+        "fields": [
+          {
+            "name": "node",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "TimelineItem", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "CursorType", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TimelineItem",
+        "description": "",
+        "fields": [
+          {
+            "name": "_id",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "_index",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "data",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "TimelineNonEcsData", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ecs",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "ECS", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TimelineNonEcsData",
+        "description": "",
+        "fields": [
+          {
+            "name": "field",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ToStringArray",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TimelineDetailsData",
         "description": "",
         "fields": [
           {
@@ -3685,14 +3938,18 @@
             "deprecationReason": null
           },
           {
-            "name": "value",
+            "name": "values",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "DetailItemValue", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "originalValue",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "EsValue", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3704,7 +3961,7 @@
       },
       {
         "kind": "SCALAR",
-        "name": "DetailItemValue",
+        "name": "EsValue",
         "description": "",
         "fields": null,
         "inputFields": null,

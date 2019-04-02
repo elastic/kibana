@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
-import { Ecs } from '../../../../graphql/types';
+import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
@@ -33,7 +33,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  data: Ecs[];
+  data: TimelineItem[];
   eventIdToNoteIds: { [eventId: string]: string[] };
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;

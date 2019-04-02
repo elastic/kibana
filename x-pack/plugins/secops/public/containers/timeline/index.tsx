@@ -9,7 +9,13 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
+import {
+  GetTimelineQuery,
+  PageInfo,
+  SortField,
+  TimelineEdges,
+  TimelineItem,
+} from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
@@ -17,7 +23,7 @@ import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
-  events: Ecs[];
+  events: TimelineItem[];
   id: string;
   loading: boolean;
   loadMore: (cursor: string, tieBreaker: string) => void;
@@ -31,6 +37,7 @@ export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   limit: number;
   sortField: SortField;
+  fields: string[];
 }
 
 export class TimelineQuery extends QueryTemplate<
@@ -39,11 +46,11 @@ export class TimelineQuery extends QueryTemplate<
   GetTimelineQuery.Variables
 > {
   private updatedDate: number = Date.now();
-  private memoizedEvents: (events: EcsEdges[]) => Ecs[];
+  private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
 
   constructor(props: OwnProps) {
     super(props);
-    this.memoizedEvents = memoizeOne(this.getEcsEvent);
+    this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
   }
 
   public render() {
@@ -51,30 +58,29 @@ export class TimelineQuery extends QueryTemplate<
       children,
       id = 'timelineQuery',
       limit,
+      fields,
       filterQuery,
       poll,
       sourceId,
       sortField,
     } = this.props;
+    const variables: GetTimelineQuery.Variables = {
+      fieldRequested: fields,
+      filterQuery: createFilter(filterQuery),
+      sourceId,
+      pagination: { limit, cursor: null, tiebreaker: null },
+      sortField,
+    };
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
         query={timelineQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         pollInterval={poll}
-        variables={{
-          filterQuery: createFilter(filterQuery),
-          sourceId,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          sortField,
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const eventEdges = getOr([], 'source.Events.edges', data);
+          const timelineEdges = getOr([], 'source.Timeline.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
             variables: {
@@ -93,8 +99,11 @@ export class TimelineQuery extends QueryTemplate<
                 source: {
                   ...fetchMoreResult.source,
                   Events: {
-                    ...fetchMoreResult.source.Events,
-                    edges: [...prev.source.Events.edges, ...fetchMoreResult.source.Events.edges],
+                    ...fetchMoreResult.source.Timeline,
+                    edges: [
+                      ...prev.source.Timeline.edges,
+                      ...fetchMoreResult.source.Timeline.edges,
+                    ],
                   },
                 },
               };
@@ -105,9 +114,9 @@ export class TimelineQuery extends QueryTemplate<
             id,
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Events.totalCount', data),
-            pageInfo: getOr({}, 'source.Events.pageInfo', data),
-            events: this.memoizedEvents(eventEdges),
+            totalCount: getOr(0, 'source.Timeline.totalCount', data),
+            pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
+            events: this.memoizedTimelineEvents(JSON.stringify(variables), timelineEdges),
             loadMore: this.wrappedLoadMore,
             getUpdatedAt: this.getUpdatedAt,
           });
@@ -118,5 +127,6 @@ export class TimelineQuery extends QueryTemplate<
 
   private getUpdatedAt = () => this.updatedDate;
 
-  private getEcsEvent = (eventEdges: EcsEdges[]): Ecs[] => eventEdges.map((e: EcsEdges) => e.node);
+  private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
+    timelineEdges.map((e: TimelineEdges) => e.node);
 }

@@ -14,6 +14,7 @@ const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const GTE = new Date('2000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
+const DATA_COUNT = 2;
 const HOST_NAME = 'suricata-sensor-amsterdam';
 const TOTAL_COUNT = 96;
 const EDGE_LENGTH = 2;
@@ -54,7 +55,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
 
-  describe('events', () => {
+  describe('Timeline', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
@@ -74,13 +75,15 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
               sortFieldId: 'timestamp',
               direction: Direction.desc,
             },
+            fieldRequested: ['@timestamp', 'host.name'],
           },
         })
         .then(resp => {
-          const events = resp.data.source.Events;
-          expect(events.edges.length).to.be(EDGE_LENGTH);
-          expect(events.totalCount).to.be(TOTAL_COUNT);
-          expect(events.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
+          const timeline = resp.data.source.Timeline;
+          expect(timeline.edges.length).to.be(EDGE_LENGTH);
+          expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
+          expect(timeline.totalCount).to.be(TOTAL_COUNT);
+          expect(timeline.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
         });
     });
 
@@ -100,14 +103,15 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
               sortFieldId: 'timestamp',
               direction: Direction.desc,
             },
+            fieldRequested: ['@timestamp', 'host.name'],
           },
         })
         .then(resp => {
-          const events = resp.data.source.Events;
-
-          expect(events.edges.length).to.be(EDGE_LENGTH);
-          expect(events.totalCount).to.be(TOTAL_COUNT);
-          expect(events.edges[0]!.node.host!.name).to.be(HOST_NAME);
+          const timeline = resp.data.source.Timeline;
+          expect(timeline.edges.length).to.be(EDGE_LENGTH);
+          expect(timeline.totalCount).to.be(TOTAL_COUNT);
+          expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
+          expect(timeline.edges[0]!.node.ecs.host!.name).to.be(HOST_NAME);
         });
     });
   });

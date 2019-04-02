@@ -6,27 +6,29 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep, get } from 'lodash';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { Ecs } from '../../../../graphql/types';
-import { defaultHeaders, mockEcsData } from '../../../../mock';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { defaultHeaders, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
+import { getValues } from './helpers';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 
 describe('unknown_column_renderer', () => {
-  let mockDatum: Ecs;
+  let mockDatum: TimelineNonEcsData[];
+  const _id = mockTimelineData[0]._id;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockEcsData[0]);
+    mockDatum = cloneDeep(mockTimelineData[0].data);
   });
 
   test('renders correctly against snapshot', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn({
-      columnName: '_id',
-      eventId: mockDatum._id,
-      value: get('_id', mockDatum),
-      field: defaultHeaders.find(h => h.id === '_id')!,
+      columnName: '@timestamp',
+      eventId: _id,
+      values: getValues('@timestamp', mockDatum),
+      field: defaultHeaders.find(h => h.id === '@timestamp')!,
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -39,8 +41,8 @@ describe('unknown_column_renderer', () => {
   test('should return an empty value with a made up column name that does not have a valid data value', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn({
       columnName: 'a made up column name',
-      eventId: mockDatum._id,
-      value: get('a made up column name', mockDatum),
+      eventId: _id,
+      values: getValues('a made up column name', mockDatum),
       field: defaultHeaders.find(h => h.id === 'a made up column name')!,
     });
     const wrapper = mount(<span>{emptyColumn}</span>);
@@ -49,10 +51,10 @@ describe('unknown_column_renderer', () => {
 
   test('should return an empty value with a column name that has valid id value', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn({
-      columnName: '_id',
-      eventId: mockDatum._id,
-      value: get('_id', mockDatum),
-      field: defaultHeaders.find(h => h.id === '_id')!,
+      columnName: '@timestamp',
+      eventId: _id,
+      values: getValues('@timestamp', mockDatum),
+      field: defaultHeaders.find(h => h.id === '@timestamp')!,
     });
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());

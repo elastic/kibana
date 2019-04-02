@@ -10,7 +10,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
-import { mockEcsData, TestProviders } from '../../../../../mock';
+import { mockTimelineData, TestProviders } from '../../../../../mock';
 
 import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
 
@@ -25,7 +25,7 @@ describe('GenericDetails', () => {
             contextId="contextid-123"
             text="generic-text-123"
             browserFields={browserFields}
-            data={mockEcsData[21]}
+            data={mockTimelineData[21].ecs}
           />
         </TestProviders>
       );
@@ -39,7 +39,7 @@ describe('GenericDetails', () => {
             contextId="contextid-123"
             text="generic-text-123"
             browserFields={mockBrowserFields}
-            data={mockEcsData[19]}
+            data={mockTimelineData[19].ecs}
           />
         </TestProviders>
       );
@@ -55,7 +55,7 @@ describe('GenericDetails', () => {
             contextId="contextid-123"
             text="generic-text-123"
             browserFields={mockBrowserFields}
-            data={mockEcsData[0]}
+            data={mockTimelineData[0].ecs}
           />
         </TestProviders>
       );

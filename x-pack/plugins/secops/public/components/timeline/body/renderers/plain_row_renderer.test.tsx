@@ -13,14 +13,14 @@ import { ThemeProvider } from 'styled-components';
 
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
-import { mockEcsData } from '../../../../mock';
+import { mockTimelineData } from '../../../../mock';
 
 import { plainRowRenderer } from '.';
 
 describe('plain_row_renderer', () => {
   let mockDatum: Ecs;
   beforeEach(() => {
-    mockDatum = cloneDeep(mockEcsData[0]);
+    mockDatum = cloneDeep(mockTimelineData[0].ecs);
   });
 
   test('renders correctly against snapshot', () => {

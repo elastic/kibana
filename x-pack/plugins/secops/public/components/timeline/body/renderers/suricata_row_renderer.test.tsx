@@ -11,7 +11,7 @@ import * as React from 'react';
 
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
-import { mockEcsData } from '../../../../mock';
+import { mockTimelineData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
 
 import { suricataRowRenderer } from '.';
@@ -21,8 +21,8 @@ describe('suricata_row_renderer', () => {
   let suricata: Ecs;
 
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockEcsData[0]);
-    suricata = cloneDeep(mockEcsData[2]);
+    nonSuricata = cloneDeep(mockTimelineData[0].ecs);
+    suricata = cloneDeep(mockTimelineData[2].ecs);
   });
 
   test('renders correctly against snapshot', () => {
