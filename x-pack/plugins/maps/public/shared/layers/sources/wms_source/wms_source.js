@@ -11,6 +11,7 @@ import { TileLayer } from '../../tile_layer';
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../../common/i18n_getters';
+import { WmsClient } from './wms_client';
 
 export class WMSSource extends AbstractTMSSource {
 
@@ -81,5 +82,10 @@ export class WMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     return this._descriptor.serviceUrl;
+  }
+
+  getUrlTemplate() {
+    const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
+    return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles);
   }
 }
