@@ -23,6 +23,7 @@ export {
   ClusterClient,
   Headers,
   ScopedClusterClient,
+  ElasticsearchClientConfig,
   APICaller,
 } from './elasticsearch';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';

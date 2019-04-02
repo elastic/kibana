@@ -20,3 +20,4 @@
 export { ElasticsearchServiceSetup, ElasticsearchService } from './elasticsearch_service';
 export { CallAPIOptions, ClusterClient } from './cluster_client';
 export { ScopedClusterClient, Headers, APICaller } from './scoped_cluster_client';
+export { ElasticsearchClientConfig } from './elasticsearch_client_config';

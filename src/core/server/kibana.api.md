@@ -26,8 +26,6 @@ export interface CallAPIOptions {
 
 // @public
 export class ClusterClient {
-    // Warning: (ae-forgotten-export) The symbol "ElasticsearchClientConfig" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     constructor(config: ElasticsearchClientConfig, log: Logger);
     asScoped(req?: {
@@ -47,6 +45,16 @@ export interface DiscoveredPlugin {
     readonly optionalPlugins: ReadonlyArray<PluginName>;
     readonly requiredPlugins: ReadonlyArray<PluginName>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "ElasticsearchConfig" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
+    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
+    sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
+    ssl?: Partial<ElasticsearchConfig['ssl']>;
+};
 
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;

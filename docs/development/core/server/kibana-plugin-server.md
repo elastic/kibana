@@ -25,6 +25,7 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
+|  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) | Config that consumers can pass to the Elasticsearch JS client is complex and includes not only entries from standard <code>elasticsearch.*</code> yaml config, but also some Elasticsearch JS client specific options like <code>keepAlive</code> or <code>plugins</code> (that eventually will be deprecated). |
 |  [Headers](./kibana-plugin-server.headers.md) |  |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 
