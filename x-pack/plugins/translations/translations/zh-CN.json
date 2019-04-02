@@ -7449,7 +7449,6 @@
     "xpack.searchProfiler.platinumLicenseTitle": "白金级",
     "xpack.searchProfiler.profileTree.cumulativeTimeTitle": "累计时间：",
     "xpack.searchProfiler.profileTree.cumulativeTimeTooltip": "索引中所有分片的累计时间。注意：这不是时钟时间，因为分片可以并行执行。",
-    "xpack.searchProfiler.profileTree.header.percentageTimeTitle": "时间百分比",
     "xpack.searchProfiler.profileTree.header.selfTimeTitle": "独自时间",
     "xpack.searchProfiler.profileTree.header.totalTimeTitle": "总时间",
     "xpack.searchProfiler.profileTree.header.typeTitle": "类型",
