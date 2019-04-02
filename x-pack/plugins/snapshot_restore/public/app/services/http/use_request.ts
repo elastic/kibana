@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { httpService } from './index';
 
 interface SendRequest {
@@ -47,6 +47,7 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
+  const isMounted = useRef<boolean>(true);
 
   const request = async () => {
     setError(null);
@@ -56,6 +57,11 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
       method,
       body,
     });
+    // Avoid setting state for components that unmounted before request completed
+    if (!isMounted.current) {
+      return;
+    }
+    // Set state for components that are still mounted
     if (responseError) {
       setError(responseError);
     } else {
@@ -82,5 +88,8 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
     loading,
     data,
     request,
+    setIsMounted: (status: boolean) => {
+      isMounted.current = status;
+    },
   };
 };

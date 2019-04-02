@@ -3,5 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { httpService } from './http';
-export { sendRequest, useRequest } from './use_request';
+export * from './requests';

@@ -5,16 +5,12 @@
  */
 import React, { Fragment, useEffect, useState } from 'react';
 
-import {
-  API_BASE_PATH,
-  PLUGIN_REPOSITORY_TYPES,
-  REPOSITORY_TYPES,
-} from '../../../../common/constants';
+import { PLUGIN_REPOSITORY_TYPES, REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../common/types';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
-import { httpService, useRequest } from '../../services/http';
+import { loadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 
 import { SectionError } from '../section_error';
@@ -59,15 +55,23 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
+  // Load repository types
   const {
     error: repositoryTypesError,
     loading: repositoryTypesLoading,
     data: repositoryTypes,
-  } = useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
-    method: 'get',
-  });
+    setIsMounted,
+  } = loadRepositoryTypes();
 
+  // Set mounted to false when unmounting to avoid in-flight request setting state on unmounted component
+  useEffect(() => {
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
+  // Repository state
   const [repository, setRepository] = useState<Repository>({
     ...originalRepository,
     settings: {
@@ -75,10 +79,9 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     },
   });
 
-  const [availableRepositoryTypes, setAvailableRepositoryTypes] = useState<RepositoryType[]>([]);
-
-  // Get repository type options
+  // Repository types state and load types
   // If existing repository's plugin is no longer installed, let's add it to the list of options for warning UX
+  const [availableRepositoryTypes, setAvailableRepositoryTypes] = useState<RepositoryType[]>([]);
   useEffect(
     () => {
       const repositoryTypeOptions = [...repositoryTypes];

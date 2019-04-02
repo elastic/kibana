@@ -7,13 +7,11 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { API_BASE_PATH } from '../../../../../common/constants';
 import { Repository } from '../../../../../common/types';
-
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, Section } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { httpService, useRequest } from '../../../services/http';
+import { loadRepositories } from '../../../services/http';
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
@@ -42,10 +40,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     loading,
     data: { repositories, verification },
     request: reload,
-  } = useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
-    method: 'get',
-  });
+  } = loadRepositories();
   const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
     undefined
   );

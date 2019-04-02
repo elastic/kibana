@@ -6,14 +6,14 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
-import { httpService, sendRequest } from '../../services/http';
+import { editRepository, loadRepository } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -35,48 +35,44 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
 
-  // Load repository information states
-  const [loadingRepository, setLoadingRepository] = useState<boolean>(true);
-  const [repositoryError, setRepositoryError] = useState<null | any>(null);
+  // Set breadcrumb
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs('repositoryEdit');
+  }, []);
+
+  // Repository state with default empty repository
   const [repository, setRepository] = useState<Repository>({
     name: '',
     type: REPOSITORY_TYPES.fs,
     settings: {},
   });
 
+  // Load repository
+  const {
+    error: repositoryError,
+    loading: loadingRepository,
+    data: repositoryData,
+  } = loadRepository(name);
+
+  // Update repository state when data is loaded
+  useEffect(
+    () => {
+      if (repositoryData && repositoryData.repository) {
+        setRepository(repositoryData.repository);
+      }
+    },
+    [repositoryData]
+  );
+
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>({});
-
-  // Set breadcrumb
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs('repositoryEdit');
-  }, []);
-
-  // Load repository information
-  useEffect(() => {
-    sendRequest({
-      path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
-      method: 'get',
-    }).then(({ data, error }) => {
-      if (error) {
-        setRepositoryError(error);
-      } else {
-        setRepository(data.repository);
-      }
-      setLoadingRepository(false);
-    });
-  }, []);
 
   // Save repository
   const onSave = async (editedRepository: Repository) => {
     setIsSaving(true);
     setErrors({ ...errors, save: null });
-    const { error } = await sendRequest({
-      path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
-      method: 'put',
-      body: editedRepository,
-    });
+    const { error } = await editRepository(editedRepository);
     setIsSaving(false);
     if (error) {
       setErrors({ ...errors, save: error });

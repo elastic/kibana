@@ -6,14 +6,14 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
-import { httpService, sendRequest } from '../../services/http';
+import { addRepository } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -36,11 +36,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
     setIsSaving(true);
     setErrors({ ...errors, save: null });
     const { name } = newRepository;
-    const { error } = await sendRequest({
-      path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
-      method: 'put',
-      body: newRepository,
-    });
+    const { error } = await addRepository(newRepository);
     setIsSaving(false);
     if (error) {
       setErrors({ ...errors, save: error });

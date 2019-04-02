@@ -8,10 +8,10 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
-import { httpService, useRequest } from '../../../../services/http';
+import { loadRepository } from '../../../../services/http';
 import { textService } from '../../../../services/text';
 
-import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
@@ -19,7 +19,7 @@ import {
   SectionError,
   SectionLoading,
 } from '../../../../components';
-import { BASE_PATH, Section } from '../../../../constants';
+import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
 import {
@@ -58,12 +58,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     error,
     loading,
     data: { repository, verification },
-  } = useRequest({
-    path: httpService.addBasePath(
-      `${API_BASE_PATH}repositories/${encodeURIComponent(repositoryName)}`
-    ),
-    method: 'get',
-  });
+  } = loadRepository(repositoryName);
 
   const renderBody = () => {
     if (loading) {
