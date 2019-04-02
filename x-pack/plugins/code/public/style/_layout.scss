@@ -3,6 +3,21 @@
   flex-grow: 1;
 }
 
+.codeContainer__root {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.codeContainer__root--inner {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  height: 100%;
+}
+
 .codeContainer__main {
   width: calc(100% - 16rem);
   flex-grow: 1;
