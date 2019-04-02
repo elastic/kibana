@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { GetIpOverviewQuery, HostEcsFields, IpOverviewType } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 
 import {
   autonomousSystemRenderer,
@@ -21,11 +21,12 @@ import {
   whoisRenderer,
 } from './field_renderers';
 import { mockData } from './mock';
+import AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
 
 describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const wrapper = shallow(
         <TestProviders>
           {locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)}
         </TestProviders>
@@ -38,7 +39,7 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when invalid fields provided', () => {
@@ -47,31 +48,24 @@ describe('Field Renderers', () => {
           {locationRenderer(['source.geo.my_house'], mockData.complete)}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const wrapper = shallow(
         <TestProviders>{dateRenderer('firstSeen', mockData.complete.source!)}</TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it renders emptyTagValue when non-string fieldprovided', () => {
-      const wrapper = mount(
-        <TestProviders>{dateRenderer('geo.location.lat', mockData.complete.source!)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual('--');
-    });
-
     test('it renders emptyTagValue when invalid field provided', () => {
       const wrapper = mount(
         <TestProviders>{dateRenderer('geo.spark_plug', mockData.complete.source!)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
@@ -80,7 +74,7 @@ describe('Field Renderers', () => {
     const halfEmptyMock: AutonomousSystem = { as_org: null, asn: 'Test ASN', ip: '10.10.10.10' };
 
     test('it renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const wrapper = shallow(
         <TestProviders>
           {autonomousSystemRenderer(
             mockData.complete.source!.autonomousSystem!,
@@ -98,14 +92,14 @@ describe('Field Renderers', () => {
           {autonomousSystemRenderer(halfEmptyMock, IpOverviewType.source)}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
       const wrapper = mount(
         <TestProviders>{autonomousSystemRenderer(emptyMock, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
@@ -121,7 +115,7 @@ describe('Field Renderers', () => {
       ip: null,
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const wrapper = shallow(
         <TestProviders>
           {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.10')}
         </TestProviders>
@@ -136,20 +130,20 @@ describe('Field Renderers', () => {
           {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.11')}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
         <TestProviders>{hostNameRenderer(emptyIdHost, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
         <TestProviders>{hostNameRenderer(emptyIpHost, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
@@ -170,7 +164,7 @@ describe('Field Renderers', () => {
       ip: ['10.10.10.10'],
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const wrapper = shallow(
         <TestProviders>
           {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.10')}
         </TestProviders>
@@ -185,32 +179,34 @@ describe('Field Renderers', () => {
           {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.11')}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
         <TestProviders>{hostNameRenderer(emptyIdHost, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
         <TestProviders>{hostNameRenderer(emptyIpHost, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.name is provided', () => {
       const wrapper = mount(
         <TestProviders>{hostNameRenderer(emptyNameHost, IpOverviewType.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual('--');
+      expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
   describe('#whoisRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = mountWithIntl(<TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>);
+      const wrapper = shallowWithIntl(
+        <TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>
+      );
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -218,7 +214,9 @@ describe('Field Renderers', () => {
 
   describe('#reputationRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = mountWithIntl(<TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>);
+      const wrapper = shallowWithIntl(
+        <TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>
+      );
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });

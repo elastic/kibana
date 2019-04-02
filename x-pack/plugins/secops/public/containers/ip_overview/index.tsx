@@ -41,7 +41,8 @@ export const IpOverviewQuery = pure<IpOverviewProps>(
       }}
     >
       {({ data, loading }) => {
-        const ipOverviewData = getOr({}, `source.IpOverview`, data);
+        const init: IpOverviewData = {};
+        const ipOverviewData: IpOverviewData = getOr(init, 'source.IpOverview', data);
         return children({
           id,
           ipOverviewData,

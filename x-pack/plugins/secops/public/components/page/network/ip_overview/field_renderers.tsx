@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getOr, isString } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 
 import {
@@ -18,20 +18,16 @@ import {
 import { DefaultDraggable } from '../../../draggables';
 import { getEmptyTagValue } from '../../../empty_value';
 import { ExternalLinkIcon } from '../../../external_link_icon';
-import { PreferenceFormattedDate } from '../../../formatted_date';
+import { FormattedDate } from '../../../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../../../links';
 
 import { IpOverviewId } from './index';
 import * as i18n from './translations';
 
-export const locationRenderer = (
-  fieldNames: string[],
-  data: IpOverviewData
-): React.ReactElement => {
-  return fieldNames.length > 0 &&
-    fieldNames.every((fieldName: string) => getOr(null, fieldName, data)) ? (
+export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
+  fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
-      {fieldNames.map((fieldName: string, index: number) => {
+      {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
           <React.Fragment key={`${IpOverviewId}-${fieldName}`}>
@@ -50,22 +46,16 @@ export const locationRenderer = (
   ) : (
     getEmptyTagValue()
   );
-};
 
-export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => {
-  const value = getOr(null, fieldName, data);
-  return value && isString(value) ? (
-    <PreferenceFormattedDate value={new Date(value)} />
-  ) : (
-    getEmptyTagValue()
-  );
-};
+export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => (
+  <FormattedDate value={getOr(null, fieldName, data)} fieldName={fieldName} />
+);
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowType: IpOverviewType
-): React.ReactElement => {
-  return as && as.as_org && as.asn ? (
+): React.ReactElement =>
+  as && as.as_org && as.asn ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
@@ -84,10 +74,9 @@ export const autonomousSystemRenderer = (
   ) : (
     getEmptyTagValue()
   );
-};
 
-export const hostIdRenderer = (host: HostEcsFields, ipFilter: string): React.ReactElement => {
-  return host.id && host.ip && host.ip.includes(ipFilter) ? (
+export const hostIdRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
+  host.id && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.id'} value={host.id}>
@@ -98,10 +87,9 @@ export const hostIdRenderer = (host: HostEcsFields, ipFilter: string): React.Rea
   ) : (
     getEmptyTagValue()
   );
-};
 
-export const hostNameRenderer = (host: HostEcsFields, ipFilter: string): React.ReactElement => {
-  return host.id && host.ip && host.ip.includes(ipFilter) ? (
+export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
+  host.id && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.id}>
@@ -114,25 +102,20 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter: string): React.R
   ) : (
     getEmptyTagValue()
   );
-};
 
-export const whoisRenderer = (ip: string) => {
-  return (
-    <>
-      <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>
-      <ExternalLinkIcon />
-    </>
-  );
-};
+export const whoisRenderer = (ip: string) => (
+  <>
+    <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>
+    <ExternalLinkIcon />
+  </>
+);
 
-export const reputationRenderer = (ip: string): React.ReactElement => {
-  return (
-    <>
-      <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
-      <ExternalLinkIcon />
-      <br />
-      <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
-      <ExternalLinkIcon />
-    </>
-  );
-};
+export const reputationRenderer = (ip: string): React.ReactElement => (
+  <>
+    <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
+    <ExternalLinkIcon />
+    <br />
+    <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
+    <ExternalLinkIcon />
+  </>
+);

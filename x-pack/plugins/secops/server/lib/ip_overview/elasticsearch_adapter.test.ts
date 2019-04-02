@@ -6,10 +6,11 @@
 import { IpOverviewType } from '../../graphql/types';
 
 import { getIpOverviewAgg } from './elasticsearch_adapter';
+import { IpOverviewHit } from './types';
 
 describe('elasticsearch_adapter', () => {
-  describe('#getHosts', () => {
-    const responseAggs = {
+  describe('#getIpOverview', () => {
+    const responseAggs: IpOverviewHit = {
       aggregations: {
         destination: {
           doc_count: 882307,
@@ -24,10 +25,6 @@ describe('elasticsearch_adapter', () => {
                 max_score: null,
                 hits: [
                   {
-                    _index: 'filebeat-8.0.0-2019.03.21-000002',
-                    _type: '_doc',
-                    _id: 'u35Py2kBCQofM5eXerHN',
-                    _score: null,
                     _source: {
                       destination: {
                         geo: {
@@ -109,9 +106,6 @@ describe('elasticsearch_adapter', () => {
                 hits: [],
               },
             },
-          },
-          ip_count: {
-            value: 882307,
           },
         },
         source: {
@@ -213,11 +207,24 @@ describe('elasticsearch_adapter', () => {
               },
             },
           },
-          ip_count: {
-            value: 1002234,
-          },
         },
       },
+      _shards: {
+        total: 42,
+        successful: 42,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 71358841,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      took: 392,
+      timeout: 500,
     };
 
     const formattedDestination = {
@@ -303,19 +310,22 @@ describe('elasticsearch_adapter', () => {
     };
 
     test('will return a destination correctly', () => {
-      // @ts-ignore
-      const destination = getIpOverviewAgg(IpOverviewType.destination, responseAggs);
+      const destination = getIpOverviewAgg(
+        IpOverviewType.destination,
+        responseAggs.aggregations.destination!
+      );
       expect(destination).toEqual(formattedDestination);
     });
 
     test('will return a source correctly', () => {
-      // @ts-ignore
-      const destination = getIpOverviewAgg(IpOverviewType.source, responseAggs);
+      const destination = getIpOverviewAgg(
+        IpOverviewType.source,
+        responseAggs.aggregations.source!
+      );
       expect(destination).toEqual(formattedSource);
     });
 
     test('will return an empty source correctly', () => {
-      // @ts-ignore
       const destination = getIpOverviewAgg(IpOverviewType.source, {});
       expect(destination).toEqual(formattedEmptySource);
     });

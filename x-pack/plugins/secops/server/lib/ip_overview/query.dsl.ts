@@ -15,11 +15,6 @@ const getAggs = (type: string, ip: string) => {
         },
       },
       aggs: {
-        ip_count: {
-          value_count: {
-            field: `${type}.ip`,
-          },
-        },
         firstSeen: {
           min: {
             field: '@timestamp',

@@ -32,7 +32,7 @@ describe('IP Overview Component', () => {
         <TestProviders>
           <IpOverview
             loading={false}
-            ip="'10.10.10.10'"
+            ip="10.10.10.10"
             data={mockData.IpOverview}
             type={networkModel.NetworkType.details}
           />
@@ -50,7 +50,7 @@ describe('IP Overview Component', () => {
           <TestProviders store={store}>
             <IpOverview
               loading={false}
-              ip="'10.10.10.10'"
+              ip="10.10.10.10"
               data={mockData.complete}
               type={networkModel.NetworkType.details}
             />

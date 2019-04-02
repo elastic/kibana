@@ -6,13 +6,13 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IpOverviewData } from '../../graphql/types';
-import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
+import { AutonomousSystem, GeoEcsFields, HostEcsFields, IpOverviewData } from '../../graphql/types';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
 import { IpOverviewRequestOptions } from './index';
 import { buildQuery } from './query.dsl';
-import { IpOverviewAdapter, IpOverviewHit } from './types';
+import { IpOverviewAdapter, IpOverviewHit, OverviewHit } from './types';
 
 export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -28,33 +28,30 @@ export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
     );
 
     return {
-      ...getIpOverviewAgg('source', response),
-      ...getIpOverviewAgg('destination', response),
+      ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
+      ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
     };
   }
 }
 
-export const getIpOverviewAgg = (
-  type: string,
-  response: DatabaseSearchResponse<IpOverviewHit, TermAggregation>
-) => {
-  const firstSeen = getOr(null, `aggregations.${type}.firstSeen.value_as_string`, response);
-  const lastSeen = getOr(null, `aggregations.${type}.lastSeen.value_as_string`, response);
+export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) => {
+  const firstSeen = getOr(null, `firstSeen.value_as_string`, overviewHit);
+  const lastSeen = getOr(null, `lastSeen.value_as_string`, overviewHit);
 
-  const autonomousSystem = getOr(
+  const autonomousSystem: AutonomousSystem | null = getOr(
     null,
-    `aggregations.${type}.autonomousSystem.results.hits.hits[0]._source.autonomous_system`,
-    response
+    `autonomousSystem.results.hits.hits[0]._source.autonomous_system`,
+    overviewHit
   );
-  const geoFields = getOr(
+  const geoFields: GeoEcsFields | null = getOr(
     null,
-    `aggregations.${type}.geo.results.hits.hits[0]._source.${type}.geo`,
-    response
+    `geo.results.hits.hits[0]._source.${type}.geo`,
+    overviewHit
   );
-  const hostFields = getOr(
+  const hostFields: HostEcsFields | null = getOr(
     null,
-    `aggregations.${type}.host.results.hits.hits[0]._source.host`,
-    response
+    `host.results.hits.hits[0]._source.host`,
+    overviewHit
   );
 
   return {

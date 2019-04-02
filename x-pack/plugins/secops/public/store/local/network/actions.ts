@@ -32,7 +32,7 @@ export const updateDnsSort = actionCreator<{
 export const updateIsPtrIncluded = actionCreator<{
   isPtrIncluded: boolean;
   networkType: NetworkType;
-}>('UPDATE_DNS_iS_PTR_INCLUDED');
+}>('UPDATE_DNS_IS_PTR_INCLUDED');
 
 export const updateTopNFlowLimit = actionCreator<{
   limit: number;

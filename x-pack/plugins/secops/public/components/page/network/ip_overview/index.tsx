@@ -9,12 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';

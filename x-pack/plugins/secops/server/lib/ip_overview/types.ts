@@ -6,7 +6,7 @@
 
 import { IpOverviewData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
-import { Hit, SearchHit, ShardsResponse, TotalValue } from '../types';
+import { Hit, ShardsResponse, TotalValue } from '../types';
 
 export interface IpOverviewAdapter {
   getIpOverview(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
@@ -18,7 +18,14 @@ interface ResultHit<T> {
     hits: {
       total: TotalValue | number;
       max_score: number | null;
-      hits: Array<{ _source: T }>;
+      hits: Array<{
+        _source: T;
+        sort?: [number];
+        _index?: string;
+        _type?: string;
+        _id?: string;
+        _score?: number | null;
+      }>;
     };
   };
 }
@@ -27,9 +34,9 @@ export interface OverviewHit {
   took?: number;
   timed_out?: boolean;
   _scroll_id?: string;
-  _shards: ShardsResponse;
+  _shards?: ShardsResponse;
   timeout?: number;
-  hits: {
+  hits?: {
     total: number;
     hits: Hit[];
   };
@@ -47,9 +54,25 @@ export interface OverviewHit {
   };
 }
 
-export interface IpOverviewHit extends SearchHit {
+export interface IpOverviewHit {
   aggregations: {
-    destination: OverviewHit;
-    source: OverviewHit;
+    destination?: OverviewHit;
+    source?: OverviewHit;
   };
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    max_score: number | null;
+    hits: [];
+  };
+  took: number;
+  timeout: number;
 }
