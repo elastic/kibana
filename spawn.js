@@ -81,7 +81,7 @@ const start = async function () {
   const cmdSpawnConfig = {
     stdio: ['inherit', 'pipe', 'inherit']
   };
-  let cmdLogs;
+  let cmdLogs = '';
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
