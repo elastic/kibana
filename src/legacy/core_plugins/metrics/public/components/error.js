@@ -17,15 +17,18 @@
  * under the License.
  */
 
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
+
 function ErrorComponent(props) {
   const { error } = props;
   let additionalInfo;
-  const type = _.get(error, 'error.caused_by.type');
+  const type = _.get(error, 'error.caused_by.type') || _.get(error, 'error.type');
   let reason = _.get(error, 'error.caused_by.reason');
   const title = _.get(error, 'error.caused_by.title');
 
@@ -33,33 +36,42 @@ function ErrorComponent(props) {
     reason = _.get(error, 'message');
   }
 
+  if (['runtime_exception', 'illegal_argument_exception'].includes(type)) {
+    reason = _.get(error, 'error.reason').replace(guidPattern, ``);
+  }
+
   if (type === 'script_exception') {
     const scriptStack = _.get(error, 'error.caused_by.script_stack');
     reason = _.get(error, 'error.caused_by.caused_by.reason');
     additionalInfo = (
       <div className="tvbError__additional">
-        <div className="tvbError__reason">{reason}</div>
+        <div>{reason}</div>
         <div className="tvbError__stack">{scriptStack.join('\n')}</div>
       </div>
     );
   } else if (reason) {
     additionalInfo = (
       <div className="tvbError__additional">
-        <div className="tvbError__reason">{reason}</div>
+        {reason}
       </div>
     );
   }
 
   return (
-    <div className="tvbError">
-      <div className="tvbError__title">
+    <div className="visError">
+      <EuiText size="xs" color="subdued">
+        <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+
+        <EuiSpacer size="s" />
+
         {title ||
         <FormattedMessage
           id="tsvb.error.requestForPanelFailedErrorMessage"
           defaultMessage="The request for this panel failed"
         />}
-      </div>
-      {additionalInfo}
+
+        {additionalInfo}
+      </EuiText>
     </div>
   );
 }

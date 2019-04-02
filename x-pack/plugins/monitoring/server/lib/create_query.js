@@ -11,29 +11,8 @@ import { standaloneClusterFilter } from './standalone_clusters';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 /*
- * Builds a type filter syntax that supports backwards compatibility to read
- * from indices before and after `_type` is removed from Elasticsearch
- *
- * TODO: this backwards compatibility helper will only be supported for 5.x-6. This
- * function should be removed in 7.0
- */
-export const createTypeFilter = (type) => {
-  return {
-    bool: {
-      should: [
-        { term: { _type: type } },
-        { term: { type } }
-      ]
-    }
-  };
-};
-
-/*
  * Creates the boilerplace for querying monitoring data, including filling in
  * document UUIDs, start time and end time, and injecting additional filters.
- *
- * Create a bool for types that will query for documents using `_type` (true type) and `type` (as a field)
- * Makes backwards compatibility for types being deprecated in Elasticsearch
  *
  * Options object:
  * @param {String} options.type - `type` field value of the documents
@@ -52,7 +31,7 @@ export function createQuery(options) {
 
   let typeFilter;
   if (type) {
-    typeFilter = createTypeFilter(type);
+    typeFilter = { term: { type } };
   }
 
   let clusterUuidFilter;

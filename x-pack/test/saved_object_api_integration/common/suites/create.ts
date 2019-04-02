@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getUrlPrefix } from '../lib/space_test_utils';
@@ -59,11 +59,11 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       id: resp.body.id,
       migrationVersion: {
-        visualization: '7.0.0',
+        visualization: '7.1.0',
       },
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         title: 'My favorite vis',
       },
@@ -104,7 +104,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       id: resp.body.id,
       type: notSpaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         name: `Can't be contained to a space`,
       },

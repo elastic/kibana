@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
+import { getRenderedHref } from 'x-pack/plugins/apm/public/utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
 
 describe('MLJobLink', () => {
@@ -23,18 +24,18 @@ describe('MLJobLink', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should have correct path props', () => {
-    const location = { search: '' } as Location;
-    const wrapper = shallow(
+  it('should produce the correct URL', async () => {
+    const location = { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location;
+    const href = await getRenderedHref(() => (
       <MLJobLink
         serviceName="myServiceName"
         transactionType="myTransactionType"
         location={location}
       />
-    );
+    ));
 
-    expect(wrapper.prop('href')).toBe(
-      '/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)),time:(from:now-24h,mode:quick,to:now))'
+    expect(href).toEqual(
+      `/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))`
     );
   });
 });

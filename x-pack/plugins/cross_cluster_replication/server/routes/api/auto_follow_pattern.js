@@ -15,14 +15,12 @@ import {
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
-// import { esErrors } from '../../../fixtures'; // Temp for development to test ES error in UI
-
 export const registerAutoFollowPatternRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   /**
-   * Returns a list of all Auto follow patterns
+   * Returns a list of all auto-follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns`,
@@ -32,8 +30,6 @@ export const registerAutoFollowPatternRoutes = (server) => {
     },
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-
-      // throw wrapEsError(esErrors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
 
       try {
         const response = await callWithRequest('ccr.autoFollowPatterns');
@@ -118,7 +114,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Returns a single Auto follow pattern
+   * Returns a single auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
@@ -145,7 +141,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Delete an auto follow pattern
+   * Delete an auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,

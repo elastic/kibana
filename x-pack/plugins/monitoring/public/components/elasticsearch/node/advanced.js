@@ -9,6 +9,7 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
@@ -42,17 +43,19 @@ export const AdvancedNode = ({
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           <NodeDetailStatus stats={nodeSummary} />
-          <EuiSpacer size="m"/>
-          <EuiFlexGrid columns={2} gutterSize="none">
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
+          <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
-              <EuiFlexItem key={index} style={{ width: '50%' }}>
+              <EuiFlexItem key={index}>
                 <MonitoringTimeseriesContainer
                   series={metric}
                   {...props}
                 />
-                <EuiSpacer size="m"/>
+                <EuiSpacer />
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>

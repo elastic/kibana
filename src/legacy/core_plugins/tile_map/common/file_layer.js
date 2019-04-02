@@ -19,6 +19,7 @@
 
 
 import { ORIGIN } from './origin';
+import url from 'url';
 
 export class FileLayer {
 
@@ -84,8 +85,14 @@ export class FileLayer {
   }
 
   getEMSHotLink() {
-    const id = `file/${this.getId()}`;
-    return `${this._emsClient.getLandingPageUrl()}#${id}`;
+    const landingPageString = this._emsClient.getLandingPageUrl();
+    const urlObject = url.parse(landingPageString);
+    urlObject.hash = `file/${this.getId()}`;
+    urlObject.query = {
+      ...urlObject.query,
+      locale: this._emsClient.getLocale()
+    };
+    return url.format(urlObject);
   }
 
   getDefaultFormatType() {

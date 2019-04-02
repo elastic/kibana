@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
@@ -34,9 +34,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const sourceStatus = response.data.source.status;
 
         // shipped default values
+        expect(sourceConfiguration.name).to.be('Default');
         expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
-        expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-        expect(sourceConfiguration.fields.container).to.be('docker.container.id');
+        expect(sourceConfiguration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
+        expect(sourceConfiguration.fields.container).to.be('container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
@@ -72,7 +73,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
         expect(updatedAt).to.be.greaterThan(0);
         expect(configuration.name).to.be('NAME');
         expect(configuration.description).to.be('DESCRIPTION');
@@ -101,13 +102,13 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
         expect(updatedAt).to.be.greaterThan(0);
         expect(configuration.name).to.be('NAME');
         expect(configuration.description).to.be('');
         expect(configuration.metricAlias).to.be('metricbeat-*');
-        expect(configuration.logAlias).to.be('filebeat-*');
-        expect(configuration.fields.container).to.be('docker.container.id');
+        expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.fields.container).to.be('container.id');
         expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
@@ -162,7 +163,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
 
         const { version } = creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
 
         const deletionResponse = await client.mutate<any>({
           mutation: deleteSourceMutation,
@@ -192,7 +193,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -232,7 +233,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.name).to.be('UPDATED_NAME');
         expect(configuration.description).to.be('UPDATED_DESCRIPTION');
@@ -261,7 +263,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -281,10 +283,11 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.metricAlias).to.be('metricbeat-**');
-        expect(configuration.logAlias).to.be('filebeat-*');
+        expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -303,7 +306,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -323,7 +326,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const { version, updatedAt, configuration } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
         expect(configuration.fields.host).to.be('host.name');

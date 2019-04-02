@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -142,7 +142,7 @@ export class MonitoringViewBaseController {
 
   renderReact(component) {
     if (this._isDataInitialized === false) {
-      render(<I18nProvider><PageLoading /></I18nProvider>, document.getElementById(this.reactNodeId));
+      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }

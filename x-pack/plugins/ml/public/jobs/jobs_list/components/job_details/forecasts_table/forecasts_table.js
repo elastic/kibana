@@ -101,7 +101,6 @@ class ForecastsTableUI extends Component {
     });
 
     const appState = {
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,
@@ -160,6 +159,7 @@ class ForecastsTableUI extends Component {
             defaultMessage="No forecasts have been run for this job"
           />)}
           iconType="iInCircle"
+          role="alert"
         >
           {isTimeSeriesViewJob(this.props.job) &&
             <p>

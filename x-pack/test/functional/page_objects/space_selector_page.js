@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -12,7 +12,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'home', 'security']);
+  const PageObjects = getPageObjects(['common', 'header', 'security']);
 
   class SpaceSelectorPage {
     async initTests() {

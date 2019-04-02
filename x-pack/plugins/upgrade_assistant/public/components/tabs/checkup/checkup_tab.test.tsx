@@ -42,7 +42,12 @@ describe('CheckupTab', () => {
     expect(
       shallow(
         <CheckupTab
-          {...{ ...defaultProps, deprecations: undefined, loadingState: LoadingState.Error }}
+          {...{
+            ...defaultProps,
+            deprecations: undefined,
+            loadingState: LoadingState.Error,
+            loadingError: new Error('something bad!'),
+          }}
         />
       )
     ).toMatchSnapshot();

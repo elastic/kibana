@@ -19,6 +19,45 @@
 
 import { migrations } from './migrations';
 
+describe('index-pattern', () => {
+  describe('6.5.0', () => {
+    const migrate = doc => migrations['index-pattern']['6.5.0'](doc);
+
+    it('adds "type" and "typeMeta" properties to object when not declared', () => {
+      expect(
+        migrate({
+          attributes: {},
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": undefined,
+    "typeMeta": undefined,
+  },
+}
+`);
+    });
+
+    it('keeps "type" and "typeMeta" properties as is when declared', () => {
+      expect(
+        migrate({
+          attributes: {
+            type: '123',
+            typeMeta: '123',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": "123",
+    "typeMeta": "123",
+  },
+}
+`);
+    });
+  });
+});
+
 describe('visualization', () => {
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
@@ -189,7 +228,7 @@ Object {
 `);
     });
 
-    it('skips error when "index" is missing from searchSourceJSON', () => {
+    it('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
       const doc = {
         id: '1',
         type: 'visualization',
@@ -262,6 +301,99 @@ Object {
   "type": "visualization",
 }
 `);
+    });
+
+    it('extracts index patterns from the filter', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: { index: 'my-index', foo: true },
+                },
+              ],
+            }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+      /* eslint-enable max-len */
+    });
+
+    it('extracts index patterns from controls', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          foo: true,
+          visState: JSON.stringify({
+            bar: false,
+            params: {
+              controls: [
+                {
+                  bar: true,
+                  indexPattern: 'pattern*',
+                },
+                {
+                  foo: true,
+                },
+              ],
+            },
+          }),
+        },
+      };
+      const migratedDoc = migrate(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -634,7 +766,7 @@ Object {
 `);
     });
 
-    test('skips error when "index" is missing from searchSourceJSON', () => {
+    test('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
       const doc = {
         id: '1',
         type: 'dashboard',
@@ -715,6 +847,62 @@ Object {
   "type": "dashboard",
 }
 `);
+    });
+
+    test('extracts index patterns from filter', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: {
+                    foo: true,
+                    index: 'my-index',
+                  },
+                },
+              ],
+            }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+      /* eslint-enable max-len */
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -950,7 +1138,7 @@ Object {
 `);
     });
 
-    test('skips error when "index" is missing from searchSourceJSON', () => {
+    test('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
       const doc = {
         id: '123',
         type: 'search',
@@ -1008,6 +1196,51 @@ Object {
   "type": "search",
 }
 `);
+    });
+
+    test('extracts index patterns from filter', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: {
+                    foo: true,
+                    index: 'my-index',
+                  },
+                },
+              ],
+            }),
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+  },
+  "id": "123",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "search",
+}
+`);
+      /* eslint-enable max-len */
     });
   });
 });

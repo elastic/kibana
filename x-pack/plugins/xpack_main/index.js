@@ -13,6 +13,7 @@ import {
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
+import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
 import {
   xpackInfoRoute,
   telemetryRoute,
@@ -33,15 +34,7 @@ export { callClusterFactory } from './server/lib/call_cluster_factory';
  * @param {Object} config Kibana configuration object.
  */
 function isTelemetryEnabled(config) {
-  const enabled = config.get('xpack.xpack_main.telemetry.enabled');
-
-  // Remove deprecated 'report_stats' in 7.0
-  if (enabled) {
-    // if xpack.monitoring.enabled is false, then report_stats cannot be defined
-    return !config.get('xpack.monitoring.enabled') || config.get('xpack.monitoring.report_stats');
-  }
-
-  return enabled;
+  return config.get('xpack.xpack_main.telemetry.enabled');
 }
 
 export const xpackMain = (kibana) => {
@@ -133,6 +126,7 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
+      server.usage.collectorSet.register(getLocalizationUsageCollector(server));
     }
   });
 };

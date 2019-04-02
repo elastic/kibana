@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'ui/angular_ui_select';
 import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
 import { getCreateRecognizerJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
@@ -24,6 +25,7 @@ import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
+import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
@@ -86,7 +88,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
       combinedQuery } = createSearchItems();
 
     const pageTitle = (savedSearch.id !== undefined) ?
@@ -144,8 +145,6 @@ module
       kibanaObjects: {},
       start: 0,
       end: 0,
-      query,
-      filters: [],
       useFullIndexData: true,
       startDatafeedAfterSave: true,
       useDedicatedIndex: false,
@@ -156,7 +155,6 @@ module
     $scope.resetJob = function () {
       $scope.overallState = SAVE_STATE.NOT_SAVED;
       $scope.formConfig.jobs = [];
-      $scope.formConfig.filters = [];
       $scope.formConfig.kibanaObjects = {};
 
       loadJobConfigs();
@@ -212,7 +210,8 @@ module
                   title: o.title,
                   saveState: SAVE_STATE.NOT_SAVED,
                   config: o.config,
-                  exists: false
+                  exists: false,
+                  errors: [],
                 };
               });
             });
@@ -342,6 +341,9 @@ module
                       obj.saveState = SAVE_STATE.SAVED;
                     } else {
                       obj.saveState = SAVE_STATE.FAILED;
+                      if (kibanaObjectResult.error && kibanaObjectResult.error.message) {
+                        obj.errors.push(kibanaObjectResult.error.message);
+                      }
                     }
                   } else {
                     obj.saveState = SAVE_STATE.FAILED;
@@ -357,6 +359,23 @@ module
               });
             }
             resolve();
+          })
+          .catch((err) => {
+            console.log('Error setting up module', err);
+            toastNotifications.addWarning({
+              title: i18n('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningTitle', {
+                defaultMessage: 'Error setting up module {moduleId}',
+                values: { moduleId }
+              }),
+              text: i18n('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningDescription', {
+                defaultMessage: 'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+                values: {
+                  count: $scope.formConfig.jobs.length
+                }
+              })
+            });
+            $scope.overallState = SAVE_STATE.FAILED;
+            $scope.$applyAsync();
           });
       });
     }

@@ -165,15 +165,6 @@ interface RequestHeaders {
   [name: string]: string;
 }
 
-interface ElasticsearchClientLogging {
-  error(err: Error): void;
-  warning(message: string): void;
-  trace(method: string, options: { path: string }, query?: string, statusCode?: number): void;
-  info(): void;
-  debug(): void;
-  close(): void;
-}
-
 interface AssistantAPIClientParams extends GenericParams {
   path: '/_migration/assistance';
   method: 'GET';
@@ -202,12 +193,15 @@ export interface DeprecationInfo {
   details?: string;
 }
 
+export interface IndexSettingsDeprecationInfo {
+  [indexName: string]: DeprecationInfo[];
+}
+
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
+  ml_settings: DeprecationInfo[];
   node_settings: DeprecationInfo[];
-  index_settings: {
-    [indexName: string]: DeprecationInfo[];
-  };
+  index_settings: IndexSettingsDeprecationInfo;
 }
 
 export interface CallClusterOptions {
@@ -371,7 +365,7 @@ export interface CallClusterWithRequest {
   <T = any>(
     request: Request,
     endpoint: string,
-    clientParams: any,
+    clientParams?: any,
     options?: CallClusterOptions
   ): Promise<T>;
 }
@@ -524,13 +518,11 @@ export interface CallCluster {
   >;
 
   // Catch-all definition
-  <T = any>(endpoint: string, clientParams: any, options?: CallClusterOptions): Promise<T>;
+  <T = any>(endpoint: string, clientParams?: any, options?: CallClusterOptions): Promise<T>;
 }
 
 export interface ElasticsearchPlugin {
-  ElasticsearchClientLogging: ElasticsearchClientLogging;
   getCluster(name: string): Cluster;
   createCluster(name: string, config: ClusterConfig): Cluster;
-  filterHeaders(originalHeaders: RequestHeaders, headersToKeep: string[]): void;
   waitUntilReady(): Promise<void>;
 }

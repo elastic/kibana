@@ -7,9 +7,10 @@
 import chrome from 'ui/chrome';
 
 import { initIndexPatternCreation } from './register';
+import { CONFIG_ROLLUPS } from '../../common';
 
 const uiSettings = chrome.getUiSettingsClient();
-const isRollupIndexPatternsEnabled = uiSettings.get('rollups:enableIndexPatterns');
+const isRollupIndexPatternsEnabled = uiSettings.get(CONFIG_ROLLUPS);
 
 if (isRollupIndexPatternsEnabled) {
   initIndexPatternCreation();

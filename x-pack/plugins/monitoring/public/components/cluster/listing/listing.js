@@ -22,7 +22,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
@@ -292,7 +292,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
             defaultMessage="Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring."
             values={{
               getLicenseInfoLink: (
-                <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                <a href="https://www.elastic.co/subscriptions" target="_blank">
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
                     defaultMessage="Get a license with full functionality"
@@ -340,7 +340,7 @@ const handleClickInvalidLicense = (scope, clusterName) => {
                 </a>
               ),
               getLicenseInfoLink: (
-                <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                <a href="https://www.elastic.co/subscriptions" target="_blank">
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel"
                     defaultMessage="get a license with full functionality"
@@ -422,45 +422,46 @@ export class Listing extends Component {
     const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
 
     return (
-      <I18nProvider>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
-              <EuiMonitoringTable
-                className="clusterTable"
-                rows={clusters}
-                columns={getColumns(
-                  angular.showLicenseExpiration,
-                  _changeCluster,
-                  _handleClickIncompatibleLicense,
-                  _handleClickInvalidLicense
-                )}
-                rowProps={item => {
-                  return {
-                    'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                  };
-                }}
-                sorting={{
-                  ...sorting,
-                  sort: {
-                    ...sorting.sort,
-                    field: 'cluster_name'
-                  }
-                }}
-                pagination={pagination}
-                search={{
-                  box: {
-                    incremental: true,
-                    placeholder: angular.scope.filterText
-                  },
-                }}
-                onTableChange={onTableChange}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
+            <EuiMonitoringTable
+              className="clusterTable"
+              rows={clusters}
+              columns={getColumns(
+                angular.showLicenseExpiration,
+                _changeCluster,
+                _handleClickIncompatibleLicense,
+                _handleClickInvalidLicense
+              )}
+              rowProps={item => {
+                return {
+                  'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                };
+              }}
+              sorting={{
+                ...sorting,
+                sort: {
+                  ...sorting.sort,
+                  field: 'cluster_name'
+                }
+              }}
+              pagination={pagination}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: angular.scope.filterText
+                },
+              }}
+              onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['cluster_name']
+              }}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

@@ -16,7 +16,7 @@ FeatureCatalogueRegistryProvider.register(() => ({
   description: i18n.translate('xpack.uptime.featureCatalogueDescription', {
     defaultMessage: 'Perform endpoint health checks and uptime monitoring.',
   }),
-  icon: 'heartbeatApp',
+  icon: 'uptimeApp',
   path: `uptime#/`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateSeeds rejects empty seeds when there's no input 1`] = `
+<FormattedMessage
+  defaultMessage="At least one seed node is required."
+  id="xpack.remoteClusters.form.errors.seedMissing"
+  values={Object {}}
+/>
+`;

@@ -19,15 +19,10 @@ exports[`ActionsSection renders with no actions selected 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -47,7 +42,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip
@@ -70,15 +64,10 @@ exports[`ActionsSection renders with no actions selected 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -98,7 +87,6 @@ exports[`ActionsSection renders with no actions selected 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip
@@ -138,15 +126,10 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -166,7 +149,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip
@@ -189,15 +171,10 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -217,7 +194,6 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip
@@ -257,15 +233,10 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -285,7 +256,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip
@@ -308,15 +278,10 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
   />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCheckbox
@@ -336,7 +301,6 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiIconTip

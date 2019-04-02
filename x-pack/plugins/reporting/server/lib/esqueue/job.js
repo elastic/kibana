@@ -13,23 +13,22 @@ import { isPlainObject } from 'lodash';
 const puid = new Puid();
 
 export class Job extends events.EventEmitter {
-  constructor(queue, index, type, payload, options = {}) {
-    if (typeof type !== 'string') throw new Error('Type must be a string');
+  constructor(queue, index, jobtype, payload, options = {}) {
+    if (typeof jobtype !== 'string') throw new Error('Jobtype must be a string');
     if (!isPlainObject(payload)) throw new Error('Payload must be a plain object');
 
     super();
 
     this.queue = queue;
-    this.client = options.client || this.queue.client;
+    this._client = this.queue.client;
     this.id = puid.generate();
     this.index = index;
-    this.jobtype = type;
+    this.jobtype = jobtype;
     this.payload = payload;
     this.created_by = options.created_by || false;
     this.timeout = options.timeout || 10000;
     this.maxAttempts = options.max_attempts || 3;
     this.priority = Math.max(Math.min(options.priority || 10, 20), -20);
-    this.doctype = options.doctype || constants.DEFAULT_SETTING_DOCTYPE;
     this.indexSettings = options.indexSettings || {};
     this.browser_type = options.browser_type;
 
@@ -48,7 +47,6 @@ export class Job extends events.EventEmitter {
 
     const indexParams = {
       index: this.index,
-      type: this.doctype,
       id: this.id,
       body: {
         jobtype: this.jobtype,
@@ -75,18 +73,18 @@ export class Job extends events.EventEmitter {
       indexParams.headers = options.headers;
     }
 
-    this.ready = createIndex(this.client, this.index, this.doctype, this.indexSettings)
-      .then(() => this.client.index(indexParams))
+    this.ready = createIndex(this._client, this.index, this.indexSettings)
+      .then(() => this._client.callWithInternalUser('index', indexParams))
       .then((doc) => {
         this.document = {
           id: doc._id,
-          type: doc._type,
           index: doc._index,
-          version: doc._version,
+          _seq_no: doc._seq_no,
+          _primary_term: doc._primary_term,
         };
         this.debug(`Job created in index ${this.index}`);
 
-        return this.client.indices.refresh({
+        return this._client.callWithInternalUser('indices.refresh', {
           index: this.index
         }).then(() => {
           this.debug(`Job index refreshed ${this.index}`);
@@ -107,9 +105,8 @@ export class Job extends events.EventEmitter {
   get() {
     return this.ready
       .then(() => {
-        return this.client.get({
+        return this._client.callWithInternalUser('get', {
           index: this.index,
-          type: this.doctype,
           id: this.id
         });
       })
@@ -117,8 +114,8 @@ export class Job extends events.EventEmitter {
         return Object.assign(doc._source, {
           index: doc._index,
           id: doc._id,
-          type: doc._type,
-          version: doc._version,
+          _seq_no: doc._seq_no,
+          _primary_term: doc._primary_term,
         });
       });
   }
@@ -127,7 +124,6 @@ export class Job extends events.EventEmitter {
     return {
       id: this.id,
       index: this.index,
-      type: this.doctype,
       jobtype: this.jobtype,
       created_by: this.created_by,
       payload: this.payload,

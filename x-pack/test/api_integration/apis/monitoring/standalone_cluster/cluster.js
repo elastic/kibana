@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import clusterFixture from './fixtures/cluster';
 
 export default function ({ getService }) {
@@ -14,8 +14,8 @@ export default function ({ getService }) {
   describe('cluster', () => {
     const archive = 'monitoring/standalone_cluster';
     const timeRange = {
-      min: '2019-01-15T19:00:49.104Z',
-      max: '2019-01-15T19:59:49.104Z'
+      min: '2019-02-04T16:52:11.741Z',
+      max: '2019-02-04T17:52:11.741Z'
     };
 
     before('load archive', () => {

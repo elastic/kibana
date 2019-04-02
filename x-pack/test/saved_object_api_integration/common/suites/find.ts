@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -63,11 +63,12 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'globaltype',
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             name: 'My favorite global object',
           },
           references: [],
+          updated_at: '2017-09-21T18:59:16.270Z',
         },
       ],
     });
@@ -96,11 +97,21 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             title: 'Count of requests',
           },
-          references: [],
+          migrationVersion: {
+            visualization: '7.1.0',
+          },
+          references: [
+            {
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+            },
+          ],
+          updated_at: '2017-09-21T18:51:23.794Z',
         },
       ],
     });
@@ -125,7 +136,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
-      it(`not space aware type should return ${tests.spaceAwareType.statusCode} with ${
+      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
         tests.notSpaceAwareType.description
       }`, async () =>
         await supertest
@@ -165,7 +176,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           tests.unknownSearchField.description
         }`, async () =>
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));

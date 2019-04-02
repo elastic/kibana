@@ -4,7 +4,7 @@
       "DELETE"
     ],
     "patterns": [
-      "_xpack/rollup/job/{id}"
+      "_rollup/job/{id}"
     ]
   }
 }

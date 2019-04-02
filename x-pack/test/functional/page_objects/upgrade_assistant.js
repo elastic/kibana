@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function UpgradeAssistantProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -65,6 +65,14 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
         const summaryEl = await testSubjects.find('upgradeAssistantIssueSummary');
         const summaryElText = await summaryEl.getVisibleText();
         expect(summaryElText).to.eql(summary);
+      });
+    }
+
+    async expectTelemetryHasFinish() {
+      return await retry.try(async () => {
+        log.debug('expectTelemetryHasFinish');
+        const isTelemetryFinished = !(await testSubjects.exists('upgradeAssistantTelemetryRunning'));
+        expect(isTelemetryFinished).to.equal(true);
       });
     }
   }

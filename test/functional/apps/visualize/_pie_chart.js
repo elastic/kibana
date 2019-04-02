@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('select bucket Split Slices');
       await PageObjects.visualize.clickBucket('Split Slices');
       log.debug('Click aggregation Histogram');
@@ -86,8 +85,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug(`Set absolute time range from "${fromTime}" to "${toTime}"`);
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         log.debug('Click aggregation Terms');
@@ -191,8 +189,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         log.debug('Click aggregation Filters');
@@ -207,19 +204,81 @@ export default function ({ getService, getPageObjects }) {
         const emptyFromTime = '2016-09-19 06:31:44.000';
         const emptyToTime = '2016-09-23 18:31:44.000';
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
-        await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
+        await PageObjects.timePicker.setAbsoluteRange(emptyFromTime, emptyToTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.expectError();
       });
     });
     describe('multi series slice', () => {
-      it('should still showing pie chart when a subseries have zero data', async function () {
+      before(async () => {
+        log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Histogram');
+        await PageObjects.visualize.selectAggregation('Histogram');
+        log.debug('Click field memory');
+        await PageObjects.visualize.selectField('memory');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1003);
+        log.debug('setNumericInterval 4000');
+        await PageObjects.visualize.setNumericInterval('40000');
+        log.debug('Toggle previous editor');
+        await PageObjects.visualize.toggleAggregationEditor(2);
+        await PageObjects.visualize.clickAddBucket();
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('geo.dest');
+        await PageObjects.visualize.clickGo();
+      });
+
+      it ('should show correct chart', async () => {
+        const expectedTableData =  [ [ '0', '55', 'CN', '14' ], [ '0', '55', 'IN', '9' ], [ '0', '55', 'MX', '3' ],
+          [ '0', '55', 'US', '3' ], [ '0', '55', 'BR', '2' ], [ '40,000', '50', 'CN', '7' ],
+          [ '40,000', '50', 'IN', '7' ], [ '40,000', '50', 'US', '5' ], [ '40,000', '50', 'MY', '3' ],
+          [ '40,000', '50', 'ET', '2' ], [ '80,000', '41', 'CN', '9' ], [ '80,000', '41', 'IN', '4' ],
+          [ '80,000', '41', 'US', '4' ], [ '80,000', '41', 'BR', '3' ], [ '80,000', '41', 'IT', '2' ],
+          [ '120,000', '43', 'CN', '8' ], [ '120,000', '43', 'IN', '5' ], [ '120,000', '43', 'US', '4' ],
+          [ '120,000', '43', 'JP', '3' ], [ '120,000', '43', 'RU', '3' ], [ '160,000', '44', 'CN', '15' ],
+          [ '160,000', '44', 'IN', '5' ], [ '160,000', '44', 'IQ', '2' ], [ '160,000', '44', 'JP', '2' ],
+          [ '160,000', '44', 'NG', '2' ], [ '200,000', '40', 'IN', '7' ], [ '200,000', '40', 'CN', '6' ],
+          [ '200,000', '40', 'MX', '3' ], [ '200,000', '40', 'BR', '2' ], [ '200,000', '40', 'ID', '2' ],
+          [ '240,000', '46', 'CN', '6' ], [ '240,000', '46', 'IN', '6' ], [ '240,000', '46', 'US', '6' ],
+          [ '240,000', '46', 'NG', '3' ], [ '240,000', '46', 'CH', '2' ], [ '280,000', '39', 'CN', '11' ],
+          [ '280,000', '39', 'IN', '5' ], [ '280,000', '39', 'BR', '2' ], [ '280,000', '39', 'IT', '2' ],
+          [ '280,000', '39', 'NG', '2' ], [ '320,000', '40', 'CN', '7' ], [ '320,000', '40', 'US', '6' ],
+          [ '320,000', '40', 'MX', '4' ], [ '320,000', '40', 'BD', '2' ], [ '320,000', '40', 'ID', '2' ],
+          [ '360,000', '47', 'IN', '8' ], [ '360,000', '47', 'CN', '6' ], [ '360,000', '47', 'US', '4' ],
+          [ '360,000', '47', 'BD', '3' ], [ '360,000', '47', 'BR', '2' ] ];
+
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+
+      it('should correctly filter on legend', async () => {
+        const expectedTableData = [ '0', 'CN', '40,000', 'CN', '80,000', 'CN', '120,000', 'CN', '160,000', 'CN',
+          '200,000', 'CN', '240,000', 'CN', '280,000', 'CN', '320,000', 'CN', '360,000', 'CN' ];
+        await PageObjects.visualize.filterLegend('CN');
+        await PageObjects.visualize.waitForVisualization();
+        await pieChart.expectPieChartLabels(expectedTableData);
+        await filterBar.removeFilter('geo.dest');
+        await PageObjects.visualize.waitForVisualization();
+      });
+
+      it('should still showing pie chart when a subseries have zero data', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         log.debug('Click aggregation Filters');
@@ -248,8 +307,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Chart');
         await PageObjects.visualize.selectAggregation('Terms');

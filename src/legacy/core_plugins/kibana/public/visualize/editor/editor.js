@@ -23,10 +23,13 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
+import 'ui/search_bar';
+import 'ui/apply_filters';
+import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -43,7 +46,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
-import { getVisualizeLoader } from '../../../../../../ui/public/visualize/loader';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -118,6 +121,7 @@ function VisEditor(
   AppState,
   $window,
   $injector,
+  indexPatterns,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -134,7 +138,7 @@ function VisEditor(
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
-  // vis is instance of src/ui/public/vis/vis.js.
+  // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
 
@@ -179,6 +183,13 @@ function VisEditor(
         });
       };
 
+      const confirmButtonLabel = $scope.isAddToDashMode() ? (
+        <FormattedMessage
+          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+          defaultMessage="Save and add to dashboard"
+        />
+      ) : null;
+
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
@@ -186,6 +197,7 @@ function VisEditor(
           title={savedVis.title}
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
+          confirmButtonLabel={confirmButtonLabel}
         />);
       showSaveModal(saveModal);
     }
@@ -287,10 +299,39 @@ function VisEditor(
     return appState;
   }());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.onCancelApplyFilters = () => {
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.onApplyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.onApplyFilters(filters);
+    }
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.indexPattern = vis.indexPattern;
+    if (vis.indexPattern) {
+      $scope.indexPattern = vis.indexPattern;
+    } else {
+      indexPatterns.getDefault().then(defaultIndexPattern => {
+        $scope.indexPattern = defaultIndexPattern;
+      });
+    }
+
     $scope.searchSource = searchSource;
     $scope.state = $state;
 
@@ -303,6 +344,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showQueryBar = () => {
+      return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
@@ -311,29 +356,37 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (newQuery) => {
+      const query = migrateLegacyQuery(newQuery);
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
-
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
-        defaultMessage: '{visTitle} (unsaved)',
-        values: {
-          visTitle: savedVis.title,
-        },
-      });
-    };
 
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-    ], function ([index, requiresTimePicker]) {
+      $scope.showQueryBar,
+    ], function ([index, requiresTimePicker, showQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-      } else {
+      if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
+      }
+      else if (showTimeFilter) {
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else {
+        timefilter.disableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
 
@@ -348,11 +401,16 @@ function VisEditor(
       }
     };
 
-    timefilter.enableAutoRefreshSelector();
+    const updateRefreshInterval = () => {
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+    };
+
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      $scope.filters = queryFilter.getFilters();
       $scope.fetch();
     });
 
@@ -385,9 +443,17 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
-    $state.query = migrateLegacyQuery(query);
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
+    $state.query = query;
     $scope.fetch();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   /**

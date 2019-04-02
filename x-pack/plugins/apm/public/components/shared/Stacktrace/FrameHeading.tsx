@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import { colors, fontFamilyCode, px, units } from '../../../style/variables';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   padding: ${px(units.half)};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 const LibraryFrameFileDetail = styled.span`
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
 `;
 const AppFrameFileDetail = styled.span`
   font-weight: bold;
-  color: ${colors.black};
+  color: ${theme.euiColorFullShade};
 `;
 
 interface Props {

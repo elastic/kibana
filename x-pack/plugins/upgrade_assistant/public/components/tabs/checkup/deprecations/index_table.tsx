@@ -135,7 +135,7 @@ export class IndexDeprecationTableUI extends React.Component<
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.reindex)) {
+    if (!indices.find(i => i.reindex === true)) {
       return null;
     }
 
@@ -143,7 +143,7 @@ export class IndexDeprecationTableUI extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
-            return <ReindexButton indexName={indexDep.index} />;
+            return <ReindexButton indexName={indexDep.index!} />;
           },
         },
       ],

@@ -16,63 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
-import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { getAnnotationRequestParams } from './annorations/get_request_params';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
     annotation.time_field &&
     annotation.fields &&
     annotation.icon &&
-    annotation.template;
+    annotation.template &&
+    !annotation.hidden;
 }
 
-export default async (req, panel, esQueryConfig) => {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const bodiesPromises = panel.annotations
-    .filter(validAnnotation)
-    .map(annotation => {
-      return getAnnotationBody(req, panel, annotation, esQueryConfig);
-    });
-  const bodies = await Promise.all(bodiesPromises);
-  if (!bodies.length) {
-    return {
-      responses: [],
-    };
-  }
+export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
+  const panelIndexPattern = panel.index_pattern;
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const annotations = panel.annotations.filter(validAnnotation);
+
+  const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
+  const body = (await Promise.all(bodiesPromises))
+    .reduce((acc, items) => acc.concat(items), []);
+
+  if (!body.length) return { responses: [] };
+
   try {
-    const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
-    const resp = await callWithRequest(req, 'msearch', {
-      ignore_throttled: !includeFrozen,
-      rest_total_hits_as_int: true,
-      body: bodies.reduce((acc, item) => acc.concat(item), [])
-    });
-    const results = {};
-    panel.annotations
-      .filter(validAnnotation)
-      .forEach((annotation, index) => {
-        const data = resp.responses[index];
-        results[annotation.id] = handleAnnotationResponse(data, annotation);
-      });
-    return results;
+    const responses = await searchRequest.search({ body });
+
+    return annotations
+      .reduce((acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
+
+        return acc;
+      }, {});
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-};
-
-async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
-  const indexPatternString = annotation.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-  const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
-  request.timeout = '90s';
-  return [
-    {
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    },
-    request,
-  ];
 }

@@ -10,12 +10,6 @@ kbn-management-objects-view {
   display: block;
 }
 
-// SASSTODO: Remove when Kibana has a proper background color
-kbn-management-objects, kbn-management-app, .tab-management {
-  background: $euiColorLightestShade;
-  flex-grow: 1;
-}
-
 #management-landing {
   display: flex;
 }

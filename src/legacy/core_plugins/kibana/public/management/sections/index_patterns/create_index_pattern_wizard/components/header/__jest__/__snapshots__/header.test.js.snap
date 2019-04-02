@@ -25,20 +25,14 @@ exports[`Header should render a different name, prompt, and beta tag if provided
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -87,20 +81,14 @@ exports[`Header should render normally 1`] = `
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -143,20 +131,14 @@ exports[`Header should render without including system indices 1`] = `
   </EuiTitle>
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor

@@ -5,6 +5,7 @@
  */
 import * as t from 'io-ts';
 import { configBlockSchemas } from './config_schemas';
+import { DateFromString } from './io_ts_types';
 
 export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 
@@ -39,7 +40,7 @@ export interface ConfigurationBlock
 
 export interface CMBeat {
   id: string;
-  config_status: 'OK' | 'UNKNOWN' | 'ERROR';
+  status?: BeatEvent;
   enrollment_token: string;
   active: boolean;
   access_token: string;
@@ -103,4 +104,33 @@ export interface BeatTag
   id: string;
   // Used by the UI and api when a tag exists but is an invalid option
   disabled?: boolean;
+}
+
+export const RuntimeBeatEvent = t.interface(
+  {
+    type: t.union([t.literal('STATE'), t.literal('ERROR')]),
+    beat: t.union([t.undefined, t.string]),
+    timestamp: DateFromString,
+    event: t.type({
+      type: t.union([
+        t.literal('RUNNING'),
+        t.literal('STARTING'),
+        t.literal('IN_PROGRESS'),
+        t.literal('CONFIG'),
+        t.literal('FAILED'),
+        t.literal('STOPPED'),
+      ]),
+      message: t.string,
+      uuid: t.union([t.undefined, t.string]),
+    }),
+  },
+  'BeatEvent'
+);
+export interface BeatEvent
+  extends Pick<
+    t.TypeOf<typeof RuntimeBeatEvent>,
+    Exclude<keyof t.TypeOf<typeof RuntimeBeatEvent>, 'timestamp'>
+  > {
+  beat: string;
+  timestamp: Date;
 }

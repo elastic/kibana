@@ -23,7 +23,6 @@ import {
   extractHtmlMessages,
   extractCodeMessages,
   extractPugMessages,
-  extractHandlebarsMessages,
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
@@ -40,30 +39,6 @@ function addMessageToMap(targetMap, key, value, reporter) {
   } else {
     targetMap.set(key, value);
   }
-}
-
-export function filterPaths(inputPaths, paths) {
-  const availablePaths = Object.values(paths);
-  const pathsForExtraction = new Set();
-
-  for (const inputPath of inputPaths) {
-    const normalizedPath = normalizePath(inputPath);
-
-    // If input path is the sub path of or equal to any available path, include it.
-    if (
-      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
-    ) {
-      pathsForExtraction.add(normalizedPath);
-    } else {
-      // Otherwise go through all available paths and see if any of them is the sub
-      // path of the input path (empty normalized path corresponds to root or above).
-      availablePaths
-        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
-        .forEach(ePath => pathsForExtraction.add(ePath));
-    }
-  }
-
-  return [...pathsForExtraction];
 }
 
 function filterEntries(entries, exclude) {
@@ -88,13 +63,13 @@ See .i18nrc.json for the list of supported namespaces.`)
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
+  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
     ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
   });
 
-  const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, pugEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
 
@@ -102,15 +77,13 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.pug')) {
         paths.pugEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
-        paths.hbsEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
+    { htmlEntries: [], codeEntries: [], pugEntries: [] }
   );
 
   await Promise.all(
@@ -118,7 +91,6 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
       [htmlEntries, extractHtmlMessages],
       [codeEntries, extractCodeMessages],
       [pugEntries, extractPugMessages],
-      [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
         filterEntries(entries, config.exclude).map(async entry => {
@@ -147,14 +119,4 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
       }
     })
   );
-}
-
-export async function getDefaultMessagesMap(inputPaths, config, reporter) {
-  const defaultMessagesMap = new Map();
-
-  for (const inputPath of filterPaths(inputPaths, config.paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config, reporter);
-  }
-
-  return defaultMessagesMap;
 }

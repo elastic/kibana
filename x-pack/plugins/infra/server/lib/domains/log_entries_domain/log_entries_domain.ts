@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
+import { InfraLogItem } from '../../../graphql/types';
 import {
   InfraLogEntry,
   InfraLogMessageSegment,
@@ -13,7 +15,8 @@ import {
 } from '../../../graphql/types';
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
-import { builtinRules } from './builtin_rules';
+import { getBuiltinRules } from './builtin_rules';
+import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
 import { compileFormattingRules } from './message';
 
 export class InfraLogEntriesDomain {
@@ -39,7 +42,7 @@ export class InfraLogEntriesDomain {
     }
 
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const formattingRules = compileFormattingRules(builtinRules);
+    const formattingRules = compileFormattingRules(getBuiltinRules(configuration.fields.message));
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
       request,
@@ -87,7 +90,7 @@ export class InfraLogEntriesDomain {
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const formattingRules = compileFormattingRules(builtinRules);
+    const formattingRules = compileFormattingRules(getBuiltinRules(configuration.fields.message));
     const documents = await this.adapter.getContainedLogEntryDocuments(
       request,
       configuration,
@@ -121,6 +124,32 @@ export class InfraLogEntriesDomain {
     const buckets = dateRangeBuckets.map(convertDateRangeBucketToSummaryBucket);
     return buckets;
   }
+
+  public async getLogItem(
+    request: InfraFrameworkRequest,
+    id: string,
+    sourceConfiguration: InfraSourceConfiguration
+  ): Promise<InfraLogItem> {
+    const document = await this.adapter.getLogItem(request, id, sourceConfiguration);
+    const defaultFields = [
+      { field: '_index', value: document._index },
+      { field: '_id', value: document._id },
+    ];
+    return {
+      id: document._id,
+      index: document._index,
+      fields: sortBy(
+        [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
+        'field'
+      ),
+    };
+  }
+}
+
+interface LogItemHit {
+  _index: string;
+  _id: string;
+  _source: JsonObject;
 }
 
 export interface LogEntriesAdapter {
@@ -153,6 +182,12 @@ export interface LogEntriesAdapter {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraDateRangeAggregationBucket[]>;
+
+  getLogItem(
+    request: InfraFrameworkRequest,
+    id: string,
+    source: InfraSourceConfiguration
+  ): Promise<LogItemHit>;
 }
 
 export type LogEntryQuery = JsonObject;
@@ -169,12 +204,12 @@ export interface LogEntryDocumentFields {
 
 const convertLogDocumentToEntry = (
   sourceId: string,
-  formatMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
+  formatLogMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
 ) => (document: LogEntryDocument): InfraLogEntry => ({
   key: document.key,
   gid: document.gid,
   source: sourceId,
-  message: formatMessage(document.fields),
+  message: formatLogMessage(document.fields),
 });
 
 const convertDateRangeBucketToSummaryBucket = (

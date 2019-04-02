@@ -11,15 +11,21 @@ import {
   SearchParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
+import { cloneDeep, has, set } from 'lodash';
 import moment from 'moment';
+import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 
 function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
+export interface APMSearchParams extends SearchParams {
+  omitLegacyData?: boolean;
+}
+
 export type ESClient = <T = void, U = void>(
   type: string,
-  params: SearchParams
+  params: APMSearchParams
 ) => Promise<AggregationSearchResponse<T, U>>;
 
 export interface Setup {
@@ -37,26 +43,54 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
+function addFilterForLegacyData({
+  omitLegacyData = true,
+  ...params
+}: APMSearchParams): SearchParams {
+  // search across all data (including data)
+  if (!omitLegacyData) {
+    return params;
+  }
+
+  const nextParams = cloneDeep(params);
+  if (!has(nextParams, 'body.query.bool.filter')) {
+    set(nextParams, 'body.query.bool.filter', []);
+  }
+
+  // add filter for omitting pre-7.x data
+  nextParams.body.query.bool.filter.push({
+    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
+  });
+
+  return nextParams;
+}
+
 export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
+  const uiSettings = req.getUiSettingsService();
 
-  const client: ESClient = (type, params) => {
+  const client: ESClient = async (type, params) => {
+    const includeFrozen = await uiSettings.get('search:includeFrozen');
+
+    const nextParams = {
+      ...addFilterForLegacyData(params), // filter out pre-7.0 data
+      ignore_throttled: !includeFrozen, // whether to query frozen indices or not
+      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    };
+
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
+      console.log('includeFrozen: ', includeFrozen);
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
         )}`
       );
-      console.log(`GET ${params.index}/_search`);
-      console.log(JSON.stringify(params.body, null, 4));
+      console.log(`GET ${nextParams.index}/_search`);
+      console.log(JSON.stringify(nextParams.body, null, 4));
     }
 
-    const nextParams = {
-      ...params,
-      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
-    };
     return cluster.callWithRequest(req, type, nextParams);
   };
 

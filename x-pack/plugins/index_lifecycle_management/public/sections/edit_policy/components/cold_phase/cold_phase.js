@@ -14,20 +14,15 @@ import {
   EuiSpacer,
   EuiFieldNumber,
   EuiDescribedFormGroup,
-  EuiButton,
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
 import {
   PHASE_COLD,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-  PHASE_NODE_ATTRS,
   PHASE_REPLICA_COUNT,
   PHASE_FREEZE_ENABLED
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
@@ -41,15 +36,6 @@ class ColdPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    }).isRequired,
   };
   render() {
     const {
@@ -66,7 +52,7 @@ class ColdPhaseUi extends PureComponent {
       defaultMessage: 'Freeze index',
     });
     return (
-      <Fragment>
+      <div id="coldPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
           title={
             <div>
@@ -91,38 +77,26 @@ class ColdPhaseUi extends PureComponent {
                   Because your queries are slower, you can reduce the number of replicas."
                 />
               </p>
-              {phaseData[PHASE_ENABLED] ? (
-                <EuiButton
-                  color="danger"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, false);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
+              <EuiSwitch
+                data-test-subj="enablePhaseSwitch-cold"
+                label={
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
-                    defaultMessage="Deactivate cold phase"
-                  />
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  data-test-subj="activatePhaseButton-cold"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, true);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
                     defaultMessage="Activate cold phase"
                   />
-                </EuiButton>
-              )}
+                }
+                id={`${PHASE_COLD}-${PHASE_ENABLED}`}
+                checked={phaseData[PHASE_ENABLED]}
+                onChange={e => {
+                  setPhaseData(PHASE_ENABLED, e.target.checked);
+                }}
+                aria-controls="coldPhaseContent"
+              />
             </Fragment>
           }
           fullWidth
         >
-          <div id="coldPhaseContent" aria-live="polite" role="region">
+          <Fragment>
             {phaseData[PHASE_ENABLED] ? (
               <Fragment>
                 <MinAgeInput
@@ -170,8 +144,8 @@ class ColdPhaseUi extends PureComponent {
                       <EuiFieldNumber
                         id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
                         value={phaseData[PHASE_REPLICA_COUNT]}
-                        onChange={async e => {
-                          await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                        onChange={e => {
+                          setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         }}
                         min={0}
                       />
@@ -181,7 +155,7 @@ class ColdPhaseUi extends PureComponent {
 
               </Fragment>
             ) : <div />}
-          </div>
+          </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
           <Fragment>
@@ -210,8 +184,8 @@ class ColdPhaseUi extends PureComponent {
               <EuiSwitch
                 data-test-subj="freezeSwitch"
                 checked={phaseData[PHASE_FREEZE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                onChange={e => {
+                  setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
                 }}
                 label={freezeLabel}
                 aria-label={freezeLabel}
@@ -226,7 +200,7 @@ class ColdPhaseUi extends PureComponent {
             />
           </Fragment>
         ) : null }
-      </Fragment>
+      </div>
     );
   }
 }

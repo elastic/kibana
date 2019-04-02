@@ -40,11 +40,11 @@ export function awsMetricsSpecProvider(server, context) {
       },
     }),
     euiIconType: 'logoAWS',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {
-          id: 'c5846400-f7fb-11e8-af03-c999c9dea608',
+          id: 'c5846400-f7fb-11e8-af03-c999c9dea608-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'AWS metrics dashboard',
           }),

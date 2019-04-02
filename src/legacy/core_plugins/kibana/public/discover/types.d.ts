@@ -28,7 +28,7 @@ export interface SavedSearch {
   sort: string[];
   destroy: () => void;
 }
-
 export interface SavedSearchLoader {
-  get: (id: string) => SavedSearch;
+  get: (id: string) => Promise<SavedSearch>;
+  urlFor: (id: string) => string;
 }

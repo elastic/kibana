@@ -7,7 +7,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 <%_ } _%>
 
 import 'ui/autoload/styles';
-import './less/main.less';
 import { Main } from './components/main';
 
 const app = uiModules.get('apps/<%= camelCase(name) %>');

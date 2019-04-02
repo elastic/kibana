@@ -29,6 +29,7 @@ import {
   policyNameContainsSpaceErrorMessage,
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
+  maximumDocumentsRequiredMessage,
 } from '../../public/store/selectors/lifecycle';
 
 let server;
@@ -63,8 +64,8 @@ window.scrollTo = jest.fn();
 window.TextEncoder = null;
 let component;
 const activatePhase = (rendered, phase) => {
-  const testSubject = `activatePhaseButton-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('click');
+  const testSubject = `enablePhaseSwitch-${phase}`;
+  findTestSubject(rendered, testSubject).simulate('change', { target: { checked: true } });
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
@@ -184,7 +185,7 @@ describe('edit policy', () => {
       maxAgeInput.simulate('change', { target: { value: '' } });
       rendered.update();
       save(rendered);
-      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage]);
+      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage, maximumDocumentsRequiredMessage]);
     });
     test('should show number above 0 required error when trying to save with -1 for max size', () => {
       const rendered = mountWithIntl(component);

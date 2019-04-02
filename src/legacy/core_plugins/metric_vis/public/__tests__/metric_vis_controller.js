@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MetricVisComponent } from '../metric_vis_controller';
 
 describe('metric vis controller', function () {
@@ -30,8 +30,9 @@ describe('metric vis controller', function () {
           { from: 0, to: 1000 }
         ],
         style: {},
+      }, dimensions: {
+        metrics: [{ accessor: 0 }],
         bucket: null,
-        metrics: [{ accessor: 0 }]
       }
     }
   };
@@ -39,7 +40,7 @@ describe('metric vis controller', function () {
   let metricController;
 
   beforeEach(() => {
-    metricController = new MetricVisComponent({ vis: vis });
+    metricController = new MetricVisComponent({ vis: vis, visParams: vis.params });
   });
 
   it('should set the metric label and value', function () {
@@ -54,7 +55,7 @@ describe('metric vis controller', function () {
   });
 
   it('should support multi-value metrics', function () {
-    vis.params.metric.metrics.push({ accessor: 1 });
+    vis.params.dimensions.metrics.push({ accessor: 1 });
     const metrics = metricController._processTableGroups({
       columns: [
         { id: 'col-0', name: '1st percentile of bytes' },

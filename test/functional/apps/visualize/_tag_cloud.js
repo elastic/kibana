@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
 
   describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('select Tags');
       await PageObjects.visualize.clickBucket('Tags');
       log.debug('Click aggregation Terms');
@@ -133,6 +132,7 @@ export default function ({ getService, getPageObjects }) {
       before(async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('visualize');
         await PageObjects.visualize.loadSavedVisualization(vizName1, { navigateToVisualize: false });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
       });
 
@@ -148,6 +148,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');

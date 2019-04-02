@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
+exports[`#setup() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <I18nProvider>
+    <I18nContext>
       <GlobalToastList
         dismissToast={[Function]}
         toasts$={
@@ -21,7 +21,7 @@ Array [
           }
         }
       />
-    </I18nProvider>,
+    </I18nContext>,
     <div
       test="target-dom-element"
     />,

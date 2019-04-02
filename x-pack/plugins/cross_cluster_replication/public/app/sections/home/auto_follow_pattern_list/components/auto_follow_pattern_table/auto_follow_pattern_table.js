@@ -7,7 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -21,222 +21,250 @@ import { API_STATUS } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
 
-export const AutoFollowPatternTable = injectI18n(
-  class extends PureComponent {
-    static propTypes = {
-      autoFollowPatterns: PropTypes.array,
-      openDetailPanel: PropTypes.func.isRequired,
-    }
+export class AutoFollowPatternTable extends PureComponent {
+  static propTypes = {
+    autoFollowPatterns: PropTypes.array,
+    selectAutoFollowPattern: PropTypes.func.isRequired,
+  }
 
-    state = {
-      selectedItems: [],
-    }
+  state = {
+    selectedItems: [],
+  }
 
-    onSearch = ({ query }) => {
-      const { text } = query;
-      const normalizedSearchText = text.toLowerCase();
-      this.setState({
-        queryText: normalizedSearchText,
+  onSearch = ({ query }) => {
+    const { text } = query;
+    const normalizedSearchText = text.toLowerCase();
+    this.setState({
+      queryText: normalizedSearchText,
+    });
+  };
+
+  getFilteredPatterns = () => {
+    const { autoFollowPatterns } = this.props;
+    const { queryText } = this.state;
+
+    if(queryText) {
+      return autoFollowPatterns.filter(autoFollowPattern => {
+        const { name, remoteCluster, followIndexPatternPrefix, followIndexPatternSuffix } = autoFollowPattern;
+
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+        const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
+        const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
+
+        return inName || inRemoteCluster || inPrefix || inSuffix;
       });
-    };
-
-    getFilteredPatterns = () => {
-      const { autoFollowPatterns } = this.props;
-      const { queryText } = this.state;
-
-      if(queryText) {
-        return autoFollowPatterns.filter(autoFollowPattern => {
-          const { name, remoteCluster, followIndexPatternPrefix, followIndexPatternSuffix } = autoFollowPattern;
-
-          const inName = name.toLowerCase().includes(queryText);
-          const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
-          const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
-          const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
-
-          return inName || inRemoteCluster || inPrefix || inSuffix;
-        });
-      }
-
-      return autoFollowPatterns.slice(0);
-    };
-
-    getTableColumns() {
-      const { intl, editAutoFollowPattern, openDetailPanel } = this.props;
-
-      return [{
-        field: 'name',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.nameColumnTitle',
-          defaultMessage: 'Name',
-        }),
-        sortable: true,
-        truncateText: false,
-        render: (name) => {
-          return (
-            <EuiLink onClick={() => openDetailPanel(name)}>
-              {name}
-            </EuiLink>
-          );
-        }
-      }, {
-        field: 'remoteCluster',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
-          defaultMessage: 'Cluster',
-        }),
-        truncateText: true,
-        sortable: true,
-      }, {
-        field: 'leaderIndexPatterns',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.leaderPatternsColumnTitle',
-          defaultMessage: 'Leader patterns',
-        }),
-        render: (leaderPatterns) => leaderPatterns.join(', '),
-      }, {
-        field: 'followIndexPatternPrefix',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
-          defaultMessage: 'Follower pattern prefix',
-        }),
-        sortable: true,
-      }, {
-        field: 'followIndexPatternSuffix',
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
-          defaultMessage: 'Follower pattern suffix',
-        }),
-        sortable: true,
-      }, {
-        name: intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            render: ({ name }) => {
-              const label = i18n.translate(
-                'xpack.crossClusterReplication.autofollowPatternList.table.actionDeleteDescription',
-                {
-                  defaultMessage: 'Delete auto-follow pattern',
-                }
-              );
-
-              return (
-                <EuiToolTip
-                  content={label}
-                  delay="long"
-                >
-                  <AutoFollowPatternDeleteProvider>
-                    {(deleteAutoFollowPattern) => (
-                      <EuiButtonIcon
-                        aria-label={label}
-                        iconType="trash"
-                        color="danger"
-                        onClick={() => deleteAutoFollowPattern(name)}
-                      />
-                    )}
-                  </AutoFollowPatternDeleteProvider>
-                </EuiToolTip>
-              );
-            },
-          },
-          {
-            name: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditLabel',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.crossClusterReplication.editIndexPattern.fields.table.actionEditDescription',
-              defaultMessage: 'Edit',
-            }),
-            icon: 'pencil',
-            onClick: ({ name }) => {
-              editAutoFollowPattern(name);
-              routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(name)}`));
-            },
-            type: 'icon',
-          },
-        ],
-        width: '100px',
-      }];
     }
 
-    renderLoading = () => {
-      const { apiStatusDelete } = this.props;
+    return autoFollowPatterns.slice(0);
+  };
 
-      if (apiStatusDelete === API_STATUS.DELETING) {
+  getTableColumns() {
+    const { selectAutoFollowPattern } = this.props;
+
+    return [{
+      field: 'name',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.nameColumnTitle',
+        {
+          defaultMessage: 'Name'
+        }
+      ),
+      sortable: true,
+      truncateText: false,
+      render: (name) => {
         return (
-          <EuiOverlayMask>
-            <EuiLoadingKibana size="xl"/>
-          </EuiOverlayMask>
+          <EuiLink
+            onClick={() => selectAutoFollowPattern(name)}
+            data-test-subj="ccrAutoFollowPatternListPatternLink"
+          >
+            {name}
+          </EuiLink>
         );
       }
-      return null;
-    };
-
-    render() {
-      const {
-        selectedItems,
-      } = this.state;
-
-      const sorting = {
-        sort: {
-          field: 'name',
-          direction: 'asc',
+    }, {
+      field: 'remoteCluster',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
+        {
+          defaultMessage: 'Remote cluster'
         }
-      };
+      ),
+      truncateText: true,
+      sortable: true,
+    }, {
+      field: 'leaderIndexPatterns',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.leaderPatternsColumnTitle',
+        {
+          defaultMessage: 'Leader patterns'
+        }
+      ),
+      render: (leaderPatterns) => leaderPatterns.join(', '),
+    }, {
+      field: 'followIndexPatternPrefix',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
+        {
+          defaultMessage: 'Follower index prefix'
+        }
+      ),
+      sortable: true,
+    }, {
+      field: 'followIndexPatternSuffix',
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
+        {
+          defaultMessage: 'Follower index suffix'
+        }
+      ),
+      sortable: true,
+    }, {
+      name: i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
+        {
+          defaultMessage: 'Actions'
+        }
+      ),
+      actions: [
+        {
+          render: ({ name }) => {
+            const label = i18n.translate(
+              'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
+              {
+                defaultMessage: 'Delete auto-follow pattern',
+              }
+            );
 
-      const pagination = {
-        initialPageSize: 20,
-        pageSizeOptions: [10, 20, 50]
-      };
-
-      const selection = {
-        onSelectionChange: (selectedItems) => this.setState({ selectedItems })
-      };
-
-      const search = {
-        toolsLeft: selectedItems.length ? (
-          <AutoFollowPatternDeleteProvider>
-            {(deleteAutoFollowPattern) => (
-              <EuiButton
-                iconType="trash"
-                color="danger"
-                onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+            return (
+              <EuiToolTip
+                content={label}
+                delay="long"
               >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
-                  defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
-                  values={{
-                    total: selectedItems.length
-                  }}
-                />
-              </EuiButton>
-            )}
-          </AutoFollowPatternDeleteProvider>
-        ) : undefined,
-        onChange: this.onSearch,
-        box: {
-          incremental: true,
+                <AutoFollowPatternDeleteProvider>
+                  {(deleteAutoFollowPattern) => (
+                    <EuiButtonIcon
+                      aria-label={label}
+                      iconType="trash"
+                      color="danger"
+                      onClick={() => deleteAutoFollowPattern(name)}
+                      data-test-subj="ccrAutoFollowPatternListDeleteActionButton"
+                    />
+                  )}
+                </AutoFollowPatternDeleteProvider>
+              </EuiToolTip>
+            );
+          },
         },
-      };
+        {
+          render: ({ name }) => {
+            const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
+              defaultMessage: 'Edit auto-follow pattern',
+            });
 
+            return (
+              <EuiToolTip
+                content={label}
+                delay="long"
+              >
+                <EuiButtonIcon
+                  aria-label={label}
+                  iconType="pencil"
+                  color="primary"
+                  href={routing.getAutoFollowPatternPath(name)}
+                  data-test-subj="ccrAutoFollowPatternListEditActionButton"
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+      ],
+      width: '100px',
+    }];
+  }
+
+  renderLoading = () => {
+    const { apiStatusDelete } = this.props;
+
+    if (apiStatusDelete === API_STATUS.DELETING) {
       return (
-        <Fragment>
-          <EuiInMemoryTable
-            items={this.getFilteredPatterns()}
-            itemId="name"
-            columns={this.getTableColumns()}
-            search={search}
-            pagination={pagination}
-            sorting={sorting}
-            selection={selection}
-            isSelectable={true}
-          />
-          {this.renderLoading()}
-        </Fragment>
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
       );
     }
+    return null;
+  };
+
+  render() {
+    const {
+      selectedItems,
+    } = this.state;
+
+    const sorting = {
+      sort: {
+        field: 'name',
+        direction: 'asc',
+      }
+    };
+
+    const pagination = {
+      initialPageSize: 20,
+      pageSizeOptions: [10, 20, 50]
+    };
+
+    const selection = {
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems })
+    };
+
+    const search = {
+      toolsLeft: selectedItems.length ? (
+        <AutoFollowPatternDeleteProvider>
+          {(deleteAutoFollowPattern) => (
+            <EuiButton
+              iconType="trash"
+              color="danger"
+              onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+              data-test-subj="ccrAutoFollowPatternListBulkDeleteActionButton"
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
+                defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
+                values={{
+                  total: selectedItems.length
+                }}
+              />
+            </EuiButton>
+          )}
+        </AutoFollowPatternDeleteProvider>
+      ) : undefined,
+      onChange: this.onSearch,
+      box: {
+        incremental: true,
+      },
+    };
+
+    return (
+      <Fragment>
+        <EuiInMemoryTable
+          items={this.getFilteredPatterns()}
+          itemId="name"
+          columns={this.getTableColumns()}
+          search={search}
+          pagination={pagination}
+          sorting={sorting}
+          selection={selection}
+          isSelectable={true}
+          rowProps={() => ({
+            'data-test-subj': 'ccrAutoFollowPatternListTableRow'
+          })}
+          cellProps={(item, column) => ({
+            'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
+          })}
+          data-test-subj="ccrAutoFollowPatternListTable"
+        />
+        {this.renderLoading()}
+      </Fragment>
+    );
   }
-);
+}

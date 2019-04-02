@@ -9,7 +9,7 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -23,10 +23,9 @@ import { FilterLists } from './filter_lists';
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-filter-lists">
-    <ml-filter-lists></ml-filter-lists>
-  </div>
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="settings" />
+  <ml-filter-lists />
 `;
 
 uiRoutes
@@ -52,9 +51,9 @@ module.directive('mlFilterLists', function () {
       };
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(FilterLists, props)}
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

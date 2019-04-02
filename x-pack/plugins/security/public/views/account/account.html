@@ -1,25 +1,12 @@
-<kbn-top-nav class="navbar navbar-default navbar-static-top" name="account-nav" ng-if="!k7design">
-  <!-- Transcluded elements. -->
-  <div data-transclude-slots>
-    <!-- Title. -->
-    <div
-      data-transclude-slot="topLeftCorner"
-      class="kuiLocalTitle"
-    >
-      {{user.full_name || user.username}}
-    </div>
-  </div>
-</kbn-top-nav>
-
 <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
   <!-- Subheader -->
   <div class="kuiBar kuiVerticalRhythm">
     <!-- Title -->
     <div class="kuiBarSection">
-      <h1 
+      <h1
         class="kuiTitle"
         i18n-id="xpack.security.account.accountSettingsTitle"
-        i18n-default-message="Account Settings"  
+        i18n-default-message="Account Settings"
       ></h1>
     </div>
 
@@ -44,7 +31,7 @@
     <label
       class="kuiFormLabel"
       i18n-id="xpack.security.account.emailLabel"
-      i18n-default-message="Email"  
+      i18n-default-message="Email"
     ></label>
     <div class="euiText">
       <p ng-bind="::accountController.getEmail()" data-test-subj=emailIdField></p>

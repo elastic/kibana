@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,7 +22,7 @@ const wrapChild = ({ label, value, ...props }, index) => (
       title={value}
       titleSize="s"
       textAlign="left"
-      description={label ? `${label}:` : ''}
+      description={label ? `${label}` : ''}
     />
   </EuiFlexItem>
 );
@@ -70,7 +70,7 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
         titleSize="s"
         textAlign="left"
         description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
-          defaultMessage: 'Status:',
+          defaultMessage: 'Status',
         })}
       />
     </EuiFlexItem>
@@ -84,7 +84,6 @@ export function SummaryStatus({ metrics, status, isOnline, IconComponent = Defau
         <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
         {metrics.map(wrapChild)}
       </EuiFlexGroup>
-      <EuiHorizontalRule/>
     </div>
   );
 }

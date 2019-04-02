@@ -16,6 +16,8 @@ import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_t
 
 import { TimeseriesChart } from './timeseries_chart';
 
+import { annotation$ } from '../../../services/annotations_service';
+
 export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
@@ -39,19 +41,19 @@ export function getAnnotationBrush(this: TimeseriesChart) {
     const endTimestamp = extent[1].getTime();
 
     if (timestamp === endTimestamp) {
-      this.closeFlyout();
+      annotation$.next(null);
       return;
     }
 
     const annotation: Annotation = {
       timestamp,
       end_timestamp: endTimestamp,
-      annotation: this.state.annotation.annotation || '',
+      annotation: '',
       job_id: selectedJob.job_id,
       type: ANNOTATION_TYPE.ANNOTATION,
     };
 
-    this.showFlyout(annotation);
+    annotation$.next(annotation);
   }
 
   return annotateBrush;
@@ -108,8 +110,7 @@ export function renderAnnotations(
   focusChartHeight: number,
   focusXScale: TimeseriesChart['focusXScale'],
   showAnnotations: boolean,
-  showFocusChartTooltip: (d: Annotation, t: object) => {},
-  showFlyout: TimeseriesChart['showFlyout']
+  showFocusChartTooltip: (d: Annotation, t: object) => {}
 ) {
   const upperRectMargin = ANNOTATION_UPPER_RECT_MARGIN;
   const upperTextMargin = ANNOTATION_UPPER_TEXT_MARGIN;
@@ -157,7 +158,12 @@ export function renderAnnotations(
     })
     .on('mouseout', () => mlChartTooltipService.hide())
     .on('click', (d: Annotation) => {
-      showFlyout(d);
+      // clear a possible existing annotation set up for editing before setting the new one.
+      // this needs to be done explicitly here because a new annotation created using the brush tool
+      // could still be present in the chart.
+      annotation$.next(null);
+      // set the actual annotation and trigger the flyout
+      annotation$.next(d);
     });
 
   rects

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries', 'timePicker']);
   const pointSeriesVis = PageObjects.pointSeries;
 
   describe('point series', function describeIndexTests() {
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');
@@ -165,8 +164,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function () {
         await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
-        await PageObjects.visualize.loadSavedVisualization(visName);
         await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.loadSavedVisualization(visName);
+        await PageObjects.visualize.waitForRenderingCount();
         await PageObjects.visualize.clickData();
         await PageObjects.visualize.toggleOpenEditor(1);
         await PageObjects.visualize.setCustomLabel('test', 1);

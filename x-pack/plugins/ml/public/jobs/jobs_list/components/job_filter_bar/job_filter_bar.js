@@ -7,7 +7,8 @@
 
 import PropTypes from 'prop-types';
 import React, {
-  Component
+  Component,
+  Fragment,
 } from 'react';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -15,12 +16,12 @@ import { JobGroup } from '../job_group';
 
 import {
   EuiSearchBar,
-  EuiCallOut,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 function loadGroups() {
   return ml.jobs.groups()
@@ -68,29 +69,9 @@ class JobFilterBarUI extends Component {
     }
   };
 
-  renderError() {
-    const { error } = this.state;
-    if (!error) {
-      return;
-    }
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiCallOut
-          color="danger"
-          title={(<FormattedMessage
-            id="xpack.ml.jobsList.jobFilterBar.invalidSearchErrorMessage"
-            defaultMessage="Invalid search: {errorMessage}"
-            values={{ errorMessage: error.message }}
-          />
-          )}
-        />
-        <EuiSpacer size="l" />
-      </EuiFlexItem>
-    );
-  }
-
   render() {
     const { intl } = this.props;
+    const { error } = this.state;
     const filters = [
       {
         type: 'field_value_toggle_group',
@@ -164,8 +145,15 @@ class JobFilterBarUI extends Component {
             onChange={this.onChange}
             className="mlJobFilterBar"
           />
+          <EuiFormRow
+            fullWidth
+            isInvalid={(error !== null)}
+            error={getError(error)}
+            style={{ maxHeight: '0px' }}
+          >
+            <Fragment />
+          </EuiFormRow>
         </EuiFlexItem>
-        { this.renderError() || ''}
       </EuiFlexGroup>
     );
   }
@@ -173,5 +161,16 @@ class JobFilterBarUI extends Component {
 JobFilterBarUI.propTypes = {
   setFilters: PropTypes.func.isRequired,
 };
+
+function getError(error) {
+  if (error) {
+    return i18n.translate('xpack.ml.jobsList.jobFilterBar.invalidSearchErrorMessage', {
+      defaultMessage: 'Invalid search: {errorMessage}',
+      values: { errorMessage: error.message },
+    });
+  }
+
+  return '';
+}
 
 export const JobFilterBar = injectI18n(JobFilterBarUI);

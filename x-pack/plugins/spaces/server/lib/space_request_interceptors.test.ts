@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 import sinon from 'sinon';
 
-import { SavedObject } from 'src/server/saved_objects';
+import { SavedObject } from 'src/legacy/server/saved_objects';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {

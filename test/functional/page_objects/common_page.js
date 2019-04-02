@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import getUrl from '../../../src/test_utils/get_url';
 
@@ -90,9 +90,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName) {
+    /**
+     * @param {string} appName - name of the app
+     * @param {object} [opts] - optional options object
+     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
+     */
+    navigateToApp(appName, opts = { appConfig: {} }) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get(['apps', appName]),
+        ...opts.appConfig,
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
@@ -108,9 +116,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
                     'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
                   });
                 }
               }
@@ -295,7 +301,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
+      let toast;
+      await retry.try(async () => {
+        toast = await find.byCssSelector('.euiToast');
+        if (!toast) {
+          throw new Error('Toast is not visible yet');
+        }
+      });
       await browser.moveMouseTo(toast);
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
       log.debug(title);

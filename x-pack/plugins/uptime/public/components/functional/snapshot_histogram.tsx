@@ -8,32 +8,48 @@
 import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { HistogramSeries } from '../../../common/graphql/types';
-import { formatHistogramData } from '../../lib/adapters/monitors/format_histogram_data';
+import { HistogramDataPoint } from '../../../common/graphql/types';
 
-interface SnapshotHistogramProps {
-  histogram: HistogramSeries[];
+export interface SnapshotHistogramProps {
+  windowWidth: number;
+  primaryColor: string;
+  dangerColor: string;
+  histogram: HistogramDataPoint[];
 }
 
-export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
-  const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
+/**
+ * These charts are going to be deprecated. Their responsive feature isn't
+ * working with our app, so temporarily we will use this ratio to auto-resize
+ * the histogram. When we upgrade the charts we will delete this.
+ */
+const windowRatio = 0.545238095238095;
 
-  return (
-    <EuiSeriesChart width={600} height={107} stackBy="y" xType={EuiSeriesChartUtils.SCALE.TIME}>
-      <EuiHistogramSeries
-        data={upSeriesData}
-        name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
-          defaultMessage: 'Up',
-        })}
-        color="green"
-      />
-      <EuiHistogramSeries
-        data={downSeriesData}
-        name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-          defaultMessage: 'Down',
-        })}
-        color="red"
-      />
-    </EuiSeriesChart>
-  );
-};
+export const SnapshotHistogram = ({
+  dangerColor,
+  histogram,
+  primaryColor,
+  windowWidth,
+}: SnapshotHistogramProps) => (
+  <EuiSeriesChart
+    width={windowWidth * windowRatio}
+    height={120}
+    stackBy="y"
+    xType={EuiSeriesChartUtils.SCALE.TIME}
+    xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+  >
+    <EuiHistogramSeries
+      data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount }))}
+      name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+        defaultMessage: 'Up',
+      })}
+      color={primaryColor}
+    />
+    <EuiHistogramSeries
+      data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount }))}
+      name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+        defaultMessage: 'Down',
+      })}
+      color={dangerColor}
+    />
+  </EuiSeriesChart>
+);

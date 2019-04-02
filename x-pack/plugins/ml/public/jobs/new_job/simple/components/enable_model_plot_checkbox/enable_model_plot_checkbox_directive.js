@@ -11,7 +11,7 @@ import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
 import { ml } from '../../../../../services/ml_api_service';
 import { checkCardinalitySuccess } from '../../../utils/new_job_utils';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -142,9 +142,9 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
         };
 
         ReactDOM.render(
-          <I18nProvider>
+          <I18nContext>
             {React.createElement(EnableModelPlotCheckbox, props)}
-          </I18nProvider>,
+          </I18nContext>,
           $element[0]
         );
       }

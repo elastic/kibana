@@ -5,14 +5,14 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../../common/constants';
-import { getErrorCount } from '../../errors/get_error_count';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
 export type TransactionAPIResponse = Transaction | undefined;
@@ -33,15 +33,7 @@ export async function getTransaction(
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [TRANSACTION_ID]: transactionId } },
     { term: { [TRACE_ID]: traceId } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
 
   if (esFilterQuery) {
@@ -62,15 +54,4 @@ export async function getTransaction(
 
   const resp = await client<Transaction>('search', params);
   return idx(resp, _ => _.hits.hits[0]._source);
-}
-
-export async function getTransactionWithErrorCount(
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-): Promise<TransactionWithErrorCountAPIResponse> {
-  return Promise.all([
-    getTransaction(transactionId, traceId, setup),
-    getErrorCount(transactionId, traceId, setup)
-  ]).then(([transaction, errorCount]) => ({ transaction, errorCount }));
 }

@@ -9,16 +9,16 @@
 
 import 'ngreact';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { ValidateJob } from './validate_job_view';
 import { mlJobService } from 'plugins/ml/services/job_service';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlValidateJob', function (reactDirective) {
   return reactDirective(
-    injectI18nProvider(ValidateJob),
+    wrapInI18nContext(ValidateJob),
     undefined,
     { restrict: 'E' },
     { mlJobService }

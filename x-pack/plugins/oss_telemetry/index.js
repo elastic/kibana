@@ -12,6 +12,7 @@ export const ossTelemetry = (kibana) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     require: ['elasticsearch', 'xpack_main', 'task_manager'],
+    configPrefix: 'xpack.oss_telemetry',
 
     init(server) {
       registerCollectors(server);

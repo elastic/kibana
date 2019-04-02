@@ -5,10 +5,13 @@
  */
 
 import { Legacy } from 'kibana';
+import { UpgradeAssistantTelemetryServer } from '../common/types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
+import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
+import { registerTelemetryRoutes } from './routes/telemetry';
 
 export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
@@ -24,4 +27,8 @@ export function initServer(server: Legacy.Server) {
 
   const worker = registerReindexWorker(server, credentialStore);
   registerReindexIndicesRoutes(server, worker, credentialStore);
+
+  // Bootstrap the needed routes and the collector for the telemetry
+  registerTelemetryRoutes(server as UpgradeAssistantTelemetryServer);
+  makeUpgradeAssistantUsageCollector(server as UpgradeAssistantTelemetryServer);
 }

@@ -16,12 +16,12 @@ const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlK
 
 const isLeftClickEvent = event => event.button === 0;
 
-const queryParamsFromObject = params => {
+const queryParamsFromObject = (params, encodeParams = false) => {
   if (!params) {
     return;
   }
 
-  const paramsStr = stringify(params, '&', '=', {
+  const paramsStr = stringify(params, '&', '=', encodeParams ? {} : {
     encodeURIComponent: (val) => val, // Don't encode special chars
   });
   return `?${paramsStr}`;
@@ -42,9 +42,9 @@ class Routing {
    *
    * @param {*} to URL to navigate to
    */
-  getRouterLinkProps(to, base = BASE_PATH, params = {}) {
-    const search = queryParamsFromObject(params) || '';
-    const location = typeof to === "string"
+  getRouterLinkProps(to, base = BASE_PATH, params = {}, encodeParams = false) {
+    const search = queryParamsFromObject(params, encodeParams) || '';
+    const location = typeof to === 'string'
       ? createLocation(base + to + search, null, null, this._reactRouter.history.location)
       : to;
     const href = this._reactRouter.history.createHref(location);
@@ -71,14 +71,24 @@ class Routing {
     return { href, onClick };
   }
 
-  navigate(route = '/home', app = APPS.CCR_APP, params) {
-    const search = queryParamsFromObject(params);
+  navigate(route = '/home', app = APPS.CCR_APP, params, encodeParams = false) {
+    const search = queryParamsFromObject(params, encodeParams);
 
     this._reactRouter.history.push({
       pathname: encodeURI(appToBasePathMap[app] + route),
       search,
     });
   }
+
+  getAutoFollowPatternPath = (name, section = '/edit') => {
+    return encodeURI(`#${BASE_PATH}/auto_follow_patterns${section}/${encodeURIComponent(name)}`);
+  };
+
+  getFollowerIndexPath = (name, section = '/edit', withBase = true) => {
+    return withBase
+      ? encodeURI(`#${BASE_PATH}/follower_indices${section}/${encodeURIComponent(name)}`)
+      : encodeURI(`/follower_indices${section}/${encodeURIComponent(name)}`);
+  };
 
   get reactRouter() {
     return this._reactRouter;

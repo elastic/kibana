@@ -5,16 +5,9 @@
  */
 
 import { startBasic } from '../../../lib/start_basic';
-import { wrapEsError } from '../../../lib/wrap_es_error';
 
-export function registerStartBasicRoute(server) {
-  const xpackInfo = server.plugins.xpack_main.info;
-  server.route({
-    path: '/api/license/start_basic',
-    method: 'POST',
-    handler: (request) => {
-      return startBasic(request, xpackInfo)
-        .catch(e => wrapEsError(e));
-    }
+export function registerStartBasicRoute(router, xpackInfo) {
+  router.post('/start_basic', (request) => {
+    return startBasic(request, xpackInfo);
   });
 }

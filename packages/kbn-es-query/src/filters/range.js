@@ -36,6 +36,8 @@ function formatValue(field, params) {
   return _.map(params, (val, key) => operators[key] + format(field, val)).join(' ');
 }
 
+// Creates a filter where the value for the given field is in the given range
+// params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   const filter = { meta: { index: indexPattern.id } };
   if (formattedValue) filter.meta.formattedValue = formattedValue;
@@ -96,7 +98,7 @@ export function getRangeScript(field, params) {
 
   return {
     script: {
-      inline: script,
+      source: script,
       params: knownParams,
       lang: field.lang
     }

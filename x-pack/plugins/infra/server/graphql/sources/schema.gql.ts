@@ -12,7 +12,7 @@ export const sourcesSchema = gql`
     "The id of the source"
     id: ID!
     "The version number the source configuration was last persisted with"
-    version: Float
+    version: String
     "The timestamp the source configuration was last persisted at"
     updatedAt: Float
     "The raw configuration of the source"
@@ -44,6 +44,8 @@ export const sourcesSchema = gql`
     container: String!
     "The fields to identify a host by"
     host: String!
+    "The fields to use as the log message"
+    message: [String!]!
     "The field to identify a pod by"
     pod: String!
     "The field to use as a tiebreaker for log events that have identical timestamps"

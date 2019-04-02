@@ -27,25 +27,39 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
+
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        ui: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }).default(),
+      }).default();
+    },
+
     uiExports: {
       app: {
         title: 'Timelion',
         order: -1000,
-        description: i18n.translate('timelion.appDescription', {
-          defaultMessage: 'Time series expressions for everything'
-        }),
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      injectDefaultVars(server) {
+        return {
+          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
+        };
+      },
       hacks: [
+        'plugins/timelion/hacks/toggle_app_link_in_nav',
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'
       ],
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],

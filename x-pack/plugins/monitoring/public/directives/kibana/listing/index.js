@@ -23,7 +23,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
 const columns = [
@@ -155,7 +156,7 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
 
       scope.$watch('instances', (instances = []) => {
         const kibanasTable = (
-          <I18nProvider>
+          <I18nContext>
             <MonitoringTable
               className="kibanaInstancesTable"
               rows={instances}
@@ -169,7 +170,7 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
               columns={columns}
               rowComponent={instanceRowFactory(scope, kbnUrl)}
             />
-          </I18nProvider>
+          </I18nContext>
         );
         render(kibanasTable, $el[0]);
       });

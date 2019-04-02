@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export function checkLicense(xpackLicenseInfo) {
-  const pluginName = 'Cross Cluster Replication';
+  const pluginName = 'Cross-Cluster Replication';
 
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable
@@ -26,7 +26,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
-  const VALID_LICENSE_MODES = ['trial', 'basic', 'standard', 'gold', 'platinum'];
+  const VALID_LICENSE_MODES = [ 'trial', 'platinum' ];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
@@ -36,7 +36,7 @@ export function checkLicense(xpackLicenseInfo) {
   if (!isLicenseModeValid) {
     return {
       isAvailable: false,
-      showLinks: false,
+      isActive: false,
       message: i18n.translate(
         'xpack.crossClusterReplication.checkLicense.errorUnsupportedMessage',
         {
@@ -50,9 +50,8 @@ export function checkLicense(xpackLicenseInfo) {
   // License is valid but not active
   if (!isLicenseActive) {
     return {
-      isAvailable: false,
-      showLinks: true,
-      enableLinks: false,
+      isAvailable: true,
+      isActive: false,
       message: i18n.translate(
         'xpack.crossClusterReplication.checkLicense.errorExpiredMessage',
         {
@@ -66,7 +65,6 @@ export function checkLicense(xpackLicenseInfo) {
   // License is valid and active
   return {
     isAvailable: true,
-    showLinks: true,
-    enableLinks: true,
+    isActive: true,
   };
 }

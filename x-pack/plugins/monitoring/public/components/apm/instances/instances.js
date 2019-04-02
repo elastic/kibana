@@ -130,6 +130,9 @@ export function ApmServerInstancesUI({ apms, intl }) {
               ]
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

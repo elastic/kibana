@@ -16,20 +16,21 @@ import { Explorer } from './explorer';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { mapScopeToProps } from './explorer_utils';
 
 import { EXPLORER_ACTION } from './explorer_constants';
-import { mlExplorerDashboardService } from './explorer_dashboard_service';
+import { explorer$ } from './explorer_dashboard_service';
 
 module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
     ReactDOM.render(
-      <I18nProvider>{React.createElement(Explorer, mapScopeToProps(scope))}</I18nProvider>,
+      <I18nContext>{React.createElement(Explorer, mapScopeToProps(scope))}</I18nContext>,
       element[0]
     );
 
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.LOAD_JOBS);
+    explorer$.next({ action: EXPLORER_ACTION.LOAD_JOBS });
+
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);

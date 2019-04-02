@@ -14,7 +14,11 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+// TODO: remove ui imports completely (move to plugins)
+import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
+import 'ui/directives/input_focus';
+import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
@@ -140,9 +144,6 @@ uiRoutes
 
 //========  Controller for basic UI ==================
 app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
-
-  config.bindToScope($scope, 'k7design');
-
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
       .then(() => data);
@@ -751,7 +752,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
 
   const managementUrl = chrome.getNavLinkById('kibana:management').url;
-  const url = `${managementUrl}/kibana/indices`;
+  const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({

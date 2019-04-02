@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +26,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
+  // Remote Clusters are used in both CCS and CCR, and CCS is available for all licenses.
   const VALID_LICENSE_MODES = [
     'trial',
     'basic',

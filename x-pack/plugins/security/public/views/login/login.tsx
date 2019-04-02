@@ -14,9 +14,9 @@ import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 import { parse } from 'url';
 import { LoginState } from '../../../common/login_state';
-import './login.less';
 const messageMap = {
   SESSION_EXPIRED: i18n.translate('xpack.security.login.sessionExpiredDescription', {
     defaultMessage: 'Your session has timed out. Please log in again.',
@@ -49,15 +49,17 @@ interface AnyObject {
         const msgQueryParam = parse($window.location.href, true).query.msg || '';
 
         render(
-          <LoginPage
-            http={$http}
-            window={$window}
-            infoMessage={get(messageMap, msgQueryParam)}
-            loginState={loginState}
-            isSecureConnection={isSecure}
-            requiresSecureConnection={secureCookies}
-            next={next}
-          />,
+          <I18nContext>
+            <LoginPage
+              http={$http}
+              window={$window}
+              infoMessage={get(messageMap, msgQueryParam)}
+              loginState={loginState}
+              isSecureConnection={isSecure}
+              requiresSecureConnection={secureCookies}
+              next={next}
+            />
+          </I18nContext>,
           domNode
         );
       });

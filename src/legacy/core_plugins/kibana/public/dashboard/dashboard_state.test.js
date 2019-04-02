@@ -33,7 +33,6 @@ describe('DashboardState', function () {
     time: {},
     setTime: function (time) { this.time = time; },
   };
-  const mockQuickTimeRanges = [{ from: 'now/w', to: 'now/w', display: 'This week', section: 0 }];
   const mockIndexPattern = { id: 'index1' };
 
   function initDashboardState() {
@@ -52,12 +51,10 @@ describe('DashboardState', function () {
 
       mockTimefilter.time.from = '2015-09-19 06:31:44.000';
       mockTimefilter.time.to = '2015-09-29 06:31:44.000';
-      mockTimefilter.time.mode = 'absolute';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter, mockQuickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
-      expect(mockTimefilter.time.mode).toBe('quick');
       expect(mockTimefilter.time.to).toBe('now/w');
       expect(mockTimefilter.time.from).toBe('now/w');
     });
@@ -69,12 +66,10 @@ describe('DashboardState', function () {
 
       mockTimefilter.time.from = '2015-09-19 06:31:44.000';
       mockTimefilter.time.to = '2015-09-29 06:31:44.000';
-      mockTimefilter.time.mode = 'absolute';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter, mockQuickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
-      expect(mockTimefilter.time.mode).toBe('relative');
       expect(mockTimefilter.time.to).toBe('now');
       expect(mockTimefilter.time.from).toBe('now-13d');
     });
@@ -86,12 +81,10 @@ describe('DashboardState', function () {
 
       mockTimefilter.time.from = 'now/w';
       mockTimefilter.time.to = 'now/w';
-      mockTimefilter.time.mode = 'quick';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter, mockQuickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
-      expect(mockTimefilter.time.mode).toBe('absolute');
       expect(mockTimefilter.time.to).toBe(savedDashboard.timeTo);
       expect(mockTimefilter.time.from).toBe(savedDashboard.timeFrom);
     });
@@ -120,9 +113,9 @@ describe('DashboardState', function () {
       initDashboardState();
     });
 
-    function simulateNewEmbeddableWithIndexPattern({ panelId, indexPattern }) {
+    function simulateNewEmbeddableWithIndexPatterns({ panelId, indexPatterns }) {
       store.dispatch(setPanels({ [panelId]: { panelIndex: panelId } }));
-      const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPattern };
+      const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPatterns };
       store.dispatch(embeddableIsInitialized({ metadata, panelId: panelId }));
     }
 
@@ -131,19 +124,19 @@ describe('DashboardState', function () {
     });
 
     test('registers index pattern when an embeddable is initialized with one', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo1', indexPattern: mockIndexPattern });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo1', indexPatterns: [mockIndexPattern] });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
 
     test('registers unique index patterns', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo2', indexPattern: mockIndexPattern });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo2', indexPatterns: [mockIndexPattern] });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
 
     test('does not register undefined index pattern for panels with no index pattern', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo2' });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo2' });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });

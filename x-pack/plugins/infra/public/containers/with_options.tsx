@@ -18,7 +18,6 @@ import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
   options: {
-    sourceId: 'default',
     timerange: {
       interval: '1m',
       to: moment.utc().valueOf(),

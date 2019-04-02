@@ -2,7 +2,6 @@
 
 .tvbSeriesEditor__container {
   padding: $euiSize;
-  background-color: $euiColorLightestShade;
 }
 
 @include euiPanel('tvbSeriesEditor');

@@ -14,7 +14,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../../base_controller';
 
 function getPageData($injector) {
@@ -73,13 +73,13 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <AdvancedIndex
               indexSummary={data.indexSummary}
               metrics={data.metrics}
               onBrush={this.onBrush}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

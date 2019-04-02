@@ -1,0 +1,85 @@
+{
+  "index": ".ml-annotations-read",
+  "size": 500,
+  "body": {
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "query_string": {
+              "query": "type:annotation",
+              "analyze_wildcard": false
+            }
+          },
+          {
+            "bool": {
+              "must": [
+                {
+                  "bool": {
+                    "must_not": [
+                      {
+                        "bool": {
+                          "filter": [
+                            {
+                              "range": {
+                                "timestamp": {
+                                  "lte": 1454804100000,
+                                  "format": "epoch_millis"
+                                }
+                              }
+                            },
+                            {
+                              "range": {
+                                "end_timestamp": {
+                                  "lte": 1454804100000,
+                                  "format": "epoch_millis"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "bool": {
+                          "filter": [
+                            {
+                              "range": {
+                                "timestamp": {
+                                  "gte": 1455233399999,
+                                  "format": "epoch_millis"
+                                }
+                              }
+                            },
+                            {
+                              "range": {
+                                "end_timestamp": {
+                                  "gte": 1455233399999,
+                                  "format": "epoch_millis"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "exists": {
+                    "field": "annotation"
+                  }
+                },
+                {
+                  "query_string": {
+                    "analyze_wildcard": false,
+                    "query": "job_id:jobIdMock"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

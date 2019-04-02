@@ -11,10 +11,12 @@ import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats
 import { ElasticsearchConfigurationBlockAdapter } from '../adapters/configuration_blocks/elasticsearch_configuration_block_adapter';
 import { DatabaseKbnESPlugin } from '../adapters/database/adapter_types';
 import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
+import { ElasticsearchBeatEventsAdapter } from '../adapters/events/elasticsearch_beat_events_adapter';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
+import { BeatEventsLib } from '../beat_events';
 import { CMBeatsDomain } from '../beats';
 import { ConfigurationBlocksLib } from '../configuration_blocks';
 import { CMTagsDomain } from '../tags';
@@ -44,8 +46,10 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     tokens,
     framework,
   });
+  const beatEvents = new BeatEventsLib(new ElasticsearchBeatEventsAdapter(database), beats);
 
   const libs: CMServerLibs = {
+    beatEvents,
     framework,
     database,
     beats,

@@ -19,6 +19,7 @@
 
 import { Field } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
+import { DocTitleProvider } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -29,7 +30,7 @@ import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadc
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
@@ -47,7 +48,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
     }
 
     render(
-      <I18nProvider>
+      <I18nContext>
         <FieldEditor
           indexPattern={indexPattern}
           field={field}
@@ -59,7 +60,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
             redirectAway,
           }}
         />
-      </I18nProvider>,
+      </I18nContext>,
       node,
     );
   });
@@ -101,8 +102,9 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
       const getConfig = (...args) => config.get(...args);
+      const docTitle = Private(DocTitleProvider);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 

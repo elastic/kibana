@@ -18,19 +18,13 @@ import { TimeseriesChart } from './timeseries_chart';
 
 import angular from 'angular';
 import { timefilter } from 'ui/timefilter';
-import { toastNotifications } from 'ui/notify';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-
-import { I18nProvider } from '@kbn/i18n/react';
-
-import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+import { I18nContext } from 'ui/i18n';
 
 module.directive('mlTimeseriesChart', function ($timeout) {
 
@@ -47,13 +41,12 @@ module.directive('mlTimeseriesChart', function ($timeout) {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
-        indexAnnotation: ml.annotations.indexAnnotation,
+        annotationsEnabled: scope.annotationsEnabled,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
         contextChartData: scope.contextChartData,
         contextForecastData: scope.contextForecastData,
         contextChartSelected: contextChartSelected,
-        deleteAnnotation: ml.annotations.deleteAnnotation,
         detectorIndex: scope.detectorIndex,
         focusAnnotationData: scope.focusAnnotationData,
         focusChartData: scope.focusChartData,
@@ -69,15 +62,14 @@ module.directive('mlTimeseriesChart', function ($timeout) {
         svgWidth,
         swimlaneData: scope.swimlaneData,
         timefilter,
-        toastNotifications,
         zoomFrom: scope.zoomFrom,
         zoomTo: scope.zoomTo
       };
 
       ReactDOM.render(
-        <I18nProvider>
-          {React.createElement(TimeseriesChart, props)}
-        </I18nProvider>,
+        <I18nContext>
+          <TimeseriesChart {...props} />
+        </I18nContext>,
         element[0]
       );
     }
@@ -97,7 +89,8 @@ module.directive('mlTimeseriesChart', function ($timeout) {
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
     scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
-    if (mlAnnotationsEnabled) {
+    scope.$watch('annotationsEnabled', renderReactComponent);
+    if (scope.annotationsEnabled) {
       scope.$watchCollection('focusAnnotationData', renderFocusChart);
       scope.$watch('showAnnotations', renderFocusChart);
     }
@@ -122,6 +115,7 @@ module.directive('mlTimeseriesChart', function ($timeout) {
 
   return {
     scope: {
+      annotationsEnabled: '=',
       selectedJob: '=',
       detectorIndex: '=',
       modelPlotEnabled: '=',

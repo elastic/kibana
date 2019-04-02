@@ -10,11 +10,11 @@ import * as t from '../action_types';
 export const initialState = {
   status: {
     [SECTIONS.AUTO_FOLLOW_PATTERN]: API_STATUS.IDLE,
-    [SECTIONS.INDEX_FOLLOWER]: API_STATUS.IDLE,
+    [SECTIONS.FOLLOWER_INDEX]: API_STATUS.IDLE,
   },
   error: {
     [SECTIONS.AUTO_FOLLOW_PATTERN]: null,
-    [SECTIONS.INDEX_FOLLOWER]: null,
+    [SECTIONS.FOLLOWER_INDEX]: null,
   },
 };
 

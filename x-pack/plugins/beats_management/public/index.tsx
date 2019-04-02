@@ -6,10 +6,10 @@
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import { I18nContext } from 'ui/i18n';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
@@ -25,7 +25,7 @@ async function startApp(libs: FrontendLibs) {
   libs.framework.renderUIAtPath(
     BASE_PATH,
     <ThemeProvider theme={{ eui: euiVars }}>
-      <I18nProvider>
+      <I18nContext>
         <HashRouter basename="/management/beats_management">
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
             <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
@@ -44,7 +44,7 @@ async function startApp(libs: FrontendLibs) {
             </BreadcrumbProvider>
           </UnstatedProvider>
         </HashRouter>
-      </I18nProvider>
+      </I18nContext>
     </ThemeProvider>,
     libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
   );
@@ -63,7 +63,7 @@ async function startApp(libs: FrontendLibs) {
     libs.framework.registerManagementUI({
       sectionId: 'beats',
       name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
-        defaultMessage: 'Central Management (Beta)',
+        defaultMessage: 'Central Management',
       }),
       basePath: BASE_PATH,
     });

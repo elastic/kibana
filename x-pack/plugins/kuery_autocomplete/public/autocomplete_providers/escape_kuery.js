@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flow } from 'lodash';
+
 export function escapeQuotes(string) {
   return string.replace(/"/g, '\\"');
 }
 
-export const escapeKuery = (string) => escapeNot(escapeAndOr(escapeSpecialCharacters(string)));
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
 
 // See the SpecialCharacter rule in kuery.peg
 function escapeSpecialCharacters(string) {
@@ -22,4 +24,12 @@ function escapeAndOr(string) {
 
 function escapeNot(string) {
   return string.replace(/not(\s+)/ig, '\\$&');
+}
+
+// See the Space rule in kuery.peg
+function escapeWhitespace(string) {
+  return string
+    .replace(/\t/g, '\\t')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
 }

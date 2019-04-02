@@ -74,6 +74,7 @@ export function initPutRolesApi(
         }),
         privileges: Joi.array().items(Joi.string()),
         query: Joi.string().allow(''),
+        allow_restricted_indices: Joi.boolean(),
       }),
       run_as: Joi.array().items(Joi.string()),
     }),

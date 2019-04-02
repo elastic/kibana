@@ -7,7 +7,7 @@
 
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('ML - Explorer Controller', () => {
   beforeEach(() => {
@@ -20,7 +20,6 @@ describe('ML - Explorer Controller', () => {
       $controller('MlExplorerController', { $scope: scope });
 
       expect(Array.isArray(scope.jobs)).to.be(true);
-      expect(Array.isArray(scope.queryFilters)).to.be(true);
     });
   });
 });

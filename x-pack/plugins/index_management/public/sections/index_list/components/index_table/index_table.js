@@ -8,9 +8,6 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
-import { NoMatch } from '../../../no_match';
-import { healthToColor } from '../../../../services';
-import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
   EuiButton,
@@ -38,13 +35,17 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-import { IndexActionsContextMenu } from '../../components';
+import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
+import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
+import { healthToColor, trackUiMetric } from '../../../../services';
 import {
   getBannerExtensions,
   getFilterExtensions,
   getToggleExtensions,
 } from '../../../../index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
+import { NoMatch } from '../../../no_match';
+import { IndexActionsContextMenu } from '../../components';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -213,20 +214,24 @@ export class IndexTableUi extends Component {
   }
 
   buildRowCell(fieldName, value, index) {
-    const { openDetailPanel } = this.props;
+    const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
       return (
-        <EuiLink
-          className="indTable__link"
-          data-test-subj="indexTableIndexNameLink"
-          onClick={() => {
-            openDetailPanel(value);
-          }}
-        >
-          {value}{renderBadges(index)}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            className="indTable__link"
+            data-test-subj="indexTableIndexNameLink"
+            onClick={() => {
+              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              openDetailPanel(value);
+            }}
+          >
+            {value}
+          </EuiLink>
+          {renderBadges(index, filterChanged)}
+        </Fragment>
       );
     }
     return value;
@@ -361,12 +366,12 @@ export class IndexTableUi extends Component {
               <h1>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionHeading"
-                  defaultMessage="Index management"
+                  defaultMessage="Index Management"
                 />
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionDescription"

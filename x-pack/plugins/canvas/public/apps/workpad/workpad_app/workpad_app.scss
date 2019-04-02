@@ -1,6 +1,8 @@
+$canvasLayoutFontSize: $euiFontSizeS;
+
 .canvasLayout {
   display: flex;
-  background: $euiColorLightestShade;
+  background: $euiPageBackgroundColor;
   flex-grow: 1;
   overflow: hidden;
 }
@@ -29,6 +31,7 @@
   flex-grow: 0;
   flex-basis: auto;
   padding: $euiSizeM $euiSize $euiSizeS $euiSize;
+  font-size: $canvasLayoutFontSize;
 }
 
 .canvasLayout__stageContent {
@@ -54,7 +57,7 @@
   flex-grow: 0;
   flex-basis: auto;
   width: 350px;
-  background: darken($euiColorLightestShade, 2%);
+  background: $euiColorLightestShade;
   display: flex;
   position: relative;
 
@@ -67,6 +70,7 @@
   flex-grow: 0;
   flex-basis: auto;
   width: 100%;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
   z-index: $euiZNavigation;
+  font-size: $canvasLayoutFontSize;
 }

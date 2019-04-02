@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
-  AgentName,
   APM_TELEMETRY_DOC_ID,
-  ApmTelemetry,
   createApmTelementry,
   getSavedObjectsClient,
   storeApmTelemetry
@@ -17,38 +16,38 @@ describe('apm_telemetry', () => {
   describe('createApmTelementry', () => {
     it('should create a ApmTelemetry object with boolean flag and frequency map of the given list of AgentNames', () => {
       const apmTelemetry = createApmTelementry([
-        AgentName.GoLang,
-        AgentName.NodeJs,
-        AgentName.GoLang,
-        AgentName.JsBase
+        'go',
+        'nodejs',
+        'go',
+        'js-base'
       ]);
       expect(apmTelemetry.has_any_services).toBe(true);
       expect(apmTelemetry.services_per_agent).toMatchObject({
-        [AgentName.GoLang]: 2,
-        [AgentName.NodeJs]: 1,
-        [AgentName.JsBase]: 1
+        go: 2,
+        nodejs: 1,
+        'js-base': 1
       });
     });
     it('should ignore undefined or unknown AgentName values', () => {
       const apmTelemetry = createApmTelementry([
-        AgentName.GoLang,
-        AgentName.NodeJs,
-        AgentName.GoLang,
-        AgentName.JsBase,
+        'go',
+        'nodejs',
+        'go',
+        'js-base',
         'example-platform' as any,
         undefined as any
       ]);
       expect(apmTelemetry.services_per_agent).toMatchObject({
-        [AgentName.GoLang]: 2,
-        [AgentName.NodeJs]: 1,
-        [AgentName.JsBase]: 1
+        go: 2,
+        nodejs: 1,
+        'js-base': 1
       });
     });
   });
 
   describe('storeApmTelemetry', () => {
     let server: any;
-    let apmTelemetry: ApmTelemetry;
+    let apmTelemetry: SavedObjectAttributes;
     let savedObjectsClientInstance: any;
 
     beforeEach(() => {
@@ -69,9 +68,9 @@ describe('apm_telemetry', () => {
       apmTelemetry = {
         has_any_services: true,
         services_per_agent: {
-          [AgentName.GoLang]: 2,
-          [AgentName.NodeJs]: 1,
-          [AgentName.JsBase]: 1
+          go: 2,
+          nodejs: 1,
+          'js-base': 1
         }
       };
     });

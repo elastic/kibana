@@ -25,11 +25,15 @@ import {
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
 
+interface CallWithRequestParams extends GenericParams {
+  max_concurrent_shard_requests?: number;
+}
+
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
 
   constructor(private server: Legacy.Server) {
-    this.version = server.plugins.kibana.status.plugin.version;
+    this.version = server.config().get('pkg.version');
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -85,13 +89,22 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public async callWithRequest(
     req: InfraFrameworkRequest<Legacy.Request>,
     endpoint: string,
-    params: GenericParams,
+    params: CallWithRequestParams,
     ...rest: any[]
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
     const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+    if (endpoint === 'msearch') {
+      const maxConcurrentShardRequests = await internalRequest
+        .getUiSettingsService()
+        .get('courier:maxConcurrentShardRequests');
+      if (maxConcurrentShardRequests > 0) {
+        params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
+      }
+    }
+
     const fields = await callWithRequest(
       internalRequest,
       endpoint,

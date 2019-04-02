@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { Location } from 'history';
@@ -52,11 +52,11 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 
 interface Props {
   location: Location;
-  distribution: ITransactionDistributionAPIResponse;
+  distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
-export class Distribution extends Component<Props> {
+export class TransactionDistribution extends Component<Props> {
   public formatYShort = (t: number) => {
     return i18n.translate(
       'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
@@ -95,8 +95,44 @@ export class Distribution extends Component<Props> {
         );
   };
 
+  public redirectToTransactionType() {
+    const { urlParams, location, distribution } = this.props;
+
+    if (
+      !distribution ||
+      !distribution.defaultSample ||
+      urlParams.traceId ||
+      urlParams.transactionId
+    ) {
+      return;
+    }
+
+    const { traceId, transactionId } = distribution.defaultSample;
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        traceId,
+        transactionId
+      })
+    });
+  }
+
+  public componentDidMount() {
+    this.redirectToTransactionType();
+  }
+
+  public componentDidUpdate() {
+    this.redirectToTransactionType();
+  }
+
   public render() {
     const { location, distribution, urlParams } = this.props;
+
+    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
+      return null;
+    }
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -130,7 +166,7 @@ export class Distribution extends Component<Props> {
 
     return (
       <div>
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h5>
             {i18n.translate(
               'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
@@ -138,32 +174,22 @@ export class Distribution extends Component<Props> {
                 defaultMessage: 'Transactions duration distribution'
               }
             )}{' '}
-            <EuiToolTip
-              content={
-                <div>
-                  <EuiText>
-                    <strong>
-                      {i18n.translate(
-                        'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
-                        {
-                          defaultMessage: 'Sampling'
-                        }
-                      )}
-                    </strong>
-                  </EuiText>
-                  <EuiText>
-                    {i18n.translate(
-                      'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
-                      {
-                        defaultMessage: `Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration.`
-                      }
-                    )}
-                  </EuiText>
-                </div>
-              }
-            >
-              <EuiIcon type="questionInCircle" />
-            </EuiToolTip>
+            <EuiIconTip
+              title={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
+                {
+                  defaultMessage: 'Sampling'
+                }
+              )}
+              content={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
+                {
+                  defaultMessage:
+                    "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
+                }
+              )}
+              position="top"
+            />
           </h5>
         </EuiTitle>
 
@@ -173,7 +199,7 @@ export class Distribution extends Component<Props> {
           bucketIndex={bucketIndex}
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
-              history.replace({
+              history.push({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),

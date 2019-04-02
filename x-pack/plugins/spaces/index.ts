@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-import { SavedObjectsService } from 'src/server/saved_objects';
+import { SavedObjectsService } from 'src/legacy/server/saved_objects';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore

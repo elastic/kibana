@@ -114,7 +114,10 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   };
   aggregations?: Aggregations;
   hits: {
-    total: number;
+    total: {
+      value: number;
+      relation: string;
+    };
     hits: Hit[];
   };
 }
@@ -157,9 +160,6 @@ export interface InfraDateRangeAggregationResponse {
 
 export interface InfraMetadataAggregationBucket {
   key: string;
-  names?: {
-    buckets: InfraMetadataAggregationBucket[];
-  };
 }
 
 export interface InfraMetadataAggregationResponse {

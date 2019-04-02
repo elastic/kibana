@@ -9,9 +9,10 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 
+import { rangeFilter } from '../../helpers/range_filter';
 import { getTransactionGroups } from '../../transaction_groups';
 import { ITransactionGroup } from '../../transaction_groups/transform';
 
@@ -32,11 +33,7 @@ export async function getTopTransactions({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    {
-      range: {
-        '@timestamp': { gte: start, lte: end, format: 'epoch_millis' }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
 
   if (transactionType) {

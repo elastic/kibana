@@ -25,6 +25,7 @@ Object {
             },
           ],
         },
+        "group": Array [],
         "is": Object {},
         "term": Array [],
       },
@@ -32,6 +33,7 @@ Object {
     "syntax": Object {
       "parse": [Function],
       "print": [Function],
+      "printClause": [Function],
     },
     "text": "ilm.step:ERROR",
   },
@@ -352,29 +354,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -455,17 +443,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -536,13 +518,17 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 withTitle={true}
               >
                 <EuiOutsideClickDetector
+                  isDisabled={true}
                   onOutsideClick={[Function]}
                 >
                   <div
                     className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
                     id="phaseExecutionPopover"
-                    onClick={[Function]}
                     onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"
@@ -734,29 +720,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -837,17 +809,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl

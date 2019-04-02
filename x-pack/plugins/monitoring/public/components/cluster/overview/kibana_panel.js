@@ -41,7 +41,7 @@ function KibanaPanelUi(props) {
       title={props.intl.formatMessage({
         id: 'xpack.monitoring.cluster.overview.kibanaPanel.kibanaTitle', defaultMessage: 'Kibana' })}
     >
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">

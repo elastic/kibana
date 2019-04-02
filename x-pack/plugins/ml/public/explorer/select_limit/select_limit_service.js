@@ -8,16 +8,13 @@
 * AngularJS service for storing limit values in AppState.
 */
 
-import { stateFactoryProvider } from '../../factories/state_factory';
-import { mlSelectLimitService } from './select_limit';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.service('mlSelectLimitService', function (Private) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlSelectLimitService.state = stateFactory('mlSelectLimit', {
-    limit: { display: '10', val: 10 }
-  });
-  mlSelectLimitService.initialized = true;
+import { subscribeAppStateToObservable } from '../../util/app_state_utils';
+import { limit$ } from './select_limit';
+
+module.service('mlSelectLimitService', function (AppState, $rootScope) {
+  subscribeAppStateToObservable(AppState, 'mlSelectLimit', limit$, () => $rootScope.$applyAsync());
 });

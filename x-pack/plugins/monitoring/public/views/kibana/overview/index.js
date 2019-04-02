@@ -14,9 +14,9 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
@@ -67,12 +67,14 @@ uiRoutes.when('/kibana', {
         }
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={data.clusterStatus} />
-                  <EuiSpacer size="m"/>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
@@ -91,7 +93,7 @@ uiRoutes.when('/kibana', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

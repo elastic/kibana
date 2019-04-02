@@ -59,7 +59,13 @@ export const CustomFieldPanel = injectI18n(
                 isClearable={false}
               />
             </EuiFormRow>
-            <EuiButton type="submit" size="s" fill onClick={this.handleSubmit}>
+            <EuiButton
+              disabled={!this.state.selectedOptions.length}
+              type="submit"
+              size="s"
+              fill
+              onClick={this.handleSubmit}
+            >
               Add
             </EuiButton>
           </EuiForm>

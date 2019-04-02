@@ -24,7 +24,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Label } from './label';
 import { FeedbackMessage } from './feedback_message';
 
@@ -35,16 +35,21 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
+    const cloudRelativeContainer = document.createElement('div');
+    cloudRelativeContainer.classList.add('tgcVis');
+    cloudRelativeContainer.setAttribute('style', 'position: relative');
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tgcVis');
     cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
-    this._containerNode.appendChild(cloudContainer);
+    this._containerNode.classList.add('visChart--vertical');
+    cloudRelativeContainer.appendChild(cloudContainer);
+    this._containerNode.appendChild(cloudRelativeContainer);
 
     this._vis = vis;
     this._truncated = false;
     this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
-      if (!this._vis.params.bucket) {
+      if (!this._visParams.bucket) {
         return;
       }
       this._vis.API.events.filter({
@@ -57,7 +62,7 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(<I18nProvider><FeedbackMessage ref={this._feedbackMessage} /></I18nProvider>, this._feedbackNode);
+    render(<I18nContext><FeedbackMessage ref={this._feedbackMessage} /></I18nContext>, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
@@ -66,14 +71,11 @@ export class TagCloudVisualization {
 
   }
 
-  async render(data, status) {
+  async render(data, visParams, status) {
     if (!(status.resize || status.data || status.params)) return;
 
-    if (status.params || status.aggs) {
-      this._updateParams();
-    }
-
-    if (status.data || status.params) {
+    if (status.params || status.data) {
+      this._updateParams(visParams);
       this._updateData(data);
     }
 
@@ -94,7 +96,7 @@ export class TagCloudVisualization {
 
     this._label.current.setState({
       label: `${data.columns[0].name} - ${data.columns[1].name}`,
-      shouldShowLabel: this._vis.params.showLabel
+      shouldShowLabel: visParams.showLabel
     });
     this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
@@ -115,8 +117,8 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucket = this._vis.params.bucket;
-    const metric = this._vis.params.metric;
+    const bucket = this._visParams.bucket;
+    const metric = this._visParams.metric;
     const bucketFormatter = bucket ? getFormat(bucket.format) : null;
     const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
     const metricColumn = data.columns[metric.accessor].id;
@@ -146,8 +148,9 @@ export class TagCloudVisualization {
 
   }
 
-  _updateParams() {
-    this._tagCloud.setOptions(this._vis.params);
+  _updateParams(visParams) {
+    this._visParams = visParams;
+    this._tagCloud.setOptions(visParams);
   }
 
   _resize() {

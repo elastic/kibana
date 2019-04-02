@@ -17,7 +17,8 @@ export const followerBadgeExtension = {
   label: i18n.translate('xpack.crossClusterReplication.indexMgmtBadge.followerLabel', {
     defaultMessage: 'Follower',
   }),
-  color: 'default'
+  color: 'default',
+  filterExpression: 'isFollowerIndex:true'
 };
 
 addBadgeExtension(followerBadgeExtension);

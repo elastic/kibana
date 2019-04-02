@@ -14,7 +14,7 @@ import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_fi
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { WithSource } from '../../containers/with_source';
 import { InfraNodeType } from '../../graphql/types';
-import { getTimeFromLocation } from './query_params';
+import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -34,8 +34,8 @@ export const RedirectToNodeLogs = injectI18n(
     intl,
   }: RedirectToNodeLogsProps) => (
     <WithSource>
-      {({ configuredFields }) => {
-        if (!configuredFields) {
+      {({ configuration, isLoading }) => {
+        if (isLoading) {
           return (
             <LoadingPage
               message={intl.formatMessage(
@@ -51,8 +51,16 @@ export const RedirectToNodeLogs = injectI18n(
           );
         }
 
+        if (!configuration) {
+          return null;
+        }
+
+        const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+        const userFilter = getFilterFromLocation(location);
+        const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+
         const searchString = compose(
-          replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeId}`),
+          replaceLogFilterInQueryString(filter),
           replaceLogPositionInQueryString(getTimeFromLocation(location))
         )('');
 

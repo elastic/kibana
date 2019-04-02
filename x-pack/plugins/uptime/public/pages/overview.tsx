@@ -7,15 +7,18 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from '../components/queries/empty_state';
-import { ErrorList } from '../components/queries/error_list';
-import { FilterBar } from '../components/queries/filter_bar';
-import { MonitorList } from '../components/queries/monitor_list';
-import { Snapshot } from '../components/queries/snapshot';
+import {
+  EmptyStateQuery,
+  ErrorListQuery,
+  FilterBarQuery,
+  MonitorListQuery,
+  SnapshotQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
 interface OverviewPageProps {
+  basePath: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -40,19 +43,19 @@ export class OverviewPage extends React.Component<Props, OverviewPageState> {
   public render() {
     return (
       <Fragment>
-        <EmptyState {...this.props}>
-          <FilterBar
+        <EmptyStateQuery {...this.props}>
+          <FilterBarQuery
             {...this.props}
             updateQuery={(query: object | undefined) => {
               this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
             }}
           />
-          <Snapshot filters={this.state.currentFilterQuery} {...this.props} />
+          <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer size="xl" />
-          <MonitorList filters={this.state.currentFilterQuery} {...this.props} />
+          <MonitorListQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer />
-          <ErrorList filters={this.state.currentFilterQuery} {...this.props} />
-        </EmptyState>
+          <ErrorListQuery filters={this.state.currentFilterQuery} {...this.props} />
+        </EmptyStateQuery>
       </Fragment>
     );
   }

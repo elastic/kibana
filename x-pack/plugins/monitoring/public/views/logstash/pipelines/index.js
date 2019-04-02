@@ -16,7 +16,7 @@ import {
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
 
@@ -72,6 +72,7 @@ uiRoutes
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
           getPageData,
+          reactNodeId: 'monitoringLogstashPipelinesApp',
           $scope,
           $injector
         });
@@ -101,7 +102,7 @@ uiRoutes
             : null;
 
           render(
-            <I18nProvider>
+            <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
                 onBrush={onBrush}
@@ -117,7 +118,7 @@ uiRoutes
                   scope: $scope,
                 }}
               />
-            </I18nProvider>,
+            </I18nContext>,
             document.getElementById('monitoringLogstashPipelinesApp')
           );
         };

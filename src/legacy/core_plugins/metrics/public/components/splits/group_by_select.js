@@ -55,7 +55,7 @@ function GroupBySelectUi(props) {
       options={modeOptions}
       selectedOptions={[selectedOption]}
       onChange={props.onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
     />
   );
 

@@ -20,12 +20,14 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-export * from './target/types/type_exports';
+export { Public, Server } from 'src/core';
+
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
 import * as LegacyElasticsearch from './src/legacy/core_plugins/elasticsearch';
-import * as LegacyKibanaServer from './src/server/kbn_server';
+import * as LegacyKibanaPluginSpec from './src/legacy/plugin_discovery/plugin_spec/plugin_spec_options';
+import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 
 /**
  *  Re-export legacy types under a namespace.
@@ -39,6 +41,10 @@ export namespace Legacy {
   export type SavedObjectsClient = LegacyKibanaServer.SavedObjectsClient;
   export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
   export type Server = LegacyKibanaServer.Server;
+
+  export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;
+  export type UiExports = LegacyKibanaPluginSpec.UiExports;
+  export type PluginSpecOptions = LegacyKibanaPluginSpec.PluginSpecOptions;
 
   export namespace Plugins {
     export namespace elasticsearch {

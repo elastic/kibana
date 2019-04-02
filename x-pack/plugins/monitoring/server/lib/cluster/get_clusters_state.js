@@ -6,7 +6,6 @@
 
 import { get, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
-import { createTypeFilter } from '../create_query';
 
 /**
  * Augment the {@clusters} with their cluster state's from the {@code response}.
@@ -64,7 +63,7 @@ export function getClustersState(req, esIndexPattern, clusters) {
       query: {
         bool: {
           filter: [
-            { ...createTypeFilter('cluster_state') },
+            { term: { type: 'cluster_state' } },
             { terms: { 'cluster_uuid': clusterUuids } }
           ]
         }

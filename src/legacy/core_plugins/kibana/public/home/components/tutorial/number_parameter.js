@@ -26,14 +26,14 @@ export function NumberParameter({ id, label, value, setParameter }) {
   };
 
   return (
-    <div className="kuiSideBarFormRow">
+    <div className="visEditorSidebar__formRow">
       <label
-        className="kuiSideBarFormRow__label"
+        className="visEditorSidebar__formLabel"
         htmlFor={id}
       >
         {label}
       </label>
-      <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
+      <div className="visEditorSidebar__formControl kuiFieldGroupSection--wide">
         <input
           className="kuiTextInput"
           type="number"

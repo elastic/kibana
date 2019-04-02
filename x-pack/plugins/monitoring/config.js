@@ -47,7 +47,6 @@ export const config = (Joi) => {
     max_bucket_size: Joi.number().default(10000),
     min_interval_seconds: Joi.number().default(10),
     show_license_expiration: Joi.boolean().default(true),
-    report_stats: Joi.boolean().default(true),
     agent: Joi.object({
       interval: Joi.string().regex(/[\d\.]+[yMwdhms]/).default('10s')
     }).default(),

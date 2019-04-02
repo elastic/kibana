@@ -44,7 +44,7 @@ module.directive('mlPostSaveOptions', function (Private, i18n) {
 
       $scope.apply = function () {
         postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch, i18n)
-          .catch()
+          .catch(() => {})
           .then(() => {
             $scope.$applyAsync();
           });

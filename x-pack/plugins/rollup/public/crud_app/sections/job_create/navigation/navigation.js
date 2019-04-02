@@ -45,63 +45,61 @@ const NavigationUi = ({
     );
   }
 
-  let previousStepButton;
-  if (hasPreviousStep) {
-    previousStepButton = (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconType="arrowLeft"
-          onClick={goToPreviousStep}
-        >
-          <FormattedMessage
-            id="xpack.rollupJobs.create.backButton.label"
-            defaultMessage="Back"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    );
-  }
+  const previousStepButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        iconType="arrowLeft"
+        onClick={goToPreviousStep}
+        data-test-subj="rollupJobBackButton"
+      >
+        <FormattedMessage
+          id="xpack.rollupJobs.create.backButton.label"
+          defaultMessage="Back"
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  );
 
-  let nextStepButton;
-  if (hasNextStep) {
-    nextStepButton = (
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="arrowRight"
-          iconSide="right"
-          onClick={goToNextStep}
-          isDisabled={!canGoToNextStep}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.rollupJobs.create.nextButton.label"
-            defaultMessage="Next"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    );
-  } else {
-    nextStepButton = (
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          color="secondary"
-          iconType="check"
-          onClick={save}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.rollupJobs.create.saveButton.label"
-            defaultMessage="Save"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    );
-  }
+  const nextStepButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        iconType="arrowRight"
+        iconSide="right"
+        onClick={goToNextStep}
+        isDisabled={!canGoToNextStep}
+        fill
+        data-test-subj="rollupJobNextButton"
+      >
+        <FormattedMessage
+          id="xpack.rollupJobs.create.nextButton.label"
+          defaultMessage="Next"
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  );
+
+  const saveButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        color="secondary"
+        iconType="check"
+        onClick={save}
+        fill
+        data-test-subj="rollupJobSaveButton"
+      >
+        <FormattedMessage
+          id="xpack.rollupJobs.create.saveButton.label"
+          defaultMessage="Save"
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  );
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-      {previousStepButton}
-      {nextStepButton}
+      {hasPreviousStep && previousStepButton}
+      {hasNextStep && nextStepButton}
+      {!hasNextStep && saveButton}
     </EuiFlexGroup>
   );
 };

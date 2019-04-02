@@ -4,25 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockClient } from './polling_service.test.mocks';
+
 import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
-
-const mockClient = {
-  post: jest.fn().mockResolvedValue({
-    lastCompletedStep: ReindexStep.created,
-    status: ReindexStatus.inProgress,
-  }),
-  get: jest.fn().mockResolvedValue({
-    status: 200,
-    data: {
-      warnings: [],
-      reindexOp: null,
-    },
-  }),
-};
-jest.mock('axios', () => ({
-  create: jest.fn().mockReturnValue(mockClient),
-}));
-
 import { ReindexPollingService } from './polling_service';
 
 describe('ReindexPollingService', () => {
@@ -96,6 +80,15 @@ describe('ReindexPollingService', () => {
       await service.startReindex();
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex');
+    });
+  });
+
+  describe('cancelReindex', () => {
+    it('posts to cancel endpoint', async () => {
+      const service = new ReindexPollingService('myIndex');
+      await service.cancelReindex();
+
+      expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex/cancel');
     });
   });
 });

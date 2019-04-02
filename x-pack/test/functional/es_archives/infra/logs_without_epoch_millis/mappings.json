@@ -1,68 +1,64 @@
 {
   "type": "index",
   "value": {
-    "index": "filebeat-without-millis",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": "filebeat-without-millis",
     "mappings": {
       "_meta": {
         "version": "7.0.0-alpha1"
       },
+      "date_detection": false,
       "dynamic_templates": [
         {
           "fields": {
-            "path_match": "fields.*",
-            "match_mapping_type": "string",
             "mapping": {
               "type": "keyword"
-            }
+            },
+            "match_mapping_type": "string",
+            "path_match": "fields.*"
           }
         },
         {
           "docker.container.labels": {
-            "path_match": "docker.container.labels.*",
-            "match_mapping_type": "string",
             "mapping": {
               "type": "keyword"
-            }
+            },
+            "match_mapping_type": "string",
+            "path_match": "docker.container.labels.*"
           }
         },
         {
           "kibana.log.meta": {
-            "path_match": "kibana.log.meta.*",
-            "match_mapping_type": "string",
             "mapping": {
               "type": "keyword"
-            }
+            },
+            "match_mapping_type": "string",
+            "path_match": "kibana.log.meta.*"
           }
         },
         {
           "strings_as_keyword": {
-            "match_mapping_type": "string",
             "mapping": {
               "ignore_above": 1024,
               "type": "keyword"
-            }
+            },
+            "match_mapping_type": "string"
           }
         }
       ],
-      "date_detection": false,
       "properties": {
         "@timestamp": {
-          "type": "date",
-          "format": "strict_date_time||strict_date_time_no_millis"
+          "format": "strict_date_time||strict_date_time_no_millis",
+          "type": "date"
         },
         "apache2": {
           "properties": {
             "access": {
               "properties": {
                 "agent": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "body_sent": {
                   "properties": {
@@ -74,54 +70,54 @@
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "http_version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "method": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "referrer": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "response_code": {
                   "type": "long"
                 },
                 "url": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user_agent": {
                   "properties": {
                     "device": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "major": {
                       "type": "long"
@@ -130,12 +126,12 @@
                       "type": "long"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os_major": {
                       "type": "long"
@@ -144,38 +140,38 @@
                       "type": "long"
                     },
                     "os_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "patch": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "user_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "error": {
               "properties": {
                 "client": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "module": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "pid": {
                   "type": "long"
@@ -192,75 +188,75 @@
             "log": {
               "properties": {
                 "a0": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "acct": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "item": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "items": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "new_auid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "new_ses": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "old_auid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "old_ses": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "pid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "ppid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "record_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "res": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "sequence": {
                   "type": "long"
@@ -272,20 +268,20 @@
         "beat": {
           "properties": {
             "hostname": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "name": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "timezone": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "version": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -294,19 +290,19 @@
             "container": {
               "properties": {
                 "id": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "image": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "labels": {
                   "type": "object"
                 },
                 "name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -317,43 +313,43 @@
             "audit": {
               "properties": {
                 "action": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "event_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "layer": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "node_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "origin_address": {
                   "type": "ip"
                 },
                 "origin_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "principal": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "request": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "request_body": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "uri": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -369,8 +365,8 @@
                   "type": "float"
                 },
                 "tags": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "threads_total_stop_time_secs": {
                   "type": "float"
@@ -380,68 +376,68 @@
             "server": {
               "properties": {
                 "component": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "slowlog": {
               "properties": {
                 "extra_source": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "index_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "logger": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "loglevel": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "node_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "search_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "shard_id": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "source_query": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "stats": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "took": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "took_millis": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "total_hits": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "total_shards": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "types": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -453,12 +449,12 @@
               "type": "long"
             },
             "message": {
-              "type": "text",
-              "norms": false
+              "norms": false,
+              "type": "text"
             },
             "type": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -478,49 +474,49 @@
         "fileset": {
           "properties": {
             "module": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "name": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
         "host": {
           "properties": {
             "architecture": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "ip": {
               "type": "ip"
             },
             "mac": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "name": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "os": {
               "properties": {
                 "family": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "platform": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -531,48 +527,48 @@
             "debug": {
               "properties": {
                 "facility": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "severity": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "main": {
               "properties": {
                 "facility": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "severity": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "startup": {
               "properties": {
                 "facility": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "severity": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -583,8 +579,8 @@
             "access": {
               "properties": {
                 "agent": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "body_received": {
                   "properties": {
@@ -601,58 +597,58 @@
                   }
                 },
                 "cookie": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "hostname": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "http_version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "method": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "port": {
                   "type": "long"
                 },
                 "query_string": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "referrer": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "request_time_ms": {
                   "type": "long"
@@ -661,29 +657,29 @@
                   "type": "long"
                 },
                 "server_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "server_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "site_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "sub_status": {
                   "type": "long"
                 },
                 "url": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user_agent": {
                   "properties": {
                     "device": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "major": {
                       "type": "long"
@@ -692,12 +688,12 @@
                       "type": "long"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os_major": {
                       "type": "long"
@@ -706,18 +702,18 @@
                       "type": "long"
                     },
                     "os_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "patch": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "user_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "win32_status": {
                   "type": "long"
@@ -729,45 +725,45 @@
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "http_version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "method": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "queue_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "reason_phrase": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_port": {
                   "type": "long"
@@ -776,15 +772,15 @@
                   "type": "long"
                 },
                 "server_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "server_port": {
                   "type": "long"
                 },
                 "url": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -793,8 +789,8 @@
         "input": {
           "properties": {
             "type": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -803,38 +799,38 @@
             "log": {
               "properties": {
                 "class": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "component": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "timestamp": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "trace": {
                   "properties": {
                     "class": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "full": {
-                      "type": "text",
-                      "norms": false
+                      "norms": false,
+                      "type": "text"
                     },
                     "message": {
-                      "type": "text",
-                      "norms": false
+                      "norms": false,
+                      "type": "text"
                     }
                   }
                 }
@@ -850,12 +846,12 @@
                   "type": "object"
                 },
                 "state": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "tags": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -869,12 +865,12 @@
             "container": {
               "properties": {
                 "image": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -882,26 +878,26 @@
               "type": "object"
             },
             "namespace": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "node": {
               "properties": {
                 "name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "pod": {
               "properties": {
                 "name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "uid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -910,8 +906,8 @@
         "log": {
           "properties": {
             "level": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -920,62 +916,62 @@
             "log": {
               "properties": {
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "log_event": {
                   "type": "object"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "module": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "thread": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 }
               }
             },
             "slowlog": {
               "properties": {
                 "event": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "module": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "plugin_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "plugin_params": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "plugin_params_object": {
                   "type": "object"
                 },
                 "plugin_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "thread": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "took_in_millis": {
                   "type": "long"
@@ -988,40 +984,40 @@
           }
         },
         "message": {
-          "type": "text",
-          "norms": false
+          "norms": false,
+          "type": "text"
         },
         "meta": {
           "properties": {
             "cloud": {
               "properties": {
                 "availability_zone": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "instance_id": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "instance_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "machine_type": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "project_id": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "provider": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "region": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1032,20 +1028,20 @@
             "log": {
               "properties": {
                 "component": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "context": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "severity": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1056,34 +1052,34 @@
             "error": {
               "properties": {
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "thread_id": {
                   "type": "long"
                 },
                 "timestamp": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "slowlog": {
               "properties": {
                 "host": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "id": {
                   "type": "long"
                 },
                 "ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "lock_time": {
                   "properties": {
@@ -1093,8 +1089,8 @@
                   }
                 },
                 "query": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "query_time": {
                   "properties": {
@@ -1113,8 +1109,8 @@
                   "type": "long"
                 },
                 "user": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1125,8 +1121,8 @@
             "access": {
               "properties": {
                 "agent": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "body_sent": {
                   "properties": {
@@ -1138,54 +1134,54 @@
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "http_version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "method": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "referrer": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "response_code": {
                   "type": "long"
                 },
                 "url": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user_agent": {
                   "properties": {
                     "device": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "major": {
                       "type": "long"
@@ -1194,12 +1190,12 @@
                       "type": "long"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os_major": {
                       "type": "long"
@@ -1208,18 +1204,18 @@
                       "type": "long"
                     },
                     "os_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "patch": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "user_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -1229,12 +1225,12 @@
                   "type": "long"
                 },
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "pid": {
                   "type": "long"
@@ -1254,20 +1250,20 @@
             "result": {
               "properties": {
                 "action": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "calendar_time": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "host_identifier": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "unix_time": {
                   "type": "long"
@@ -1281,38 +1277,38 @@
             "log": {
               "properties": {
                 "database": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "duration": {
                   "type": "float"
                 },
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "query": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "thread_id": {
                   "type": "long"
                 },
                 "timestamp": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "timezone": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1324,53 +1320,53 @@
               "type": "long"
             },
             "program": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
         "prospector": {
           "properties": {
             "type": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
         "read_timestamp": {
-          "type": "keyword",
-          "ignore_above": 1024
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "redis": {
           "properties": {
             "log": {
               "properties": {
                 "level": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "pid": {
                   "type": "long"
                 },
                 "role": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
             "slowlog": {
               "properties": {
                 "args": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "cmd": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "duration": {
                   "properties": {
@@ -1383,8 +1379,8 @@
                   "type": "long"
                 },
                 "key": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1393,18 +1389,18 @@
         "service": {
           "properties": {
             "name": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
         "source": {
-          "type": "keyword",
-          "ignore_above": 1024
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "stream": {
-          "type": "keyword",
-          "ignore_above": 1024
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "syslog": {
           "properties": {
@@ -1412,15 +1408,15 @@
               "type": "long"
             },
             "facility_label": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "priority": {
               "type": "long"
             },
             "severity_label": {
-              "type": "keyword",
-              "ignore_above": 1024
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
         },
@@ -1434,25 +1430,25 @@
                       "type": "long"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "hostname": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "pid": {
                   "type": "long"
                 },
                 "program": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "ssh": {
                   "properties": {
@@ -1460,29 +1456,29 @@
                       "type": "ip"
                     },
                     "event": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "geoip": {
                       "properties": {
                         "city_name": {
-                          "type": "keyword",
-                          "ignore_above": 1024
+                          "ignore_above": 1024,
+                          "type": "keyword"
                         },
                         "continent_name": {
-                          "type": "keyword",
-                          "ignore_above": 1024
+                          "ignore_above": 1024,
+                          "type": "keyword"
                         },
                         "country_iso_code": {
-                          "type": "keyword",
-                          "ignore_above": 1024
+                          "ignore_above": 1024,
+                          "type": "keyword"
                         },
                         "location": {
                           "type": "geo_point"
                         },
                         "region_name": {
-                          "type": "keyword",
-                          "ignore_above": 1024
+                          "ignore_above": 1024,
+                          "type": "keyword"
                         }
                       }
                     },
@@ -1490,49 +1486,49 @@
                       "type": "ip"
                     },
                     "method": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "port": {
                       "type": "long"
                     },
                     "signature": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "sudo": {
                   "properties": {
                     "command": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "error": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "pwd": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "tty": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "user": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "timestamp": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "useradd": {
                   "properties": {
@@ -1540,16 +1536,16 @@
                       "type": "long"
                     },
                     "home": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "shell": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "uid": {
                       "type": "long"
@@ -1561,44 +1557,44 @@
             "syslog": {
               "properties": {
                 "hostname": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "message": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "pid": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "program": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "timestamp": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
           }
         },
         "tags": {
-          "type": "keyword",
-          "ignore_above": 1024
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "traefik": {
           "properties": {
             "access": {
               "properties": {
                 "agent": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "backend_url": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "body_sent": {
                   "properties": {
@@ -1608,47 +1604,47 @@
                   }
                 },
                 "frontend_name": {
-                  "type": "text",
-                  "norms": false
+                  "norms": false,
+                  "type": "text"
                 },
                 "geoip": {
                   "properties": {
                     "city_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "continent_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "country_iso_code": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "location": {
                       "type": "geo_point"
                     },
                     "region_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "http_version": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "method": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "referrer": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "remote_ip": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "request_count": {
                   "type": "long"
@@ -1657,14 +1653,14 @@
                   "type": "long"
                 },
                 "url": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "user_agent": {
                   "properties": {
                     "device": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "major": {
                       "type": "long"
@@ -1673,12 +1669,12 @@
                       "type": "long"
                     },
                     "name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "os_major": {
                       "type": "long"
@@ -1687,18 +1683,18 @@
                       "type": "long"
                     },
                     "os_name": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "patch": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
                 "user_name": {
-                  "type": "keyword",
-                  "ignore_above": 1024
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             }
@@ -1706,6 +1702,11 @@
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }

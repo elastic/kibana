@@ -71,7 +71,8 @@
     is-loading="loading === true"
   />
 
-  <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
+  <div class="no-results-container"
+    ng-show="jobs.length > 0 && loading === false && hasResults === false && dataNotChartable === false">
     <div class="no-results">
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.noResultsFoundLabel"
@@ -81,6 +82,24 @@
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.tryWideningTheTimeSelectionDescription"
         i18n-default-message="Try widening the time selection or moving further back in time"
+      ></div>
+    </div>
+  </div>
+
+  <div class="no-results-container"
+    ng-show="jobs.length > 0 && loading === false && hasResults === false && dataNotChartable === true">
+    <div class="no-results">
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.noResultsFoundLabel"
+        i18n-default-message="{icon} No results found"
+        i18n-values="{ html_icon: '<i class=\'fa fa-info-circle\'></i>' }"
+      ></div>
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.dataNotChartableDescription"
+        i18n-default-message="Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}} and the source data cannot be plotted for this detector"
+        i18n-values="{
+          entityCount: entities.length
+        }"
       ></div>
     </div>
   </div>
@@ -161,6 +180,7 @@
       <div class="ml-timeseries-chart">
 
         <ml-timeseries-chart style="width: 1200px; height: 400px;"
+          annotations-enabled="showAnnotationsCheckbox"
           selected-job="selectedJob"
           detector-index="detectorId"
           model-plot-enabled="modelPlotEnabled"
@@ -178,8 +198,7 @@
           zoom-from="zoomFrom"
           zoom-to="zoomTo"
           auto-zoom-duration="autoZoomDuration"
-          refresh="refresh">
-        </ml-timeseries-chart>
+        />
 
       </div>
 
@@ -189,15 +208,17 @@
           i18n-id="xpack.ml.timeSeriesExplorer.annotationsTitle"
           i18n-default-message="Annotations"
         ></span>
-  
+
         <ml-annotation-table
           annotations="focusAnnotationData"
           drill-down="false"
           number-badge="true"
         />
 
-        <br /><br />
+        <div class="euiSpacer euiSpacer--l"></div>
       </div>
+
+      <ml-annotation-flyout />
 
       <span
         class="panel-title euiText"

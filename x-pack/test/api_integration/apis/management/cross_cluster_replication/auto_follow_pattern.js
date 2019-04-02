@@ -4,43 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import Chance from 'chance';
-import { API_BASE_PATH, REMOTE_CLUSTERS_API_BASE_PATH } from './constants';
+import expect from '@kbn/expect';
 
-const chance = new Chance();
-const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
-const getRandomName = () => chance.string({ pool: CHARS_POOL });
-const CLUSTER_NAME = `test-${getRandomName()}`;
+import { API_BASE_PATH } from './constants';
+
+import { initClusterHelpers, getRandomString } from './lib';
+
 const AUTO_FOLLOW_PATTERNS_API_BASE_PATH = API_BASE_PATH + '/auto_follow_patterns';
 
 export default function ({ getService }) {
   let autoFollowPatternsCreated = [];
   const supertest = getService('supertest');
 
-  const addCluster = async (name = CLUSTER_NAME) => (
-    await supertest
-      .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        "name": name,
-        "seeds": [
-          "localhost:9300"
-        ],
-        "skipUnavailable": true,
-      })
-  );
+  const { CLUSTER_NAME, addCluster, deleteAllClusters } = initClusterHelpers(supertest);
 
-  const deleteCluster = (name = CLUSTER_NAME) => {
-    return (
-      supertest
-        .delete(`${REMOTE_CLUSTERS_API_BASE_PATH}/${name}`)
-        .set('kbn-xsrf', 'xxx')
-    );
-  };
-
-  const deleteAutoFollowPattern = async (name) => (
-    await supertest
+  const deleteAutoFollowPatternRequest = (name) => (
+    supertest
       .delete(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
       .set('kbn-xsrf', 'xxx')
   );
@@ -51,7 +30,7 @@ export default function ({ getService }) {
     followIndexPattern: '{{leader_index}}_follower'
   });
 
-  const createAutoFollowIndexRequest = (name = getRandomName(), payload = getAutoFollowIndexPayload()) => {
+  const createAutoFollowIndexRequest = (name = getRandomString(), payload = getAutoFollowIndexPayload()) => {
     autoFollowPatternsCreated.push(name);
 
     return supertest
@@ -61,14 +40,13 @@ export default function ({ getService }) {
   };
 
   const cleanUp = () => (
-    Promise.all([deleteCluster(), ...autoFollowPatternsCreated.map(name => deleteAutoFollowPattern(name))])
+    Promise.all([deleteAllClusters(), ...autoFollowPatternsCreated.map(deleteAutoFollowPatternRequest)])
       .then(() => {
         autoFollowPatternsCreated = [];
       })
   );
 
   describe('auto follow patterns', () => {
-
     afterEach(() => {
       return cleanUp();
     });
@@ -102,7 +80,7 @@ export default function ({ getService }) {
       it('should create an auto-follow pattern when cluster is known', async () => {
         await addCluster();
 
-        const name = getRandomName();
+        const name = getRandomString();
         const { body } = await createAutoFollowIndexRequest(name).expect(200);
 
         expect(body.acknowledged).to.eql(true);
@@ -111,7 +89,7 @@ export default function ({ getService }) {
 
     describe('get()', () => {
       it('should return a 404 when the auto-follow pattern is not found', async () => {
-        const name = getRandomName();
+        const name = getRandomString();
         const { body } = await supertest
           .get(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
           .expect(404);
@@ -120,7 +98,7 @@ export default function ({ getService }) {
       });
 
       it('should return an auto-follow pattern that was created', async () => {
-        const name = getRandomName();
+        const name = getRandomString();
         const autoFollowPattern = getAutoFollowIndexPayload();
 
         await addCluster();

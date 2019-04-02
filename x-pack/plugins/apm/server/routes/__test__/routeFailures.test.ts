@@ -6,11 +6,8 @@
 
 import { Server } from 'hapi';
 import { flatten } from 'lodash';
-// @ts-ignore
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
-// @ts-ignore
-import { initStatusApi } from '../status_check';
 import { initTracesApi } from '../traces';
 
 describe('route handlers should fail with a Boom error', () => {
@@ -35,7 +32,10 @@ describe('route handlers should fail with a Boom error', () => {
             getCluster: () => mockCluster
           }
         }
-      }
+      },
+      getUiSettingsService: jest.fn(() => ({
+        get: jest.fn()
+      }))
     };
 
     const routes = flatten(mockServer.route.mock.calls);
@@ -66,10 +66,6 @@ describe('route handlers should fail with a Boom error', () => {
 
   describe('service routes', async () => {
     await testRouteFailures(initServicesApi);
-  });
-
-  describe('status check routes', async () => {
-    await testRouteFailures(initStatusApi);
   });
 
   describe('trace routes', async () => {

@@ -2,17 +2,9 @@
 
 exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -63,6 +55,7 @@ exports[`Field for array setting should render as read only with help text if ov
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -85,6 +78,7 @@ exports[`Field for array setting should render as read only with help text if ov
         }
         isInvalid={false}
         label="array:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="array test setting"
@@ -101,7 +95,6 @@ exports[`Field for array setting should render as read only with help text if ov
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -109,17 +102,9 @@ exports[`Field for array setting should render as read only with help text if ov
 
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -158,6 +143,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -169,6 +155,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
         helpText={null}
         isInvalid={false}
         label="array:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="array test setting"
@@ -185,7 +172,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -193,17 +179,9 @@ exports[`Field for array setting should render custom setting icon if it is cust
 
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -231,6 +209,7 @@ exports[`Field for array setting should render default value if there is no user
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -242,6 +221,7 @@ exports[`Field for array setting should render default value if there is no user
         helpText={null}
         isInvalid={false}
         label="array:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="array test setting"
@@ -258,7 +238,6 @@ exports[`Field for array setting should render default value if there is no user
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -266,17 +245,9 @@ exports[`Field for array setting should render default value if there is no user
 
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -327,6 +298,7 @@ exports[`Field for array setting should render user value if there is user value
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "array:test:setting-aria",
@@ -357,6 +329,7 @@ exports[`Field for array setting should render user value if there is user value
         }
         isInvalid={false}
         label="array:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="array test setting"
@@ -373,7 +346,6 @@ exports[`Field for array setting should render user value if there is user value
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -381,17 +353,9 @@ exports[`Field for array setting should render user value if there is user value
 
 exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -442,6 +406,7 @@ exports[`Field for boolean setting should render as read only with help text if 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -464,6 +429,7 @@ exports[`Field for boolean setting should render as read only with help text if 
         }
         isInvalid={false}
         label="boolean:test:setting"
+        labelType="label"
       >
         <EuiSwitch
           aria-label="boolean test setting"
@@ -484,7 +450,6 @@ exports[`Field for boolean setting should render as read only with help text if 
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -492,17 +457,9 @@ exports[`Field for boolean setting should render as read only with help text if 
 
 exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -541,6 +498,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -552,6 +510,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         helpText={null}
         isInvalid={false}
         label="boolean:test:setting"
+        labelType="label"
       >
         <EuiSwitch
           aria-label="boolean test setting"
@@ -572,7 +531,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -580,17 +538,9 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -618,6 +568,7 @@ exports[`Field for boolean setting should render default value if there is no us
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -629,6 +580,7 @@ exports[`Field for boolean setting should render default value if there is no us
         helpText={null}
         isInvalid={false}
         label="boolean:test:setting"
+        labelType="label"
       >
         <EuiSwitch
           aria-label="boolean test setting"
@@ -649,7 +601,6 @@ exports[`Field for boolean setting should render default value if there is no us
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -657,17 +608,9 @@ exports[`Field for boolean setting should render default value if there is no us
 
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -718,6 +661,7 @@ exports[`Field for boolean setting should render user value if there is user val
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "boolean:test:setting-aria",
@@ -748,6 +692,7 @@ exports[`Field for boolean setting should render user value if there is user val
         }
         isInvalid={false}
         label="boolean:test:setting"
+        labelType="label"
       >
         <EuiSwitch
           aria-label="boolean test setting"
@@ -768,7 +713,6 @@ exports[`Field for boolean setting should render user value if there is user val
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -776,17 +720,9 @@ exports[`Field for boolean setting should render user value if there is user val
 
 exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -837,6 +773,7 @@ exports[`Field for image setting should render as read only with help text if ov
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -859,6 +796,7 @@ exports[`Field for image setting should render as read only with help text if ov
         }
         isInvalid={false}
         label="image:test:setting"
+        labelType="label"
       >
         <EuiImage
           allowFullScreen={true}
@@ -872,7 +810,6 @@ exports[`Field for image setting should render as read only with help text if ov
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -880,17 +817,9 @@ exports[`Field for image setting should render as read only with help text if ov
 
 exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -929,6 +858,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -940,6 +870,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
         helpText={null}
         isInvalid={false}
         label="image:test:setting"
+        labelType="label"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -954,7 +885,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -962,17 +892,9 @@ exports[`Field for image setting should render custom setting icon if it is cust
 
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1000,6 +922,7 @@ exports[`Field for image setting should render default value if there is no user
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -1011,6 +934,7 @@ exports[`Field for image setting should render default value if there is no user
         helpText={null}
         isInvalid={false}
         label="image:test:setting"
+        labelType="label"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -1025,7 +949,6 @@ exports[`Field for image setting should render default value if there is no user
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1033,17 +956,9 @@ exports[`Field for image setting should render default value if there is no user
 
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1094,6 +1009,7 @@ exports[`Field for image setting should render user value if there is user value
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "image:test:setting-aria",
@@ -1139,6 +1055,7 @@ exports[`Field for image setting should render user value if there is user value
         }
         isInvalid={false}
         label="image:test:setting"
+        labelType="label"
       >
         <EuiImage
           allowFullScreen={true}
@@ -1152,7 +1069,6 @@ exports[`Field for image setting should render user value if there is user value
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1160,17 +1076,9 @@ exports[`Field for image setting should render user value if there is user value
 
 exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1225,6 +1133,7 @@ exports[`Field for json setting should render as read only with help text if ove
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1247,6 +1156,7 @@ exports[`Field for json setting should render as read only with help text if ove
         }
         isInvalid={false}
         label="json:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
@@ -1270,6 +1180,7 @@ exports[`Field for json setting should render as read only with help text if ove
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"hello\\": \\"world\\"}"
             width="100%"
@@ -1279,7 +1190,6 @@ exports[`Field for json setting should render as read only with help text if ove
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1287,17 +1197,9 @@ exports[`Field for json setting should render as read only with help text if ove
 
 exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1336,6 +1238,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1347,6 +1250,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
         helpText={null}
         isInvalid={false}
         label="json:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
@@ -1370,6 +1274,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"foo\\": \\"bar\\"}"
             width="100%"
@@ -1379,7 +1284,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1387,17 +1291,9 @@ exports[`Field for json setting should render custom setting icon if it is custo
 
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1452,6 +1348,7 @@ exports[`Field for json setting should render default value if there is no user 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1482,6 +1379,7 @@ exports[`Field for json setting should render default value if there is no user 
         }
         isInvalid={false}
         label="json:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
@@ -1505,6 +1403,7 @@ exports[`Field for json setting should render default value if there is no user 
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"foo\\": \\"bar\\"}"
             width="100%"
@@ -1514,7 +1413,6 @@ exports[`Field for json setting should render default value if there is no user 
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1522,17 +1420,9 @@ exports[`Field for json setting should render default value if there is no user 
 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1587,6 +1477,7 @@ exports[`Field for json setting should render user value if there is user value 
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "json:test:setting-aria",
@@ -1617,6 +1508,7 @@ exports[`Field for json setting should render user value if there is user value 
         }
         isInvalid={false}
         label="json:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
@@ -1640,6 +1532,7 @@ exports[`Field for json setting should render user value if there is user value 
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"hello\\": \\"world\\"}"
             width="100%"
@@ -1649,7 +1542,6 @@ exports[`Field for json setting should render user value if there is user value 
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1657,17 +1549,9 @@ exports[`Field for json setting should render user value if there is user value 
 
 exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1718,6 +1602,7 @@ exports[`Field for markdown setting should render as read only with help text if
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -1740,6 +1625,7 @@ exports[`Field for markdown setting should render as read only with help text if
         }
         isInvalid={false}
         label="markdown:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
@@ -1763,6 +1649,7 @@ exports[`Field for markdown setting should render as read only with help text if
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="**bold**"
             width="100%"
@@ -1772,7 +1659,6 @@ exports[`Field for markdown setting should render as read only with help text if
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1780,17 +1666,9 @@ exports[`Field for markdown setting should render as read only with help text if
 
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1829,6 +1707,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -1840,6 +1719,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         helpText={null}
         isInvalid={false}
         label="markdown:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
@@ -1863,6 +1743,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value=""
             width="100%"
@@ -1872,7 +1753,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1880,17 +1760,9 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1918,6 +1790,7 @@ exports[`Field for markdown setting should render default value if there is no u
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -1929,6 +1802,7 @@ exports[`Field for markdown setting should render default value if there is no u
         helpText={null}
         isInvalid={false}
         label="markdown:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
@@ -1952,6 +1826,7 @@ exports[`Field for markdown setting should render default value if there is no u
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value=""
             width="100%"
@@ -1961,7 +1836,6 @@ exports[`Field for markdown setting should render default value if there is no u
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1969,17 +1843,9 @@ exports[`Field for markdown setting should render default value if there is no u
 
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2030,6 +1896,7 @@ exports[`Field for markdown setting should render user value if there is user va
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "markdown:test:setting-aria",
@@ -2060,6 +1927,7 @@ exports[`Field for markdown setting should render user value if there is user va
         }
         isInvalid={false}
         label="markdown:test:setting"
+        labelType="label"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
@@ -2083,6 +1951,7 @@ exports[`Field for markdown setting should render user value if there is user va
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="**bold**"
             width="100%"
@@ -2092,7 +1961,6 @@ exports[`Field for markdown setting should render user value if there is user va
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2100,17 +1968,9 @@ exports[`Field for markdown setting should render user value if there is user va
 
 exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2161,6 +2021,7 @@ exports[`Field for number setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2183,6 +2044,7 @@ exports[`Field for number setting should render as read only with help text if o
         }
         isInvalid={false}
         label="number:test:setting"
+        labelType="label"
       >
         <EuiFieldNumber
           aria-label="number test setting"
@@ -2199,7 +2061,6 @@ exports[`Field for number setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2207,17 +2068,9 @@ exports[`Field for number setting should render as read only with help text if o
 
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2256,6 +2109,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2267,6 +2121,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
         helpText={null}
         isInvalid={false}
         label="number:test:setting"
+        labelType="label"
       >
         <EuiFieldNumber
           aria-label="number test setting"
@@ -2283,7 +2138,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2291,17 +2145,9 @@ exports[`Field for number setting should render custom setting icon if it is cus
 
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2329,6 +2175,7 @@ exports[`Field for number setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2340,6 +2187,7 @@ exports[`Field for number setting should render default value if there is no use
         helpText={null}
         isInvalid={false}
         label="number:test:setting"
+        labelType="label"
       >
         <EuiFieldNumber
           aria-label="number test setting"
@@ -2356,7 +2204,6 @@ exports[`Field for number setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2364,17 +2211,9 @@ exports[`Field for number setting should render default value if there is no use
 
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2425,6 +2264,7 @@ exports[`Field for number setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "number:test:setting-aria",
@@ -2455,6 +2295,7 @@ exports[`Field for number setting should render user value if there is user valu
         }
         isInvalid={false}
         label="number:test:setting"
+        labelType="label"
       >
         <EuiFieldNumber
           aria-label="number test setting"
@@ -2471,7 +2312,6 @@ exports[`Field for number setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2479,17 +2319,9 @@ exports[`Field for number setting should render user value if there is user valu
 
 exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2540,6 +2372,7 @@ exports[`Field for select setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2562,6 +2395,7 @@ exports[`Field for select setting should render as read only with help text if o
         }
         isInvalid={false}
         label="select:test:setting"
+        labelType="label"
       >
         <EuiSelect
           aria-label="select test setting"
@@ -2595,7 +2429,6 @@ exports[`Field for select setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2603,17 +2436,9 @@ exports[`Field for select setting should render as read only with help text if o
 
 exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2652,6 +2477,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2663,6 +2489,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
         helpText={null}
         isInvalid={false}
         label="select:test:setting"
+        labelType="label"
       >
         <EuiSelect
           aria-label="select test setting"
@@ -2696,7 +2523,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2704,17 +2530,9 @@ exports[`Field for select setting should render custom setting icon if it is cus
 
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2742,6 +2560,7 @@ exports[`Field for select setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2753,6 +2572,7 @@ exports[`Field for select setting should render default value if there is no use
         helpText={null}
         isInvalid={false}
         label="select:test:setting"
+        labelType="label"
       >
         <EuiSelect
           aria-label="select test setting"
@@ -2786,7 +2606,6 @@ exports[`Field for select setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2794,17 +2613,9 @@ exports[`Field for select setting should render default value if there is no use
 
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2855,6 +2666,7 @@ exports[`Field for select setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "select:test:setting-aria",
@@ -2885,6 +2697,7 @@ exports[`Field for select setting should render user value if there is user valu
         }
         isInvalid={false}
         label="select:test:setting"
+        labelType="label"
       >
         <EuiSelect
           aria-label="select test setting"
@@ -2918,7 +2731,6 @@ exports[`Field for select setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2926,17 +2738,9 @@ exports[`Field for select setting should render user value if there is user valu
 
 exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2987,6 +2791,7 @@ exports[`Field for string setting should render as read only with help text if o
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3009,6 +2814,7 @@ exports[`Field for string setting should render as read only with help text if o
         }
         isInvalid={false}
         label="string:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="string test setting"
@@ -3025,7 +2831,6 @@ exports[`Field for string setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3033,17 +2838,9 @@ exports[`Field for string setting should render as read only with help text if o
 
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3082,6 +2879,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3093,6 +2891,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
         helpText={null}
         isInvalid={false}
         label="string:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="string test setting"
@@ -3109,7 +2908,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3117,17 +2915,9 @@ exports[`Field for string setting should render custom setting icon if it is cus
 
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3155,6 +2945,7 @@ exports[`Field for string setting should render default value if there is no use
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3166,6 +2957,7 @@ exports[`Field for string setting should render default value if there is no use
         helpText={null}
         isInvalid={false}
         label="string:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="string test setting"
@@ -3182,7 +2974,6 @@ exports[`Field for string setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3190,17 +2981,9 @@ exports[`Field for string setting should render default value if there is no use
 
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3251,6 +3034,7 @@ exports[`Field for string setting should render user value if there is user valu
       titleSize="xs"
     >
       <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
         describedByIds={
           Array [
             "string:test:setting-aria",
@@ -3281,6 +3065,7 @@ exports[`Field for string setting should render user value if there is user valu
         }
         isInvalid={false}
         label="string:test:setting"
+        labelType="label"
       >
         <EuiFieldText
           aria-label="string test setting"
@@ -3297,7 +3082,6 @@ exports[`Field for string setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>

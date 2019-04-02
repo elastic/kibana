@@ -28,7 +28,7 @@ export function etcdMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.etcdMetrics.nameTitle', {
       defaultMessage: 'Etcd metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Etcd server.',

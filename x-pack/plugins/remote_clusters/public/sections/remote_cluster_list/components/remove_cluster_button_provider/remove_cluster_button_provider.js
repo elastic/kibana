@@ -80,6 +80,7 @@ export const RemoveClusterButtonProvider = injectI18n(
           <EuiOverlayMask>
             { /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */ }
             <EuiConfirmModal
+              data-test-subj="remoteClustersDeleteConfirmModal"
               title={title}
               onCancel={this.closeConfirmModal}
               onConfirm={this.onConfirm}

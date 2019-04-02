@@ -29,7 +29,7 @@ export function phpfpmMetricsSpecProvider(server, context) {
       defaultMessage: 'PHP-FPM metrics',
     }),
     category: TUTORIAL_CATEGORY.METRICS,
-    isBeta: true,
+    isBeta: false,
     shortDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from PHP-FPM.',
     }),

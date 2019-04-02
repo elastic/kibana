@@ -8,12 +8,13 @@ export default function ({ getService, loadTestFile }) {
   const es = getService('es');
 
   describe('uptime', () => {
-    beforeEach(() =>
+    before(() =>
       es.indices.delete({
-        index: 'heartbeat',
+        index: 'heartbeat*',
         ignore: [404],
       }));
 
     loadTestFile(require.resolve('./get_all_pings'));
+    loadTestFile(require.resolve('./graphql'));
   });
 }

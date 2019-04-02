@@ -20,6 +20,9 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+
 const store = new Map();
 (window as any).localStorage = {
   setItem: (key: string, value: string) => store.set(String(key), String(value)),
@@ -29,25 +32,62 @@ const store = new Map();
 
 import { ChromeService } from './chrome_service';
 
+function defaultSetupDeps(): any {
+  return {
+    notifications: notificationServiceMock.createSetupContract(),
+    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+  };
+}
+
 beforeEach(() => {
   store.clear();
 });
 
-describe('start', () => {
+describe('setup', () => {
+  it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const setupDeps = defaultSetupDeps();
+    setupDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    service.setup(setupDeps);
+    expect(setupDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Your browser does not meet the security requirements for Kibana.",
+  ],
+]
+`);
+  });
+
+  it('does not add legacy browser warning if browser supports CSP', () => {
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const setupDeps = defaultSetupDeps();
+    setupDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    service.setup(setupDeps);
+    expect(setupDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  it('does not add legacy browser warning if warnLegacyBrowsers is disabled', () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const setupDeps = defaultSetupDeps();
+    setupDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: false });
+    service.setup(setupDeps);
+    expect(setupDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
   describe('brand', () => {
     it('updates/emits the brand as it changes', async () => {
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getBrand$()
         .pipe(toArray())
         .toPromise();
 
-      start.setBrand({
+      setup.setBrand({
         logo: 'big logo',
         smallLogo: 'not so big logo',
       });
-      start.setBrand({
+      setup.setBrand({
         logo: 'big logo without small logo',
       });
       service.stop();
@@ -70,16 +110,16 @@ Array [
 
   describe('visibility', () => {
     it('updates/emits the visibility', async () => {
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsVisible(true);
-      start.setIsVisible(false);
-      start.setIsVisible(true);
+      setup.setIsVisible(true);
+      setup.setIsVisible(false);
+      setup.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -92,19 +132,19 @@ Array [
 `);
     });
 
-    it('always emits false if embed query string is in hash when started', async () => {
+    it('always emits false if embed query string is in hash when set up', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsVisible(true);
-      start.setIsVisible(false);
-      start.setIsVisible(true);
+      setup.setIsVisible(true);
+      setup.setIsVisible(false);
+      setup.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -120,16 +160,16 @@ Array [
 
   describe('is collapsed', () => {
     it('updates/emits isCollapsed', async () => {
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getIsCollapsed$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsCollapsed(true);
-      start.setIsCollapsed(false);
-      start.setIsCollapsed(true);
+      setup.setIsCollapsed(true);
+      setup.setIsCollapsed(false);
+      setup.setIsCollapsed(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -143,33 +183,33 @@ Array [
     });
 
     it('only stores true in localStorage', async () => {
-      const service = new ChromeService();
-      const start = service.start();
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
 
-      start.setIsCollapsed(true);
+      setup.setIsCollapsed(true);
       expect(store.size).toBe(1);
 
-      start.setIsCollapsed(false);
+      setup.setIsCollapsed(false);
       expect(store.size).toBe(0);
     });
   });
 
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getApplicationClasses$()
         .pipe(toArray())
         .toPromise();
 
-      start.addApplicationClass('foo');
-      start.addApplicationClass('foo');
-      start.addApplicationClass('bar');
-      start.addApplicationClass('bar');
-      start.addApplicationClass('baz');
-      start.removeApplicationClass('bar');
-      start.removeApplicationClass('foo');
+      setup.addApplicationClass('foo');
+      setup.addApplicationClass('foo');
+      setup.addApplicationClass('bar');
+      setup.addApplicationClass('bar');
+      setup.addApplicationClass('baz');
+      setup.removeApplicationClass('bar');
+      setup.removeApplicationClass('foo');
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -208,17 +248,17 @@ Array [
 
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
-      const service = new ChromeService();
-      const start = service.start();
-      const promise = start
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
         .getBreadcrumbs$()
         .pipe(toArray())
         .toPromise();
 
-      start.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
-      start.setBreadcrumbs([{ text: 'foo' }]);
-      start.setBreadcrumbs([{ text: 'bar' }]);
-      start.setBreadcrumbs([]);
+      setup.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
+      setup.setBreadcrumbs([{ text: 'foo' }]);
+      setup.setBreadcrumbs([{ text: 'bar' }]);
+      setup.setBreadcrumbs([]);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -247,18 +287,42 @@ Array [
 `);
     });
   });
+
+  describe('help extension', () => {
+    it('updates/emits the current help extension', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
+        .getHelpExtension$()
+        .pipe(toArray())
+        .toPromise();
+
+      setup.setHelpExtension(() => () => undefined);
+      setup.setHelpExtension(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  [Function],
+  undefined,
+]
+`);
+    });
+  });
 });
 
 describe('stop', () => {
   it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
-    const service = new ChromeService();
-    const start = service.start();
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const setup = service.setup(defaultSetupDeps());
     const promise = Rx.combineLatest(
-      start.getBrand$(),
-      start.getApplicationClasses$(),
-      start.getIsCollapsed$(),
-      start.getBreadcrumbs$(),
-      start.getIsVisible$()
+      setup.getBrand$(),
+      setup.getApplicationClasses$(),
+      setup.getIsCollapsed$(),
+      setup.getBreadcrumbs$(),
+      setup.getIsVisible$(),
+      setup.getHelpExtension$()
     ).toPromise();
 
     service.stop();
@@ -266,17 +330,18 @@ describe('stop', () => {
   });
 
   it('completes immediately if service already stopped', async () => {
-    const service = new ChromeService();
-    const start = service.start();
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const setup = service.setup(defaultSetupDeps());
     service.stop();
 
     await expect(
       Rx.combineLatest(
-        start.getBrand$(),
-        start.getApplicationClasses$(),
-        start.getIsCollapsed$(),
-        start.getBreadcrumbs$(),
-        start.getIsVisible$()
+        setup.getBrand$(),
+        setup.getApplicationClasses$(),
+        setup.getIsCollapsed$(),
+        setup.getBreadcrumbs$(),
+        setup.getIsVisible$(),
+        setup.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
   });

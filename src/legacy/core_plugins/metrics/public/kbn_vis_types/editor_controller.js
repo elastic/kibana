@@ -19,7 +19,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
+import chrome from 'ui/chrome';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
@@ -27,30 +29,39 @@ function ReactEditorControllerProvider(Private, config) {
       this.el = el;
       this.savedObj = savedObj;
       this.vis = savedObj.vis;
+      this.vis.fields = {};
     }
+
+    setDefaultIndexPattern = async () => {
+      const savedObjectsClient = chrome.getSavedObjectsClient();
+      const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+      this.vis.params.default_index_pattern = indexPattern.attributes.title;
+    };
 
     async render(params) {
       const Component = this.vis.type.editorConfig.component;
+
+      await this.setDefaultIndexPattern();
+      const visFields = await fetchIndexPatternFields(this.vis.params, this.vis.fields);
+
       render(
-        <I18nProvider>
+        <I18nContext>
           <Component
             config={config}
             vis={this.vis}
+            visFields={visFields}
+            visParams={this.vis.params}
             savedObj={this.savedObj}
             timeRange={params.timeRange}
             renderComplete={() => {}}
             isEditorMode={true}
             appState={params.appState}
           />
-        </I18nProvider>,
+        </I18nContext>,
         this.el);
     }
 
-    resize() {
-      if (this.visData) {
-        this.render(this.visData);
-      }
-    }
+    resize() {}
 
     destroy() {
       unmountComponentAtNode(this.el);

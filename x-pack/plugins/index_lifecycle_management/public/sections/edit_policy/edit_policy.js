@@ -36,7 +36,7 @@ import {
   PHASE_DELETE,
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
-} from '../../store/constants';
+} from '../../constants';
 import { findFirstError } from '../../services/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
@@ -106,7 +106,7 @@ class EditPolicyUi extends Component {
       const errorRowId = `${firstError.replace('.', '-')}-row`;
       const element = document.getElementById(errorRowId);
       if (element) {
-        element.scrollIntoView({ block: "center", inline: "nearest" });
+        element.scrollIntoView({ block: 'center', inline: 'nearest' });
       }
     } else {
       const success = await saveLifecyclePolicy(lifecycle, saveAsNewPolicy);

@@ -5,12 +5,12 @@
  */
 
 import { applyMiddleware, compose, createStore } from 'redux';
+import thunk from 'redux-thunk';
 
-import { apiMiddleware, autoFollowPatternMiddleware } from './middleware';
 import { ccr } from './reducers';
 
 function createCrossClusterReplicationStore(initialState = {}) {
-  const enhancers = [applyMiddleware(apiMiddleware, autoFollowPatternMiddleware)];
+  const enhancers = [applyMiddleware(thunk)];
 
   if (window.__REDUX_DEVTOOLS_EXTENSION__) {
     enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());

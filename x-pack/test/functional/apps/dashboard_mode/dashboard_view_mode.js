@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const appsMenu = getService('appsMenu');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -23,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
     'dashboard',
     'header',
     'settings',
+    'timePicker',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
@@ -34,7 +36,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
@@ -127,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the create dashboard button', async () => {
-        const createNewButtonExists = await testSubjects.exists('newDashboardLink');
+        const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
       });
 
@@ -140,8 +141,8 @@ export default function ({ getService, getPageObjects }) {
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await pieChart.filterOnPieSlice();
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
 
       it('does not show the edit menu item', async () => {
@@ -173,7 +174,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows the timepicker', async () => {
-        const timePickerExists = await testSubjects.exists('globalTimepickerButton');
+        const timePickerExists = await PageObjects.timePicker.timePickerExists();
         expect(timePickerExists).to.be(true);
       });
 

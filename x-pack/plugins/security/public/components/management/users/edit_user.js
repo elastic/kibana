@@ -64,8 +64,8 @@ class EditUserUI extends Component {
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({
-            id: "xpack.security.management.users.editUser.errorLoadingUserTitle",
-            defaultMessage: "Error loading user"
+            id: 'xpack.security.management.users.editUser.errorLoadingUserTitle',
+            defaultMessage: 'Error loading user'
           }),
           text: get(err, 'data.message') || err.message,
         });
@@ -79,8 +79,8 @@ class EditUserUI extends Component {
     } catch (err) {
       toastNotifications.addDanger({
         title: this.props.intl.formatMessage({
-          id: "xpack.security.management.users.editUser.errorLoadingRolesTitle",
-          defaultMessage: "Error loading roles"
+          id: 'xpack.security.management.users.editUser.errorLoadingRolesTitle',
+          defaultMessage: 'Error loading roles'
         }),
         text: get(err, 'data.message') || err.message,
       });
@@ -106,8 +106,8 @@ class EditUserUI extends Component {
     const { password } = this.state;
     if (password !== null && password.length < 6) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.passwordLengthErrorMessage",
-        defaultMessage: "Password must be at least 6 characters"
+        id: 'xpack.security.management.users.editUser.passwordLengthErrorMessage',
+        defaultMessage: 'Password must be at least 6 characters'
       });
     }
   };
@@ -115,8 +115,8 @@ class EditUserUI extends Component {
     const { currentPasswordError } = this.state;
     if (currentPasswordError) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.incorrectPasswordErrorMessage",
-        defaultMessage: "The current password you entered is incorrect"
+        id: 'xpack.security.management.users.editUser.incorrectPasswordErrorMessage',
+        defaultMessage: 'The current password you entered is incorrect'
       });
     }
   };
@@ -124,8 +124,8 @@ class EditUserUI extends Component {
     const { password, confirmPassword } = this.state;
     if (password && confirmPassword !== null && password !== confirmPassword) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.passwordDoNotMatchErrorMessage",
-        defaultMessage: "Passwords do not match"
+        id: 'xpack.security.management.users.editUser.passwordDoNotMatchErrorMessage',
+        defaultMessage: 'Passwords do not match'
       });
     }
   };
@@ -133,13 +133,13 @@ class EditUserUI extends Component {
     const { username } = this.state.user;
     if (username !== null && !username) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.requiredUsernameErrorMessage",
-        defaultMessage: "Username is required"
+        id: 'xpack.security.management.users.editUser.requiredUsernameErrorMessage',
+        defaultMessage: 'Username is required'
       });
     } else if (username && !username.match(validUsernameRegex)) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.usernameAllowedCharactersErrorMessage",
-        defaultMessage: "Username must begin with a letter or underscore and contain only letters, underscores, and numbers"
+        id: 'xpack.security.management.users.editUser.usernameAllowedCharactersErrorMessage',
+        defaultMessage: 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers'
       });
     }
   };
@@ -147,8 +147,8 @@ class EditUserUI extends Component {
     const { email } = this.state.user;
     if (email !== null && email !== '' && !email.match(validEmailRegex)) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.validEmailRequiredErrorMessage",
-        defaultMessage: "Email address is invalid"
+        id: 'xpack.security.management.users.editUser.validEmailRequiredErrorMessage',
+        defaultMessage: 'Email address is invalid'
       });
     }
   };
@@ -159,8 +159,8 @@ class EditUserUI extends Component {
       await apiClient.changePassword(user.username, password, currentPassword);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
-          id: "xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage",
-          defaultMessage: "Password changed."
+          id: 'xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage',
+          defaultMessage: 'Password changed.'
         })
       );
     } catch (e) {
@@ -169,8 +169,8 @@ class EditUserUI extends Component {
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.management.users.editUser.settingPasswordErrorMessage",
-            defaultMessage: "Error setting password: {message}"
+            id: 'xpack.security.management.users.editUser.settingPasswordErrorMessage',
+            defaultMessage: 'Error setting password: {message}'
           }, { message: e.data.message })
         );
       }
@@ -191,16 +191,16 @@ class EditUserUI extends Component {
       await apiClient.saveUser(userToSave);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
-          id: "xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage",
-          defaultMessage: "Saved user {message}"
+          id: 'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
+          defaultMessage: 'Saved user {message}'
         }, { message: user.username })
       );
       changeUrl(USERS_PATH);
     } catch (e) {
       toastNotifications.addDanger(
         this.props.intl.formatMessage({
-          id: "xpack.security.management.users.editUser.savingUserErrorMessage",
-          defaultMessage: "Error saving user: {message}"
+          id: 'xpack.security.management.users.editUser.savingUserErrorMessage',
+          defaultMessage: 'Error saving user: {message}'
         }, { message: e.data.message })
       );
     }
@@ -220,8 +220,8 @@ class EditUserUI extends Component {
         {userIsLoggedInUser ? (
           <EuiFormRow
             label={this.props.intl.formatMessage({
-              id: "xpack.security.management.users.editUser.currentPasswordFormRowLabel",
-              defaultMessage: "Current password"
+              id: 'xpack.security.management.users.editUser.currentPasswordFormRowLabel',
+              defaultMessage: 'Current password'
             })}
             isInvalid={!!this.currentPasswordError()}
             error={this.currentPasswordError()}
@@ -236,11 +236,11 @@ class EditUserUI extends Component {
         <EuiFormRow
           label={
             userIsLoggedInUser ? this.props.intl.formatMessage({
-              id: "xpack.security.management.users.editUser.newPasswordFormRowLabel",
-              defaultMessage: "New password"
+              id: 'xpack.security.management.users.editUser.newPasswordFormRowLabel',
+              defaultMessage: 'New password'
             }) : this.props.intl.formatMessage({
-              id: "xpack.security.management.users.editUser.passwordFormRowLabel",
-              defaultMessage: "Password"
+              id: 'xpack.security.management.users.editUser.passwordFormRowLabel',
+              defaultMessage: 'Password'
             })
           }
           isInvalid={!!this.passwordError()}
@@ -256,8 +256,8 @@ class EditUserUI extends Component {
         </EuiFormRow>
         <EuiFormRow
           label={this.props.intl.formatMessage({
-            id: "xpack.security.management.users.editUser.confirmPasswordFormRowLabel",
-            defaultMessage: "Confirm password"
+            id: 'xpack.security.management.users.editUser.confirmPasswordFormRowLabel',
+            defaultMessage: 'Confirm password'
           })}
           isInvalid={!!this.confirmPasswordError()}
           error={this.confirmPasswordError()}
@@ -291,8 +291,8 @@ class EditUserUI extends Component {
           <Fragment>
             <EuiCallOut
               title={this.props.intl.formatMessage({
-                id: "xpack.security.management.users.editUser.changePasswordExtraStepTitle",
-                defaultMessage: "Extra step needed"
+                id: 'xpack.security.management.users.editUser.changePasswordExtraStepTitle',
+                defaultMessage: 'Extra step needed'
               })}
               color="warning"
               iconType="help"
@@ -445,14 +445,14 @@ class EditUserUI extends Component {
                   helpText={
                     !isNewUser && !reserved
                       ? intl.formatMessage({
-                        id: "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription",
-                        defaultMessage: "Username's cannot be changed after creation."
+                        id: 'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
+                        defaultMessage: `Usernames can't be changed after creation.`
                       })
                       : null
                   }
                   label={intl.formatMessage({
-                    id: "xpack.security.management.users.editUser.usernameFormRowLabel",
-                    defaultMessage: "Username"
+                    id: 'xpack.security.management.users.editUser.usernameFormRowLabel',
+                    defaultMessage: 'Username'
                   })}
                 >
                   <EuiFieldText
@@ -480,8 +480,8 @@ class EditUserUI extends Component {
                   <Fragment>
                     <EuiFormRow
                       label={intl.formatMessage({
-                        id: "xpack.security.management.users.editUser.fullNameFormRowLabel",
-                        defaultMessage: "Full name"
+                        id: 'xpack.security.management.users.editUser.fullNameFormRowLabel',
+                        defaultMessage: 'Full name'
                       })}
                     >
                       <EuiFieldText
@@ -510,8 +510,8 @@ class EditUserUI extends Component {
                       isInvalid={!!this.emailError()}
                       error={this.emailError()}
                       label={intl.formatMessage({
-                        id: "xpack.security.management.users.editUser.emailAddressFormRowLabel",
-                        defaultMessage: "Email address"
+                        id: 'xpack.security.management.users.editUser.emailAddressFormRowLabel',
+                        defaultMessage: 'Email address'
                       })}
                     >
                       <EuiFieldText
@@ -540,15 +540,15 @@ class EditUserUI extends Component {
                 )}
                 <EuiFormRow
                   label={intl.formatMessage({
-                    id: "xpack.security.management.users.editUser.rolesFormRowLabel",
-                    defaultMessage: "Roles"
+                    id: 'xpack.security.management.users.editUser.rolesFormRowLabel',
+                    defaultMessage: 'Roles'
                   })}
                 >
                   <EuiComboBox
                     data-test-subj="userFormRolesDropdown"
                     placeholder={intl.formatMessage({
-                      id: "xpack.security.management.users.editUser.addRolesPlaceholder",
-                      defaultMessage: "Add roles"
+                      id: 'xpack.security.management.users.editUser.addRolesPlaceholder',
+                      defaultMessage: 'Add roles'
                     })}
                     onChange={this.onRolesChange}
                     isDisabled={reserved}

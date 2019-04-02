@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit } from 'lodash';
+import { cloneDeep, get, omit, has } from 'lodash';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -31,20 +31,40 @@ function migrateIndexPattern(doc) {
     // Let it go, the data is invalid and we'll leave it as is
     return;
   }
-  if (!searchSource.index) {
-    return;
+  if (searchSource.index) {
+    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    doc.references.push({
+      name: searchSource.indexRefName,
+      type: 'index-pattern',
+      id: searchSource.index,
+    });
+    delete searchSource.index;
   }
-  doc.references.push({
-    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    type: 'index-pattern',
-    id: searchSource.index,
-  });
-  searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-  delete searchSource.index;
+  if (searchSource.filter) {
+    searchSource.filter.forEach((filterRow, i) => {
+      if (!filterRow.meta || !filterRow.meta.index) {
+        return;
+      }
+      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      doc.references.push({
+        name: filterRow.meta.indexRefName,
+        type: 'index-pattern',
+        id: filterRow.meta.index,
+      });
+      delete filterRow.meta.index;
+    });
+  }
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
 export const migrations = {
+  'index-pattern': {
+    '6.5.0': (doc) => {
+      doc.attributes.type = doc.attributes.type || undefined;
+      doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
+      return doc;
+    }
+  },
   visualization: {
     '7.0.0': (doc) => {
       // Set new "references" attribute
@@ -63,6 +83,33 @@ export const migrations = {
         });
         doc.attributes.savedSearchRefName = 'search_0';
         delete doc.attributes.savedSearchId;
+      }
+
+      // Migrate controls
+      const visStateJSON = get(doc, 'attributes.visState');
+      if (visStateJSON) {
+        let visState;
+        try {
+          visState = JSON.parse(visStateJSON);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+        }
+        if (visState) {
+          const controls = get(visState, 'params.controls') || [];
+          controls.forEach((control, i) => {
+            if (!control.indexPattern) {
+              return;
+            }
+            control.indexPatternRefName = `control_${i}_index_pattern`;
+            doc.references.push({
+              name: control.indexPatternRefName,
+              type: 'index-pattern',
+              id: control.indexPattern,
+            });
+            delete control.indexPattern;
+          });
+          doc.attributes.visState = JSON.stringify(visState);
+        }
       }
 
       // Migrate table splits
@@ -98,6 +145,44 @@ export const migrations = {
       } catch (e) {
         throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
       }
+    },
+    '7.1.0': doc => {
+      // [TSVB] Migrate percentile-rank aggregation (value -> values)
+      const migratePercentileRankAggregation = doc => {
+        const visStateJSON = get(doc, 'attributes.visState');
+        let visState;
+
+        if (visStateJSON) {
+          try {
+            visState = JSON.parse(visStateJSON);
+          } catch (e) {
+            // Let it go, the data is invalid and we'll leave it as is
+          }
+          if (visState && visState.type === 'metrics') {
+            const series = get(visState, 'params.series') || [];
+
+            series.forEach(part => {
+              (part.metrics || []).forEach(metric => {
+                if (metric.type === 'percentile_rank' && has(metric, 'value')) {
+                  metric.values = [metric.value];
+
+                  delete metric.value;
+                }
+              });
+            });
+            return {
+              ...doc,
+              attributes: {
+                ...doc.attributes,
+                visState: JSON.stringify(visState),
+              },
+            };
+          }
+        }
+        return doc;
+      };
+
+      return migratePercentileRankAggregation(doc);
     }
   },
   dashboard: {

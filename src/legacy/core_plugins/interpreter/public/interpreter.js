@@ -17,38 +17,37 @@
  * under the License.
  */
 
-
-import { initializeInterpreter, loadBrowserRegistries, createSocket } from '@kbn/interpreter/public';
-import chrome from 'ui/chrome';
+import 'uiExports/interpreter';
+import { register, registryFactory } from '@kbn/interpreter/common';
+import { initializeInterpreter } from './lib/interpreter';
+import { registries } from './registries';
+import { kfetch } from 'ui/kfetch';
+import { ajaxStream } from 'ui/ajax_stream';
 import { functions } from './functions';
-import { functionsRegistry } from './functions_registry';
-import { typesRegistry } from './types_registry';
-import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
+import { typeSpecs } from '../common/types';
 
-const basePath = chrome.getInjected('serverBasePath');
+// Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
+// can register without a transpile step.
+global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
 
-const types = {
-  browserFunctions: functionsRegistry,
-  renderers: renderFunctionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-renderFunctionsRegistry.register(visualization);
+register(registries, {
+  types: typeSpecs,
+  browserFunctions: functions,
+  renderers: [visualization],
+});
 
 let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  await loadBrowserRegistries(types, basePath);
-  const socket = await createSocket(basePath, functionsRegistry);
-  initializeInterpreter(socket, typesRegistry, functionsRegistry).then(interpreter => {
-    _resolve({ interpreter, socket });
+  initializeInterpreter({
+    kfetch,
+    ajaxStream,
+    typesRegistry: registries.types,
+    functionsRegistry: registries.browserFunctions,
+  }).then(interpreter => {
+    _resolve({ interpreter });
   });
 };
 
@@ -63,9 +62,4 @@ export const getInterpreter = async () => {
 export const interpretAst = async (...params) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
-};
-
-export const updateInterpreterFunctions = async () => {
-  const { socket } =  await getInterpreter();
-  socket.emit('updateFunctionList');
 };

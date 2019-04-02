@@ -15,12 +15,12 @@ import { injectI18n } from '@kbn/i18n/react';
 
 const CHART_DESCRIPTION = {
   [CHART_TYPE.EVENT_DISTRIBUTION]: i18n.translate('xpack.ml.explorer.charts.infoTooltip.chartEventDistributionDescription', {
-    defaultMessage: 'The gray dots depict the distribution of occurences over time for a sample of {byFieldValuesParam} with' +
-      'more frequent event types at the top and rarer ones at the bottom.',
+    defaultMessage: 'The gray dots depict the approximate distribution of occurrences over time for a sample of {byFieldValuesParam} with' +
+      ' more frequent event types at the top and rarer ones at the bottom.',
     values: { byFieldValuesParam: 'by_field_values' }
   }),
   [CHART_TYPE.POPULATION_DISTRIBUTION]: i18n.translate('xpack.ml.explorer.charts.infoTooltip.chartPopulationDistributionDescription', {
-    defaultMessage: 'The gray dots depict the distribution of values over time for a sample of {overFieldValuesParam}.',
+    defaultMessage: 'The gray dots depict the approximate distribution of values over time for a sample of {overFieldValuesParam}.',
     values: { overFieldValuesParam: 'over_field_values' }
   }),
 };

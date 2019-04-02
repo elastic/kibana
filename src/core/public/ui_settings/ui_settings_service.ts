@@ -17,28 +17,30 @@
  * under the License.
  */
 
-import { BasePathStartContract } from '../base_path';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { LoadingCountStartContract } from '../loading_count';
-import { NotificationsStartContract } from '../notifications';
+import { BasePathSetup } from '../base_path';
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { NotificationsSetup } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
+import { i18n } from '@kbn/i18n';
+
 interface Deps {
-  notifications: NotificationsStartContract;
-  loadingCount: LoadingCountStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  basePath: BasePathStartContract;
+  notifications: NotificationsSetup;
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  basePath: BasePathSetup;
 }
 
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public start({ notifications, loadingCount, injectedMetadata, basePath }: Deps) {
+  public setup({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
-    loadingCount.add(this.uiSettingsApi.getLoadingCount$());
+    http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
@@ -47,7 +49,9 @@ export class UiSettingsService {
       api: this.uiSettingsApi,
       onUpdateError: error => {
         notifications.toasts.addDanger({
-          title: 'Unable to update UI setting',
+          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
+            defaultMessage: 'Unable to update UI setting',
+          }),
           text: error.message,
         });
       },
@@ -69,4 +73,4 @@ export class UiSettingsService {
   }
 }
 
-export type UiSettingsStartContract = UiSettingsClient;
+export type UiSettingsSetup = UiSettingsClient;

@@ -24,13 +24,13 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
-  getMonitorChartsData?: (MonitorChartEntry | null)[] | null;
+  getMonitorChartsData?: MonitorChart | null;
 
   getLatestMonitors: Ping[];
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorListItem | null)[] | null;
+  getErrorsList?: ErrorListItem[] | null;
 
   getMonitorPageTitle?: MonitorPageTitle | null;
 }
@@ -305,16 +305,17 @@ export interface DocCount {
 }
 
 export interface LatestMonitorsResult {
-  monitors?: (LatestMonitor | null)[] | null;
+  monitors?: LatestMonitor[] | null;
 }
-
+/** Represents the latest recorded information about a monitor. */
 export interface LatestMonitor {
+  /** The ID of the monitor represented by this data. */
   id: MonitorKey;
-
+  /** Information from the latest document. */
   ping?: Ping | null;
-
+  /** Buckets of recent up count status data. */
   upSeries?: (MonitorSeriesPoint | null)[] | null;
-
+  /** Buckets of recent down count status data. */
   downSeries?: (MonitorSeriesPoint | null)[] | null;
 }
 
@@ -335,17 +336,9 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
-  histogram?: (HistogramSeries | null)[] | null;
-}
-
-export interface HistogramSeries {
-  monitorId?: string | null;
-
-  data?: (HistogramDataPoint | null)[] | null;
+  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
@@ -359,47 +352,51 @@ export interface HistogramDataPoint {
 
   y?: UnsignedInteger | null;
 }
-
-export interface MonitorChartEntry {
-  maxContent?: DataPoint | null;
-
-  maxResponse?: DataPoint | null;
-
-  maxValidate?: DataPoint | null;
-
-  maxTotal?: DataPoint | null;
-
-  maxWriteRequest?: DataPoint | null;
-
-  maxTcpRtt?: DataPoint | null;
-
-  maxDuration?: DataPoint | null;
-
-  minDuration?: DataPoint | null;
-
-  avgDuration?: DataPoint | null;
-
-  status?: StatusData | null;
+/** The data used to populate the monitor charts. */
+export interface MonitorChart {
+  /** The max and min values for the monitor duration. */
+  durationArea: MonitorDurationAreaPoint[];
+  /** The average values for the monitor duration. */
+  durationLine: MonitorDurationAveragePoint[];
+  /** The counts of up/down checks for the monitor. */
+  status: StatusData[];
+  /** The maximum status doc count in this chart. */
+  statusMaxCount: number;
+  /** The maximum duration value in this chart. */
+  durationMaxValue: number;
 }
-
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
+}
+/** Represents the average monitor duration ms at a point in time. */
+export interface MonitorDurationAveragePoint {
+  /** The timeseries value for this point. */
+  x: UnsignedInteger;
+  /** The average duration ms for the monitor. */
   y?: number | null;
 }
-
+/** Represents a bucket of monitor status information. */
 export interface StatusData {
-  x?: UnsignedInteger | null;
-
+  /** The timeseries point for this status data. */
+  x: UnsignedInteger;
+  /** The value of up counts for this point. */
   up?: number | null;
-
+  /** The value for down counts for this point. */
   down?: number | null;
-
+  /** The total down counts for this point. */
   total?: number | null;
 }
 
 export interface FilterBar {
   ids?: MonitorKey[] | null;
+
+  names?: string[] | null;
 
   ports?: number[] | null;
 
@@ -428,6 +425,12 @@ export interface MonitorPageTitle {
   url?: string | null;
 
   name?: string | null;
+}
+
+export interface DataPoint {
+  x?: UnsignedInteger | null;
+
+  y?: number | null;
 }
 
 // ====================================================

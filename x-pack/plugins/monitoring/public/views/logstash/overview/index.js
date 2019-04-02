@@ -13,7 +13,7 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Overview } from '../../../components/logstash/overview';
 import { MonitoringViewBaseController } from '../../base_controller';
 
@@ -59,13 +59,13 @@ uiRoutes.when('/logstash', {
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <Overview
               stats={data.clusterStatus}
               metrics={data.metrics}
               onBrush={this.onBrush}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

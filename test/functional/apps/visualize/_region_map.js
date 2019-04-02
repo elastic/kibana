@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 
 export default function ({ getService, getPageObjects }) {
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
-    const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+    const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
 
     before(async function () {
 
@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickRegionMap');
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = shape field');
       await PageObjects.visualize.clickBucket('shape field');
       log.debug('Aggregation = Terms');

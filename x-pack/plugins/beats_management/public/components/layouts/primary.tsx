@@ -22,7 +22,7 @@ import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
-  title: string;
+  title: string | React.ReactNode;
   actionSection?: React.ReactNode;
   hideBreadcrumbs?: boolean;
 }

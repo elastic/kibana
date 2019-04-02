@@ -37,7 +37,7 @@ describe('chartSelectors', () => {
       overallAvgDuration: 200
     } as ApmTimeSeriesResponse;
 
-    it('should match snapshot', () => {
+    it('should produce correct series', () => {
       expect(getResponseTimeSeries(apmTimeseries)).toEqual([
         {
           color: '#3185fc',
@@ -47,7 +47,7 @@ describe('chartSelectors', () => {
           type: 'linemark'
         },
         {
-          color: '#ecae23',
+          color: '#e6c220',
           data: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
           title: '95th percentile',
           titleShort: '95th',
@@ -77,7 +77,7 @@ describe('chartSelectors', () => {
       ]
     } as any) as ApmTimeSeriesResponse;
     const transactionType = 'MyTransactionType';
-    it('should match snapshot', () => {
+    it('should produce correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
           color: '#00b3a4',

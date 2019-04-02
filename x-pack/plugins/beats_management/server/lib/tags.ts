@@ -30,7 +30,7 @@ export class CMTagsDomain {
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
     const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
-    if (beats.length > 0) {
+    if (beats.filter(b => b.active).length > 0) {
       return false;
     }
     await this.configurationBlocksAdapter.deleteForTags(user, tagIds);

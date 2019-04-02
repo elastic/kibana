@@ -6,12 +6,13 @@
 
 export const filebeatApache2Rules = [
   {
+    // pre-ECS
     when: {
       exists: ['apache2.access'],
     },
     format: [
       {
-        constant: '[Apache][access] ',
+        constant: '[apache][access] ',
       },
       {
         field: 'apache2.access.remote_ip',
@@ -55,12 +56,35 @@ export const filebeatApache2Rules = [
     ],
   },
   {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'apache.error',
+      },
+    },
+    format: [
+      {
+        constant: '[apache][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['apache2.error.message'],
     },
     format: [
       {
-        constant: '[Apache][',
+        constant: '[apache][',
       },
       {
         field: 'apache2.error.level',

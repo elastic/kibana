@@ -51,7 +51,7 @@ function PanelOptionsMenuUi({
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
       color="text"
-      className={isViewMode && !isPopoverOpen ? 'dshPanel_optionsMenuButton' : ''}
+      className="dshPanel_optionsMenuButton"
       aria-label={intl.formatMessage({
         id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButtonAriaLabel',
         defaultMessage: 'Panel options',

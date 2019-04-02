@@ -23,7 +23,7 @@ import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
 import {
-  EuiBasicTable,
+  EuiBasicTable as EuiBasicTableTyped,
   EuiButtonIcon,
   EuiPageContent,
   EuiSpacer,
@@ -123,7 +123,7 @@ class ReportListingUi extends Component<Props, State> {
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
           </h1>
         </EuiTitle>
-        <EuiText color="subdued">
+        <EuiText color="subdued" size="s">
           <p>
             <FormattedMessage
               id="xpack.reporting.listing.reports.subtitle"
@@ -296,7 +296,7 @@ class ReportListingUi extends Component<Props, State> {
     };
 
     return (
-      <EuiBasicTable
+      <EuiBasicTableTyped
         itemId={'id'}
         items={this.state.jobs}
         loading={this.state.isLoading}

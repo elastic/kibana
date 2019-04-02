@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
 
 
   describe('tile map visualize app', function () {
@@ -44,8 +45,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         //do not configure aggs
       });
 
@@ -70,8 +70,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Geo Coordinates');
         await PageObjects.visualize.clickBucket('Geo Coordinates');
         log.debug('Click aggregation Geohash');
@@ -164,6 +163,26 @@ export default function ({ getService, getPageObjects }) {
           await inspector.open();
           const data = await inspector.getTableData();
           await inspector.close();
+          compareTableData(data, expectedPrecision2DataTable);
+        });
+
+        it('Fit data bounds works with pinned filter data', async () => {
+          const expectedPrecision2DataTable = [
+            ['-', 'f05', '1', { lat: 45, lon: -85 }],
+            ['-', 'dpr', '1', { lat: 40, lon: -79 }],
+            ['-', '9qh', '1', { lat: 33, lon: -118 }],
+          ];
+
+          await filterBar.addFilter('bytes', 'is between', '19980', '19990');
+          await filterBar.toggleFilterPinned('bytes');
+          await PageObjects.visualize.zoomAllTheWayOut();
+          await PageObjects.visualize.clickMapFitDataBounds();
+
+          await inspector.open();
+          const data = await inspector.getTableData();
+          await inspector.close();
+
+          await filterBar.removeAllFilters();
           compareTableData(data, expectedPrecision2DataTable);
         });
 

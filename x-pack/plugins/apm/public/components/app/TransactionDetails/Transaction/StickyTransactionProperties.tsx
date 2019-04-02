@@ -8,20 +8,19 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
   URL_FULL,
   USER_ID
-} from '../../../../../common/constants';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
+import { ErrorCountBadge } from './ErrorCountBadge';
 
 interface Props {
   transaction: Transaction;
@@ -40,6 +39,14 @@ export function StickyTransactionProperties({
     idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
+
+  const noErrorsText = i18n.translate(
+    'xpack.apm.transactionDetails.errorsNone',
+    {
+      defaultMessage: 'None'
+    }
+  );
+
   const stickyProperties: IStickyProperty[] = [
     {
       label: i18n.translate('xpack.apm.transactionDetails.timestampLabel', {
@@ -81,7 +88,25 @@ export function StickyTransactionProperties({
       }),
       fieldName: TRANSACTION_RESULT,
       val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
-      width: '25%'
+      width: '14%'
+    },
+    {
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.errorsOverviewLabel',
+        {
+          defaultMessage: 'Errors'
+        }
+      ),
+      val: errorCount ? (
+        <ErrorCountBadge
+          errorCount={errorCount}
+          transaction={transaction}
+          verbose
+        />
+      ) : (
+        noErrorsText
+      ),
+      width: '18%'
     },
     {
       label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
@@ -90,47 +115,9 @@ export function StickyTransactionProperties({
       fieldName: USER_ID,
       val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
-      width: '25%'
+      width: '18%'
     }
   ];
-
-  if (errorCount !== undefined) {
-    const errorsOverviewLink = (
-      <KibanaLink
-        pathname={'/app/apm'}
-        hash={`/${idx(transaction, _ => _.service.name)}/errors`}
-        query={{
-          kuery: legacyEncodeURIComponent(
-            `transaction.id : "${transaction.transaction.id}"`
-          )
-        }}
-      >
-        {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
-          values: { errorCount },
-          defaultMessage:
-            '{errorCount, plural, one {View 1 error} other {View # errors}}'
-        })}
-      </KibanaLink>
-    );
-
-    const noErrorsText = i18n.translate(
-      'xpack.apm.transactionDetails.errorsNone',
-      {
-        defaultMessage: 'None'
-      }
-    );
-
-    stickyProperties.push({
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.errorsOverviewLabel',
-        {
-          defaultMessage: 'Errors'
-        }
-      ),
-      val: errorCount === 0 ? noErrorsText : errorsOverviewLink,
-      width: '25%'
-    });
-  }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }

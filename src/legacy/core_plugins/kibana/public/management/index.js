@@ -19,12 +19,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
-import 'ui/filters/start_from';
 import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
@@ -32,7 +32,6 @@ import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
-import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
@@ -62,7 +61,7 @@ export function updateLandingPage(version) {
 
   render(
     <EuiPageContent horizontalPosition="center">
-      <I18nProvider>
+      <I18nContext>
         <div>
           <div className="eui-textCenter">
             <EuiIcon type="managementApp" size="xxl" />
@@ -95,7 +94,7 @@ export function updateLandingPage(version) {
             </p>
           </EuiText>
         </div>
-      </I18nProvider>
+      </I18nContext>
     </EuiPageContent>,
     node,
   );
@@ -110,13 +109,13 @@ export function updateSidebar(
   }
 
   render(
-    <I18nProvider>
+    <I18nContext>
       <SidebarNav
         sections={items}
         selectedId={id}
         className="mgtSideNav"
       />
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }

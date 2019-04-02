@@ -16,20 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import buildRequestBody from './build_request_body';
+import { buildRequestBody } from './build_request_body';
+import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-export default async (req, panel, series, esQueryConfig) => {
-  const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-  const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject);
-  request.timeout = '90s';
-  return [
-    {
+export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
+  const bodies = [];
+  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities);
+  const esShardTimeout = await getEsShardTimeout(req);
+
+  if (capabilities.batchRequestsSupport) {
+    bodies.push({
       index: indexPatternString,
-      ignoreUnavailable: true,
-    },
-    request,
-  ];
-};
+    });
+  }
+
+  if (esShardTimeout > 0) {
+    request.timeout = `${esShardTimeout}ms`;
+  }
+
+  bodies.push(request);
+
+  return bodies;
+}

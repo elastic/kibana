@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
 import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
 import { MetricsQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
+import { DATES } from './constants';
+const { min, max } = DATES['7.0.0'].hosts;
+
 const metricTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
   describe('metrics', () => {
-    before(() => esArchiver.load('infra/metrics_and_logs'));
-    after(() => esArchiver.unload('infra/metrics_and_logs'));
+    before(() => esArchiver.load('infra/7.0.0/hosts'));
+    after(() => esArchiver.unload('infra/7.0.0/hosts'));
 
     it('should basically work', () => {
       return client
@@ -27,11 +30,11 @@ const metricTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             metrics: ['hostCpuUsage'],
             timerange: {
-              to: 1539806283952,
-              from: 1539805341208,
+              to: max,
+              from: min,
               interval: '>=1m',
             },
-            nodeId: 'demo-stack-nginx-01',
+            nodeId: 'demo-stack-mysql-01',
             nodeType: 'host',
           },
         })
@@ -45,8 +48,8 @@ const metricTests: KbnTestProvider = ({ getService }) => {
           expect(series).to.have.property('id', 'user');
           expect(series).to.have.property('data');
           const datapoint = last(series.data);
-          expect(datapoint).to.have.property('timestamp', 1539806220000);
-          expect(datapoint).to.have.property('value', 0.0065);
+          expect(datapoint).to.have.property('timestamp', 1547571720000);
+          expect(datapoint).to.have.property('value', 0.0018333333333333333);
         });
     });
 
@@ -58,11 +61,11 @@ const metricTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             metrics: ['hostCpuUsage', 'hostLoad'],
             timerange: {
-              to: 1539806283952,
-              from: 1539805341208,
+              to: max,
+              from: min,
               interval: '>=1m',
             },
-            nodeId: 'demo-stack-nginx-01',
+            nodeId: 'demo-stack-mysql-01',
             nodeType: 'host',
           },
         })

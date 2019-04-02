@@ -6,29 +6,186 @@
 
 Canvas is included with X-Pack and requires a Basic license or better to use.
 
-Canvas has its own build pipeline that gets triggered as part of `node scripts/kbn bootstrap`. However, should you ever need to run the build manually, like if you updated one of the plugins, you can do so with the following command:
-
-```bash
-yarn kbn run build --include x-pack
-```
-
 ### Developing in Canvas
 
-As mentioned above, Canvas has its plugin build process, so if you are planning to work on any of the plugin code, you'll need to use the plugin build process.
+To develop your own Canvas plugins, you simply create a Kibana plugin, and register your customizations with Canvas.
 
-**If you are not working on Canvas plugins, you can just start Kibana like normal, as long as you've used `yarn kbn bootstrap`**.
+The following is a step-by-step guide to adding your own custom random number Canvas plugin.
 
-The easiest way to do develop on Canvas and have the plugins built automatically is to cd into the canvas plugin path and start the process from there:
+#### Generating a Kibana plugin
 
 ```bash
-# while in kibana/
-cd x-pack/plugins/canvas
+# in the kibana directory
+# Rename canvas_example to whatever you want your plugin to be named
+node scripts/generate_plugin.js canvas_example
+```
+
+This will prompt you for some input. Generally, you can answer as follows:
+
+```
+❯ node scripts/generate_plugin.js canvas_example
+? Provide a short description An awesome Kibana plugin
+? What Kibana version are you targeting? master
+? Should an app component be generated? No
+? Should translation files be generated? No
+? Should a hack component be generated? No
+? Should a server API be generated? No
+```
+
+Once this has completed, go to your plugin directory:
+
+```bash
+cd plugins/canvas_example
+```
+
+Open that folder in your code editor of choice: `code .`
+
+#### Creating a Canvas element and function
+
+Open your plugin's `index.js` file, and modify it to look something like this (but replace canvas_example with whatever you named your plugin):
+
+```js
+export default function (kibana) {
+  return new kibana.Plugin({
+    // Tell Kibana that this plugin needs canvas and the Kibana interpreter
+    require: ['interpreter', 'canvas'],
+
+    // The name of your plugin. Make this whatever you want.
+    name: 'canvas_example',
+
+    uiExports: {
+      // Tell Kibana that the files in `/public` should be loaded into the
+      // browser only when the user is in the Canvas app.
+      canvas: ['plugins/canvas_example']
+    },
+
+    // Enable the plugin by default
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+  });
+}
+```
+
+Now that the Kibana plugin boilerplate is out of the way, you can write a Canvas plugin.
+
+Create a new file: `public/index.js` and make it look like this:
+
+```js
+/*global kbnInterpreter */
+
+// Elements show up in the Canvas elements menu and can be visually added to a canvas
+const elements = [
+  () => ({
+    name: 'randomNumber',
+    displayName: 'Random Number',
+    help: 'A random number between 1 and 100',
+    image: 'https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb59c89a07c05b937/5c583a6602ac90e80ba0ab8f/icon-white-circle-elastic-stack.svg',
+    expression: 'random | metric "Random Number"',
+  }),
+];
+
+// Browser functions are Canvas functions which run in the browser, and can be used in
+// expressions (such as `random | metric "Random Number"`)
+const browserFunctions = [
+  () => ({
+    name: 'random',
+    help: 'Make a random number between 1 and 100',
+    args: {},
+    fn() {
+      return Math.floor(Math.random() * 100) + 1;
+    }
+  }),
+];
+
+// Register our elements and browserFunctions with the Canvas interpreter.
+kbnInterpreter.register({
+  elements,
+  browserFunctions,
+});
+
+```
+
+#### Trying out your new plugin
+
+In the terminal, in your plugin's directory, run:
+
+```bash
+# In plugins/canvas_example
 yarn start
 ```
 
-There are several other scripts available once you are in that path as well.
+- Pull up Kibana in your browser: `http://localhost:5601`
+- Go to canvas, and click: "Create workpad"
+- Click: "Add element"
+- Click: "Random Number"
 
-- `node scripts/build_plugins` - local alias to build Canvas plugins, an alternative to using `kbn`.
+#### Adding a server-side function
+
+Now, let's add a function which runs on the server.
+
+In your plugin's root `index.js` file, modify the `kibana.Plugin` definition to have an init function:
+
+```js
+export default function (kibana) {
+  return new kibana.Plugin({
+    // Tell Kibana that this plugin needs canvas and the Kibana interpreter
+    require: ['interpreter', 'canvas'],
+
+    // The name of your plugin. Make this whatever you want.
+    name: 'canvas_example',
+
+    uiExports: {
+      // Tell Kibana that the files in `/public` should be loaded into the
+      // browser only when the user is in the Canvas app.
+      canvas: ['plugins/canvas_example']
+    },
+
+    // Enable the plugin by default
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
+    // Add this init function, which registers a new function with Canvas: `serverTime`
+    init(server) {
+      const { register } = server.plugins.interpreter;
+      register({
+        serverFunctions: [
+          () => ({
+            name: 'serverTime',
+            help: 'Get the server time in milliseconds',
+            args: {},
+            fn() {
+              return Date.now();
+            },
+          })
+        ],
+      });
+    },
+  });
+}
+```
+
+Now, let's try out our new server function.
+
+- Refresh your browser.
+- In the same Canvas workpad:
+  - Add another Random Number element as before
+  - Click that element to select it
+  - Click "Expression editor"
+  - Modify the expression to look like this: `serverTime | metric "Server Time in ms"`
+  - Click "Run"
+
+You should now see one random number and one "Server Time in ms" value.
+
+## Scripts
+
+There are several scripts available once you are in that path as well.
+
 - `node scripts/lint` - local linter setup, can also be used with the `--fix` flag for automatic fixes.
 - `node scripts/test` - local test runner, does not require a real Kibana instance. Runs all the same unit tests the normal runner does, just limited to Canvas, and *waaaaaay* faster (currently 12 seconds or less).
 - `node scripts/test_dev` - Same as above, but watches for changes and only runs tests for the given scope (browser, server, or common).

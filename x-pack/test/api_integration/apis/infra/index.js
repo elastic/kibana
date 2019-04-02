@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export default function ({ loadTestFile }) {
   describe('InfraOps GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
@@ -14,5 +13,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./waffle'));
+    loadTestFile(require.resolve('./log_item'));
   });
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has } from 'lodash';
+import { get } from 'lodash';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**
@@ -17,12 +17,6 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
  */
 export const deprecations = () => {
   return [
-    (settings, log) => {
-      if (has(settings, 'report_stats')) {
-        log('Config key "xpack.monitoring.report_stats" is deprecated and will be removed in 7.0. ' +
-          'Use "xpack.xpack_main.telemetry.enabled" instead.');
-      }
-    },
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled = clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');

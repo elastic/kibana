@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/constants';
+import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
 
 describe('timeseriesFetcher', () => {
@@ -22,7 +22,8 @@ describe('timeseriesFetcher', () => {
         end: 1528977600000,
         client: clientSpy,
         config: {
-          get: () => 'myIndex' as any
+          get: () => 'myIndex' as any,
+          has: () => true
         }
       }
     });

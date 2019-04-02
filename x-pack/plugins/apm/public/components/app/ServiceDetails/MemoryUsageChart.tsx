@@ -11,18 +11,21 @@ import React from 'react';
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import { HoverXHandlers } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
-import { MemoryChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_memory_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { MemoryMetricSeries } from '../../../store/selectors/chartSelectors';
 
 interface Props {
-  data: MemoryChartAPIResponse;
+  data: MemoryMetricSeries;
   hoverXHandlers: HoverXHandlers;
 }
+
+const tickFormatY = (y: number | null) => `${(y || 0) * 100}%`;
+const formatTooltipValue = (c: Coordinate) => asPercent(c.y || 0, 1);
 
 export function MemoryUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <span>
           {i18n.translate(
             'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
@@ -36,8 +39,8 @@ export function MemoryUsageChart({ data, hoverXHandlers }: Props) {
         {...hoverXHandlers}
         noHits={data.totalHits === 0}
         series={data.series}
-        tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0, 1)}
+        tickFormatY={tickFormatY}
+        formatTooltipValue={formatTooltipValue}
         yMax={1}
       />
     </React.Fragment>

@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_INDEX_PRIORITY,
-} from '../../../store/constants';
+} from '../../../constants';
 import { ErrableFormRow } from '../form_errors';
 import { FormattedMessage } from '@kbn/i18n/react';
 export const SetPriorityInput = props => {
@@ -59,8 +59,8 @@ export const SetPriorityInput = props => {
         <EuiFieldNumber
           id={`${phase}-${PHASE_INDEX_PRIORITY}`}
           value={phaseData[PHASE_INDEX_PRIORITY]}
-          onChange={async e => {
-            await setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
+          onChange={e => {
+            setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
           }}
           min={0}
         />

@@ -17,15 +17,14 @@ import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privi
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { getSettingsBreadcrumbs } from './breadcrumbs';
 
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
 
 const template = `
+  <div class="euiSpacer euiSpacer--s" />
   <ml-nav-menu name="settings" />
-  <div class="mlSettingsPage">
-    <ml-settings />
-  </div>
+  <ml-settings />
 `;
 
 uiRoutes
@@ -44,9 +43,6 @@ import { Settings } from './settings.js';
 
 module.directive('mlSettings', function () {
 
-  timefilter.disableTimeRangeSelector(); // remove time picker from top of page
-  timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
-
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');
 
@@ -55,15 +51,18 @@ module.directive('mlSettings', function () {
     replace: false,
     scope: {},
     link: function (scope, element) {
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
+
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(
             Settings, {
               canGetFilters,
               canGetCalendars
             })
           }
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

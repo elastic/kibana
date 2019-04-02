@@ -18,34 +18,66 @@
  */
 
 export function extractReferences({ attributes, references = [] }) {
-  if (!attributes.savedSearchId) {
-    return { attributes, references };
+  const updatedAttributes = { ...attributes };
+  const updatedReferences = [...references];
+
+  // Extract saved search
+  if (updatedAttributes.savedSearchId) {
+    updatedReferences.push({
+      name: 'search_0',
+      type: 'search',
+      id: updatedAttributes.savedSearchId,
+    });
+    delete updatedAttributes.savedSearchId;
+    updatedAttributes.savedSearchRefName = 'search_0';
   }
+
+  // Extract index patterns from controls
+  if (updatedAttributes.visState) {
+    const visState = JSON.parse(updatedAttributes.visState);
+    const controls = visState.params && visState.params.controls || [];
+    controls.forEach((control, i) => {
+      if (!control.indexPattern) {
+        return;
+      }
+      control.indexPatternRefName = `control_${i}_index_pattern`;
+      updatedReferences.push({
+        name: control.indexPatternRefName,
+        type: 'index-pattern',
+        id: control.indexPattern,
+      });
+      delete control.indexPattern;
+    });
+    updatedAttributes.visState = JSON.stringify(visState);
+  }
+
   return {
-    references: [
-      ...references,
-      {
-        type: 'search',
-        name: 'search_0',
-        id: attributes.savedSearchId,
-      },
-    ],
-    attributes: {
-      ...attributes,
-      savedSearchId: undefined,
-      savedSearchRefName: 'search_0',
-    },
+    references: updatedReferences,
+    attributes: updatedAttributes,
   };
 }
 
 export function injectReferences(savedObject, references) {
-  if (!savedObject.savedSearchRefName) {
-    return;
+  if (savedObject.savedSearchRefName) {
+    const savedSearchReference = references.find(reference => reference.name === savedObject.savedSearchRefName);
+    if (!savedSearchReference) {
+      throw new Error(`Could not find saved search reference "${savedObject.savedSearchRefName}"`);
+    }
+    savedObject.savedSearchId = savedSearchReference.id;
+    delete savedObject.savedSearchRefName;
   }
-  const reference = references.find(reference => reference.name === savedObject.savedSearchRefName);
-  if (!reference) {
-    throw new Error(`Could not find reference "${savedObject.savedSearchRefName}"`);
+  if (savedObject.visState) {
+    const controls = (savedObject.visState.params && savedObject.visState.params.controls) || [];
+    controls.forEach((control) => {
+      if (!control.indexPatternRefName) {
+        return;
+      }
+      const reference = references.find(reference => reference.name === control.indexPatternRefName);
+      if (!reference) {
+        throw new Error (`Could not find index pattern reference "${control.indexPatternRefName}"`);
+      }
+      control.indexPattern = reference.id;
+      delete control.indexPatternRefName;
+    });
   }
-  savedObject.savedSearchId = reference.id;
-  delete savedObject.savedSearchRefName;
 }

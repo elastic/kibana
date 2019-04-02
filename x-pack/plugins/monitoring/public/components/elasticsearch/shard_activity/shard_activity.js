@@ -155,6 +155,9 @@ class ShardActivityUI extends React.Component {
           search={false}
           pagination={pagination}
           onTableChange={onTableChange}
+          executeQueryOptions={{
+            defaultFields: ['name']
+          }}
         />
       </Fragment>
     );

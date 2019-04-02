@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
+import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -21,14 +23,8 @@ import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import {
-  borderRadius,
-  colors,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import { borderRadius, px, unit, units } from '../../../style/variables';
 
 registerLanguage('javascript', javascript);
 registerLanguage('python', python);
@@ -46,7 +42,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   height: ${px(units.eighth * 9)};
   top: ${props => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
-  background-color: ${colors.yellow};
+  background-color: ${tint(0.1, theme.euiColorWarning)};
 `;
 
 const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
@@ -54,7 +50,10 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   top: 0;
   left: 0;
   border-radius: 0 0 0 ${borderRadius};
-  background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
+  background: ${props =>
+    props.isLibraryFrame
+      ? theme.euiColorEmptyShade
+      : theme.euiColorLightestShade};
 `;
 
 const LineNumber = styled.div<{ highlight: boolean }>`
@@ -62,11 +61,12 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   min-width: ${px(units.eighth * 21)};
   padding-left: ${px(units.half)};
   padding-right: ${px(units.quarter)};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   line-height: ${px(unit + units.eighth)};
   text-align: right;
-  border-right: 1px solid ${colors.gray4};
-  background-color: ${props => (props.highlight ? colors.yellow : null)};
+  border-right: 1px solid ${theme.euiColorLightShade};
+  background-color: ${props =>
+    props.highlight ? tint(0.1, theme.euiColorWarning) : null};
 
   &:last-of-type {
     border-radius: 0 0 0 ${borderRadius};
@@ -77,7 +77,7 @@ const LineContainer = styled.div`
   overflow: auto;
   margin: 0 0 0 ${px(units.eighth * 21)};
   padding: 0;
-  background-color: ${colors.white};
+  background-color: ${theme.euiColorEmptyShade};
 
   &:last-of-type {
     border-radius: 0 0 ${borderRadius} 0;

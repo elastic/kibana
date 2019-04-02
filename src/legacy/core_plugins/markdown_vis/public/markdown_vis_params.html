@@ -1,4 +1,4 @@
-<div class="kuiSideBarSection">
+<div class="visEditorSidebar__section">
   <div class="form-group">
     <div class="clearfix form-group">
       <label for="markdownVisInput">Markdown</label>
@@ -13,8 +13,8 @@
         </a>
       </small>
     </div>
-    <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="markdownVisFontSize">
+    <div class="visEditorSidebar__formRow">
+      <label class="visEditorSidebar__formLabel" for="markdownVisFontSize">
         <span
           i18n-id="markdownVis.params.fontSizeLabel"
           i18n-default-message="Font Size ({fontSize}pt)"
@@ -22,19 +22,19 @@
         >
         </span>
       </label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <input id="markdownVisFontSize" type="range" ng-model="editorState.params.fontSize" class="form-control" min="8" max="36" />
       </div>
     </div>
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="markdownVisOpenLinksInNewTab"
         i18n-id="markdownVis.params.openLinksLabel"
         i18n-default-message="Open links in new tab"
       >
       </label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <input
           id="markdownVisOpenLinksInNewTab"
           type="checkbox"

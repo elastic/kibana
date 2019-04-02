@@ -7,9 +7,15 @@
 export function authorizationModeFactory(
   xpackInfoFeature,
 ) {
+  const useRbacForRequestCache = new WeakMap();
+
   return {
-    useRbac() {
-      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
+    useRbacForRequest(request) {
+      if (!useRbacForRequestCache.has(request)) {
+        useRbacForRequestCache.set(request, Boolean(xpackInfoFeature.getLicenseCheckResults().allowRbac));
+      }
+
+      return useRbacForRequestCache.get(request);
     },
   };
 }

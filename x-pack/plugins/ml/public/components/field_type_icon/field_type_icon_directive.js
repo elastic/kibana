@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { FieldTypeIcon } from './field_type_icon.js';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -35,9 +35,9 @@ module.directive('mlFieldTypeIcon', function () {
         };
 
         ReactDOM.render(
-          <I18nProvider>
+          <I18nContext>
             {React.createElement(FieldTypeIcon, props)}
-          </I18nProvider>,
+          </I18nContext>,
           element[0]
         );
       }
