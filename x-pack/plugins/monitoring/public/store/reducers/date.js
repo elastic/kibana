@@ -9,8 +9,14 @@ import { updateRefreshIntervalFromDatePicker, updateTimeFromDatePicker, updateDa
 
 const defaultState = {
   isSet: false,
-  refreshInterval: {},
-  time: {}
+  refreshInterval: {
+    pause: false,
+    value: 10000,
+  },
+  time: {
+    from: 'now-24h',
+    to: 'now'
+  }
 };
 
 export const date = handleActions(

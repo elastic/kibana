@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import qs from 'querystring';
-import { isEqual } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import rison from 'rison-node';
 import { getDateForUrlComparison, getDateIsSet } from '../selectors';
 import { updateDateFromUrl } from '../actions';
@@ -35,7 +35,17 @@ function readFromUrl() {
   const queryParamsAsString = hash.split('?')[1];
   const queryParams = qs.parse(queryParamsAsString);
   const encodedState = queryParams._g;
+  if (!encodedState) {
+    return null;
+  }
   return rison.decode(encodedState);
+}
+
+function isStateValid(state) {
+  if (isEmpty(state) || isEmpty(state.refreshInterval)) {
+    return false;
+  }
+  return true;
 }
 
 const actionsToIgnore = [
@@ -50,7 +60,7 @@ export const syncStateToUrl = store => next => action => {
   const urlState = readFromUrl();
   const localState = getDateForUrlComparison(state);
   const isLocalSet = getDateIsSet(state);
-  if (!isLocalSet) {
+  if (!isLocalSet && isStateValid(urlState)) {
     store.dispatch(updateDateFromUrl(urlState));
   } else if (!isEqual(urlState, localState)) {
     writeToUrl(localState);
