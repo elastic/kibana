@@ -43,7 +43,7 @@ export class ToggleAllFeatures extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiLink onClick={this.onButtonClick} className={'spcFeatureChangeAllLink'}>
+      <EuiLink onClick={this.onButtonClick} className={'spcToggleAllFeatures__changeAllLink'}>
         <FormattedMessage
           id="xpack.spaces.management.toggleAllFeaturesLink"
           defaultMessage="(change all)"

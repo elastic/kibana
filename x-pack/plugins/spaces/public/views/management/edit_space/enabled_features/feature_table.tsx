@@ -81,7 +81,7 @@ export class FeatureTable extends Component<Props, {}> {
     },
     {
       field: 'space',
-      width: '150px',
+      width: '150',
       name: (
         <span>
           <FormattedMessage
