@@ -2,7 +2,7 @@
 
 ## ScopedClusterClient.callAsCurrentUser() method
 
-Calls specified  with provided  on behalf of the user initiated request to the Kibana server (via HTTP request headers).
+Calls specified `endpoint` with provided `clientParams` on behalf of the user initiated request to the Kibana server (via HTTP request headers).
 
 <b>Signature:</b>
 

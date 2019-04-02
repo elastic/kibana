@@ -46,7 +46,7 @@ export class ScopedClusterClient {
   ) {}
 
   /**
-   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -61,7 +61,7 @@ export class ScopedClusterClient {
   }
 
   /**
-   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.

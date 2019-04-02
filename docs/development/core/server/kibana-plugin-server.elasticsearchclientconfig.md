@@ -2,8 +2,6 @@
 
 ## ElasticsearchClientConfig type
 
-Config that consumers can pass to the Elasticsearch JS client is complex and includes not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
-
 <b>Signature:</b>
 
 ```typescript
