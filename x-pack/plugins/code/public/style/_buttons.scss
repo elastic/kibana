@@ -21,4 +21,7 @@
 
 .codeButtonGroup {
   margin-left: $euiSizeS;
+  .euiButton {
+    font-size: $euiFontSizeS;
+  }
 }
