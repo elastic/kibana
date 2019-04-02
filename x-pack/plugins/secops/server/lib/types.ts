@@ -13,6 +13,7 @@ import { IndexFields } from './index_fields';
 import { IpOverview } from './ip_overview';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
+import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
@@ -27,6 +28,7 @@ export interface AppDomainLibs {
   ipOverview: IpOverview;
   network: Network;
   kpiNetwork: KpiNetwork;
+  overview: Overview;
   uncommonProcesses: UncommonProcesses;
 }
 

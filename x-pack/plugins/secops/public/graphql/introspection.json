@@ -545,6 +545,68 @@
             "deprecationReason": null
           },
           {
+            "name": "OverviewNetwork",
+            "description": "",
+            "args": [
+              {
+                "name": "id",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "timerange",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filterQuery",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": { "kind": "OBJECT", "name": "OverviewNetworkData", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "OverviewHost",
+            "description": "",
+            "args": [
+              {
+                "name": "id",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "timerange",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filterQuery",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": { "kind": "OBJECT", "name": "OverviewHostData", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "UncommonProcesses",
             "description": "Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified",
             "args": [
@@ -4975,6 +5037,140 @@
           },
           {
             "name": "uniqueDomains",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OverviewNetworkData",
+        "description": "",
+        "fields": [
+          {
+            "name": "packetbeatFlow",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "packetbeatDNS",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filebeatSuricata",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filebeatZeek",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatSocket",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OverviewHostData",
+        "description": "",
+        "fields": [
+          {
+            "name": "auditbeatAuditd",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatFIM",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatLogin",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatPackage",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatProcess",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditbeatUser",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

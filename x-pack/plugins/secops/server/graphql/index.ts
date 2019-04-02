@@ -17,6 +17,7 @@ import { hostsSchema } from './hosts';
 import { ipOverviewSchema } from './ip_overview';
 import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
+import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
@@ -32,6 +33,7 @@ export const schemas = [
   ipOverviewSchema,
   kpiNetworkSchema,
   networkSchema,
+  overviewSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,
