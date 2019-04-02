@@ -6,7 +6,7 @@
 
 import { ChildProcess, spawn } from 'child_process';
 import getPort from 'get-port';
-import { resolve } from 'path';
+import * as path from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
@@ -32,22 +32,27 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     return TS_LANG_DETACH_PORT;
   }
 
-  createExpander(
-    proxy: LanguageServerProxy,
-    builtinWorkspace: boolean,
-    maxWorkspace: number
-  ): RequestExpander {
+  startConnect(proxy: LanguageServerProxy) {
+    proxy.awaitServerConnection();
+  }
+
+  createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
     return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
       installNodeDependency: this.options.security.installNodeDependency,
       gitHostWhitelist: this.options.security.gitHostWhitelist,
     });
   }
+
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
-    const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
-      detached: false,
-      stdio: 'pipe',
-      cwd: resolve(installationPath, '../..'),
-    });
+    const p = spawn(
+      process.execPath,
+      [installationPath, '--socket', port.toString(), '--log-level', '3'],
+      {
+        detached: false,
+        stdio: 'pipe',
+        cwd: path.resolve(installationPath, '../..'),
+      }
+    );
     p.stdout.on('data', data => {
       log.stdout(data.toString());
     });
