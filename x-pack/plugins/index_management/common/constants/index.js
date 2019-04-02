@@ -11,7 +11,6 @@ export * from './index_statuses';
 export {
   UIM_APP_NAME,
   UIM_APP_LOAD,
-  USER_ACTIONS,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
   UIM_INDEX_CLEAR_CACHE_MANY,
