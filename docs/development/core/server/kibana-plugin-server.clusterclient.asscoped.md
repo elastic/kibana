@@ -16,7 +16,7 @@ asScoped(req?: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  req | `{`<p/>`        headers?: Headers;`<p/>`    }` | Request the `ScopedClusterClient` instance will be scoped to. |
+|  req | <code>{`<p/>`        headers?: Headers;`<p/>`    }</code> | Request the <code>ScopedClusterClient</code> instance will be scoped to. |
 
 <b>Returns:</b>
 

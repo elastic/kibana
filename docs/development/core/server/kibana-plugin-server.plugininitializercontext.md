@@ -14,7 +14,7 @@ export interface PluginInitializerContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-server.plugininitializercontext.config.md) | `{`<p/>`        create: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config>;`<p/>`        createIfExists: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config | undefined>;`<p/>`    }` |  |
-|  [env](./kibana-plugin-server.plugininitializercontext.env.md) | `{`<p/>`        mode: EnvironmentMode;`<p/>`    }` |  |
-|  [logger](./kibana-plugin-server.plugininitializercontext.logger.md) | `LoggerFactory` |  |
+|  [config](./kibana-plugin-server.plugininitializercontext.config.md) | <code>{`<p/>`        create: &lt;Schema extends Type&lt;any&gt;, Config&gt;(ConfigClass: ConfigWithSchema&lt;Schema, Config&gt;) =&gt; Observable&lt;Config&gt;;`<p/>`        createIfExists: &lt;Schema extends Type&lt;any&gt;, Config&gt;(ConfigClass: ConfigWithSchema&lt;Schema, Config&gt;) =&gt; Observable&lt;Config &#124; undefined&gt;;`<p/>`    }</code> |  |
+|  [env](./kibana-plugin-server.plugininitializercontext.env.md) | <code>{`<p/>`        mode: EnvironmentMode;`<p/>`    }</code> |  |
+|  [logger](./kibana-plugin-server.plugininitializercontext.logger.md) | <code>LoggerFactory</code> |  |
 

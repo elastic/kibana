@@ -14,5 +14,5 @@ export interface PluginSetupContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-server.pluginsetupcontext.elasticsearch.md) | `{`<p/>`        adminClient$: Observable<ClusterClient>;`<p/>`        dataClient$: Observable<ClusterClient>;`<p/>`    }` |  |
+|  [elasticsearch](./kibana-plugin-server.pluginsetupcontext.elasticsearch.md) | <code>{`<p/>`        adminClient$: Observable&lt;ClusterClient&gt;;`<p/>`        dataClient$: Observable&lt;ClusterClient&gt;;`<p/>`    }</code> |  |
 

@@ -14,9 +14,9 @@ callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, opti
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  endpoint | `string` | String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`<!-- -->. |
-|  clientParams | `Record<string, unknown>` | A dictionary of parameters that will be passed directly to the Elasticsearch JS client. |
-|  options | `CallAPIOptions` | Options that affect the way we call the API and process the result. |
+|  endpoint | <code>string</code> | String descriptor of the endpoint e.g. <code>cluster.getSettings</code> or <code>ping</code>. |
+|  clientParams | <code>Record&lt;string, unknown&gt;</code> | A dictionary of parameters that will be passed directly to the Elasticsearch JS client. |
+|  options | <code>CallAPIOptions</code> | Options that affect the way we call the API and process the result. |
 
 <b>Returns:</b>
 

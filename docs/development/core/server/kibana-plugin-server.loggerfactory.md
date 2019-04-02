@@ -14,5 +14,5 @@ export interface LoggerFactory
 
 |  Method | Description |
 |  --- | --- |
-|  [get(contextParts)](./kibana-plugin-server.loggerfactory.get.md) | Returns a `Logger` instance for the specified context. |
+|  [get(contextParts)](./kibana-plugin-server.loggerfactory.get.md) | Returns a <code>Logger</code> instance for the specified context. |
 

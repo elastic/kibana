@@ -6,8 +6,8 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via `asScoped(...)`<!-- -->). |
-|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
+|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
+|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
 
 ## Interfaces
 
@@ -15,10 +15,10 @@
 |  --- | --- |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
-|  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of `LoggerFactory` interface is to define a way to retrieve a context-based logger instance. |
+|  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
-|  [PluginSetupContext](./kibana-plugin-server.pluginsetupcontext.md) | Context passed to the plugins `setup` method. |
+|  [PluginSetupContext](./kibana-plugin-server.pluginsetupcontext.md) | Context passed to the plugins <code>setup</code> method. |
 
 ## Type Aliases
 

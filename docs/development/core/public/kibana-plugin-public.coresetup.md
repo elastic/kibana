@@ -14,12 +14,12 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [basePath](./kibana-plugin-public.coresetup.basepath.md) | `BasePathSetup` |  |
-|  [chrome](./kibana-plugin-public.coresetup.chrome.md) | `ChromeSetup` |  |
-|  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | `FatalErrorsSetup` |  |
-|  [http](./kibana-plugin-public.coresetup.http.md) | `HttpSetup` |  |
-|  [i18n](./kibana-plugin-public.coresetup.i18n.md) | `I18nSetup` |  |
-|  [injectedMetadata](./kibana-plugin-public.coresetup.injectedmetadata.md) | `InjectedMetadataSetup` |  |
-|  [notifications](./kibana-plugin-public.coresetup.notifications.md) | `NotificationsSetup` |  |
-|  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | `UiSettingsSetup` |  |
+|  [basePath](./kibana-plugin-public.coresetup.basepath.md) | <code>BasePathSetup</code> |  |
+|  [chrome](./kibana-plugin-public.coresetup.chrome.md) | <code>ChromeSetup</code> |  |
+|  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> |  |
+|  [http](./kibana-plugin-public.coresetup.http.md) | <code>HttpSetup</code> |  |
+|  [i18n](./kibana-plugin-public.coresetup.i18n.md) | <code>I18nSetup</code> |  |
+|  [injectedMetadata](./kibana-plugin-public.coresetup.injectedmetadata.md) | <code>InjectedMetadataSetup</code> |  |
+|  [notifications](./kibana-plugin-public.coresetup.notifications.md) | <code>NotificationsSetup</code> |  |
+|  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | <code>UiSettingsSetup</code> |  |
 

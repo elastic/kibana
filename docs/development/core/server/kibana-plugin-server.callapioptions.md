@@ -14,5 +14,5 @@ export interface CallAPIOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [wrap401Errors](./kibana-plugin-server.callapioptions.wrap401errors.md) | `boolean` | Indicates whether `401 Unauthorized` errors returned from the Elasticsearch API should be wrapped into `Boom` error instances with properly set `WWW-Authenticate` header that could have been returned by the API itself. If API didn't specify that then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`<!-- -->. |
+|  [wrap401Errors](./kibana-plugin-server.callapioptions.wrap401errors.md) | <code>boolean</code> | Indicates whether <code>401 Unauthorized</code> errors returned from the Elasticsearch API should be wrapped into <code>Boom</code> error instances with properly set <code>WWW-Authenticate</code> header that could have been returned by the API itself. If API didn't specify that then <code>Basic realm=&quot;Authorization Required&quot;</code> is used as <code>WWW-Authenticate</code>. |
 

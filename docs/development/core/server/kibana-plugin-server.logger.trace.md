@@ -14,8 +14,8 @@ trace(message: string, meta?: LogMeta): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | `string` | The log message |
-|  meta | `LogMeta` |  |
+|  message | <code>string</code> | The log message |
+|  meta | <code>LogMeta</code> |  |
 
 <b>Returns:</b>
 

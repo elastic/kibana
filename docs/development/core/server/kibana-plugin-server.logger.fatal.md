@@ -14,8 +14,8 @@ fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  errorOrMessage | `string | Error` | An Error object or message string to log |
-|  meta | `LogMeta` |  |
+|  errorOrMessage | <code>string &#124; Error</code> | An Error object or message string to log |
+|  meta | <code>LogMeta</code> |  |
 
 <b>Returns:</b>
 
