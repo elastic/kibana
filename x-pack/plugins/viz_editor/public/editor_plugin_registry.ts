@@ -29,6 +29,7 @@ export type GetSuggestionsType<S extends VisModel> = (
 
 export interface PanelComponentProps<S extends VisModel = VisModel> {
   visModel: S;
+  onChangeVisModel: (visModel: S) => void;
 }
 
 /**

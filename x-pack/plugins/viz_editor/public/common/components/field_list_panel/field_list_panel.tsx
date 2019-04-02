@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButton,
   EuiFieldSearch,
   EuiIcon,
   // @ts-ignore
