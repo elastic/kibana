@@ -168,6 +168,32 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents reserved privileges from specifying app entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['bar'],
+      privileges: {},
+      reserved: {
+        description: 'something',
+        privilege: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: ['foo', 'bar', 'baz'],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.reserved has unknown app entries: foo, baz"`
+    );
+  });
+
   it(`prevents privileges from specifying catalogue entries that don't exist at the root level`, () => {
     const feature: Feature = {
       id: 'test-feature',
@@ -191,6 +217,34 @@ describe('FeatureRegistry', () => {
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature privilege test-feature.all has unknown catalogue entries: foo, baz"`
+    );
+  });
+
+  it(`prevents reserved privileges from specifying catalogue entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      privileges: {},
+      reserved: {
+        description: 'something',
+        privilege: {
+          catalogue: ['foo', 'bar', 'baz'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.reserved has unknown catalogue entries: foo, baz"`
     );
   });
 
@@ -226,7 +280,7 @@ describe('FeatureRegistry', () => {
     );
   });
 
-  it(`prevents privileges from specifying management entries that don't exist at the root level`, () => {
+  it(`prevents reserved privileges from specifying management entries that don't exist at the root level`, () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
@@ -235,8 +289,10 @@ describe('FeatureRegistry', () => {
       management: {
         kibana: ['hey'],
       },
-      privileges: {
-        all: {
+      privileges: {},
+      reserved: {
+        description: 'something',
+        privilege: {
           catalogue: ['bar'],
           management: {
             kibana: ['hey-there'],
@@ -254,7 +310,7 @@ describe('FeatureRegistry', () => {
     const featureRegistry = new FeatureRegistry();
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"Feature privilege test-feature.all has unknown management entries for section kibana: hey-there"`
+      `"Feature privilege test-feature.reserved has unknown management entries for section kibana: hey-there"`
     );
   });
 

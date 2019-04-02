@@ -141,7 +141,12 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [] } = feature;
 
-  Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
+  const privilegeEntries = [...Object.entries(feature.privileges)];
+  if (feature.reserved) {
+    privilegeEntries.push(['reserved', feature.reserved.privilege]);
+  }
+
+  privilegeEntries.forEach(([privilegeId, privilegeDefinition]) => {
     if (!privilegeDefinition) {
       throw new Error('Privilege definition may not be null or undefined');
     }
