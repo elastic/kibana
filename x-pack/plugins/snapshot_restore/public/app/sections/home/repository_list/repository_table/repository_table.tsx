@@ -17,7 +17,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
 import { RepositoryDeleteProvider, RepositoryVerificationBadge } from '../../../../components';
-import { BASE_PATH, Section } from '../../../../constants';
+import { BASE_PATH } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 
