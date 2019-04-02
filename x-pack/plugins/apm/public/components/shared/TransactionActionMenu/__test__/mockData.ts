@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 
 export const transaction: Transaction = {
   '@metadata': 'whatever',

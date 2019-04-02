@@ -8,7 +8,7 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { Ellipsis } from '../../shared/Icons';
 import { Stackframe } from './Stackframe';
 

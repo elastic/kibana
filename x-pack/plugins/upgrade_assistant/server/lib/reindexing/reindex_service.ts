@@ -8,8 +8,7 @@ import Boom from 'boom';
 
 import { Server } from 'hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
-import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
+import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,
@@ -17,6 +16,7 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 import { apmReindexScript, isLegacyApmIndex } from '../apm';
 import apmMappings from '../apm/mapping.json';
 import {

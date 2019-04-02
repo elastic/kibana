@@ -7,7 +7,7 @@ import Chance from 'chance'; // eslint-disable-line
 // @ts-ignore
 import request from 'request';
 import uuidv4 from 'uuid/v4';
-import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
+import { configBlockSchemas } from '../common/config_schemas';
 import { BeatTag } from '../common/domain_types';
 import { compose } from '../public/lib/compose/scripts';
 const args = process.argv.slice(2);

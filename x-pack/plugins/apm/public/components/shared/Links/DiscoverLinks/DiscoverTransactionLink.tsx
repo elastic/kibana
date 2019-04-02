@@ -9,8 +9,8 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {
