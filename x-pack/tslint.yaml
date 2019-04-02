@@ -30,7 +30,3 @@ rules:
        * specific language governing permissions and limitations
        * under the License.
        */
-  module-migration:
-    - true
-    - from: 'x-pack'
-      toRelative: 'x-pack'
