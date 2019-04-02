@@ -75,13 +75,14 @@ const logRateLimit = ({
 
 const start = async function () {
   const [owner, repo] = process.env.ghprbGhRepository.split('/');
-  const title = process.argv[2];
+  const name = process.argv[2];
   const cmd = process.argv[3];
   const cmdArgs = process.argv.slice(4);
   const cmdSpawnConfig = {
     stdio: ['inherit', 'pipe', 'inherit']
   };
   let cmdLogs = '';
+  const title = `${cmd} ${cmdArgs.join(' ')}`;
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
 
@@ -91,19 +92,17 @@ const start = async function () {
   const commonArgs = {
     owner,
     repo,
-    name: title,
+    name,
     head_sha: process.env.ghprbActualCommit,
     details_url: process.env.BUILD_URL,
   };
-
-  const outputTitle = `${cmd} ${cmdArgs.join(' ')}`;
 
   clientWithAuth.checks.create({
     ...commonArgs,
     started_at: new Date().toISOString(),
     status: 'in_progress',
     output: {
-      outputTitle,
+      title,
       summary: `in progress`,
     },
   }).then(logRateLimit);
@@ -122,7 +121,7 @@ const start = async function () {
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: new Date().toISOString(),
       output: {
-        outputTitle,
+        title,
         summary: `.`,
         text: `\`\`\`${logs}\`\`\``
       },
