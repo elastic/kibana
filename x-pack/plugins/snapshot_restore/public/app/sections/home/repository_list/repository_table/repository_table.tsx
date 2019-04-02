@@ -39,7 +39,6 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const section = 'repositories' as Section;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
