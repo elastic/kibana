@@ -8,8 +8,8 @@ import { CoreSetup } from 'src/core/server';
 import {
   APM_TELEMETRY_DOC_ID,
   createApmTelementry,
-  getSavedObjectsClient
 } from './apm_telemetry';
+import { getSavedObjectsClient } from '../saved_objects/client';
 
 // TODO this type should be defined by the platform
 export interface CoreSetupWithUsageCollector extends CoreSetup {
