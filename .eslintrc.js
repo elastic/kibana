@@ -129,7 +129,7 @@ module.exports = {
     {
       files: ['x-pack/test/functional/apps/**/*', 'x-pack/plugins/apm/**/*'],
       rules: {
-        '@kbn/eslint/no-default-export': 'off',
+        'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
