@@ -205,7 +205,8 @@ class JobsListUI extends Component {
               (item.latestTimestampMs === undefined) ? '' : moment(item.latestTimestampMs).format(TIME_FORMAT)
             }
           </span>
-        )
+        ),
+        textOnly: true,
       }, {
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.actionsLabel',

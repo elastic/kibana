@@ -6,6 +6,7 @@
   "private": true,
   "dependencies": {
     "@kbn/dev-utils": "1.0.0",
+    "abort-controller": "^2.0.3",
     "chalk": "^2.4.1",
     "dedent": "^0.7.0",
     "del": "^3.0.0",

@@ -29,7 +29,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         }
       >
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -39,7 +38,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 10,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
@@ -201,7 +199,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         }
       >
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -211,7 +208,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 10,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           stackBy="y"
           width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
