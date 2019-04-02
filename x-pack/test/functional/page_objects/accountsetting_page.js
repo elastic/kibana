@@ -19,7 +19,7 @@ export function AccountSettingProvider({ getService }) {
       const userName = await usernameField.getVisibleText();
       expect(userName).to.be(expectedUserName);
 
-      const emailIdField = await testSubjects.find('emial');
+      const emailIdField = await testSubjects.find('email');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);
     }
