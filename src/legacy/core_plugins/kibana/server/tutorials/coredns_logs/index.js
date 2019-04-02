@@ -27,7 +27,7 @@ export function corednsLogsSpecProvider(server, context) {
   return {
     id: 'corednsLogs',
     name: i18n.translate('kbn.server.tutorials.corednsLogs.nameTitle', {
-      defaultMessage: 'Coredns logs',
+      defaultMessage: 'CoreDNS logs',
     }),
     category: TUTORIAL_CATEGORY.SECURITY,
     shortDescription: i18n.translate('kbn.server.tutorials.corednsLogs.shortDescription', {
@@ -35,7 +35,7 @@ export function corednsLogsSpecProvider(server, context) {
     }),
     longDescription: i18n.translate('kbn.server.tutorials.corednsLogs.longDescription', {
       defaultMessage: 'The `coredns` Filebeat module collects the logs from \
-[Coredns](https://coredns.io/manual/toc/). \
+[CoreDNS](https://coredns.io/manual/toc/). \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
@@ -47,7 +47,7 @@ export function corednsLogsSpecProvider(server, context) {
         {
           id: '53aa1f70-443e-11e9-8548-ab7fbe04f038',
           linkLabel: i18n.translate('kbn.server.tutorials.corednsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Coredns logs dashboard',
+            defaultMessage: 'CoreDNS logs dashboard',
           }),
           isOverview: true
         }
