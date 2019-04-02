@@ -72,12 +72,18 @@ const isApiChangedWarning = (warning: string) => {
 };
 
 const renameExtractedApiPackageName = async (folder: string) => {
-  const json = JSON.parse(await fs.readFileSync(`build/${folder}/kibana.api.json`).toString());
+  const json = JSON.parse(fs.readFileSync(`build/${folder}/kibana.api.json`).toString());
   json.canonicalReference = `kibana-plugin-${folder}`;
   json.name = `kibana-plugin-${folder}`;
-  await fs.writeFileSync(`build/${folder}/kibana.api.json`, JSON.stringify(json, null, 2));
+  fs.writeFileSync(`build/${folder}/kibana.api.json`, JSON.stringify(json, null, 2));
 };
 
+/**
+ * Runs api-extractor with a custom logger in order to extract results from the process
+ *
+ * TODO: Once Microsoft/web-build-tools#1133 is fixed, use the updated interface instead
+ *  of parsing log strings.
+ */
 const runApiExtractor = (folder: string, acceptChanges: boolean = false) => {
   // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
   const warnings = [] as string[];
