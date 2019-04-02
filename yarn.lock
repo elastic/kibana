@@ -1416,10 +1416,9 @@
     through2 "^2.0.0"
     update-notifier "^0.5.0"
 
-"@elastic/node-crypto@0.1.2":
+"@elastic/node-crypto@elastic/node-crypto#pull/3/head":
   version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
-  integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
+  resolved "https://codeload.github.com/elastic/node-crypto/tar.gz/7f7a7e5fc384a67d5ad489cdf4fd6d57fb5c2b6a"
 
 "@elastic/nodegit@0.25.0-alpha.12":
   version "0.25.0-alpha.12"

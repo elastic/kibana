@@ -18,13 +18,17 @@
  */
 
 import { resolve } from 'path';
+import { initServer } from './server';
 
-export default function (kibana) {
+export default function testbedPlugin(kibana) {
   return new kibana.Plugin({
     id: 'testbed',
     publicDir: resolve(__dirname, 'public'),
+    require: ['encrypted_saved_objects'],
     uiExports: {
-      hacks: [ 'plugins/testbed' ]
-    }
+      hacks: [ 'plugins/testbed' ],
+      mappings: require('./mappings.json'),
+    },
+    init: initServer,
   });
 }

@@ -1,0 +1,12 @@
+{
+  "saved-object-with-secret": {
+    "properties": {
+      "publicProperty": {
+        "type": "keyword"
+      },
+      "privateProperty": {
+        "type": "text"
+      }
+    }
+  }
+}
