@@ -188,7 +188,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMore"
-              defaultMessage="Learn more about {pluginsDocLink}."
+              defaultMessage="Learn more about {pluginsDocLink}"
               values={{
                 pluginsDocLink: (
                   <EuiLink
@@ -318,7 +318,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   const renderTypeHelp = (repositoryType: RepositoryType) => (
     <FormattedMessage
       id="xpack.snapshotRestore.repositoryForm.fields.typeHelpText"
-      defaultMessage="Learn more about the {repositoryType} repository type."
+      defaultMessage="Learn more about the {repositoryType} repository type"
       values={{
         repositoryType: (
           <EuiLink

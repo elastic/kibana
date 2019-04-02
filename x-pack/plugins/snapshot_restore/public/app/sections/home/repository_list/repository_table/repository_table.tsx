@@ -70,11 +70,11 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     },
     {
       field: 'name',
-      name: i18n.translate('xpack.snapshotRestore.repositoryList.table.verificationColumnTitle', {
-        defaultMessage: 'Verification',
+      name: i18n.translate('xpack.snapshotRestore.repositoryList.table.verificationStatusColumnTitle', {
+        defaultMessage: 'Status',
       }),
       truncateText: true,
-      render: (name: Repository['name'], repository: Repository) => (
+      render: (name: Repository['name']) => (
         <RepositoryVerificationBadge verificationResults={verification[name] || null} />
       ),
     },

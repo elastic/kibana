@@ -39,7 +39,7 @@ export const RepositoryVerificationBadge: React.FunctionComponent<Props> = ({
       <EuiHealth color="success">
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryVerification.verificationSuccessfulValue"
-          defaultMessage="Success"
+          defaultMessage="Connected"
         />
       </EuiHealth>
     );
