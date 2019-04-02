@@ -1,3 +1,4 @@
+[role="xpack"]
 [[heatmap-layer]]
 == Heat map layer
 
