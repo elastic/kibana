@@ -30,14 +30,6 @@ describe('inflight middleware', () => {
     dispatch.mockClear();
   });
 
-  it('tests', () => {
-    const action = { type: 'action' };
-
-    testMiddleware(action);
-
-    expect(next).toBeCalled();
-  });
-
   describe('loading indicator', () => {
     beforeEach(() => {
       loadingIndicator.show = jest.fn();
