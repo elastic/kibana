@@ -66,8 +66,7 @@ const loadJobsMock = {
   }]
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/34206
-describe.skip('<JobList />', () => {
+describe('<JobList />', () => {
   describe('detail panel', () => {
     let server;
     let component;
@@ -94,8 +93,8 @@ describe.skip('<JobList />', () => {
         JSON.stringify(loadJobsMock),
       ]);
 
-      // Mock all user actions tracking
-      server.respondWith('POST', /\/api\/user_action/, [200, { 'Content-Type': 'application/json' }, '']);
+      // Mock all other HTTP Requests
+      server.respondWith([200, {}, '']);
 
       const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
       ({ component, exists, getMetadataFromEuiTable } = initTestBed(undefined, testBedOptions));

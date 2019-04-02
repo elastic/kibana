@@ -59,6 +59,13 @@ function getPlatform(key) {
   }
 }
 
+function headersToString(headers, indent = '') {
+  return [...headers.entries()].reduce(
+    (acc, [key, value]) => `${acc}\n${indent}${key}: ${value}`,
+    ''
+  );
+}
+
 exports.Artifact = class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
@@ -211,7 +218,12 @@ exports.Artifact = class Artifact {
 
     if (!resp.ok) {
       abc.abort();
-      throw new Error(`Unable to download elasticsearch snapshot: ${resp.statusText}`);
+      throw new Error(
+        `Unable to download elasticsearch snapshot: ${resp.statusText}${headersToString(
+          resp.headers,
+          '  '
+        )}`
+      );
     }
 
     if (etag) {
@@ -248,6 +260,7 @@ exports.Artifact = class Artifact {
       etag: resp.headers.get('etag'),
       contentLength,
       first500Bytes,
+      headers: resp.headers,
     };
   }
 
@@ -266,18 +279,26 @@ exports.Artifact = class Artifact {
 
     if (!resp.ok) {
       abc.abort();
-      throw new Error(`Unable to download elasticsearch checksum: ${resp.statusText}`);
+      throw new Error(
+        `Unable to download elasticsearch checksum: ${resp.statusText}${headersToString(
+          resp.headers,
+          '  '
+        )}`
+      );
     }
 
     // in format of stdout from `shasum` cmd, which is `<checksum>   <filename>`
     const [expectedChecksum] = (await resp.text()).split(' ');
     if (artifactResp.checksum !== expectedChecksum) {
-      const len = `${artifactResp.first500Bytes / artifactResp.contentLength}`;
+      const len = Buffer.byteLength(artifactResp.first500Bytes);
+      const lenString = `${len} / ${artifactResp.contentLength}`;
+
       throw createCliError(
         `artifact downloaded from ${this.getUrl()} does not match expected checksum\n` +
           `  expected: ${expectedChecksum}\n` +
           `  received: ${artifactResp.checksum}\n` +
-          `  content[${len}]: ${artifactResp.first500Bytes.toString('utf8')}`
+          `  headers: ${headersToString(artifactResp.headers, '    ')}\n` +
+          `  content[${lenString} base64]: ${artifactResp.first500Bytes.toString('base64')}`
       );
     }
 

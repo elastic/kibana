@@ -37,7 +37,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('visual builder', function describeIndexTests() {
+  // FAILING: https://github.com/elastic/kibana/issues/34299
+  // FAILING: https://github.com/elastic/kibana/issues/34292
+  describe.skip('visual builder', function describeIndexTests() {
     describe('Time Series', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
