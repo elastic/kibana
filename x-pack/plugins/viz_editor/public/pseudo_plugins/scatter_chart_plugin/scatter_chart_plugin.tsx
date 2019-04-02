@@ -6,17 +6,19 @@
 
 import React from 'react';
 import { DatasourceField } from '../../../common';
-import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
+  EditorPlugin,
   getColumnIdByIndex,
+  getTypes,
   selectColumn,
+  Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
-} from '../../common/lib';
-import { getTypes } from '../../common/lib/operation_types';
-import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+  VisualizationPanelProps,
+} from '../../../public';
+import { columnSummary } from '../../common/components/config_panel';
 
 interface ScatterChartPrivateState {
   xAxis: Axis;
@@ -29,7 +31,7 @@ const updateScatterState = updatePrivateState<'scatterChart', ScatterChartPrivat
   'scatterChart'
 );
 
-function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<ScatterChartVisModel>) {
+function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>) {
   if (!visModel.private.scatterChart) {
     return <>No chart configured</>;
   }
@@ -45,13 +47,13 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<Scatter
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col, visModel))}</span>
+          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col, visModel))}</span>
+          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
         ))}
       </div>
     </>

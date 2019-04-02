@@ -5,8 +5,7 @@
  */
 
 import { Query, WhereOperation } from '../../../common';
-import { VisModel } from '../../common/lib';
-import { getTypes } from '../../common/lib/operation_types';
+import { getTypes, VisModel } from '../../../public';
 
 function isRawDocumentQuery(query: Query) {
   return query.select.every(selectOperation => selectOperation.operation === 'column');
