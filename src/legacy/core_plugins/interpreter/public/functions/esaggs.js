@@ -36,11 +36,12 @@ export const esaggs = () => ({
   name: 'esaggs',
   type: 'kibana_datatable',
   context: {
-    types: ['kibana_context', 'null'],
+    types: [
+      'kibana_context',
+      'null',
+    ],
   },
-  help: i18n.translate('interpreter.functions.esaggs.help', {
-    defaultMessage: 'Run AggConfig aggregation',
-  }),
+  help: i18n.translate('interpreter.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
   args: {
     index: {
       types: ['string', 'null'],
