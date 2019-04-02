@@ -39,7 +39,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   // FAILING: https://github.com/elastic/kibana/issues/34299
   // FAILING: https://github.com/elastic/kibana/issues/34292
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     describe('Time Series', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -47,7 +47,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show the correct count in the legend', async () => {
         await retry.try(async () => {
-          await PageObjects.header.waitUntilLoadingHasFinished();
           const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
           expect(actualCount).to.be('156');
         });
@@ -56,14 +55,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       it('should show the correct count in the legend with 2h offset', async () => {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('293');
       });
 
       it('should show the correct count in the legend with -2h offset', async () => {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('53');
       });

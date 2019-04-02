@@ -39,6 +39,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.visualize.clickVisualBuilder();
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async clickMetric() {
@@ -159,23 +160,24 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
-      await PageObjects.common.sleep(500);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async clearOffsetSeries() {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async enterOffsetSeries(value: string) {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
       await el.type(value);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getRhythmChartLegendValue() {
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
@@ -183,7 +185,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickGauge() {
       await testSubjects.click('gaugeTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getGaugeLabel() {
@@ -198,7 +200,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTopN() {
       await testSubjects.click('top_nTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getTopNLabel() {
@@ -213,7 +215,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTable() {
       await testSubjects.click('tableTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async createNewAgg(nth = 0) {
