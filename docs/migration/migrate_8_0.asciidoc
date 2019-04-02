@@ -11,8 +11,13 @@ coming[8.0.0]
 
 See also <<release-highlights>> and <<release-notes>>.
 
+* <<breaking_80_setting_changes>>
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
 [float]
-[[breaking_70_setting_changes]]
+[[breaking_80_setting_changes]]
 === Settings changes
 
 // tag::notable-breaking-changes[]
