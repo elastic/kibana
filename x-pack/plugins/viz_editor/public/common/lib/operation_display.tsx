@@ -26,6 +26,10 @@ const prettyNames: OperationPrettyNames = {
     defaultMessage: 'Average',
     description: '',
   }),
+  cardinality: i18n.translate('xpack.viz_editor.operations.cardinality', {
+    defaultMessage: 'Unique Values',
+    description: '',
+  }),
   sum: i18n.translate('xpack.viz_editor.operations.avg', {
     defaultMessage: 'Sum',
     description: '',

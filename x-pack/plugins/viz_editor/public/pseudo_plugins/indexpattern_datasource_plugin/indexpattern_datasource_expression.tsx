@@ -8,40 +8,84 @@
 
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
-import { kfetch } from 'ui/kfetch';
+import chrome from 'ui/chrome';
+// @ts-ignore
+import { SearchSourceProvider } from 'ui/courier/search_source';
+// @ts-ignore
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+// @ts-ignore
+import { IndexPatternsProvider } from 'ui/index_patterns';
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
-function fancyQueryFunction() {
+function columnTypesFunction() {
   return {
-    name: 'fancy_query',
-    type: 'datatable',
+    name: 'column_types',
+    type: 'kibana_datatable',
     args: {
-      queries: {
+      types: {
         types: ['string'],
       },
-      indexpattern: {
+    },
+    context: { types: ['kibana_datatable'] },
+    async fn(context: any, args: any) {
+      const types = JSON.parse(args.types);
+      return {
+        ...context,
+        columns: context.columns.map((column: any, index: number) => ({
+          ...column,
+          type: types[index],
+        })),
+      };
+    },
+  };
+}
+
+function esDocsFunction() {
+  return {
+    name: 'client_esdocs',
+    type: 'kibana_datatable',
+    args: {
+      index: {
+        types: ['string'],
+      },
+      fields: {
+        types: ['string'],
+      },
+      filter: {
         types: ['string'],
       },
     },
     context: { types: [] },
     async fn(context: any, args: any) {
-      const queries = JSON.parse(args.queries);
-      const query = Object.values(queries)[0];
-      const result: any = await kfetch({
-        pathname: '/api/viz_editor/search',
-        method: 'POST',
-        body: JSON.stringify({
-          query,
-          indexpattern: args.indexpattern,
-        }),
-      });
+      const $injector = await chrome.dangerouslyGetActiveInjector();
+      const Private: any = $injector.get('Private');
+      const indexPatterns = Private(IndexPatternsProvider);
+      const SearchSource = Private(SearchSourceProvider);
+      const queryFilter = Private(FilterBarQueryFilterProvider);
+      const fields: string[] = JSON.parse(args.fields);
+
+      const indexPattern = await indexPatterns.get(args.index);
+
+      const searchSource = new SearchSource();
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 500);
+      searchSource.setField('source', fields);
+
+      searchSource.setField('query', null);
+      searchSource.setField('filter', queryFilter.getFilters());
+
+      const response = await searchSource.fetch();
 
       return {
-        type: 'datatable',
-        ...result,
+        type: 'kibana_datatable',
+        columns: fields.map(fieldName => ({
+          id: fieldName,
+          type: indexPattern.fields.find((field: any) => field.name === fieldName).type,
+        })),
+        rows: response.hits.hits.map((hit: any) => hit._source),
       };
     },
   };
@@ -49,6 +93,6 @@ function fancyQueryFunction() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [fancyQueryFunction],
+    browserFunctions: [esDocsFunction, columnTypesFunction],
   });
 };
