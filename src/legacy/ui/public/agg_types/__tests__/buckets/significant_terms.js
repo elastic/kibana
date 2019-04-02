@@ -22,43 +22,37 @@ import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
 describe('Significant Terms Agg', function () {
+
   describe('order agg editor UI', function () {
-
-    let $rootScope;
-
-    // function init({ responseValueAggs = [], aggParams = {} }) {
-    function init({ aggParams = {} }) {
-      ngMock.module('kibana');
-      ngMock.inject(function (Private, $controller, _$rootScope_) {
-        const significantTerms = aggTypes.byName.significant_terms;
-        // const orderAggController = terms.params.byName.orderAgg.controller;
-
-        $rootScope = _$rootScope_;
-        $rootScope.agg = {
-          id: 'test',
-          params: aggParams,
-          type: significantTerms,
-          vis: {
-            aggs: []
-          }
-        };
-        // $rootScope.responseValueAggs = responseValueAggs;
-        // $controller(orderAggController, { $scope: $rootScope });
-        // $rootScope.$digest();
-      });
-    }
 
     describe('convert include/exclude from old format', function () {
 
-      it('it doesnt do anything with string type', function () {
-        init({
-          aggParams: {
-            include: '404',
-            exclude: '400',
-          }
-        });
+      let $rootScope;
 
-        const aggConfig = $rootScope.agg;
+      // function init({ responseValueAggs = [], aggParams = {} }) {
+      function init({ aggParams = {} }) {
+        ngMock.module('kibana');
+        ngMock.inject(function (Private, $controller, _$rootScope_) {
+        // ngMock.inject(function (_$rootScope_) {
+          const significantTerms = aggTypes.byName.significant_terms;
+          // const orderAggController = aggTypes.byName.terms.params.byName.orderAgg.controller;
+
+          $rootScope = _$rootScope_;
+          $rootScope.agg = {
+            id: 'test',
+            params: aggParams,
+            type: significantTerms,
+            vis: {
+              aggs: []
+            }
+          };
+          // $rootScope.responseValueAggs = responseValueAggs;
+          // $controller(orderAggController, { $scope: $rootScope });
+          // $rootScope.$digest();
+        });
+      }
+
+      function testSerializeAndWrite(aggConfig) {
         const includeArg = $rootScope.agg.type.params.byName.include;
         const excludeArg = $rootScope.agg.type.params.byName.exclude;
 
@@ -72,6 +66,17 @@ describe('Significant Terms Agg', function () {
 
         expect(output.params.include).to.equal('404');
         expect(output.params.exclude).to.equal('400');
+      }
+
+      it('it doesnt do anything with string type', function () {
+        init({
+          aggParams: {
+            include: '404',
+            exclude: '400',
+          }
+        });
+
+        testSerializeAndWrite($rootScope.agg);
       });
 
       it('converts object to string type', function () {
@@ -85,22 +90,8 @@ describe('Significant Terms Agg', function () {
           }
         });
 
-        const aggConfig = $rootScope.agg;
-        const includeArg = $rootScope.agg.type.params.byName.include;
-        const excludeArg = $rootScope.agg.type.params.byName.exclude;
-
-        expect(includeArg.serialize(aggConfig.params.include)).to.equal('404');
-        expect(excludeArg.serialize(aggConfig.params.exclude)).to.equal('400');
-
-        const output = { params: {} };
-
-        includeArg.write(aggConfig, output);
-        excludeArg.write(aggConfig, output);
-
-        expect(output.params.include).to.equal('404');
-        expect(output.params.exclude).to.equal('400');
+        testSerializeAndWrite($rootScope.agg);
       });
-
     });
   });
 });
