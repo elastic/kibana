@@ -24,6 +24,7 @@ import indexPatternResponse from '../../../__fixtures__/index_pattern_response.j
 
 // Helpful utility allowing us to test the PEG parser by simply checking for deep equality between
 // the nodes the parser generates and the nodes our constructor functions generate.
+// TINA check tests
 function fromLegacyKueryExpressionNoMeta(text) {
   return ast.fromLegacyKueryExpression(text, { includeMetadata: false });
 }

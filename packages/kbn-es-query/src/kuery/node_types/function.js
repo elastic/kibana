@@ -47,15 +47,8 @@ export function buildNodeWithArgumentNodes(functionName, argumentNodes) {
   };
 }
 
-/*
-/*
-  Adding in the Time Zone:
-  TODO:
-  1. add in the time_zone nested in a config parameter, similarly to how the indexPattern is treated in here.
-  (We don't have access to settings in this package, so we have to pass down the config (that will have the time_zone in it))
-*/
-export function toElasticsearchQuery(node, indexPattern, dateFormatTZ) {
+export function toElasticsearchQuery(node, indexPattern, config) {
   const kueryFunction = functions[node.function];
-  return kueryFunction.toElasticsearchQuery(node, indexPattern, dateFormatTZ);  // TINA: we need to use the dateFormatTZ in these functions and pass it along in here. each of the node types will have it's own version of toElasticsearchQuery
+  return kueryFunction.toElasticsearchQuery(node, indexPattern, config);
 }
 

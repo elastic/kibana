@@ -21,7 +21,7 @@ import { buildQueryFromKuery } from '../from_kuery';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import expect from '@kbn/expect';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
-
+// TINA check tests
 describe('build query', function () {
   describe('buildQueryFromKuery', function () {
     it('should return the parameters of an Elasticsearch bool query', function () {

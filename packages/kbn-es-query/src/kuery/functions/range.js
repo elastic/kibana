@@ -22,6 +22,7 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from '../../filters';
 import { getFields } from './utils/get_fields';
+import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -35,7 +36,7 @@ export function buildNodeParams(fieldName, params) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ }) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
@@ -60,23 +61,20 @@ export function toElasticsearchQuery(node, indexPattern) {
         script: getRangeScript(field, queryParams),
       };
     }
-
-    return {
-      range: {
-        /*
-        TODO: check if the range is a date, implement similar method but slightly different to:
-      if (field.type === 'date') {
-      return [...accumulator, {
+    else if (field.type === 'date') {
+      const timeZoneParam = dateFormatTZ ? { time_zone: getTimeZoneFromSettings(dateFormatTZ) } : {};
+      return {
         range: {
           [field.name]: {
-            gte: value,
-            lte: value,
-            time_zone: 'Africa/Johannesburg',
-          },
+            gte: queryParams,
+            lte: queryParams,
+            ...timeZoneParam,
+          }
         }
-      }];
+      };
     }
-        */
+    return {
+      range: {
         [field.name]: queryParams
       }
     };

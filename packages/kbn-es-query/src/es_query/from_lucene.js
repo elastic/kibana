@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
-
+// TINA check tests
 export function buildQueryFromLucene(queries, queryStringOptions, dateFormatTZ) {
   const combinedQueries = _.map(queries, (query) => {
     const queryDsl = luceneStringToDsl(query.query);

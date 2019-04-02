@@ -18,14 +18,12 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment-timezone';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
-
-const detectedTimezone = moment.tz.guess();
+import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -44,11 +42,11 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, dateFormatTZ) {
+export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ }) {
   // the indexPattern needs work too
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
 
-  const fieldName = ast.toElasticsearchQuery(fieldNameArg); // TINA, Q: should we be passing dateFormatTZ back in here?
+  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
@@ -125,13 +123,13 @@ export function toElasticsearchQuery(node, indexPattern, dateFormatTZ) {
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
     else if (field.type === 'date') {
+      const timeZoneParam = dateFormatTZ ? { time_zone: getTimeZoneFromSettings(dateFormatTZ) } : {};
       return [...accumulator, {
         range: {
           [field.name]: {
             gte: value,
             lte: value,
-            time_zone: dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ,
-            // time_zone: 'Africa/Johannesburg',
+            ...timeZoneParam,
           },
         }
       }];

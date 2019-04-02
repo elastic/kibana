@@ -22,22 +22,22 @@ import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, n
 export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ) {
   const queryASTs = queries.map(query => {
     try {
-      return fromKueryExpression(query.query, { allowLeadingWildcards }); // TINA do we add the dateFormatTZ here within the options object or seperately?
+      return fromKueryExpression(query.query, { allowLeadingWildcards });
     } catch (parseError) {
       try {
-        fromLegacyKueryExpression(query.query); // TINA note: the function expects two parameters but only one is given
+        fromLegacyKueryExpression(query.query);
       } catch (legacyParseError) {
         throw parseError;
       }
       throw Error('OutdatedKuerySyntaxError');
     }
   });
-  return buildQuery(indexPattern, queryASTs, dateFormatTZ); // TINA  or do we have to pass along the dateFormatTZ to buildQuery? Yes, I think since we need to use it in there
+  return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
 }
 
-function buildQuery(indexPattern, queryASTs, dateFormatTZ) {
+function buildQuery(indexPattern, queryASTs, config) {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, dateFormatTZ);
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
   return {
     must: [],
     filter: [],

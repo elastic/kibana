@@ -43,7 +43,6 @@ export function buildEsQuery(
 
   const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
-
   const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards, config.dateFormatTZ);
   const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions, config.dateFormatTZ);
   const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);

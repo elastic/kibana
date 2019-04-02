@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
-import { parse as parseKuery } from './kuery'; // TINA: stay out of this file, it looks scary!
+import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';
 
 export function fromLiteralExpression(expression, parseOptions) {
@@ -36,12 +36,10 @@ export function fromLegacyKueryExpression(expression, parseOptions) {
 }
 
 export function fromKueryExpression(expression, parseOptions) {
-  // TINA parseOptions contains {allowLeadingWildcards, dateFormatTZ}
   return fromExpression(expression, parseOptions, parseKuery);
 }
 
 function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
-  // TINA parseOptions contains {allowLeadingWildcards, dateFormatTZ}
   if (_.isUndefined(expression)) {
     throw new Error('expression must be a string, got undefined instead');
   }
@@ -51,24 +49,20 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
     helpers: { nodeTypes },
   };
 
-  return parse(expression, parseOptions); // TINA parseOptions now contains {allowLeadingWildcards, dateFormatTZ, helpers = {nodeTypes}}
+  return parse(expression, parseOptions);
 }
-
-// indexPattern isn't required, but if you pass one in, we can be more intelligent
-// about how we craft the queries (e.g. scripted fields)
-
-/* TINA
-  Adding in the Time Zone:
-  TODO:
-  1. add in the time_zone nested in a config parameter, similarly to how the indexPattern is treated in here.
-  (We don't have access to settings in this package, so we have to pass down the config (that will have the time_zone in it))
-*/
-export function toElasticsearchQuery(node, indexPattern, dateFormatTZ) {
+/**
+ * @params {String} indexPattern - IndexPattern isn't required, but if you pass one in, we can be more intelligent
+ * about how we craft the queries (e.g. scripted fields)
+ * @params {Object} config - contains the dateFormatTZ
+ *
+ */
+export function toElasticsearchQuery(node, indexPattern, config) {
   if (!node || !node.type || !nodeTypes[node.type]) {
-    return toElasticsearchQuery(nodeTypes.function.buildNode('and', [])); // TINA: Looks like this is simply a recursive call with forcing a node type of 'and'.
+    return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
   }
 
-  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, dateFormatTZ); // TINA: toElasticsearchQuery on this line is the one nested within the nodeTypes.
+  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, config);
 }
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression) {

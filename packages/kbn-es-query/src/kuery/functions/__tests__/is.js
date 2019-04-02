@@ -23,7 +23,7 @@ import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
 let indexPattern;
-
+// TINA check tests
 describe('kuery functions', function () {
 
   describe('is', function () {

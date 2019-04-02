@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment-timezone';
-const detectedTimezone = moment.tz.guess();
+import { getTimeZoneFromSettings } from '../utils/get_time_zone_from_settings';
 
 /**
  * Decorate queries with default parameters
@@ -34,7 +33,7 @@ export function decorateQuery(query, queryStringOptions, dateFormatTZ) {
   if (_.has(query, 'query_string.query')) {
     _.extend(query.query_string, queryStringOptions);
     if (dateFormatTZ) {
-      _.defaults(query.query_string, { time_zone: dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ });
+      _.defaults(query.query_string, { time_zone: getTimeZoneFromSettings(dateFormatTZ) });
     }
   }
 
