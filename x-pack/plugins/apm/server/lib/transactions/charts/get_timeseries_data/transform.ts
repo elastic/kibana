@@ -59,7 +59,7 @@ export function getTpmBuckets(
 ) {
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
-      const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
+      const dataPoints = timeseries.buckets.slice(1).map(bucket => {
         return {
           x: bucket.key,
           y: round(bucket.doc_count * (60 / bucketSize), 1)
@@ -82,7 +82,7 @@ export function getTpmBuckets(
 function getResponseTime(
   responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
 ) {
-  return responseTimeBuckets.slice(1, -1).reduce(
+  return responseTimeBuckets.slice(1).reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;
 
