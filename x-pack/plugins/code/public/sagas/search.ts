@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import queryString from 'querystring';
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
@@ -22,6 +22,9 @@ import {
   RepositorySearchPayload,
   repositorySearchQueryChanged,
   repositorySearchSuccess,
+  searchReposForScope,
+  searchReposForScopeFailed,
+  searchReposForScopeSuccess,
 } from '../actions';
 import { searchRoutePattern } from './patterns';
 
@@ -122,4 +125,17 @@ function* handleSearchRouteChange(action: Action<Match>) {
 
 export function* watchSearchRouteChange() {
   yield takeLatest(searchRoutePattern, handleSearchRouteChange);
+}
+
+function* handleReposSearchForScope(action: Action<RepositorySearchPayload>) {
+  try {
+    const data = yield call(requestRepositorySearch, action.payload!.query);
+    yield put(searchReposForScopeSuccess(data));
+  } catch (err) {
+    yield put(searchReposForScopeFailed(err));
+  }
+}
+
+export function* watchRepoScopeSearch() {
+  yield takeEvery(searchReposForScope, handleReposSearchForScope);
 }

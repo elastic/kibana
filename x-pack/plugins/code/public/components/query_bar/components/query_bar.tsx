@@ -7,14 +7,17 @@
 import { debounce, isEqual } from 'lodash';
 import React, { Component } from 'react';
 
-import { SearchOptions as ISearchOptions } from '../../../actions';
+import {
+  saveSearchOptions,
+  SearchOptions as ISearchOptions,
+  searchReposForScope,
+} from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { SearchScope } from '../../../../model';
-import { repositorySearch, saveSearchOptions } from '../../../actions';
 import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
 import {
@@ -485,16 +488,14 @@ export class CodeQueryBar extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  repoSearchResults: state.search.repositorySearchResults
-    ? state.search.repositorySearchResults.repositories
-    : [],
-  searchLoading: state.search.isLoading,
+  repoSearchResults: state.search.scopeSearchResults.repositories,
+  searchLoading: state.search.isScopeSearchLoading,
   searchScope: state.search.scope,
   searchOptions: state.search.searchOptions,
 });
 
 const mapDispatchToProps = {
-  repositorySearch,
+  repositorySearch: searchReposForScope,
   saveSearchOptions,
 };
 

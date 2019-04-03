@@ -43,3 +43,7 @@ export const repositoryTypeaheadSearchSuccess = createAction<string>('REPOSITORY
 export const repositoryTypeaheadSearchFailed = createAction<string>('REPOSITORY SEARCH FAILED');
 
 export const saveSearchOptions = createAction<SearchOptions>('SAVE SEARCH OPTIONS');
+
+export const searchReposForScope = createAction<RepositorySearchPayload>('SEARCH REPOS FOR SCOPE');
+export const searchReposForScopeSuccess = createAction<any>('SEARCH REPOS FOR SCOPE SUCCESS');
+export const searchReposForScopeFailed = createAction<any>('SEARCH REPOS FOR SCOPE FAILED');
