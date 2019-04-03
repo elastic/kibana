@@ -11,33 +11,24 @@ import { i18n } from '@kbn/i18n';
 
 export class FeatureTooltip extends React.Component {
 
-  _renderFilterButton(tooltipProperty, hasFilters) {
-    if (!this.props.isFilterable || !hasFilters)  {
+  _renderFilterButton(tooltipProperty, filterInAtLeastOneProperty) {
+    if (!this.props.isFilterable || !filterInAtLeastOneProperty || !tooltipProperty.isFilterable())  {
       return null;
     }
 
-
-    let icon;
-    if (tooltipProperty.isFilterable()) {
-      icon = (<EuiButtonIcon
-        iconType="plusInCircle"
-        title="Filter on property"
-        onClick={() => {
-          this.props.closeTooltip();
-          const filterAction = tooltipProperty.getFilterAction();
-          filterAction();
-        }}
-        aria-label="Filter on property"
-        className="mapFeatureTooltipFilterButton"
-      />);
-    } else {
-      icon = null;
-    }
-
-
     return (
-      <EuiFlexItem className="mapFeatureTooltipFilterButton" grow={false}>
-        {icon}
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="plusInCircle"
+          title="Filter on property"
+          onClick={() => {
+            this.props.closeTooltip();
+            const filterAction = tooltipProperty.getFilterAction();
+            filterAction();
+          }}
+          aria-label="Filter on property"
+          className="mapFeatureTooltipFilterButton"
+        />
       </EuiFlexItem>
     );
   }
