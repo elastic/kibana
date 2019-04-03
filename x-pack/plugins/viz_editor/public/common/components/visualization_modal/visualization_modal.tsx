@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
