@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DatasourceField } from '../../../common';
+import { ColumnOperation, DatasourceField, fieldToOperation } from '../../../common';
 import {
   Axis,
   EditorPlugin,
@@ -23,6 +23,7 @@ import { columnSummary } from '../../common/components/config_panel';
 interface ScatterChartPrivateState {
   xAxis: Axis;
   yAxis: Axis;
+  hasDate: boolean;
 }
 
 type ScatterChartVisModel = VisModel<'scatterChart', ScatterChartPrivateState>;
@@ -71,12 +72,14 @@ function toExpression(visModel: ScatterChartVisModel) {
 
   const {
     private: {
-      scatterChart: { xAxis, yAxis },
+      scatterChart: { xAxis, yAxis, hasDate },
     },
   } = visModel;
 
   const xColumn = selectColumn(xAxis.columns[0], visModel);
   const yColumn = selectColumn(yAxis.columns[0], visModel);
+
+  const xScaleType = hasDate ? 'time' : 'linear';
 
   const scatterSpec = `
   {
@@ -89,7 +92,7 @@ function toExpression(visModel: ScatterChartVisModel) {
     "scales": [
       {
         "name": "x",
-        "type": "linear",
+        "type": "${xScaleType}",
         "round": true,
         "nice": true,
         "zero": true,
@@ -111,7 +114,7 @@ function toExpression(visModel: ScatterChartVisModel) {
       {
         "scale": "x",
         "grid": true,
-        "domain": false,
+        "domain": true,
         "orient": "bottom",
         "tickCount": 5,
         "title": "${xAxis.title}"
@@ -119,7 +122,7 @@ function toExpression(visModel: ScatterChartVisModel) {
       {
         "scale": "y",
         "grid": true,
-        "domain": false,
+        "domain": true,
         "orient": "left",
         "titlePadding": 5,
         "title": "${yAxis.title}"
@@ -215,15 +218,29 @@ function getSuggestionsForField(
     return [];
   }
 
+  const { datasource } = visModel;
+
+  const select: ColumnOperation[] = [
+    fieldToOperation(field, 'column') as ColumnOperation,
+    fieldToOperation(field, 'column') as ColumnOperation,
+  ];
+
+  let hasDate = false;
+
+  if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
+    hasDate = true;
+    select[0] = fieldToOperation(
+      datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+      'column'
+    ) as ColumnOperation;
+  }
+
   const prefilledVisModel: ScatterChartVisModel = {
     ...visModel,
     queries: {
       q1: {
         datasourceRef: datasourceName,
-        select: [
-          { operation: 'column', alias: field.name, argument: { field: field.name } },
-          { operation: 'column', alias: field.name, argument: { field: field.name } },
-        ],
+        select,
       },
     },
     editorPlugin: 'scatter_chart',
@@ -232,6 +249,7 @@ function getSuggestionsForField(
       scatterChart: {
         xAxis: { title: 'X Axis', columns: ['q1_0'] },
         yAxis: { title: 'Y Axis', columns: ['q1_1'] },
+        hasDate,
       },
     },
   };
@@ -241,7 +259,7 @@ function getSuggestionsForField(
       previewExpression: toExpression(prefilledVisModel),
       score: 0.5,
       visModel: prefilledVisModel,
-      title: `Scatter Chart: ${field.name} vs ${field.name}`,
+      title: `Scatter Chart: ${select[1].argument!.field} vs ${select[0].argument!.field}`,
       iconType: 'visHeatmap',
       pluginName: 'scatter_chart',
     },

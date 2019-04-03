@@ -32,9 +32,18 @@ function columnTypesFunction() {
     context: { types: ['kibana_datatable'] },
     async fn(context: any, args: any) {
       const types = JSON.parse(args.types);
+
+      // esaggs columns are not the same order as the operation order
+      // So to reorder, we sort by id: "col-{id}-{index}"
+      const columns = [...context.columns].sort((col1: { id: string }, col2: { id: string }) => {
+        const col1Parts = col1.id.split('-');
+        const col2Parts = col2.id.split('-');
+        return col1Parts[col1Parts.length - 1] < col2Parts[col2Parts.length - 1] ? -1 : 1;
+      });
+
       return {
         ...context,
-        columns: context.columns.map((column: any, index: number) => ({
+        columns: columns.map((column: any, index: number) => ({
           ...column,
           type: types[index],
         })),

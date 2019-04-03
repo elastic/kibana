@@ -22,7 +22,7 @@ export function XAxisEditor({
   const onDropField = (field: DatasourceField) => {
     const operation: SelectOperation =
       field.type === 'date'
-        ? { operation: 'date_histogram', argument: { field: field.name, interval: '1m' } }
+        ? { operation: 'date_histogram', argument: { field: field.name, interval: 'd' } }
         : { operation: 'column', argument: { field: field.name } };
 
     onChangeVisModel(updateColumn(col, operation, visModel));

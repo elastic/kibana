@@ -11,11 +11,11 @@ type OperationPrettyNames = { [operation in SelectOperator]: string };
 
 const prettyNames: OperationPrettyNames = {
   column: i18n.translate('xpack.viz_editor.operations.column', {
-    defaultMessage: 'Terms',
+    defaultMessage: 'Values',
     description: '',
   }),
   terms: i18n.translate('xpack.viz_editor.operations.terms', {
-    defaultMessage: 'Top Unique Terms',
+    defaultMessage: 'Top Values',
     description: '',
   }),
   count: i18n.translate('xpack.viz_editor.operations.count', {
@@ -27,7 +27,7 @@ const prettyNames: OperationPrettyNames = {
     description: '',
   }),
   cardinality: i18n.translate('xpack.viz_editor.operations.cardinality', {
-    defaultMessage: 'Unique Values',
+    defaultMessage: 'Unique Count',
     description: '',
   }),
   sum: i18n.translate('xpack.viz_editor.operations.avg', {
