@@ -156,12 +156,13 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(layerId, errorMessage) {
+function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
+      isInErrorState: errorMessage !== null ? true : false,
       layerId,
-      errorMessage,
+      errorMessage
     });
   };
 }
@@ -403,7 +404,7 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
@@ -413,6 +414,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
       meta,
       requestToken
     });
+    dispatch(setLayerDataLoadErrorStatus(layerId, null));
   };
 }
 
@@ -426,7 +428,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
       requestToken,
     });
 
-    dispatch(setLayerErrorStatus(layerId, errorMessage));
+    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
