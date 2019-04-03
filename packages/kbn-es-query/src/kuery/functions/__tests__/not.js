@@ -49,7 +49,8 @@ describe('kuery functions', function () {
 
     describe('toElasticsearchQuery', function () {
 
-      it('should wrap a subquery in an ES bool query\'s must_not clause', function () {
+      // eslint-disable-next-line mocha/no-exclusive-tests
+      it.only('should wrap a subquery in an ES bool query\'s must_not clause', function () {
         const node = nodeTypes.function.buildNode('not', childNode);
         const result = not.toElasticsearchQuery(node, indexPattern);
         expect(result).to.only.have.keys('bool');

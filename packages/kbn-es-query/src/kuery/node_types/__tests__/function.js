@@ -66,7 +66,8 @@ describe('kuery node types', function () {
 
     describe('toElasticsearchQuery', function () {
 
-      it('should return the given function type\'s ES query representation', function () {
+      // eslint-disable-next-line mocha/no-exclusive-tests
+      it.only('should return the given function type\'s ES query representation', function () {
         const node = functionType.buildNode('is', 'extension', 'jpg');
         const expected = isFunction.toElasticsearchQuery(node, indexPattern);
         const result = functionType.toElasticsearchQuery(node, indexPattern);

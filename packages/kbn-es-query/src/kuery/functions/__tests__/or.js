@@ -51,7 +51,8 @@ describe('kuery functions', function () {
 
     describe('toElasticsearchQuery', function () {
 
-      it('should wrap subqueries in an ES bool query\'s should clause', function () {
+      // eslint-disable-next-line mocha/no-exclusive-tests
+      it.only('should wrap subqueries in an ES bool query\'s should clause', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
         expect(result).to.only.have.keys('bool');
@@ -61,7 +62,8 @@ describe('kuery functions', function () {
         );
       });
 
-      it('should require one of the clauses to match', function () {
+      // eslint-disable-next-line mocha/no-exclusive-tests
+      it.only('should require one of the clauses to match', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
         expect(result.bool).to.have.property('minimum_should_match', 1);

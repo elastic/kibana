@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 // TINA check tests
-export function buildQueryFromLucene(queries, queryStringOptions, dateFormatTZ) {
+export function buildQueryFromLucene(queries, queryStringOptions, dateFormatTZ = null) {
   const combinedQueries = _.map(queries, (query) => {
     const queryDsl = luceneStringToDsl(query.query);
     return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ); // this is where the advanced settings are added.

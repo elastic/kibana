@@ -36,7 +36,7 @@ export function buildNodeParams(fieldName, params) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ }) {
+export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { dateFormatTZ: null }) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);

@@ -57,7 +57,7 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
  * @params {Object} config - contains the dateFormatTZ
  *
  */
-export function toElasticsearchQuery(node, indexPattern, config) {
+export function toElasticsearchQuery(node, indexPattern, config = {}) {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
   }

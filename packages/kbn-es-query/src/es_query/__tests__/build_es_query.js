@@ -26,7 +26,8 @@ import { decorateQuery } from '../decorate_query';
 
 // TINA check tests
 describe('build query', function () {
-  describe('buildEsQuery', function () {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('buildEsQuery', function () {
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildEsQuery();

@@ -26,7 +26,8 @@ let indexPattern;
 // TINA check tests
 describe('kuery functions', function () {
 
-  describe('is', function () {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('is', function () {
 
 
     beforeEach(() => {

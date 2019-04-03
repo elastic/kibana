@@ -42,7 +42,7 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ }) {
+export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { dateFormatTZ: null }) {
   // the indexPattern needs work too
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
 

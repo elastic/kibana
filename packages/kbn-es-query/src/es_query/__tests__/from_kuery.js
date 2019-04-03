@@ -23,7 +23,8 @@ import expect from '@kbn/expect';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 // TINA check tests
 describe('build query', function () {
-  describe('buildQueryFromKuery', function () {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('buildQueryFromKuery', function () {
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildQueryFromKuery(null, [], true);
       const expected = {
