@@ -7,7 +7,7 @@
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Search. -->
-      <div ng-show="chrome.getVisible()" class="fullWidth" dashboard-title="model.title" data-transclude-slot="bottomRow">
+      <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
         <search-bar
           query="model.query"
           screen-title="screenTitle"
@@ -24,7 +24,6 @@
           refresh-interval="model.refreshInterval.value"
           on-refresh-change="onRefreshChange"
           watch-depth="reference"
-          dashboard-title="model.title"
         ></search-bar>
       </div>
     </div>
