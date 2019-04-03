@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, last, omit } from 'lodash';
+import { cloneDeep, last, omit, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
 
@@ -50,6 +50,12 @@ export function _handleResponse(response) {
   });
 
   return pipelines;
+}
+
+export async function logstashPipelineWithoutPipelineFieldsExists(req, logstashIndexPattern) {
+  const metricResponse = await getMetrics(req, logstashIndexPattern, ['logstash_cluster_no_pipelines_count']);
+  const noPipelinesCount = get(metricResponse, 'logstash_cluster_no_pipelines_count', []);
+  return noPipelinesCount.reduce((acc, { data }) =>  acc || data.some(([_a, b]) => b === true), false);
 }
 
 export async function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMetricKey) {
