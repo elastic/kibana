@@ -37,6 +37,8 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
     return Source.type === sourceDescriptor.type;
   });
   if (!Source) {
+    console.error(sourceDescriptor);
+    console.trace();
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
   return new Source(sourceDescriptor, inspectorAdapters);

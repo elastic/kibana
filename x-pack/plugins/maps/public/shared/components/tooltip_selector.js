@@ -26,7 +26,7 @@ export class TooltipSelector extends React.Component {
             defaultMessage: `Select fields`
           })
           }
-          value={this.props.tooltipProperties}
+          value={this.props.value}
           onChange={this.props.onChange}
           fields={this.props.fields}
         />

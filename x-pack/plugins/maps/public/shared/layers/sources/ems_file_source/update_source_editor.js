@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEmsVectorFilesMeta } from '../../../../meta';
@@ -47,13 +47,11 @@ export class UpdateSourceEditor extends Component {
 
   render() {
     return (
-      <Fragment>
-        <TooltipSelector
-          tooltipProperties={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesSelect}
-          fields={this.state.fields}
-        />
-      </Fragment>
+      <TooltipSelector
+        value={this.props.tooltipProperties}
+        onChange={this._onTooltipPropertiesSelect}
+        fields={this.state.fields}
+      />
     );
   }
 }

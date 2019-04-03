@@ -12,7 +12,6 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
-import _ from 'lodash';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -42,12 +41,8 @@ export class EMSFileSource extends AbstractVectorSource {
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
   }
 
-
   constructor(descriptor, inspectorAdapters) {
-    super({
-      id: descriptor.id,
-      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-    }, inspectorAdapters);
+    super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {
