@@ -4,25 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButtonEmpty,
+  EuiButton,
   EuiTitle,
+  EuiSpacer,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export function LayerControl({ isReadOnly, showAddLayerWizard }) {
+export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, closeLayerTOC, openLayerTOC }) {
+  if (!isLayerTOCOpen) {
+    return (
+      <EuiButton
+        className="mapLayerControl__openLayerTOCButton"
+        onClick={openLayerTOC}
+        iconType="arrowLeft"
+        aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
+          defaultMessage: 'Open layer table of contents'
+        })}
+      />
+    );
+  }
+
   let addLayer;
   if (!isReadOnly) {
     addLayer = (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          flush="right"
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiButton
+          className="mapLayerControl__addLayerButton"
+          fill
           onClick={showAddLayerWizard}
           data-test-subj="addLayerButton"
         >
@@ -30,37 +47,50 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
             id="xpack.maps.layerControl.addLayerButtonLabel"
             defaultMessage="Add layer"
           />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+        </EuiButton>
+      </Fragment>
     );
   }
 
   return (
-    <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
-      <EuiFlexItem className="mapWidgetControl__header" grow={false}>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          gutterSize="none"
-        >
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>
-                <FormattedMessage
-                  id="xpack.maps.layerControl.layersTitle"
-                  defaultMessage="Layers"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {addLayer}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    <Fragment>
+      <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
+        <EuiFlexItem className="mapWidgetControl__header" grow={false}>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            responsive={false}
+            gutterSize="none"
+          >
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.maps.layerControl.layersTitle"
+                    defaultMessage="Layers"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                onClick={closeLayerTOC}
+                iconType="arrowRight"
+                aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
+                  defaultMessage: 'Close layer table of contents'
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-      <EuiFlexItem className="mapLayerControl">
-        <LayerTOC />
-      </EuiFlexItem>
-    </EuiPanel>
+        <EuiFlexItem className="mapLayerControl">
+          <LayerTOC />
+        </EuiFlexItem>
+      </EuiPanel>
+
+      {addLayer}
+
+    </Fragment>
   );
 }

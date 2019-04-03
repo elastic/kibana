@@ -22,7 +22,7 @@ import {
   setQuery,
   setRefreshConfig,
 } from '../actions/store_actions';
-import { setReadOnly } from '../store/ui';
+import { getIsLayerTOCOpen, setReadOnly, setIsLayerTOCOpen } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 
@@ -83,6 +83,13 @@ export class MapEmbeddable extends Embeddable {
   render(domNode, containerState) {
     this._store.dispatch(setReadOnly(true));
 
+    if (_.has(this._embeddableConfig, 'isLayerTOCOpen')) {
+      this._store.dispatch(setIsLayerTOCOpen(this._embeddableConfig.isLayerTOCOpen));
+    } else if (this._savedMap.uiStateJSON) {
+      const uiState = JSON.parse(this._savedMap.uiStateJSON);
+      this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', true)));
+    }
+
     if (this._embeddableConfig.mapCenter) {
       this._store.dispatch(setGotoWithCenter({
         lat: this._embeddableConfig.mapCenter.lat,
@@ -135,18 +142,30 @@ export class MapEmbeddable extends Embeddable {
   }
 
   _handleStoreChanges() {
+    let embeddableConfigChanged = false;
+
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
-
     if (!this._embeddableConfig.mapCenter
       || this._embeddableConfig.mapCenter.lat !== center.lat
       || this._embeddableConfig.mapCenter.lon !== center.lon
       || this._embeddableConfig.mapCenter.zoom !== zoom) {
+      embeddableConfigChanged = true;
       this._embeddableConfig.mapCenter = {
         lat: center.lat,
         lon: center.lon,
         zoom: zoom,
       };
+    }
+
+    const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
+    if (!this._embeddableConfig.isLayerTOCOpen
+      || this._embeddableConfig.isLayerTOCOpen !== isLayerTOCOpen) {
+      embeddableConfigChanged = true;
+      this._embeddableConfig.isLayerTOCOpen = isLayerTOCOpen;
+    }
+
+    if (embeddableConfigChanged) {
       this._onEmbeddableStateChanged({
         customization: this._embeddableConfig
       });
