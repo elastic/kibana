@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-search]]
-== Searching Your Data
+== Searching your data
 
 The **Maps** application embeds the query bar for real-time ad hoc search.
 Only layers requesting data from {es} are filtered when you submit a search request.
