@@ -603,16 +603,8 @@ class ObjectsTableUI extends Component {
                   onChange={this.changeIncludeReferencesDeep}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="rowReverse">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={this.onExportAll}>
-                      <FormattedMessage
-                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                        defaultMessage="Export All"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={this.closeExportAllModal}>
                       <FormattedMessage
@@ -620,6 +612,14 @@ class ObjectsTableUI extends Component {
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={this.onExportAll}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                        defaultMessage="Export All"
+                      />
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
