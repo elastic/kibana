@@ -44,7 +44,11 @@ export class DeleteWorker extends AbstractWorker {
     this.cancellationService.cancelIndexJob(uri);
 
     // 2. Delete repository on local fs.
-    const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(
+      this.serverOptions.repoPath,
+      this.serverOptions.credsPath,
+      this.log
+    );
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     // 3. Delete ES indices and aliases

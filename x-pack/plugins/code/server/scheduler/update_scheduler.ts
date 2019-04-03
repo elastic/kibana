@@ -50,9 +50,7 @@ export class UpdateScheduler extends AbstractScheduler {
         cloneStatus.cloneProgress.isCloned &&
         cloneStatus.progress === WorkerReservedProgress.COMPLETED
       ) {
-        const payload = {
-          uri: repo.uri,
-        };
+        const payload = repo;
 
         // Update the next repo update timestamp.
         const nextRepoUpdateTimestamp = this.repoNextSchedulingTime();
