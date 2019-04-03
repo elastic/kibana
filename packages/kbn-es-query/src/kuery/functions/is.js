@@ -36,20 +36,17 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
   const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
-
   return {
     arguments: [fieldNode, valueNode, isPhraseNode],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { dateFormatTZ: null }) {
+export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   // the indexPattern needs work too
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
-
   const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
-
   if (fieldNameArg.value === null) {
     if (valueArg.type === 'wildcard') {
       return {
@@ -69,7 +66,6 @@ export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { da
   }
 
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
-
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
   // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
@@ -123,7 +119,7 @@ export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { da
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
     else if (field.type === 'date') {
-      const timeZoneParam = dateFormatTZ ? { time_zone: getTimeZoneFromSettings(dateFormatTZ) } : {};
+      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
       return [...accumulator, {
         range: {
           [field.name]: {

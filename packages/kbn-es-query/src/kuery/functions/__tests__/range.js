@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable mocha/no-exclusive-tests */
 import expect from '@kbn/expect';
 import * as range from '../range';
 import { nodeTypes } from '../../node_types';
@@ -63,7 +62,7 @@ describe('kuery functions', function () {
 
     });
 
-    describe.only('toElasticsearchQuery', function () {
+    describe('toElasticsearchQuery', function () {
 
       it('should return an ES range query for the node\'s field and params', function () {
         const expected = {

@@ -24,10 +24,8 @@ import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import { decorateQuery } from '../decorate_query';
 
-// TINA check tests
 describe('build query', function () {
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('buildEsQuery', function () {
+  describe('buildEsQuery', function () {
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildEsQuery();

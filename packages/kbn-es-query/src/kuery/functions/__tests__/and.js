@@ -30,8 +30,7 @@ const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('and', function () {
+  describe('and', function () {
 
     beforeEach(() => {
       indexPattern = indexPatternResponse;
