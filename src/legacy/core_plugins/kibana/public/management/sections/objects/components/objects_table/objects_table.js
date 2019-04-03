@@ -39,6 +39,17 @@ import {
   EuiCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
+  EuiSwitch,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiModalHeaderTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import {
   parseQuery,
@@ -97,6 +108,7 @@ class ObjectsTableUI extends Component {
       isDeleting: false,
       exportAllOptions: [],
       exportAllSelectedOptions: {},
+      isIncludeReferencesDeepChecked: true,
     };
   }
 
@@ -510,12 +522,23 @@ class ObjectsTableUI extends Component {
     );
   }
 
+  changeIncludeReferencesDeep = () => {
+    this.setState(state => ({
+      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
+    }));
+  }
+
+  closeExportAllModal = () => {
+    this.setState({ isShowingExportAllOptionsModal: false });
+  }
+
   renderExportAllOptionsModal() {
     const {
       isShowingExportAllOptionsModal,
       filteredItemCount,
       exportAllOptions,
       exportAllSelectedOptions,
+      isIncludeReferencesDeepChecked,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
@@ -524,53 +547,85 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiOverlayMask>
-        <EuiConfirmModal
-          title={(<FormattedMessage
-            id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
-            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-            values={{
-              filteredItemCount
-            }}
-          />)}
-          onCancel={() =>
-            this.setState({ isShowingExportAllOptionsModal: false })
-          }
-          onConfirm={this.onExportAll}
-          cancelButtonText={(
-            <FormattedMessage id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
-          )}
-          confirmButtonText={(
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-              defaultMessage="Export All"
-            />
-          )}
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        <EuiModal
+          onClose={this.closeExportAllModal}
         >
-          <p>
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-              defaultMessage="Select which types to export. The number in parentheses indicates
-              how many of this type are available to export."
-            />
-          </p>
-          <EuiCheckboxGroup
-            options={exportAllOptions}
-            idToSelectedMap={exportAllSelectedOptions}
-            onChange={optionId => {
-              const newExportAllSelectedOptions = {
-                ...exportAllSelectedOptions,
-                ...{
-                  [optionId]: !exportAllSelectedOptions[optionId],
-                },
-              };
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+                defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                values={{
+                  filteredItemCount
+                }}
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                  defaultMessage="Select which types to export. The number in parentheses indicates
+                  how many of this type are available to export."
+                />
+              </p>
+              <EuiCheckboxGroup
+                options={exportAllOptions}
+                idToSelectedMap={exportAllSelectedOptions}
+                onChange={optionId => {
+                  const newExportAllSelectedOptions = {
+                    ...exportAllSelectedOptions,
+                    ...{
+                      [optionId]: !exportAllSelectedOptions[optionId],
+                    },
+                  };
 
-              this.setState({
-                exportAllSelectedOptions: newExportAllSelectedOptions,
-              });
-            }}
-          />
-        </EuiConfirmModal>
+                  this.setState({
+                    exportAllSelectedOptions: newExportAllSelectedOptions,
+                  });
+                }}
+              />
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={(
+                    <FormattedMessage
+                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include all nested references"
+                    />
+                  )}
+                  checked={isIncludeReferencesDeepChecked}
+                  onChange={this.changeIncludeReferencesDeep}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="rowReverse">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={this.onExportAll}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                        defaultMessage="Export All"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalFooter>
+        </EuiModal>
       </EuiOverlayMask>
     );
   }
