@@ -134,7 +134,7 @@ Full details are {repo}tree/6.7/packages/kbn-i18n#react[here].
 
 
 [float]
-==== i18n for Angular 
+===== i18n for Angular 
 
 AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive` and `filter`. Both the directive and the filter use the translation `service` with i18n engine under the hood.
 
