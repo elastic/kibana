@@ -81,8 +81,10 @@ export class EditorComponent extends React.Component<IProps> {
       revision: routeRevision,
       path: routePath,
     } = this.props.match.params;
-    if (file.content && prevProps.file.content !== file.content) {
-      this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
+    const prevContent = prevProps.file && prevProps.file.content;
+
+    if (prevContent !== file.content) {
+      this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
