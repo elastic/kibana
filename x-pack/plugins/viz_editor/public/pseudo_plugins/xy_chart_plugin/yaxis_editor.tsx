@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { columnSummary } from '../../common/components/config_panel';
+import { DatasourceField } from '../../../common';
 import { Draggable } from '../../common/components/draggable';
-import { Field, selectColumn, updateColumn, VisModel } from '../../common/lib';
+import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
+import { selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function YAxisEditor({
   col,
@@ -21,7 +21,7 @@ export function YAxisEditor({
 }) {
   const currentOperation: any = selectColumn(col, visModel) || { operation: 'count' };
   const fieldName = currentOperation.argument && currentOperation.argument.field;
-  const onDropField = (field: Field) => {
+  const onDropField = (field: DatasourceField) => {
     const operation = fieldName
       ? { ...currentOperation, argument: { ...currentOperation.argument, field: field.name } }
       : { operation: 'sum', argument: { field: field.name } };
@@ -29,42 +29,27 @@ export function YAxisEditor({
     onChangeVisModel(updateColumn(col, operation, visModel));
   };
 
-  const onChangeOperation = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const operationName = e.target.value;
-    const operation = {
-      ...currentOperation,
-      operation: operationName,
-    };
+  const column = selectColumn(col, visModel);
 
-    onChangeVisModel(updateColumn(col, operation, visModel));
-  };
-
-  const options = [
-    {
-      value: 'count',
-      text: 'Count',
-    },
-    {
-      value: 'avg',
-      text: `Average of ${fieldName}`,
-    },
-    {
-      value: 'sum',
-      text: `Sum of ${fieldName}`,
-    },
-  ];
+  if (!column) {
+    // TODO...
+    return <span>N/A</span>;
+  }
 
   return (
-    <Draggable canHandleDrop={(f: Field) => f && f.type === 'number'} onDrop={onDropField}>
-      {fieldName ? (
-        <EuiSelect
-          options={options}
-          value={currentOperation.operation}
-          onChange={onChangeOperation}
-        />
-      ) : (
-        columnSummary(selectColumn(col, visModel))
-      )}
+    <Draggable
+      canHandleDrop={(f: DatasourceField) => f && f.type === 'number'}
+      onDrop={onDropField}
+    >
+      <OperationEditor
+        column={column}
+        visModel={visModel}
+        onColumnChange={newColumn => {
+          onChangeVisModel(updateColumn(col, newColumn, visModel));
+        }}
+      >
+        {getOperationSummary(column.operation, column)}
+      </OperationEditor>
     </Draggable>
   );
 }

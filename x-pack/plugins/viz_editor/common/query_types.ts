@@ -15,7 +15,8 @@ export type SelectOperator =
   | 'date_histogram'
   | 'sum'
   | 'avg'
-  | 'terms';
+  | 'terms'
+  | 'window';
 
 export interface Aliasable {
   operation: SelectOperator;
@@ -53,6 +54,28 @@ export interface AvgOperation extends FieldOperation {
   operation: 'avg';
   argument: Field;
 }
+
+export type WindowFunction =
+  | 'max'
+  | 'min'
+  | 'sum'
+  | 'stdDev'
+  | 'unweightedAvg'
+  | 'linearWeightedAvg'
+  | 'ewma'
+  | 'holt'
+  | 'holtWinters';
+
+export interface WindowOperationArgument extends Field {
+  windowFunction: WindowFunction;
+  windowSize: number;
+}
+
+export interface WindowOperation extends FieldOperation {
+  operation: 'window';
+  argument: WindowOperationArgument;
+}
+
 export interface CardinalityOperation extends FieldOperation {
   operation: 'cardinality';
   argument: Field;
@@ -76,7 +99,8 @@ export type SelectOperation =
   | CountOperation
   | AvgOperation
   | CardinalityOperation
-  | TermsOperation;
+  | TermsOperation
+  | WindowOperation;
 
 // ----------------------------------------
 // Where clause
