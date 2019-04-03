@@ -75,7 +75,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
   dispatch({
     type: REMOVE_CLUSTERS_FINISH,
     // Send the cluster that have been removed to the reducers
-    // and update the store wihtout need to re-fetch from the server
+    // and update the store immediately without the need to re-fetch from the server
     payload: removalSuccesses,
   });
 };
