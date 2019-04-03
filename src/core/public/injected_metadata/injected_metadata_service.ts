@@ -84,6 +84,9 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
+      /**
+       * An array of frontend plugins in topological order.
+       */
       getPlugins: () => {
         return this.state.uiPlugins;
       },
