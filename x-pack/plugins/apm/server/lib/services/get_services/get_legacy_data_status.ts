@@ -15,7 +15,7 @@ export async function getLegacyDataStatus(setup: Setup) {
   const { client, config } = setup;
 
   const params: APMSearchParams = {
-    omitLegacyData: false,
+    includeLegacyData: true,
     terminateAfter: 1,
     index: [config.get('apm_oss.transactionIndices')],
     body: {
