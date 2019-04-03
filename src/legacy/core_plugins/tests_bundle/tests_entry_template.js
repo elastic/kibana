@@ -100,6 +100,9 @@ new CoreSystem({
         timelion: {
           save: true
         },
+      },
+      interpreterConfig: {
+        enableInVisualize: true
       }
     },
   },

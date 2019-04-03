@@ -31,6 +31,7 @@ import {
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
@@ -171,6 +172,12 @@ export class AdvancedSettings extends Component {
         <EuiSpacer size="m" />
         <CallOuts />
         <EuiSpacer size="m" />
+
+        <AdvancedSettingsVoiceAnnouncement
+          queryText={query.text}
+          settings={filteredSettings}
+        />
+
         <Form
           settings={filteredSettings}
           categories={this.categories}

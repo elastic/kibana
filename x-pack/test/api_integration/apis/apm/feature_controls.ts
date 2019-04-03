@@ -85,16 +85,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/status/server`,
-      expectForbidden: expect404,
-      expectResponse: expect200,
-    },
-    {
-      url: `/api/apm/status/agent`,
-      expectForbidden: expect404,
-      expectResponse: expect200,
-    },
-    {
       url: `/api/apm/traces?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
