@@ -6,10 +6,13 @@
 
 import { defaultsDeep } from 'lodash';
 
-import { PDF_JOB_TYPE, PNG_JOB_TYPE, CSV_JOB_TYPE } from '../../common/constants';
-import { ReportingFeature, FeatureAvailabilityMap, RangeStats } from './types';
+import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
+import { FeatureAvailabilityMap, RangeStats, ReportingFeature } from './types';
 
-export const getFullStatsForRange = (range: RangeStats, featureAvailability: FeatureAvailabilityMap): RangeStats => {
+export const getFullStatsForRange = (
+  range: RangeStats,
+  featureAvailability: FeatureAvailabilityMap
+): RangeStats => {
   const isAvailable = (feature: ReportingFeature) => {
     return featureAvailability[feature] != null ? featureAvailability[feature] : false;
   };

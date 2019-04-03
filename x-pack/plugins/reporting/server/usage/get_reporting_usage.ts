@@ -11,8 +11,8 @@ import { getExportTypesHandler } from './get_export_type_handler';
 import {
   AggregationBuckets,
   AggregationResults,
-  JobTypes,
   FeatureAvailabilityMap,
+  JobTypes,
   KeyCountBucket,
   RangeAggregationResults,
   RangeStats,
@@ -87,9 +87,9 @@ async function handleResponse(server: any, response: AggregationResults): Promis
   }
   const { lastDay, last7Days, all } = buckets as RangeAggregationResults;
 
-  const lastDayUsage = lastDay ? getAggStats(lastDay) : {} as RangeStats;
-  const last7DaysUsage = last7Days ? getAggStats(last7Days) : {} as RangeStats;
-  const allUsage = all ? getAggStats(all) : {} as RangeStats;
+  const lastDayUsage = lastDay ? getAggStats(lastDay) : ({} as RangeStats);
+  const last7DaysUsage = last7Days ? getAggStats(last7Days) : ({} as RangeStats);
+  const allUsage = all ? getAggStats(all) : ({} as RangeStats);
 
   return {
     last7Days: last7DaysUsage,
@@ -143,9 +143,7 @@ export async function getReportingUsage(server: any, callCluster: any) {
 
       const xpackInfo = server.plugins.xpack_main.info;
       const exportTypesHandler = await getExportTypesHandler(server);
-      const availability = exportTypesHandler.getAvailability(
-        xpackInfo
-      ) as FeatureAvailabilityMap;
+      const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilityMap;
 
       const { lastDay, last7Days, ...all } = usage;
 
