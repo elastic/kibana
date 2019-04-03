@@ -44,11 +44,7 @@ export interface MissingReferencesError {
     type: string;
     id: string;
   }>;
-}
-
-export interface ReferencesMissingReferencesError {
-  type: 'references_missing_references';
-  references: Array<{
+  blocking: Array<{
     type: string;
     id: string;
   }>;
@@ -58,5 +54,5 @@ export interface ImportError {
   id: string;
   type: string;
   title?: string;
-  error: ConflictError | MissingReferencesError | ReferencesMissingReferencesError | UnknownError;
+  error: ConflictError | MissingReferencesError | UnknownError;
 }

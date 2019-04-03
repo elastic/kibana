@@ -232,18 +232,10 @@ describe('POST /api/saved_objects/_import', () => {
                 id: 'my-pattern-*',
               },
             ],
-          },
-        },
-        {
-          id: 'my-dashboard',
-          type: 'dashboard',
-          title: 'Look at my dashboard',
-          error: {
-            type: 'references_missing_references',
-            references: [
+            blocking: [
               {
-                type: 'index-pattern',
-                id: 'my-pattern-*',
+                type: 'dashboard',
+                id: 'my-dashboard',
               },
             ],
           },

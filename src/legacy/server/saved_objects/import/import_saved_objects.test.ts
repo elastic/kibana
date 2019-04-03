@@ -370,6 +370,12 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
+        "blocking": Array [
+          Object {
+            "id": "3",
+            "type": "visualization",
+          },
+        ],
         "references": Array [
           Object {
             "id": "2",
@@ -381,20 +387,6 @@ Object {
       "id": "1",
       "title": "My Search",
       "type": "search",
-    },
-    Object {
-      "error": Object {
-        "references": Array [
-          Object {
-            "id": "2",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "references_missing_references",
-      },
-      "id": "3",
-      "title": "My Visualization",
-      "type": "visualization",
     },
   ],
   "success": false,

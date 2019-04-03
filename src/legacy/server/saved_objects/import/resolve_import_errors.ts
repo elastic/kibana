@@ -45,6 +45,7 @@ export async function resolveImportErrors({
   retries,
   savedObjectsClient,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
+  let successCount = 0;
   let errors: ImportError[] = [];
   const filter = createObjectsFilter(retries);
 
@@ -89,15 +90,17 @@ export async function resolveImportErrors({
       overwrite: true,
     });
     errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite));
+    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
     errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite));
+    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
 
   return {
+    successCount,
     success: errors.length === 0,
-    successCount: objectsToResolve.length - errors.length,
     ...(errors.length ? { errors } : {}),
   };
 }

@@ -69,7 +69,7 @@ export async function importSavedObjects({
 
   return {
     success: errors.length === 0,
-    successCount: objectsFromStream.length - errors.length,
+    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
     ...(errors.length ? { errors } : {}),
   };
 }

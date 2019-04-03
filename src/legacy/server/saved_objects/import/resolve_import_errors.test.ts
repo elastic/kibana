@@ -85,7 +85,7 @@ describe('resolveImportErrors()', () => {
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
+      saved_objects: [],
     });
     const result = await resolveImportErrors({
       readStream,
@@ -110,7 +110,7 @@ Object {
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: savedObjects,
+      saved_objects: savedObjects.filter(obj => obj.type === 'visualization' && obj.id === '3'),
     });
     const result = await resolveImportErrors({
       readStream,
@@ -165,7 +165,7 @@ Object {
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
+      saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
     });
     const result = await resolveImportErrors({
       readStream,
@@ -223,7 +223,7 @@ Object {
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
+      saved_objects: savedObjects.filter(obj => obj.type === 'dashboard' && obj.id === '4'),
     });
     const result = await resolveImportErrors({
       readStream,
@@ -426,6 +426,12 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
+        "blocking": Array [
+          Object {
+            "id": "3",
+            "type": "visualization",
+          },
+        ],
         "references": Array [
           Object {
             "id": "2",
@@ -437,20 +443,6 @@ Object {
       "id": "1",
       "title": "My Search",
       "type": "search",
-    },
-    Object {
-      "error": Object {
-        "references": Array [
-          Object {
-            "id": "2",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "references_missing_references",
-      },
-      "id": "3",
-      "title": "My Visualization",
-      "type": "visualization",
     },
   ],
   "success": false,

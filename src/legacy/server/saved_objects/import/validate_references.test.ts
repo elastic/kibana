@@ -346,6 +346,7 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
+        "blocking": Array [],
         "references": Array [
           Object {
             "id": "3",
@@ -360,6 +361,7 @@ Object {
     },
     Object {
       "error": Object {
+        "blocking": Array [],
         "references": Array [
           Object {
             "id": "5",

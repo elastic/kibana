@@ -164,6 +164,7 @@ export default function ({ getService }) {
                     id: '1',
                     error: {
                       type: 'missing_references',
+                      blocking: [],
                       references: [
                         {
                           type: 'index-pattern',

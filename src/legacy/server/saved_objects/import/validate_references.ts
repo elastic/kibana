@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { SavedObject, SavedObjectsClient } from '../service';
-import { ImportError, MissingReferencesError } from './types';
+import { ImportError } from './types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
 
@@ -106,6 +106,7 @@ export async function validateReferences(
       error: {
         type: 'missing_references',
         references: missingReferences,
+        blocking: [],
       },
     };
     return false;
@@ -114,29 +115,19 @@ export async function validateReferences(
   // Filter out objects that reference objects within the import but are missing_references
   // For example: visualization referencing a search that is missing an index pattern needs to be filtered out
   filteredObjects = filteredObjects.filter(savedObject => {
-    let referenceErrors: MissingReferencesError['references'] = [];
-    const filteredReferences = (savedObject.references || []).filter(
-      ref =>
-        errorMap[`${ref.type}:${ref.id}`] &&
-        errorMap[`${ref.type}:${ref.id}`].error.type === 'missing_references'
-    );
-    for (const { type: refType, id: refId } of filteredReferences) {
-      const error = errorMap[`${refType}:${refId}`].error as MissingReferencesError;
-      referenceErrors = referenceErrors.concat(error.references);
+    let isBlocked = false;
+    for (const reference of savedObject.references || []) {
+      const referencedObjectError = errorMap[`${reference.type}:${reference.id}`];
+      if (!referencedObjectError || referencedObjectError.error.type !== 'missing_references') {
+        continue;
+      }
+      referencedObjectError.error.blocking.push({
+        type: savedObject.type,
+        id: savedObject.id,
+      });
+      isBlocked = true;
     }
-    if (referenceErrors.length === 0) {
-      return true;
-    }
-    errorMap[`${savedObject.type}:${savedObject.id}`] = {
-      id: savedObject.id,
-      type: savedObject.type,
-      title: savedObject.attributes && savedObject.attributes.title,
-      error: {
-        type: 'references_missing_references',
-        references: referenceErrors,
-      },
-    };
-    return false;
+    return !isBlocked;
   });
 
   return {

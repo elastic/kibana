@@ -145,6 +145,7 @@ export default function ({ getService }) {
                   title: 'My favorite vis',
                   error: {
                     type: 'missing_references',
+                    blocking: [],
                     references: [
                       {
                         type: 'index-pattern',
