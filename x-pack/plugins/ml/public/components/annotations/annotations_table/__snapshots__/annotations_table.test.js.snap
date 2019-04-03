@@ -10,7 +10,6 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "field": "annotation",
           "name": "Annotation",
           "sortable": true,
-          "textOnly": true,
           "width": "50%",
         },
         Object {

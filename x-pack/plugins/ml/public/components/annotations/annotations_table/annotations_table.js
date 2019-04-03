@@ -302,7 +302,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           id: 'xpack.ml.annotationsTable.annotationColumnName',
           defaultMessage: 'Annotation',
         }),
-        textOnly: true,
         sortable: true,
         width: '50%',
       },
