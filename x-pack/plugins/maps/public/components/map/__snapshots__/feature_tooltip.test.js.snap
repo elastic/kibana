@@ -152,21 +152,6 @@ exports[`FeatureTooltip should show filter action for filterable properties 1`] 
               }
             />
           </EuiFlexItem>
-          <EuiFlexItem
-            className="mapFeatureTooltipFilterButton"
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Filter on property"
-              className="mapFeatureTooltipFilterButton"
-              color="primary"
-              iconSize="m"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              title="Filter on property"
-              type="button"
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup
           key="1"
@@ -189,10 +174,6 @@ exports[`FeatureTooltip should show filter action for filterable properties 1`] 
               }
             />
           </EuiFlexItem>
-          <EuiFlexItem
-            className="mapFeatureTooltipFilterButton"
-            grow={false}
-          />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiFlexItem>
