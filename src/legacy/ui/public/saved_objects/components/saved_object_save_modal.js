@@ -97,6 +97,11 @@ export class SavedObjectSaveModal extends React.Component {
     });
   }
 
+  onFormSubmit = (event) => {
+    event.preventDefault();
+    this.saveSavedObject();
+  };
+
   renderDuplicateTitleCallout = () => {
     if (!this.state.hasTitleDuplicate) {
       return;
@@ -166,7 +171,7 @@ export class SavedObjectSaveModal extends React.Component {
           className="dshSaveModal"
           onClose={this.props.onClose}
         >
-          <form>
+          <form onSubmit={this.onFormSubmit}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <FormattedMessage
@@ -220,7 +225,6 @@ export class SavedObjectSaveModal extends React.Component {
               <EuiButton
                 fill
                 data-test-subj="confirmSaveSavedObjectButton"
-                onClick={this.saveSavedObject}
                 isLoading={this.state.isLoading}
                 isDisabled={this.state.title.length === 0}
                 type="submit"
