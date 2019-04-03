@@ -34,6 +34,8 @@ export const sourcesSchema = gql`
     auditbeatAlias: String!
     "The alias to read packetbeat data from"
     packetbeatAlias: String!
+    "The alias to read winbeat data from"
+    winbeatAlias: String!
     "The field mapping to use for this source"
     fields: SourceFields!
   }

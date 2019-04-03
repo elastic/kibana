@@ -64,6 +64,7 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
           const logAlias = get('source.configuration.logAlias', data);
           const auditbeatAlias = get('source.configuration.auditbeatAlias', data);
           const packetbeatAlias = get('source.configuration.packetbeatAlias', data);
+          const winbeatAlias = get('source.configuration.winbeatAlias', data);
           let indexPatternTitle: string[] = [];
           if (indexTypes.includes(IndexType.ANY)) {
             indexPatternTitle = [...indexPatternTitle, logAlias, auditbeatAlias, packetbeatAlias];
@@ -76,6 +77,9 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
             }
             if (indexTypes.includes(IndexType.PACKETBEAT)) {
               indexPatternTitle = [...indexPatternTitle, packetbeatAlias];
+            }
+            if (indexTypes.includes(IndexType.WINBEAT)) {
+              indexPatternTitle = [...indexPatternTitle, winbeatAlias];
             }
           }
           return children({

@@ -37,6 +37,7 @@ export interface AliasConfiguration {
   logAlias: string;
   auditbeatAlias: string;
   packetbeatAlias: string;
+  winbeatAlias: string;
 }
 
 export interface SourceConfiguration extends AliasConfiguration {

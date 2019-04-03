@@ -14,6 +14,7 @@ export const buildOverviewNetworkQuery = ({
     auditbeatAlias,
     logAlias,
     packetbeatAlias,
+    winbeatAlias,
   },
 }: RequestBasicOptions) => {
   const filter = [
@@ -30,7 +31,7 @@ export const buildOverviewNetworkQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias, logAlias, packetbeatAlias],
+    index: [auditbeatAlias, logAlias, packetbeatAlias, winbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggregations: {

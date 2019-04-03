@@ -42,6 +42,8 @@ export const sourceStatusSchema = gql`
     filebeatIndices: [String!]!
     "Whether the configured packetbeat alias exists"
     packetbeatAliasExists: Boolean!
+    "Whether the configured winbeat alias exists"
+    winbeatAliasExists: Boolean!
     "Whether the configured alias or wildcard pattern resolve to any packetbeat indices"
     packetbeatIndicesExist: Boolean!
     "The list of indices in the packetbeat alias"

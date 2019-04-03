@@ -72,6 +72,8 @@ export interface SourceConfiguration {
   auditbeatAlias: string;
   /** The alias to read packetbeat data from */
   packetbeatAlias: string;
+  /** The alias to read winbeat data from */
+  winbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -106,6 +108,8 @@ export interface SourceStatus {
   filebeatIndices: string[];
   /** Whether the configured packetbeat alias exists */
   packetbeatAliasExists: boolean;
+  /** Whether the configured winbeat alias exists */
+  winbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
@@ -1099,6 +1103,7 @@ export enum IndexType {
   FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
   PACKETBEAT = 'PACKETBEAT',
+  WINBEAT = 'WINBEAT',
 }
 
 export enum Direction {

@@ -701,6 +701,18 @@
             "deprecationReason": null
           },
           {
+            "name": "winbeatAlias",
+            "description": "The alias to read winbeat data from",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "The field mapping to use for this source",
             "args": [],
@@ -925,6 +937,18 @@
             "deprecationReason": null
           },
           {
+            "name": "winbeatAliasExists",
+            "description": "Whether the configured winbeat alias exists",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "packetbeatIndicesExist",
             "description": "Whether the configured alias or wildcard pattern resolve to any packetbeat indices",
             "args": [],
@@ -1033,7 +1057,8 @@
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
-          }
+          },
+          { "name": "WINBEAT", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

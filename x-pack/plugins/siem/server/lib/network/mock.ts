@@ -18,6 +18,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
     packetbeatAlias: 'packetbeat-*',
+    winbeatAlias: 'winbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

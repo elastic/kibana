@@ -101,6 +101,8 @@ export interface SourceConfiguration {
   auditbeatAlias: string;
   /** The alias to read packetbeat data from */
   packetbeatAlias: string;
+  /** The alias to read winbeat data from */
+  winbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -135,6 +137,8 @@ export interface SourceStatus {
   filebeatIndices: string[];
   /** Whether the configured packetbeat alias exists */
   packetbeatAliasExists: boolean;
+  /** Whether the configured winbeat alias exists */
+  winbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
@@ -1128,6 +1132,7 @@ export enum IndexType {
   FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
   PACKETBEAT = 'PACKETBEAT',
+  WINBEAT = 'WINBEAT',
 }
 
 export enum Direction {
@@ -1456,6 +1461,8 @@ export namespace SourceConfigurationResolvers {
     auditbeatAlias?: AuditbeatAliasResolver<string, TypeParent, Context>;
     /** The alias to read packetbeat data from */
     packetbeatAlias?: PacketbeatAliasResolver<string, TypeParent, Context>;
+    /** The alias to read winbeat data from */
+    winbeatAlias?: WinbeatAliasResolver<string, TypeParent, Context>;
     /** The field mapping to use for this source */
     fields?: FieldsResolver<SourceFields, TypeParent, Context>;
   }
@@ -1471,6 +1478,11 @@ export namespace SourceConfigurationResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatAliasResolver<
+    R = string,
+    Parent = SourceConfiguration,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinbeatAliasResolver<
     R = string,
     Parent = SourceConfiguration,
     Context = SiemContext
@@ -1546,6 +1558,8 @@ export namespace SourceStatusResolvers {
     filebeatIndices?: FilebeatIndicesResolver<string[], TypeParent, Context>;
     /** Whether the configured packetbeat alias exists */
     packetbeatAliasExists?: PacketbeatAliasExistsResolver<boolean, TypeParent, Context>;
+    /** Whether the configured winbeat alias exists */
+    winbeatAliasExists?: WinbeatAliasExistsResolver<boolean, TypeParent, Context>;
     /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
     packetbeatIndicesExist?: PacketbeatIndicesExistResolver<boolean, TypeParent, Context>;
     /** The list of indices in the packetbeat alias */
@@ -1585,6 +1599,11 @@ export namespace SourceStatusResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatAliasExistsResolver<
+    R = boolean,
+    Parent = SourceStatus,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinbeatAliasExistsResolver<
     R = boolean,
     Parent = SourceStatus,
     Context = SiemContext
