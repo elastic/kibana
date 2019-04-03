@@ -181,12 +181,12 @@ async function run(folder: string): Promise<boolean> {
 
   log.info(`Core ${folder} API: checking for changes in API signature...`);
 
-  await runBuildTypes().catch(e => {
-    if (e) {
-      log.error(e);
-      return false;
-    }
-  });
+  try {
+    await runBuildTypes();
+  } catch (e) {
+    log.error(e);
+    return false;
+  }
 
   const { apiChanged, warnings, errors } = runApiExtractor(folder, opts.accept);
   await renameExtractedApiPackageName(folder);
