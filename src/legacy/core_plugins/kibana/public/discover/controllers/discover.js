@@ -90,6 +90,20 @@ uiRoutes
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
       ),
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.discover.save) {
+        return null;
+      }
+
+      return {
+        text: i18n('kbn.discover.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n('kbn.discover.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      };
+    }
   })
   .when('/discover/:id?', {
     template: indexTemplate,

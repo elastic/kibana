@@ -38,6 +38,7 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabili
   {},
   // angular injected React props
   {
+    badge$: chrome.badge.get$(),
     breadcrumbs$: chrome.breadcrumbs.get$(),
     helpExtension$: chrome.helpExtension.get$(),
     navLinks$: chrome.getNavLinks$(),

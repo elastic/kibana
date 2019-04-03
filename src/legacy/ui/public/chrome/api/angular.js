@@ -76,6 +76,7 @@ export function initAngularApi(chrome, internals) {
         $locationProvider.hashPrefix('');
       })
       .run(internals.capture$httpLoadingCount)
+      .run(internals.$setupBadgeAutoClear)
       .run(internals.$setupBreadcrumbsAutoClear)
       .run(internals.$setupHelpExtensionAutoClear)
       .run(internals.$initNavLinksDeepWatch)

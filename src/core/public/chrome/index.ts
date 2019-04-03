@@ -18,6 +18,7 @@
  */
 
 export {
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeService,
   ChromeSetup,
