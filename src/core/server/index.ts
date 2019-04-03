@@ -37,6 +37,7 @@ export {
   PluginSetupContext,
 } from './plugins';
 
+/** @public */
 export interface CoreSetup {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;

@@ -7,6 +7,8 @@
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { Observable } from 'rxjs';
+import { Server } from 'hapi';
+import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 
@@ -34,6 +36,22 @@ export class ClusterClient {
     callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
+
+// @public (undocumented)
+export interface CoreSetup {
+    // Warning: (ae-forgotten-export) The symbol "ElasticsearchServiceSetup" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceSetup;
+    // Warning: (ae-forgotten-export) The symbol "HttpServiceSetup" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    http: HttpServiceSetup;
+    // Warning: (ae-forgotten-export) The symbol "PluginsServiceSetup" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    plugins: PluginsServiceSetup;
+}
 
 // Warning: (ae-internal-missing-underscore) The name DiscoveredPlugin should be prefixed with an underscore because the declaration is marked as "@internal"
 // 
