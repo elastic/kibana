@@ -36,7 +36,7 @@ export const LogsPageContent: React.SFC<Props> = ({ showFlyout, setFlyoutItem })
                   reportVisiblePositions,
                   targetPosition,
                 }) => (
-                  <WithStreamItems>
+                  <WithStreamItems initializeOnMount={!isAutoReloading}>
                     {({
                       hasMoreAfterEnd,
                       hasMoreBeforeStart,
