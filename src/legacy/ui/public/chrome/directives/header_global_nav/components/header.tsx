@@ -24,6 +24,7 @@ import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
+  EuiBetaBadge,
   // @ts-ignore
   EuiHeader,
   // @ts-ignore
@@ -59,15 +60,17 @@ import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 
+import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { NavControlSide } from '../';
-import { ChromeBreadcrumb } from '../../../../../../../core/public';
+import { ChromeBadge, ChromeBreadcrumb } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
+  badge$: Rx.Observable<ChromeBadge | null>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
@@ -216,6 +219,7 @@ class HeaderUI extends Component<Props, State> {
   public render() {
     const {
       appTitle,
+      badge$,
       breadcrumbs$,
       isVisible,
       navControls,
@@ -296,6 +300,8 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
 
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
+
+          <HeaderBadge badge$={badge$} />
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>

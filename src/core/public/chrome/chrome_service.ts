@@ -33,6 +33,12 @@ function isEmbedParamInHash() {
 }
 
 /** @public */
+export interface ChromeBadge {
+  text: string;
+  tooltip: string;
+}
+
+/** @public */
 export interface ChromeBrand {
   logo?: string;
   smallLogo?: string;
@@ -75,6 +81,7 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | null>(null);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -174,6 +181,18 @@ export class ChromeService {
           map(set => [...set]),
           takeUntil(this.stop$)
         ),
+
+      /**
+       * Get an observable of the current badge
+       */
+      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current badge
+       */
+      setBadge: (badge: ChromeBadge | null) => {
+        badge$.next(badge);
+      },
 
       /**
        * Get an observable of the current list of breadcrumbs
