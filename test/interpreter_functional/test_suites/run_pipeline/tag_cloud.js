@@ -42,39 +42,30 @@ export default function ({ getService, updateBaselines }) {
         // we execute the part of expression that fetches the data and store its response
         dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
       });
-      it('with no data', async () => {
-        const expression = 'tagcloud';
-        await expectExpression('tagcloud_no_data', expression).toMatchSnapshot().toMatchScreenshot();
-      });
 
       it('with invalid data', async () => {
-        const expression = 'metric={vis_dimension 0}';
-        await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot().toMatchScreenshot();
+        const expression = 'tagcloud metric={vis_dimension 0}';
+        await (await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with just metric data', async () => {
-        const expression = 'metric={vis_dimension 0}';
-        await expectExpression('tagcloud_metric_data', expression, dataContext).toMatchSnapshot().toMatchScreenshot();
+        const expression = 'tagcloud metric={vis_dimension 0}';
+        await (await expectExpression('tagcloud_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with metric and bucket data', async () => {
-        const expression = 'metric={vis_dimension 0} bucket={vis_dimension 1}';
-        await expectExpression('tagcloud_all_data', expression, dataContext).toMatchSnapshot().toMatchScreenshot();
+        const expression = 'tagcloud metric={vis_dimension 0} bucket={vis_dimension 1}';
+        await (await expectExpression('tagcloud_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with font size options', async () => {
-        const expression = 'metric={vis_dimension 0} bucket={vis_dimension 1} minFontSize=20 maxFontSize=40';
-        await expectExpression('tagcloud_formatted_data', expression).toMatchSnapshot().toMatchScreenshot();
-      });
-
-      it('with font size options', async () => {
-        const expression = 'metric={vis_dimension 0} bucket={vis_dimension 1} minFontSize=20 maxFontSize=40';
-        await expectExpression('tagcloud_formatted_data', expression).toMatchSnapshot().toMatchScreenshot();
+        const expression = 'tagcloud metric={vis_dimension 0} bucket={vis_dimension 1} minFontSize=20 maxFontSize=40';
+        await (await expectExpression('tagcloud_fontsize', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with scale and orientation options', async () => {
-        const expression = 'metric={vis_dimension 0} bucket={vis_dimension 1} scale="log" orientation="multiple"';
-        await expectExpression('tagcloud_formatted_data', expression).toMatchSnapshot().toMatchScreenshot();
+        const expression = 'tagcloud metric={vis_dimension 0} bucket={vis_dimension 1} scale="log" orientation="multiple"';
+        await (await expectExpression('tagcloud_options', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
     });
   });
