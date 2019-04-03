@@ -9,7 +9,6 @@ Object {
       "listenOnChange": true,
     },
     "visConfig": Object {
-      "bucket": undefined,
       "maxFontSize": 72,
       "metric": Object {
         "accessor": 0,

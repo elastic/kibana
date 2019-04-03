@@ -21,13 +21,20 @@ import { i18n } from '@kbn/i18n';
 
 export const visDimension = () => ({
   name: 'vis_dimension',
-  help: 'Generates visConfig dimension object',
+  help: i18n.translate('interpreter.function.visDimension.help', {
+    defaultMessage: 'Generates visConfig dimension object'
+  }),
   type: 'vis_dimension',
+  context: {
+    types: [
+      'kibana_datatable'
+    ],
+  },
   args: {
     accessor: {
       types: ['string', 'number'],
       aliases: ['_'],
-      help: i18n.translate('interpreter.function.visDimension.help', {
+      help: i18n.translate('interpreter.function.visDimension.accessor.help', {
         defaultMessage: 'Column in your dataset to use (either column index or column name)'
       }),
     },

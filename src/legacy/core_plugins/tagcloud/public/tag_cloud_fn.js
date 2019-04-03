@@ -65,6 +65,7 @@ export const tagcloud = () => ({
       help: i18n.translate('tagCloud.function.metric.help', {
         defaultMessage: 'metric dimension configuration'
       }),
+      required: true,
     },
     bucket: {
       types: ['vis_dimension'],
@@ -74,7 +75,6 @@ export const tagcloud = () => ({
     },
   },
   fn(context, args) {
-
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
@@ -82,8 +82,11 @@ export const tagcloud = () => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: args.metric,
-      bucket: args.bucket,
     };
+
+    if (args.bucket !== undefined) {
+      visConfig.bucket = args.bucket;
+    }
 
     return {
       type: 'render',
