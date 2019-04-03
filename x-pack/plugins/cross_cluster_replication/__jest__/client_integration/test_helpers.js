@@ -129,6 +129,16 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
       return {
         clickSaveForm,
       };
+    },
+    // Follower index FORM
+    followerIndexForm() {
+      const clickSaveForm = () => {
+        find('ccrFollowerIndexFormSubmitButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
+      };
     }
   };
 

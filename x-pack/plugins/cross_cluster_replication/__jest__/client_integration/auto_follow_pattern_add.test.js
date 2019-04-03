@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import sinon from 'sinon';
 
 import { initTestBed, registerHttpRequestMockHelpers, nextTick, findTestSubject, getRandomString } from './test_helpers';
@@ -100,7 +99,7 @@ describe('Create Auto-follow pattern', () => {
     });
   });
 
-  describe('form validations', () => {
+  describe('form validation', () => {
     describe('auto-follow pattern name', () => {
       beforeEach(async () => {
         ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));

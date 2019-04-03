@@ -613,6 +613,7 @@ export class FollowerIndexForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
+            data-test-subj="followerIndexFormError"
           />
 
           <EuiSpacer size="l" />
@@ -681,7 +682,7 @@ export class FollowerIndexForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
+        <EuiForm data-test-subj="ccrFollowerIndexForm">
           {renderRemoteClusterField()}
           {renderLeaderIndex()}
           {renderFollowerIndexName()}
