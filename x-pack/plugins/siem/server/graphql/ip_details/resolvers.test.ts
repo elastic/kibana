@@ -8,16 +8,16 @@ import { omit } from 'lodash/fp';
 
 import { Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
-import { IpOverview } from '../../lib/ip_overview';
-import { IpOverviewAdapter } from '../../lib/ip_overview/types';
+import { IpDetails } from '../../lib/ip_details';
+import { IpDetailsAdapter } from '../../lib/ip_details/types';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
 
-import { mockIpOverviewData, mockIpOverviewFields } from './ip_overview.mock';
-import { createIpOverviewResolvers, IpOverviewResolversDeps } from './resolvers';
+import { mockDomainsData, mockIpOverviewData, mockIpOverviewFields } from './ip_details.mock';
+import { createIpDetailsResolvers, IDetailsResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockIpOverviewFields] });
@@ -31,12 +31,19 @@ mockIpOverview.mockResolvedValue({
     ...mockIpOverviewData.IpOverview,
   },
 });
-const mockIpOverviewAdapter: IpOverviewAdapter = {
-  getIpOverview: mockIpOverview,
+const mockDomains = jest.fn();
+mockDomains.mockResolvedValue({
+  Domains: {
+    ...mockDomainsData.Domains,
+  },
+});
+const mockIpDetailsAdapter: IpDetailsAdapter = {
+  getIpDetails: mockIpOverview,
+  getDomains: mockDomains,
 };
 
-const mockIpOverviewLibs: IpOverviewResolversDeps = {
-  ipOverview: new IpOverview(mockIpOverviewAdapter),
+const mockIpDetailsLibs: IDetailsResolversDeps = {
+  ipDetails: new IpDetails(mockIpDetailsAdapter),
 };
 
 const mockSrcLibs: SourcesResolversDeps = {
@@ -69,7 +76,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    const data = await createIpOverviewResolvers(mockIpOverviewLibs).Source.IpOverview(
+    const data = await createIpDetailsResolvers(mockIpDetailsLibs).Source.IpOverview(
       source as Source,
       {
         ip: '10.10.10.10',
@@ -77,7 +84,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    expect(mockIpOverviewAdapter.getIpOverview).toHaveBeenCalled();
+    expect(mockIpDetailsAdapter.getIpDetails).toHaveBeenCalled();
     expect(data).toEqual(omit('status', mockIpOverviewData));
   });
 });

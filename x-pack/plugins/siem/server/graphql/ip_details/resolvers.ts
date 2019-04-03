@@ -6,7 +6,7 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { IpOverview } from '../../lib/ip_overview';
+import { IpDetails } from '../../lib/ip_details';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -15,21 +15,31 @@ export type QueryIpOverviewResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export interface IpOverviewResolversDeps {
-  ipOverview: IpOverview;
+export type QueryDomainsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.DomainsResolver>,
+  QuerySourceResolver
+>;
+
+export interface IDetailsResolversDeps {
+  ipDetails: IpDetails;
 }
 
-export const createIpOverviewResolvers = (
-  libs: IpOverviewResolversDeps
+export const createIpDetailsResolvers = (
+  libs: IDetailsResolversDeps
 ): {
   Source: {
     IpOverview: QueryIpOverviewResolver;
+    Domains: QueryDomainsResolver;
   };
 } => ({
   Source: {
     async IpOverview(source, args, { req }, info) {
       const options = { ...createOptions(source, args, info), ip: args.ip };
-      return libs.ipOverview.getIpOverview(req, options);
+      return libs.ipDetails.getIpOverview(req, options);
+    },
+    async Domains(source, args, { req }, info) {
+      const options = { ...createOptions(source, args, info), ip: args.ip };
+      return libs.ipDetails.getDomains(req, options);
     },
   },
 });

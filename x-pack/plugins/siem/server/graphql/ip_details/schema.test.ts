@@ -15,12 +15,12 @@ import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 
-import { getIpOverviewQueryMock, mockIpOverviewData } from './ip_overview.mock';
+import { getIpOverviewQueryMock, mockIpOverviewData } from './ip_details.mock';
 
-import { ipOverviewSchema } from './schema.gql';
+import { ipDetailsSchemas } from './schema.gql';
 
 const testCaseSource = {
-  id: 'Test case to query IpOverview',
+  id: 'Test case to query IpDetails',
   query: `
   query GetIpOverviewQuery(
     $filterQuery: String
@@ -132,7 +132,7 @@ describe('Test Source Schema', () => {
     sourcesSchema,
     sourceStatusSchema,
     ecsSchema,
-    ipOverviewSchema,
+    ...ipDetailsSchemas,
     dateSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });

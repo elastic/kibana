@@ -6,18 +6,24 @@
 
 import { getOr } from 'lodash/fp';
 
-import { AutonomousSystem, GeoEcsFields, HostEcsFields, IpOverviewData } from '../../graphql/types';
+import {
+  AutonomousSystem,
+  DomainsData,
+  GeoEcsFields,
+  HostEcsFields,
+  IpOverviewData,
+} from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
-import { IpOverviewRequestOptions } from './index';
+import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
 import { buildQuery } from './query.dsl';
-import { IpOverviewAdapter, IpOverviewHit, OverviewHit } from './types';
+import { IpDetailsAdapter, IpOverviewHit, OverviewHit } from './types';
 
-export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
+export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getIpOverview(
+  public async getIpDetails(
     request: FrameworkRequest,
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
@@ -30,6 +36,15 @@ export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
     return {
       ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
       ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
+    };
+  }
+
+  public async getDomains(
+    request: FrameworkRequest,
+    options: DomainsRequestOptions
+  ): Promise<DomainsData> {
+    return {
+      domain_name: 'hiii2',
     };
   }
 }

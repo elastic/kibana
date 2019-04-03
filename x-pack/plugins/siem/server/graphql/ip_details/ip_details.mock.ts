@@ -8,7 +8,7 @@ import { FieldNode } from 'graphql';
 
 import { Logger } from '../../utils/logger';
 import { SiemContext } from '../index';
-import { IpOverviewData } from '../types';
+import { DomainsData, IpOverviewData } from '../types';
 
 export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
   IpOverview: {
@@ -76,6 +76,12 @@ export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
         type: 'Hello World',
       },
     },
+  },
+};
+
+export const mockDomainsData: { Domains: DomainsData } = {
+  Domains: {
+    domain_name: 'Hiii',
   },
 };
 

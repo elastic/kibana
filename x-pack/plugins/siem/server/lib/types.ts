@@ -10,7 +10,7 @@ import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
-import { IpOverview } from './ip_overview';
+import { IpDetails } from './ip_details';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
@@ -25,7 +25,7 @@ export interface AppDomainLibs {
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  ipOverview: IpOverview;
+  ipDetails: IpDetails;
   network: Network;
   kpiNetwork: KpiNetwork;
   overview: Overview;

@@ -50,6 +50,8 @@ export interface Source {
 
   IpOverview?: IpOverviewData | null;
 
+  Domains?: DomainsData | null;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -783,6 +785,10 @@ export interface AutonomousSystem {
   ip?: string | null;
 }
 
+export interface DomainsData {
+  domain_name?: string | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1024,6 +1030,13 @@ export interface HostsSourceArgs {
   filterQuery?: string | null;
 }
 export interface IpOverviewSourceArgs {
+  id?: string | null;
+
+  filterQuery?: string | null;
+
+  ip: string;
+}
+export interface DomainsSourceArgs {
   id?: string | null;
 
   filterQuery?: string | null;

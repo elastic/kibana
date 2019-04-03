@@ -79,6 +79,8 @@ export interface Source {
 
   IpOverview?: IpOverviewData | null;
 
+  Domains?: DomainsData | null;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -812,6 +814,10 @@ export interface AutonomousSystem {
   ip?: string | null;
 }
 
+export interface DomainsData {
+  domain_name?: string | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1059,6 +1065,13 @@ export interface IpOverviewSourceArgs {
 
   ip: string;
 }
+export interface DomainsSourceArgs {
+  id?: string | null;
+
+  filterQuery?: string | null;
+
+  ip: string;
+}
 export interface KpiNetworkSourceArgs {
   id?: string | null;
 
@@ -1232,6 +1245,8 @@ export namespace SourceResolvers {
 
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
 
+    Domains?: DomainsResolver<DomainsData | null, TypeParent, Context>;
+
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
@@ -1342,6 +1357,19 @@ export namespace SourceResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context, IpOverviewArgs>;
   export interface IpOverviewArgs {
+    id?: string | null;
+
+    filterQuery?: string | null;
+
+    ip: string;
+  }
+
+  export type DomainsResolver<
+    R = DomainsData | null,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DomainsArgs>;
+  export interface DomainsArgs {
     id?: string | null;
 
     filterQuery?: string | null;
@@ -3832,6 +3860,18 @@ export namespace AutonomousSystemResolvers {
   export type IpResolver<
     R = string | null,
     Parent = AutonomousSystem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsData> {
+    domain_name?: DomainNameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type DomainNameResolver<
+    R = string | null,
+    Parent = DomainsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

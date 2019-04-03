@@ -35,3 +35,15 @@ export const ipOverviewSchema = gql`
     IpOverview(id: String, filterQuery: String, ip: String!): IpOverviewData
   }
 `;
+
+export const domainsSchema = gql`
+  type DomainsData {
+    domain_name: String
+  }
+
+  extend type Source {
+    Domains(id: String, filterQuery: String, ip: String!): DomainsData
+  }
+`;
+
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema];

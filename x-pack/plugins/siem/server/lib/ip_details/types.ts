@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IpOverviewData } from '../../graphql/types';
+import { DomainsData, IpOverviewData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
-export interface IpOverviewAdapter {
-  getIpOverview(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
+export interface IpDetailsAdapter {
+  getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
+  getDomains(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
 }
 
 interface ResultHit<T> {
