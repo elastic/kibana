@@ -32,17 +32,20 @@ function isEmbedParamInHash() {
   return Boolean(query.embed);
 }
 
+/** @public */
 export interface ChromeBrand {
   logo?: string;
   smallLogo?: string;
 }
 
+/** @public */
 export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
 }
 
+/** @public */
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 interface ConstructorParams {
@@ -54,6 +57,7 @@ interface SetupDeps {
   notifications: NotificationsSetup;
 }
 
+/** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
@@ -202,4 +206,5 @@ export class ChromeService {
   }
 }
 
+/** @public */
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
