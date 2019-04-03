@@ -37,6 +37,7 @@ import {
   EuiOutsideClickDetector,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+// @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
@@ -51,8 +52,6 @@ import { fromUser, toUser } from '../../parse_query';
 import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-
-// @ts-ignore
 
 const KEY_CODES = {
   LEFT: 37,

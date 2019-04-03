@@ -21,9 +21,9 @@ import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-// @ts-ignore untyped dependency
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+// @ts-ignore untyped dependency
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
