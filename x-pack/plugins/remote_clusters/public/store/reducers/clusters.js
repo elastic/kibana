@@ -22,14 +22,14 @@ const initialState = {
 
 // Convert an  Array of clusters to an object where
 // each key is the cluster name
-const byName = (clusters) => (
+const mapClustersToNames = (clusters) => (
   clusters.reduce((byName, cluster) => ({
     ...byName,
     [cluster.name]: cluster
   }), {})
 );
 
-const toName = (clusters) => clusters.map(cluster => cluster.name);
+const getClustersNames = (clusters) => clusters.map(cluster => cluster.name);
 
 export function clusters(state = initialState, action) {
   const { type, payload } = action;
@@ -44,16 +44,16 @@ export function clusters(state = initialState, action) {
     case LOAD_CLUSTERS_SUCCESS:
       return {
         asList: [...payload.clusters],
-        byName: byName(payload.clusters),
-        allNames: toName(payload.clusters),
+        byName: mapClustersToNames(payload.clusters),
+        allNames: getClustersNames(payload.clusters),
         isLoading: false,
       };
 
     case REFRESH_CLUSTERS_SUCCESS:
       return {
         asList: [...payload.clusters],
-        byName: byName(payload.clusters),
-        allNames: toName(payload.clusters),
+        byName: mapClustersToNames(payload.clusters),
+        allNames: getClustersNames(payload.clusters),
       };
 
     case LOAD_CLUSTERS_FAILURE:
@@ -73,8 +73,8 @@ export function clusters(state = initialState, action) {
       return {
         ...state,
         asList: updatedList,
-        byName: byName(updatedList),
-        allNames: toName(updatedList)
+        byName: mapClustersToNames(updatedList),
+        allNames: getClustersNames(updatedList)
       };
 
     default:

@@ -106,7 +106,7 @@ export const RemoteClusterTable = injectI18n(
                   {link}
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="remoteClustersTableListClusterDefinedByNodeTooltip">
                   <EuiIconTip
                     type="iInCircle"
                     color="subdued"

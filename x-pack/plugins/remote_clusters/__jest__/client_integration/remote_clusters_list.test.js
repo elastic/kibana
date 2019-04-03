@@ -72,7 +72,7 @@ describe('<RemoteClusterList />', () => {
     });
   });
 
-  describe('when there are follower indices', async () => {
+  describe('when there are remote clusters', async () => {
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
     // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
@@ -114,8 +114,6 @@ describe('<RemoteClusterList />', () => {
         clickRowActionButtonAt,
         clickConfirmModalDeleteRemoteCluster,
         clickRemoteClusterAt,
-        // clickContextMenuButtonAt,
-        // clickFollowerIndexAt,
       } = getUserActions('remoteClusterList'));
 
       // Read the remote clusters list table
@@ -146,6 +144,11 @@ describe('<RemoteClusterList />', () => {
           remoteCluster2.connectedNodesCount.toString(),
           '' ]
       ]);
+    });
+
+    test('should have a tooltip to indicate that the cluster has been defined in elasticsearch.yml', () => {
+      const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
+      expect(findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length).toBe(1);
     });
 
     describe('bulk delete button', () => {
