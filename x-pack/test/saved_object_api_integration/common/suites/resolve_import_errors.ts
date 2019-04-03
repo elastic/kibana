@@ -80,7 +80,7 @@ export function resolveImportErrorsTestSuiteFactory(
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard, missing saved_object:dashboard/bulk_create`,
+      message: `Unable to bulk_create dashboard`,
     });
   };
 
@@ -88,7 +88,7 @@ export function resolveImportErrorsTestSuiteFactory(
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,wigwags, missing saved_object:dashboard/bulk_create,saved_object:wigwags/bulk_create`,
+      message: `Unable to bulk_create dashboard,wigwags`,
     });
   };
 
@@ -96,7 +96,7 @@ export function resolveImportErrorsTestSuiteFactory(
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,wigwags, missing saved_object:wigwags/bulk_create`,
+      message: `Unable to bulk_create wigwags`,
     });
   };
 

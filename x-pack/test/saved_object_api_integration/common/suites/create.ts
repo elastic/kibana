@@ -40,7 +40,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to create ${type}, missing saved_object:${type}/create`,
+      message: `Unable to create ${type}`,
     });
   };
 
