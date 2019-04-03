@@ -346,6 +346,24 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
   }
 }
 
+export class LogstashPipelineNodeWithoutPipelineCountMetric extends LogstashMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      derivative: false
+    });
+
+    this.dateHistogramSubAggs = {
+      with_no_pipeline: {
+        missing: {
+          field: 'logstash_stats.pipelines.id',
+        },
+      }
+    };
+    this.calculation = bucket => !!_.get(bucket, 'with_no_pipeline.doc_count', undefined);
+  }
+}
+
 export class LogstashPipelineNodeCountMetric extends LogstashMetric {
   constructor(opts) {
     super({
@@ -354,6 +372,11 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     });
 
     this.dateHistogramSubAggs = {
+      with_no_pipeline: {
+        missing: {
+          field: 'logstash_stats.pipelines.id',
+        },
+      },
       pipelines_nested: {
         nested: {
           path: 'logstash_stats.pipelines'
