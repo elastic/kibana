@@ -132,11 +132,11 @@ app.directive('dashboardApp', function ($injector) {
       const updateState = () => {
         // Following the "best practice" of always have a '.' in your ng-models –
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-
         $scope.model = {
           query: dashboardStateManager.getQuery(),
           filters: queryFilter.getFilters(),
           timeRestore: dashboardStateManager.getTimeRestore(),
+          title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
           timeRange: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
