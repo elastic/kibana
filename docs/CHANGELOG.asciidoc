@@ -21,8 +21,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.0.0-rc2]]
 == {kib} 7.0.0-rc2
 
-coming[7.0.0]
-
 [float]
 === Known issues
 
@@ -30,10 +28,6 @@ Monitoring::
 * If you have a version 7.0 monitoring cluster, a version 6.7 production
 cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
 {kib}. {issue}34357[#34357]
-
-
-[[release-notes-7.0.0-rc2]]
-== {kib} 7.0.0-rc2
 
 [float]
 [[breaking-7.0.0-rc2]]
