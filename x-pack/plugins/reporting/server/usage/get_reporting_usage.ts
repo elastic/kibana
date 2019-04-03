@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, get } from 'lodash';
-import { getDefaultObject } from './get_default_object';
+import { get } from 'lodash';
+import { getFullStatsForRange } from './get_default_object';
 // @ts-ignore untyped module
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
@@ -85,11 +85,11 @@ async function handleResponse(server: any, response: AggregationResults): Promis
   if (!buckets) {
     return {};
   }
-  const { all, last1, last7 } = buckets as RangeAggregationResults;
+  const { lastDay, last7Days, all } = buckets as RangeAggregationResults;
 
-  const allUsage = all ? getAggStats(all) : undefined;
-  const lastDayUsage = last1 ? getAggStats(last1) : undefined;
-  const last7DaysUsage = last7 ? getAggStats(last7) : undefined;
+  const lastDayUsage = lastDay ? getAggStats(lastDay) : {} as RangeStats;
+  const last7DaysUsage = last7Days ? getAggStats(last7Days) : {} as RangeStats;
+  const allUsage = all ? getAggStats(all) : {} as RangeStats;
 
   return {
     last7Days: last7DaysUsage,
@@ -113,8 +113,8 @@ export async function getReportingUsage(server: any, callCluster: any) {
           filters: {
             filters: {
               all: { match_all: {} },
-              last1: { range: { created_at: { gte: 'now-1d/d' } } },
-              last7: { range: { created_at: { gte: 'now-7d/d' } } },
+              lastDay: { range: { created_at: { gte: 'now-1d/d' } } },
+              last7Days: { range: { created_at: { gte: 'now-7d/d' } } },
             },
           },
           aggs: {
@@ -147,10 +147,15 @@ export async function getReportingUsage(server: any, callCluster: any) {
         xpackInfo
       ) as FeatureAvailabilityMap;
 
+      const { lastDay, last7Days, ...all } = usage;
+
       return {
         available: true,
         browser_type: browserType,
-        ...defaultsDeep(usage, getDefaultObject(availability)),
+        enabled: true,
+        lastDay: getFullStatsForRange(lastDay, availability),
+        last7Days: getFullStatsForRange(last7Days, availability),
+        ...getFullStatsForRange(all, availability),
       };
     });
 }

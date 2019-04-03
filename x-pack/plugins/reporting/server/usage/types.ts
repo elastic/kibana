@@ -34,7 +34,7 @@ export type AggregationResults = { [K in AggregationKeys]: AggregationBuckets } 
   doc_count: number;
 };
 
-type RangeAggregationKeys = 'all' | 'last1' | 'last7';
+type RangeAggregationKeys = 'all' | 'lastDay' | 'last7Days';
 export type RangeAggregationResults = { [K in RangeAggregationKeys]?: AggregationResults };
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
@@ -64,5 +64,5 @@ export type UsageObject = RangeStats & {
   last7Days: RangeStats;
 };
 
-type ReportingFeature = 'csv' | 'printable_pdf' | 'PNG';
+export type ReportingFeature = 'csv' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ReportingFeature]: boolean };
