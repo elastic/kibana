@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { KibanaRisonLink } from '../KibanaRisonLink';
+import { RisonAPMQueryParams } from '../rison_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
-  query: StringMap<any>;
+  query: RisonAPMQueryParams;
   children: React.ReactNode;
 }
 

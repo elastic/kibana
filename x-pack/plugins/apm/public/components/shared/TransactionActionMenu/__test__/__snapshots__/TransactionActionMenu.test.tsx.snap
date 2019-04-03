@@ -202,7 +202,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))&_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
+          href="/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))&_a=(interval:auto,query:(language:lucene,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))"
           icon="discoverApp"
           layoutAlign="center"
           toolTipPosition="right"

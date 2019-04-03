@@ -5,14 +5,14 @@
  */
 
 import React, { ReactElement } from 'react';
-import { StringMap } from '../../../../../typings/common';
 import {
   getAPMIndexPattern,
   ISavedObject
 } from '../../../../services/rest/savedObjects';
+import { RisonAPMQueryParams } from '../rison_helpers';
 
 export function getQueryWithIndexPattern(
-  query: StringMap<any>,
+  query: RisonAPMQueryParams,
   indexPattern?: ISavedObject
 ) {
   if ((query._a && query._a.index) || !indexPattern) {
@@ -30,8 +30,8 @@ export function getQueryWithIndexPattern(
 }
 
 interface Props {
-  query: StringMap<any>;
-  children: (query: StringMap<any>) => ReactElement<unknown>;
+  query: RisonAPMQueryParams;
+  children: (query: RisonAPMQueryParams) => ReactElement<unknown>;
 }
 
 interface State {

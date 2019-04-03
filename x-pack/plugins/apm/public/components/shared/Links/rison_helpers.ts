@@ -12,7 +12,7 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
-import { PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
+import { APMQueryParams, PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
 
 interface RisonEncoded {
   _g?: string;
@@ -24,8 +24,17 @@ export interface RisonDecoded {
   _a?: StringMap<any>;
 }
 
-function createG(query: StringMap<any>) {
-  const g = { ...query._g };
+export type RisonAPMQueryParams = APMQueryParams & RisonDecoded;
+export interface RisonHrefArgs {
+  location: Location;
+  pathname?: string;
+  hash?: string;
+  query?: RisonAPMQueryParams;
+}
+
+function createG(query: RisonAPMQueryParams) {
+  const { _g: nextG = {} } = query;
+  const g: RisonDecoded['_g'] = { ...nextG };
 
   if (typeof query.rangeFrom !== 'undefined') {
     set(g, 'time.from', encodeURIComponent(query.rangeFrom));
@@ -44,13 +53,6 @@ function createG(query: StringMap<any>) {
   return g;
 }
 
-export interface RisonHrefArgs {
-  location: Location;
-  pathname?: string;
-  hash?: string;
-  query?: StringMap<any>;
-}
-
 export function getRisonHref({
   location,
   pathname,
@@ -64,25 +66,22 @@ export function getRisonHref({
     ...query
   };
 
+  // Create _g value for non-apm links
   const g = createG(nextQuery);
   const encodedG = rison.encode(g);
-  const encodedA = query._a ? rison.encode(query._a) : '';
-
-  const risonQuery: RisonEncoded = { _g: encodedG };
+  const encodedA = query._a ? rison.encode(query._a) : ''; // TODO: Do we need to url-encode the _a values before rison encoding _a?
+  const risonQuery: RisonEncoded = {
+    _g: encodedG
+  };
 
   if (encodedA) {
     risonQuery._a = encodedA;
   }
 
   // don't URI-encode the already-encoded rison
-  const search = qs.stringify(
-    { ...query, ...risonQuery },
-    undefined,
-    undefined,
-    {
-      encodeURIComponent: (v: string) => v
-    }
-  );
+  const search = qs.stringify(risonQuery, undefined, undefined, {
+    encodeURIComponent: (v: string) => v
+  });
 
   const href = url.format({
     pathname: chrome.addBasePath(pathname),
