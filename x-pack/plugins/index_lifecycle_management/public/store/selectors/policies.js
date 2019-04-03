@@ -124,7 +124,7 @@ export const splitSizeAndUnits = field => {
 
 export const isNumber = value => typeof value === 'number';
 export const isEmptyObject = (obj) => {
-  return Object.entries(obj).length === 0 && obj.constructor === Object;
+  return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
 };
 
 export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
@@ -275,7 +275,7 @@ export const phaseToES = (phase, originalEsPhase) => {
   }
   if (esPhase.actions.allocate
       && !esPhase.actions.allocate.require
-      && !esPhase.actions.allocate.number_of_replicas
+      && !isNumber(esPhase.actions.allocate.number_of_replicas)
       && isEmptyObject(esPhase.actions.allocate.include)
       && isEmptyObject(esPhase.actions.allocate.exclude)
   ) {
