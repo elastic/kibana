@@ -215,14 +215,13 @@ async function run(folder: string): Promise<boolean> {
   }
 
   if (opts.accept || opts.docs) {
-    await runApiDocumenter(folder)
-      .then(() => {
-        log.info(`Core ${folder} API: updated documentation ✔`);
-      })
-      .catch(e => {
-        log.error(e);
-        return false;
-      });
+    try {
+      await runApiDocumenter(folder);
+    } catch (e) {
+      log.error(e);
+      return false;
+    }
+    log.info(`Core ${folder} API: updated documentation ✔`);
   }
 
   // If the API changed and we're not accepting the changes, exit process with error
