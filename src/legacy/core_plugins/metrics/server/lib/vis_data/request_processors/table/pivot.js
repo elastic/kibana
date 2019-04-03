@@ -42,7 +42,9 @@ export default function pivot(req, panel) {
           set(doc, `aggs.pivot.terms.order`, { [bucketPath]: sort.order });
           set(doc, `aggs.pivot.aggs`, { [sortAggKey]: fn(metric) });
         } else {
-          set(doc, 'aggs.pivot.terms.order', { _term: get(sort, 'order', 'asc') });
+          set(doc, 'aggs.pivot.terms.order', {
+            _key: get(sort, 'order', 'asc')
+          });
         }
       }
     } else {

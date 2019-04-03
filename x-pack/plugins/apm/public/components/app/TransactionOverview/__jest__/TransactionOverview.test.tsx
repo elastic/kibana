@@ -9,10 +9,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { queryByLabelText, render } from 'react-testing-library';
-// @ts-ignore
-import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { TransactionOverview } from '..';
+// @ts-ignore
+import configureStore from '../../../../store/config/configureStore';
+import { IUrlParams } from '../../../../store/urlParams';
 
 function setup(props: {
   urlParams: IUrlParams;

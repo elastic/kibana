@@ -10,7 +10,7 @@ import { pick } from 'lodash';
 import qs from 'querystring';
 import chrome from 'ui/chrome';
 import url from 'url';
-import { TIMEPICKER_DEFAULTS } from 'x-pack/plugins/apm/public/store/urlParams';
+import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};

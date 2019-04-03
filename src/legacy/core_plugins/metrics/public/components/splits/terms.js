@@ -40,7 +40,7 @@ const SplitByTermsUi = props => {
     label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
   };
   const terms = {
-    value: '_term',
+    value: '_key',
     label: intl.formatMessage({ id: 'tsvb.splits.terms.termsLabel', defaultMessage: 'Terms' })
   };
 
