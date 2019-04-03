@@ -7,12 +7,18 @@
 
 import { GIS_API_PATH } from '../common/constants';
 import _ from 'lodash';
+import { getEMSResources } from '../common/ems_util';
+import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
+import { EMSClient } from 'ui/vis/map/ems_client';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 let meta = null;
 let loadingMetaPromise = null;
 let isLoaded = false;
+
+
 export async function getDataSources() {
   if (meta) {
     return meta;
@@ -26,10 +32,25 @@ export async function getDataSources() {
     try {
       const response = await fetch(`${GIS_API_RELATIVE}/meta`);
       const metaJson = await response.json();
+      const useCors = chrome.getInjected('useCORSForElasticMapsService', true);
+      const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+      if (useCors) {
+        const emsClient = new EMSClient({
+          language: i18n.getLocale(),
+          kbnVersion: chrome.getInjected('kbnPkgVersion'),
+          manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
+          landingPageUrl: chrome.getInjected('emsLandingPageUrl')
+        });
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, 'todo_use_licenseuid', true);
+        metaJson.data_sources.ems = {
+          file: emsResponse.fileLayers,
+          tms: emsResponse.tmsServices
+        };
+      }
       isLoaded = true;
       meta = metaJson.data_sources;
       resolve(meta);
-    } catch(e) {
+    } catch (e) {
       reject(e);
     }
   });

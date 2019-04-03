@@ -39,9 +39,14 @@ export function maps(kibana) {
       injectDefaultVars(server) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
+
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          useCORSForElasticMapsService: mapConfig.useCORSForElasticMapsService,
+          emsManifestServiceUrl: mapConfig.manifestServiceUrl,
+          emsLandingPageUrl: mapConfig.manifestServiceUrl,
+          kbnPkgVersion: serverConfig.get('pkg.version')
         };
       },
       embeddableFactories: [
