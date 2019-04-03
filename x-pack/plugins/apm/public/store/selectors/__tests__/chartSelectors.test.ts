@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { ApmTimeSeriesResponse } from '../../../../server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   getAnomalyScoreSeries,
   getResponseTimeSeries,
@@ -38,7 +38,9 @@ describe('chartSelectors', () => {
     } as ApmTimeSeriesResponse;
 
     it('should produce correct series', () => {
-      expect(getResponseTimeSeries(apmTimeseries)).toEqual([
+      expect(
+        getResponseTimeSeries({ apmTimeseries, anomalyTimeseries: undefined })
+      ).toEqual([
         {
           color: '#3185fc',
           data: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
@@ -64,7 +66,10 @@ describe('chartSelectors', () => {
     });
 
     it('should return 3 series', () => {
-      expect(getResponseTimeSeries(apmTimeseries).length).toBe(3);
+      expect(
+        getResponseTimeSeries({ apmTimeseries, anomalyTimeseries: undefined })
+          .length
+      ).toBe(3);
     });
   });
 

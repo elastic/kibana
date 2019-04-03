@@ -7,7 +7,7 @@
 import {
   OBSERVER_VERSION_MAJOR,
   PROCESSOR_EVENT
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 import { APMSearchParams, Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found

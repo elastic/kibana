@@ -3,36 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
-export interface MemoryChartAPIResponse {
-  series: {
-    memoryUsedAvg: Coordinate[];
-    memoryUsedMax: Coordinate[];
-  };
-  // overall totals for the whole time range
-  overallValues: {
-    memoryUsedAvg: number | null;
-    memoryUsedMax: number | null;
-  };
-  totalHits: number;
-}
-
-export type MemoryMetricName = 'memoryUsedAvg' | 'memoryUsedMax';
-
+type MemoryMetricName = 'memoryUsedAvg' | 'memoryUsedMax';
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
   'memoryUsedAvg',
   'memoryUsedMax'
 ];
 
-export function transform(result: ESResponse): MemoryChartAPIResponse {
+export type MemoryChartAPIResponse = ReturnType<typeof transform>;
+export function transform(result: ESResponse) {
   const { aggregations, hits } = result;
   const { timeseriesData, memoryUsedAvg, memoryUsedMax } = aggregations;
 
-  const series: MemoryChartAPIResponse['series'] = {
-    memoryUsedAvg: [],
-    memoryUsedMax: []
+  const series = {
+    memoryUsedAvg: [] as Coordinate[],
+    memoryUsedMax: [] as Coordinate[]
   };
 
   // using forEach here to avoid looping over the entire dataset
