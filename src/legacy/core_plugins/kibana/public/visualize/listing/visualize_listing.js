@@ -18,7 +18,6 @@
  */
 
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/pager_control';
 import 'ui/pager';
 import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';

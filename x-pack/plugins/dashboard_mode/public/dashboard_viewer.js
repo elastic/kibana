@@ -36,7 +36,6 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
 import 'ui/pager';
-import 'ui/pager_control';
 import 'leaflet';
 
 import { showAppRedirectNotification } from 'ui/notify';
