@@ -10,8 +10,8 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { Store } from 'redux';
 // @ts-ignore
-import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-import { mockNow, tick } from 'x-pack/plugins/apm/public/utils/testHelpers';
+import configureStore from '../../../../store/config/configureStore';
+import { mockNow, tick } from '../../../../utils/testHelpers';
 import { DatePicker, DatePickerComponent } from '../DatePicker';
 
 function mountPicker(initialState = {}) {
