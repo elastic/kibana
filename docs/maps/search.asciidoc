@@ -13,7 +13,7 @@ You can create a layer that requests data from {es} from the following:
 
 ** Grid aggregation source
 
-** <<terms-join>>.
+** <<terms-join>>
 
 * <<heatmap-layer>> with Grid aggregation source.
 
