@@ -15,7 +15,7 @@ const DEFAULT_MAPPINGS = {
     "type": "keyword"
   },
   "location": {
-    "type": "geo_point"
+    "type": "geo_shape"
   }
 };
 

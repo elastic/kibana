@@ -18,7 +18,6 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     throw('No file imported');
     return;
   }
-  // const parsedFileArr = splitJsonString(parsedFile);
   const initializedIndex = await writeToIndex({
     id: undefined,
     data: [],
@@ -34,29 +33,7 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     settings: {},
     mappings: {},
   });
-}
-
-function splitJsonString(parsedFile) {
-  try {
-    const splitJson = parsedFile.split(/}\s*\n/);
-
-    const jsonArr = [];
-    for (let i = 0; i < splitJson.length; i++) {
-      if (splitJson[i] !== '') {
-        // note the extra } at the end of the line, adding back
-        // the one that was eaten in the split
-        jsonArr.push(`${splitJson[i]}}`);
-      }
-    }
-
-    // this.docArray = jsonArr;
-    console.log(jsonArr)
-
-    return jsonArr;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
+  //create index pattern
 }
 
 function writeToIndex(indexingDetails) {
@@ -97,6 +74,7 @@ async function populateIndex({ id, index, data, mappings, settings }) {
   let success = true;
   const failures = [];
   let error;
+  let docCount = 0;
 
   for (let i = 0; i < chunks.length; i++) {
     const aggs = {
@@ -126,11 +104,12 @@ async function populateIndex({ id, index, data, mappings, settings }) {
     }
 
     if (resp.success) {
-      console.log('yes!');
+      docCount = resp.docCount;
     } else {
       console.error(resp);
       success = false;
       error = resp.error;
+      docCount = 0;
       break;
     }
   }
@@ -138,7 +117,7 @@ async function populateIndex({ id, index, data, mappings, settings }) {
   const result = {
     success,
     failures,
-    docCount: this.docArray.length,
+    docCount,
   };
 
   if (success) {

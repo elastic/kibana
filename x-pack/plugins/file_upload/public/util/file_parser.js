@@ -19,7 +19,7 @@ export async function parseFile(file, previewCallback = null, postProcessing = n
         if (postProcessing) {
           parsedJson = postProcessing(parsedJson);
         }
-        parsedJson = transformJson(parsedJson);
+        parsedJson = geoJsonToEs(parsedJson);
         resolve(parsedJson);
       } catch (e) {
         console.log(e);
@@ -30,9 +30,22 @@ export async function parseFile(file, previewCallback = null, postProcessing = n
   });
 }
 
-function transformJson(parsedJson) {
-  return parsedJson.reduce((accu, el) => {
-    accu.push(JSON.stringify({ 'name': el.name, 'location': [el.latlng[1], el.latlng[0]] }));
+function geoJsonToEs(parsedGeojson) {
+  if (!parsedGeojson) {
+    return [];
+  }
+  const shapes = parsedGeojson.type === 'Feature'
+    ? [ parsedGeojson ]
+    : parsedGeojson.features;
+
+  return shapes.reduce((accu, shape) => {
+    accu.push(JSON.stringify({
+      location: {
+        'type': shape.geometry.type.toLowerCase(),
+        'coordinates': shape.geometry.coordinates
+      },
+      name: _.get(shape, 'properties.name', '')
+    }));
     return accu;
   }, []);
 }
