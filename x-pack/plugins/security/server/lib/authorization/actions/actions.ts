@@ -40,5 +40,14 @@ export class Actions {
 }
 
 export function actionsFactory(config: any) {
-  return new Actions(config.get('pkg.version'));
+  const version = config.get('pkg.version');
+  if (typeof version !== 'string') {
+    throw new Error('version should be a string');
+  }
+
+  if (version === '') {
+    throw new Error(`version can't be an empty string`);
+  }
+
+  return new Actions(version);
 }
