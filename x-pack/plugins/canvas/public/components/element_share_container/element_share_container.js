@@ -20,30 +20,21 @@ export class ElementShareContainer extends React.PureComponent {
   };
 
   componentDidMount() {
-    const { functionName, onComplete } = this.props;
-    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const { onComplete } = this.props;
 
     // check that the done event is called within a certain time
-    if (isDevelopment) {
-      const timeout = 15; // timeout, in seconds
-      this.timeout = setTimeout(() => {
-        // TODO: show this message in a proper notification
-        console.warn(
-          `done handler not called in render function after ${timeout} seconds: ${functionName}`
-        );
-      }, timeout * 1000);
-    }
+    this.createDoneChecker();
 
     // dispatches a custom DOM event on the container when the element is complete
     onComplete(() => {
-      clearTimeout(this.timeout);
+      this.clearDoneChecker();
       if (!this.sharedItemRef) {
         return;
       } // without this, crazy fast forward/backward paging leads to an error
       const ev = new CustomEvent('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
 
-      // if the element is finished before reporting is listening for then
+      // if the element is finished before reporting is listening for the
       // renderComplete event, the report never completes. to get around that
       // issue, track the completed state locally and set the
       // [data-render-complete] value accordingly.
@@ -53,9 +44,41 @@ export class ElementShareContainer extends React.PureComponent {
     });
   }
 
-  componentWillUnmount() {
-    clearTimeout(this.timeout);
+  getSnapshotBeforeUpdate(prevProps) {
+    return { functionName: prevProps.functionName };
   }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    // if function name changed, clear and recreate done checker
+    if (snapshot.functionName !== this.props.functionName) {
+      this.clearDoneChecker();
+      this.createDoneChecker();
+    }
+  }
+
+  componentWillUnmount() {
+    this.clearDoneChecker();
+  }
+
+  createDoneChecker = () => {
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    if (!isDevelopment) {
+      return;
+    }
+
+    const { functionName } = this.props;
+    const timeout = 15; // timeout, in seconds
+    this.timeout = setTimeout(() => {
+      // TODO: show this message in a proper notification
+      console.warn(
+        `done handler not called in render function after ${timeout} seconds: ${functionName}`
+      );
+    }, timeout * 1000);
+  };
+
+  clearDoneChecker = () => {
+    clearTimeout(this.timeout);
+  };
 
   render() {
     // NOTE: the data-shared-item and data-render-complete attributes are used for reporting
