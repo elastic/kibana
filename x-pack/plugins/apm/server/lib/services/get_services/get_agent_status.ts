@@ -5,16 +5,19 @@
  */
 
 import { SearchParams } from 'elasticsearch';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../helpers/setup_request';
+import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
+import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
-export async function getAgentStatus({ setup }: { setup: Setup }) {
+export async function getAgentStatus(setup: Setup) {
   const { client, config } = setup;
 
   const params: SearchParams = {
+    terminateAfter: 1,
     index: [
       config.get('apm_oss.errorIndices'),
+      config.get('apm_oss.metricsIndices'),
+      config.get('apm_oss.sourcemapIndices'),
       config.get('apm_oss.transactionIndices')
     ],
     body: {
@@ -26,9 +29,9 @@ export async function getAgentStatus({ setup }: { setup: Setup }) {
               terms: {
                 [PROCESSOR_EVENT]: [
                   'error',
-                  'transaction',
                   'metric',
-                  'sourcemap'
+                  'sourcemap',
+                  'transaction'
                 ]
               }
             }
@@ -39,8 +42,6 @@ export async function getAgentStatus({ setup }: { setup: Setup }) {
   };
 
   const resp = await client('search', params);
-
-  return {
-    dataFound: resp.hits.total > 0
-  };
+  const hasHistorialAgentData = resp.hits.total > 0;
+  return hasHistorialAgentData;
 }

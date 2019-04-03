@@ -9,8 +9,14 @@ export interface StringMap<T = unknown> {
 }
 
 // Allow unknown properties in an object
-export type AllowUnknownProperties<T> = T extends object
-  ? { [P in keyof T]: AllowUnknownProperties<T[P]> } & {
+export type AllowUnknownProperties<Obj> = Obj extends object
+  ? { [Prop in keyof Obj]: AllowUnknownProperties<Obj[Prop]> } & {
       [key: string]: unknown;
     }
-  : T;
+  : Obj;
+
+export type PromiseReturnType<Func> = Func extends (
+  ...args: any[]
+) => Promise<infer Value>
+  ? Value
+  : Func;

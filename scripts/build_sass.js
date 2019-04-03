@@ -17,13 +17,5 @@
  * under the License.
  */
 
-module.exports = {
-  meta: {
-    schema: [],
-  },
-  create: context => ({
-    ExportDefaultDeclaration: node => {
-      context.report(node, 'Default exports not allowed.');
-    },
-  }),
-};
+require('../src/setup_node_env');
+require('../src/dev/sass/run_build_sass_cli');

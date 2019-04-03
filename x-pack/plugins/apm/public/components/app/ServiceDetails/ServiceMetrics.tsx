@@ -14,14 +14,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { ErrorDistribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
-import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
-import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { loadErrorDistribution } from '../../../services/rest/apm/error_groups';
+import { IUrlParams } from '../../../store/urlParams';
+import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { CPUUsageChart } from './CPUUsageChart';
 import { MemoryUsageChart } from './MemoryUsageChart';
 

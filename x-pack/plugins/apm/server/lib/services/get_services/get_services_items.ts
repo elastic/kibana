@@ -4,31 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'elasticsearch';
-import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { BucketAgg, ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION
-} from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../../common/idx';
+import { PromiseReturnType } from '../../../../typings/common';
+import { rangeFilter } from '../../helpers/range_filter';
+import { Setup } from '../../helpers/setup_request';
 
-export interface IServiceListItem {
-  serviceName: string;
-  agentName: string | undefined;
-  transactionsPerMinute: number;
-  errorsPerMinute: number;
-  avgResponseTime: number;
-}
-
-export type ServiceListAPIResponse = IServiceListItem[];
-
-export async function getServices(
-  setup: Setup
-): Promise<ServiceListAPIResponse> {
+export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
+export async function getServicesItems(setup: Setup) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const filter: ESFilter[] = [
@@ -97,7 +86,7 @@ export async function getServices(
   const aggs = resp.aggregations;
   const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
 
-  return serviceBuckets.map(bucket => {
+  const items = serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
     const transactions = eventTypes.find(e => e.key === 'transaction');
     const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
@@ -117,4 +106,6 @@ export async function getServices(
       avgResponseTime: bucket.avg.value
     };
   });
+
+  return items;
 }
