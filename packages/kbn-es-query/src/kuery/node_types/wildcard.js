@@ -47,8 +47,8 @@ export function test(node, string) {
   const regex = value
     .split(wildcardSymbol)
     .map(escapeRegExp)
-    .join('.*');
-  const regexp = new RegExp(`^${regex}$`, 's');
+    .join('[\\s\\S]*');
+  const regexp = new RegExp(`^${regex}$`);
   return regexp.test(string);
 }
 

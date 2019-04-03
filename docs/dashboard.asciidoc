@@ -45,18 +45,6 @@ with dashboard*.
 [[loading-a-saved-dashboard]]
 To import, export, and delete dashboards, see <<managing-saved-objects>>.
 
-[float]
-=== Changing the Color Theme ===
-
-By default, Kibana dashboards use the light color theme. To use the dark color theme:
-
-. Go to the menu bar and click *Edit*. 
-. Click *Options* in the menu bar.
-. Select *Use dark theme*. 
-
-To set the dark theme as the default, go to *Management > Advanced Settings*. 
-Scroll down to *Dashboard* and toggle *Dark Theme* to *On*.
-
 [[customizing-your-dashboard]]
 == Arranging Dashboard Elements
 

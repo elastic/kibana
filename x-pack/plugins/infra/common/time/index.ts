@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './time';
 export * from './time_unit';
 export * from './time_scale';
 export * from './time_key';

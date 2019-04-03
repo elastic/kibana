@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
@@ -19,8 +19,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/flstest');
       await esArchiver.load('empty_kibana');
       browser.setWindowSize(1600, 1000);
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('flstest', null);
     });
 

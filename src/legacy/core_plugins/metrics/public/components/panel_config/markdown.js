@@ -213,6 +213,22 @@ class MarkdownPanelConfigUi extends Component {
                   onChange={this.props.onChange}
                 />
               </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.markdown.optionsTab.openLinksInNewTab"
+                    defaultMessage="Open links in new tab?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.markdown_openLinksInNewTab}
+                  name="markdown_openLinksInNewTab"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>
                   <FormattedMessage
@@ -263,11 +279,12 @@ class MarkdownPanelConfigUi extends Component {
           <EuiTab
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
+            data-test-subj="markdown-subtab"
           >
             Markdown
           </EuiTab>
           <EuiTab
-            data-test-subj="markdownDataBtn"
+            data-test-subj="data-subtab"
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
@@ -279,6 +296,7 @@ class MarkdownPanelConfigUi extends Component {
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
+            data-test-subj="options-subtab"
           >
             <FormattedMessage
               id="tsvb.markdown.optionsTab.panelOptionsButtonLabel"

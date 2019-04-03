@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { geohashColumns } from '../decode_geo_hash';
 
 describe('decode_geo_hash', function () {

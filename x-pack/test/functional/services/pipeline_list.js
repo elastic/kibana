@@ -4,23 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { times, mapValues } from 'lodash';
-
 export function PipelineListProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const random = getService('random');
-
-  function assertLengthsMatch(arrays) {
-    const lengths = arrays.map(array => array.length);
-
-    try {
-      expect(Math.min(...lengths)).to.be(Math.max(...lengths));
-    } catch (err) {
-      throw new Error(`Expected lengths of arrays to match, ${JSON.stringify(arrays)}`);
-    }
-  }
 
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
@@ -30,11 +17,15 @@ export function PipelineListProvider({ getService }) {
   const SUBJ_FILTER = `pipelineList filter`;
   const SUBJ_SELECT_ALL = `pipelineList pipelineTable checkboxSelectAll`;
   const getSelectCheckbox = id => `pipelineList pipelineTable checkboxSelectRow-${id}`;
-  const SUBJ_CELL_ID = `pipelineList pipelineTable cellId`;
-  const SUBJ_CELL_DESCRIPTION = `pipelineList pipelineTable cellDescription`;
-  const SUBJ_CELL_LAST_MODIFIED = `pipelineList pipelineTable cellLastModified`;
-  const SUBJ_CELL_USERNAME = `pipelineList pipelineTable cellUsername`;
   const SUBJ_BTN_NEXT_PAGE = `pipelineList pagination-button-next`;
+
+  const INNER_SUBJ_ROW = `row`;
+  const INNER_SUBJ_CELL_ID = `cellId`;
+  const INNER_SUBJ_CELL_DESCRIPTION = `cellDescription`;
+  const INNER_SUBJ_CELL_LAST_MODIFIED = `cellLastModified`;
+  const INNER_SUBJ_CELL_USERNAME = `cellUsername`;
+
+  const SUBJ_CELL_ID = `${SUBJ_CONTAINER} ${INNER_SUBJ_ROW} ${INNER_SUBJ_CELL_ID}`;
 
   return new class PipelineList {
     /**
@@ -52,36 +43,11 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Object>}
      */
     async getRowCounts() {
-      const ids = await this.getRowIds();
-      const isSelecteds = await Promise.all(
-        ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id)))
-      );
-      const total = isSelecteds.length;
-      const isSelected = isSelecteds.filter(Boolean).length;
+      const rows = await this.readRows();
+      const total = rows.length;
+      const isSelected = rows.reduce((acc, row) => acc + (row.selected ? 1 : 0), 0);
       const isUnselected = total - isSelected;
       return { total, isSelected, isUnselected };
-    }
-
-    /**
-     *  Read the rows from the table, mapping the cell values to key names
-     *  in an array of objects
-     *  @return {Promise<Array<Object>>}
-     */
-    async getRowsFromTable() {
-      const ids = await this.getRowIds();
-      const selected = await Promise.all(ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id))));
-      const description = await testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION);
-      const lastModified = await testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED);
-      const username = await testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME);
-      const valuesByKey = { selected, id: ids, description, lastModified, username };
-
-      // ensure that we got values for every row, otherwise we can't
-      // recombine these into a list of rows
-      assertLengthsMatch(Object.values(valuesByKey));
-
-      return times(valuesByKey.id.length, i => {
-        return mapValues(valuesByKey, values => values[i]);
-      });
     }
 
     /**
@@ -128,35 +94,33 @@ export function PipelineListProvider({ getService }) {
         throw new Error('pipelineList.selectRandomRow() requires at least one unselected row');
       }
 
-      // get pick an unselected selectbox and click it
-      await retry.try(async () => {
-        const ids = await this.getRowIds();
-        const rowToClick = await random.pickOne(ids);
-        const checkboxId = getSelectCheckbox(rowToClick);
-        const isSelected = await testSubjects.isSelected(checkboxId);
+      // pick an unselected selectbox and select it
+      const rows = await this.readRows();
+      const rowToClick = await random.pickOne(rows.filter(r => !r.selected));
+      await testSubjects.click(getSelectCheckbox(rowToClick.id));
 
-        if (isSelected) {
-          throw new Error('randomly chosen row was already selected');
-        }
-
-        await testSubjects.click(checkboxId);
-      });
-
-      // wait for the selected count to grow
-      await retry.try(async () => {
-        const now = await this.getRowCounts();
-        if (initial.isSelected >= now.isSelected) {
-          throw new Error(`randomly selected row still not selected`);
-        }
-      });
+      await retry.waitFor('selected count to grow', async () => (
+        (await this.getRowCounts()).isSelected > initial.isSelected
+      ));
     }
 
     /**
-     * Get a list of all pipeline IDs in the current table
-     * @return {Promise<any>}
+     *  Read the rows from the table, mapping the cell values to key names
+     *  in an array of objects
+     *  @return {Promise<Array<Object>>}
      */
-    async getRowIds() {
-      return await testSubjects.getVisibleTextAll(SUBJ_CELL_ID);
+    async readRows() {
+      const pipelineTable = await testSubjects.find('pipelineTable');
+      const $ = await pipelineTable.parseDomContent();
+      return $.findTestSubjects(INNER_SUBJ_ROW).toArray().map(row => {
+        return {
+          selected: $(row).hasClass('euiTableRow-isSelected'),
+          id: $(row).findTestSubjects(INNER_SUBJ_CELL_ID).text(),
+          description: $(row).findTestSubjects(INNER_SUBJ_CELL_DESCRIPTION).text(),
+          lastModified: $(row).findTestSubjects(INNER_SUBJ_CELL_LAST_MODIFIED).text(),
+          username: $(row).findTestSubjects(INNER_SUBJ_CELL_USERNAME).text()
+        };
+      });
     }
 
     /**
@@ -196,10 +160,11 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      await retry.try(async () => {
-        if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
-          throw new Error('Expected to find the pipeline list');
-        }
+      await retry.waitFor('pipline list visible on screen', async () => {
+        const container = await testSubjects.find(SUBJ_CONTAINER);
+        const found = await container.findAllByCssSelector('table tbody');
+        const isLoading = await testSubjects.exists('loadingPipelines');
+        return (found.length > 0) && (isLoading === false);
       });
     }
 

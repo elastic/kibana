@@ -132,6 +132,7 @@ export class RemoteClustersFormField extends PureComponent {
           onChange={(e) => { this.onRemoteClusterChange(e.target.value); }}
           hasNoInitialSelection={!hasClusters}
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
+          data-test-subj="ccrRemoteClusterSelect"
         />
         { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
         { errorMessage }
@@ -144,6 +145,7 @@ export class RemoteClustersFormField extends PureComponent {
               size="s"
               iconType="plusInCircle"
               flush="left"
+              data-test-subj="ccrRemoteClusterInlineAddButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
@@ -177,6 +179,7 @@ export class RemoteClustersFormField extends PureComponent {
             {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             iconType="plusInCircle"
             color="danger"
+            data-test-subj="ccrRemoteClusterAddButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
@@ -212,6 +215,7 @@ export class RemoteClustersFormField extends PureComponent {
         <EuiButton
           {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
           color={fatal ? 'danger' : 'warning'}
+          data-test-subj="ccrRemoteClusterEditButton"
         >
           <FormattedMessage
             id="xpack.crossClusterReplication.remoteClustersFormField.viewRemoteClusterButtonLabel"
@@ -242,6 +246,7 @@ export class RemoteClustersFormField extends PureComponent {
           {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
           iconType="plusInCircle"
           color="danger"
+          data-test-subj="ccrRemoteClusterAddButton"
         >
           <FormattedMessage
             id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"

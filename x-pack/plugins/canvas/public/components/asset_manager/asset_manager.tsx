@@ -19,7 +19,7 @@ import { AssetModal } from './asset_modal';
 
 interface Props {
   /** A list of assets, if available */
-  assets: AssetType[];
+  assetValues: AssetType[];
   /** Function to invoke when an asset is selected to be added as an element to the workpad */
   onAddImageElement: (id: string) => void;
   /** Function to invoke when an asset is deleted */
@@ -38,7 +38,7 @@ interface State {
 
 export class AssetManager extends React.PureComponent<Props, State> {
   public static propTypes = {
-    assets: PropTypes.array,
+    assetValues: PropTypes.array,
     onAddImageElement: PropTypes.func.isRequired,
     onAssetAdd: PropTypes.func.isRequired,
     onAssetCopy: PropTypes.func.isRequired,
@@ -46,7 +46,7 @@ export class AssetManager extends React.PureComponent<Props, State> {
   };
 
   public static defaultProps = {
-    assets: [],
+    assetValues: [],
   };
 
   public state = {
@@ -57,11 +57,11 @@ export class AssetManager extends React.PureComponent<Props, State> {
 
   public render() {
     const { isModalVisible, isLoading } = this.state;
-    const { assets, onAssetCopy, onAddImageElement } = this.props;
+    const { assetValues, onAssetCopy, onAddImageElement } = this.props;
 
     const assetModal = (
       <AssetModal
-        assets={assets}
+        assetValues={assetValues}
         isLoading={isLoading}
         onAssetCopy={onAssetCopy}
         onAssetCreate={(createdAsset: AssetType) => {

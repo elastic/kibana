@@ -19,10 +19,10 @@
 
 import { IRootScopeService } from 'angular';
 
-import { ChromeStartContract, HelpExtension } from '../../../../../core/public/chrome';
+import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public';
 
-let newPlatformChrome: ChromeStartContract;
-export function __newPlatformInit__(instance: ChromeStartContract) {
+let newPlatformChrome: ChromeSetup;
+export function __newPlatformInit__(instance: ChromeSetup) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/help_extension is already initialized');
   }
@@ -31,7 +31,7 @@ export function __newPlatformInit__(instance: ChromeStartContract) {
 }
 
 export type HelpExtensionApi = ReturnType<typeof createHelpExtensionApi>['helpExtension'];
-export { HelpExtension };
+export type HelpExtension = ChromeHelpExtension;
 
 function createHelpExtensionApi() {
   /**

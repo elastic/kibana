@@ -38,36 +38,85 @@ const getCtrlShortcuts = shortcuts => {
   };
 };
 
-const refreshShortcut = getAltShortcuts('r');
-const previousPageShortcut = getAltShortcuts('[');
-const nextPageShortcut = getAltShortcuts(']');
+const refreshShortcut = { ...getAltShortcuts('r'), help: 'Refresh workpad' };
+const previousPageShortcut = { ...getAltShortcuts('['), help: 'Go to previous page' };
+const nextPageShortcut = { ...getAltShortcuts(']'), help: 'Go to next page' };
+const deleteElementShortcuts = ['del', 'backspace'];
+const groupShortcut = ['g'];
+const ungroupShortcut = ['u'];
+const fullscreentExitShortcut = ['esc'];
 
 export const keymap = {
+  ELEMENT: {
+    displayName: 'Element controls',
+    COPY: { ...getCtrlShortcuts('c'), help: 'Copy' },
+    CLONE: { ...getCtrlShortcuts('d'), help: 'Clone' },
+    CUT: { ...getCtrlShortcuts('x'), help: 'Cut' },
+    PASTE: { ...getCtrlShortcuts('v'), help: 'Paste' },
+    DELETE: {
+      osx: deleteElementShortcuts,
+      windows: deleteElementShortcuts,
+      linux: deleteElementShortcuts,
+      other: deleteElementShortcuts,
+      help: 'Delete',
+    },
+    BRING_FORWARD: {
+      ...getCtrlShortcuts('up'),
+      help: 'Send forward',
+    },
+    BRING_TO_FRONT: {
+      ...getCtrlShortcuts('shift+up'),
+      help: 'Send to front',
+    },
+    SEND_BACKWARD: {
+      ...getCtrlShortcuts('down'),
+      help: 'Send backward',
+    },
+    SEND_TO_BACK: {
+      ...getCtrlShortcuts('shift+down'),
+      help: 'Send to back',
+    },
+    GROUP: {
+      osx: groupShortcut,
+      windows: groupShortcut,
+      linux: groupShortcut,
+      other: groupShortcut,
+      help: 'Group',
+    },
+    UNGROUP: {
+      osx: ungroupShortcut,
+      windows: ungroupShortcut,
+      linux: ungroupShortcut,
+      other: ungroupShortcut,
+      help: 'Ungroup',
+    },
+  },
   EDITOR: {
-    UNDO: getCtrlShortcuts('z'),
-    REDO: getCtrlShortcuts('shift+z'),
+    displayName: 'Editor controls',
+    UNDO: { ...getCtrlShortcuts('z'), help: 'Undo last action' },
+    REDO: { ...getCtrlShortcuts('shift+z'), help: 'Redo last action' },
     PREV: previousPageShortcut,
     NEXT: nextPageShortcut,
-    FULLSCREEN: getAltShortcuts(['p', 'f']),
-    FULLSCREEN_EXIT: ['escape'],
-    EDITING: getAltShortcuts('e'),
-    GRID: getAltShortcuts('g'),
+    EDITING: { ...getAltShortcuts('e'), help: 'Toggle edit mode' },
+    GRID: { ...getAltShortcuts('g'), help: 'Show grid' },
     REFRESH: refreshShortcut,
   },
-  ELEMENT: {
-    COPY: getCtrlShortcuts('c'),
-    CLONE: getCtrlShortcuts('d'),
-    CUT: getCtrlShortcuts('x'),
-    PASTE: getCtrlShortcuts('v'),
-    DELETE: ['del', 'backspace'],
-    BRING_FORWARD: getCtrlShortcuts('up'),
-    SEND_BACKWARD: getCtrlShortcuts('down'),
-    BRING_TO_FRONT: getCtrlShortcuts('shift+up'),
-    SEND_TO_BACK: getCtrlShortcuts('shift+down'),
-  },
   PRESENTATION: {
-    PREV: mapValues(previousPageShortcut, osShortcuts => osShortcuts.concat(['backspace', 'left'])),
-    NEXT: mapValues(nextPageShortcut, osShortcuts => osShortcuts.concat(['space', 'right'])),
+    displayName: 'Presentation mode',
+    FULLSCREEN: { ...getAltShortcuts(['p', 'f']), help: 'Enter presentation mode' },
+    FULLSCREEN_EXIT: {
+      osx: fullscreentExitShortcut,
+      windows: fullscreentExitShortcut,
+      linux: fullscreentExitShortcut,
+      other: fullscreentExitShortcut,
+      help: 'Exit presentation mode',
+    },
+    PREV: mapValues(previousPageShortcut, (osShortcuts, key) =>
+      key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
+    ),
+    NEXT: mapValues(nextPageShortcut, (osShortcuts, key) =>
+      key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
+    ),
     REFRESH: refreshShortcut,
   },
 };

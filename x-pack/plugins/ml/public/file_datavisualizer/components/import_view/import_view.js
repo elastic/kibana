@@ -30,6 +30,7 @@ import { ml } from '../../../services/ml_api_service';
 import { hasImportPermission } from '../utils';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
+const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {
@@ -577,10 +578,15 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
 }
 
 function getDefaultState(state, results) {
-  const indexSettingsString = (state.indexSettingsString === '') ? '{}' : state.indexSettingsString;
-  const mappingsString = (state.mappingsString === '') ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+  const indexSettingsString = (state.indexSettingsString === '') ?
+    JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2) : state.indexSettingsString;
+
+  const mappingsString = (state.mappingsString === '') ?
+    JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+
   const pipelineString = (state.pipelineString === '' && results.ingest_pipeline !== undefined) ?
     JSON.stringify(results.ingest_pipeline, null, 2) : state.pipelineString;
+
   const timeFieldName = results.timestamp_field;
 
   return {

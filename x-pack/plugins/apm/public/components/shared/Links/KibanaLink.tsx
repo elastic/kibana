@@ -8,13 +8,14 @@ import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
 import { connect } from 'react-redux';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../typings/common';
 import { getKibanaHref, KibanaHrefArgs } from './url_helpers';
 
 interface Props extends KibanaHrefArgs {
   disabled?: boolean;
   to?: StringMap;
   className?: string;
+  [prop: string]: any;
 }
 
 /**
@@ -23,13 +24,13 @@ interface Props extends KibanaHrefArgs {
  *
  * You must remember to pass in location in that case.
  */
-export function UnconnectedKibanaLink({
+const UnconnectedKibanaLink: React.FunctionComponent<Props> = ({
   location,
   pathname,
   hash,
   query,
   ...props
-}: Props) {
+}) => {
   const href = getKibanaHref({
     location,
     pathname,
@@ -37,11 +38,13 @@ export function UnconnectedKibanaLink({
     query
   });
   return <EuiLink {...props} href={href} />;
-}
+};
 
 const withLocation = connect(
   ({ location }: { location: Location }) => ({ location }),
   {}
 );
 
-export const KibanaLink = withLocation(UnconnectedKibanaLink);
+const KibanaLink = withLocation(UnconnectedKibanaLink);
+
+export { UnconnectedKibanaLink, KibanaLink };

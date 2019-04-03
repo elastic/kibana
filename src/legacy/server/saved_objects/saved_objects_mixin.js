@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { createSavedObjectsService } from './service';
 import { KibanaMigrator } from './migrations';
 import { SavedObjectsSchema } from './schema';
 import { SavedObjectsSerializer } from './serialization';
+import {
+  SavedObjectsClient,
+  SavedObjectsRepository,
+  ScopedSavedObjectsClientProvider,
+} from './service';
+import { getRootPropertiesObjects } from '../mappings';
 
 import {
   createBulkCreateRoute,
@@ -30,21 +35,21 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createExportRoute,
+  createImportRoute,
+  createResolveImportErrorsRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = new KibanaMigrator({ kbnServer });
 
-  server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
   server.decorate('server', 'kibanaMigrator', migrator);
 
+  const warn = message => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
-    server.log(
-      ['warning', 'saved-objects'],
-      `Saved Objects uninitialized because the Kibana plugin is disabled.`
-    );
+    warn('Saved Objects uninitialized because the Kibana plugin is disabled.');
     return;
   }
 
@@ -56,7 +61,6 @@ export function savedObjectsMixin(kbnServer, server) {
       },
     },
   };
-
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
@@ -64,13 +68,66 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
+  server.route(createExportRoute(prereqs, server));
+  server.route(createImportRoute(prereqs, server));
+  server.route(createResolveImportErrorsRoute(prereqs, server));
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
+  const mappings = migrator.getActiveMappings();
+  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+
+  const createRepository = (callCluster, extraTypes = []) => {
+    if (typeof callCluster !== 'function') {
+      throw new TypeError('Repository requires a "callCluster" function to be provided.');
+    }
+    // throw an exception if an extraType is not defined.
+    extraTypes.forEach(type => {
+      if (!allTypes.includes(type)) {
+        throw new Error(`Missing mappings for saved objects type '${type}'`);
+      }
+    });
+    const combinedTypes = visibleTypes.concat(extraTypes);
+    const allowedTypes = [...new Set(combinedTypes)];
+
+    return new SavedObjectsRepository({
+      index: server.config().get('kibana.index'),
+      migrator,
+      mappings,
+      schema,
+      serializer,
+      allowedTypes,
+      callCluster,
+    });
+  };
+
+  const provider = new ScopedSavedObjectsClientProvider({
+    index: server.config().get('kibana.index'),
+    mappings,
+    defaultClientFactory({ request }) {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      const callCluster = (...args) => callWithRequest(request, ...args);
+      const repository = createRepository(callCluster);
+
+      return new SavedObjectsClient(repository);
+    },
+  });
+
+  const service = {
+    types: visibleTypes,
+    SavedObjectsClient,
+    SavedObjectsRepository,
+    getSavedObjectsRepository: createRepository,
+    getScopedSavedObjectsClient: (...args) => provider.getClient(...args),
+    setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
+    addScopedSavedObjectsClientWrapperFactory: (...args) =>
+      provider.addClientWrapperFactory(...args),
+  };
+  server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function () {
+  server.decorate('request', 'getSavedObjectsClient', function() {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {

@@ -24,12 +24,14 @@ import {
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { Fragment, SFC } from 'react';
+// @ts-ignore
+import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset, AssetType } from './asset';
 
 interface Props {
   /** The assets to display within the modal */
-  assets: AssetType[];
+  assetValues: AssetType[];
   /** Indicates if assets are being loaded */
   isLoading: boolean;
   /** Function to invoke when the modal is closed */
@@ -44,11 +46,9 @@ interface Props {
   onAssetDelete: (asset: AssetType) => void;
 }
 
-const ASSET_MAX_LIMIT = 25000;
-
 export const AssetModal: SFC<Props> = props => {
   const {
-    assets,
+    assetValues,
     isLoading,
     onAssetCopy,
     onAssetCreate,
@@ -58,10 +58,10 @@ export const AssetModal: SFC<Props> = props => {
   } = props;
 
   const assetsTotal = Math.round(
-    assets.reduce((total, asset) => total + asset.value.length, 0) / 1024
+    assetValues.reduce((total, { value }) => total + value.length, 0) / 1024
   );
 
-  const percentageUsed = Math.round((assetsTotal / ASSET_MAX_LIMIT) * 100);
+  const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
 
   const emptyAssets = (
     <EuiPanel className="canvasAssetManager__emptyPanel">
@@ -114,9 +114,9 @@ export const AssetModal: SFC<Props> = props => {
             </p>
           </EuiText>
           <EuiSpacer />
-          {assets.length ? (
+          {assetValues.length ? (
             <EuiFlexGrid columns={4}>
-              {assets.map(asset => (
+              {assetValues.map(asset => (
                 <Asset
                   asset={asset}
                   key={asset.id}
@@ -135,7 +135,7 @@ export const AssetModal: SFC<Props> = props => {
             <EuiFlexItem>
               <EuiProgress
                 value={assetsTotal}
-                max={ASSET_MAX_LIMIT}
+                max={ASSET_MAX_SIZE}
                 color={percentageUsed < 90 ? 'secondary' : 'danger'}
                 size="s"
                 aria-labelledby="CanvasAssetManagerLabel"
@@ -155,7 +155,7 @@ export const AssetModal: SFC<Props> = props => {
 };
 
 AssetModal.propTypes = {
-  assets: PropTypes.array,
+  assetValues: PropTypes.array,
   isLoading: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onFileUpload: PropTypes.func.isRequired,

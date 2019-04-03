@@ -206,6 +206,9 @@ function PipelinesTableUi({
       search={search}
       selection={selectionOptions}
       sorting={true}
+      rowProps={{
+        'data-test-subj': 'row'
+      }}
     />
   );
 }

@@ -27,7 +27,7 @@
 
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       const fieldName = 'geo.srcdest';
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickIndexPatternLogstash();
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');

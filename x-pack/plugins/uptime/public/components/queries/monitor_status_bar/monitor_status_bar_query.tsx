@@ -9,10 +9,10 @@ import { ApolloError } from 'apollo-client';
 import { get } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
+import { Ping } from '../../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { EmptyStatusBar, MonitorStatusBar } from '../../functional';
-import { formatDuration } from './format_duration';
 import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
@@ -63,16 +63,11 @@ export const MonitorStatusBarQuery = ({
       }
       const { monitor, timestamp, url } = monitorStatus[0];
       const status = get(monitor, 'status', undefined);
-      const duration = parseInt(get(monitor, 'duration.us'), 10);
+      const duration = microsToMillis(get(monitor, 'duration.us', null));
       const full = get(url, 'full', undefined);
 
       return (
-        <MonitorStatusBar
-          duration={formatDuration(duration)}
-          status={status}
-          timestamp={timestamp}
-          url={full}
-        />
+        <MonitorStatusBar duration={duration} status={status} timestamp={timestamp} url={full} />
       );
     }}
   </Query>

@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { timingSafeEqual } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
+import { chunk } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { CMServerLibs } from './types';
@@ -28,7 +28,6 @@ export class CMTokensDomain {
       this.framework.internalUser,
       enrollmentToken
     );
-
     if (!fullToken) {
       return {
         token: null,
@@ -103,7 +102,7 @@ export class CMTokensDomain {
 
     const tokenData = {
       created: moment().toJSON(),
-      randomHash: this.createRandomHash(),
+      randomHash: randomBytes(26).toString(),
     };
 
     return signToken(tokenData, enrollmentTokenSecret);
@@ -119,20 +118,25 @@ export class CMTokensDomain {
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
+    const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
 
     while (tokens.length < numTokens) {
+      const tokenData = {
+        created: moment().toJSON(),
+        expires: enrollmentTokenExpiration,
+        randomHash: randomBytes(26).toString(),
+      };
+
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: this.createRandomHash(),
+        token: signToken(tokenData, enrollmentTokenSecret),
       });
     }
 
-    await this.adapter.upsertTokens(user, tokens);
+    await Promise.all(
+      chunk(tokens, 100).map(tokenChunk => this.adapter.insertTokens(user, tokenChunk))
+    );
 
     return tokens.map(token => token.token);
-  }
-
-  private createRandomHash() {
-    return uuid.v4().replace(/-/g, '');
   }
 }

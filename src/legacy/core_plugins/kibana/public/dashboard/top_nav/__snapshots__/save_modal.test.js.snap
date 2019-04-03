@@ -18,6 +18,7 @@ exports[`renders DashboardSaveModal 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiTextArea
           compressed={true}
@@ -46,6 +47,7 @@ exports[`renders DashboardSaveModal 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiSwitch
           checked={true}

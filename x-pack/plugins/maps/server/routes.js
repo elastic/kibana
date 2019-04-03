@@ -106,7 +106,8 @@ export function initRoutes(server, licenseUid) {
         fields: fileLayer.getFieldsInLanguage(),
         url: fileLayer.getDefaultFormatUrl(),
         format: format, //legacy: format and meta are split up
-        meta: meta //legacy, format and meta are split up
+        meta: meta, //legacy, format and meta are split up,
+        emsLink: fileLayer.getEMSHotLink()
       };
     });
 

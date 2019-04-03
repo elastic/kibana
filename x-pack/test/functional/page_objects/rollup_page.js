@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { map as mapAsync } from 'bluebird';
 
 export function RollupPageProvider({ getService, getPageObjects }) {
@@ -59,8 +59,8 @@ export function RollupPageProvider({ getService, getPageObjects }) {
         const jobStatusElement = await job.findByCssSelector('[data-test-subj="jobTableCell-status"]');
         const jobIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-indexPattern"]');
         const jobRollUpIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-rollupIndex"]');
-        const jobDelayElement = await job.findByCssSelector('[data-test-subj="jobTableCell-delay"]');
-        const jobIntervalElement = await job.findByCssSelector('[data-test-subj="jobTableCell-interval"]');
+        const jobDelayElement = await job.findByCssSelector('[data-test-subj="jobTableCell-rollupDelay"]');
+        const jobIntervalElement = await job.findByCssSelector('[data-test-subj="jobTableCell-dateHistogramInterval"]');
         const jobGroupElement = await job.findByCssSelector('[data-test-subj="jobTableCell-groups"]');
         const jobMetricsElement = await job.findByCssSelector('[data-test-subj="jobTableCell-metrics"]');
 

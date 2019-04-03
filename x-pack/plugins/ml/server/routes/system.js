@@ -8,6 +8,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
+import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
 import Boom from 'boom';
@@ -43,10 +44,22 @@ export function systemRoutes(server, commonRouteConfig) {
     async handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
-        const info = await callWithRequest('ml.info');
-        // if ml indices are currently being migrated, upgrade_mode will be set to true
-        // pass this back with the privileges to allow for the disabling of UI controls.
-        const upgradeInProgress = (info.upgrade_mode === true);
+        let upgradeInProgress = false;
+        try {
+          const info = await callWithRequest('ml.info');
+          // if ml indices are currently being migrated, upgrade_mode will be set to true
+          // pass this back with the privileges to allow for the disabling of UI controls.
+          upgradeInProgress = (info.upgrade_mode === true);
+        } catch (error) {
+          // if the ml.info check fails, it could be due to the user having insufficient privileges
+          // most likely they do not have the ml_user role and therefore will be blocked from using
+          // ML at all. However, we need to catch this error so the privilege check doesn't fail.
+          if (error.status === 403) {
+            mlLog('info', 'Unable to determine whether upgrade is being performed due to insufficient user privileges');
+          } else {
+            mlLog('warning', 'Unable to determine whether upgrade is being performed');
+          }
+        }
 
         // isSecurityDisabled will return true if it is a basic license
         // this will cause the subsequent ml.privilegeCheck to fail.

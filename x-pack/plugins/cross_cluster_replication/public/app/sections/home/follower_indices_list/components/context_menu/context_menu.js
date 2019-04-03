@@ -67,12 +67,13 @@ export class ContextMenu extends PureComponent {
           values={{ followerIndicesLength }}
         />
       ),
+      testSubj,
     } = this.props;
 
 
     const button = (
       <EuiButton
-        data-test-subj="followerIndexContextMenuButton"
+        data-test-subj={testSubj}
         iconSide={iconSide}
         onClick={this.onButtonClick}
         iconType={iconType}
@@ -102,7 +103,7 @@ export class ContextMenu extends PureComponent {
             values={{ followerIndicesLength }}
           />
         </EuiPopoverTitle>
-        <EuiContextMenuPanel>
+        <EuiContextMenuPanel data-test-subj="followerIndexActionContextMenu">
 
           {
             activeFollowerIndices.length ? (
@@ -111,6 +112,7 @@ export class ContextMenu extends PureComponent {
                   <EuiContextMenuItem
                     icon="pause"
                     onClick={() => pauseFollowerIndex(activeFollowerIndices)}
+                    data-test-subj="ccrFollowerIndexContextMenuPauseActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
@@ -129,6 +131,7 @@ export class ContextMenu extends PureComponent {
                   <EuiContextMenuItem
                     icon="play"
                     onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
+                    data-test-subj="ccrFollowerIndexContextMenuResumeActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
@@ -148,6 +151,7 @@ export class ContextMenu extends PureComponent {
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
+                  data-test-subj="ccrFollowerIndexContextMenuEditActionButton"
                   defaultMessage="Edit follower index"
                 />
               </EuiContextMenuItem>
@@ -159,6 +163,7 @@ export class ContextMenu extends PureComponent {
               <EuiContextMenuItem
                 icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}
+                data-test-subj="ccrFollowerIndexContextMenuUnfollowActionButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.unfollowLabel"

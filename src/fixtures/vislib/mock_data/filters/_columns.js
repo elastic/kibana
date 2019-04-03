@@ -21,6 +21,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['css', 'png'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -55,6 +56,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['css', 'png'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -89,6 +91,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['css', 'png'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);

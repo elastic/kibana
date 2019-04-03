@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { MonitorPageTitle as TitleType } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
 
 interface MonitorPageTitleProps {
   pageTitle: TitleType;
@@ -16,7 +16,7 @@ export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTi
   <EuiFlexGroup alignItems="baseline">
     <EuiFlexItem grow={false}>
       <EuiTitle>
-        <h2>{name ? name : url}</h2>
+        <h2 data-test-subj="monitor-page-title">{name ? name : url}</h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

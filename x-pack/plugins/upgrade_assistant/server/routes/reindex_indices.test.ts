@@ -18,6 +18,7 @@ const mockReindexService = {
   cancelReindexing: jest.fn(),
 };
 
+jest.mock('../lib/es_version_precheck');
 jest.mock('../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,

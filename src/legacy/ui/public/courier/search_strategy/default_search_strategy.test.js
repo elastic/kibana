@@ -35,7 +35,7 @@ describe('defaultSearchStrategy', function () {
         searchRequests: [],
         es: { msearch: msearchMock },
         Promise,
-        serializeFetchParams: () => Promise.resolve([]),
+        serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
       };
     });
 

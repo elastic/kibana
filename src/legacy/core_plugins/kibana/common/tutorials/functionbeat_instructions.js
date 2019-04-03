@@ -315,7 +315,7 @@ export function functionbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms, geoipRequired, uaRequired, context) {
+export function onPremInstructions(platforms, context) {
   const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
 
   return {

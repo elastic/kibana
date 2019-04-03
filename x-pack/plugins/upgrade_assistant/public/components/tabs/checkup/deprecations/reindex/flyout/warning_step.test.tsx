@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -22,7 +23,11 @@ describe('WarningsFlyoutStep', () => {
   });
 
   it('does not allow proceeding until all are checked', () => {
-    const wrapper = mount(<WarningsFlyoutStep {...defaultProps} />);
+    const wrapper = mount(
+      <I18nProvider>
+        <WarningsFlyoutStep {...defaultProps} />
+      </I18nProvider>
+    );
     const button = wrapper.find('EuiButton');
 
     button.simulate('click');

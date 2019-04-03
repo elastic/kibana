@@ -387,7 +387,14 @@ export class FieldEditorComponent extends PureComponent {
     const { intl } = this.props;
 
     return (
-      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.popularityLabel', defaultMessage: 'Popularity' })}>
+      <EuiFormRow label={
+        intl.formatMessage({
+          id: 'common.ui.fieldEditor.popularityLabel',
+          defaultMessage: 'Popularity',
+          description: '"Popularity" refers to Kibana\'s measurement how popular a field is (i.e. how commonly it is used).',
+        })
+      }
+      >
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"

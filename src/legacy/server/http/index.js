@@ -28,7 +28,7 @@ import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  kbnServer.server = new Hapi.Server(kbnServer.core.serverOptions);
+  kbnServer.server = new Hapi.Server(kbnServer.newPlatform.params.serverOptions);
   server = kbnServer.server;
 
   setupBasePathProvider(server, config);
