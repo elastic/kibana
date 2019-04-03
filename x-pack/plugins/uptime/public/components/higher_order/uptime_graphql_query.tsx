@@ -7,7 +7,7 @@
 import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
 import React, { Fragment, useEffect, useState } from 'react';
-import { withApollo, WithApolloClient } from 'react-apollo';
+import { withApollo } from 'react-apollo';
 import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
 
 export interface UptimeGraphQLQueryProps<T> {
