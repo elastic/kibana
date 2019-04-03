@@ -10,16 +10,24 @@ export const ecsSchema = gql`
   scalar ToStringArray
 
   type EventEcsFields {
+    action: String
     category: String
+    created: Date
+    dataset: String
     duration: Float
+    end: Date
+    hash: String
     id: Float
+    kind: String
     module: String
+    original: [String]
+    outcome: String
+    risk_score: Float
+    risk_score_norm: Float
     severity: Float
     start: Date
-    end: Date
-    action: String
+    timezone: String
     type: String
-    dataset: String
   }
 
   type Location {

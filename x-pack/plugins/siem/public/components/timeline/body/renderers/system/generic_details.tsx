@@ -15,26 +15,26 @@ import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
 import { AuditdNetflow } from '../auditd_netflow';
 
-import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
+import { Details, TokensFlexItem, UserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
   id: string;
   hostName: string | null | undefined;
-  result: string | null | undefined;
+  outcome: string | null | undefined;
   userName: string | null | undefined;
   primary: string | null | undefined;
   contextId: string;
   text: string;
   secondary: string | null | undefined;
-  processExecutable: string | null | undefined;
+  processPid: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
 }
 
-export const AuditdGenericLine = pure<Props>(
+export const SystemGenericLine = pure<Props>(
   ({
     id,
     contextId,
@@ -42,41 +42,35 @@ export const AuditdGenericLine = pure<Props>(
     userName,
     primary,
     secondary,
-    processExecutable,
+    processPid,
     processTitle,
     workingDirectory,
     args,
-    result,
+    outcome,
     session,
     text,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <SessionUserHostWorkingDir
-        eventId={id}
+      <UserHostWorkingDir
         contextId={contextId}
-        hostName={hostName}
+        eventId={id}
         userName={userName}
-        primary={primary}
-        secondary={secondary}
+        hostName={hostName}
         workingDirectory={workingDirectory}
-        session={session}
       />
-      {processExecutable != null && (
-        <TokensFlexItem grow={false} component="span">
-          {text}
-        </TokensFlexItem>
-      )}
+      <TokensFlexItem grow={false} component="span">
+        {text}
+      </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           contextId={contextId}
           eventId={id}
-          field="process.executable"
-          value={processExecutable}
-          iconType="console"
+          field="process.pid"
+          value={processPid}
+          iconType="number"
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
-      {result != null && (
+      {outcome != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
         </TokensFlexItem>
@@ -85,9 +79,9 @@ export const AuditdGenericLine = pure<Props>(
         <DraggableBadge
           contextId={contextId}
           eventId={id}
-          field="auditd.result"
-          queryValue={result}
-          value={result}
+          field="event.outcome"
+          queryValue={outcome}
+          value={outcome}
         />
       </TokensFlexItem>
     </EuiFlexGroup>
@@ -101,44 +95,44 @@ interface GenericDetailsProps {
   text: string;
 }
 
-export const AuditdGenericDetails = pure<GenericDetailsProps>(
+export const SystemGenericDetails = pure<GenericDetailsProps>(
   ({ browserFields, data, contextId, text }) => {
+    // TODO: Do not check this in
+    // console.log('data is:', JSON.stringify(data, null, 2));
     const id = data._id;
-    const session: string | null | undefined = get('auditd.session', data);
     const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
-    const result: string | null | undefined = get('auditd.result', data);
-    const processExecutable: string | null | undefined = get('process.executable', data);
+    const outcome: string | null | undefined = get('event.outcome', data);
+    const processExecutable: string | null | undefined = get('process.pid', data);
+    const processPid: string | null | undefined = get('process.pid', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);
-    const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
-    const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
     const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
-    if (data.process != null) {
-      return (
-        <Details>
-          <AuditdGenericLine
-            id={id}
-            contextId={contextId}
-            text={text}
-            hostName={hostName}
-            userName={userName}
-            processExecutable={processExecutable}
-            processTitle={processTitle}
-            workingDirectory={workingDirectory}
-            args={args}
-            session={session}
-            primary={primary}
-            result={result}
-            secondary={secondary}
-          />
-          <EuiSpacer size="s" />
-          <AuditdNetflow data={data} />
-        </Details>
-      );
-    } else {
-      return null;
-    }
+    // const primary: string | null | undefined = get('user.effective.name', data);
+    // const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
+    // TODO: Do not check this in
+    // console.log('outcome of the system is:', outcome);
+    return (
+      <Details>
+        <SystemGenericLine
+          id={id}
+          contextId={contextId}
+          text={text}
+          hostName={hostName}
+          userName={userName}
+          processPid={processPid}
+          processTitle={processTitle}
+          workingDirectory={workingDirectory}
+          args={args}
+          session={undefined}
+          primary={undefined}
+          outcome={outcome}
+          secondary={undefined}
+        />
+        <EuiSpacer size="s" />
+        <AuditdNetflow data={data} />
+      </Details>
+    );
   }
 );

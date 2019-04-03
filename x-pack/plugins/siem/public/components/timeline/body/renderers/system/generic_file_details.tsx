@@ -11,20 +11,25 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { Args } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
+import { getEmptyStringTag } from '../../../../empty_value';
 import { AuditdNetflow } from '../auditd_netflow';
 
-import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
+import { Details, TokensFlexItem } from '.';
+import { UserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
+  processName: string | null | undefined;
+  processPid: string | null | undefined;
   processExecutable: string | null | undefined;
-  result: string | null | undefined;
+  outcome: string | null | undefined;
   primary: string | null | undefined;
   fileIcon: IconType;
   contextId: string;
@@ -37,16 +42,18 @@ interface Props {
   session: string | null | undefined;
 }
 
-export const AuditdGenericFileLine = pure<Props>(
+export const SystemGenericFileLine = pure<Props>(
   ({
     id,
     contextId,
     hostName,
     userName,
-    result,
+    outcome,
     primary,
     secondary,
     filePath,
+    processPid,
+    processName,
     processTitle,
     processExecutable,
     workingDirectory,
@@ -56,46 +63,27 @@ export const AuditdGenericFileLine = pure<Props>(
     fileIcon,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <SessionUserHostWorkingDir
+      <UserHostWorkingDir
         eventId={id}
         contextId={contextId}
-        hostName={hostName}
         userName={userName}
-        primary={primary}
-        secondary={secondary}
         workingDirectory={workingDirectory}
-        session={session}
+        hostName={hostName}
       />
-      {(filePath != null || processExecutable != null) && (
-        <TokensFlexItem grow={false} component="span">
-          {text}
-        </TokensFlexItem>
-      )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={id}
-          field="file.path"
-          value={filePath}
-          iconType={fileIcon}
-        />
+        {text}
       </TokensFlexItem>
-      {processExecutable != null && (
-        <TokensFlexItem grow={false} component="span">
-          {i18n.USING}
-        </TokensFlexItem>
-      )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
+        <ProcessDraggable
           contextId={contextId}
           eventId={id}
-          field="process.executable"
-          value={processExecutable}
-          iconType="console"
+          processPid={processPid}
+          processName={processName}
+          processExecutable={processExecutable}
         />
       </TokensFlexItem>
       <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
-      {result != null && (
+      {outcome != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
         </TokensFlexItem>
@@ -104,9 +92,9 @@ export const AuditdGenericFileLine = pure<Props>(
         <DraggableBadge
           contextId={contextId}
           eventId={id}
-          field="auditd.result"
-          queryValue={result}
-          value={result}
+          field="event.outcome"
+          queryValue={outcome}
+          value={outcome}
         />
       </TokensFlexItem>
     </EuiFlexGroup>
@@ -121,13 +109,15 @@ interface GenericDetailsProps {
   fileIcon: IconType;
 }
 
-export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
+export const SystemGenericFileDetails = pure<GenericDetailsProps>(
   ({ browserFields, data, contextId, text, fileIcon = 'document' }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session', data);
     const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
-    const result: string | null | undefined = get('auditd.result', data);
+    const outcome: string | null | undefined = get('event.outcome', data);
+    const processPid: string | null | undefined = get('process.pid', data);
+    const processName: string | null | undefined = get('process.name', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);
@@ -140,7 +130,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
     if (data.process != null) {
       return (
         <Details>
-          <AuditdGenericFileLine
+          <SystemGenericFileLine
             id={id}
             contextId={contextId}
             text={text}
@@ -152,15 +142,75 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
             args={args}
             session={session}
             primary={primary}
+            processName={processName}
+            processPid={processPid}
             processExecutable={processExecutable}
             secondary={secondary}
             fileIcon={fileIcon}
-            result={result}
+            outcome={outcome}
           />
           <EuiSpacer size="s" />
           <AuditdNetflow data={data} />
         </Details>
       );
+    } else {
+      return null;
+    }
+  }
+);
+
+interface ProcessDraggableProps {
+  contextId: string;
+  eventId: string;
+  processExecutable: string | undefined | null;
+  processPid?: string | undefined | null;
+  processName?: string | undefined | null;
+}
+
+export const ProcessDraggable = pure<ProcessDraggableProps>(
+  ({ contextId, eventId, processExecutable, processName, processPid }) => {
+    if (processExecutable != null) {
+      if (processExecutable === '') {
+        return getEmptyStringTag();
+      } else {
+        return (
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="process.executable"
+            value={processExecutable}
+            iconType="console"
+          />
+        );
+      }
+    } else if (processName != null) {
+      if (processName === '') {
+        return getEmptyStringTag();
+      } else {
+        return (
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="process.name"
+            value={processName}
+            iconType="console"
+          />
+        );
+      }
+    } else if (processPid != null) {
+      if (processPid === '') {
+        return getEmptyStringTag();
+      } else {
+        return (
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="process.pid"
+            value={processExecutable}
+            iconType="number"
+          />
+        );
+      }
     } else {
       return null;
     }

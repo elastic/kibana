@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../../draggables';
 
+import { TokensFlexItem } from '.';
 import * as i18n from './translations';
-
-const TokensFlexItem = styled(EuiFlexItem)`
-  margin-left: 3px;
-`;
 
 export const nilOrUnSet = (value?: string | null) =>
   value == null || value.toLowerCase() === 'unset';

@@ -97,7 +97,7 @@ export const netflowRowRenderer: RowRenderer = {
       <RowRendererContainer width={width}>
         <Details>
           <Netflow
-            contextId="auditd-acquired-creds"
+            contextId={NETWORK_FLOW}
             destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
             destinationGeoContinentName={asArrayIfExists(
               get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)

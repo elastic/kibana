@@ -44,14 +44,23 @@ export const timelineQuery = gql`
               timestamp
               event {
                 action
-                severity
-                module
                 category
-                id
+                created
                 dataset
                 duration
-                start
                 end
+                hash
+                id
+                kind
+                module
+                original
+                outcome
+                risk_score
+                risk_score_norm
+                severity
+                start
+                timezone
+                type
               }
               auditd {
                 result

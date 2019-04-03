@@ -213,15 +213,22 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.action': 'event.action',
   'event.category': 'event.category',
+  'event.created': 'event.created',
+  'event.dataset': 'event.dataset',
   'event.duration': 'event.duration',
-  // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
-  'event.id': 'suricata.eve.flow_id',
+  'event.end': 'event.end',
+  'event.hash': 'event.hash',
+  'event.id': 'event.id',
+  'event.kind': 'event.kind',
   'event.module': 'event.module',
+  'event.original': 'event.original',
+  'event.outcome': 'event.outcome',
+  'event.risk_score': 'event.risk_score',
+  'event.risk_score_norm': 'event.risk_score_norm',
   'event.severity': 'event.severity',
   'event.start': 'event.start',
-  'event.end': 'event.end',
+  'event.timezone': 'event.timezone',
   'event.type': 'event.type',
-  'event.dataset': 'event.dataset',
 };
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {

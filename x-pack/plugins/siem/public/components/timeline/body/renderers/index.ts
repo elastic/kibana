@@ -12,6 +12,7 @@ import { plainColumnRenderer } from './plain_column_renderer';
 import { plainRowRenderer } from './plain_row_renderer';
 import { RowRenderer } from './row_renderer';
 import { suricataRowRenderer } from './suricata_row_renderer';
+import { systemRowRenderers } from './system';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
@@ -31,6 +32,7 @@ export const rowRenderers: RowRenderer[] = [
   ...auditdRowRenderers,
   netflowRowRenderer,
   suricataRowRenderer,
+  ...systemRowRenderers,
   zeekRowRenderer,
   plainRowRenderer, // falls-back to the plain row renderer
 ];

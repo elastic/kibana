@@ -378,25 +378,41 @@ export interface DestinationEcsFields {
 }
 
 export interface EventEcsFields {
+  action?: string | null;
+
   category?: string | null;
+
+  created?: Date | null;
+
+  dataset?: string | null;
 
   duration?: number | null;
 
+  end?: Date | null;
+
+  hash?: string | null;
+
   id?: number | null;
 
+  kind?: string | null;
+
   module?: string | null;
+
+  original?: string | null;
+
+  outcome?: string | null;
+
+  risk_score?: number | null;
+
+  risk_score_norm?: number | null;
 
   severity?: number | null;
 
   start?: Date | null;
 
-  end?: Date | null;
-
-  action?: string | null;
+  timezone?: string | null;
 
   type?: string | null;
-
-  dataset?: string | null;
 }
 
 export interface NetworkEcsField {
@@ -2425,21 +2441,39 @@ export namespace GetTimelineQuery {
 
     action?: string | null;
 
-    severity?: number | null;
-
-    module?: string | null;
-
     category?: string | null;
 
-    id?: number | null;
+    created?: Date | null;
 
     dataset?: string | null;
 
     duration?: number | null;
 
+    end?: Date | null;
+
+    hash?: string | null;
+
+    id?: number | null;
+
+    kind?: string | null;
+
+    module?: string | null;
+
+    original?: string | null;
+
+    outcome?: string | null;
+
+    risk_score?: number | null;
+
+    risk_score_norm?: number | null;
+
+    severity?: number | null;
+
     start?: Date | null;
 
-    end?: Date | null;
+    timezone?: string | null;
+
+    type?: string | null;
   };
 
   export type Auditd = {

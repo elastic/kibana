@@ -62,6 +62,7 @@ export const ATTEMPTED_LOGIN = i18n.translate('xpack.siem.auditd.attemptedLoginD
 export const WITH_RESULT = i18n.translate('xpack.siem.auditd.withResultDescription', {
   defaultMessage: 'with result',
 });
+
 export const EXECUTED = i18n.translate('xpack.siem.auditd.executedDescription', {
   defaultMessage: 'executed',
 });

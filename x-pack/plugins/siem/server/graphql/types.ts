@@ -407,25 +407,41 @@ export interface DestinationEcsFields {
 }
 
 export interface EventEcsFields {
+  action?: string | null;
+
   category?: string | null;
+
+  created?: Date | null;
+
+  dataset?: string | null;
 
   duration?: number | null;
 
+  end?: Date | null;
+
+  hash?: string | null;
+
   id?: number | null;
 
+  kind?: string | null;
+
   module?: string | null;
+
+  original?: string | null;
+
+  outcome?: string | null;
+
+  risk_score?: number | null;
+
+  risk_score_norm?: number | null;
 
   severity?: number | null;
 
   start?: Date | null;
 
-  end?: Date | null;
-
-  action?: string | null;
+  timezone?: string | null;
 
   type?: string | null;
-
-  dataset?: string | null;
 }
 
 export interface NetworkEcsField {
@@ -2485,28 +2501,59 @@ export namespace DestinationEcsFieldsResolvers {
 
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventEcsFields> {
+    action?: ActionResolver<string | null, TypeParent, Context>;
+
     category?: CategoryResolver<string | null, TypeParent, Context>;
+
+    created?: CreatedResolver<Date | null, TypeParent, Context>;
+
+    dataset?: DatasetResolver<string | null, TypeParent, Context>;
 
     duration?: DurationResolver<number | null, TypeParent, Context>;
 
+    end?: EndResolver<Date | null, TypeParent, Context>;
+
+    hash?: HashResolver<string | null, TypeParent, Context>;
+
     id?: IdResolver<number | null, TypeParent, Context>;
 
+    kind?: KindResolver<string | null, TypeParent, Context>;
+
     module?: ModuleResolver<string | null, TypeParent, Context>;
+
+    original?: OriginalResolver<string | null, TypeParent, Context>;
+
+    outcome?: OutcomeResolver<string | null, TypeParent, Context>;
+
+    risk_score?: RiskScoreResolver<number | null, TypeParent, Context>;
+
+    risk_score_norm?: RiskScoreNormResolver<number | null, TypeParent, Context>;
 
     severity?: SeverityResolver<number | null, TypeParent, Context>;
 
     start?: StartResolver<Date | null, TypeParent, Context>;
 
-    end?: EndResolver<Date | null, TypeParent, Context>;
-
-    action?: ActionResolver<string | null, TypeParent, Context>;
+    timezone?: TimezoneResolver<string | null, TypeParent, Context>;
 
     type?: TypeResolver<string | null, TypeParent, Context>;
-
-    dataset?: DatasetResolver<string | null, TypeParent, Context>;
   }
 
+  export type ActionResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type CategoryResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedResolver<
+    R = Date | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DatasetResolver<
     R = string | null,
     Parent = EventEcsFields,
     Context = SiemContext
@@ -2516,13 +2563,48 @@ export namespace EventEcsFieldsResolvers {
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = Date | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HashResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type IdResolver<
     R = number | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type KindResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type ModuleResolver<
     R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OriginalResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OutcomeResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type RiskScoreResolver<
+    R = number | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type RiskScoreNormResolver<
+    R = number | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2536,22 +2618,12 @@ export namespace EventEcsFieldsResolvers {
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type EndResolver<
-    R = Date | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ActionResolver<
+  export type TimezoneResolver<
     R = string | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DatasetResolver<
     R = string | null,
     Parent = EventEcsFields,
     Context = SiemContext
