@@ -23,8 +23,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.0.0-rc2]]
 == {kib} 7.0.0-rc2
 
-coming[7.0.0-rc2]
-
 [float]
 [[breaking-7.0.0-rc2]]
 === Breaking changes
