@@ -86,6 +86,6 @@ export class WMSSource extends AbstractTMSSource {
 
   getUrlTemplate() {
     const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
-    return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles);
+    return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }
 }

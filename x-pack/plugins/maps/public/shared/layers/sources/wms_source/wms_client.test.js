@@ -197,11 +197,11 @@ describe('getCapabilities', () => {
   });
 
   it('Should not overwrite specific query parameters when defined in the url', async () => {
-    const urlWithQuery = 'http://example.com/wms?format=image/jpeg&service=NotWMS&version=0&request=GetNull&srs=Invalid&transparent=false&width=1024&height=640';
+    const urlWithQuery = 'http://example.com/wms?map=MyMap&format=image/jpeg&service=NotWMS&version=0&request=GetNull&srs=Invalid&transparent=false&width=1024&height=640';
     const wmsClient = new WmsClient({ serviceUrl: urlWithQuery });
     const urlTemplate = await wmsClient.getUrlTemplate('MyLayer', 'MyStyle');
     expect(urlTemplate).toEqual(
-      'http://example.com/wms?format=image%2Fpng&service=WMS&version=1.1.1&request=GetMap&srs=EPSG%3A3857&transparent=true&width=256&height=256&layers=MyLayer&styles=MyStyle&bbox={bbox-epsg-3857}'
+      'http://example.com/wms?map=MyMap&format=image%2Fpng&service=WMS&version=1.1.1&request=GetMap&srs=EPSG%3A3857&transparent=true&width=256&height=256&layers=MyLayer&styles=MyStyle&bbox={bbox-epsg-3857}'
     );
   });
 });
