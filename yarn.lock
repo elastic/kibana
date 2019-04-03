@@ -10167,10 +10167,10 @@ gaze@^1.0.0, gaze@^1.1.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.16.0:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.16.0.tgz#ec97f3b175522ce31584af7b42b4ff978e2be170"
-  integrity sha512-im4iInm9n3ntXlsmaoQx5wP1jMP40t+FQBbvlEr5jMCq3ruKcN60/kXn7eYNn0bchpgQf6nXVBy4p8SEaMpI4w==
+geckodriver@^1.16.1:
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.16.1.tgz#349ddc88244356eefc475d943c379bc320d7d59a"
+  integrity sha512-e16K82snvoG60GaMc9E4gIOXwc6HaVY9JIToaIlTI+eVjqnj96vUjQ+/gFZlOUw2N3g4KgST7RFpyoeyJ/jzkQ==
   dependencies:
     adm-zip "0.4.11"
     bluebird "3.4.6"

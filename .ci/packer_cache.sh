@@ -21,8 +21,7 @@ if [ -z "$chromedriverDistVersion" ] || [ -z "$chromedriverPkgVersion" ]; then
   echo "UNABLE TO DETERMINE CHROMEDRIVER VERSIONS"
   exit 1
 fi
-
-mkdir ".chromedriver"
+mkdir -p .chromedriver
 curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/chromedriver.zip
 echo "$chromedriverPkgVersion" > .chromedriver/pkgVersion
 
@@ -32,7 +31,7 @@ if [ -z "$geckodriverPkgVersion" ]; then
   echo "UNABLE TO DETERMINE geckodriver VERSIONS"
   exit 1
 fi
-mkdir ".geckodriver"
+mkdir -p ".geckodriver"
 cp "node_modules/geckodriver/geckodriver.tar.gz" .geckodriver/geckodriver.tar.gz
 echo "$geckodriverPkgVersion" > .geckodriver/pkgVersion
 
