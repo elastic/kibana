@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { parse } from 'wellknown';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -113,28 +114,8 @@ export function geoPointToGeometry(value) {
   );
 }
 
-export function geoShapeToGeometry(value) {
-  if (!value) {
-    return [];
-  }
 
-  if (Array.isArray(value)) {
-    // value expressed as an array of values
-    return value.reduce(
-      (shapes, itemInValueArray) => {
-        return shapes.concat(geoShapeToGeometry(itemInValueArray));
-      },
-      []
-    );
-  }
-
-  // TODO handle case where value is WKT and convert to geojson
-  if (typeof value === 'string') {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.wktIsUnsupportedErrorMessage', {
-      defaultMessage: `Unable to convert WKT to geojson, not supported`,
-    });
-    throw new Error(errorMessage);
-  }
+function convertESShapeToGeojsonGeometry(value) {
 
   const geoJson = _.cloneDeep(value);
 
@@ -165,6 +146,39 @@ export function geoShapeToGeometry(value) {
     case 'circle':
       // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
       throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
+  }
+  return geoJson;
+}
+
+function convertWKTStringToGeojson(value) {
+  try {
+    return parse(value);
+  } catch (e) {
+    throw new Error(`Unable to convert ${value} to geojson. Valid WKT expected.`);
+  }
+}
+
+
+export function geoShapeToGeometry(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    // value expressed as an array of values
+    return value.reduce(
+      (shapes, itemInValueArray) => {
+        return shapes.concat(geoShapeToGeometry(itemInValueArray));
+      },
+      []
+    );
+  }
+
+  let geoJson;
+  if (typeof value === 'string') {
+    geoJson = convertWKTStringToGeojson(value);
+  } else {
+    geoJson = convertESShapeToGeojsonGeometry(value);
   }
 
   return [geoJson];
