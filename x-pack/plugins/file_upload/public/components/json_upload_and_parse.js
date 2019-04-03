@@ -16,13 +16,15 @@ import { parseFile } from '../util/file_parser';
 import { triggerIndexing } from '../util/indexing_service';
 import _ from 'lodash';
 
-export function JsonUploadAndParse({ previewFile, defaultMessage, postProcessing, boolIndexData = false }) {
+export function JsonUploadAndParse({ postProcessing, previewCallback,
+  defaultMessage, boolIndexData = false, indexingDetails
+}) {
 
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
 
   if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile).then(() =>
+    triggerIndexing(parsedFile, indexingDetails).then(() =>
       setIndexedFile(parsedFile)
     );
   }
@@ -44,16 +46,10 @@ export function JsonUploadAndParse({ previewFile, defaultMessage, postProcessing
           />
         )}
         onChange={async ([fileToImport]) => {
-          const parsedFileResult = await parseFile(fileToImport, postProcessing);
-          const defaultLayerName = _.get(fileToImport, 'name', 'fileToImport');
-          if (fileToImport) {
-            // Callback to preview file if needed
-            if (previewFile) {
-              previewFile(parsedFileResult, defaultLayerName);
-            }
-            if (boolIndexData) {
-              triggerIndexing(parsedFileResult);
-            }
+          const parsedFileResult = await parseFile(fileToImport, previewCallback,
+            postProcessing);
+          if (fileToImport && boolIndexData) {
+            triggerIndexing(parsedFileResult);
           }
           setParsedFile(parsedFileResult);
         }}
