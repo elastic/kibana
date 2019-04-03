@@ -21,14 +21,15 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
 
-interface Params {
+interface NotificationServiceParams {
   targetDomElement$: Observable<HTMLElement>;
 }
 
-interface Deps {
+interface NotificationsServiceDeps {
   i18n: I18nSetup;
 }
 
+/** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
 
@@ -36,14 +37,14 @@ export class NotificationsService {
   private domElemSubscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
-  constructor(private readonly params: Params) {
+  constructor(private readonly params: NotificationServiceParams) {
     this.toastsContainer$ = new Subject<HTMLElement>();
     this.toasts = new ToastsService({
       targetDomElement$: this.toastsContainer$.asObservable(),
     });
   }
 
-  public setup({ i18n }: Deps) {
+  public setup({ i18n }: NotificationsServiceDeps) {
     this.domElemSubscription = this.params.targetDomElement$.subscribe({
       next: targetDomElement => {
         this.cleanupTargetDomElement();
@@ -74,4 +75,5 @@ export class NotificationsService {
   }
 }
 
+/** @public */
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;

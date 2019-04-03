@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/ui/fields/Agent';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/Agent';
 import { PropertyTabKey } from '../../components/shared/PropertiesTable/tabConfig';
 
 const AGENT_URL_ROOT = 'https://www.elastic.co/guide/en/apm/agent';

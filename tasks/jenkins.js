@@ -27,6 +27,7 @@ module.exports = function (grunt) {
     'run:tslint',
     'run:sasslint',
     'run:checkTsProjects',
+    'run:checkCoreApiChanges',
     'run:typeCheck',
     'run:i18nCheck',
     'run:checkFileCasing',
