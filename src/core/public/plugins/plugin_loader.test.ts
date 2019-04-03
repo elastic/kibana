@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { loadPluginBundle } from './plugin_loader';
+import { CoreWindow, loadPluginBundle } from './plugin_loader';
 
 let createdScriptTags = [] as any[];
 let appendChildSpy: jest.Mock<Node, [Node]>;
 let createElementSpy: jest.Mock<HTMLElement, [string, (ElementCreationOptions | undefined)?]>;
+
+const coreWindow = (window as unknown) as CoreWindow;
 
 beforeEach(() => {
   // Mock document.createElement to return fake tags we can use to inspect what
@@ -38,15 +40,15 @@ beforeEach(() => {
   appendChildSpy = jest.spyOn(document.body, 'appendChild').mockReturnValue({} as any);
 
   // Mock global fields needed for loading modules.
-  window.__kbnNonce__ = 'asdf';
-  window.__kbnBundles__ = {};
+  coreWindow.__kbnNonce__ = 'asdf';
+  coreWindow.__kbnBundles__ = {};
 });
 
 afterEach(() => {
   appendChildSpy.mockRestore();
   createElementSpy.mockRestore();
-  delete window.__kbnNonce__;
-  delete window.__kbnBundles__;
+  delete coreWindow.__kbnNonce__;
+  delete coreWindow.__kbnBundles__;
 });
 
 const addBasePath = (path: string) => path;
@@ -69,7 +71,7 @@ test('`loadPluginBundles` creates a script tag and loads initializer', async () 
 
   // Setup a fake initializer as if a plugin bundle had actually been loaded.
   const fakeInitializer = jest.fn();
-  window.__kbnBundles__['plugin/plugin-a'] = fakeInitializer;
+  coreWindow.__kbnBundles__['plugin/plugin-a'] = fakeInitializer;
   // Call the onload callback
   fakeScriptTag.onload();
   await expect(loadPromise).resolves.toEqual(fakeInitializer);
@@ -113,7 +115,7 @@ test('`loadPluginBundles` rejects if bundle does attach an initializer to window
   const fakeScriptTag1 = createdScriptTags[0];
 
   // Setup a fake initializer as if a plugin bundle had actually been loaded.
-  window.__kbnBundles__['plugin/plugin-a'] = undefined;
+  coreWindow.__kbnBundles__['plugin/plugin-a'] = undefined;
   // Call the onload callback
   fakeScriptTag1.onload();
 

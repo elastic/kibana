@@ -27,16 +27,14 @@ import { PluginInitializer } from './plugin';
 export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string, unknown>>;
 
 /**
- * Extend window with types for loading bundles
+ * Custom window type for loading bundles. Do not extend global Window to avoid leaking these types.
  * @internal
  */
-declare global {
-  interface Window {
-    __kbnNonce__: string;
-    __kbnBundles__: {
-      [pluginBundleName: string]: UnknownPluginInitializer | undefined;
-    };
-  }
+export interface CoreWindow {
+  __kbnNonce__: string;
+  __kbnBundles__: {
+    [pluginBundleName: string]: UnknownPluginInitializer | undefined;
+  };
 }
 
 /**
@@ -71,6 +69,7 @@ export const loadPluginBundle: LoadPluginBundle = <
 ) =>
   new Promise<PluginInitializer<TSetup, TDependencies>>((resolve, reject) => {
     const script = document.createElement('script');
+    const coreWindow = (window as unknown) as CoreWindow;
 
     // Assumes that all plugin bundles get put into the bundles/plugins subdirectory
     const bundlePath = addBasePath(`/bundles/plugin/${pluginName}.bundle.js`);
@@ -79,7 +78,7 @@ export const loadPluginBundle: LoadPluginBundle = <
     script.setAttribute('async', '');
 
     // Add kbnNonce for CSP
-    script.setAttribute('nonce', window.__kbnNonce__);
+    script.setAttribute('nonce', coreWindow.__kbnNonce__);
 
     const cleanupTag = () => {
       clearTimeout(timeout);
@@ -92,7 +91,7 @@ export const loadPluginBundle: LoadPluginBundle = <
     script.onload = () => {
       cleanupTag();
 
-      const initializer = window.__kbnBundles__[`plugin/${pluginName}`];
+      const initializer = coreWindow.__kbnBundles__[`plugin/${pluginName}`];
       if (!initializer || typeof initializer !== 'function') {
         reject(
           new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
@@ -116,6 +115,9 @@ export const loadPluginBundle: LoadPluginBundle = <
     document.body.appendChild(script);
   });
 
+/**
+ * @internal
+ */
 export type LoadPluginBundle = <TSetup, TDependencies extends Record<string, unknown>>(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
