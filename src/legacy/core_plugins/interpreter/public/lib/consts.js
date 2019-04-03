@@ -18,4 +18,4 @@
  */
 
 // The server endpoint for retrieiving and running Canvas functions.
-export const FUNCTIONS_URL = '/api/canvas/fns';
+export const FUNCTIONS_URL = '/api/interpreter/fns';

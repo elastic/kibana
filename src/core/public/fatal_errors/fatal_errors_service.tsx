@@ -37,6 +37,7 @@ interface Deps {
   i18n: I18nSetup;
 }
 
+/** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
   private i18n?: I18nSetup;
@@ -109,4 +110,5 @@ export class FatalErrorsService {
   }
 }
 
+/** @public */
 export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;

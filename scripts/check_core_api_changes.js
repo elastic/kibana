@@ -17,8 +17,5 @@
  * under the License.
  */
 
-import '@babel/polyfill';
-import { typeSpecs } from './index';
-
-// eslint-disable-next-line no-undef
-typeSpecs.forEach(canvas.register);
+require('../src/setup_node_env');
+require('../src/dev/run_check_core_api_changes');
