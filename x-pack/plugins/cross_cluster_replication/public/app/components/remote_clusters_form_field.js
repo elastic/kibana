@@ -91,6 +91,7 @@ export class RemoteClustersFormField extends PureComponent {
           fullWidth
           disabled
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
+          data-test-subj="ccrRemoteClusterInput"
         />
         { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
         { errorMessage }

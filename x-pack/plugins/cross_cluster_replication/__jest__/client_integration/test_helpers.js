@@ -223,11 +223,20 @@ export const registerHttpRequestMockHelpers = server => {
     }
   };
 
+  const setGetAutoFollowPatternResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadFollowerIndicesResponse,
     setLoadAutoFollowPatternsResponse,
     setDeleteAutoFollowPatternResponse,
     setAutoFollowStatsResponse,
     setLoadRemoteClusteresResponse,
+    setGetAutoFollowPatternResponse,
   };
 };
