@@ -247,16 +247,24 @@ export const getOperationName = (opType: string) => {
   return operation && operation.name;
 };
 
+export const tryGetOperationDefinition = (opType: string) =>
+  operations.find(({ type }) => type === opType);
+
 export const getOperationDefinition = (opType: string) => {
-  const operation = operations.find(({ type }) => type === opType);
+  const operation = tryGetOperationDefinition(opType);
   if (!operation) {
     throw new Error(`Could not find operation of type ${opType}`);
   }
   return operation;
 };
 
-export const getOperationSummary = (opType: string, operation: SelectOperation) => {
-  const opDefinition = getOperationDefinition(opType);
+export const getOperationSummary = (operation?: SelectOperation) => {
+  const opDefinition = operation && tryGetOperationDefinition(operation.operation);
+
+  // TODO: What should we do in this case?
+  if (!operation || !opDefinition) {
+    return 'N/A';
+  }
 
   if (opDefinition.summarize) {
     return opDefinition.summarize(operation);
@@ -266,5 +274,5 @@ export const getOperationSummary = (opType: string, operation: SelectOperation) 
   const fieldName = argument && argument.field;
   const fieldSummary = fieldName ? ` of ${fieldName}` : '';
 
-  return `${getOperationName(opType)}${fieldSummary}`;
+  return `${getOperationName(operation.operation)}${fieldSummary}`;
 };

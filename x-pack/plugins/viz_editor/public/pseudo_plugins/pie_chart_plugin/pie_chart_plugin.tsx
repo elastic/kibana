@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { DatasourceField, fieldToOperation } from '../../../common';
-import { columnSummary } from '../../common/components/config_panel';
+import { getOperationSummary } from '../../common/components/operation_editor';
 import {
   Axis,
   getColumnIdByIndex,
@@ -46,13 +46,13 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChar
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Slice pie by</span>
         {sliceAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, visModel))}</span>
+          <span>{getOperationSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Size slices by</span>
         {angleAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, visModel))}</span>
+          <span>{getOperationSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
     </>

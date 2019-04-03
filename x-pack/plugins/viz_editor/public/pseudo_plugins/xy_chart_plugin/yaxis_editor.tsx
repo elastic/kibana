@@ -48,7 +48,7 @@ export function YAxisEditor({
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
       >
-        {getOperationSummary(column.operation, column)}
+        {getOperationSummary(column)}
       </OperationEditor>
     </Draggable>
   );
