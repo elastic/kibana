@@ -49,9 +49,9 @@ export function isValidDataUrl(str: string) {
 export function encode(data: any | null, type = 'text/plain') {
   // use FileReader if it's available, like in the browser
   if (FileReader) {
-    return new Promise((_, reject) => {
+    return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => reader.result;
+      reader.onloadend = () => resolve(reader.result);
       reader.onerror = err => reject(err);
       reader.readAsDataURL(data);
     });
