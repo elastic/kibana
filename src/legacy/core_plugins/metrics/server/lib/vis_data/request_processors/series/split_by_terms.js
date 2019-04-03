@@ -31,13 +31,9 @@ export default function splitByTerm(req, panel, series) {
       set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       if (series.terms_include) {
         set(doc, `aggs.${series.id}.terms.include`, series.terms_include);
-      } else {
-        delete doc.aggs[series.id].terms.include;
       }
       if (series.terms_exclude) {
         set(doc, `aggs.${series.id}.terms.exclude`, series.terms_exclude);
-      } else {
-        delete doc.aggs[series.id].terms.exclude;
       }
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${series.terms_order_by}-SORT`;

@@ -18,7 +18,8 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
+import { get } from 'lodash';
 import GroupBySelect from './group_by_select';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
@@ -57,6 +58,8 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fiel
   const selectedDirectionOption = dirOptions.find(option => {
     return model.terms_direction === option.value;
   });
+  const selectedField = (fields[indexPattern] || []).find(({ name }) => name === model.terms_field);
+  const selectedFieldType = get(selectedField, 'type');
 
   return (
     <div>
@@ -148,32 +151,35 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fiel
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('include')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.includeLabel"
-              defaultMessage="Include"
-            />)}
-          >
-            <EuiFieldText value={model.terms_include} onChange={handleTextChange('terms_include')} />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('exclude')}
-            label={(<FormattedMessage
-              id="tsvb.splits.terms.excludeLabel"
-              defaultMessage="Exclude"
-            />)}
-          >
-            <EuiFieldText value={model.terms_exclude} onChange={handleTextChange('terms_exclude')} />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {selectedFieldType === 'string' && (
+        <Fragment>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id={htmlId('include')}
+                label={(<FormattedMessage
+                  id="tsvb.splits.terms.includeLabel"
+                  defaultMessage="Include"
+                />)}
+              >
+                <EuiFieldText value={model.terms_include} onChange={handleTextChange('terms_include')} />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                id={htmlId('exclude')}
+                label={(<FormattedMessage
+                  id="tsvb.splits.terms.excludeLabel"
+                  defaultMessage="Exclude"
+                />)}
+              >
+                <EuiFieldText value={model.terms_exclude} onChange={handleTextChange('terms_exclude')} />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      )}
     </div>
   );
 };
