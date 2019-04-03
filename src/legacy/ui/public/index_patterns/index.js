@@ -19,11 +19,7 @@
 
 export { IndexPatternSelect } from './components/index_pattern_select';
 
-export { IndexPatternsProvider } from './index_patterns';
-
-export {
-  IndexPatternsApiClientProvider,
-} from './index_patterns_api_client_provider';
+export { IndexPatterns } from './index_patterns';
 
 export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS,

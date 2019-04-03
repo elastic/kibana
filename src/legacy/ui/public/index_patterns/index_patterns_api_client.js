@@ -23,90 +23,88 @@ import { pick, mapValues } from 'lodash';
 
 import { IndexPatternMissingIndices } from '../errors';
 
-export function createIndexPatternsApiClient($http, basePath) {
-  const apiBaseUrl = `${basePath}/api/index_patterns/`;
+function join(...uriComponents) {
+  return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
+}
 
-  function join(...uriComponents) {
-    return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
+function request(method, url, body) {
+  return fetch({
+    method,
+    url,
+    data: body,
+  })
+    .then(resp => resp.data)
+    .catch((resp) => {
+      const respBody = resp.data;
+
+      if (resp.status === 404 && respBody.code === 'no_matching_indices') {
+        throw new IndexPatternMissingIndices(respBody.message);
+      }
+
+      const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
+      err.status = resp.status;
+      err.body = respBody;
+      throw err;
+    });
+}
+
+export class IndexPatternsApiClient {
+  constructor(basePath) {
+    this.apiBaseUrl = `${basePath}/api/index_patterns/`;
   }
 
-  function getUrl(path, query) {
+  _getUrl(path, query) {
     const noNullsQuery = pick(query, value => value != null);
     const noArraysQuery = mapValues(noNullsQuery, value => (
       Array.isArray(value) ? JSON.stringify(value) : value
     ));
 
-    return resolveUrl(apiBaseUrl, formatUrl({
+    return resolveUrl(this.apiBaseUrl, formatUrl({
       pathname: join(...path),
       query: noArraysQuery,
     }));
   }
 
-  function request(method, url, body) {
-    return $http({
-      method,
-      url,
-      data: body,
-    })
-      .then(resp => resp.data)
-      .catch((resp) => {
-      // convert $http errors into actual error objects
-        const respBody = resp.data;
 
-        if (resp.status === 404 && respBody.code === 'no_matching_indices') {
-          throw new IndexPatternMissingIndices(respBody.message);
-        }
+  getFieldsForTimePattern(options = {}) {
+    const {
+      pattern,
+      lookBack,
+      metaFields,
+    } = options;
 
-        const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
-        err.status = resp.status;
-        err.body = respBody;
-        throw err;
-      });
+    const url = this._getUrl(['_fields_for_time_pattern'], {
+      pattern,
+      look_back: lookBack,
+      meta_fields: metaFields,
+    });
+
+    return request('GET', url).then(resp => resp.fields);
   }
 
-  class IndexPatternsApiClient {
-    getFieldsForTimePattern(options = {}) {
-      const {
-        pattern,
-        lookBack,
-        metaFields,
-      } = options;
+  getFieldsForWildcard(options = {}) {
+    const {
+      pattern,
+      metaFields,
+      type,
+      params,
+    } = options;
 
-      const url = getUrl(['_fields_for_time_pattern'], {
+    let url;
+
+    if(type) {
+      url = this._getUrl([type, '_fields_for_wildcard'], {
         pattern,
-        look_back: lookBack,
+        meta_fields: metaFields,
+        params: JSON.stringify(params),
+      });
+    } else {
+      url = this._getUrl(['_fields_for_wildcard'], {
+        pattern,
         meta_fields: metaFields,
       });
-
-      return request('GET', url).then(resp => resp.fields);
     }
 
-    getFieldsForWildcard(options = {}) {
-      const {
-        pattern,
-        metaFields,
-        type,
-        params,
-      } = options;
-
-      let url;
-
-      if(type) {
-        url = getUrl([type, '_fields_for_wildcard'], {
-          pattern,
-          meta_fields: metaFields,
-          params: JSON.stringify(params),
-        });
-      } else {
-        url = getUrl(['_fields_for_wildcard'], {
-          pattern,
-          meta_fields: metaFields,
-        });
-      }
-
-      return request('GET', url).then(resp => resp.fields);
-    }
+    return request('GET', url).then(resp => resp.fields);
   }
-
-  return new IndexPatternsApiClient();
 }

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import React from 'react';
 import { banners } from '../../notify';
 import { NoDefaultIndexPattern } from '../../errors';
-import { IndexPatternsGetProvider } from '../_get';
+import { indexPatternsGetProvider } from '../_get';
 import uiRoutes from '../../routes';
 import {
   EuiCallOut,
@@ -65,8 +65,8 @@ export default function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
   uiRoutes
-    .addSetupWork(function loadDefaultIndexPattern(Private, $route, config) {
-      const getIds = Private(IndexPatternsGetProvider)('id');
+    .addSetupWork(function loadDefaultIndexPattern($route, config, chrome) {
+      const getIds = indexPatternsGetProvider(chrome.getSavedObjectsClient())('id');
       const route = _.get($route, 'current.$$route');
 
       if (!route.requireDefaultIndex) {

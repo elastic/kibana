@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import angular from 'angular';
-import _ from 'lodash';
+import { mapValues } from 'lodash';
 
 // eslint-disable-next-line import/no-default-export
-export default function MappingSetupService() {
-  const mappingSetup = this;
+export function mappingSetupService() {
+  const mappingSetup = {};
 
   const json = {
     _serialize: function (val) {
-      if (val != null) return angular.toJson(val);
+      if (val != null) return JSON.stringify(val);
     },
     _deserialize: function (val) {
       if (val != null) return JSON.parse(val);
@@ -34,7 +33,7 @@ export default function MappingSetupService() {
   };
 
   mappingSetup.expandShorthand = function (sh) {
-    return _.mapValues(sh || {}, function (val) {
+    return mapValues(sh || {}, function (val) {
       // allow shortcuts for the field types, by just setting the value
       // to the type name
       if (typeof val === 'string') val = { type: val };
@@ -48,4 +47,6 @@ export default function MappingSetupService() {
       return val;
     });
   };
+
+  return mappingSetup;
 }

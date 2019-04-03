@@ -18,57 +18,65 @@
  */
 
 import { IndexPatternMissingIndices } from '../errors';
-import { IndexPatternProvider } from './_index_pattern';
-import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
-import { IndexPatternsGetProvider } from './_get';
-import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { IndexPattern } from './_index_pattern';
+import { indexPatternsPatternCacheProvider } from './_pattern_cache';
+import { indexPatternsGetProvider } from './_get';
+import { FieldsFetcher } from './fields_fetcher';
 import { fieldFormats } from '../registry/field_formats';
-import { uiModules } from '../modules';
-const module = uiModules.get('kibana/index_patterns');
+import { IndexPatternsApiClient } from './index_patterns_api_client';
 
-export function IndexPatternsProvider(Private, config) {
-  const self = this;
+export class IndexPatterns {
+  constructor(basePath, config, savedObjectsClient) {
+    const getProvider = indexPatternsGetProvider(savedObjectsClient);
+    const apiClient = new IndexPatternsApiClient(basePath);
 
-  const IndexPattern = Private(IndexPatternProvider);
-  const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const getProvider = Private(IndexPatternsGetProvider);
+    this.config = config;
+    this.savedObjectsClient = savedObjectsClient;
+
+    this.errors = {
+      MissingIndices: IndexPatternMissingIndices
+    };
+
+    this.fieldsFetcher = new FieldsFetcher(apiClient, config);
+    this.cache = indexPatternsPatternCacheProvider();
+    this.getIds = getProvider('id');
+    this.getTitles = getProvider('attributes.title');
+    this.getFields = getProvider.multiple;
+    this.fieldFormats = fieldFormats;
+  }
 
 
-  self.get = function (id) {
-    if (!id) return self.make();
+  get = (id) => {
+    if (!id) return this.make();
 
-    const cache = patternCache.get(id);
-    return cache || patternCache.set(id, self.make(id));
+    const cache = this.cache.get(id);
+    return cache || this.cache.set(id, this.make(id));
   };
 
-  self.getDefault = async () => {
-    const defaultIndexPatternId = config.get('defaultIndex');
+  getDefault = async () => {
+    const defaultIndexPatternId = this.config.get('defaultIndex');
     if (defaultIndexPatternId) {
-      return await self.get(defaultIndexPatternId);
+      return await this.get(defaultIndexPatternId);
     }
 
     return null;
   };
 
-  self.make = function (id) {
-    return (new IndexPattern(id)).init();
+  make = (id) => {
+    return (new IndexPattern(id, this.config, this.savedObjectsClient, this.cache, this.fieldsFetcher, this.getIds)).init();
   };
 
-  self.delete = function (pattern) {
-    self.getIds.clearCache();
+  delete = (pattern) => {
+    this.getIds.clearCache();
     return pattern.destroy();
   };
-
-  self.errors = {
-    MissingIndices: IndexPatternMissingIndices
-  };
-
-  self.cache = patternCache;
-  self.getIds = getProvider('id');
-  self.getTitles = getProvider('attributes.title');
-  self.getFields = getProvider.multiple;
-  self.fieldsFetcher = Private(FieldsFetcherProvider);
-  self.fieldFormats = fieldFormats;
 }
 
-module.service('indexPatterns', Private => Private(IndexPatternsProvider));
+// add angular service for backward compatibility
+import { uiModules } from '../modules';
+const module = uiModules.get('kibana/index_patterns');
+let _service;
+module.service('indexPatterns', function (chrome) {
+  if (!_service) _service = new IndexPatterns(chrome.getBasePath(), chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
+  return _service;
+});
