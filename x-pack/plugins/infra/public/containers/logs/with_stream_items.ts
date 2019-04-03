@@ -24,10 +24,17 @@ export const withStreamItems = connect(
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
+    reloadEntries: logEntriesActions.reloadEntries,
   })
 );
 
-export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
+export const WithStreamItems = asChildFunctionRenderer(withStreamItems, {
+  onInitialize: props => {
+    if (!props.isReloading && !props.isLoadingMore) {
+      props.reloadEntries();
+    }
+  },
+});
 
 const selectItems = createSelector(
   logEntriesSelectors.selectEntries,

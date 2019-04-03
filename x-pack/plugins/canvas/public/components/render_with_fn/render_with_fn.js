@@ -25,7 +25,7 @@ export class RenderWithFn extends React.Component {
       destroy: PropTypes.func.isRequired,
       onDestroy: PropTypes.func.isRequired,
     }),
-    config: PropTypes.object.isRequired,
+    config: PropTypes.object,
     size: PropTypes.object.isRequired,
     onError: PropTypes.func.isRequired,
   };
