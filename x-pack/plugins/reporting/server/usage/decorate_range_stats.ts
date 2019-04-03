@@ -7,9 +7,9 @@
 import { defaultsDeep } from 'lodash';
 
 import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
-import { FeatureAvailabilityMap, RangeStats, ReportingFeature } from './types';
+import { FeatureAvailabilityMap, RangeStats, ReportingFeature } from './';
 
-export const getFullStatsForRange = (
+export const decorateRangeStats = (
   range: RangeStats,
   featureAvailability: FeatureAvailabilityMap
 ): RangeStats => {

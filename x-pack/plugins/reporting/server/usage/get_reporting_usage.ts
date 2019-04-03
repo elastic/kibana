@@ -5,9 +5,6 @@
  */
 
 import { get } from 'lodash';
-import { getFullStatsForRange } from './get_default_object';
-// @ts-ignore untyped module
-import { getExportTypesHandler } from './get_export_type_handler';
 import {
   AggregationBuckets,
   AggregationResults,
@@ -17,7 +14,10 @@ import {
   RangeAggregationResults,
   RangeStats,
   UsageObject,
-} from './types';
+} from './';
+import { decorateRangeStats } from './decorate_range_stats';
+// @ts-ignore untyped module
+import { getExportTypesHandler } from './get_export_type_handler';
 
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
@@ -151,9 +151,9 @@ export async function getReportingUsage(server: any, callCluster: any) {
         available: true,
         browser_type: browserType,
         enabled: true,
-        lastDay: getFullStatsForRange(lastDay, availability),
-        last7Days: getFullStatsForRange(last7Days, availability),
-        ...getFullStatsForRange(all, availability),
+        lastDay: decorateRangeStats(lastDay, availability),
+        last7Days: decorateRangeStats(last7Days, availability),
+        ...decorateRangeStats(all, availability),
       };
     });
 }
