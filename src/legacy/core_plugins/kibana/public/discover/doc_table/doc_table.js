@@ -26,6 +26,7 @@ import './components/table_row';
 import { dispatchRenderComplete } from 'ui/render_complete';
 import { uiModules } from 'ui/modules';
 import 'ui/pager_control';
+import 'ui/pager';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
@@ -52,7 +53,6 @@ uiModules.get('app/discover')
         inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
-        debugger;
         const notify = new Notifier();
 
         $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {

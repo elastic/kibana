@@ -35,7 +35,6 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import 'ui/pager';
 import 'leaflet';
 
 import { showAppRedirectNotification } from 'ui/notify';
