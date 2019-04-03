@@ -18,6 +18,7 @@ export const SourceConfigurationButton: React.FunctionComponent = () => {
     <EuiButtonEmpty
       aria-label="Configure source"
       color="text"
+      data-test-subj="configureSourceButton"
       iconType="gear"
       onClick={toggleIsVisible}
     >

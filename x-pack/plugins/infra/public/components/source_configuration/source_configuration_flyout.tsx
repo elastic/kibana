@@ -89,7 +89,12 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
   }
 
   return (
-    <EuiFlyout aria-labelledby="sourceConfigurationTitle" hideCloseButton onClose={noop}>
+    <EuiFlyout
+      aria-labelledby="sourceConfigurationTitle"
+      data-test-subj="sourceConfigurationFlyout"
+      hideCloseButton
+      onClose={noop}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 id="sourceConfigurationTitle">
@@ -122,7 +127,12 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             {!isFormDirty ? (
-              <EuiButtonEmpty iconType="cross" isDisabled={isLoading} onClick={() => hide()}>
+              <EuiButtonEmpty
+                data-test-subj="closeFlyoutButton"
+                iconType="cross"
+                isDisabled={isLoading}
+                onClick={() => hide()}
+              >
                 <FormattedMessage
                   id="xpack.infra.sourceConfiguration.closeButtonLabel"
                   defaultMessage="Close"
@@ -130,6 +140,7 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
               </EuiButtonEmpty>
             ) : (
               <EuiButtonEmpty
+                data-test-subj="discardAndCloseFlyoutButton"
                 color="danger"
                 iconType="cross"
                 isDisabled={isLoading}
@@ -153,6 +164,7 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
               </EuiButton>
             ) : (
               <EuiButton
+                data-test-subj="updateSourceConfigurationButton"
                 color="primary"
                 isDisabled={!isFormDirty || !isFormValid}
                 fill

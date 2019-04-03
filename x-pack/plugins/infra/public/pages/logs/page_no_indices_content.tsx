@@ -19,6 +19,7 @@ export const LogsPageNoIndicesContent = injectI18n(({ intl }) => {
     <WithKibanaChrome>
       {({ basePath }) => (
         <NoIndices
+          data-test-subj="noLogsIndicesPrompt"
           title={intl.formatMessage({
             id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
             defaultMessage: "Looks like you don't have any logging indices.",
@@ -42,7 +43,7 @@ export const LogsPageNoIndicesContent = injectI18n(({ intl }) => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton color="primary" onClick={show}>
+                <EuiButton data-test-subj="configureSourceButton" color="primary" onClick={show}>
                   {intl.formatMessage({
                     id: 'xpack.infra.configureSourceActionLabel',
                     defaultMessage: 'Change source configuration',

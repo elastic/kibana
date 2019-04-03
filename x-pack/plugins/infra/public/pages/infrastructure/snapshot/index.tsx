@@ -103,7 +103,11 @@ export const SnapshotPage = injectI18n(({ intl }) => {
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton color="primary" onClick={show}>
+                    <EuiButton
+                      data-test-subj="configureSourceButton"
+                      color="primary"
+                      onClick={show}
+                    >
                       {intl.formatMessage({
                         id: 'xpack.infra.configureSourceActionLabel',
                         defaultMessage: 'Change source configuration',
