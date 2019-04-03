@@ -10,6 +10,7 @@ declare class Events {
   public EVENT_JOB_CREATED: 'job:created';
   public EVENT_JOB_CREATE_ERROR: 'job:creation error';
   public EVENT_WORKER_COMPLETE: 'worker:job complete';
+  public EVENT_WORKER_RESET_PROCESSING_JOB_ERROR: 'worker:reset job processing error';
   public EVENT_WORKER_JOB_CLAIM_ERROR: 'worker:claim job error';
   public EVENT_WORKER_JOB_SEARCH_ERROR: 'worker:pending jobs error';
   public EVENT_WORKER_JOB_UPDATE_ERROR: 'worker:update job error';
