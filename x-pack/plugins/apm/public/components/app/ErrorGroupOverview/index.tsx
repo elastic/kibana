@@ -14,13 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { ErrorDistribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
+import { IUrlParams } from '../../../store/urlParams';
+import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {

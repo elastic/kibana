@@ -7,8 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { HistoryTabs } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IUrlParams } from '../../../store/urlParams';
+import { HistoryTabs } from '../../shared/HistoryTabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from './ServiceMetrics';

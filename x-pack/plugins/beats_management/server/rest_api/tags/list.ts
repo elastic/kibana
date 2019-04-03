@@ -5,9 +5,9 @@
  */
 
 import * as Joi from 'joi';
-import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 

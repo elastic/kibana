@@ -9,15 +9,15 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import { IUrlParams } from '../../../../../../store/urlParams';
+// @ts-ignore
+import Timeline from '../../../../../shared/charts/Timeline';
 import {
   APMQueryParams,
   fromQuery,
   history,
   toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from '../../../../../../store/urlParams';
-// @ts-ignore
-import Timeline from '../../../../../shared/charts/Timeline';
+} from '../../../../../shared/Links/url_helpers';
 import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';

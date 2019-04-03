@@ -97,7 +97,7 @@ export const RemoteClusterList = injectI18n(
                 <h1>
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterListTitle"
-                    defaultMessage="Remote clusters"
+                    defaultMessage="Remote Clusters"
                   />
                 </h1>
               </EuiTitle>
