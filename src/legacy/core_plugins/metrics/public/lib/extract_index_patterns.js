@@ -41,6 +41,9 @@ export function extractIndexPatterns(params, fetchedFields) {
     });
   }
 
-  return uniq(patternsToFetch);
+  if (patternsToFetch.length === 0) {
+    patternsToFetch.push('');
+  }
 
+  return uniq(patternsToFetch);
 }
