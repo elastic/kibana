@@ -15,8 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
-
-const DEFAULT_LIMIT = 2048;
+import { DEFAULT_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
 
@@ -51,7 +50,7 @@ export class ESSearchSource extends AbstractESSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
-      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
+      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     }, inspectorAdapters);
   }

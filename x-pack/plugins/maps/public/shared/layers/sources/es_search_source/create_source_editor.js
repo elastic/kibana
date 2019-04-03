@@ -7,17 +7,23 @@
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
 
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { kfetch } from 'ui/kfetch';
+import { GIS_API_PATH } from '../../../../../common/constants';
+import { DEFAULT_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 function filterGeoField(field) {
   return ['geo_point', 'geo_shape'].includes(field.type);
 }
+
+const DOC_COUNT_UNSET = -1;
 
 export class CreateSourceEditor extends Component {
 
@@ -30,6 +36,9 @@ export class CreateSourceEditor extends Component {
     indexPatternId: '',
     geoField: '',
     noGeoIndexPatternsExist: false,
+    indexDocCount: DOC_COUNT_UNSET,
+    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
+    showFilterByBoundsSwitch: false,
   };
 
   componentWillUnmount() {
@@ -52,8 +61,27 @@ export class CreateSourceEditor extends Component {
       isLoadingIndexPattern: true,
       indexPattern: undefined,
       geoField: undefined,
+      indexDocCount: DOC_COUNT_UNSET,
+      filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
+      showFilterByBoundsSwitch: false,
     }, this.debouncedLoad.bind(null, indexPatternId));
   };
+
+  loadIndexDocCount = async (indexPatternTitle) => {
+    try {
+      const { count } = await kfetch({
+        pathname: `../${GIS_API_PATH}/indexCount`,
+        query: {
+          index: indexPatternTitle
+        }
+      });
+      return count;
+    } catch (error) {
+      // retrieving index count is a nice to have and is not essential
+      // do not interrupt user flow if unable to retrieve count
+      return DOC_COUNT_UNSET;
+    }
+  }
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
@@ -68,6 +96,11 @@ export class CreateSourceEditor extends Component {
       return;
     }
 
+    // Turn off filterByMapBounds when index contains a limited number of documents
+    const indexDocCount = await this.loadIndexDocCount(indexPattern.title);
+    const showFilterByBoundsSwitch = indexDocCount !== DOC_COUNT_UNSET && indexDocCount <= DEFAULT_LIMIT;
+    const filterByMapBounds = !showFilterByBoundsSwitch;
+
     if (!this._isMounted) {
       return;
     }
@@ -80,7 +113,10 @@ export class CreateSourceEditor extends Component {
 
     this.setState({
       isLoadingIndexPattern: false,
-      indexPattern: indexPattern
+      indexPattern: indexPattern,
+      indexDocCount,
+      filterByMapBounds,
+      showFilterByBoundsSwitch
     });
 
     //make default selection
@@ -97,21 +133,21 @@ export class CreateSourceEditor extends Component {
     }, this.previewLayer);
   };
 
-  onLimitChange = e => {
-    const sanitizedValue = parseInt(e.target.value, 10);
+  onFilterByMapBoundsChange = event => {
     this.setState({
-      limit: isNaN(sanitizedValue) ? '' : sanitizedValue,
+      filterByMapBounds: event.target.checked,
     }, this.previewLayer);
-  }
+  };
 
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
+      filterByMapBounds,
     } = this.state;
 
     const sourceConfig = (indexPatternId && geoField)
-      ? { indexPatternId, geoField }
+      ? { indexPatternId, geoField, filterByMapBounds }
       : null;
     this.props.onSelect(sourceConfig);
   }
@@ -141,6 +177,54 @@ export class CreateSourceEditor extends Component {
           fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
       </EuiFormRow>
+    );
+  }
+
+  _renderFilterByMapBounds() {
+    if (!this.state.showFilterByBoundsSwitch) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={
+            i18n.translate('xpack.maps.source.esSearch.disableFilterByMapBoundsTitle', {
+              defaultMessage: `Dynamically filter for data in the visible map area has been disabled`
+            })
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.maps.source.esSearch.disableFilterByMapBoundsExplainMsg"
+              defaultMessage="Index '{indexPatternTitle}' currenlty has a limited number of documents
+               and does not need to be filtered by the visible map area."
+              values={{
+                indexPatternTitle: this.state.indexPattern ? this.state.indexPattern.title : this.state.indexPatternId,
+              }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.source.esSearch.disableFilterByMapBoundsTurnOnMsg"
+              defaultMessage="Turn on dynamically filter by the visible map area if you expect the number of documents to increase."
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+        <EuiFormRow>
+          <EuiSwitch
+            label={
+              i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
+                defaultMessage: `Dynamically filter for data in the visible map area.`
+              })
+
+            }
+            checked={this.props.filterByMapBounds}
+            onChange={this.onFilterByMapBoundsChange}
+          />
+        </EuiFormRow>
+      </Fragment>
     );
   }
 
@@ -182,6 +266,8 @@ export class CreateSourceEditor extends Component {
         </EuiFormRow>
 
         {this._renderGeoSelect()}
+
+        {this._renderFilterByMapBounds()}
 
       </Fragment>
     );
