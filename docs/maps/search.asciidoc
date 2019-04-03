@@ -15,7 +15,7 @@ You can create a layer that requests data from {es} from the following:
 
 ** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source.
+* <<heatmap-layer>> with Grid aggregation source
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
