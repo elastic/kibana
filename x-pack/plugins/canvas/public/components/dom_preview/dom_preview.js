@@ -19,26 +19,29 @@ export class DomPreview extends React.Component {
   };
 
   componentDidMount() {
-    const original = document.querySelector(`#${this.props.elementId}`);
-
-    const update = this.update(original);
-    update();
-
-    const slowUpdate = debounce(update, 250);
-
-    this.observer = new MutationObserver(slowUpdate);
-    // configuration of the observer
-    const config = { attributes: true, childList: true, subtree: true };
-    // pass in the target node, as well as the observer options
-    this.observer.observe(original, config);
+    this.update();
   }
 
   componentWillUnmount() {
-    this.observer.disconnect();
+    this.observer && this.observer.disconnect(); // observer not guaranteed to exist
   }
 
-  update = original => () => {
-    if (!this.content || !this.container) {
+  update = () => {
+    const original = document.querySelector(`#${this.props.elementId}`);
+
+    if (!original || !this.content || !this.container) {
+      return;
+    }
+
+    if (!this.observer) {
+      const slowUpdate = debounce(this.update, 250);
+      const fastUpdate = debounce(this.update, 100);
+      this.observer = new MutationObserver(slowUpdate);
+      // configuration of the observer
+      const config = { attributes: true, childList: true, subtree: true };
+      // pass in the target node, as well as the observer options
+      this.observer.observe(original, config);
+      fastUpdate();
       return;
     }
 
