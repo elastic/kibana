@@ -125,11 +125,13 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | '
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+      displayType: displayType || 'line',
     });
   } else {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
+      displayType: displayType || 'line',
     });
   }
 }
@@ -155,7 +157,8 @@ function getSuggestion(
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: PLUGIN_NAME,
-  } as Suggestion;
+    category: 'XY Chart',
+  };
 }
 
 function getSuggestionsForField(
@@ -165,7 +168,8 @@ function getSuggestionsForField(
 ): Suggestion[] {
   const operationNames = getOperationsForField(field);
 
-  if (operationNames.length === 0) {
+  // TODO remove the number exception here, just to prevent triggering a bug in elastic-charts
+  if (operationNames.length === 0 || field.type === 'number') {
     return [] as Suggestion[];
   }
 
@@ -203,6 +207,7 @@ function getSuggestionsForField(
       title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,
       iconType: displayTypeIcon.line,
       pluginName: PLUGIN_NAME,
+      category: 'Line chart',
     };
   });
 }

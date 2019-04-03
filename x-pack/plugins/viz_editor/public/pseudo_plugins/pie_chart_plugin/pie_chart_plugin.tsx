@@ -184,6 +184,7 @@ function getSuggestionsForField(
       title: `Pie Chart: ${formattedNameSlice} of ${field.name} vs ${formattedNameSize}`,
       iconType: 'visPie' as IconType,
       pluginName: PLUGIN_NAME,
+      category: 'Pie chart',
     };
   });
 }

@@ -58,7 +58,7 @@ export function DroppablePane({
         <VisualizationModal
           renderersRegistry={renderersRegistry}
           getInterpreter={getInterpreter}
-          title={`Suggested visualizations for ${state.fieldName}`}
+          title={`How do you want to use ${state.fieldName}?`}
           suggestions={state.suggestions}
           onClose={() => closeModal()}
           onSelect={newVisModel => {

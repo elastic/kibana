@@ -10,13 +10,13 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageSideBar,
+  EuiPanel,
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -233,22 +233,30 @@ export function Main(props: MainProps) {
         <EuiPageSideBar>
           <ConfigPanel {...panelProps} />
 
-          <h4>Suggestions</h4>
-          <EuiListGroup>
-            {suggestions.map((suggestion, i) => (
-              <EuiListGroupItem
-                key={i}
-                label={suggestion.title}
-                iconType={suggestion.iconType}
-                onClick={() => {
-                  onChangeVisModel({
-                    ...suggestion.visModel,
-                    editorPlugin: suggestion.pluginName,
-                  });
-                }}
-              />
-            ))}
-          </EuiListGroup>
+          {Object.keys(state.visModel.queries).length > 0 && (
+            <>
+              <h4>Suggestions</h4>
+              {suggestions.map((suggestion, i) => (
+                <EuiPanel
+                  key={i}
+                  onClick={() => {
+                    onChangeVisModel({
+                      ...suggestion.visModel,
+                      editorPlugin: suggestion.pluginName,
+                    });
+                  }}
+                  paddingSize="s"
+                >
+                  {suggestion.title}
+                  <ExpressionRenderer
+                    {...props}
+                    expression={suggestion.previewExpression}
+                    size="preview"
+                  />
+                </EuiPanel>
+              ))}
+            </>
+          )}
         </EuiPageSideBar>
       )}
     </EuiPage>
