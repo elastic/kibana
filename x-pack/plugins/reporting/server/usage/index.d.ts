@@ -39,7 +39,7 @@ export type RangeAggregationResults = { [K in RangeAggregationKeys]?: Aggregatio
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
 export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
-  printable_pdf: {
+  printable_pdf: AvailableTotal & {
     app: {
       visualization: number;
       dashboard: number;
