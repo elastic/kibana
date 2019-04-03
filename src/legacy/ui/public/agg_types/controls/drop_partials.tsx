@@ -47,7 +47,7 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
   return (
     <EuiFormRow label={label} fullWidth={true} className="visEditorSidebar__aggParamFormRow">
       <EuiSwitch
-        checked={Boolean(value)}
+        checked={value}
         data-test-subj="dropPartialBucketsCheckbox"
         onChange={ev => setValue(ev.target.checked)}
       />
