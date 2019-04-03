@@ -9,7 +9,7 @@ You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source.
+** Documents source
 
 ** Grid aggregation source.
 
