@@ -150,6 +150,20 @@ export class DataRecognizer {
     return (resp.hits.total !== 0);
   }
 
+  async listModules() {
+    const manifestFiles = await this.loadManifestFiles();
+    const ids = manifestFiles
+      .map(({ json }) => json.id)
+      .sort((a, b) => a.localeCompare(b)); // sort as json files are read from disk and could be in any order.
+
+    const modules = [];
+    for (let i = 0; i < ids.length; i++) {
+      const module = await this.getModule(ids[i]);
+      modules.push(module);
+    }
+    return modules;
+  }
+
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
@@ -224,6 +238,7 @@ export class DataRecognizer {
     }
 
     return {
+      ...manifestJSON,
       jobs,
       datafeeds,
       kibana

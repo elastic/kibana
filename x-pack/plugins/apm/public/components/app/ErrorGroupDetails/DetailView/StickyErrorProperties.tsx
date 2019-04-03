@@ -13,11 +13,11 @@ import {
   TRANSACTION_ID,
   URL_FULL,
   USER_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { idx } from '../../../../../common/idx';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';

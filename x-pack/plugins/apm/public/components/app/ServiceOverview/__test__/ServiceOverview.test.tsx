@@ -9,9 +9,9 @@ import { Provider } from 'react-redux';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
-import * as apmRestServices from 'x-pack/plugins/apm/public/services/rest/apm/services';
+import * as apmRestServices from '../../../../services/rest/apm/services';
 // @ts-ignore
-import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
+import configureStore from '../../../../store/config/configureStore';
 import { ServiceOverview } from '../view';
 
 function renderServiceOverview() {

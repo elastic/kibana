@@ -26,8 +26,14 @@ import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metada
 import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
+/** @interal */
 export { CoreSystem } from './core_system';
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
 export interface CoreSetup {
   i18n: I18nSetup;
   injectedMetadata: InjectedMetadataSetup;

@@ -7,12 +7,12 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
-import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
-import { HoverXHandlers } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
-import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 import { MemoryMetricSeries } from '../../../store/selectors/chartSelectors';
+import { asPercent } from '../../../utils/formatters';
+// @ts-ignore
+import CustomPlot from '../../shared/charts/CustomPlot';
+import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
 
 interface Props {
   data: MemoryMetricSeries;
