@@ -6,7 +6,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { ChangeEvent, FocusEvent, SFC } from 'react';
+import React, { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
 
 export interface Props {
   /**
@@ -25,9 +25,12 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const DropdownFilter: SFC<Props> = ({ value, onChange, commit, choices = [] }) => {
-  choices = choices || [];
-
+export const DropdownFilter: FunctionComponent<Props> = ({
+  value,
+  onChange,
+  commit,
+  choices = [],
+}) => {
   let options = [{ value: '%%CANVAS_MATCH_ALL%%', text: '-- ANY --' }];
   options = options.concat(choices.map(choice => ({ value: choice, text: choice })));
 

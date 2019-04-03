@@ -13,7 +13,12 @@ import { RendererFactory } from '../types';
 import { DropdownFilter } from './component';
 
 interface Config {
+  /** The column to use within the exactly function */
   column: string;
+  /**
+   * A collection of choices to display in the dropdown
+   * @default []
+   */
   choices: string[];
 }
 
@@ -24,6 +29,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
+    const { column, choices } = config;
     let value = '%%CANVAS_MATCH_ALL%%';
     if (handlers.getFilter() !== '') {
       const filterAST = fromExpression(handlers.getFilter());
@@ -42,7 +48,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
               function: 'exactly',
               arguments: {
                 value: [value],
-                column: [config.column],
+                column: [column],
               },
             },
           ],
@@ -52,9 +58,6 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
         handlers.setFilter(filter);
       }
     };
-
-    // Get choices
-    const choices = config.choices;
 
     ReactDOM.render(
       <DropdownFilter commit={commit} choices={choices || []} value={value} />,
