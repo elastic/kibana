@@ -35,22 +35,25 @@ export async function FailureDebuggingProvider({ getService }) {
 
   await del(config.get('failureDebugging.htmlDirectory'));
 
-  async function logCurrentUrl() {
+  async function logCurrentUrl(test) {
     const currentUrl = await browser.getCurrentUrl();
+    test.addl.currentUrl = currentUrl;
     log.info(`Current URL is: ${currentUrl}`);
   }
 
-  async function savePageHtml(name) {
+  async function savePageHtml(name, test) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await browser.getPageSource();
+    test.addl.htmlFileName = htmlOutputFileName;
     log.info(`Saving page source to: ${htmlOutputFileName}`);
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
-  async function logBrowserConsole() {
+  async function logBrowserConsole(test) {
     const browserLogs = await browser.getLogsFor('browser');
     const browserOutput = browserLogs.reduce((acc, log) => acc += `${log.message.replace(/\\n/g, '\n')}\n`, '');
+    test.addl.browserOutput = browserOutput;
     log.info(`Browser output is: ${browserOutput}`);
   }
 
@@ -58,15 +61,13 @@ export async function FailureDebuggingProvider({ getService }) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
 
-    test.extra_thing = {
-      hi: 'hello'
-    };
+    test.addl = {};
 
     await Promise.all([
       screenshots.takeForFailure(name),
-      logCurrentUrl(),
-      savePageHtml(name),
-      logBrowserConsole(),
+      logCurrentUrl(test),
+      savePageHtml(name, test),
+      logBrowserConsole(test),
     ]);
   }
 

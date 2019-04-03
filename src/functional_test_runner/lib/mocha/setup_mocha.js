@@ -22,6 +22,18 @@ import Mocha from 'mocha';
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';
 import { MochaReporterProvider } from './reporter';
+import { MochaCheckReporter } from './check_reporter';
+
+
+const multireporter = (reporters) => {
+  return class extends Mocha.reporters.Base {
+    constructor(runner, options) {
+      super(runner, options);
+      reporters.forEach(Reporter => new Reporter(runner, options));
+    }
+  };
+};
+
 
 /**
  *  Instantiate mocha and load testfiles into it
@@ -33,13 +45,11 @@ import { MochaReporterProvider } from './reporter';
  *  @return {Promise<Mocha>}
  */
 export async function setupMocha(lifecycle, log, config, providers) {
+  const MochaReporter = await providers.loadExternalService('mocha reporter', MochaReporterProvider);
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
-    reporter: await providers.loadExternalService(
-      'mocha reporter',
-      MochaReporterProvider
-    )
+    reporter: multireporter([MochaReporter, MochaCheckReporter])
   });
 
   // global beforeEach hook in root suite triggers before all others

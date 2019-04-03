@@ -23,6 +23,7 @@ const Octokit = require('@octokit/rest');
 const App = require('@octokit/app');
 const request = require('@octokit/request');
 const stripAnsi = require('strip-ansi');
+const fs = require('fs');
 
 // removing 8 chars for markdown triple backtick wrap
 const MAX_DETAIL_BYTES = 65535 - 8;
@@ -120,7 +121,12 @@ const start = async function () {
 
   ls.on('close', (code) => {
     const logs = prettyLogs(cmdLogs);
+    let annotations = [];
 
+    if(fs.existsSync(__dirname + 'target/errors.json')) {
+      annotations = JSON.parse(fs.readFileSync(__dirname + 'target/errors.json'));
+    }
+    console.log('annotations: ', annotations);
     clientWithAuth.checks.create({
       ...commonArgs,
       conclusion: code === 0 ? 'success' : 'failure',
@@ -128,7 +134,8 @@ const start = async function () {
       output: {
         title,
         summary: `.`,
-        text: `\`\`\`\n${logs}\n\`\`\``
+        text: `\`\`\`\n${logs}\n\`\`\``,
+        annotations,
       }
     }).then((response) => {
       logRateLimit(response);
