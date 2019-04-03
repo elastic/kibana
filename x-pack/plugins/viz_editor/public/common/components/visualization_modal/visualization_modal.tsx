@@ -6,8 +6,6 @@
 
 import {
   EuiButton,
-  // @ts-ignore
-  EuiCard,
   EuiFlexGrid,
   EuiFlexItem,
   EuiIcon,
@@ -17,9 +15,11 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
 import { Suggestion } from '../../../editor_plugin_registry';
+import { ExpressionRenderer } from '../../../frame/expression_renderer';
 import { VisModel } from '../../lib';
 
 interface VisualizationModalProps {
@@ -27,6 +27,8 @@ interface VisualizationModalProps {
   onClose: () => void;
   onSelect: (newVisModel: VisModel) => void;
   suggestions: Suggestion[];
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: { get: (renderer: string) => any };
 }
 
 export function VisualizationModal({
@@ -34,6 +36,8 @@ export function VisualizationModal({
   title,
   onClose,
   onSelect,
+  getInterpreter,
+  renderersRegistry,
 }: VisualizationModalProps) {
   return (
     <>
@@ -47,13 +51,15 @@ export function VisualizationModal({
             <EuiFlexGrid columns={3}>
               {suggestions.map(suggestion => (
                 <EuiFlexItem key={suggestion.title}>
-                  <EuiCard
-                    key={suggestion.title}
-                    onClick={() => onSelect(suggestion.visModel)}
-                    icon={<EuiIcon size="xl" type={suggestion.iconType} />}
-                    title={suggestion.title}
-                    description=""
-                  />
+                  <EuiPanel onClick={() => onSelect(suggestion.visModel)} paddingSize="s">
+                    {suggestion.title}
+                    <ExpressionRenderer
+                      getInterpreter={getInterpreter}
+                      renderersRegistry={renderersRegistry}
+                      expression={suggestion.previewExpression}
+                      size="preview"
+                    />
+                  </EuiPanel>
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>

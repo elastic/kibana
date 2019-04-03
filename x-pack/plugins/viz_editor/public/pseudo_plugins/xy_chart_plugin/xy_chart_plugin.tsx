@@ -97,14 +97,15 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
   );
 }
 
-function toExpression(viewState: XyChartVisModel) {
+function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'edit' = 'view') {
   if (!viewState.private.xyChart) {
     return '';
   }
 
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
+  return `xy_chart hideTooltips=${mode === 'preview'} hideAxes=${mode ===
+    'preview'} displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
 function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
@@ -148,7 +149,7 @@ function getSuggestion(
     displayType
   ) as XyChartVisModel;
   return {
-    previewExpression: toExpression(prefilledVisModel),
+    previewExpression: toExpression(prefilledVisModel, 'preview'),
     score: 0.5,
     visModel: prefilledVisModel,
     title,
@@ -196,7 +197,7 @@ function getSuggestionsForField(
     };
 
     return {
-      previewExpression: toExpression(prefilledVisModel),
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
       score: 0.5,
       visModel: prefilledVisModel,
       title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,

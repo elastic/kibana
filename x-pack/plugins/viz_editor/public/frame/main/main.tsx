@@ -26,6 +26,7 @@ import {
   editorRegistry,
   GetSuggestionsType,
   initialState,
+  Suggestion,
   VisModel,
 } from '../../../public';
 import { ExpressionRenderer } from '../expression_renderer';
@@ -60,11 +61,21 @@ function getExpression(visModel: VisModel) {
     ? toRenderExpression(visModel, 'edit')
     : `${visModel.editorPlugin}_chart { config }`;
 
-  const fetchExpression = toDataFetchExpression
-    ? toDataFetchExpression(visModel, 'edit')
-    : `${visModel.editorPlugin}_chart { config }`;
+  const fetchExpression = toDataFetchExpression(visModel, 'full');
 
   return `${fetchExpression} | ${renderExpression}`;
+}
+
+function addDataFetchingToSuggestion(suggestion: Suggestion): Suggestion {
+  const { visModel, previewExpression } = suggestion;
+  const datasourcePlugin = datasourceRegistry.getByName(suggestion.visModel.datasourcePlugin);
+  return {
+    ...suggestion,
+    previewExpression: `${datasourcePlugin.toExpression(
+      visModel,
+      'preview'
+    )} | ${previewExpression}`,
+  };
 }
 
 function reducer(state: RootState, action: Action): RootState {
@@ -117,7 +128,8 @@ export function Main(props: MainProps) {
         plugin.getSuggestionsForField
           ? plugin.getSuggestionsForField(datasourceName, field, visModel)
           : []
-      );
+      )
+      .map(addDataFetchingToSuggestion);
   };
 
   const panelProps = {
@@ -134,7 +146,8 @@ export function Main(props: MainProps) {
     .getAll()
     .flatMap(plugin =>
       plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
-    );
+    )
+    .map(addDataFetchingToSuggestion);
 
   return (
     <EuiPage>
@@ -163,6 +176,7 @@ export function Main(props: MainProps) {
       )}
       <EuiPageBody className="vzBody">
         <DroppablePane
+          {...props}
           visModel={state.visModel}
           getAllSuggestionsForField={getAllSuggestionsForField}
           onChangeVisModel={onChangeVisModel}
