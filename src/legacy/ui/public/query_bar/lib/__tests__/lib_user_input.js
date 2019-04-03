@@ -17,64 +17,13 @@
  * under the License.
  */
 
-import angular from 'angular';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 
-// Load the kibana app dependencies.
+import { toUser, fromUser } from '../';
 
-let $rootScope;
-let $compile;
-let config;
-let $elemScope;
-let $elem;
-
-let cycleIndex = 0;
-const markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
-import '../parse_query';
-import { toUser, fromUser } from '../../../query_bar/lib';
-
-const init = function () {
-  // Load the application
-  ngMock.module('kibana');
-
-  // Create the scope
-  ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _config_) {
-    $compile = _$compile_;
-    config = _config_;
-
-    // Give us a scope
-    $rootScope = _$rootScope_;
-  });
-};
-
-const compile = function () {
-  $rootScope.mockModel = 'cycle' + cycleIndex++;
-  $rootScope.mockQueryInput = undefined;
-
-  $elem = angular.element(markup);
-  $compile($elem)($rootScope);
-  $elemScope = $elem.isolateScope();
-  $rootScope.$digest();
-};
-
-describe('parse-query directive', function () {
-  describe('initialization', function () {
-    beforeEach(function () {
-      init();
-      compile();
-    });
-
-    it('should use the model', function () {
-      expect($elemScope).to.have.property('ngModel');
-    });
-  });
+describe('user input helpers', function () {
 
   describe('user input parser', function () {
-
-    beforeEach(function () {
-      config.set('query:queryString:options', {});
-    });
 
     it('should return the input if passed an object', function () {
       expect(fromUser({ foo: 'bar' })).to.eql({ foo: 'bar' });
@@ -128,5 +77,4 @@ describe('parse-query directive', function () {
       expect(toUser(400)).to.be('400');
     });
   });
-
 });
