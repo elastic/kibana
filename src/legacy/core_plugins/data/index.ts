@@ -24,7 +24,7 @@ import { Legacy } from '../../../../kibana';
 export default function DataPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'data',
-    require: ['kibana', 'elasticsearch', 'interpreter'],
+    require: ['elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     config: (Joi: any) => {
       return Joi.object({

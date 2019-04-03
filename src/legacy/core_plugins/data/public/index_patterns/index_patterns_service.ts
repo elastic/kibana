@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { InterpreterService } from './interpreter_service';
+export class IndexPatternsService {
+  public setup() {
+    return {
+      // contracts go here
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}

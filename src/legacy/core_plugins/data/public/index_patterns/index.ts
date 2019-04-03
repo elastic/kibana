@@ -17,30 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fromExpression } from '@kbn/interpreter/common';
-import { getInterpreter, interpretAst } from 'plugins/interpreter/interpreter';
-import {
-  functionsRegistry,
-  renderersRegistry,
-  typesRegistry,
-} from 'plugins/interpreter/registries';
-
-export class InterpreterService {
-  public start() {
-    return {
-      getInterpreter,
-      interpretAst,
-      fromExpression,
-      registries: {
-        functionsRegistry,
-        renderersRegistry,
-        typesRegistry,
-      },
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
+export { IndexPatternsService } from './index_patterns_service';

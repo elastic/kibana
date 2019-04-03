@@ -17,25 +17,28 @@
  * under the License.
  */
 
-import { InterpreterService } from './interpreter';
+import { IndexPatternsService } from './index_patterns';
 
 class DataService {
-  private readonly interpreter: InterpreterService;
+  private readonly indexPatterns: IndexPatternsService;
 
   constructor() {
-    this.interpreter = new InterpreterService();
+    this.indexPatterns = new IndexPatternsService();
   }
 
-  public start() {
+  public setup() {
     return {
-      interpreter: this.interpreter.start(),
+      indexPatterns: this.indexPatterns.setup(),
     };
   }
 
   public stop() {
-    this.interpreter.stop();
+    this.indexPatterns.stop();
   }
 }
 
+// We temporarily export default here so that users importing from 'plugins/data'
+// will automatically receive the response value of the `setup` contract, mimicking
+// the data that will eventually be injected by the new platform.
 // tslint:disable no-default-export
-export default new DataService().start();
+export default new DataService().setup();
