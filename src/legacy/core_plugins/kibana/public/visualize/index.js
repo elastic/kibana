@@ -20,7 +20,6 @@
 import './editor/editor';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
-import 'ui/filters/sort_prefix_first';
 import 'ui/filter_bar';
 import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';

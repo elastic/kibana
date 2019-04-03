@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { sortPrefixFirst } from '../utils/sort_prefix_first';
+import { uiModules } from '../../modules';
+import { sortPrefixFirst } from '../../utils/sort_prefix_first';
 
 uiModules
   .get('kibana')
