@@ -51,6 +51,9 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
+        defaultMessage: 'Exclude'
+      }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),
@@ -58,6 +61,9 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'include',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
+        defaultMessage: 'Include'
+      }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),

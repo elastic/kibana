@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isString, isObject } from 'lodash';
 
 function isNotType(type) {
   return function (agg) {
@@ -28,12 +28,12 @@ function isNotType(type) {
 
 const migrateIncludeExcludeFormat = {
   serialize: function (value) {
-    if (!value || _.isString(value)) return value;
+    if (!value || isString(value)) return value;
     else return value.pattern;
   },
   write: function (aggConfig, output) {
     const value = aggConfig.params[this.name];
-    if (_.isObject(value)) {
+    if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value) {
       output.params[this.name] = value;
