@@ -36,7 +36,7 @@ export default function splitByTerm(req, panel, series) {
           .replace(series.terms_order_by, sortAggKey);
         _.set(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: direction });
         _.set(doc, `aggs.${series.id}.aggs`, { [sortAggKey]: fn(metric) });
-      } else if (['_term', '_count'].includes(series.terms_order_by)) {
+      } else if (['_key', '_count'].includes(series.terms_order_by)) {
         _.set(doc, `aggs.${series.id}.terms.order`, { [series.terms_order_by]: direction });
       } else {
         _.set(doc, `aggs.${series.id}.terms.order`, { _count: direction });

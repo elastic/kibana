@@ -5,7 +5,7 @@
  */
 
 import { SearchParams } from 'elasticsearch';
-import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem

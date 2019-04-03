@@ -23,4 +23,6 @@ export interface Field {
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;
+  parent?: string;
+  subType?: string;
 }
