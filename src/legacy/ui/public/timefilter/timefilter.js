@@ -43,7 +43,7 @@ class Timefilter extends SimpleEmitter {
       from: moment.isMoment(from) ? from.toISOString() : from,
       to: moment.isMoment(to) ? to.toISOString() : to
     };
-  }
+  };
 
   /**
    * Updates timefilter time.
@@ -64,11 +64,11 @@ class Timefilter extends SimpleEmitter {
       this.emit('timeUpdate');
       this.emit('fetch');
     }
-  }
+  };
 
   getRefreshInterval = () => {
     return _.clone(this._refreshInterval);
-  }
+  };
 
   /**
    * Set timefilter refresh interval.
@@ -96,19 +96,30 @@ class Timefilter extends SimpleEmitter {
         this.emit('fetch');
       }
     }
-  }
+    this.resetAutoRefresh();
+  };
 
-  toggleRefresh = () => {
-    this.setRefreshInterval({ pause: !this._refreshInterval.pause });
-  }
+  // Clear the existing auto-refresh interval and set up a new one
+  resetAutoRefresh = () => {
+    this.clearAutoRefresh();
+    const { pause, value } = this._refreshInterval;
+    if (pause) return;
+    this._autoRefreshTimeout = setInterval(() => this.emit('autoRefreshFetch'), value);
+  };
+
+  clearAutoRefresh = () => {
+    if (this._autoRefreshTimeout !== undefined) {
+      clearTimeout(this._autoRefreshTimeout);
+    }
+  };
 
   createFilter = (indexPattern, timeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
-  }
+  };
 
   getBounds = () => {
     return this.calculateBounds(this._time);
-  }
+  };
 
   getForceNow = () => {
     const forceNow = parseQueryString().forceNow;
@@ -121,17 +132,17 @@ class Timefilter extends SimpleEmitter {
       throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
     }
     return new Date(ticks);
-  }
+  };
 
   calculateBounds = (timeRange) => {
     return calculateBounds(timeRange, { forceNow: this.getForceNow() });
-  }
+  };
 
   getActiveBounds = () => {
     if (this.isTimeRangeSelectorEnabled) {
       return this.getBounds();
     }
-  }
+  };
 
   /**
    * Show the time bounds selector part of the time filter
@@ -139,7 +150,7 @@ class Timefilter extends SimpleEmitter {
   enableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = true;
     this.emit('enabledUpdated');
-  }
+  };
 
   /**
    * Hide the time bounds selector part of the time filter
@@ -147,7 +158,7 @@ class Timefilter extends SimpleEmitter {
   disableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = false;
     this.emit('enabledUpdated');
-  }
+  };
 
   /**
    * Show the auto refresh part of the time filter
@@ -155,7 +166,7 @@ class Timefilter extends SimpleEmitter {
   enableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = true;
     this.emit('enabledUpdated');
-  }
+  };
 
   /**
    * Hide the auto refresh part of the time filter
@@ -163,7 +174,7 @@ class Timefilter extends SimpleEmitter {
   disableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = false;
     this.emit('enabledUpdated');
-  }
+  };
 
 }
 

@@ -539,7 +539,7 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
+        $scope.$listen(timefilter, 'autoRefreshFetch', function () {
           $scope.fetch();
         });
         $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
