@@ -143,6 +143,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const baseExplanation = calculatedPrivileges.base;
 
+    const hasSelectedSpaces = this.state.selectedSpaceIds.length > 0;
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -263,6 +265,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               allowedPrivileges,
               baseExplanation
             )}`}
+            disabled={!hasSelectedSpaces}
           />
         </EuiFormRow>
 
@@ -291,7 +294,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
           spacesIndex={this.state.editingIndex}
-          disabled={this.state.selectedBasePrivilege.length > 0}
+          disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
         />
 
         {this.requiresGlobalPrivilegeWarning() && (
