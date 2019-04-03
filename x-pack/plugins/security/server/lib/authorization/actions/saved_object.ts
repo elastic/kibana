@@ -23,7 +23,7 @@ export class SavedObjectActions {
     }
 
     if (!operation || !isString(operation)) {
-      throw new Error('operation is required and must be a string');
+      throw new Error('type is required and must be a string');
     }
 
     return `${this.prefix}${type}/${operation}`;
