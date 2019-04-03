@@ -112,7 +112,7 @@ export class AutoFollowPatternForm extends PureComponent {
   onCreateLeaderIndexPattern = (indexPattern) => {
     const error = validateLeaderIndexPattern(indexPattern);
 
-    if (error.message) {
+    if (error) {
       const errors = {
         leaderIndexPatterns:
         {
@@ -169,16 +169,9 @@ export class AutoFollowPatternForm extends PureComponent {
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     } else {
       this.setState(({ fieldsErrors, autoFollowPattern: { leaderIndexPatterns } }) => {
-        let errors;
-        if (!leaderIndexPatterns.length) {
-          // If we don't have yet any pattern in our state,
-          // we validate the *current value* of the auto-follow pattern form input
-          errors = validateAutoFollowPattern({ leaderIndexPatterns: [leaderIndexPattern] });
-        } else {
-          // If we do have some auto-follow pattern in our state,
-          // we validate the *value in the state*
-          errors = validateAutoFollowPattern({ leaderIndexPatterns });
-        }
+        // If the user has fixed invalid input, then we need to update the validation state to clear
+        // the outdated errors.
+        const errors = validateAutoFollowPattern({ leaderIndexPatterns });
         return updateFormErrors(errors, fieldsErrors);
       });
     }
@@ -195,12 +188,7 @@ export class AutoFollowPatternForm extends PureComponent {
   };
 
   isFormValid() {
-    return Object.values(this.state.fieldsErrors).every(error => {
-      if (error !== null && typeof error === 'object') {
-        return error.message === null;
-      }
-      return error === undefined || error === null;
-    });
+    return Object.values(this.state.fieldsErrors).every(error => error === undefined || error === null);
   }
 
   sendForm = () => {
@@ -383,7 +371,7 @@ export class AutoFollowPatternForm extends PureComponent {
      * Leader index pattern(s)
      */
     const renderLeaderIndexPatterns = () => {
-      const hasError = !!fieldsErrors.leaderIndexPatterns.message;
+      const hasError = !!(fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message);
       const isInvalid = hasError && (fieldsErrors.leaderIndexPatterns.alwaysVisible || areErrorsVisible);
       const formattedLeaderIndexPatterns = leaderIndexPatterns.map(pattern => ({ label: pattern }));
 
