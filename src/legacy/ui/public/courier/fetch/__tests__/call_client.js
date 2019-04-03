@@ -158,17 +158,6 @@ describe('callClient', () => {
         expect(fakeSearch.callCount).to.be(1);
       });
     });
-
-    it('calls searchRequest.whenAborted() as part of setup', async () => {
-      const whenAbortedSpy = sinon.spy();
-      const searchRequest = createSearchRequest();
-      searchRequest.whenAborted = whenAbortedSpy;
-      searchRequests = [ searchRequest ];
-
-      return callClient(searchRequests).then(() => {
-        expect(whenAbortedSpy.callCount).to.be(1);
-      });
-    });
   });
 
   describe('aborting at different points in the request lifecycle:', () => {

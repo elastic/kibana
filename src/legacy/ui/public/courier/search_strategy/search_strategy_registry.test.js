@@ -18,14 +18,14 @@
  */
 
 import {
-  assignSearchRequestsToSearchStrategies,
+  getSearchStrategyForSearchRequest,
   addSearchStrategy,
 } from './search_strategy_registry';
 
 import { noOpSearchStrategy } from './no_op_search_strategy';
 
 describe('SearchStrategyRegistry', () => {
-  describe('assignSearchRequestsToSearchStrategies', () => {
+  describe('getSearchStrategyForSearchRequest', () => {
     test('associates search requests with valid search strategies', () => {
       const searchStrategyA = {
         id: 'a',
@@ -55,41 +55,19 @@ describe('SearchStrategyRegistry', () => {
         source: { getField: () => 'a', getPreferredSearchStrategyId: () => {} },
       };
 
-      const searchRequest2 = {
-        id: 2,
-        source: { getField: () => 'a', getPreferredSearchStrategyId: () => {} },
-      };
-
-      const searchRequest3 = {
-        id: 3,
-        source: { getField: () => 'b', getPreferredSearchStrategyId: () => {} },
-      };
-
-      const searchRequests = [ searchRequest0, searchRequest1, searchRequest2, searchRequest3];
-      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
-
-      expect(searchStrategiesWithSearchRequests).toEqual([{
-        searchStrategy: searchStrategyB,
-        searchRequests: [ searchRequest0, searchRequest3 ],
-      }, {
-        searchStrategy: searchStrategyA,
-        searchRequests: [ searchRequest1, searchRequest2 ],
-      }]);
+      expect(getSearchStrategyForSearchRequest(searchRequest0)).toEqual(searchStrategyB);
+      expect(getSearchStrategyForSearchRequest(searchRequest1)).toEqual(searchStrategyA);
     });
 
     test(`associates search requests with noOpSearchStrategy when a viable one can't be found`, () => {
-      const searchRequest0 = {
+      const searchRequest = {
         id: 0,
         source: { getField: () => {}, getPreferredSearchStrategyId: () => {} },
       };
 
-      const searchRequests = [ searchRequest0 ];
-      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
+      const searchStrategy = getSearchStrategyForSearchRequest(searchRequest);
 
-      expect(searchStrategiesWithSearchRequests).toEqual([{
-        searchStrategy: noOpSearchStrategy,
-        searchRequests: [ searchRequest0 ],
-      }]);
+      expect(searchStrategy).toEqual(noOpSearchStrategy);
     });
   });
 });

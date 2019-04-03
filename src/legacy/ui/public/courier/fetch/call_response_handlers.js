@@ -19,59 +19,36 @@
 
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
-import { RequestStatus } from './req_status';
 import { SearchError } from '../search_strategy/search_error';
 import { i18n } from '@kbn/i18n';
 
-export function CallResponseHandlersProvider(Private, Promise) {
-  const ABORTED = RequestStatus.ABORTED;
-  const INCOMPLETE = RequestStatus.INCOMPLETE;
+export function callResponseHandlers(searchRequests, responses) {
+  return Promise.all(searchRequests.map(async (searchRequest, index) => {
+    const response = responses[index];
 
-  function callResponseHandlers(searchRequests, responses) {
-    return Promise.map(searchRequests, function (searchRequest, index) {
-      if (searchRequest === ABORTED || searchRequest.aborted) {
-        return ABORTED;
-      }
+    if (response.timed_out) {
+      toastNotifications.addWarning({
+        title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
+          defaultMessage: 'Data might be incomplete because your request timed out',
+        })
+      });
+    }
 
-      const response = responses[index];
+    if (response._shards && response._shards.failed) {
+      toastNotifications.addWarning({
+        title: i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+          defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
+          values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total }
+        })
+      });
+    }
 
-      if (response.timed_out) {
-        toastNotifications.addWarning({
-          title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
-            defaultMessage: 'Data might be incomplete because your request timed out',
-          })
-        });
-      }
+    if (response.error) {
+      return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
+    }
 
-      if (response._shards && response._shards.failed) {
-        toastNotifications.addWarning({
-          title: i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
-            defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-            values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total }
-          })
-        });
-      }
-
-      function progress() {
-        if (searchRequest.isIncomplete()) {
-          return INCOMPLETE;
-        }
-
-        searchRequest.complete();
-        return response;
-      }
-
-      if (response.error) {
-        if (searchRequest.filterError(response)) {
-          return progress();
-        } else {
-          return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
-        }
-      }
-
-      return Promise.try(() => searchRequest.handleResponse(response)).then(progress);
-    });
-  }
-
-  return callResponseHandlers;
+    await searchRequest.handleResponse(response);
+    searchRequest.complete();
+    return response;
+  }));
 }

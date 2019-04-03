@@ -24,7 +24,7 @@ import { searchRequestQueue } from '../../../search_request_queue';
 import { i18n } from '@kbn/i18n';
 
 export function SearchRequestProvider(Promise) {
-  class SearchRequest {
+  return class SearchRequest {
     constructor({ source, defer, errorHandler }) {
       if (!errorHandler) {
         throw new Error(
@@ -62,10 +62,6 @@ export function SearchRequestProvider(Promise) {
      *  @return {Boolean}
      */
     canStart() {
-      if (this.source._fetchDisabled) {
-        return false;
-      }
-
       if (this.stopped) {
         return false;
       }
@@ -123,10 +119,6 @@ export function SearchRequestProvider(Promise) {
       return this.source._flatten();
     }
 
-    filterError() {
-      return false;
-    }
-
     handleResponse(resp) {
       this.success = true;
       this.resp = resp;
@@ -137,25 +129,6 @@ export function SearchRequestProvider(Promise) {
       this.resp = error;
       this.resp = (error && error.resp) || error;
       return this.errorHandler(this, error);
-    }
-
-    isIncomplete() {
-      return false;
-    }
-
-    continue() {
-      throw new Error(
-        i18n.translate('common.ui.courier.fetch.unableContinueRequestErrorMessage', {
-          defaultMessage: 'Unable to continue {type} request',
-          values: { type: this.type }
-        })
-      );
-    }
-
-    retry() {
-      const clone = this.clone();
-      this.abort();
-      return clone;
     }
 
     _markStopped() {
@@ -173,10 +146,6 @@ export function SearchRequestProvider(Promise) {
       this.abortedDefer = null;
     }
 
-    whenAborted(cb) {
-      this.abortedDefer.promise.then(cb);
-    }
-
     complete() {
       this._markStopped();
       this.ms = this.moment.diff() * -1;
@@ -188,14 +157,7 @@ export function SearchRequestProvider(Promise) {
     }
 
     getCompleteOrAbortedPromise() {
-      return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
+      return Promise.race([this.defer.promise, this.abortedDefer.promise]);
     }
-
-    clone = () => {
-      const { source, defer, errorHandler } = this;
-      return new SearchRequest({ source, defer, errorHandler });
-    };
-  }
-
-  return SearchRequest;
+  };
 }

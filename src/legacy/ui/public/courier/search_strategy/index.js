@@ -18,7 +18,7 @@
  */
 
 export {
-  assignSearchRequestsToSearchStrategies,
+  getSearchStrategyForSearchRequest,
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
 } from './search_strategy_registry';

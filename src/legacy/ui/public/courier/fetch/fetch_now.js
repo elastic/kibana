@@ -19,10 +19,7 @@
 
 import { fatalError } from '../../notify';
 import { CallClientProvider } from './call_client';
-import { CallResponseHandlersProvider } from './call_response_handlers';
-import { ContinueIncompleteProvider } from './continue_incomplete';
-import { RequestStatus } from './req_status';
-import { i18n } from '@kbn/i18n';
+import { callResponseHandlers } from './call_response_handlers';
 
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
@@ -38,87 +35,34 @@ import { i18n } from '@kbn/i18n';
 export function FetchNowProvider(Private, Promise) {
   // core tasks
   const callClient = Private(CallClientProvider);
-  const callResponseHandlers = Private(CallResponseHandlersProvider);
-  const continueIncomplete = Private(ContinueIncompleteProvider);
 
-  const ABORTED = RequestStatus.ABORTED;
-  const INCOMPLETE = RequestStatus.INCOMPLETE;
-
-  function fetchNow(searchRequests) {
-    return fetchSearchResults(searchRequests.map(function (searchRequest) {
-      if (!searchRequest.started) {
-        return searchRequest;
-      }
-
-      return searchRequest.retry();
-    }))
-      .catch(error => {
-        // If any errors occur after the search requests have resolved, then we kill Kibana.
-        fatalError(error, 'Courier fetch');
-      });
-  }
-
-  function fetchSearchResults(searchRequests) {
-    function replaceAbortedRequests() {
-      searchRequests = searchRequests.map(searchRequest => {
-        if (searchRequest.aborted) {
-          return ABORTED;
-        }
-
-        return searchRequest;
-      });
+  return async function fetchNow(searchRequests) {
+    try {
+      return await fetchSearchResults(searchRequests);
+    } catch (e) {
+      // If any errors occur after the search requests have resolved, then we kill Kibana.
+      fatalError(e, 'Courier fetch');
     }
+  };
 
-    replaceAbortedRequests();
-    return startRequests(searchRequests)
-      .then(function () {
-        replaceAbortedRequests();
-        return callClient(searchRequests)
-          .catch(() => {
-            // Silently swallow errors that result from search requests so the consumer can surface
-            // them as notifications instead of courier forcing fatal errors.
-          });
-      })
-      .then(function (responses) {
-        replaceAbortedRequests();
-        return callResponseHandlers(searchRequests, responses);
-      })
-      .then(function (responses) {
-        replaceAbortedRequests();
-        return continueIncomplete(searchRequests, responses, fetchSearchResults);
-      })
-      .then(function (responses) {
-        replaceAbortedRequests();
-        return responses.map(function (resp) {
-          switch (resp) {
-            case ABORTED:
-              return null;
-            case INCOMPLETE:
-              throw new Error(
-                i18n.translate('common.ui.courier.fetch.failedToClearRequestErrorMessage', {
-                  defaultMessage: 'Failed to clear incomplete or duplicate request from responses.',
-                })
-              );
-            default:
-              return resp;
-          }
-        });
-      });
+  async function fetchSearchResults(searchRequests) {
+    await startRequests(searchRequests);
+    try {
+      const responses = await callClient(searchRequests);
+      return callResponseHandlers(searchRequests, responses);
+    } catch (e) {
+      // Silently swallow errors that result from search requests so the consumer can surface
+      // them as notifications instead of courier forcing fatal errors.
+    }
   }
 
   function startRequests(searchRequests) {
-    return Promise.map(searchRequests, function (searchRequest) {
-      if (searchRequest === ABORTED) {
-        return searchRequest;
+    return Promise.all(searchRequests.map(async searchRequest => {
+      try {
+        searchRequest.start();
+      } catch (e) {
+        searchRequest.handleFailure(e);
       }
-
-      return new Promise(function (resolve) {
-        const action = searchRequest.started ? searchRequest.continue : searchRequest.start;
-        resolve(action.call(searchRequest));
-      })
-        .catch(err => searchRequest.handleFailure(err));
-    });
+    }));
   }
-
-  return fetchNow;
 }
