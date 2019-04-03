@@ -589,4 +589,36 @@ Object {
 `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
+
+  test('throws when bulkGet fails', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          error: {
+            statusCode: 400,
+            message: 'Error',
+          },
+        },
+      ],
+    });
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ];
+    await expect(
+      validateReferences(savedObjects, savedObjectsClient)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
+  });
 });

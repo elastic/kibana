@@ -36,13 +36,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
 
   beforeEach(() => {
     server = createMockServer();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -219,12 +213,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
         'Content-Type: application/ndjson',
         '',
-        '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}',
-        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}',
+        '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}',
         '--EXAMPLE',
         'Content-Disposition: form-data; name="retries"',
         '',
-        '[{"type":"dashboard","id":"my-dashboard","replaceReferences":[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]}]',
+        '[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]',
         '--EXAMPLE--',
       ].join('\r\n'),
       headers: {
@@ -234,18 +227,28 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
-          type: 'dashboard',
-          id: 'my-dashboard',
+          type: 'visualization',
+          id: 'my-vis',
           attributes: {
-            title: 'Look at my dashboard',
+            title: 'Look at my visualization',
           },
           references: [
             {
-              name: 'panel_0',
-              type: 'visualization',
-              id: 'my-vis-2',
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: 'existing',
             },
           ],
+        },
+      ],
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'existing',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
         },
       ],
     });
@@ -260,17 +263,40 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       Array [
         Object {
           "attributes": Object {
-            "title": "Look at my dashboard",
+            "title": "Look at my visualization",
           },
-          "id": "my-dashboard",
+          "id": "my-vis",
           "references": Array [
             Object {
-              "id": "my-vis-2",
-              "name": "panel_0",
-              "type": "visualization",
+              "id": "existing",
+              "name": "ref_0",
+              "type": "index-pattern",
             },
           ],
-          "type": "dashboard",
+          "type": "visualization",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "existing",
+          "type": "index-pattern",
         },
       ],
     ],

@@ -36,13 +36,7 @@ describe('POST /api/saved_objects/_import', () => {
 
   beforeEach(() => {
     server = createMockServer();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -207,7 +201,18 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'my-pattern-*',
+          type: 'index-pattern',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+      ],
+    });
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
     expect(statusCode).toBe(200);
@@ -245,5 +250,28 @@ describe('POST /api/saved_objects/_import', () => {
         },
       ],
     });
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "my-pattern-*",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 });

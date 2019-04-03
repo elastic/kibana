@@ -74,13 +74,7 @@ describe('resolveImportErrors()', () => {
   };
 
   beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
   });
 
   test('works with empty parameters', async () => {
@@ -396,7 +390,18 @@ Object {
         this.push(null);
       },
     });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: '2',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+      ],
+    });
     const result = await resolveImportErrors({
       readStream,
       objectLimit: 2,
@@ -450,6 +455,29 @@ Object {
   ],
   "success": false,
   "successCount": 0,
+}
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "2",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
 }
 `);
   });

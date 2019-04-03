@@ -29,9 +29,9 @@ describe('splitOverwrites()', () => {
         replaceReferences: [],
       },
       {
-        type: 'd',
         id: '2',
-        overwrite: true,
+        type: 'b',
+        overwrite: false,
         replaceReferences: [],
       },
       {
