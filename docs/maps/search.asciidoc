@@ -35,7 +35,7 @@ Add {ref}/mapping-index-field.html[_index] to your search to include documents f
 For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents
 and another vector layer with `kibana_sample_data_flights` documents.
 (See <<add-sample-data, adding sample data>>
-to install `kibana_sample_data_logs` and `kibana_sample_data_flights` indices.)
+to install the `kibana_sample_data_logs` and `kibana_sample_data_flights` indices.)
 
 If you query for
 --------------------------------------------------
