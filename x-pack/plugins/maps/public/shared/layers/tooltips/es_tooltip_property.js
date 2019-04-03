@@ -33,7 +33,7 @@ export class ESTooltipProperty extends TooltipProperty {
 
   isFilterable() {
     const field = this._indexPattern.fields.byName[this._propertyName];
-    return field && field.type === 'string';
+    return field && (field.type === 'string' || field.type === 'date' || field.type === 'ip' || field.type === 'number');
   }
 
   getESFilter() {
