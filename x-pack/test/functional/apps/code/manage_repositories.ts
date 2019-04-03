@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function manageRepositoriesFunctonalTests({
+export default function manageRepositoriesFunctionalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {

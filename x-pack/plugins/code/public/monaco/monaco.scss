@@ -1,19 +1,16 @@
 .code-monaco-highlight-line {
   background: $euiCodeBlockBuiltInColor;
-
 }
 
 .code-mark-line-number {
   background: $euiCodeBlockBuiltInColor;
-	width: $euiSizeXS;
+  width: $euiSizeXS;
 }
 
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;
   border-right: $euiBorderThin;
 }
-
-
 
 .monaco-editor-hover {
   min-width: 350px;
@@ -29,7 +26,7 @@
   -o-user-select: text;
   user-select: text;
   box-sizing: initial;
-  animation: fadein .1s linear;
+  animation: fadein 0.1s linear;
   line-height: 1.5em;
   background: $euiColorLightestShade;
   border-radius: 4px 4px 4px 4px;
@@ -51,7 +48,7 @@
   border-left: 1px solid $euiBorderColor;
 }
 
-.monaco-editor-hover .button-group button{
+.monaco-editor-hover .button-group button {
   font-size: 13px;
   font-weight: normal;
   border: 0;
@@ -63,7 +60,8 @@
   display: none;
 }
 
-.code-mark-line-number, .code-monaco-highlight-line {
+.code-mark-line-number,
+.code-monaco-highlight-line {
   background-color: $euiColorLightShade;
 }
 
@@ -80,18 +78,22 @@
   animation-name: placeHolderShimmer;
   animation-timing-function: linear;
   background: $euiColorLightestShade;
-  background: linear-gradient(to right, $euiColorLightShade 8%, $euiColorLightestShade 38%, $euiColorLightShade 54%);
+  background: linear-gradient(
+    to right,
+    $euiColorLightShade 8%,
+    $euiColorLightestShade 38%,
+    $euiColorLightShade 54%
+  );
   background-size: 1000px 640px;
 
   position: relative;
-
 }
 
-@keyframes placeHolderShimmer{
-  0%{
-    background-position: -468px 0
+@keyframes placeHolderShimmer {
+  0% {
+    background-position: -468px 0;
   }
-  100%{
-    background-position: 468px 0
+  100% {
+    background-position: 468px 0;
   }
 }
