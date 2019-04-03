@@ -1,3 +1,8 @@
+<% if (generateScss) { -%>
+import { resolve } from 'path';
+import { existsSync } from 'fs';
+
+<% } -%>
 <% if (generateApi) { -%>
 import exampleRoute from './server/routes/example';
 
@@ -20,7 +25,7 @@ export default function (kibana) {
       ],
       <%_ } -%>
       <%_ if (generateScss) { -%>
-      styleSheetPaths: require('path').resolve(__dirname, 'public/app.scss'),
+      styleSheetPaths: [resolve(__dirname, 'public/app.scss'), resolve(__dirname, 'public/app.css')].find(p => existsSync(p)),
       <%_ } -%>
     },
 

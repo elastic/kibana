@@ -12,7 +12,6 @@ import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 import { initErrorsApi } from './server/routes/errors';
 import { initMetricsApi } from './server/routes/metrics';
 import { initServicesApi } from './server/routes/services';
-import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
 import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 
@@ -79,7 +78,6 @@ export function apm(kibana: any) {
       initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
-      initStatusApi(server);
       initMetricsApi(server);
       makeApmUsageCollector(server);
     }

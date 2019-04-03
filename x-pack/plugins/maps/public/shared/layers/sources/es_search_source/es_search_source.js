@@ -201,7 +201,7 @@ export class ESSearchSource extends AbstractESSource {
   async getStringFields() {
     const indexPattern = await this._getIndexPattern();
     const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string';
+      return field.type === 'string' && field.subType !== 'multi';
     });
     return stringFields.map(stringField => {
       return { name: stringField.name, label: stringField.name };
