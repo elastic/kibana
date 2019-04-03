@@ -18,8 +18,15 @@
  */
 
 import Hapi from 'hapi';
+import * as exportMock from '../export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
+
+const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
+
+jest.mock('../export', () => ({
+  getSortedObjectsForExport: jest.fn(),
+}));
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
@@ -49,13 +56,7 @@ describe('POST /api/saved_objects/_export', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
   });
 
   test('formats successful response', async () => {
@@ -67,33 +68,26 @@ describe('POST /api/saved_objects/_export', () => {
         includeReferencesDeep: true,
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      saved_objects: [
-        {
-          id: '2',
-          type: 'search',
-          attributes: {},
-          references: [
-            {
-              name: 'ref_0',
-              type: 'index-pattern',
-              id: '1',
-            },
-          ],
-        },
-      ],
-    });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'index-pattern',
-          attributes: {},
-          references: [],
-        },
-      ],
-    });
+    getSortedObjectsForExport.mockResolvedValueOnce([
+      {
+        id: '1',
+        type: 'index-pattern',
+        attributes: {},
+        references: [],
+      },
+      {
+        id: '2',
+        type: 'search',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ]);
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));
@@ -123,38 +117,28 @@ Array [
   },
 ]
 `);
-    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+    expect(getSortedObjectsForExport).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "perPage": 10000,
-        "sortField": "_id",
-        "sortOrder": "asc",
-        "type": Array [
+        "exportSizeLimit": 10000,
+        "includeReferencesDeep": true,
+        "objects": undefined,
+        "savedObjectsClient": Object {
+          "bulkCreate": [MockFunction],
+          "bulkGet": [MockFunction],
+          "create": [MockFunction],
+          "delete": [MockFunction],
+          "errors": Object {},
+          "find": [MockFunction],
+          "get": [MockFunction],
+          "update": [MockFunction],
+        },
+        "types": Array [
           "search",
         ],
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ],
     ],
   ],
   "results": Array [

@@ -17,7 +17,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 `objects` (optional)::
   (array) A list of objects to export
 `includeReferencesDeep`::
-  (boolean) Include all nested references in the export
+  (boolean) This will make the exported objects include all the referenced objects needed
 
 Note: At least `type` or `objects` must be passed in.
 

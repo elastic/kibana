@@ -66,7 +66,6 @@ describe('getSortedObjectsForExport()', () => {
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
-      includeReferencesDeep: false,
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -138,7 +137,6 @@ Array [
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
-        includeReferencesDeep: false,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
   });
@@ -177,7 +175,6 @@ Array [
           id: '2',
         },
       ],
-      includeReferencesDeep: false,
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -254,10 +251,6 @@ Array [
       types: ['index-pattern', 'search'],
       objects: [
         {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
           type: 'search',
           id: '2',
         },
@@ -288,10 +281,6 @@ Array [
   "calls": Array [
     Array [
       Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
         Object {
           "id": "2",
           "type": "search",
@@ -336,7 +325,6 @@ Array [
           id: '2',
         },
       ],
-      includeReferencesDeep: false,
     };
     await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`

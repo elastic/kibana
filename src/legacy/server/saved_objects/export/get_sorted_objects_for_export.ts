@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClient } from '../service/saved_objects_client';
+import { SavedObjectsClient } from '../service/saved_objects_client';
 import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
@@ -32,23 +32,26 @@ interface ExportObjectsOptions {
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
-  includeReferencesDeep: boolean;
+  includeReferencesDeep?: boolean;
 }
 
-export async function getSortedObjectsForExport({
-  types,
+async function fetchObjectsToExport({
   objects,
-  savedObjectsClient,
+  types,
   exportSizeLimit,
-  includeReferencesDeep,
-}: ExportObjectsOptions) {
-  let objectsToExport: SavedObject[] = [];
+  savedObjectsClient,
+}: {
+  objects?: ObjectToExport[];
+  types?: string[];
+  exportSizeLimit: number;
+  savedObjectsClient: SavedObjectsClient;
+}) {
   if (objects) {
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    ({ saved_objects: objectsToExport } = await savedObjectsClient.bulkGet(objects));
-    const erroredObjects = objectsToExport.filter(obj => !!obj.error);
+    const bulkGetResult = await savedObjectsClient.bulkGet(objects);
+    const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
       err.output.payload.attributes = {
@@ -56,20 +59,36 @@ export async function getSortedObjectsForExport({
       };
       throw err;
     }
-  } else {
-    const findResponse = await savedObjectsClient.find({
-      type: types,
-      sortField: '_id',
-      sortOrder: 'asc',
-      perPage: exportSizeLimit,
-    });
-    if (findResponse.total > exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
-    }
-    ({ saved_objects: objectsToExport } = findResponse);
+    return bulkGetResult.saved_objects;
   }
-  if (includeReferencesDeep) {
-    objectsToExport = await injectNestedDependencies(objectsToExport, savedObjectsClient);
+  const findResponse = await savedObjectsClient.find({
+    type: types,
+    sortField: '_id',
+    sortOrder: 'asc',
+    perPage: exportSizeLimit,
+  });
+  if (findResponse.total > exportSizeLimit) {
+    throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
   }
-  return sortObjects(objectsToExport);
+  return findResponse.saved_objects;
+}
+
+export async function getSortedObjectsForExport({
+  types,
+  objects,
+  savedObjectsClient,
+  exportSizeLimit,
+  includeReferencesDeep = false,
+}: ExportObjectsOptions) {
+  const objectsToExport = await fetchObjectsToExport({
+    types,
+    objects,
+    savedObjectsClient,
+    exportSizeLimit,
+  });
+  return sortObjects(
+    includeReferencesDeep
+      ? await injectNestedDependencies(objectsToExport, savedObjectsClient)
+      : objectsToExport
+  );
 }
