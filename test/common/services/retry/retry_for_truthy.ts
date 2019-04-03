@@ -26,12 +26,12 @@ interface Options {
   methodName: string;
   description: string;
   block: () => Promise<boolean>;
-  onRetryBlock?: () => Promise<any>;
+  onFailureBlock?: () => Promise<any>;
 }
 
 export async function retryForTruthy(
   log: ToolingLog,
-  { timeout, methodName, description, block, onRetryBlock }: Options
+  { timeout, methodName, description, block, onFailureBlock }: Options
 ) {
   log.debug(`Waiting up to ${timeout}ms for ${description}...`);
 
@@ -39,7 +39,7 @@ export async function retryForTruthy(
     timeout,
     methodName,
     block,
-    onRetryBlock,
+    onFailureBlock,
     onFailure: lastError => {
       let msg = `timed out waiting for ${description}`;
 

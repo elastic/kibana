@@ -29,22 +29,22 @@ export function RetryProvider({ getService }: FtrProviderContext) {
     public async tryForTime<T>(
       timeout: number,
       block: () => Promise<T>,
-      onRetryBlock?: () => Promise<T>
+      onFailureBlock?: () => Promise<T>
     ) {
       return await retryForSuccess(log, {
         timeout,
         methodName: 'retry.tryForTime',
         block,
-        onRetryBlock,
+        onFailureBlock,
       });
     }
 
-    public async try<T>(block: () => Promise<T>, onRetryBlock?: () => Promise<T>) {
+    public async try<T>(block: () => Promise<T>, onFailureBlock?: () => Promise<T>) {
       return await retryForSuccess(log, {
         timeout: config.get('timeouts.try'),
         methodName: 'retry.try',
         block,
-        onRetryBlock,
+        onFailureBlock,
       });
     }
 
@@ -52,28 +52,28 @@ export function RetryProvider({ getService }: FtrProviderContext) {
       description: string,
       timeout: number,
       block: () => Promise<boolean>,
-      onRetryBlock?: () => Promise<any>
+      onFailureBlock?: () => Promise<any>
     ) {
       await retryForTruthy(log, {
         timeout,
         methodName: 'retry.waitForWithTimeout',
         description,
         block,
-        onRetryBlock,
+        onFailureBlock,
       });
     }
 
     public async waitFor(
       description: string,
       block: () => Promise<boolean>,
-      onRetryBlock?: () => Promise<any>
+      onFailureBlock?: () => Promise<any>
     ) {
       await retryForTruthy(log, {
         timeout: config.get('timeouts.waitFor'),
         methodName: 'retry.waitFor',
         description,
         block,
-        onRetryBlock,
+        onFailureBlock,
       });
     }
   }();
