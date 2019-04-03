@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { Fragment, SFC } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 // @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
@@ -46,7 +46,7 @@ interface Props {
   onAssetDelete: (asset: AssetType) => void;
 }
 
-export const AssetModal: SFC<Props> = props => {
+export const AssetModal: FunctionComponent<Props> = props => {
   const {
     assetValues,
     isLoading,

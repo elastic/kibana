@@ -12,7 +12,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import { ConfirmModal } from '../confirm_modal';
 import { AssetType } from './asset';
 import { AssetModal } from './asset_modal';
@@ -31,12 +31,15 @@ interface Props {
 }
 
 interface State {
+  /** The id of the asset to delete, if applicable.  Is set if the viewer clicks the delete icon */
   deleteId: string | null;
+  /** Determines if the modal is currently visible */
   isModalVisible: boolean;
+  /** Indicates if the modal is currently loading */
   isLoading: boolean;
 }
 
-export class AssetManager extends React.PureComponent<Props, State> {
+export class AssetManager extends PureComponent<Props, State> {
   public static propTypes = {
     assetValues: PropTypes.array,
     onAddImageElement: PropTypes.func.isRequired,
@@ -74,18 +77,22 @@ export class AssetManager extends React.PureComponent<Props, State> {
       />
     );
 
+    const confirmModal = (
+      <ConfirmModal
+        isOpen={this.state.deleteId !== null}
+        title="Remove Asset"
+        message="Are you sure you want to remove this asset?"
+        confirmButtonText="Remove"
+        onConfirm={this.doDelete}
+        onCancel={this.resetDelete}
+      />
+    );
+
     return (
       <Fragment>
         <EuiButtonEmpty onClick={this.showModal}>Manage assets</EuiButtonEmpty>
         {isModalVisible ? assetModal : null}
-        <ConfirmModal
-          isOpen={this.state.deleteId !== null}
-          title="Remove Asset"
-          message="Are you sure you want to remove this asset?"
-          confirmButtonText="Remove"
-          onConfirm={this.doDelete}
-          onCancel={this.resetDelete}
-        />
+        {confirmModal}
       </Fragment>
     );
   }
