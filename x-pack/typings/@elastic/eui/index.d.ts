@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SnapshotRestoreHome } from './home';
-export { RepositoryAdd } from './repository_add';
-export { RepositoryEdit } from './repository_edit';
+// TODO: Remove once typescript definitions are in EUI
+
+declare module '@elastic/eui' {
+  export const EuiDescribedFormGroup: React.SFC<any>;
+  export const EuiCodeEditor: React.SFC<any>;
+}

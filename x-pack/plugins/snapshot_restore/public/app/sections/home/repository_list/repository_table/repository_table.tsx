@@ -3,24 +3,37 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+} from '@elastic/eui';
 import React, { useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository, RepositoryType } from '../../../../../../common/types';
-import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
+import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
+import { RepositoryDeleteProvider, RepositoryVerificationBadge } from '../../../../components';
+import { BASE_PATH } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
+import { textService } from '../../../../services/text';
 
-interface Props {
+interface Props extends RouteComponentProps {
   repositories: Repository[];
+  verification: { [key: string]: RepositoryVerification };
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
-export const RepositoryTable: React.FunctionComponent<Props> = ({
+const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
+  verification,
   reload,
   openRepositoryDetails,
+  history,
 }) => {
   const {
     core: { i18n },
@@ -49,13 +62,23 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
         if (type === REPOSITORY_TYPES.source) {
-          return (
-            <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
-          );
-        } else {
-          return <RepositoryTypeName type={type} />;
+          return textService.getRepositoryTypeName(type, repository.settings.delegate_type);
         }
+        return textService.getRepositoryTypeName(type);
       },
+    },
+    {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.snapshotRestore.repositoryList.table.verificationStatusColumnTitle',
+        {
+          defaultMessage: 'Status',
+        }
+      ),
+      truncateText: true,
+      render: (name: Repository['name']) => (
+        <RepositoryVerificationBadge verificationResults={verification[name] || null} />
+      ),
     },
     {
       name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionsColumnTitle', {
@@ -74,8 +97,8 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           ),
           icon: 'pencil',
           type: 'icon',
-          onClick: () => {
-            /* placeholder */
+          onClick: ({ name }: Repository) => {
+            history.push(`${BASE_PATH}/edit_repository/${name}`);
           },
         },
         {
@@ -152,12 +175,31 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       undefined
     ),
     toolsRight: (
-      <EuiButton color="secondary" iconType="refresh" onClick={reload}>
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
-          defaultMessage="Reload repositories"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+        <EuiFlexItem>
+          <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
+              defaultMessage="Reload"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            href={history.createHref({
+              pathname: `${BASE_PATH}/add_repository`,
+            })}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="srRepositoriesAddButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
+              defaultMessage="Register a repository"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
     box: {
       incremental: true,
@@ -177,7 +219,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         ).map(type => {
           return {
             value: type,
-            view: <RepositoryTypeName type={type as RepositoryType} />,
+            view: textService.getRepositoryTypeName(type),
           };
         }),
       },
@@ -203,3 +245,5 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     />
   );
 };
+
+export const RepositoryTable = withRouter(RepositoryTableUi);

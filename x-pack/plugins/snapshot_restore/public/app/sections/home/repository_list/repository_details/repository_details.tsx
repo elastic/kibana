@@ -4,52 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { useAppDependencies } from '../../../../index';
-import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
-import { useRequest } from '../../../../services/http';
+import { documentationLinksService } from '../../../../services/documentation';
+import { loadRepository } from '../../../../services/http';
+import { textService } from '../../../../services/text';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  RepositoryTypeName,
+  RepositoryVerificationBadge,
   SectionError,
   SectionLoading,
 } from '../../../../components';
+import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-interface Props {
+import 'brace/theme/textmate';
+
+interface Props extends RouteComponentProps {
   repositoryName: Repository['name'];
   onClose: () => void;
 }
 
-export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryName, onClose }) => {
+const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
+  repositoryName,
+  onClose,
+  history,
+}) => {
   const {
-    core: {
-      i18n,
-      documentation: { esDocBasePath, esPluginDocBasePath },
-    },
+    core: { i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const { error, loading, data: repository } = useRequest({
-    path: `repositories/${repositoryName}`,
-    method: 'get',
-  });
+  const {
+    error,
+    loading,
+    data: { repository, verification },
+  } = loadRepository(repositoryName);
 
   const renderBody = () => {
     if (loading) {
@@ -103,6 +112,9 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
   };
 
   const renderRepository = () => {
+    if (!repository) {
+      return null;
+    }
     const { type } = repository as Repository;
     return (
       <Fragment>
@@ -117,17 +129,15 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === REPOSITORY_TYPES.source ? (
-              <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
-            ) : (
-              <RepositoryTypeName type={type} />
-            )}
+            {type === REPOSITORY_TYPES.source
+              ? textService.getRepositoryTypeName(type, repository.settings.delegate_type)
+              : textService.getRepositoryTypeName(type)}
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getRepositoryTypeDocUrl(type, esDocBasePath, esPluginDocBasePath)}
+              href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
               iconType="help"
             >
@@ -137,9 +147,64 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
         </EuiFlexGroup>
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
+        <EuiHorizontalRule />
+        {renderVerification()}
       </Fragment>
     );
   };
+
+  const renderVerification = () => (
+    <Fragment>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.verificationTitle"
+            defaultMessage="Verification status"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <RepositoryVerificationBadge verificationResults={verification || null} />
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle"
+            defaultMessage="Details"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {verification ? (
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          isReadOnly
+          value={JSON.stringify(verification.response || verification.error, null, 2)}
+          setOptions={{
+            showLineNumbers: false,
+            tabSize: 2,
+            maxLines: Infinity,
+          }}
+          editorProps={{
+            $blockScrolling: Infinity,
+          }}
+          showGutter={false}
+          minLines={6}
+          aria-label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
+              defaultMessage="Verification details repository '{name}'"
+              values={{
+                name,
+              }}
+            />
+          }
+        />
+      ) : null}
+    </Fragment>
+  );
 
   const renderFooter = () => {
     return (
@@ -181,9 +246,9 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => {
-                    /* placeholder */
-                  }}
+                  href={history.createHref({
+                    pathname: `${BASE_PATH}/edit_repository/${repositoryName}`,
+                  })}
                   fill
                   color="primary"
                 >
@@ -222,3 +287,5 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
     </EuiFlyout>
   );
 };
+
+export const RepositoryDetails = withRouter(RepositoryDetailsUi);

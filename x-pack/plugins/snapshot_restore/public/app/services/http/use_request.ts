@@ -3,42 +3,69 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState } from 'react';
-import { API_BASE_PATH } from '../../../../common/constants';
-import { useAppDependencies } from '../../index';
+import { useEffect, useRef, useState } from 'react';
+import { httpService } from './index';
 
-export const useRequest = ({
-  path,
-  method,
-  body,
-  interval,
-}: {
+interface SendRequest {
   path: string;
   method: string;
   body?: any;
-  interval?: number;
-}) => {
-  const {
-    core: { http, chrome },
-  } = useAppDependencies();
+}
 
+interface SendRequestResponse {
+  data: any;
+  error: Error;
+}
+
+export const sendRequest = async ({
+  path,
+  method,
+  body,
+}: SendRequest): Promise<Partial<SendRequestResponse>> => {
+  try {
+    const response = await httpService.httpClient[method](path, body);
+
+    if (!response.data) {
+      throw new Error(response.statusText);
+    }
+
+    return {
+      data: response.data,
+    };
+  } catch (e) {
+    return {
+      error: e,
+    };
+  }
+};
+
+interface UseRequest extends SendRequest {
+  interval?: number;
+}
+
+export const useRequest = ({ path, method, body, interval }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
+  const isMounted = useRef<boolean>(true);
 
   const request = async () => {
     setError(null);
     setLoading(true);
-    try {
-      const response = await http
-        .getClient()
-        [method](chrome.addBasePath(`${API_BASE_PATH}${path}`), body);
-      if (!response.data) {
-        throw new Error(response.statusText);
-      }
-      setData(response.data);
-    } catch (e) {
-      setError(e);
+    const { data: responseData, error: responseError } = await sendRequest({
+      path,
+      method,
+      body,
+    });
+    // Avoid setting state for components that unmounted before request completed
+    if (!isMounted.current) {
+      return;
+    }
+    // Set state for components that are still mounted
+    if (responseError) {
+      setError(responseError);
+    } else {
+      setData(responseData);
     }
     setLoading(false);
   };
@@ -61,5 +88,8 @@ export const useRequest = ({
     loading,
     data,
     request,
+    setIsMounted: (status: boolean) => {
+      isMounted.current = status;
+    },
   };
 };

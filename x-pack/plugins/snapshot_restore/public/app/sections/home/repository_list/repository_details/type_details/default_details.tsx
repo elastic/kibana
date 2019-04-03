@@ -3,20 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiCodeEditor: React.SFC<any>;
-}
-
 import React, { Fragment } from 'react';
 
 import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
-import 'brace/theme/textmate';
-
 import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import 'brace/theme/textmate';
 
 interface Props {
   repository: Repository;
@@ -59,6 +53,7 @@ export const DefaultDetails: React.FunctionComponent<Props> = ({
           $blockScrolling: Infinity,
         }}
         showGutter={false}
+        minLines={6}
         aria-label={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryDetails.genericSettingsDescription"

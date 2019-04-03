@@ -11,6 +11,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } fro
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
+import { breadcrumbService } from '../../services/breadcrumb';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -30,11 +31,10 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
   const [activeSection, setActiveSection] = useState<Section>(section);
 
   const {
-    core: { i18n, chrome },
-    plugins: { management },
+    core: {
+      i18n: { FormattedMessage },
+    },
   } = useAppDependencies();
-
-  const { FormattedMessage } = i18n;
 
   const tabs = [
     {
@@ -64,16 +64,9 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
     history.push(`${BASE_PATH}/${newSection}`);
   };
 
+  // Set breadcrumb
   useEffect(() => {
-    chrome.breadcrumbs.set([
-      management.constants.BREADCRUMB,
-      {
-        text: i18n.translate('xpack.snapshotRestore.home.BreadcrumbTitle', {
-          defaultMessage: 'Snapshot and Restore',
-        }),
-        href: `#${BASE_PATH}`,
-      },
-    ]);
+    breadcrumbService.setBreadcrumbs('home');
   }, []);
 
   return (
@@ -106,8 +99,8 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}/repositories/:name?`} component={RepositoryList} />
-          <Route exact path={`${BASE_PATH}/snapshots/:name?`} component={SnapshotList} />
+          <Route exact path={`${BASE_PATH}/repositories/:name*`} component={RepositoryList} />
+          <Route exact path={`${BASE_PATH}/snapshots/:name*`} component={SnapshotList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

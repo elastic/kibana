@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
 
-export { SnapshotRestoreHome } from './home';
-export { RepositoryAdd } from './repository_add';
-export { RepositoryEdit } from './repository_edit';
+export declare function wrapCustomError(error: Error, statusCode: number): Boom<null>;
+
+export declare function wrapEsError(error: Error, statusCodeToMessageMap?: object): Boom<null>;

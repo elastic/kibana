@@ -34,7 +34,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Bucket"
         />
       ),
-      description: bucket,
+      description: bucket || '',
     },
   ];
 

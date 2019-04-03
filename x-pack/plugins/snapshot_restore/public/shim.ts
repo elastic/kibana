@@ -21,13 +21,27 @@ export interface AppCore {
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
   };
-  chrome: typeof chrome;
   notification: {
     fatalError: typeof fatalError;
   };
+}
+
+export interface AppPlugins {
+  management: {
+    sections: typeof management;
+  };
+}
+
+export interface Core extends AppCore {
+  chrome: typeof chrome;
   http: {
     getClient(): any;
     setClient(client: any): void;
+  };
+  routing: {
+    registerAngularRoute(path: string, config: object): void;
+    registerRouter(router: HashRouter): void;
+    getRouter(): HashRouter | undefined;
   };
   documentation: {
     esDocBasePath: string;
@@ -35,7 +49,7 @@ export interface AppCore {
   };
 }
 
-export interface AppPlugins {
+export interface Plugins extends AppPlugins {
   management: {
     sections: typeof management;
     constants: {
@@ -43,16 +57,6 @@ export interface AppPlugins {
     };
   };
 }
-
-export interface Core extends AppCore {
-  routing: {
-    registerAngularRoute(path: string, config: object): void;
-    registerRouter(router: HashRouter): void;
-    getRouter(): HashRouter | undefined;
-  };
-}
-
-export interface Plugins extends AppPlugins {} // tslint:disable-line no-empty-interface
 
 export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern

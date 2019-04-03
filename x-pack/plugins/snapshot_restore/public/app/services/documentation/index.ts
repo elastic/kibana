@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getRepositoryTypeDocUrl } from './documentation_links';
+export { documentationLinksService } from './documentation_links';

@@ -8,11 +8,11 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { Repository } from '../../../../../common/types';
+import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, Section } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useRequest } from '../../../services/http';
+import { loadRepositories } from '../../../services/http';
 
-import { SectionError, SectionLoading } from '../../../components';
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
 
@@ -35,10 +35,12 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
-  const { error, loading, data: repositories, request: reload } = useRequest({
-    path: 'repositories',
-    method: 'get',
-  });
+  const {
+    error,
+    loading,
+    data: { repositories, verification },
+    request: reload,
+  } = loadRepositories();
   const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
     undefined
   );
@@ -82,7 +84,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     );
   }
 
-  if (repositories.length === 0) {
+  if (repositories && repositories.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="managementApp"
@@ -106,12 +108,12 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         }
         actions={
           <EuiButton
-            onClick={() => {
-              /* placeholder */
-            }}
+            href={history.createHref({
+              pathname: `${BASE_PATH}/add_repository`,
+            })}
             fill
             iconType="plusInCircle"
-            data-test-subj="srRepositoriesEmptyPromptCreateButton"
+            data-test-subj="srRepositoriesEmptyPromptAddButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryButtonLabel"
@@ -129,7 +131,8 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         <RepositoryDetails repositoryName={currentRepository} onClose={closeRepositoryDetails} />
       ) : null}
       <RepositoryTable
-        repositories={repositories}
+        repositories={repositories || []}
+        verification={verification || {}}
         reload={reload}
         openRepositoryDetails={openRepositoryDetails}
       />
