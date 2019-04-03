@@ -152,7 +152,7 @@ export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
 
-// @public (undocumented)
+// @public
 export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
     // (undocumented)
     setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
@@ -163,11 +163,11 @@ export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = 
 // @public
 export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
 
-// @public (undocumented)
+// @public
 export interface PluginInitializerContext {
 }
 
-// @public (undocumented)
+// @public
 export interface PluginSetupContext {
     // (undocumented)
     basePath: BasePathSetup;

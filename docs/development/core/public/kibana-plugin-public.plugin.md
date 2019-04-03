@@ -2,6 +2,8 @@
 
 ## Plugin interface
 
+The interface that should be returned by a `PluginInitializer`<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

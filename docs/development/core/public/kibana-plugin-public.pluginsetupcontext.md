@@ -2,6 +2,8 @@
 
 ## PluginSetupContext interface
 
+The available core services passed to a plugin's `Plugin#setup` method.
+
 <b>Signature:</b>
 
 ```typescript

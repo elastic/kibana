@@ -28,9 +28,19 @@ import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps } from './plugins_service';
 
+/**
+ * The available core services passed to a `PluginInitializer`
+ *
+ * @public
+ */
 // tslint:disable-next-line no-empty-interface
 export interface PluginInitializerContext {}
 
+/**
+ * The available core services passed to a plugin's `Plugin#setup` method.
+ *
+ * @public
+ */
 export interface PluginSetupContext {
   basePath: BasePathSetup;
   chrome: ChromeSetup;

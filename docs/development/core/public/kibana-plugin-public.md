@@ -16,9 +16,9 @@
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the start lifecycle |
-|  [Plugin](./kibana-plugin-public.plugin.md) |  |
-|  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) |  |
-|  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) |  |
+|  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
+|  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) | The available core services passed to a plugin's <code>Plugin#setup</code> method. |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
 ## Type Aliases

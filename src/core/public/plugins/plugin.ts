@@ -21,6 +21,11 @@ import { DiscoveredPlugin, PluginName } from '../../server';
 import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 
+/**
+ * The interface that should be returned by a `PluginInitializer`.
+ *
+ * @public
+ */
 export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
   setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
   stop?: () => void;
@@ -29,6 +34,8 @@ export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = 
 /**
  * The `plugin` export at the root of a plugin's `public` directory should conform
  * to this interface.
+ *
+ * @public
  */
 export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (
   core: PluginInitializerContext
@@ -37,6 +44,7 @@ export type PluginInitializer<TSetup, TDependencies extends Record<string, unkno
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ *
  * @internal
  */
 export class PluginWrapper<

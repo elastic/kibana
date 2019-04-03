@@ -2,6 +2,8 @@
 
 ## PluginInitializerContext interface
 
+The available core services passed to a `PluginInitializer`
+
 <b>Signature:</b>
 
 ```typescript
