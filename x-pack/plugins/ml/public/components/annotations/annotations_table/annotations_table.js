@@ -302,7 +302,9 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           id: 'xpack.ml.annotationsTable.annotationColumnName',
           defaultMessage: 'Annotation',
         }),
-        sortable: true
+        textOnly: true,
+        sortable: true,
+        width: '50%',
       },
       {
         field: 'timestamp',
@@ -322,24 +324,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
         }),
         dataType: 'date',
         render: renderDate,
-        sortable: true,
-      },
-      {
-        field: 'create_time',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.creationDateColumnName',
-          defaultMessage: 'Creation date',
-        }),
-        dataType: 'date',
-        render: renderDate,
-        sortable: true,
-      },
-      {
-        field: 'create_username',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.createdByColumnName',
-          defaultMessage: 'Created by',
-        }),
         sortable: true,
       },
       {
