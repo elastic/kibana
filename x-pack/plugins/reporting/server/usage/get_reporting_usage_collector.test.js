@@ -55,49 +55,7 @@ function getServerMock(customization) {
   return Object.assign(defaultServerMock, customization);
 }
 
-const getResponseMock = () => ({
-  aggregations: {
-    ranges: {
-      meta: {},
-      buckets: {
-        all: {
-          doc_count: 22,
-          layoutTypes: {
-            doc_count: 7,
-            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 7 }] },
-          },
-          objectTypes: { doc_count: 7, pdf: { buckets: [{ key: 'dashboard', doc_count: 7 }] } },
-          statusTypes: {
-            buckets: [{ key: 'pending', doc_count: 16 }, { key: 'completed', doc_count: 6 }],
-          },
-          jobTypes: {
-            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 7 }],
-          },
-        },
-        last1: {
-          doc_count: 15,
-          jobTypes: {
-            buckets: [{ key: 'csv', doc_count: 15 }],
-          },
-        },
-        last7: {
-          doc_count: 16,
-          layoutTypes: {
-            doc_count: 1,
-            pdf: { buckets: [{ key: 'preserve_layout', doc_count: 1 }] },
-          },
-          objectTypes: { doc_count: 1, pdf: { buckets: [{ key: 'dashboard', doc_count: 1 }] } },
-          statusTypes: {
-            buckets: [{ key: 'completed', doc_count: 16 }],
-          },
-          jobTypes: {
-            buckets: [{ key: 'csv', doc_count: 15 }, { key: 'printable_pdf', doc_count: 1 }],
-          },
-        },
-      },
-    },
-  },
-});
+const getResponseMock = () => ({});
 
 describe('with a basic license', async () => {
   let usageStats;

@@ -63,3 +63,6 @@ export type UsageObject = RangeStats & {
   lastDay: RangeStats;
   last7Days: RangeStats;
 };
+
+type ReportingFeature = 'csv' | 'printable_pdf' | 'PNG';
+export type FeatureAvailabilityMap = { [F in ReportingFeature]: boolean };

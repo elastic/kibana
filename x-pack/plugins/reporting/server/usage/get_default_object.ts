@@ -4,36 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UsageObject } from './types';
+import { PDF_JOB_TYPE, PNG_JOB_TYPE, CSV_JOB_TYPE } from '../../common/constants';
+import { FeatureAvailabilityMap, UsageObject } from './types';
 
-const AVAILABLE_TOTAL_FIELDS = { available: false, total: 0 };
-const AVAILABLE_TOTAL_FIELDS_CSV = { available: true, total: 0 };
-const STATUS_FIELDS = { status: { completed: 0, failed: 0 } }; // these are just the common statuses
-const PDF_APP_FIELDS = { app: { visualization: 0, dashboard: 0 } };
-const PDF_LAYOUT_FIELDS = { layout: { print: 0, preserve_layout: 0 } };
-
-export const getDefaultObject = (): UsageObject => ({
-  available: true,
-  enabled: true,
-  browser_type: 'chromium',
-  _all: 0,
-  csv: AVAILABLE_TOTAL_FIELDS_CSV,
-  PNG: AVAILABLE_TOTAL_FIELDS,
-  printable_pdf: { ...AVAILABLE_TOTAL_FIELDS, ...PDF_APP_FIELDS, ...PDF_LAYOUT_FIELDS },
-  ...STATUS_FIELDS,
-
-  lastDay: {
+export const getDefaultObject = (featureAvailability: FeatureAvailabilityMap): UsageObject => {
+  const TIMERANGE_FIELDS = {
     _all: 0,
-    csv: AVAILABLE_TOTAL_FIELDS_CSV,
-    PNG: AVAILABLE_TOTAL_FIELDS,
-    printable_pdf: { ...AVAILABLE_TOTAL_FIELDS, ...PDF_APP_FIELDS, ...PDF_LAYOUT_FIELDS },
-    ...STATUS_FIELDS,
-  },
-  last7Days: {
-    _all: 0,
-    csv: AVAILABLE_TOTAL_FIELDS_CSV,
-    PNG: AVAILABLE_TOTAL_FIELDS,
-    printable_pdf: { ...AVAILABLE_TOTAL_FIELDS, ...PDF_APP_FIELDS, ...PDF_LAYOUT_FIELDS },
-    ...STATUS_FIELDS,
-  },
-});
+    [CSV_JOB_TYPE]: { available: featureAvailability[CSV_JOB_TYPE], total: 0 },
+    [PNG_JOB_TYPE]: { available: featureAvailability[PNG_JOB_TYPE], total: 0 },
+    [PDF_JOB_TYPE]: {
+      available: featureAvailability[PDF_JOB_TYPE],
+      total: 0,
+      app: { visualization: 0, dashboard: 0 },
+      layout: { print: 0, preserve_layout: 0 },
+    },
+    status: { completed: 0, failed: 0 },
+  };
+
+  return {
+    available: true,
+    enabled: true,
+    browser_type: 'chromium',
+    ...TIMERANGE_FIELDS,
+    lastDay: TIMERANGE_FIELDS,
+    last7Days: TIMERANGE_FIELDS,
+  };
+};

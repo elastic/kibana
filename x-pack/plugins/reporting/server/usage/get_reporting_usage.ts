@@ -12,6 +12,7 @@ import {
   AggregationBuckets,
   AggregationResults,
   JobTypes,
+  FeatureAvailabilityMap,
   KeyCountBucket,
   RangeAggregationResults,
   RangeStats,
@@ -34,17 +35,12 @@ const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
   buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
 
-type FeatureSet = 'csv' | 'printable_pdf' | 'PNG';
-type FeatureAvailabilitySet = { [F in FeatureSet]: boolean };
-
-function getAggStats(aggs: AggregationResults, featureSet: FeatureAvailabilitySet) {
+function getAggStats(aggs: AggregationResults) {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
-    const feature = key as FeatureSet;
     return {
       ...accum,
-      [feature]: {
-        available: featureSet[feature],
+      [key]: {
         total: count,
       },
     };
@@ -85,19 +81,15 @@ type RangeStatSets = Partial<
   }
 >;
 async function handleResponse(server: any, response: AggregationResults): Promise<RangeStatSets> {
-  const xpackInfo = server.plugins.xpack_main.info;
-  const exportTypesHandler = await getExportTypesHandler(server);
-  const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilitySet;
-
   const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
   }
   const { all, last1, last7 } = buckets as RangeAggregationResults;
 
-  const allUsage = all ? getAggStats(all, availability) : undefined;
-  const lastDayUsage = last1 ? getAggStats(last1, availability) : undefined;
-  const last7DaysUsage = last7 ? getAggStats(last7, availability) : undefined;
+  const allUsage = all ? getAggStats(all) : undefined;
+  const lastDayUsage = last1 ? getAggStats(last1) : undefined;
+  const last7DaysUsage = last7 ? getAggStats(last7) : undefined;
 
   return {
     last7Days: last7DaysUsage,
@@ -144,15 +136,21 @@ export async function getReportingUsage(server: any, callCluster: any) {
 
   return callCluster('search', params)
     .then((response: AggregationResults) => handleResponse(server, response))
-    .then((usage: UsageObject) => {
+    .then(async (usage: UsageObject) => {
       // Allow this to explicitly throw an exception if/when this config is deprecated,
       // because we shouldn't collect browserType in that case!
       const browserType = config.get('xpack.reporting.capture.browser.type');
 
+      const xpackInfo = server.plugins.xpack_main.info;
+      const exportTypesHandler = await getExportTypesHandler(server);
+      const availability = exportTypesHandler.getAvailability(
+        xpackInfo
+      ) as FeatureAvailabilityMap;
+
       return {
         available: true,
         browser_type: browserType,
-        ...defaultsDeep(usage, getDefaultObject()),
+        ...defaultsDeep(usage, getDefaultObject(availability)),
       };
     });
 }
