@@ -34,6 +34,7 @@ import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
+import { Source } from '../../containers/source';
 import { WithSource } from '../../containers/with_source';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
@@ -88,154 +89,159 @@ export const MetricDetail = withTheme(
         const layouts = layoutCreator(this.props.theme);
 
         return (
-          <WithSource>
-            {({ sourceId }) => (
-              <WithMetricsTime resetOnUnmount>
-                {({
-                  currentTimeRange,
-                  isAutoReloading,
-                  setRangeTime,
-                  startMetricsAutoReload,
-                  stopMetricsAutoReload,
-                }) => (
-                  <WithMetadata
-                    layouts={layouts}
-                    sourceId={sourceId}
-                    nodeType={nodeType}
-                    nodeId={nodeId}
-                  >
-                    {({ name, filteredLayouts, loading: metadataLoading }) => {
-                      const breadcrumbs = [
-                        {
-                          href: '#/',
-                          text: intl.formatMessage({
-                            id: 'xpack.infra.header.infrastructureTitle',
-                            defaultMessage: 'Infrastructure',
-                          }),
-                        },
-                        { text: name },
-                      ];
-                      return (
-                        <ColumnarPage>
-                          <Header breadcrumbs={breadcrumbs} />
-                          <SourceConfigurationFlyout />
-                          <WithMetricsTimeUrlState />
-                          <DocumentTitle
-                            title={intl.formatMessage(
-                              {
-                                id: 'xpack.infra.metricDetailPage.documentTitle',
-                                defaultMessage: 'Infrastructure | Metrics | {name}',
-                              },
-                              {
-                                name,
-                              }
-                            )}
-                          />
-                          <DetailPageContent>
-                            <WithMetrics
-                              layouts={filteredLayouts}
-                              sourceId={sourceId}
-                              timerange={currentTimeRange as InfraTimerangeInput}
-                              nodeType={nodeType}
-                              nodeId={nodeId}
-                            >
-                              {({ metrics, error, loading, refetch }) => {
-                                if (error) {
-                                  const invalidNodeError = error.graphQLErrors.some(
-                                    (err: GraphQLFormattedError) =>
-                                      err.code === InfraMetricsErrorCodes.invalid_node
-                                  );
+          <Source.Provider sourceId="default">
+              <WithSource>
+                {({ sourceId }) => (
+                  <WithMetricsTime resetOnUnmount>
+                    {({
+                      currentTimeRange,
+                      isAutoReloading,
+                      setRangeTime,
+                      startMetricsAutoReload,
+                      stopMetricsAutoReload,
+                    }) => (
+                      <WithMetadata
+                        layouts={layouts}
+                        sourceId={sourceId}
+                        nodeType={nodeType}
+                        nodeId={nodeId}
+                      >
+                        {({ name, filteredLayouts, loading: metadataLoading }) => {
+                          const breadcrumbs = [
+                            {
+                              href: '#/',
+                              text: intl.formatMessage({
+                                id: 'xpack.infra.header.infrastructureTitle',
+                                defaultMessage: 'Infrastructure',
+                              }),
+                            },
+                            { text: name },
+                          ];
+                          return (
+                            <ColumnarPage>
+                              <Header breadcrumbs={breadcrumbs} />
+                              <SourceConfigurationFlyout />
+                              <WithMetricsTimeUrlState />
+                              <DocumentTitle
+                                title={intl.formatMessage(
+                                  {
+                                    id: 'xpack.infra.metricDetailPage.documentTitle',
+                                    defaultMessage: 'Infrastructure | Metrics | {name}',
+                                  },
+                                  {
+                                    name,
+                                  }
+                                )}
+                              />
+                              <DetailPageContent>
+                                <WithMetrics
+                                  layouts={filteredLayouts}
+                                  sourceId={sourceId}
+                                  timerange={currentTimeRange as InfraTimerangeInput}
+                                  nodeType={nodeType}
+                                  nodeId={nodeId}
+                                >
+                                  {({ metrics, error, loading, refetch }) => {
+                                    if (error) {
+                                      const invalidNodeError = error.graphQLErrors.some(
+                                        (err: GraphQLFormattedError) =>
+                                          err.code === InfraMetricsErrorCodes.invalid_node
+                                      );
 
-                                  return (
-                                    <>
-                                      <DocumentTitle
-                                        title={(previousTitle: string) =>
-                                          intl.formatMessage(
-                                            {
-                                              id: 'xpack.infra.metricDetailPage.documentTitleError',
-                                              defaultMessage: '{previousTitle} | Uh oh',
-                                            },
-                                            {
-                                              previousTitle,
+                                      return (
+                                        <>
+                                          <DocumentTitle
+                                            title={(previousTitle: string) =>
+                                              intl.formatMessage(
+                                                {
+                                                  id:
+                                                    'xpack.infra.metricDetailPage.documentTitleError',
+                                                  defaultMessage: '{previousTitle} | Uh oh',
+                                                },
+                                                {
+                                                  previousTitle,
+                                                }
+                                              )
                                             }
-                                          )
-                                        }
-                                      />
-                                      {invalidNodeError ? (
-                                        <InvalidNodeError nodeName={name} />
-                                      ) : (
-                                        <ErrorPageBody message={error.message} />
-                                      )}
-                                    </>
-                                  );
-                                }
-                                return (
-                                  <EuiPage style={{ flex: '1 0 auto' }}>
-                                    <MetricsSideNav
-                                      layouts={filteredLayouts}
-                                      loading={metadataLoading}
-                                      nodeName={name}
-                                      handleClick={this.handleClick}
-                                    />
-                                    <AutoSizer content={false} bounds detectAnyWindowResize>
-                                      {({ measureRef, bounds: { width = 0 } }) => {
-                                        return (
-                                          <MetricsDetailsPageColumn innerRef={measureRef}>
-                                            <EuiPageBody style={{ width: `${width}px` }}>
-                                              <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                                <EuiPageHeaderSection style={{ width: '100%' }}>
-                                                  <MetricsTitleTimeRangeContainer>
-                                                    <EuiHideFor sizes={['xs', 's']}>
-                                                      <EuiTitle size="m">
-                                                        <h1>{name}</h1>
-                                                      </EuiTitle>
-                                                    </EuiHideFor>
-                                                    <MetricsTimeControls
-                                                      currentTimeRange={currentTimeRange}
-                                                      isLiveStreaming={isAutoReloading}
+                                          />
+                                          {invalidNodeError ? (
+                                            <InvalidNodeError nodeName={name} />
+                                          ) : (
+                                            <ErrorPageBody message={error.message} />
+                                          )}
+                                        </>
+                                      );
+                                    }
+                                    return (
+                                      <EuiPage style={{ flex: '1 0 auto' }}>
+                                        <MetricsSideNav
+                                          layouts={filteredLayouts}
+                                          loading={metadataLoading}
+                                          nodeName={name}
+                                          handleClick={this.handleClick}
+                                        />
+                                        <AutoSizer content={false} bounds detectAnyWindowResize>
+                                          {({ measureRef, bounds: { width = 0 } }) => {
+                                            return (
+                                              <MetricsDetailsPageColumn innerRef={measureRef}>
+                                                <EuiPageBody style={{ width: `${width}px` }}>
+                                                  <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                                    <EuiPageHeaderSection style={{ width: '100%' }}>
+                                                      <MetricsTitleTimeRangeContainer>
+                                                        <EuiHideFor sizes={['xs', 's']}>
+                                                          <EuiTitle size="m">
+                                                            <h1>{name}</h1>
+                                                          </EuiTitle>
+                                                        </EuiHideFor>
+                                                        <MetricsTimeControls
+                                                          currentTimeRange={currentTimeRange}
+                                                          isLiveStreaming={isAutoReloading}
+                                                          onChangeRangeTime={setRangeTime}
+                                                          startLiveStreaming={
+                                                            startMetricsAutoReload
+                                                          }
+                                                          stopLiveStreaming={stopMetricsAutoReload}
+                                                        />
+                                                      </MetricsTitleTimeRangeContainer>
+                                                    </EuiPageHeaderSection>
+                                                  </EuiPageHeader>
+
+                                                  <EuiPageContentWithRelative>
+                                                    <Metrics
+                                                      label={name}
+                                                      nodeId={nodeId}
+                                                      layouts={filteredLayouts}
+                                                      metrics={metrics}
+                                                      loading={
+                                                        metrics.length > 0 && isAutoReloading
+                                                          ? false
+                                                          : loading
+                                                      }
+                                                      refetch={refetch}
                                                       onChangeRangeTime={setRangeTime}
-                                                      startLiveStreaming={startMetricsAutoReload}
+                                                      isLiveStreaming={isAutoReloading}
                                                       stopLiveStreaming={stopMetricsAutoReload}
                                                     />
-                                                  </MetricsTitleTimeRangeContainer>
-                                                </EuiPageHeaderSection>
-                                              </EuiPageHeader>
-
-                                              <EuiPageContentWithRelative>
-                                                <Metrics
-                                                  label={name}
-                                                  nodeId={nodeId}
-                                                  layouts={filteredLayouts}
-                                                  metrics={metrics}
-                                                  loading={
-                                                    metrics.length > 0 && isAutoReloading
-                                                      ? false
-                                                      : loading
-                                                  }
-                                                  refetch={refetch}
-                                                  onChangeRangeTime={setRangeTime}
-                                                  isLiveStreaming={isAutoReloading}
-                                                  stopLiveStreaming={stopMetricsAutoReload}
-                                                />
-                                              </EuiPageContentWithRelative>
-                                            </EuiPageBody>
-                                          </MetricsDetailsPageColumn>
-                                        );
-                                      }}
-                                    </AutoSizer>
-                                  </EuiPage>
-                                );
-                              }}
-                            </WithMetrics>
-                          </DetailPageContent>
-                        </ColumnarPage>
-                      );
-                    }}
-                  </WithMetadata>
+                                                  </EuiPageContentWithRelative>
+                                                </EuiPageBody>
+                                              </MetricsDetailsPageColumn>
+                                            );
+                                          }}
+                                        </AutoSizer>
+                                      </EuiPage>
+                                    );
+                                  }}
+                                </WithMetrics>
+                              </DetailPageContent>
+                            </ColumnarPage>
+                          );
+                        }}
+                      </WithMetadata>
+                    )}
+                  </WithMetricsTime>
                 )}
-              </WithMetricsTime>
-            )}
-          </WithSource>
+              </WithSource>
+          </Source.Provider>
         );
       }
 
