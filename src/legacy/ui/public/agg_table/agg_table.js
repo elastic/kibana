@@ -123,8 +123,8 @@ uiModules
               formattedColumn.class = 'visualize-table-right';
             }
 
-            const isDate = _.get(dimension, 'format.id') === 'date';
-            const isNumeric = _.get(dimension, 'format.id') === 'number';
+            const isDate = _.get(dimension, 'format.id') === 'date' || _.get(dimension, 'format.params.id') === 'date';
+            const isNumeric = _.get(dimension, 'format.id') === 'number' || _.get(dimension, 'format.params.id') === 'number';
 
             if (isNumeric || isDate || $scope.totalFunc === 'count') {
               const sum = tableRows => {
