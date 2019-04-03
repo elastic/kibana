@@ -47,7 +47,7 @@ class VisualizeListingTableUi extends Component {
         createItem={this.props.createItem}
         findItems={this.props.findItems}
         deleteItems={uiCapabilities.visualize.delete ? this.props.deleteItems : null}
-        editItem={uiCapabilities.visualize.edit ? this.props.editItem : null}
+        editItem={uiCapabilities.visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={100}
         initialFilter={''}
