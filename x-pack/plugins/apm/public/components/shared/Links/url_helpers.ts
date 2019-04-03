@@ -50,11 +50,15 @@ function getSearchString(
   return fromQuery(query);
 }
 
+export type QueryStringMap = StringMap<
+  string | number | boolean | undefined | null
+>;
+
 export interface KibanaHrefArgs {
   location: Location;
   pathname?: string;
   hash?: string;
-  query?: StringMap<string | number | boolean | undefined | null>;
+  query?: QueryStringMap;
 }
 
 export function getKibanaHref({

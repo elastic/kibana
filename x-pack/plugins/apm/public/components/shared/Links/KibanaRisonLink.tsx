@@ -9,9 +9,10 @@ import { Location } from 'history';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StringMap } from '../../../../typings/common';
-import { getRisonHref, RisonHrefArgs } from './rison_helpers';
+import { getRisonHref } from './rison_helpers';
+import { KibanaHrefArgs } from './url_helpers';
 
-interface Props extends RisonHrefArgs {
+interface Props extends KibanaHrefArgs {
   disabled?: boolean;
   to?: StringMap;
   className?: string;

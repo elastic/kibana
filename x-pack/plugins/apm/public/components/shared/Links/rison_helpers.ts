@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import { pick, set } from 'lodash';
 import qs from 'querystring';
 import rison from 'rison-node';
@@ -11,11 +12,16 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
-import { KibanaHrefArgs, PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
+import { PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
 
 interface RisonEncoded {
   _g?: string;
   _a?: string;
+}
+
+export interface RisonDecoded {
+  _g?: StringMap<any>;
+  _a?: StringMap<any>;
 }
 
 function createG(query: StringMap<any>) {
@@ -38,12 +44,19 @@ function createG(query: StringMap<any>) {
   return g;
 }
 
+export interface RisonHrefArgs {
+  location: Location;
+  pathname?: string;
+  hash?: string;
+  query?: StringMap<any>;
+}
+
 export function getRisonHref({
   location,
   pathname,
   hash,
   query = {}
-}: KibanaHrefArgs) {
+}: RisonHrefArgs) {
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
