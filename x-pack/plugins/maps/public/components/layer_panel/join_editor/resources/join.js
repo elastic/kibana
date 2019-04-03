@@ -91,7 +91,13 @@ export class Join extends Component {
       return;
     }
 
-    this.setState({ rightFields: indexPattern.fields });
+    this.setState({
+      rightFields: indexPattern.fields.filter(field => {
+        // Do not show multi fields as right join options
+        // since they do not have values in _source and exist for indexing only
+        return field.subType !== 'multi';
+      })
+    });
   }
 
   async _loadLeftSourceName() {
