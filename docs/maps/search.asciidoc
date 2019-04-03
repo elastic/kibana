@@ -11,7 +11,7 @@ You can create a layer that requests data from {es} from the following:
 
 ** Documents source
 
-** Grid aggregation source.
+** Grid aggregation source
 
 ** <<terms-join>>.
 
