@@ -29,7 +29,7 @@ describe('setupRequest', () => {
     };
   });
 
-  it('should call callWithRequest with correct args', async () => {
+  it('should call callWithRequest with default args', async () => {
     const setup = setupRequest(mockReq);
     await setup.client('myType', { body: { foo: 'bar' } });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
@@ -46,6 +46,70 @@ describe('setupRequest', () => {
     });
   });
 
+  describe('omitLegacyData', () => {
+    it('should add `observer.version_major` filter if `omitLegacyData=true` ', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        omitLegacyData: true,
+        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+      });
+      expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              { range: { 'observer.version_major': { gte: 7 } } }
+            ]
+          }
+        }
+      });
+    });
+
+    it('should not add `observer.version_major` filter if `omitLegacyData=false` ', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        omitLegacyData: false,
+        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+      });
+      expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+        query: { bool: { filter: [{ term: 'someTerm' }] } }
+      });
+    });
+
+    it('should set filter if none exists', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      });
+    });
+
+    it('should have `omitLegacyData=true` as default and merge boolean filters', async () => {
+      const setup = setupRequest(mockReq);
+      await setup.client('myType', {
+        body: {
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
+        }
+      });
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              { range: { 'observer.version_major': { gte: 7 } } }
+            ]
+          }
+        }
+      });
+    });
+  });
+
   it('should set ignore_throttled to false if includeFrozen is true', async () => {
     // mock includeFrozen to return true
     mockReq.getUiSettingsService.mockImplementation(() => ({
@@ -55,36 +119,5 @@ describe('setupRequest', () => {
     await setup.client('myType', {});
     const params = callWithRequestSpy.mock.calls[0][2];
     expect(params.ignore_throttled).toBe(false);
-  });
-
-  it('should set filter if none exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {});
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
-      }
-    });
-  });
-
-  it('should merge filters if one exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {
-      body: {
-        query: { bool: { filter: [{ term: 'someTerm' }] } }
-      }
-    });
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: {
-          filter: [
-            { term: 'someTerm' },
-            { range: { 'observer.version_major': { gte: 7 } } }
-          ]
-        }
-      }
-    });
   });
 });
