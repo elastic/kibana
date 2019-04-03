@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const API_ROUTE = '/api/canvas';
+export const API_ROUTE = '/api/interpreter';
