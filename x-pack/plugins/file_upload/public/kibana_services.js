@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './kibana_services';
+import { uiModules } from 'ui/modules';
 
-export { JsonUploadAndParse } from './components/json_upload_and_parse';
-export { triggerIndexing } from './util/indexing_service';
+export let indexPatternService;
+
+uiModules.get('app/file_upload').run(($injector) => {
+  indexPatternService = $injector.get('indexPatterns');
+});

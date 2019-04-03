@@ -8,6 +8,7 @@ import { http } from './http_service';
 import chrome from 'ui/chrome';
 import { chunk } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { indexPatternService } from '../../../maps/public/kibana_services';
 
 const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
@@ -34,6 +35,8 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     mappings: {},
   });
   //create index pattern
+  const indexPatternResp = await createIndexPattern('', indexingDetails.index);
+  console.log(indexPatternResp);
 }
 
 function writeToIndex(indexingDetails) {
@@ -128,3 +131,37 @@ async function populateIndex({ id, index, data, mappings, settings }) {
 
   return result;
 }
+
+async function createIndexPattern(indexPattern = '', index) {
+  const indexPatterns = await indexPatternService.get();
+  const indexPatternName = (indexPattern === '') ? index : indexPattern;
+  const indexPatternResp = await createKibanaIndexPattern(
+    indexPatternName,
+    indexPatterns
+  );
+  return indexPatternResp;
+}
+
+
+async function createKibanaIndexPattern(indexPatternName, indexPatterns) {
+  try {
+    Object.assign(indexPatterns, {
+      id: '',
+      title: indexPatternName,
+    });
+
+    const id = await indexPatterns.create();
+
+    return {
+      success: true,
+      id,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error,
+    };
+  }
+}
+
