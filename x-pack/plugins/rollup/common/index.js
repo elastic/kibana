@@ -12,7 +12,6 @@ export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
 export {
   UIM_APP_NAME,
-  USER_ACTIONS,
   UIM_APP_LOAD,
   UIM_JOB_CREATE,
   UIM_JOB_DELETE,

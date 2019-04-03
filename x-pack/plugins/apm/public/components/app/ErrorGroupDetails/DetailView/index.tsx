@@ -17,17 +17,13 @@ import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { idx } from '../../../../../common/idx';
+import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { IUrlParams } from '../../../../store/urlParams';
 import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import { getCurrentTab } from '../../../shared/PropertiesTable/tabConfig';
 import { Stacktrace } from '../../../shared/Stacktrace';

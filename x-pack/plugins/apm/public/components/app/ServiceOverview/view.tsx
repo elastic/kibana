@@ -11,9 +11,9 @@ import React, { useEffect } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceList } from '../../../services/rest/apm/services';
+import { IUrlParams } from '../../../store/urlParams';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 

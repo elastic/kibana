@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { ErrorListItem } from 'x-pack/plugins/uptime/common/graphql/types';
+import { ErrorListItem } from '../../../../common/graphql/types';
 import { ErrorList } from '../error_list';
 
 describe('ErrorList component', () => {

@@ -15,17 +15,17 @@ import {
   uniq,
   zipObject
 } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { idx } from '../../../../../../../../common/idx';
+import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
+import { StringMap } from '../../../../../../../../typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 
-export interface IWaterfallIndex {
+interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
 }
 
-export interface IWaterfallGroup {
+interface IWaterfallGroup {
   [key: string]: IWaterfallItem[];
 }
 

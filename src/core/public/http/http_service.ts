@@ -34,6 +34,7 @@ interface Deps {
   fatalErrors: FatalErrorsSetup;
 }
 
+/** @internal */
 export class HttpService {
   private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
@@ -83,4 +84,5 @@ export class HttpService {
   }
 }
 
+/** @public */
 export type HttpSetup = ReturnType<HttpService['setup']>;

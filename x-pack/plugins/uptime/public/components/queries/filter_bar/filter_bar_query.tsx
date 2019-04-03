@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FilterBar as FilterBarType } from 'x-pack/plugins/uptime/common/graphql/types';
+import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../../pages/overview';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { FilterBar, FilterBarLoading } from '../../functional';

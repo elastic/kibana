@@ -8,13 +8,9 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
   getCurrentTab,
