@@ -7,8 +7,8 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useContext, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceFields } from 'x-pack/plugins/infra/common/graphql/types';
-import { MetricsExplorerMetric } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+import { SourceFields } from '../../../../common/graphql/types';
+import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_exploerer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_exploerer/toolbar';
@@ -65,6 +65,7 @@ export const MetricsExplorerPage = injectI18n(
     const handleMetricsChange = (metrics: MetricsExplorerMetric[]) => {
       setOptions({
         ...options,
+        afterKey: null, // since we are changing the metrics we need to reset the pagination
         metrics,
       });
     };

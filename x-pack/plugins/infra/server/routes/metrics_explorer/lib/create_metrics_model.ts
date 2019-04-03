@@ -17,37 +17,36 @@ export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricM
     // Create one series per metric requested. The series.id will be used to identify the metric
     // when the responses are processed and combined with the grouping request.
     series: options.metrics.map((metric, index) => {
-      const aggregation =
-        MetricsExplorerAggregation[metric.aggregation] || MetricsExplorerAggregation.avg;
       // If the metric is a rate then we need to add TSVB metrics for calculating the derivative
-      if (metric.rate) {
+      if (metric.aggregation === MetricsExplorerAggregation.rate) {
         return {
           id: `metric_${index}`,
           split_mode: 'everything',
           metrics: [
             {
-              id: `metric_${aggregation}_${index}`,
+              id: `metric_max_${index}`,
               field: metric.field,
-              type: InfraMetricModelMetricType[aggregation],
+              type: InfraMetricModelMetricType.max,
             },
             {
-              id: `metric_deriv_${aggregation}_${index}`,
-              field: `metric_${aggregation}_${index}`,
+              id: `metric_deriv_max_${index}`,
+              field: `metric_max_${index}`,
               type: InfraMetricModelMetricType.derivative,
               unit: '1s',
             },
             {
-              id: `metric_posonly_deriv_${aggregation}_${index}`,
+              id: `metric_posonly_deriv_max_${index}`,
               type: InfraMetricModelMetricType.calculation,
-              variables: [
-                { id: 'var-rate', name: 'rate', field: `metric_deriv_${aggregation}_${index}` },
-              ],
+              variables: [{ id: 'var-rate', name: 'rate', field: `metric_deriv_max_${index}` }],
               script: 'params.rate > 0.0 ? params.rate : 0.0',
             },
           ],
         };
       }
       // Create a basic TSVB series with a single metric
+      const aggregation =
+        MetricsExplorerAggregation[metric.aggregation] || MetricsExplorerAggregation.avg;
+
       return {
         id: `metric_${index}`,
         split_mode: 'everything',

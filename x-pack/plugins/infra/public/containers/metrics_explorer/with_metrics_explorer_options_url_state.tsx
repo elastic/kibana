@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { isBoolean, set, values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
-import { MetricsExplorerAggregation } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
@@ -74,6 +74,8 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
             .required(),
           field: Joi.string(),
           rate: Joi.bool().default(false),
+          color: Joi.string(),
+          label: Joi.string(),
         })
       )
       .required(),

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceFields } from 'x-pack/plugins/infra/common/graphql/types';
-import { MetricsExplorerMetric } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+import { SourceFields } from '../../../common/graphql/types';
+import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
@@ -61,13 +61,20 @@ export const MetricsExplorerToolbar = injectI18n(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <MetricsExplorerMetrics options={options} onChange={onMetricsChange} />
+            <MetricsExplorerMetrics
+              fields={derivedIndexPattern.fields}
+              options={options}
+              onChange={onMetricsChange}
+            />
           </EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            <strong>by</strong>
+          </EuiText>
           <EuiFlexItem>
             <EuiComboBox
-              placeholder="Group By"
+              placeholder="Everything"
               fullWidth
               singleSelection={{ asPlainText: true }}
               selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}

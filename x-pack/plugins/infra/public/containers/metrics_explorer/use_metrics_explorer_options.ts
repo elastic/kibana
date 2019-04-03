@@ -9,7 +9,7 @@ import { useState } from 'react';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
-} from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+} from '../../../server/routes/metrics_explorer/types';
 
 export interface MetricsExplorerOptions {
   metrics: MetricsExplorerMetric[];
@@ -34,11 +34,12 @@ const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
 const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: [
     {
-      aggregation: MetricsExplorerAggregation.count,
-      rate: false,
+      aggregation: MetricsExplorerAggregation.avg,
+      field: 'system.cpu.user.pct',
+      color: '#3185FC',
     },
   ],
-  groupBy: 'kubernetes.pod.name',
+  groupBy: 'host.name',
 };
 
 export const useMetricsExplorerOptions = () => {

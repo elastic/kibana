@@ -23,6 +23,8 @@ export const metricsExplorerSchema = Joi.object({
           .required(),
         field: Joi.string(),
         rate: Joi.bool().default(false),
+        color: Joi.string(),
+        label: Joi.string(),
       })
     )
     .required(),

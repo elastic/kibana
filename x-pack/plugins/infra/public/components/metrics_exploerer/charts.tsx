@@ -27,7 +27,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { MetricsExplorerResponse } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { NoData } from '../empty_states/no_data';
 import { InfraLoadingPanel } from '../loading';
@@ -89,17 +89,18 @@ export const MetricsExplorerCharts = injectI18n(
               ) : null}
               <div style={{ height: data.series.length > 1 ? 200 : 400 }}>
                 <EuiSeriesChart animateData={false} xType="time">
-                  <EuiAreaSeries
-                    color="#3185FC"
-                    lineSize={2}
-                    fillOpacity={0.5}
-                    name={`${series.id}-metric_0`}
-                    data={series.rows.map(row => ({
-                      x: row.timestamp,
-                      y: isNumber(row.metric_0) ? row.metric_0 : 0,
-                      y0: 0,
-                    }))}
-                  />
+                  {options.metrics.map((metric, id) => (
+                    <EuiLineSeries
+                      color={metric.color || '#999'}
+                      lineSize={2}
+                      name={`${series.id}-metric_${id}`}
+                      data={series.rows.map(row => ({
+                        x: row.timestamp,
+                        y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
+                        y0: 0,
+                      }))}
+                    />
+                  ))}
                 </EuiSeriesChart>
               </div>
             </EuiFlexItem>

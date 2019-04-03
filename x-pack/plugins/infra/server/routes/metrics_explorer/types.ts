@@ -19,12 +19,14 @@ export enum MetricsExplorerAggregation {
   min = 'min',
   count = 'count',
   cardinality = 'cardinality',
+  rate = 'rate',
 }
 
 export interface MetricsExplorerMetric {
   aggregation: MetricsExplorerAggregation;
   field?: string | null;
-  rate?: boolean;
+  color?: string;
+  label?: string;
 }
 
 export interface MetricsExplorerRequest {
