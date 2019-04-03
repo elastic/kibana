@@ -19,10 +19,10 @@
 
 import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
-import { ViewActions, ViewActionTypeKeys } from '../actions';
 
 import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { QueryLanguageType } from 'ui/embeddable/types';
+import { ViewActions, ViewActionTypeKeys } from '../actions';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId, ViewState } from '../selectors';
 

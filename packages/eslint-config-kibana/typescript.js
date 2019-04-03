@@ -96,14 +96,13 @@ module.exports = {
           'eol-last': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
-          // TODO: this should be replaced by a custom rule as this plugin
-          //       don't identify individual groups
-          // 'import/order': ['error', {
-          //   'groups': [
-          //     ['external', 'builtin'],
-          //     'internal'
-          //   ],
-          // }],
+          'import/order': ['error', {
+            'groups': [
+              ['external', 'builtin'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+          }],
           'max-classes-per-file': ['error', 1],
           'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
           'new-parens': 'error',

@@ -50,16 +50,15 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
+import { HeaderNavControls } from './header_nav_controls';
+import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { NavControlSide } from '../';
 import { Breadcrumb } from '../../../../../../../core/public/chrome';
 

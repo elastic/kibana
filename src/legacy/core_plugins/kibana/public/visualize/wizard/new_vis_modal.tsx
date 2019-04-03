@@ -21,13 +21,12 @@ import React from 'react';
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 
+import chrome from 'ui/chrome';
+import { VisType } from 'ui/vis';
 import { VisualizeConstants } from '../visualize_constants';
 
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-
-import chrome from 'ui/chrome';
-import { VisType } from 'ui/vis';
 
 interface TypeSelectionProps {
   isOpen: boolean;

@@ -29,6 +29,19 @@ import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
 import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiOutsideClickDetector,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+import { EuiSuperUpdateButton } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { documentationLinks } from 'ui/documentation_links';
+import { Toast, toastNotifications } from 'ui/notify';
+import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   getAutocompleteProvider,
@@ -39,22 +52,7 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiOutsideClickDetector,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
-
 // @ts-ignore
-import { EuiSuperUpdateButton } from '@elastic/eui';
-
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { documentationLinks } from 'ui/documentation_links';
-import { Toast, toastNotifications } from 'ui/notify';
 
 const KEY_CODES = {
   LEFT: 37,
