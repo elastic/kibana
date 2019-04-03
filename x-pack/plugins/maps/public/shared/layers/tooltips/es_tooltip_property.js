@@ -7,6 +7,7 @@
 import { buildPhraseFilter } from '@kbn/es-query';
 import { filterBarQueryFilter } from '../../../kibana_services';
 import { TooltipProperty } from './tooltip_property';
+import _ from 'lodash';
 
 export class ESTooltipProperty extends TooltipProperty {
 
@@ -23,7 +24,7 @@ export class ESTooltipProperty extends TooltipProperty {
 
     const field = this._indexPattern.fields.byName[this._propertyName];
     if (!field) {
-      return '-';
+      return _.escape(this._rawValue);
     }
     const htmlConverter = field.format.getConverterFor('html');
     return  (htmlConverter) ? htmlConverter(this._rawValue) :

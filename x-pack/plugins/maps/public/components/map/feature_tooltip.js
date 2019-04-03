@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 export class FeatureTooltip extends React.Component {
 
-  _renderFilterButton(tooltipProperty, filterInAtLeastOneProperty) {
-    if (!this.props.isFilterable || !filterInAtLeastOneProperty || !tooltipProperty.isFilterable())  {
+  _renderFilterButton(tooltipProperty) {
+    if (!this.props.shouldShowFilterButtons || !tooltipProperty.isFilterable())  {
       return null;
     }
 
@@ -20,13 +20,17 @@ export class FeatureTooltip extends React.Component {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="plusInCircle"
-          title="Filter on property"
+          title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
+            defaultMessage: 'Filter on property'
+          })}
           onClick={() => {
             this.props.closeTooltip();
             const filterAction = tooltipProperty.getFilterAction();
             filterAction();
           }}
-          aria-label="Filter on property"
+          aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
+            defaultMessage: 'Filter on property'
+          })}
           className="mapFeatureTooltipFilterButton"
         />
       </EuiFlexItem>
@@ -74,7 +78,7 @@ export class FeatureTooltip extends React.Component {
               <EuiButtonIcon
                 onClick={this.props.closeTooltip}
                 iconType="cross"
-                aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
+                aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
                   defaultMessage: 'Close tooltip'
                 })}
               />
@@ -86,16 +90,13 @@ export class FeatureTooltip extends React.Component {
   }
 
   render() {
-    const hasFilterableProperties = this.props.properties.some(prop => {
-      return prop.isFilterable();
-    });
     return (
       <Fragment>
         <EuiFlexGroup direction="column" gutterSize="none">
           {this._renderCloseButton()}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
-              {this._renderProperties(hasFilterableProperties)}
+              {this._renderProperties()}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

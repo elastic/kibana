@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-
 import { FeatureTooltip } from './feature_tooltip';
-
-
 
 class MockTooltipProperty {
   constructor(key, value, isFilterable) {
