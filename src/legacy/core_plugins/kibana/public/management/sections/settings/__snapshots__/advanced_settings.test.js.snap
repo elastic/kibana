@@ -641,6 +641,32 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
   <EuiSpacer
     size="m"
   />
+  <AdvancedSettingsVoiceAnnouncement
+    queryText="ariaName:\\"test string setting\\""
+    settings={
+      Object {
+        "general": Array [
+          Object {
+            "ariaName": "Test string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:string:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "type": "string",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  />
   <InjectIntl(FormUI)
     categories={
       Array [
