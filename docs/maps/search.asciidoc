@@ -23,15 +23,15 @@ You can create a layer with {es} source from the following:
 
 
 [float]
-=== Searching across multiple indexes
+=== Searching across multiple indices
 
-Your map may contain multiple {es} indexes.
-This can occur when your map contains two or more layers with {es} sources from different indexes.
-This can also occur with a single layer with an {es} source and a <<terms-join>>.
+Your map might contain multiple {es} indices.
+This might occur when your map contains two or more layers with {es} sources from different indices.
+This might also occur with a single layer with an {es} source and a <<terms-join>>.
 
-Searching across multiple indexes can sometimes result in unanticipated empty layers.
-The most common cause for empty layers are searches for a field that exist in one index but does not exist in other indexes.
-Add {ref}/mapping-index-field.html[_index] to your search to include documents from indexes that do not contain a search field.
+Searching across multiple indices might sometimes result in empty layers.
+The most common cause for empty layers are searches for a field that exists in one index but does not exist in other indices.
+Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 
 [role="screenshot"]
-image::maps/images/global_search_multiple_indexes.png[]
+image::maps/images/global_search_multiple_indices.png[]
