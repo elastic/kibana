@@ -51,7 +51,7 @@ If you instead query for
 --------------------------------------------------
 machine.os.keyword : "osx" or _index : "kibana_sample_data_flights"
 --------------------------------------------------
-the `kibana_sample_data_flights` layer is not empty.
+the `kibana_sample_data_flights` layer includes data.
 
 [role="screenshot"]
 image::maps/images/global_search_multiple_indices_query2.png[]
