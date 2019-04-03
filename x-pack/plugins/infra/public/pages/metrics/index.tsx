@@ -27,7 +27,10 @@ import { InvalidNodeError } from '../../components/metrics/invalid_node';
 import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { SourceConfigurationFlyout } from '../../components/source_configuration';
+import {
+  SourceConfigurationFlyout,
+  SourceConfigurationFlyoutState,
+} from '../../components/source_configuration';
 import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
@@ -90,6 +93,7 @@ export const MetricDetail = withTheme(
 
         return (
           <Source.Provider sourceId="default">
+            <SourceConfigurationFlyoutState.Provider>
               <WithSource>
                 {({ sourceId }) => (
                   <WithMetricsTime resetOnUnmount>
@@ -241,6 +245,7 @@ export const MetricDetail = withTheme(
                   </WithMetricsTime>
                 )}
               </WithSource>
+            </SourceConfigurationFlyoutState.Provider>
           </Source.Provider>
         );
       }

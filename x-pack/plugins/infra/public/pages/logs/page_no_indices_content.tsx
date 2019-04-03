@@ -9,10 +9,12 @@ import { injectI18n } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
 
 import { NoIndices } from '../../components/empty_states/no_indices';
-import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
+import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 
 export const LogsPageNoIndicesContent = injectI18n(({ intl }) => {
+  const { show } = useContext(SourceConfigurationFlyoutState.Context);
+
   return (
     <WithKibanaChrome>
       {({ basePath }) => (
@@ -40,16 +42,12 @@ export const LogsPageNoIndicesContent = injectI18n(({ intl }) => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <WithSourceConfigurationFlyoutState>
-                  {({ enable }) => (
-                    <EuiButton color="primary" onClick={enable}>
-                      {intl.formatMessage({
-                        id: 'xpack.infra.configureSourceActionLabel',
-                        defaultMessage: 'Change source configuration',
-                      })}
-                    </EuiButton>
-                  )}
-                </WithSourceConfigurationFlyoutState>
+                <EuiButton color="primary" onClick={show}>
+                  {intl.formatMessage({
+                    id: 'xpack.infra.configureSourceActionLabel',
+                    defaultMessage: 'Change source configuration',
+                  })}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

@@ -17,7 +17,7 @@ import { Header } from '../../../components/header';
 import { ColumnarPage } from '../../../components/page';
 
 import { SourceConfigurationFlyout } from '../../../components/source_configuration';
-import { WithSourceConfigurationFlyoutState } from '../../../components/source_configuration/source_configuration_flyout_state';
+import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/source';
@@ -27,6 +27,7 @@ import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_t
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 
 export const SnapshotPage = injectI18n(({ intl }) => {
+  const { show } = useContext(SourceConfigurationFlyoutState.Context);
   const {
     derivedIndexPattern,
     hasFailedLoadingSource,
@@ -102,16 +103,12 @@ export const SnapshotPage = injectI18n(({ intl }) => {
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <WithSourceConfigurationFlyoutState>
-                      {({ enable }) => (
-                        <EuiButton color="primary" onClick={enable}>
-                          {intl.formatMessage({
-                            id: 'xpack.infra.configureSourceActionLabel',
-                            defaultMessage: 'Change source configuration',
-                          })}
-                        </EuiButton>
-                      )}
-                    </WithSourceConfigurationFlyoutState>
+                    <EuiButton color="primary" onClick={show}>
+                      {intl.formatMessage({
+                        id: 'xpack.infra.configureSourceActionLabel',
+                        defaultMessage: 'Change source configuration',
+                      })}
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
