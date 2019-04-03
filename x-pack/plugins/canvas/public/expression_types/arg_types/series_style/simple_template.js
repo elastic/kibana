@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import { ColorPickerMini } from '../../../components/color_picker_mini';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
 export const SimpleTemplate = props => {
@@ -47,7 +47,7 @@ export const SimpleTemplate = props => {
             <label htmlFor="series-style">Color&nbsp;</label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
-            <ColorPickerMini
+            <ColorPickerPopover
               id="series-style"
               value={color}
               onChange={val => handlePlain('color', val)}

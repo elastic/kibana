@@ -15,7 +15,7 @@ import { Location } from 'history';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
 import chrome from 'ui/chrome';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IUrlParams } from '../../../../store/urlParams';
 import { LicenseContext } from '../../Main/LicenseCheck';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';

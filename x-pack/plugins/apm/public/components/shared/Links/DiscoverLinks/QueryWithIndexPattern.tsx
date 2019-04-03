@@ -8,7 +8,7 @@ import React, { ReactElement } from 'react';
 import {
   getAPMIndexPattern,
   ISavedObject
-} from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+} from '../../../../services/rest/savedObjects';
 import { RisonAPMQueryParams } from '../rison_helpers';
 
 export function getQueryWithIndexPattern(

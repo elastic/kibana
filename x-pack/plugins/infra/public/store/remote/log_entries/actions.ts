@@ -15,3 +15,5 @@ export const loadEntries = loadEntriesActionCreators.resolve;
 export const loadMoreEntries = loadMoreEntriesActionCreators.resolve;
 
 export const loadNewerEntries = actionCreator('LOAD_NEWER_LOG_ENTRIES');
+
+export const reloadEntries = actionCreator('RELOAD_LOG_ENTRIES');
