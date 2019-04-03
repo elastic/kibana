@@ -34,7 +34,8 @@ The *Monitoring* page in {kib} is empty.
 
 . Confirm that you are not using {kib} 6.7.0 or 6.7.1. If you have a version 7.0
 monitoring cluster, a version 6.7 production cluster and {kib} version 6.7.0 or
-6.7.1, you cannot see the monitoring data in {kib}.
+6.7.1, you cannot see the monitoring data in {kib}. For more information, see
+https://github.com/elastic/kibana/issues/34357
 
 . Confirm that {kib} is seeking monitoring data from the appropriate {es} URL.
 By default, data is retrieved from the cluster specified in the 
