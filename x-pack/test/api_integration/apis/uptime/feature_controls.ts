@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from 'x-pack/test/common/services';
 import { getDocCountQueryString } from '../../../../plugins/uptime/public/components/queries/empty_state/get_doc_count';
+import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
 

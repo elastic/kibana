@@ -5,7 +5,7 @@
  */
 import Boom from 'boom';
 import { Server } from 'hapi';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { SpacesClient } from '../spaces_client';

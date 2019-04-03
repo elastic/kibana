@@ -7,8 +7,8 @@
 import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../../xpack_main/types';
 import { KibanaPrivileges, Role } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../lib/validate_role';

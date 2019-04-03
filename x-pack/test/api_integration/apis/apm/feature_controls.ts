@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from 'x-pack/test/common/services';
+import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export

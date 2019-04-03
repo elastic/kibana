@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { Request, ResponseToolkit, Server } from 'hapi';
 import { flatten } from 'lodash';
-import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { AuthorizationService } from './service';
 class ProtectedApplications {
   private applications: Set<string> | null = null;

@@ -7,8 +7,8 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../../xpack_main/types';
+import { Space } from '../../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
 

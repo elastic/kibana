@@ -5,12 +5,9 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import {
-  RawKibanaFeaturePrivileges,
-  RawKibanaPrivileges,
-} from 'x-pack/plugins/security/common/model';
 import { Feature } from '../../../../../xpack_main/types';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
+import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 

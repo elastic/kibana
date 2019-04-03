@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { FeatureRegistry } from 'x-pack/plugins/xpack_main/server/lib/feature_registry';
+import { FeatureRegistry } from '../../../../lib/feature_registry';
 // @ts-ignore
 import { setupXPackMain } from '../../../../lib/setup_xpack_main';
 import { featuresRoute } from './features';

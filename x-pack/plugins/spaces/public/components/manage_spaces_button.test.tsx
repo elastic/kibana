@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { setMockCapabilities } from 'x-pack/plugins/__mocks__/ui/capabilities';
+import { setMockCapabilities } from '../../../__mocks__/ui/capabilities';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 describe('ManageSpacesButton', () => {

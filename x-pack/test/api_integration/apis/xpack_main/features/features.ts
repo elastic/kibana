@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
 import { Feature } from '../../../../../plugins/xpack_main/types';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // tslint:disable:no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
