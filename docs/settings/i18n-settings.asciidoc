@@ -1,9 +1,6 @@
 [role="xpack"]
 [[i18n-settings-kb]]
 === i18n settings in Kibana
-++++
-<titleabbrev>i18n Settings</titleabbrev>
-++++
 
 You do not need to configure any settings to run Kibana in English.
 

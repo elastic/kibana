@@ -67,7 +67,7 @@ Checking i18n does the following:
 
 * Checks all existing labels for violations.
 * Takes translations from .i18nrc.json and compares them to the messages extracted and validated at the step above and:
-  * Checks for unused translations. If you remove a label that has a corresponding translation, you must also remove the label from the translations file.
+** Checks for unused translations. If you remove a label that has a corresponding translation, you must also remove the label from the translations file.
   * Checks for incompatible translations.  If you add or remove a new parameter from an existing string, you must also remove the label from the translations file.
 
 To check your i18n translations, run the following command:
@@ -79,7 +79,7 @@ node scripts/i18n_check --fix --include-config ../kibana-extra/myPlugin/.i18nrc.
 
 
 [float]
-==== Implementing i18n in UI
+==== Implementing i18n in the UI
 
 Kibana relies on several UI frameworks (ReactJS and AngularJS) and
 requires localization in different environments (browser and NodeJS).
@@ -94,7 +94,7 @@ message syntax.
 
 
 [float]
-==== i18n for vanilla JavaScript
+===== i18n for vanilla JavaScript
 
 ["source","js"]
 -----------
@@ -108,7 +108,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 Full details are {repo}tree/6.7/packages/kbn-i18n#vanilla-js[here].
 
 [float]
-==== i18n for React 
+===== i18n for React 
 
 To localize strings in React, use either `FormattedMessage` or `i18n.translate`.
 
