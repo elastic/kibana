@@ -168,8 +168,7 @@ function getSuggestionsForField(
 ): Suggestion[] {
   const operationNames = getOperationsForField(field);
 
-  // TODO remove the number exception here, just to prevent triggering a bug in elastic-charts
-  if (operationNames.length === 0 || field.type === 'number') {
+  if (operationNames.length === 0) {
     return [] as Suggestion[];
   }
 
