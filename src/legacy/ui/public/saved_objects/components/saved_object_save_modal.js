@@ -63,7 +63,7 @@ export class SavedObjectSaveModal extends React.Component {
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
-  }
+  };
 
   saveSavedObject = async () => {
     if (this.state.isLoading) {
@@ -95,7 +95,7 @@ export class SavedObjectSaveModal extends React.Component {
     this.setState({
       copyOnSave: event.target.checked,
     });
-  }
+  };
 
   onFormSubmit = (event) => {
     event.preventDefault();
@@ -139,7 +139,7 @@ export class SavedObjectSaveModal extends React.Component {
         <EuiSpacer />
       </Fragment>
     );
-  }
+  };
 
   renderCopyOnSave = () => {
     if (!this.props.showCopyOnSave) {
@@ -161,10 +161,10 @@ export class SavedObjectSaveModal extends React.Component {
         />
       </EuiFormRow>
     );
-  }
+  };
 
   render() {
-    const {isTitleDuplicateConfirmed, hasTitleDuplicate, title, isLoading} = this.state;
+    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, isLoading } = this.state;
 
     return (
       <EuiOverlayMask>
