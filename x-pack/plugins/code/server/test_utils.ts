@@ -35,7 +35,7 @@ const TEST_OPTIONS = {
   },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
-  disableScheduler: true, // Temp option to disable all schedulers.
+  disableIndexScheduler: true, // Temp option to disable index scheduler.
 };
 
 export function createTestServerOption() {
