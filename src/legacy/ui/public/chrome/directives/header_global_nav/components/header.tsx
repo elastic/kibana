@@ -68,7 +68,7 @@ import { ChromeBadge, ChromeBreadcrumb } from '../../../../../../../core/public'
 
 interface Props {
   appTitle?: string;
-  badge$: Rx.Observable<ChromeBadge | null>;
+  badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;

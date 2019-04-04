@@ -145,7 +145,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             text: 'Read Only',
             tooltip: 'You lack the authority',
           }
-        : null
+        : undefined
     );
   }
 

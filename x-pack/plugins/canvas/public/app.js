@@ -41,7 +41,7 @@ chrome.helpExtension.set(domNode => {
 // set the read-only badge when appropriate
 chrome.badge.set(
   uiCapabilities.canvas.save
-    ? null
+    ? undefined
     : {
         text: i18n.translate('xpack.canvas.badge.readOnly.text', {
           defaultMessage: 'Read Only',

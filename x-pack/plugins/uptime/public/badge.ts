@@ -5,4 +5,4 @@
  */
 
 import { Badge } from 'ui/chrome/api/badge';
-export type UMBadge = Badge | null;
+export type UMBadge = Badge | undefined;

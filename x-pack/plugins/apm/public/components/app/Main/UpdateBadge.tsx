@@ -29,7 +29,7 @@ class UpdateBadgeComponent extends React.Component<Props> {
               id: 'xpack.aapm.header.badge.readOnly.tooltip'
             })
           }
-        : null
+        : undefined
     );
   }
 
