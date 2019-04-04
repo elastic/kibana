@@ -152,6 +152,9 @@ export function geoShapeToGeometry(value) {
     case 'polygon':
       geoJson.type = 'Polygon';
       break;
+    case 'multipolygon':
+      geoJson.type = 'MultiPolygon';
+      break;
     case 'multipoint':
       geoJson.type = 'MultiPoint';
       break;
