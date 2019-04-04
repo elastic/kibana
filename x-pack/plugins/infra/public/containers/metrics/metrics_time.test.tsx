@@ -76,13 +76,13 @@ describe('useMetricsTime hook', () => {
       const RANGE = 200;
 
       act(({ setAutoReload, setTimeRange }) => {
+        setAutoReload(true);
+
         setTimeRange({
           from,
           to,
           interval: '>=1m',
         });
-
-        setAutoReload(true);
       });
 
       act(() => {
