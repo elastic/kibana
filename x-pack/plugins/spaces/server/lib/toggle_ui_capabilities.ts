@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../xpack_main/types';
 import { Space } from '../../common/model/space';
 
 export function toggleUICapabilities(

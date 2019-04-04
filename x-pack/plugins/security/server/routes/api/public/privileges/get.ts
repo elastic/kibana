@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { RawKibanaPrivileges } from 'x-pack/plugins/security/common/model';
+import { RawKibanaPrivileges } from '../../../../../common/model';
 
 export function initGetPrivilegesApi(
   server: Record<string, any>,

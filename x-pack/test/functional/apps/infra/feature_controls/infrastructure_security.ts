@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 import { DATE_WITH_DATA } from '../constants';
 
 // tslint:disable no-default-export

@@ -17,6 +17,7 @@
  * under the License.
  */
 import { DocTitleProvider } from 'ui/doc_title';
+
 import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';

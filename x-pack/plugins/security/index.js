@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
@@ -25,6 +24,7 @@ import {
   createAuthorizationService,
   disableUICapabilitesFactory,
   initAPIAuthorization,
+  initAppAuthorization,
   registerPrivilegesWithCluster,
   validateFeaturePrivileges
 } from './server/lib/authorization';
@@ -127,6 +127,20 @@ export const security = (kibana) => new kibana.Plugin({
     }
   },
 
+  async postInit(server) {
+    const plugin = this;
+
+    const xpackMainPlugin = server.plugins.xpack_main;
+
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
+      if (license.allowRbac) {
+        const { security } = server.plugins;
+        await validateFeaturePrivileges(security.authorization.actions, xpackMainPlugin.getFeatures());
+        await registerPrivilegesWithCluster(server);
+      }
+    });
+  },
+
   async init(server) {
     const plugin = this;
 
@@ -158,13 +172,6 @@ export const security = (kibana) => new kibana.Plugin({
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
-
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
-      if (license.allowRbac) {
-        await validateFeaturePrivileges(authorization.actions, xpackMainPlugin.getFeatures());
-        await registerPrivilegesWithCluster(server);
-      }
-    });
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
@@ -205,6 +212,7 @@ export const security = (kibana) => new kibana.Plugin({
     await initAuthenticator(server);
     initAuthenticateApi(server);
     initAPIAuthorization(server, authorization);
+    initAppAuthorization(server, xpackMainPlugin, authorization);
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
@@ -225,34 +233,6 @@ export const security = (kibana) => new kibana.Plugin({
           layout,
         }
       };
-    });
-
-
-    server.ext('onPostAuth', async function (req, h) {
-      const path = req.path;
-
-      const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
-
-      // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbacForRequest(req)) {
-        return h.continue;
-      }
-
-      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
-
-      // Enforce app restrictions
-      if (path.startsWith('/app/')) {
-        const appId = path.split('/', 3)[2];
-        const appAction = actions.app.get(appId);
-
-        const checkPrivilegesResponse = await checkPrivileges(appAction);
-        if (!checkPrivilegesResponse.hasAllRequested) {
-          return Boom.notFound();
-        }
-      }
-
-
-      return h.continue;
     });
   }
 });

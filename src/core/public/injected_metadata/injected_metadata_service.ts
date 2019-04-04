@@ -22,6 +22,7 @@ import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from '../utils/deep_freeze';
 
+/** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
@@ -62,6 +63,8 @@ export interface InjectedMetadataParams {
  * server into the page. The metadata is actually defined
  * in the entry file for the bundle containing the new platform
  * and is read from the DOM in most cases.
+ *
+ * @internal
  */
 export class InjectedMetadataService {
   private state = deepFreeze(
@@ -84,6 +87,9 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
+      /**
+       * An array of frontend plugins in topological order.
+       */
       getPlugins: () => {
         return this.state.uiPlugins;
       },
@@ -111,4 +117,5 @@ export class InjectedMetadataService {
   }
 }
 
+/** @public */
 export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;

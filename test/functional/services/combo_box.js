@@ -38,16 +38,16 @@ export function ComboBoxProvider({ getService }) {
       await this.openOptionsList(comboBoxElement);
 
       if (value !== undefined) {
-        const options = await find.allByCssSelector(`.euiComboBoxOption[title^="${value.toString().trim()}"]`);
+        const options = await find.allByCssSelector(`.euiFilterSelectItem[title^="${value.toString().trim()}"]`);
 
         if (options.length > 0) {
           await options[0].click();
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          await find.clickByCssSelector('.euiComboBoxOption');
+          await find.clickByCssSelector('.euiFilterSelectItem');
         }
       } else {
-        await find.clickByCssSelector('.euiComboBoxOption');
+        await find.clickByCssSelector('.euiFilterSelectItem');
       }
 
       await this.closeOptionsList(comboBoxElement);

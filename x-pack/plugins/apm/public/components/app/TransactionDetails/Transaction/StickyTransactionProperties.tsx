@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
   URL_FULL,
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { idx } from '../../../../../common/idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {

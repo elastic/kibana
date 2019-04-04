@@ -7,7 +7,7 @@
 import {
   Feature,
   FeatureKibanaPrivileges,
-} from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
+} from '../../../../../../xpack_main/server/lib/feature_registry/feature_registry';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeNavlinkBuilder extends BaseFeaturePrivilegeBuilder {

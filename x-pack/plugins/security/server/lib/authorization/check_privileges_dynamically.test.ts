@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from 'x-pack/plugins/spaces/types';
+import { SpacesPlugin } from '../../../../spaces/types';
 import { OptionalPlugin } from '../optional_plugin';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 

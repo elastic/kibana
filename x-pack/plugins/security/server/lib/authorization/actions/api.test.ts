@@ -6,23 +6,25 @@
 
 import { ApiActions } from './api';
 
+const version = '1.0.0-zeta1';
+
 describe('#all', () => {
-  test(`returns api:*`, () => {
-    const apiActions = new ApiActions();
-    expect(apiActions.all).toBe('api:*');
+  test('returns `api:${version}:*`', () => {
+    const apiActions = new ApiActions(version);
+    expect(apiActions.all).toBe('api:1.0.0-zeta1:*');
   });
 });
 
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((operation: any) => {
     test(`operation of ${JSON.stringify(operation)} throws error`, () => {
-      const apiActions = new ApiActions();
+      const apiActions = new ApiActions(version);
       expect(() => apiActions.get(operation)).toThrowErrorMatchingSnapshot();
     });
   });
 
-  test('returns `api:${operation}`', () => {
-    const apiActions = new ApiActions();
-    expect(apiActions.get('foo-operation')).toBe('api:foo-operation');
+  test('returns `api:${version}:${operation}`', () => {
+    const apiActions = new ApiActions(version);
+    expect(apiActions.get('foo-operation')).toBe('api:1.0.0-zeta1:foo-operation');
   });
 });

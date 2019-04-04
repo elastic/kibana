@@ -117,6 +117,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
       />
        
       <EuiText
+        color="danger"
         grow={true}
         size="s"
         style={
@@ -127,8 +128,8 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <em>
           <FormattedMessage
-            defaultMessage="(all features visible)"
-            id="xpack.spaces.management.enabledSpaceFeatures.allFeaturesEnabledMessage"
+            defaultMessage="(no features visible)"
+            id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
             values={Object {}}
           />
         </em>
@@ -194,9 +195,14 @@ exports[`EnabledFeatures renders as expected 1`] = `
           Array [
             Object {
               "app": Array [],
-              "icon": "discoverApp",
-              "id": "some-feature",
-              "name": "Some Feature",
+              "id": "feature-1",
+              "name": "Feature 1",
+              "privileges": Object {},
+            },
+            Object {
+              "app": Array [],
+              "id": "feature-2",
+              "name": "Feature 2",
               "privileges": Object {},
             },
           ]
@@ -306,7 +312,12 @@ exports[`EnabledFeatures renders as expected 1`] = `
         onChange={[MockFunction]}
         space={
           Object {
+            "disabledFeatures": Array [
+              "feature-1",
+              "feature-2",
+            ],
             "id": "my-space",
+            "name": "my space",
           }
         }
       />

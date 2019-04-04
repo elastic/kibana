@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Request } from 'hapi';
-import { XPackFeature } from 'x-pack/plugins/xpack_main/xpack_main';
+import { XPackFeature } from '../../../../xpack_main/xpack_main';
 
 export interface AuthorizationMode {
   useRbacForRequest(request: Request): boolean;

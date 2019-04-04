@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+
+import { Feature } from '../../../../../../../../../xpack_main/types';
 import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';

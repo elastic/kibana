@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RawKibanaPrivileges } from 'x-pack/plugins/security/common/model';
+import { RawKibanaPrivileges } from '../../../common/model';
 import { PrivilegeSerializer } from './privilege_serializer';
 
 interface SerializedPrivilege {

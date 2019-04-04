@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../../../../../core/public/base_path';
+import { BasePathSetup } from '../../../../../core/public';
 let newPlatformBasePath: BasePathSetup;
 
 export function __newPlatformInit__(instance: BasePathSetup) {

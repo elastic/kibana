@@ -32,18 +32,21 @@ function isEmbedParamInHash() {
   return Boolean(query.embed);
 }
 
-export interface Brand {
+/** @public */
+export interface ChromeBrand {
   logo?: string;
   smallLogo?: string;
 }
 
-export interface Breadcrumb {
+/** @public */
+export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
 }
 
-export type HelpExtension = (element: HTMLDivElement) => (() => void);
+/** @public */
+export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
@@ -54,6 +57,7 @@ interface SetupDeps {
   notifications: NotificationsSetup;
 }
 
+/** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
@@ -65,12 +69,12 @@ export class ChromeService {
   public setup({ injectedMetadata, notifications }: SetupDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
-    const brand$ = new Rx.BehaviorSubject<Brand>({});
+    const brand$ = new Rx.BehaviorSubject<ChromeBrand>({});
     const isVisible$ = new Rx.BehaviorSubject(true);
     const isCollapsed$ = new Rx.BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
-    const helpExtension$ = new Rx.BehaviorSubject<HelpExtension | undefined>(undefined);
-    const breadcrumbs$ = new Rx.BehaviorSubject<Breadcrumb[]>([]);
+    const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
+    const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -95,7 +99,7 @@ export class ChromeService {
        *    })
        *
        */
-      setBrand: (brand: Brand) => {
+      setBrand: (brand: ChromeBrand) => {
         brand$.next(
           Object.freeze({
             logo: brand.logo,
@@ -179,7 +183,7 @@ export class ChromeService {
       /**
        * Override the current set of breadcrumbs
        */
-      setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => {
+      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
       },
 
@@ -191,7 +195,7 @@ export class ChromeService {
       /**
        * Override the current set of breadcrumbs
        */
-      setHelpExtension: (helpExtension?: HelpExtension) => {
+      setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
         helpExtension$.next(helpExtension);
       },
     };
@@ -202,4 +206,5 @@ export class ChromeService {
   }
 }
 
+/** @public */
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
