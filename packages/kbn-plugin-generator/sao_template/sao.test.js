@@ -43,6 +43,7 @@ describe('plugin generator sao integration', () => {
       generateApp: false,
       generateHack: false,
       generateApi: false,
+      generateFeatureRegistration: false,
     });
 
     expect(res.fileList).not.toContain('public/app.js');
@@ -55,6 +56,7 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).not.toContain('app:');
     expect(uiExports).not.toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
+    expect(uiExports).not.toContain('registerFeature(');
   });
 
   it('includes app when answering yes', async () => {
@@ -62,6 +64,7 @@ describe('plugin generator sao integration', () => {
       generateApp: true,
       generateHack: false,
       generateApi: false,
+      generateFeatureRegistration: false,
     });
 
     // check output files
@@ -75,6 +78,7 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).toContain('app:');
     expect(uiExports).not.toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
+    expect(uiExports).not.toContain('registerFeature(');
   });
 
   it('includes hack when answering yes', async () => {
@@ -82,6 +86,7 @@ describe('plugin generator sao integration', () => {
       generateApp: true,
       generateHack: true,
       generateApi: false,
+      generateFeatureRegistration: false,
     });
 
     // check output files
@@ -95,6 +100,7 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).toContain('app:');
     expect(uiExports).toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
+    expect(uiExports).not.toContain('registerFeature(');
   });
 
   it('includes server api when answering yes', async () => {
@@ -102,6 +108,7 @@ describe('plugin generator sao integration', () => {
       generateApp: true,
       generateHack: true,
       generateApi: true,
+      generateFeatureRegistration: false,
     });
 
     // check output files
@@ -115,6 +122,29 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).toContain('app:');
     expect(uiExports).toContain('hacks:');
     expect(uiExports).toContain('init(server, options)');
+    expect(uiExports).not.toContain('registerFeature(');
+  });
+
+  it('includes feature registration when answering yes', async () => {
+    const res = await sao.mockPrompt(template, {
+      generateApp: true,
+      generateHack: true,
+      generateApi: true,
+      generateFeatureRegistration: true,
+    });
+
+    // check output files
+    expect(res.fileList).toContain('public/app.js');
+    expect(res.fileList).toContain('public/__tests__/index.js');
+    expect(res.fileList).toContain('public/hack.js');
+    expect(res.fileList).toContain('server/routes/example.js');
+    expect(res.fileList).toContain('server/__tests__/index.js');
+
+    const uiExports = getConfig(res.files['index.js']);
+    expect(uiExports).toContain('app:');
+    expect(uiExports).toContain('hacks:');
+    expect(uiExports).toContain('init(server, options)');
+    expect(uiExports).toContain('registerFeature(');
   });
 
   it('plugin config has correct name and main path', async () => {
