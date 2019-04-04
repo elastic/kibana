@@ -158,8 +158,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.canvas.expectCreateWorkpadButtonDisabled();
       });
 
-      it(`doesn't show read-only badge`, async () => {
-        await globalNav.badgeMissingOrFail();
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read Only');
       });
 
       it(`does not allow a workpad to be created`, async () => {
