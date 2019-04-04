@@ -89,6 +89,11 @@ export function splitTable(columns, rows, $parent) {
 
   return splitRows.results.map(splitValue => {
     const $newParent = new AggConfigResult(splitColumn.aggConfig, $parent, splitValue, splitValue);
+    $newParent.rawData = {
+      table: { columns, rows },
+      column: splitColumnIndex,
+      row: -1, // For split buckets, we don't need the actual row for filters, just the provided value.
+    };
     return {
       $parent: $newParent,
       aggConfig: splitColumn.aggConfig,
