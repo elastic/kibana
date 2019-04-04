@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';
+import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -36,7 +37,17 @@ export function fromLegacyKueryExpression(expression, parseOptions) {
 }
 
 export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseKuery);
+  try {
+    return fromExpression(expression, parseOptions, parseKuery);
+  }
+  catch (error) {
+    if (error.message.startsWith('kbnESQuery')) {
+      throw new KQLSyntaxError(error.message);
+    }
+    else {
+      throw error;
+    }
+  }
 }
 
 function fromExpression(expression, parseOptions = {}, parse = parseKuery) {

@@ -17,13 +17,25 @@
  * under the License.
  */
 
-import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
+import {
+  fromLegacyKueryExpression,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  KQLSyntaxError,
+} from '../kuery';
 
 export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
   const queryASTs = queries.map(query => {
     try {
       return fromKueryExpression(query.query, { allowLeadingWildcards });
     } catch (parseError) {
+      // If it's a known error go ahead and bubble it up
+      if (parseError instanceof KQLSyntaxError) {
+        throw parseError;
+      }
+
+      // If we don't recognize the error, the user may still be using the old Kuery syntax
       try {
         fromLegacyKueryExpression(query.query);
       } catch (legacyParseError) {
