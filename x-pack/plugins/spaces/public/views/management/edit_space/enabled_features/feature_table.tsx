@@ -8,8 +8,8 @@ import { EuiCheckbox, EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } 
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../../xpack_main/types';
+import { Space } from '../../../../../common/model/space';
 import { ToggleAllFeatures } from './toggle_all_features';
 
 interface Props {

@@ -79,12 +79,14 @@ uiModules
 
           // escape each cell in each row
           const csvRows = rows.map(function (row) {
-            return row.map(escape);
+            return Object.entries(row).map(([k, v]) => {
+              return escape(formatted ? columns.find(c => c.id === k).formatter.convert(v) : v);
+            });
           });
 
           // add the columns to the rows
           csvRows.unshift(columns.map(function (col) {
-            return escape(col.title);
+            return escape(formatted ? col.title : col.name);
           }));
 
           return csvRows.map(function (row) {

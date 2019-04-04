@@ -169,6 +169,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           <EuiSuperSelect
             compressed={false}
             data-test-subj="basePrivilegeComboBox"
+            disabled={true}
             fullWidth={true}
             hasDividers={true}
             onChange={[Function]}
@@ -322,7 +323,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               "feature": Object {},
             }
           }
-          disabled={false}
+          disabled={true}
           features={Array []}
           intl={
             Object {

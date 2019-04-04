@@ -20,27 +20,28 @@
 import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
 
-interface Params {
+interface NotificationServiceParams {
   targetDomElement: HTMLElement;
 }
 
-interface Deps {
+interface NotificationsServiceDeps {
   i18n: I18nSetup;
 }
 
+/** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
 
   private readonly toastsContainer: HTMLElement;
 
-  constructor(private readonly params: Params) {
+  constructor(private readonly params: NotificationServiceParams) {
     this.toastsContainer = document.createElement('div');
     this.toasts = new ToastsService({
       targetDomElement: this.toastsContainer,
     });
   }
 
-  public setup({ i18n }: Deps) {
+  public setup({ i18n }: NotificationsServiceDeps) {
     this.params.targetDomElement.appendChild(this.toastsContainer);
 
     return {
@@ -55,4 +56,5 @@ export class NotificationsService {
   }
 }
 
+/** @public */
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;

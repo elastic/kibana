@@ -23,9 +23,9 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { DEFAULT_SPACE_ID } from 'x-pack/plugins/spaces/common/constants';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
+import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';

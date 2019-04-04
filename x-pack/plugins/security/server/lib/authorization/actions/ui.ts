@@ -5,7 +5,7 @@
  */
 import { isString } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
-import { uiCapabilitiesRegex } from 'x-pack/plugins/xpack_main/types';
+import { uiCapabilitiesRegex } from '../../../../../xpack_main/types';
 
 export class UIActions {
   private readonly prefix: string;

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
-import { SecurityService, SpacesService } from 'x-pack/test/common/services';
+import { SecurityService, SpacesService } from '../../../common/services';
 import { KbnTestProvider } from './types';
 
 const introspectionQuery = gql`

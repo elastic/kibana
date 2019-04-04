@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Server } from 'hapi';
-import { DEFAULT_SPACE_ID } from 'x-pack/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
 
 export function initSpacesOnRequestInterceptor(server: Server) {

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from 'x-pack/test/common/services';
 // eslint-disable-next-line max-len
 import {
   createDashboardEditUrl,
   DashboardConstants,
 } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+import { SecurityService } from '../../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // tslint:disable:no-default-export

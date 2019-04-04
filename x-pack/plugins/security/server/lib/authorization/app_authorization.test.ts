@@ -7,8 +7,8 @@
 import { Server } from 'hapi';
 import { AuthorizationService } from './service';
 
-import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
+import { Feature } from '../../../../xpack_main/types';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { actionsFactory } from './actions';
 import { initAppAuthorization } from './app_authorization';
 

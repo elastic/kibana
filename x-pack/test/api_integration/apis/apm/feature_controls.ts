@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from 'x-pack/test/common/services';
+import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
@@ -81,16 +81,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     },
     {
       url: `/api/apm/services/foo?start=${start}&end=${end}`,
-      expectForbidden: expect404,
-      expectResponse: expect200,
-    },
-    {
-      url: `/api/apm/status/server`,
-      expectForbidden: expect404,
-      expectResponse: expect200,
-    },
-    {
-      url: `/api/apm/status/agent`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },

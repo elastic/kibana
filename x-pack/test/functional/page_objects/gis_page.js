@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
@@ -49,6 +51,26 @@ export function GisPageProvider({ getService, getPageObjects }) {
       if (isFullScreen) {
         await testSubjects.click('exitFullScreenModeLogo');
       }
+    }
+
+    // Since there are no DOM indicators that signal when map pan and zoom actions are complete,
+    // this method waits until the map view has stabilized, signaling that the panning/zooming is complete.
+    // Pass origView parameter when the new map view determinition is async
+    // so method knows when panning/zooming has started.
+    async waitForMapPanAndZoom(origView) {
+      await retry.try(async () => {
+        log.debug('Waiting for map pan and zoom to complete');
+        const prevView = await this.getView();
+        await PageObjects.common.sleep(1000);
+        const currentView = await this.getView();
+        if (origView && _.isEqual(origView, currentView)) {
+          throw new Error('Map pan and zoom has not started yet');
+        }
+        if (!_.isEqual(prevView, currentView)) {
+          throw new Error('Map is still panning and zooming');
+        }
+      });
+      await this.waitForLayersToLoad();
     }
 
     async waitForLayersToLoad() {
@@ -185,9 +207,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await this.waitForLayersToLoad();
-      // there is no way to wait for canvas been reloaded
-      await PageObjects.common.sleep(5000);
+      await this.waitForMapPanAndZoom();
     }
 
     async getView() {
@@ -197,7 +217,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const lon = await testSubjects.getAttribute('longitudeInput', 'value');
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
       await testSubjects.click('toggleSetViewVisibilityButton');
-      return { lat, lon, zoom };
+      return {
+        lat: parseFloat(lat),
+        lon: parseFloat(lon),
+        zoom: parseFloat(zoom)
+      };
     }
 
     async toggleLayerVisibility(layerName) {
@@ -208,9 +232,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async clickFitToBounds(layerName) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
+      const origView = await this.getView();
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('fitToBoundsButton');
-      await this.waitForLayersToLoad();
+      await this.waitForMapPanAndZoom(origView);
     }
 
     async openLayerTocActionsPanel(layerName) {
