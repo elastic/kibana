@@ -164,6 +164,8 @@ export class SavedObjectSaveModal extends React.Component {
   }
 
   render() {
+    const {isTitleDuplicateConfirmed, hasTitleDuplicate, title, isLoading} = this.state;
+
     return (
       <EuiOverlayMask>
         <EuiModal
@@ -199,9 +201,9 @@ export class SavedObjectSaveModal extends React.Component {
                   <EuiFieldText
                     autoFocus
                     data-test-subj="savedObjectTitle"
-                    value={this.state.title}
+                    value={title}
                     onChange={this.onTitleChange}
-                    isInvalid={this.state.hasTitleDuplicate || this.state.title.length === 0}
+                    isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
                   />
                 </EuiFormRow>
 
@@ -225,8 +227,8 @@ export class SavedObjectSaveModal extends React.Component {
               <EuiButton
                 fill
                 data-test-subj="confirmSaveSavedObjectButton"
-                isLoading={this.state.isLoading}
-                isDisabled={this.state.title.length === 0}
+                isLoading={isLoading}
+                isDisabled={title.length === 0}
                 type="submit"
               >
                 {this.props.confirmButtonLabel
