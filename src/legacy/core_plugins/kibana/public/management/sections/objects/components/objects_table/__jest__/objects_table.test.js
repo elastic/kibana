@@ -24,8 +24,6 @@ import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 
-jest.mock('ui/kfetch', () => jest.fn());
-
 jest.mock('../components/header', () => ({
   Header: () => 'Header',
 }));
@@ -53,6 +51,14 @@ jest.mock('../../../lib/fetch_export_objects', () => ({
 
 jest.mock('../../../lib/fetch_export_by_type', () => ({
   fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../lib/import_file', () => ({
+  importFile: jest.fn(),
+}));
+
+jest.mock('../../../lib/resolve_import_errors', () => ({
+  resolveImportErrors: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
