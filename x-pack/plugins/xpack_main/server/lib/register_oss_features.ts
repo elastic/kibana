@@ -48,7 +48,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization', 'url'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['show', 'createShortUrl', 'save'],
+        ui: ['show', 'createShortUrl', 'delete', 'save'],
       },
       read: {
         savedObject: {
