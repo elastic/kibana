@@ -53,10 +53,6 @@ const EXECUTE_DETAILS_INITIAL_STATE = {
 
 const INPUT_OVERRIDE_ID = 'simulateExecutionInputOverride';
 
-const ERRORS = {
-  [INPUT_OVERRIDE_ID]: [],
-};
-
 function getTableData(watch: BaseWatch) {
   const actions = watch.watch && watch.watch.actions;
   return map(actions, (action, actionId) => {
@@ -79,7 +75,23 @@ function getActionModes(items: TableData) {
   return result;
 }
 
-export const JsonWatchEditSimulate = () => {
+export const JsonWatchEditSimulate = ({
+  executeWatchJsonString,
+  setExecuteWatchJsonString,
+  errors,
+  setErrors,
+  isShowingErrors,
+  setIsShowingErrors,
+  isDisabled,
+}: {
+  executeWatchJsonString: string;
+  setExecuteWatchJsonString: (json: string) => void;
+  errors: { [key: string]: string[] };
+  setErrors: (errors: { [key: string]: string[] }) => void;
+  isShowingErrors: boolean;
+  setIsShowingErrors: (isShowingErrors: boolean) => void;
+  isDisabled: boolean;
+}) => {
   const { watch } = useContext(WatchContext);
   const tableData = getTableData(watch);
 
@@ -90,10 +102,7 @@ export const JsonWatchEditSimulate = () => {
       actionModes: getActionModes(tableData),
     })
   );
-  const [executeJsonString, setExecuteJsonString] = useState<string>('');
   const [executeResults, setExecuteResults] = useState<ExecutedWatchResults | null>(null);
-  const [isShowingErrors, setIsShowingErrors] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ [key: string]: string[] }>(ERRORS);
 
   const columns = [
     {
@@ -344,10 +353,25 @@ export const JsonWatchEditSimulate = () => {
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={executeJsonString}
-              onValidate={(annotations: any) => {
-                const hasError = annotations.find((annotation: any) => annotation.type === 'error');
-                if (hasError) {
+              value={executeWatchJsonString}
+              onChange={(json: string) => {
+                setExecuteWatchJsonString(json);
+                try {
+                  const alternativeInput = json === '' ? undefined : JSON.parse(json);
+                  if (
+                    typeof alternativeInput === 'undefined' ||
+                    (alternativeInput && typeof alternativeInput === 'object')
+                  ) {
+                    setExecuteDetails(
+                      new ExecuteDetails({
+                        ...executeDetails,
+                        alternativeInput,
+                      })
+                    );
+                    setIsShowingErrors(false);
+                    setErrors({ ...errors, [INPUT_OVERRIDE_ID]: [] });
+                  }
+                } catch (e) {
                   setErrors({
                     ...errors,
                     [INPUT_OVERRIDE_ID]: [
@@ -360,20 +384,7 @@ export const JsonWatchEditSimulate = () => {
                     ],
                   });
                   setIsShowingErrors(true);
-                  return;
                 }
-                setIsShowingErrors(false);
-                setErrors({ ...errors, [INPUT_OVERRIDE_ID]: [] });
-                setExecuteDetails(
-                  new ExecuteDetails({
-                    ...executeDetails,
-                    alternativeInput:
-                      executeJsonString === '' ? undefined : JSON.parse(executeJsonString),
-                  })
-                );
-              }}
-              onChange={(json: string) => {
-                setExecuteJsonString(json);
               }}
             />
           </ErrableFormRow>
@@ -450,7 +461,7 @@ export const JsonWatchEditSimulate = () => {
           iconType="play"
           fill
           type="submit"
-          isDisabled={isShowingErrors}
+          isDisabled={isDisabled}
           onClick={async () => {
             try {
               const executedWatch = await executeWatch(executeDetails, watch);

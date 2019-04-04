@@ -34,7 +34,7 @@ export class ExecuteDetails {
         break;
       case TIME_UNITS.MILLISECOND:
         timeValue = timeValue.add(value, 'milliseconds');
-      default:
+        break;
     }
     return timeValue.format();
   }

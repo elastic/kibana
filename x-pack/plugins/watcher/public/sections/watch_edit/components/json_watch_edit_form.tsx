@@ -19,9 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JsonWatch } from 'plugins/watcher/models/watch/json_watch';
+import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';
-import { onWatchSave } from '../json_watch_edit_actions';
+import { onWatchSave, saveWatch } from '../json_watch_edit_actions';
 import { WatchContext } from './watch_context';
 
 const JSON_WATCH_IDS = {
@@ -30,189 +31,195 @@ const JSON_WATCH_IDS = {
   JSON: 'watchJson',
 };
 
-const JSON_WATCH_ERROR_MSGS = {
-  [JSON_WATCH_IDS.JSON]: {
-    invalid: i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidJsonText', {
-      defaultMessage: 'Invalid JSON',
-    }),
-  },
-  [JSON_WATCH_IDS.ID]: {
-    invalid: i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
-      defaultMessage: `ID must begin with a letter or underscore
-      and contain only letters, underscores, dashes, and numbers.`,
-    }),
-    required: i18n.translate('xpack.watcher.sections.watchEdit.json.error.requiredIdText', {
-      defaultMessage: 'ID is required',
-    }),
-  },
-};
-
 function validateId(id: string) {
-  const regex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
+  const regex = /^[A-Za-z0-9\-\_]+$/;
   if (!id) {
-    return JSON_WATCH_ERROR_MSGS[JSON_WATCH_IDS.ID].required;
+    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.requiredIdText', {
+      defaultMessage: 'ID is required',
+    });
   } else if (!regex.test(id)) {
-    return JSON_WATCH_ERROR_MSGS[JSON_WATCH_IDS.ID].invalid;
+    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
+      defaultMessage: 'ID must only letters, underscores, dashes, and numbers.',
+    });
   }
   return false;
 }
 
-const ERRORS = {
-  [JSON_WATCH_IDS.JSON]: [],
-  [JSON_WATCH_IDS.ID]: [],
-};
-
 export const JsonWatchEditForm = ({
   kbnUrl,
   licenseService,
-  setModal,
+  watchJsonString,
+  setWatchJsonString,
+  errors,
+  setErrors,
+  isShowingErrors,
+  setIsShowingErrors,
 }: {
   kbnUrl: any;
   licenseService: any;
-  setModal: (
-    options: {
-      message: string;
-    }
-  ) => void;
+  watchJsonString: string;
+  setWatchJsonString: (json: string) => void;
+  errors: { [key: string]: string[] };
+  setErrors: (errors: { [key: string]: string[] }) => void;
+  isShowingErrors: boolean;
+  setIsShowingErrors: (isShowingErrors: boolean) => void;
 }) => {
   const { watch, setWatch } = useContext(WatchContext);
   // hooks
-  const [errors, setErrors] = useState<{ [key: string]: string[] }>(ERRORS);
-  const [isShowingErrors, setIsShowingErrors] = useState<boolean>(false);
-  // ace editor requires json to be in string format
-  const [watchJsonString, setWatchJsonString] = useState<string>(
-    JSON.stringify(watch.watch, null, 2)
-  );
+  const [modal, setModal] = useState<{ message: string } | null>(null);
   return (
-    <EuiForm>
-      <ErrableFormRow
-        id={JSON_WATCH_IDS.ID}
-        label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
-          defaultMessage: 'ID',
-        })}
-        errorKey={JSON_WATCH_IDS.ID}
-        isShowingErrors={isShowingErrors}
-        errors={errors}
-        fullWidth
-      >
-        <EuiFieldText
+    <Fragment>
+      <ConfirmWatchesModal
+        modalOptions={modal}
+        callback={async isConfirmed => {
+          if (isConfirmed) {
+            saveWatch(watch, kbnUrl, licenseService);
+          }
+          setModal(null);
+        }}
+      />
+      <EuiForm>
+        <ErrableFormRow
+          id={JSON_WATCH_IDS.ID}
+          label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
+            defaultMessage: 'ID',
+          })}
+          errorKey={JSON_WATCH_IDS.ID}
+          isShowingErrors={isShowingErrors}
+          errors={errors}
           fullWidth
-          name="id"
-          value={watch.id}
-          readOnly={!watch.isNew}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            const id = e.target.value;
-            const error = validateId(id);
-            setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
-            setIsShowingErrors(!!error);
-            setWatch(new JsonWatch({ ...watch, id }));
-          }}
-        />
-      </ErrableFormRow>
-      <EuiFormRow
-        id={JSON_WATCH_IDS.NAME}
-        label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
-          defaultMessage: 'Name',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
+        >
+          <EuiFieldText
+            fullWidth
+            name="id"
+            value={watch.id}
+            readOnly={!watch.isNew}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const id = e.target.value;
+              const error = validateId(id);
+              const newErrors = { ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] };
+              const isInvalidForm = !!Object.keys(newErrors).find(
+                errorKey => newErrors[errorKey].length >= 1
+              );
+              setErrors(newErrors);
+              setIsShowingErrors(isInvalidForm);
+              setWatch(new JsonWatch({ ...watch, id }));
+            }}
+          />
+        </ErrableFormRow>
+        <EuiFormRow
+          id={JSON_WATCH_IDS.NAME}
+          label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
+            defaultMessage: 'Name',
+          })}
           fullWidth
-          name="name"
-          value={watch.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setWatch(new JsonWatch({ ...watch, name: e.target.value }));
-          }}
-        />
-      </EuiFormRow>
-      <ErrableFormRow
-        id={JSON_WATCH_IDS.JSON}
-        label={
-          <Fragment>
-            {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonLabel', {
-              defaultMessage: 'Watch JSON',
-            })}{' '}
-            (
-            <EuiLink href={documentationLinks.watcher.putWatchApi} target="_blank">
-              {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonDocLink', {
-                defaultMessage: 'Syntax',
-              })}
-            </EuiLink>
-            )
-          </Fragment>
-        }
-        errorKey={JSON_WATCH_IDS.JSON}
-        isShowingErrors={isShowingErrors}
-        fullWidth
-        errors={errors}
-      >
-        <EuiCodeEditor
+        >
+          <EuiFieldText
+            fullWidth
+            name="name"
+            value={watch.name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setWatch(new JsonWatch({ ...watch, name: e.target.value }));
+            }}
+          />
+        </EuiFormRow>
+        <ErrableFormRow
+          id={JSON_WATCH_IDS.JSON}
+          label={
+            <Fragment>
+              {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonLabel', {
+                defaultMessage: 'Watch JSON',
+              })}{' '}
+              (
+              <EuiLink href={documentationLinks.watcher.putWatchApi} target="_blank">
+                {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonDocLink', {
+                  defaultMessage: 'Syntax',
+                })}
+              </EuiLink>
+              )
+            </Fragment>
+          }
+          errorKey={JSON_WATCH_IDS.JSON}
+          isShowingErrors={isShowingErrors}
           fullWidth
-          mode="json"
-          width="100%"
-          theme="github"
-          aria-label={i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
-            {
-              defaultMessage: 'Code editor',
-            }
-          )}
-          value={watchJsonString}
-          onValidate={(annotations: any) => {
-            const hasError = annotations.find((annotation: any) => annotation.type === 'error');
-            if (hasError || watchJsonString === '') {
-              setErrors({
-                ...errors,
-                [JSON_WATCH_IDS.JSON]: [JSON_WATCH_ERROR_MSGS[JSON_WATCH_IDS.JSON].invalid],
-              });
-              setIsShowingErrors(true);
-              return;
-            }
-            setWatch(
-              new JsonWatch({
-                ...watch,
-                watch: JSON.parse(watchJsonString),
-              })
-            );
-            setErrors({ ...errors, [JSON_WATCH_IDS.ID]: [] });
-            setIsShowingErrors(false);
-          }}
-          onChange={(json: string) => {
-            setWatchJsonString(json);
-          }}
-        />
-      </ErrableFormRow>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            type="submit"
-            isDisabled={isShowingErrors}
-            onClick={async () => {
-              const error = validateId(watch.id);
-              setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
-              setIsShowingErrors(!!error);
-              if (!error) {
-                const savedWatch = await onWatchSave(watch, kbnUrl, licenseService);
-                if (savedWatch && savedWatch.error) {
-                  return setModal(savedWatch.error);
+          errors={errors}
+        >
+          <EuiCodeEditor
+            fullWidth
+            mode="json"
+            width="100%"
+            theme="github"
+            aria-label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
+              {
+                defaultMessage: 'Code editor',
+              }
+            )}
+            value={watchJsonString}
+            onChange={(json: string) => {
+              setWatchJsonString(json);
+              try {
+                const watchJson = JSON.parse(json);
+                if (watchJson && typeof watchJson === 'object') {
+                  setWatch(
+                    new JsonWatch({
+                      ...watch,
+                      watch: watchJson,
+                    })
+                  );
+                  const newErrors = { ...errors, [JSON_WATCH_IDS.JSON]: [] };
+                  const isInvalidForm = !!Object.keys(newErrors).find(
+                    errorKey => newErrors[errorKey].length >= 1
+                  );
+                  setErrors(newErrors);
+                  setIsShowingErrors(isInvalidForm);
                 }
+              } catch (e) {
+                setErrors({
+                  ...errors,
+                  [JSON_WATCH_IDS.JSON]: [
+                    i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidJsonText', {
+                      defaultMessage: 'Invalid JSON',
+                    }),
+                  ],
+                });
+                setIsShowingErrors(true);
               }
             }}
-          >
-            {i18n.translate('xpack.watcher.sections.watchEdit.json.saveButtonLabel', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty href={'#/management/elasticsearch/watcher/watches'}>
-            {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiForm>
+          />
+        </ErrableFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="submit"
+              isDisabled={isShowingErrors}
+              onClick={async () => {
+                const error = validateId(watch.id);
+                setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
+                setIsShowingErrors(!!error);
+                if (!error) {
+                  const savedWatch = await onWatchSave(watch, kbnUrl, licenseService);
+                  if (savedWatch && savedWatch.error) {
+                    return setModal(savedWatch.error);
+                  }
+                }
+              }}
+            >
+              {i18n.translate('xpack.watcher.sections.watchEdit.json.saveButtonLabel', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty href={'#/management/elasticsearch/watcher/watches'}>
+              {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+    </Fragment>
   );
 };

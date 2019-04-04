@@ -11,12 +11,7 @@ export interface ExecutedWatchResults {
   startTime: Date;
   watchStatus: {
     state: string;
-    actionStatuses: [
-      {
-        state: string;
-        lastExecutionReason: string;
-      }
-    ];
+    actionStatuses: Array<{ state: string; lastExecutionReason: string }>;
   };
 }
 
