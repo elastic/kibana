@@ -22,6 +22,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Flyout } from '../flyout';
 
+jest.mock('ui/kfetch', () => jest.fn());
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -41,14 +43,6 @@ jest.mock('../../../../../lib/import_file', () => ({
 
 jest.mock('../../../../../lib/resolve_import_errors', () => ({
   resolveImportErrors: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/fetch_export_objects', () => ({
-  fetchExportObjects: jest.fn(),
 }));
 
 jest.mock('ui/chrome', () => ({

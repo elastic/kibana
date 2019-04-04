@@ -17,14 +17,18 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createGetRoute } from './get';
-export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
-export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createUpdateRoute } from './update';
-export { createExportRoute } from './export';
+import Hapi from 'hapi';
+
+export const createLogLegacyImportRoute = () => ({
+  path: '/api/saved_objects/_log_legacy_import',
+  method: 'POST',
+  options: {
+    handler(request: Hapi.Request) {
+      request.server.log(
+        ['warning'],
+        'Importing saved objects from a .json file has been deprecated'
+      );
+      return { success: true };
+    },
+  },
+});

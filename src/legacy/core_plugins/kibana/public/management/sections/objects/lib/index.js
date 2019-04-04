@@ -29,3 +29,4 @@ export * from './import_legacy_file';
 export * from './parse_query';
 export * from './resolve_import_errors';
 export * from './resolve_saved_objects';
+export * from './log_legacy_import';

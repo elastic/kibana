@@ -22,6 +22,8 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui/lib/services';
 
+jest.mock('ui/kfetch', () => jest.fn());
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -37,22 +39,6 @@ jest.mock('ui/errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
-}));
-
-jest.mock('../../../../../lib/import_file', () => ({
-  importFile: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/resolve_import_errors', () => ({
-  resolveImportErrors: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/fetch_export_objects', () => ({
-  fetchExportObjects: jest.fn(),
 }));
 
 import { Table } from '../table';

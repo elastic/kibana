@@ -17,14 +17,11 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createGetRoute } from './get';
-export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
-export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createUpdateRoute } from './update';
-export { createExportRoute } from './export';
+import { kfetch } from 'ui/kfetch';
+
+export async function logLegacyImport() {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_log_legacy_import',
+  });
+}

@@ -57,7 +57,7 @@ exports[`Table should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Export"
-                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
                 values={Object {}}
               />
             </EuiButton>

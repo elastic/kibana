@@ -45,7 +45,12 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
-import { importFile, importLegacyFile, resolveImportErrors } from '../../../../lib';
+import {
+  importFile,
+  importLegacyFile,
+  resolveImportErrors,
+  logLegacyImport,
+} from '../../../../lib';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
@@ -345,8 +350,10 @@ class FlyoutUI extends Component {
 
     this.setState({ isLoading: true, error: undefined });
 
-    let contents;
+    // Log warning on server, don't wait for response
+    logLegacyImport();
 
+    let contents;
     try {
       contents = await importLegacyFile(file);
     } catch (e) {
