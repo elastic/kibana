@@ -28,7 +28,9 @@ Object {
       }
     }
   />,
-  "leaderIndexPatterns": null,
+  "leaderIndexPatterns": Object {
+    "message": null,
+  },
   "name": "Name can't begin with an underscore.",
   "otherProp": null,
 }
