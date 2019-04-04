@@ -46,6 +46,22 @@ app.directive('mapListing', function (reactDirective) {
 routes.enable();
 
 routes
+  .defaults(/.*/, {
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.maps.save) {
+        return null;
+      }
+
+      return {
+        text: i18n('kbn.maps.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n('kbn.maps.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      };
+    }
+  })
   .when('/', {
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {
