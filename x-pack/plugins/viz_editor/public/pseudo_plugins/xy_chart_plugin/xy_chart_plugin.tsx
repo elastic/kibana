@@ -119,7 +119,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
   );
 }
 
-function toExpression(viewState: XyChartVisModel) {
+function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'edit' = 'view') {
   if (!viewState.private.xyChart) {
     return '';
   }
@@ -128,6 +128,8 @@ function toExpression(viewState: XyChartVisModel) {
   // TODO actually use the stuff from the viewState
   return `
     xy_chart
+      hideTooltips=${mode === 'preview'}
+      hideAxes=${mode === 'preview'}
       displayType=${viewState.private.xyChart.displayType || 'line'}
       stacked=${viewState.private.xyChart.stacked ? 'true' : 'false'}
   `;
@@ -150,11 +152,13 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayT
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+      displayType: displayType || 'line',
     });
   } else {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
+      displayType: displayType || 'line',
     });
   }
 }
@@ -178,10 +182,11 @@ function buildSuggestion(
   return {
     title,
     visModel,
-    previewExpression: toExpression(visModel),
+    previewExpression: toExpression(visModel, 'preview'),
     score: 0.5,
     iconType: displayTypeIcon.line,
     pluginName: PLUGIN_NAME,
+    category: 'line',
     ...options,
   } as Suggestion;
 }

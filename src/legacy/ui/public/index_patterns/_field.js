@@ -98,6 +98,10 @@ export function Field(indexPattern, spec) {
   // conflict info
   obj.writ('conflictDescriptions');
 
+  // multi info
+  obj.fact('parent');
+  obj.fact('subType');
+
   return obj.create();
 }
 

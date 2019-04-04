@@ -3,37 +3,48 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const type = 'conjunction';
 
-const bothArgumentsText = i18n.translate('xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText', {
-  defaultMessage: 'both arguments',
-  description: 'Part of xpack.kueryAutocomplete.andOperatorDescription. Full text: "Requires both arguments to be true"'
-});
-const oneOrMoreArgumentsText = i18n.translate('xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText', {
-  defaultMessage: 'one or more arguments',
-  description: 'Part of xpack.kueryAutocomplete.orOperatorDescription. Full text: "Requires one or more arguments to be true"'
-});
+const bothArgumentsText =
+  (<FormattedMessage
+    id="xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
+    defaultMessage="both arguments"
+    description="Part of xpack.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
+  />);
+
+const oneOrMoreArgumentsText =
+  (<FormattedMessage
+    id="xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
+    defaultMessage="one or more arguments"
+    description="Part of xpack.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
+  />);
 
 const conjunctions = {
-  and: '<p>' +
-    i18n.translate('xpack.kueryAutocomplete.andOperatorDescription', {
-      defaultMessage: 'Requires {bothArguments} to be true',
-      values: { bothArguments: `<span class="kbnSuggestionItem__callout">${bothArgumentsText}</span>` },
-      description: 'Full text: "Requires both arguments to be true". See ' +
-        'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText for "both arguments" part.'
-    }) +
-    '</p>',
-  or: '<p>' +
-    i18n.translate('xpack.kueryAutocomplete.orOperatorDescription', {
-      defaultMessage: 'Requires {oneOrMoreArguments} to be true',
-      values: { oneOrMoreArguments: `<span class="kbnSuggestionItem__callout">${oneOrMoreArgumentsText}</span>` },
-      description: 'Full text: "Requires one or more arguments to be true". See ' +
-      'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText for "one or more arguments" part.'
-    }) +
-    '</p>'
+  and: (
+    <p>
+      <FormattedMessage
+        id="xpack.kueryAutocomplete.andOperatorDescription"
+        defaultMessage="Requires {bothArguments} to be true"
+        values={{ bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span> }}
+        description="Full text: ' Requires both arguments to be true'. See
+          'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
+      />
+    </p>
+  ),
+  or: (
+    <p>
+      <FormattedMessage
+        id="xpack.kueryAutocomplete.orOperatorDescription"
+        defaultMessage="Requires {oneOrMoreArguments} to be true"
+        values={{ oneOrMoreArguments: <span className="kbnSuggestionItem__callout">{oneOrMoreArgumentsText}</span> }}
+        description="Full text: 'Requires one or more arguments to be true'. See
+          'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
+      />
+    </p>
+  )
 };
 
 function getDescription(conjunction) {

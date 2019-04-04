@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import {
   InfraMetricType,
   InfraNode,
@@ -206,20 +206,20 @@ export const NodesOverview = injectI18n(
   }
 );
 
-const MainContainer = styled.div`
+const MainContainer = euiStyled.div`
   position: relative;
   flex: 1 1 auto;
 `;
 
-const TableContainer = styled.div`
+const TableContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const ViewSwitcherContainer = styled.div`
+const ViewSwitcherContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const MapContainer = styled.div`
+const MapContainer = euiStyled.div`
   position: absolute;
   display: flex;
   top: 0;

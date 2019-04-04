@@ -5,21 +5,21 @@
  */
 
 import {
-  EuiButton,
-  // @ts-ignore
-  EuiCard,
+  EuiFacetButton,
+  EuiFacetGroup,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { Suggestion } from '../../../editor_plugin_registry';
+import { ExpressionRenderer } from '../../../frame/expression_renderer';
 import { VisModel } from '../../lib';
 
 interface VisualizationModalProps {
@@ -27,6 +27,8 @@ interface VisualizationModalProps {
   onClose: () => void;
   onSelect: (newVisModel: VisModel) => void;
   suggestions: Suggestion[];
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: { get: (renderer: string) => any };
 }
 
 export function VisualizationModal({
@@ -34,34 +36,76 @@ export function VisualizationModal({
   title,
   onClose,
   onSelect,
+  getInterpreter,
+  renderersRegistry,
 }: VisualizationModalProps) {
+  const suggestionCategoryMap = suggestions.reduce(
+    (categoryMap, suggestion) => ({
+      ...categoryMap,
+      [suggestion.category]: [...(categoryMap[suggestion.category] || []), suggestion],
+    }),
+    {} as {
+      [category: string]: Suggestion[];
+    }
+  );
+  const [filter, setFilter] = useState<string | null>(null);
+
   return (
     <>
       <EuiOverlayMask>
-        <EuiModal onClose={onClose} initialFocus="[name=popswitch]">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-          </EuiModalHeader>
-
+        <EuiModal onClose={onClose} maxWidth={false} initialFocus="[name=popswitch]">
           <EuiModalBody>
-            <EuiFlexGrid columns={3}>
-              {suggestions.map(suggestion => (
-                <EuiFlexItem key={suggestion.title}>
-                  <EuiCard
-                    key={suggestion.title}
-                    onClick={() => onSelect(suggestion.visModel)}
-                    icon={<EuiIcon size="xl" type={suggestion.iconType} />}
-                    title={suggestion.title}
-                    description=""
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
+            <EuiText>
+              <h1>{title}</h1>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup className="visualizationModal">
+              <EuiFlexItem grow={false}>
+                <EuiFacetGroup style={{ maxWidth: 200 }}>
+                  <EuiFacetButton
+                    onClick={() => {
+                      setFilter(null);
+                    }}
+                    buttonRef={null as any}
+                    quantity={suggestions.length}
+                    isSelected={!filter}
+                  >
+                    All Suggestions
+                  </EuiFacetButton>
+                  {Object.entries(suggestionCategoryMap).map(([category, categorySuggestions]) => (
+                    <EuiFacetButton
+                      key={category}
+                      onClick={() => {
+                        setFilter(category);
+                      }}
+                      buttonRef={null as any}
+                      quantity={categorySuggestions.length}
+                      isSelected={filter === category}
+                    >
+                      {category}
+                    </EuiFacetButton>
+                  ))}
+                </EuiFacetGroup>
+              </EuiFlexItem>
+              <EuiFlexItem className="visualizationModal_suggestions">
+                <EuiFlexGrid columns={3}>
+                  {(filter ? suggestionCategoryMap[filter] : suggestions).map(suggestion => (
+                    <EuiFlexItem key={suggestion.title}>
+                      <EuiPanel onClick={() => onSelect(suggestion.visModel)} paddingSize="s">
+                        {suggestion.title}
+                        <ExpressionRenderer
+                          getInterpreter={getInterpreter}
+                          renderersRegistry={renderersRegistry}
+                          expression={suggestion.previewExpression}
+                          size="preview"
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGrid>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButton onClick={onClose}>Cancel</EuiButton>
-          </EuiModalFooter>
         </EuiModal>
       </EuiOverlayMask>
     </>

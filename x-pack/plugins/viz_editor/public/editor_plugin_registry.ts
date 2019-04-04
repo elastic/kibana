@@ -20,6 +20,7 @@ export interface Suggestion<S extends VisModel = VisModel> {
   visModel: S;
   title: string;
   iconType: IconType;
+  category: string;
 }
 
 export type GetSuggestionsType<S extends VisModel> = (

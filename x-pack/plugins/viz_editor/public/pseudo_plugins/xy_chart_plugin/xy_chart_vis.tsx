@@ -18,6 +18,7 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  TooltipType,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 // @ts-ignore
@@ -53,6 +54,14 @@ function sampleVisFunction() {
       stacked: {
         types: ['boolean'],
       },
+      hideAxes: {
+        types: ['boolean'],
+        default: false,
+      },
+      hideTooltips: {
+        types: ['boolean'],
+        default: false,
+      },
     },
     context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
@@ -82,6 +91,8 @@ function sampleVisFunction() {
           title: 'A title',
           seriesType: args.displayType,
           stacked: args.stacked,
+          showAxes: !args.hideAxes,
+          hideTooltips: args.hideTooltips,
 
           xAxisName: xColumn.name,
           yAxisName: yColumn.name,
@@ -110,6 +121,8 @@ interface XyChartConfig {
   splitSeriesAccessors: string[];
 
   data: Array<Array<string | number>>;
+  showAxes: boolean;
+  hideTooltips: boolean;
 }
 
 function getFormatterFunction(type: ScaleType) {
@@ -124,23 +137,28 @@ function XyChart(props: { config: XyChartConfig }) {
 
   return (
     <Chart renderer="canvas">
-      {config.splitSeriesAccessors.length > 0 && (
-        <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings
+        showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
+        legendPosition={Position.Right}
+        tooltipType={config.hideTooltips ? TooltipType.None : TooltipType.VerticalCursor}
+      />
+      {config.showAxes && (
+        <>
+          <Axis
+            id={getAxisId('bottom')}
+            title={config.xAxisName}
+            position={Position.Bottom}
+            showOverlappingTicks={true}
+            tickFormat={getFormatterFunction(config.xAxisType)}
+          />
+          <Axis
+            id={getAxisId('left')}
+            title={config.yAxisName}
+            position={Position.Left}
+            tickFormat={d => String(Math.floor(Number(d)))}
+          />
+        </>
       )}
-      <Axis
-        id={getAxisId('bottom')}
-        title={config.xAxisName}
-        position={Position.Bottom}
-        showOverlappingTicks={true}
-        tickFormat={getFormatterFunction(config.xAxisType)}
-      />
-      <Axis
-        id={getAxisId('left')}
-        title={config.yAxisName}
-        position={Position.Left}
-        tickFormat={d => String(Math.floor(Number(d)))}
-      />
-
       {config.seriesType === 'line' && (
         <LineSeries
           id={getSpecId(config.yAxisName)}
@@ -190,8 +208,6 @@ function sampleVisRenderer() {
     displayName: 'XY Chart',
     reuseDomNode: true,
     render: async (domNode: HTMLDivElement, config: any, handlers: any) => {
-      domNode.style.position = 'relative';
-      domNode.style.height = '500px';
       ReactDOM.render(<XyChart config={config} />, domNode);
     },
   };

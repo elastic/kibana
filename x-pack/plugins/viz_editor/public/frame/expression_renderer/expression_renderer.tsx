@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
+import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
 import { DataAdapter, RequestAdapter } from 'ui/inspector/adapters';
 
@@ -43,12 +44,20 @@ async function runAndRender(
   }
 }
 
-export function ExpressionRenderer(props: any) {
+export interface ExpressionRendererProps {
+  expression: string;
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: { get: (renderer: string) => any };
+  size?: 'full' | 'preview';
+}
+
+export function ExpressionRenderer(props: ExpressionRendererProps) {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
   useEffect(
     () => {
       if (mountpoint.current) {
+        mountpoint.current.style.position = 'relative';
         runAndRender(
           props.expression,
           mountpoint.current,
@@ -62,7 +71,10 @@ export function ExpressionRenderer(props: any) {
 
   return (
     <div
-      className="expressionRenderer"
+      className={classNames({
+        'expressionRenderer-full': !props.size || props.size === 'full',
+        'expressionRenderer-preview': props.size === 'preview',
+      })}
       ref={el => {
         mountpoint.current = el;
       }}
