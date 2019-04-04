@@ -153,7 +153,10 @@ const start = async function () {
         text: `\`\`\`\n${logs}\n\`\`\``,
         annotations,
       },
-      images
+      images: [{
+        alt: 'screenshot',
+        image_url: 'https://www.google.com/logos/doodles/2019/hugh-masekelas-80th-birthday-5429979563687936-l.png',
+      }],
     }).then((response) => {
       console.log('RESPONSE: ', response);
       logRateLimit(response);
