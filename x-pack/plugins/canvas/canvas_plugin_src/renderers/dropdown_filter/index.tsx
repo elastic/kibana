@@ -47,7 +47,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
               type: 'function',
               function: 'exactly',
               arguments: {
-                value: [value],
+                value: [commitValue],
                 column: [column],
               },
             },
