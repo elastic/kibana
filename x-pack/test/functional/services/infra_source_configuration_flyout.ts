@@ -9,7 +9,6 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 export function InfraSourceConfigurationFlyoutProvider({
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
