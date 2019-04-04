@@ -17,7 +17,13 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { ChromeBrand, ChromeBreadcrumb, ChromeService, ChromeSetup } from './chrome_service';
+import {
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeService,
+  ChromeSetup,
+} from './chrome_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ChromeSetup> = {
@@ -30,6 +36,8 @@ const createSetupContractMock = () => {
     addApplicationClass: jest.fn(),
     removeApplicationClass: jest.fn(),
     getApplicationClasses$: jest.fn(),
+    getBadge$: jest.fn(),
+    setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
     getHelpExtension$: jest.fn(),
@@ -39,6 +47,7 @@ const createSetupContractMock = () => {
   setupContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
   setupContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
   setupContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
+  setupContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   setupContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
   setupContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   return setupContract;
