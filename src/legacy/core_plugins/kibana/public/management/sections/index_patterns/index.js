@@ -86,6 +86,20 @@ uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
     resolve: indexPatternsResolutions,
     requireUICapability: 'management.kibana.index_patterns',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.indexPatterns.save) {
+        return null;
+      }
+
+      return {
+        text: i18n('kbn.management.indexPatterns.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n('kbn.management.indexPatterns.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      };
+    }
   });
 
 uiRoutes
