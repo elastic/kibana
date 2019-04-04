@@ -1,7 +1,11 @@
-.expressionRenderer-full, .expressionRenderer-full > .visualization {
-    min-height: 500px;
+.expressionRenderer-full {
+    &, & > .visualization, & > .elasticCharts {
+        min-height: 500px;
+    }
 }
 
-.expressionRenderer-preview, .expressionRenderer-preview > .visualization {
-    min-height: 200px;
+.expressionRenderer-preview {
+    &, & > .visualization, & > .elasticCharts {
+        min-height: 200px;
+    }
 }

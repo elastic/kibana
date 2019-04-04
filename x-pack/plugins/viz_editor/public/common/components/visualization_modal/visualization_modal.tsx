@@ -74,6 +74,7 @@ export function VisualizationModal({
                   </EuiFacetButton>
                   {Object.entries(suggestionCategoryMap).map(([category, categorySuggestions]) => (
                     <EuiFacetButton
+                      key={category}
                       onClick={() => {
                         setFilter(category);
                       }}

@@ -149,6 +149,8 @@ export function Main(props: MainProps) {
     )
     .map(addDataFetchingToSuggestion);
 
+  const hasData = Object.keys(state.visModel.queries).length > 0;
+
   return (
     <EuiPage>
       {!state.metadata.expressionMode && (
@@ -184,13 +186,14 @@ export function Main(props: MainProps) {
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
-                {WorkspacePanel ? (
-                  <WorkspacePanel {...panelProps}>
+                {hasData &&
+                  (WorkspacePanel ? (
+                    <WorkspacePanel {...panelProps}>
+                      <ExpressionRenderer {...props} expression={expression} />
+                    </WorkspacePanel>
+                  ) : (
                     <ExpressionRenderer {...props} expression={expression} />
-                  </WorkspacePanel>
-                ) : (
-                  <ExpressionRenderer {...props} expression={expression} />
-                )}
+                  ))}
               </EuiFlexItem>
               {state.metadata.expressionMode ? (
                 <EuiFlexItem>
@@ -233,7 +236,7 @@ export function Main(props: MainProps) {
         <EuiPageSideBar>
           <ConfigPanel {...panelProps} />
 
-          {Object.keys(state.visModel.queries).length > 0 && (
+          {hasData && (
             <>
               <h4>Suggestions</h4>
               {suggestions.map((suggestion, i) => (

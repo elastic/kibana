@@ -18,6 +18,7 @@ import {
   Settings,
   TooltipType,
 } from '@elastic/charts';
+import '@elastic/charts/dist/style.css';
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
