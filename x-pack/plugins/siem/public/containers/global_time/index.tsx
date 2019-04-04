@@ -9,13 +9,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import {
-  globalPolicySelector,
-  globalTimeRangeSelector,
-  inputsActions,
-  inputsModel,
-  State,
-} from '../../store';
+import { inputsActions, inputsModel, inputsSelectors, State } from '../../store';
 
 interface GlobalTimeArgs {
   poll: number;
@@ -52,8 +46,8 @@ const GlobalTimeComponent = pure<GlobalTimeProps>(({ children, poll, from, to, s
 ));
 
 const mapStateToProps = (state: State) => {
-  const timerange: inputsModel.TimeRange = globalTimeRangeSelector(state);
-  const policy: inputsModel.Policy = globalPolicySelector(state);
+  const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
+  const policy: inputsModel.Policy = inputsSelectors.globalPolicySelector(state);
   return {
     poll: policy.kind === 'interval' && timerange.kind === 'absolute' ? policy.duration : 0,
     from: timerange.from,

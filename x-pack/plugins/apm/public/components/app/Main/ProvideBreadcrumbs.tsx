@@ -12,7 +12,7 @@ import {
   RouteProps,
   withRouter
 } from 'react-router-dom';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../typings/common';
 
 type LocationMatch = Pick<
   RouteComponentProps<StringMap<string>>,

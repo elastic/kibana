@@ -8,7 +8,7 @@ import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';

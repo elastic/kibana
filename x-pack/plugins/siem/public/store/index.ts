@@ -5,10 +5,10 @@
  */
 
 export * from './actions';
-export * from './reducer';
-export * from './selectors';
 export * from './epic';
 export * from './model';
+export * from './reducer';
+export * from './selectors';
 
 import { createStore } from './store';
 

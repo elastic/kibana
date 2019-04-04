@@ -11,9 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 
-import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
-import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
-import { State } from '../../store/reducer';
+import { dragAndDropModel, dragAndDropSelectors, State } from '../../store';
 
 import {
   addProviderToTimeline,
@@ -22,13 +20,13 @@ import {
 } from './helpers';
 
 interface Props {
-  dataProviders?: IdToDataProvider;
+  dataProviders?: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
 
 interface OnDragEndHandlerParams {
   result: DropResult;
-  dataProviders: IdToDataProvider;
+  dataProviders: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
 
@@ -56,10 +54,13 @@ const DragDropContextWrapperComponent = pure<Props>(({ dataProviders, dispatch, 
   </DragDropContext>
 ));
 
-const emptyDataProviders: IdToDataProvider = {}; // stable reference
+const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
 const mapStateToProps = (state: State) => {
-  const dataProviders = defaultTo(emptyDataProviders, dataProvidersSelector(state));
+  const dataProviders = defaultTo(
+    emptyDataProviders,
+    dragAndDropSelectors.dataProvidersSelector(state)
+  );
 
   return { dataProviders };
 };

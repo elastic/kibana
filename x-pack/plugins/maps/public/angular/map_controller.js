@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +51,7 @@ const app = uiModules.get('app/maps', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {
 
-  const savedMap = $scope.map = $route.current.locals.map;
+  const savedMap = $route.current.locals.map;
   let unsubscribe;
 
   const store = createMapStore();
@@ -202,13 +203,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  // TODO subscribe to store change and change when store updates title
-  chrome.breadcrumbs.set([
-    { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-      defaultMessage: 'Maps'
-    }), href: '#' },
-    { text: $scope.map.title }
-  ]);
+  const updateBreadcrumbs = () => {
+    chrome.breadcrumbs.set([
+      {
+        text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+          defaultMessage: 'Maps'
+        }),
+        href: '#'
+      },
+      { text: savedMap.title }
+    ]);
+  };
+  updateBreadcrumbs();
 
   addHelpMenuToAppChrome(chrome);
 
@@ -241,6 +247,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         }),
         'data-test-subj': 'saveMapSuccess',
       });
+
+      updateBreadcrumbs();
 
       if (savedMap.id !== $route.current.params.id) {
         $scope.$evalAsync(() => {

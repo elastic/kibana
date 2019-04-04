@@ -59,7 +59,7 @@ describe('Flyout', () => {
     });
 
     test('it renders the title field when its state is set to flyout is true', () => {
-      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
@@ -82,7 +82,7 @@ describe('Flyout', () => {
     });
 
     test('it does NOT render the fly out button when its state is set to flyout is true', () => {
-      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
@@ -100,7 +100,7 @@ describe('Flyout', () => {
     });
 
     test('it renders the flyout body', () => {
-      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
@@ -126,7 +126,7 @@ describe('Flyout', () => {
 
     test('it does render the data providers badge when the number is greater than 0', () => {
       const stateWithDataProviders = set(
-        'local.timeline.timelineById.test.dataProviders',
+        'timeline.timelineById.test.dataProviders',
         mockDataProviders,
         state
       );
@@ -148,7 +148,7 @@ describe('Flyout', () => {
 
     test('it renders the correct number of data providers badge when the number is greater than 0', () => {
       const stateWithDataProviders = set(
-        'local.timeline.timelineById.test.dataProviders',
+        'timeline.timelineById.test.dataProviders',
         mockDataProviders,
         state
       );
@@ -213,7 +213,7 @@ describe('Flyout', () => {
     });
 
     test('should call the onClose when the close button is clicked', () => {
-      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;

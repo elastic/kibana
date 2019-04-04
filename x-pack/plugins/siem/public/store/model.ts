@@ -4,4 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './local';
+export { appModel } from './app';
+export { inputsModel } from './inputs';
+export { hostsModel } from './hosts';
+export { dragAndDropModel } from './drag_and_drop';
+export { networkModel } from './network';
+export { timelineModel } from './timeline';
+
+export interface KueryFilterQuery {
+  kind: 'kuery';
+  expression: string;
+}
+
+export interface SerializedFilterQuery {
+  query: KueryFilterQuery;
+  serializedQuery: string;
+}

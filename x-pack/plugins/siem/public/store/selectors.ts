@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  appSelectors,
-  dataProvidersSelector,
-  globalTimeRangeSelector,
-  globalPolicySelector,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-} from './local';
+export { appSelectors } from './app';
+export { dragAndDropSelectors } from './drag_and_drop';
+export { hostsSelectors } from './hosts';
+export { inputsSelectors } from './inputs';
+export { networkSelectors } from './network';
+export { timelineSelectors } from './timeline';

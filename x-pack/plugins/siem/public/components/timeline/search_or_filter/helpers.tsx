@@ -13,7 +13,7 @@ import {
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { KqlMode } from '../../../store/local/timeline/model';
+import { timelineModel } from '../../../store';
 import { AndOrBadge } from '../../and_or_badge';
 
 import * as i18n from './translations';
@@ -24,14 +24,14 @@ const AndOrContainer = styled.div`
 `;
 
 interface ModeProperties {
-  mode: KqlMode;
+  mode: timelineModel.KqlMode;
   description: string;
   kqlBarTooltip: string;
   placeholder: string;
   selectText: string;
 }
 
-export const modes: { [key in KqlMode]: ModeProperties } = {
+export const modes: { [key in timelineModel.KqlMode]: ModeProperties } = {
   filter: {
     mode: 'filter',
     description: i18n.FILTER_DESCRIPTION,
@@ -89,5 +89,5 @@ export const options = [
   },
 ];
 
-export const getPlaceholderText = (kqlMode: KqlMode): string =>
+export const getPlaceholderText = (kqlMode: timelineModel.KqlMode): string =>
   kqlMode === 'filter' ? i18n.FILTER_KQL_PLACEHOLDER : i18n.SEARCH_KQL_PLACEHOLDER;

@@ -389,22 +389,20 @@ export class WebElementWrapper {
   }
 
   /**
-   * Waits for all elements inside this element matching the given CSS class name to be destroyed.
+   * Waits for all elements inside this element matching the given CSS selector to be destroyed.
    *
    * @param {string} className
    * @return {Promise<void>}
    */
-  async waitForDeletedByClassName(className) {
-    await this._driver.wait(() => {
-      return this._webElement.findElements(this._By.className(className)).then((children) => {
-        if (children.length <= 0) {
-          return true;
-        }
-        return false;
-      });
+  async waitForDeletedByCssSelector(selector) {
+    await this._driver.manage().setTimeouts({ implicit: 1000 });
+    await this._driver.wait(async () => {
+      const found = await this._webElement.findElements(this._By.css(selector));
+      return found.length === 0;
     },
     this._defaultFindTimeout,
-    `The element with ${className} className was still present when it should have disappeared.`);
+    `The element with ${selector} selector was still present after ${this._defaultFindTimeout} sec.`);
+    await this._driver.manage().setTimeouts({ implicit: this._defaultFindTimeout });
   }
 
   /**

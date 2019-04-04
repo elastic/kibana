@@ -10,8 +10,7 @@ import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../graphql/types';
-import { TestProviders } from '../../../../mock';
-import { mockTimelineData } from '../../../../mock';
+import { mockTimelineData, TestProviders } from '../../../../mock';
 
 import {
   constructDroppedValue,

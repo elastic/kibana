@@ -21,7 +21,8 @@ import {
   whoisRenderer,
 } from './field_renderers';
 import { mockData } from './mock';
-import AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
+
+type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
 
 describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
