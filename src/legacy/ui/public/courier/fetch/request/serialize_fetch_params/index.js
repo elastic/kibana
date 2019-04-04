@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SerializeFetchParamsProvider } from './serialize_fetch_params_provider';
+export { serializeFetchParams } from './serialize_fetch_params';

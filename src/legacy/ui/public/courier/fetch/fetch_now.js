@@ -28,11 +28,10 @@ import { callResponseHandlers } from './call_response_handlers';
  * sending out requests in a batch.
  *
  * @param Private
- * @param Promise
  * @return {fetchNow}
  * @constructor
  */
-export function FetchNowProvider(Private, Promise) {
+export function FetchNowProvider(Private) {
   // core tasks
   const callClient = Private(CallClientProvider);
 

@@ -32,7 +32,7 @@ function getAllFetchParams(searchRequests, Promise) {
   });
 }
 
-async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
+async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams, fetchParamsOptions) {
   const searchRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
@@ -49,7 +49,7 @@ async function serializeAllFetchParams(fetchParams, searchRequests, serializeFet
   });
 
   return {
-    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
+    serializedFetchParams: serializeFetchParams(searchRequestsWithFetchParams, fetchParamsOptions),
     failedSearchRequests,
   };
 }
@@ -57,16 +57,28 @@ async function serializeAllFetchParams(fetchParams, searchRequests, serializeFet
 export const defaultSearchStrategy = {
   id: 'default',
 
-  search: async ({ searchRequests, es, Promise, serializeFetchParams, includeFrozen = false, maxConcurrentShardRequests = 0 }) => {
+  search: async ({
+    searchRequests,
+    es,
+    Promise,
+    serializeFetchParams,
+    includeFrozen = false,
+    maxConcurrentShardRequests = 0,
+    sessionId,
+    esShardTimeout,
+    setRequestPreference,
+    customRequestPreference
+  }) => {
     // Flatten the searchSource within each searchRequest to get the fetch params,
     // e.g. body, filters, index pattern, query.
     const allFetchParams = await getAllFetchParams(searchRequests, Promise);
 
     // Serialize the fetch params into a format suitable for the body of an ES query.
+    const fetchParamsOptions = { sessionId, esShardTimeout, setRequestPreference, customRequestPreference };
     const {
       serializedFetchParams,
       failedSearchRequests,
-    } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
+    } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams, fetchParamsOptions);
 
     if (serializedFetchParams.trim() === '') {
       return {

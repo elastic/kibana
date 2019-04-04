@@ -18,8 +18,8 @@
  */
 
 /**
- *
  * @param requestsFetchParams {Array.<Object>}
+<<<<<<< HEAD
  * @param Promise
  * @param sessionId
  * @return {Promise.<string>}
@@ -53,13 +53,34 @@ export function serializeFetchParams(
         } else if (config.get('courier:setRequestPreference') === 'custom') {
           header.preference = config.get('courier:customRequestPreference');
         }
+=======
+ * @param options
+ */
+export function serializeFetchParams(requestsFetchParams, options) {
+  const { sessionId, esShardTimeout, setRequestPreference, customRequestPreference } = options;
+  const requests = requestsFetchParams.map(fetchParams => {
+    const body = {
+      ...fetchParams.body || {},
+    };
+    if (esShardTimeout > 0) {
+      body.timeout = `${esShardTimeout}ms`;
+    }
+>>>>>>> Simplify & remove angular from serialize fetch params
 
-        return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
-      });
-  });
+    const header = {
+      index: fetchParams.index.title,
+      type: fetchParams.type,
+      search_type: fetchParams.search_type,
+      ignore_unavailable: true,
+    };
+    if (setRequestPreference === 'sessionId') {
+      header.preference = sessionId;
+    } else if (setRequestPreference === 'custom') {
+      header.preference = customRequestPreference;
+    }
 
-  return Promise.all(promises).then(function (requests) {
-    return requests.join('\n') + '\n';
+    return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
   });
+  return requests.join('\n') + '\n';
 }
 

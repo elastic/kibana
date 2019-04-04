@@ -39,13 +39,6 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
 
       addFatalErrorCallback(closeOnFatal);
     }
-
-    /**
-     * Fetch the pending requests.
-     */
-    fetch() {
-      fetchSoon.fetchQueued();
-    }
   }
 
   return new Courier();

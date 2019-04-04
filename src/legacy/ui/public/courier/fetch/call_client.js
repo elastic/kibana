@@ -20,11 +20,10 @@
 import { uniq } from 'lodash';
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
 import { getSearchStrategyForSearchRequest } from '../search_strategy';
-import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
+import { serializeFetchParams } from './request/serialize_fetch_params';
 
-export function CallClientProvider(Private, Promise, es, config) {
+export function CallClientProvider(Private, Promise, es, config, sessionId, esShardTimeout) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
-  const serializeFetchParams = Private(SerializeFetchParamsProvider);
 
   return async function callClient(searchRequests) {
     if (searchRequests.length === 0) {
@@ -33,6 +32,8 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
     const includeFrozen = config.get('search:includeFrozen');
+    const setRequestPreference = config.get('courier:setRequestPreference');
+    const customRequestPreference = config.get('courier:customRequestPreference');
 
     try {
       // Look up the search strategy per request
@@ -50,7 +51,11 @@ export function CallClientProvider(Private, Promise, es, config) {
           Promise,
           serializeFetchParams,
           includeFrozen,
-          maxConcurrentShardRequests
+          maxConcurrentShardRequests,
+          sessionId,
+          esShardTimeout,
+          setRequestPreference,
+          customRequestPreference
         });
 
         // The list of responses for this strategy
