@@ -116,7 +116,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config'],
         },
-        ui: ['show'],
+        ui: ['show', 'save'],
       },
       read: {
         api: ['console'],
