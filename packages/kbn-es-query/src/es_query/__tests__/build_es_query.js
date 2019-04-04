@@ -74,6 +74,40 @@ describe('build query', function () {
 
       expect(result).to.eql(expectedResult);
     });
+    it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
+      const queries = [
+        { query: 'extension:jpg', language: 'kuery' },
+        { query: 'bar:baz', language: 'lucene' },
+      ];
+      const filters = [
+        {
+          match_all: {},
+          meta: { type: 'match_all' },
+        },
+      ];
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+      };
+
+      const expectedResult = {
+        bool: {
+          must: [
+            decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions),
+            { match_all: {} },
+          ],
+          filter: [
+            toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
+          ],
+          should: [],
+          must_not: [],
+        }
+      };
+
+      const result = buildEsQuery(indexPattern, queries, filters, config);
+
+      expect(result).to.eql(expectedResult);
+    });
 
     it('should accept queries and filters as either single objects or arrays', function () {
       const queries = { query: 'extension:jpg', language: 'lucene' };
@@ -93,6 +127,25 @@ describe('build query', function () {
             { match_all: {} },
           ],
           filter: [],
+          should: [],
+          must_not: [],
+        }
+      };
+
+      const result = buildEsQuery(indexPattern, queries, filters, config);
+
+      expect(result).to.eql(expectedResult);
+    });
+
+    it('should use the default time zone set in the Advanced Settings in queries and filters', function () {
+      const queries = [{ query: 'extension:jpg', language: 'kuery' }, { query: 'bar:baz', language: 'lucene' }];
+      const filters = [{ match_all: {}, meta: { type: 'match_all' } }];
+      const config = { allowLeadingWildcards: true, queryStringOptions: {}, dateFormatTZ: 'Africa/Johannesburg' };
+
+      const expectedResult = {
+        bool: {
+          must: [decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions, config.dateFormatTZ), { match_all: {} }],
+          filter: [toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern, config.dateFormatTZ)],
           should: [],
           must_not: [],
         }

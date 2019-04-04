@@ -57,6 +57,16 @@ describe('kuery functions', function () {
         );
       });
 
+      it('should pass the config to subqueries in an ES bool query\'s filter clause', function () {
+        const config = {
+          dateFormatTZ: 'America/Phoenix'
+        };
+        const node = nodeTypes.function.buildNode('and', [childNode1, childNode2]);
+        const result = and.toElasticsearchQuery(node, indexPattern, config);
+        expect(result.bool.filter).to.eql(
+          [childNode1, childNode2].map((childNode) => ast.toElasticsearchQuery(childNode, indexPattern, config))
+        );
+      });
     });
 
   });

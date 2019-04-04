@@ -222,6 +222,7 @@ describe('kuery functions', function () {
       });
 
       it('should support date fields with a dateFormat provided', function () {
+        const config = { dateFormatTZ: 'America/Phoenix' };
         const expected = {
           bool: {
             should: [
@@ -240,9 +241,7 @@ describe('kuery functions', function () {
         };
 
         const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
-        const result = is.toElasticsearchQuery(node, indexPattern, {
-          dateFormatTZ: 'America/Phoenix',
-        });
+        const result = is.toElasticsearchQuery(node, indexPattern, config);
         expect(result).to.eql(expected);
       });
 

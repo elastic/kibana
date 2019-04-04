@@ -56,6 +56,13 @@ describe('kuery functions', function () {
         expect(result.bool).to.only.have.keys('must_not');
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
+
+      it('should accept a config parameter in a subquery in an ES bool query\'s must_not clause', function () {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const node = nodeTypes.function.buildNode('not', childNode);
+        const result = not.toElasticsearchQuery(node, indexPattern, config);
+        expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern, config));
+      });
     });
   });
 });

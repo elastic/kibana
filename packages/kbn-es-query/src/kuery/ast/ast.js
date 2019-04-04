@@ -46,16 +46,17 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
 
   parseOptions = {
     ...parseOptions,
-    helpers: { nodeTypes },
+    helpers: { nodeTypes }
   };
 
   return parse(expression, parseOptions);
 }
 /**
- * @params {String} indexPattern - IndexPattern isn't required, but if you pass one in, we can be more intelligent
- * about how we craft the queries (e.g. scripted fields)
+ * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ
  *
+ * IndexPattern isn't required, but if you pass one in, we can be more intelligent
+ * about how we craft the queries (e.g. scripted fields)
  */
 export function toElasticsearchQuery(node, indexPattern, config = {}) {
   if (!node || !node.type || !nodeTypes[node.type]) {

@@ -66,11 +66,18 @@ describe('kuery node types', function () {
 
     describe('toElasticsearchQuery', function () {
 
-      // eslint-disable-next-line mocha/no-exclusive-tests
       it('should return the given function type\'s ES query representation', function () {
         const node = functionType.buildNode('is', 'extension', 'jpg');
         const expected = isFunction.toElasticsearchQuery(node, indexPattern);
         const result = functionType.toElasticsearchQuery(node, indexPattern);
+        expect(_.isEqual(expected, result)).to.be(true);
+      });
+
+      it('should accept and pass on an optional config paramter to the returned function type\'s ES query representation', function () {
+        const config = { dateFormatTZ: 'America/New York' };
+        const node = functionType.buildNode('is', '@timestamp', '"2018-01-20T13:55:00"');
+        const expected = isFunction.toElasticsearchQuery(node, indexPattern, config);
+        const result = functionType.toElasticsearchQuery(node, indexPattern, config);
         expect(_.isEqual(expected, result)).to.be(true);
       });
 

@@ -28,7 +28,7 @@ const config = {
     allowLeadingWildcards: true,
   },
   'query:queryString:options': {
-    queryStringOptions: '',
+    queryStringOptions: {},
   },
   'courier:ignoreFilterIfFieldNotInIndex': {
     ignoreFilterIfFieldNotInIndex: true,
@@ -52,7 +52,7 @@ describe('getEsQueryConfig', function () {
         ignoreFilterIfFieldNotInIndex: true,
       },
       queryStringOptions: {
-        queryStringOptions: '',
+        queryStringOptions: {},
       },
     };
     expect(result).to.eql(expected);

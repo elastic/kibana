@@ -418,9 +418,10 @@ describe('kuery AST API', function () {
     });
 
     it('should return the given node type\'s ES query representation including a time zone parameter when one is provided', function () {
+      const config = { dateFormatTZ: 'America/Phoenix' };
       const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
-      const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, { dateFormatTZ: 'America/Phoenix' });
-      const result = ast.toElasticsearchQuery(node, indexPattern, { dateFormatTZ: 'America/Phoenix' });
+      const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
+      const result = ast.toElasticsearchQuery(node, indexPattern, config);
       expect(result).to.eql(expected);
     });
 

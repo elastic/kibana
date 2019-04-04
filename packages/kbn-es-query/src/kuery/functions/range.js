@@ -36,7 +36,7 @@ export function buildNodeParams(fieldName, params) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { dateFormatTZ: null }) {
+export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
@@ -62,12 +62,11 @@ export function toElasticsearchQuery(node, indexPattern, { dateFormatTZ } = { da
       };
     }
     else if (field.type === 'date') {
-      const timeZoneParam = dateFormatTZ ? { time_zone: getTimeZoneFromSettings(dateFormatTZ) } : {};
+      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
       return {
         range: {
           [field.name]: {
-            gte: queryParams,
-            lte: queryParams,
+            ...queryParams,
             ...timeZoneParam,
           }
         }

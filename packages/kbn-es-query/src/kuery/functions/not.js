@@ -25,7 +25,7 @@ export function buildNodeParams(child) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config) {
+export function toElasticsearchQuery(node, indexPattern, config = null) {
   const [ argument ] = node.arguments;
 
   return {

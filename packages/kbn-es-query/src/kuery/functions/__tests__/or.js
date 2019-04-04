@@ -50,7 +50,6 @@ describe('kuery functions', function () {
 
     describe('toElasticsearchQuery', function () {
 
-      // eslint-disable-next-line mocha/no-exclusive-tests
       it('should wrap subqueries in an ES bool query\'s should clause', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
@@ -61,11 +60,19 @@ describe('kuery functions', function () {
         );
       });
 
-      // eslint-disable-next-line mocha/no-exclusive-tests
       it('should require one of the clauses to match', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
         expect(result.bool).to.have.property('minimum_should_match', 1);
+      });
+
+      it('should pass the config to subqueries in an ES bool query\'s filter clause', function () {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const result = or.toElasticsearchQuery(node, indexPattern, config);
+        expect(result.bool.should).to.eql(
+          [childNode1, childNode2].map(childNode => ast.toElasticsearchQuery(childNode, indexPattern, config))
+        );
       });
 
     });
