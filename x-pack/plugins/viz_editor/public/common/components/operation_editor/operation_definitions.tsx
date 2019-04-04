@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldNumber, EuiForm, EuiFormLabel, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFieldNumber, EuiForm, EuiFormRow, EuiIcon, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import {
   AvgOperation,
+  CardinalityOperation,
+  ColumnOperation,
   CountOperation,
   DatasourceField,
+  DateHistogramOperation,
   FieldOperation,
   SelectOperation,
   SumOperation,
+  TermsOperation,
   WindowFunction,
   WindowOperation,
 } from '../../../../common';
@@ -37,7 +41,7 @@ export interface OperationDefinition {
 
   // Provide a textual summary of the operation, maybe should return
   // a React component instead of a string?
-  summarize?: (operation: SelectOperation) => string;
+  summarize?: (operation: any) => React.ReactNode;
 
   // Convert the specified current operation into a different operation
   // e.g. from count to sum, etc.
@@ -156,6 +160,29 @@ function windowOperationEditor({ column, visModel, onColumnChange }: OperationEd
 
 export const operations: OperationDefinition[] = [
   {
+    name: 'Values',
+    type: 'column',
+    applicableFields: fields => fields,
+    toSelectClause(
+      currentOperation: SelectOperation | undefined,
+      fields: DatasourceField[]
+    ): ColumnOperation {
+      return {
+        operation: 'column',
+        argument: { field: getFieldName(currentOperation, fields) },
+      };
+    },
+    summarize(op: ColumnOperation) {
+      return (
+        <span>
+          <EuiIcon type="string" className="configPanel-summary-icon" />
+          {`Values of ${op.argument.field}`}
+        </span>
+      );
+    },
+  },
+
+  {
     name: 'Count',
     type: 'count',
     applicableFields: () => [],
@@ -163,6 +190,14 @@ export const operations: OperationDefinition[] = [
       return {
         operation: 'count',
       };
+    },
+    summarize(op: CountOperation) {
+      return (
+        <span>
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          {` Count`}
+        </span>
+      );
     },
   },
 
@@ -182,6 +217,100 @@ export const operations: OperationDefinition[] = [
         },
       };
     },
+    summarize(op: AvgOperation) {
+      return (
+        <span>
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          {` Average of ${op.argument.field}`}
+        </span>
+      );
+    },
+  },
+
+  {
+    name: 'Date histogram',
+    type: 'date_histogram',
+    applicableFields: dateAggFields,
+    editor: fieldOperationEditor,
+    toSelectClause(
+      currentOperation: SelectOperation | undefined,
+      fields: DatasourceField[]
+    ): DateHistogramOperation {
+      return {
+        operation: 'date_histogram',
+        argument: {
+          interval: 'auto',
+          field: getFieldName(currentOperation, dateAggFields(fields)),
+        },
+      };
+    },
+    summarize(op: DateHistogramOperation) {
+      return (
+        <span>
+          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          {` Date histogram of ${op.argument.field}`}
+        </span>
+      );
+    },
+  },
+
+  {
+    name: 'Unique count',
+    type: 'cardinality',
+    applicableFields: aggregatableFields,
+    editor: fieldOperationEditor,
+    toSelectClause(
+      currentOperation: SelectOperation | undefined,
+      fields: DatasourceField[]
+    ): CardinalityOperation {
+      return {
+        operation: 'cardinality',
+        argument: {
+          field: getFieldName(currentOperation, aggregatableFields(fields)),
+        },
+      };
+    },
+    summarize(op: CardinalityOperation) {
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="string" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Unique Values of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
+    },
+  },
+
+  {
+    name: 'Top values',
+    type: 'terms',
+    applicableFields: aggregatableFields,
+    editor: fieldOperationEditor,
+    toSelectClause(
+      currentOperation: SelectOperation | undefined,
+      fields: DatasourceField[]
+    ): TermsOperation {
+      return {
+        operation: 'terms',
+        argument: {
+          field: getFieldName(currentOperation, aggregatableFields(fields)),
+          size: 5,
+        },
+      };
+    },
+    summarize(op: CardinalityOperation) {
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="string" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Top Values of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
+    },
   },
 
   {
@@ -199,6 +328,14 @@ export const operations: OperationDefinition[] = [
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
       };
+    },
+    summarize(op: SumOperation) {
+      return (
+        <span>
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          {` Sum of ${op.argument.field}`}
+        </span>
+      );
     },
   },
 
@@ -227,8 +364,16 @@ export const operations: OperationDefinition[] = [
   },
 ];
 
+export function aggregatableFields(fields: DatasourceField[]) {
+  return fields.filter(f => f.aggregatable === true);
+}
+
 export function numericAggFields(fields: DatasourceField[]) {
   return fields.filter(f => f.type === 'number' && f.aggregatable === true);
+}
+
+export function dateAggFields(fields: DatasourceField[]) {
+  return fields.filter(f => f.type === 'date' && f.aggregatable === true);
 }
 
 export function getFieldName(
