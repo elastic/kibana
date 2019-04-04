@@ -27,8 +27,14 @@ import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notificati
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
+/** @interal */
 export { CoreContext, CoreSystem } from './core_system';
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
 export interface CoreSetup {
   i18n: I18nSetup;
   injectedMetadata: InjectedMetadataSetup;
