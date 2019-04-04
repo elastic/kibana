@@ -118,7 +118,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     // Validates the entered text, returing an array of error messages
     // for display in the form. An empty array is returned if the text is valid.
     const { annotation, intl } = this.props;
-    const errors = [];
+    const errors: string[] = [];
     if (annotation === null) {
       return errors;
     }
