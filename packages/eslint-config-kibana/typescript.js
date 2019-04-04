@@ -175,9 +175,9 @@ module.exports = {
           'jsx-a11y/scope': 'error',
           'jsx-a11y/tabindex-no-positive': 'error',
           'jsx-a11y/label-has-associated-control': 'error',
-          '@kbn/eslint/no-default-export': 'error',
+          'import/no-default-export': 'error',
         },
-        eslintConfigPrettierTypescriptEslintRules,
+        eslintConfigPrettierTypescriptEslintRules
       )
     },
     {

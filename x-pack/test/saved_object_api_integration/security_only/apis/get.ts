@@ -8,7 +8,7 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 import { TestInvoker } from '../../common/lib/types';
 import { getTestSuiteFactory } from '../../common/suites/get';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');

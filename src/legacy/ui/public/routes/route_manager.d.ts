@@ -21,7 +21,7 @@
  * WARNING: these types are incomplete
  */
 
-import { Breadcrumb } from '../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../core/public';
 
 interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
@@ -29,7 +29,7 @@ interface RouteConfiguration {
   reloadOnSearch?: boolean;
   resolve?: object;
   template?: string;
-  k7Breadcrumbs?: (...args: any[]) => Breadcrumb[];
+  k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
 }
 
 interface RouteManager {
@@ -38,5 +38,5 @@ interface RouteManager {
   defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;
 }
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default RouteManager;

@@ -208,6 +208,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-vis-stage={visType.stage}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
+        role="menuitem"
         {...stage}
       >
         <VisTypeIcon visType={visType} />

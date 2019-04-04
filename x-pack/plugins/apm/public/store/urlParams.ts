@@ -7,14 +7,11 @@
 import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
-import { createSelector } from 'reselect';
 import {
   legacyDecodeURIComponent,
   toQuery
 } from '../components/shared/Links/url_helpers';
 import { LOCATION_UPDATE } from './location';
-import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
-import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
 import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
@@ -153,16 +150,11 @@ export function toNumber(value?: string) {
   }
 }
 
-function toString(str?: string | string[]) {
-  if (
-    str === '' ||
-    str === 'null' ||
-    str === 'undefined' ||
-    Array.isArray(str)
-  ) {
+function toString(value?: string) {
+  if (value === '' || value === 'null' || value === 'undefined') {
     return;
   }
-  return str;
+  return value;
 }
 
 export function toBoolean(value?: string) {
@@ -211,23 +203,9 @@ export function refreshTimeRange(time: TimeRange): TimeRangeRefreshAction {
 }
 
 // Selectors
-export const getUrlParams = createSelector(
-  (state: IReduxState) => state.urlParams,
-  getDefaultTransactionType,
-  getDefaultDistributionSample,
-  (
-    urlParams,
-    transactionType: string,
-    { traceId, transactionId }
-  ): IUrlParams => {
-    return {
-      transactionType,
-      transactionId,
-      traceId,
-      ...urlParams
-    };
-  }
-);
+export function getUrlParams(state: IReduxState) {
+  return state.urlParams;
+}
 
 export interface IUrlParams {
   detailTab?: string;

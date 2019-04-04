@@ -6,7 +6,7 @@
 
 import { TestInvoker } from '../../common/lib/types';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: TestInvoker) {
   describe('saved objects spaces only enabled', function() {
     this.tags('ciGroup5');

@@ -8,6 +8,7 @@ import Boom from 'boom';
 import { Request } from 'hapi';
 import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
+import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -51,16 +52,6 @@ interface ProviderState {
 }
 
 /**
- * Represents error returned from Elasticsearch API.
- */
-interface APIError extends Error {
-  body?: {
-    error?: { reason?: string };
-    error_description?: string;
-  };
-}
-
-/**
  * Defines the shape of the request body containing SAML response.
  */
 interface SAMLResponsePayload {
@@ -76,25 +67,21 @@ interface SAMLRequestQuery {
 }
 
 /**
- * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
- * has been rejected because of expired token, otherwise returns `false`.
+ * If request with access token fails with `401 Unauthorized` then this token is no
+ * longer valid and we should try to refresh it. Another use case that we should
+ * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
+ * document has been removed and ES responds with `500 Internal Server Error`.
  * @param err Error returned from Elasticsearch.
  */
-function isAccessTokenExpiredError(err?: APIError) {
-  return err && err.body && err.body.error && err.body.error.reason === 'token expired';
-}
-
-/**
- * Checks the error returned by Elasticsearch as the result of `getAccessToken` call and returns `true` if
- * request has been rejected because of invalid refresh token (expired after 24 hours or have been used already),
- * otherwise returns `false`.
- * @param err Error returned from Elasticsearch.
- */
-function isInvalidRefreshTokenError(err: APIError) {
+function isAccessTokenExpiredError(err?: any) {
+  const errorStatusCode = getErrorStatusCode(err);
   return (
-    err.body &&
-    (err.body.error_description === 'token has already been refreshed' ||
-      err.body.error_description === 'refresh token is expired')
+    errorStatusCode === 401 ||
+    (errorStatusCode === 500 &&
+      err &&
+      err.body &&
+      err.body.error &&
+      err.body.error.reason === 'token document is missing and must be present')
   );
 }
 
@@ -476,7 +463,7 @@ export class SAMLAuthenticationProvider {
       // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
       // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
       // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-      if (isInvalidRefreshTokenError(err)) {
+      if (getErrorStatusCode(err) === 400) {
         if (canRedirectRequest(request)) {
           this.options.log(
             ['debug', 'security', 'saml'],

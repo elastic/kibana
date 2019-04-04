@@ -79,12 +79,14 @@ uiModules
 
           // escape each cell in each row
           const csvRows = rows.map(function (row) {
-            return row.map(escape);
+            return Object.entries(row).map(([k, v]) => {
+              return escape(formatted ? columns.find(c => c.id === k).formatter.convert(v) : v);
+            });
           });
 
           // add the columns to the rows
           csvRows.unshift(columns.map(function (col) {
-            return escape(col.title);
+            return escape(formatted ? col.title : col.name);
           }));
 
           return csvRows.map(function (row) {
@@ -123,7 +125,8 @@ uiModules
               formattedColumn.class = 'visualize-table-right';
             }
 
-            const { isNumeric, isDate } = dimension.params;
+            const isDate = _.get(dimension, 'format.id') === 'date' || _.get(dimension, 'format.params.id') === 'date';
+            const isNumeric = _.get(dimension, 'format.id') === 'number' || _.get(dimension, 'format.params.id') === 'number';
 
             if (isNumeric || isDate || $scope.totalFunc === 'count') {
               const sum = tableRows => {

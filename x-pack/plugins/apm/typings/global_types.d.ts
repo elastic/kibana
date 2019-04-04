@@ -9,6 +9,6 @@
 // and: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#arbitrary-expressions-are-forbidden-in-export-assignments-in-ambient-contexts
 declare module '*.json' {
   const json: any;
-  // eslint-disable-next-line @kbn/eslint/no-default-export
+  // eslint-disable-next-line import/no-default-export
   export default json;
 }

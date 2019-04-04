@@ -30,7 +30,8 @@ import { i18n } from '@kbn/i18n';
 const metricAggFilter = [
   '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
   '!sum_bucket', '!avg_bucket', '!min_bucket', '!max_bucket',
-  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum'
+  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+  '!geo_bounds', '!geo_centroid',
 ];
 
 const metricAggSchema = (new Schemas([

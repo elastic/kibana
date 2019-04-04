@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import {
-  EuiBasicTable,
+  EuiBasicTable as EuiBasicTableTyped,
   EuiButtonIcon,
   EuiPageContent,
   EuiSpacer,
@@ -295,7 +295,7 @@ class ReportListingUi extends Component<Props, State> {
     };
 
     return (
-      <EuiBasicTable
+      <EuiBasicTableTyped
         itemId={'id'}
         items={this.state.jobs}
         loading={this.state.isLoading}

@@ -96,6 +96,10 @@ module.exports = {
               from: 'expect.js',
               to: '@kbn/expect',
             },
+            {
+              from: 'x-pack',
+              toRelative: 'x-pack',
+            },
           ],
         ],
       },

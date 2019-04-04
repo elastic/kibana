@@ -17,20 +17,7 @@
  * under the License.
  */
 
-jest.mock('../../layouts/layouts', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
-  return {
-    Layouts: {
-      configSchema: schema.object({
-        kind: schema.literal('mock'),
-      }),
-    },
-  };
-});
-
-const mockCreateWriteStream = jest.fn();
-jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
+import { mockCreateWriteStream } from './file_appender.test.mocks';
 
 import { LogLevel } from '../../log_level';
 import { LogRecord } from '../../log_record';

@@ -6,5 +6,5 @@
 
 import { createTestConfig } from '../common/config';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default createTestConfig('spaces_only', { license: 'basic' });

@@ -33,7 +33,7 @@ export const filebeatSystemRules = [
         constant: '[System][auth] ',
       },
       {
-        field: 'system.syslog.program',
+        field: 'system.auth.program',
       },
       {
         constant: ' - ',

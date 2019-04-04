@@ -50,21 +50,24 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
-import { HeaderNavControls } from './header_nav_controls';
-import { HeaderHelpMenu } from './header_help_menu';
+
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderNavControls } from './header_nav_controls';
+
 import { NavControlSide } from '../';
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;
@@ -87,10 +90,23 @@ function extendRecentlyAccessedHistoryItem(
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
 
+  let titleAndAriaLabel = recentlyAccessed.label;
+  if (navLink) {
+    const objectTypeForAriaAppendix = navLink.title;
+    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.screenReaderLabel', {
+      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
+      values: {
+        recentlyAccessedItemLinklabel: recentlyAccessed.label,
+        pageType: objectTypeForAriaAppendix,
+      },
+    });
+  }
+
   return {
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
+    title: titleAndAriaLabel,
   };
 }
 
@@ -247,9 +263,8 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            // TODO: Add what type of app/saved object to title attr
-            title: `${item.label}`,
-            'aria-label': item.label,
+            title: item.title,
+            'aria-label': item.title,
             href: item.href,
             iconType: item.euiIconType,
           })),

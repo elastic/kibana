@@ -60,10 +60,10 @@ declare module 'hapi' {
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 type Unpromise<T> = T extends Promise<infer U> ? U : T;
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
-    start: {
+    setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
       };

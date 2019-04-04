@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['uptime']);

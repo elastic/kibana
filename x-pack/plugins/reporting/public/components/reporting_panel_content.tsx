@@ -9,7 +9,14 @@ declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
 }
 
-import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCopy as EuiCopyTyped,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
@@ -131,7 +138,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy
+        <EuiCopyTyped
           textToCopy={this.state.absoluteUrl}
           anchorClassName="kbnShareContextMenu__copyAnchor"
         >
@@ -143,7 +150,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               />
             </EuiButton>
           )}
-        </EuiCopy>
+        </EuiCopyTyped>
       </EuiForm>
     );
   }

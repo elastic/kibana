@@ -8,7 +8,7 @@ import Boom from 'boom';
 
 import { Server } from 'hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
+import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,

@@ -28,7 +28,16 @@ export default function InterpreterPlugin(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
+      injectDefaultVars: server => ({
+        serverBasePath: server.config().get('server.basePath'),
+        interpreterConfig: server.config().get('interpreter'),
+      }),
+    },
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        enableInVisualize: Joi.boolean().default(true),
+      }).default();
     },
     init,
   };

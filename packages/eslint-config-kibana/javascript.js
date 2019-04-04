@@ -18,6 +18,7 @@ module.exports = {
         'mocha',
         'babel',
         'react',
+        'react-hooks',
         'import',
         'no-unsanitized',
         'prefer-object-spread',
@@ -88,6 +89,38 @@ module.exports = {
         'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
         'no-restricted-imports': [2, RESTRICTED_MODULES],
         'no-restricted-modules': [2, RESTRICTED_MODULES],
+        '@kbn/eslint/no-restricted-paths': [
+          'error',
+          {
+            basePath: __dirname,
+            zones: [
+              {
+                target: [
+                  'src/legacy/**/*',
+                  'x-pack/**/*',
+                  '!x-pack/**/*.test.*',
+                  'src/plugins/**/(public|server)/**/*',
+                  'src/core/(public|server)/**/*',
+                ],
+                from: [
+                  'src/core/public/**/*',
+                  '!src/core/public/index*',
+                  '!src/core/public/utils/**/*',
+
+                  'src/core/server/**/*',
+                  '!src/core/server/index*',
+
+                  'src/plugins/**/public/**/*',
+                  '!src/plugins/**/public/index*',
+
+                  'src/plugins/**/server/**/*',
+                  '!src/plugins/**/server/index*',
+                ],
+                allowSameFolder: true,
+              },
+            ],
+          },
+        ],
         'no-return-assign': 'off',
         'no-script-url': 'error',
         'no-sequences': 'error',
@@ -142,6 +175,8 @@ module.exports = {
           arrow: true,
         }],
         'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
         'jsx-a11y/accessible-emoji': 'error',
         'jsx-a11y/alt-text': 'error',
         'jsx-a11y/anchor-has-content': 'error',
@@ -200,7 +235,7 @@ module.exports = {
     {
       files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
       rules: {
-        '@kbn/eslint/no-default-export': 'off',
+        'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -355,7 +390,7 @@ module.exports = {
         'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
-        'packages/kbn-eslint-plugin-license-header/**/*.js',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',

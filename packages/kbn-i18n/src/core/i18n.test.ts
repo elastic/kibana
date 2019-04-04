@@ -923,7 +923,7 @@ describe('I18n engine', () => {
       await expect(i18n.load('some-url')).resolves.toBeUndefined();
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockFetch).toHaveBeenCalledWith('some-url');
+      expect(mockFetch).toHaveBeenCalledWith('some-url', { credentials: 'same-origin' });
 
       expect(i18n.getTranslation()).toEqual(translations);
     });

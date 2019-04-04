@@ -33,9 +33,9 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { UnconnectedKibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IUrlParams } from '../../../../store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
+import { UnconnectedKibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;

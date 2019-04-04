@@ -181,12 +181,12 @@ describe('AggTable Directive', function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
-          { accessor: 1, format: { id: 'date', params: { pattern: 'YYYY-MM-DD' } }, params: { isDate: true } }
+          { accessor: 1, format: { id: 'date', params: { pattern: 'YYYY-MM-DD' } } },
         ], metrics: [
-          { accessor: 2, format: { id: 'number' }, params: { isNumeric: true } },
-          { accessor: 3, format: { id: 'date' }, params: { isDate: true } },
-          { accessor: 4, format: { id: 'number' }, params: { isNumeric: true } },
-          { accessor: 5, format: { id: 'number' }, params: { isNumeric: true } }
+          { accessor: 2, format: { id: 'number' } },
+          { accessor: 3, format: { id: 'date' } },
+          { accessor: 4, format: { id: 'number' } },
+          { accessor: 5, format: { id: 'number' } },
         ]
       };
       const response = await tableAggResponse(
@@ -262,27 +262,93 @@ describe('AggTable Directive', function () {
   });
 
   describe('aggTable.toCsv()', function () {
-    it('escapes and formats the rows and columns properly', function () {
-      const $el = $compile('<kbn-agg-table table="table"  dimensions="dimensions">')($scope);
+    it('escapes rows and columns properly', function () {
+      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')($scope);
       $scope.$digest();
 
       const $tableScope = $el.isolateScope();
       const aggTable = $tableScope.aggTable;
-
       $tableScope.table = {
         columns: [
-          { title: 'one' },
-          { title: 'two' },
-          { title: 'with double-quotes(")' }
+          { id: 'a', name: 'one' },
+          { id: 'b', name: 'two' },
+          { id: 'c', name: 'with double-quotes(")' },
         ],
         rows: [
-          [1, 2, '"foobar"']
-        ]
+          { a: 1, b: 2, c: '"foobar"' },
+        ],
       };
 
       expect(aggTable.toCsv()).to.be(
         'one,two,"with double-quotes("")"' + '\r\n' +
         '1,2,"""foobar"""' + '\r\n'
+      );
+    });
+
+    it('exports rows and columns properly', async function () {
+      $scope.dimensions = {
+        buckets: [{ accessor: 0, params: {} }, { accessor: 2, params: {} }, { accessor: 4, params: {} }],
+        metrics: [{ accessor: 1, params: {} }, { accessor: 3, params: {} }, { accessor: 5, params: {} }]
+      };
+      $scope.table = (await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions)).tables[0];
+
+      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')($scope);
+      $scope.$digest();
+
+      const $tableScope = $el.isolateScope();
+      const aggTable = $tableScope.aggTable;
+      $tableScope.table = $scope.table;
+
+      const raw = aggTable.toCsv(false);
+      expect(raw).to.be(
+        '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' + '\r\n' +
+        'png,IT,win,412032,9299,0' + '\r\n' +
+        'png,IT,mac,412032,9299,9299' + '\r\n' +
+        'png,US,linux,412032,8293,3992' + '\r\n' +
+        'png,US,mac,412032,8293,3029' + '\r\n' +
+        'css,MX,win,412032,9299,4992' + '\r\n' +
+        'css,MX,mac,412032,9299,5892' + '\r\n' +
+        'css,US,linux,412032,8293,3992' + '\r\n' +
+        'css,US,mac,412032,8293,3029' + '\r\n' +
+        'html,CN,win,412032,9299,4992' + '\r\n' +
+        'html,CN,mac,412032,9299,5892' + '\r\n' +
+        'html,FR,win,412032,8293,3992' + '\r\n' +
+        'html,FR,mac,412032,8293,3029' + '\r\n'
+      );
+    });
+
+    it('exports formatted rows and columns properly', async function () {
+      $scope.dimensions = {
+        buckets: [{ accessor: 0, params: {} }, { accessor: 2, params: {} }, { accessor: 4, params: {} }],
+        metrics: [{ accessor: 1, params: {} }, { accessor: 3, params: {} }, { accessor: 5, params: {} }]
+      };
+      $scope.table = (await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions)).tables[0];
+
+      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')($scope);
+      $scope.$digest();
+
+      const $tableScope = $el.isolateScope();
+      const aggTable = $tableScope.aggTable;
+      $tableScope.table = $scope.table;
+
+      // Create our own converter since the ones we use for tests don't actually transform the provided value
+      $tableScope.formattedColumns[0].formatter.convert = v => `${v}_formatted`;
+
+      const formatted = aggTable.toCsv(true);
+      expect(formatted).to.be(
+        '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' + '\r\n' +
+        '"png_formatted",IT,win,412032,9299,0' + '\r\n' +
+        '"png_formatted",IT,mac,412032,9299,9299' + '\r\n' +
+        '"png_formatted",US,linux,412032,8293,3992' + '\r\n' +
+        '"png_formatted",US,mac,412032,8293,3029' + '\r\n' +
+        '"css_formatted",MX,win,412032,9299,4992' + '\r\n' +
+        '"css_formatted",MX,mac,412032,9299,5892' + '\r\n' +
+        '"css_formatted",US,linux,412032,8293,3992' + '\r\n' +
+        '"css_formatted",US,mac,412032,8293,3029' + '\r\n' +
+        '"html_formatted",CN,win,412032,9299,4992' + '\r\n' +
+        '"html_formatted",CN,mac,412032,9299,5892' + '\r\n' +
+        '"html_formatted",FR,win,412032,8293,3992' + '\r\n' +
+        '"html_formatted",FR,mac,412032,8293,3029' + '\r\n'
       );
     });
   });
@@ -313,13 +379,13 @@ describe('AggTable Directive', function () {
       const saveAs = sinon.stub(aggTable, '_saveAs');
       $tableScope.table = {
         columns: [
-          { title: 'one' },
-          { title: 'two' },
-          { title: 'with double-quotes(")' }
+          { id: 'a', name: 'one' },
+          { id: 'b', name: 'two' },
+          { id: 'c', name: 'with double-quotes(")' },
         ],
         rows: [
-          [1, 2, '"foobar"']
-        ]
+          { a: 1, b: 2, c: '"foobar"' },
+        ],
       };
 
       aggTable.csv.filename = 'somefilename.csv';

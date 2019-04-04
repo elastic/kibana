@@ -9,7 +9,8 @@
 import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface LogTextStreamLoadingItemViewProps {
   alignment: 'top' | 'bottom';
@@ -137,13 +138,13 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   }
 }
 
-const ProgressEntryWrapper = styled.div`
+const ProgressEntryWrapper = euiStyled.div`
   align-items: center;
   display: flex;
-  min-height: ${props => props.theme.eui.euiSizeXxl};
+  min-height: ${props => props.theme.eui.euiSizeXXL};
   position: relative;
 `;
 
-const ProgressMessage = styled.div`
+const ProgressMessage = euiStyled.div`
   padding: 8px 16px;
 `;

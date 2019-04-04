@@ -52,6 +52,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
   autoFetch?: boolean;
+  pipelineDataLoader?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -70,13 +71,13 @@ export class EmbeddedVisualizeHandler {
    * This should not be used by any plugin.
    * @ignore
    */
-  public static readonly __ENABLE_PIPELINE_DATA_LOADER__: boolean = false;
   public readonly data$: Rx.Observable<any>;
   public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
   private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
+  private pipelineDataLoader: boolean = false;
 
   private listeners = new EventEmitter();
   private firstRenderComplete: Promise<void>;
@@ -116,6 +117,7 @@ export class EmbeddedVisualizeHandler {
       filters,
       query,
       autoFetch = true,
+      pipelineDataLoader = false,
       Private,
     } = params;
 
@@ -129,6 +131,8 @@ export class EmbeddedVisualizeHandler {
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };
+
+    this.pipelineDataLoader = pipelineDataLoader;
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
@@ -170,7 +174,7 @@ export class EmbeddedVisualizeHandler {
       });
     };
 
-    this.dataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
+    this.dataLoader = pipelineDataLoader
       ? new PipelineDataLoader(vis)
       : new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
@@ -480,7 +484,7 @@ export class EmbeddedVisualizeHandler {
     let renderer: any = null;
     let args: any[] = [];
 
-    if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
+    if (this.pipelineDataLoader) {
       renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
       args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
     } else {

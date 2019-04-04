@@ -162,7 +162,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
             data-focus-lock-disabled="false"
           >
             <div
+              aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
               class="euiModal euiModal--maxWidth-default visNewVisDialog"
+              role="menu"
               tabindex="0"
             >
               <button
@@ -275,6 +277,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-visWithSearch"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -310,6 +313,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                               data-test-subj="visType-vis"
                               data-vis-stage="production"
                               disabled=""
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -376,9 +380,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
       }
     >
       <EuiModal
+        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
         maxWidth={true}
         onClose={[Function]}
+        role="menu"
       >
         <EuiFocusTrap
           clickOutsideDisables={false}
@@ -439,7 +445,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     data-focus-lock-disabled="false"
                   >
                     <div
+                      aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                       class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                      role="menu"
                       tabindex="0"
                     >
                       <button
@@ -552,6 +560,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-visWithSearch"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -587,6 +596,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       data-test-subj="visType-vis"
                                       data-vis-stage="production"
                                       disabled=""
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -657,7 +667,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       data-focus-lock-disabled="false"
                     >
                       <div
+                        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                         class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                        role="menu"
                         tabindex="0"
                       >
                         <button
@@ -770,6 +782,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-visWithSearch"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -805,6 +818,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         data-test-subj="visType-vis"
                                         data-vis-stage="production"
                                         disabled=""
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -869,8 +883,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                 />
               </SideEffect(FocusWatcher)>
               <div
+                aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                 className="euiModal euiModal--maxWidth-default visNewVisDialog"
                 onKeyDown={[Function]}
+                role="menu"
                 tabIndex={0}
               >
                 <EuiI18n
@@ -1125,10 +1141,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           className="euiScreenReaderOnly"
                                         >
                                           <FormattedMessage
-                                            defaultMessage="{resultCount} {resultCount, plural,
-                            one {type}
-                            other {types}
-                          } found"
+                                            defaultMessage="{resultCount} {resultCount, plural, one {type} other {types} } found"
                                             id="kbn.visualize.newVisWizard.resultsFound"
                                             values={
                                               Object {
@@ -1168,6 +1181,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithSearch"
@@ -1180,6 +1194,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -1188,7 +1203,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1231,7 +1246,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1264,6 +1279,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-vis"
@@ -1276,6 +1292,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -1284,7 +1301,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1327,7 +1344,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1379,7 +1396,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
+                              <NewVisHelp>
                                 <EuiText
                                   grow={true}
                                   size="m"
@@ -1398,7 +1415,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -1593,7 +1610,9 @@ exports[`NewVisModal should render as expected 1`] = `
             data-focus-lock-disabled="false"
           >
             <div
+              aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
               class="euiModal euiModal--maxWidth-default visNewVisDialog"
+              role="menu"
               tabindex="0"
             >
               <button
@@ -1704,6 +1723,7 @@ exports[`NewVisModal should render as expected 1`] = `
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-vis"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -1738,6 +1758,7 @@ exports[`NewVisModal should render as expected 1`] = `
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-visWithSearch"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -1804,9 +1825,11 @@ exports[`NewVisModal should render as expected 1`] = `
       }
     >
       <EuiModal
+        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
         maxWidth={true}
         onClose={[Function]}
+        role="menu"
       >
         <EuiFocusTrap
           clickOutsideDisables={false}
@@ -1867,7 +1890,9 @@ exports[`NewVisModal should render as expected 1`] = `
                     data-focus-lock-disabled="false"
                   >
                     <div
+                      aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                       class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                      role="menu"
                       tabindex="0"
                     >
                       <button
@@ -1978,6 +2003,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-vis"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -2012,6 +2038,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-visWithSearch"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -2082,7 +2109,9 @@ exports[`NewVisModal should render as expected 1`] = `
                       data-focus-lock-disabled="false"
                     >
                       <div
+                        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                         class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                        role="menu"
                         tabindex="0"
                       >
                         <button
@@ -2193,6 +2222,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-vis"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -2227,6 +2257,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-visWithSearch"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -2291,8 +2322,10 @@ exports[`NewVisModal should render as expected 1`] = `
                 />
               </SideEffect(FocusWatcher)>
               <div
+                aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                 className="euiModal euiModal--maxWidth-default visNewVisDialog"
                 onKeyDown={[Function]}
+                role="menu"
                 tabIndex={0}
               >
                 <EuiI18n
@@ -2575,6 +2608,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-vis"
@@ -2587,6 +2621,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -2595,7 +2630,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2638,7 +2673,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2671,6 +2706,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithSearch"
@@ -2683,6 +2719,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -2691,7 +2728,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2734,7 +2771,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2786,7 +2823,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
+                              <NewVisHelp>
                                 <EuiText
                                   grow={true}
                                   size="m"
@@ -2805,7 +2842,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>

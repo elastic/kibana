@@ -21,7 +21,7 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
