@@ -7,6 +7,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { px, topNavHeight, unit, units } from '../../../style/variables';
 // @ts-ignore
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
@@ -14,6 +15,7 @@ import { GlobalFetchIndicator } from './GlobalFetchIndicator';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
 import { ScrollToTopOnPathChange } from './ScrollToTopOnPathChange';
+import { UpdateBadge } from './UpdateBadge';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 
 const MainContainer = styled.div`
@@ -24,19 +26,22 @@ const MainContainer = styled.div`
 
 export function Main() {
   return (
-    <GlobalFetchIndicator>
-      <MainContainer data-test-subj="apmMainContainer">
-        <UpdateBreadcrumbs />
-        <Route component={ConnectRouterToRedux} />
-        <Route component={ScrollToTopOnPathChange} />
-        <LicenseCheck>
-          <Switch>
-            {routes.map((route, i) => (
-              <Route key={i} {...route} />
-            ))}
-          </Switch>
-        </LicenseCheck>
-      </MainContainer>
-    </GlobalFetchIndicator>
+    <UICapabilitiesProvider>
+      <GlobalFetchIndicator>
+        <MainContainer data-test-subj="apmMainContainer">
+          <UpdateBreadcrumbs />
+          <UpdateBadge />
+          <Route component={ConnectRouterToRedux} />
+          <Route component={ScrollToTopOnPathChange} />
+          <LicenseCheck>
+            <Switch>
+              {routes.map((route, i) => (
+                <Route key={i} {...route} />
+              ))}
+            </Switch>
+          </LicenseCheck>
+        </MainContainer>
+      </GlobalFetchIndicator>
+    </UICapabilitiesProvider>
   );
 }
