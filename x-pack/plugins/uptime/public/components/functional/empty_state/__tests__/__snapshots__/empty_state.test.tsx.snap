@@ -2,6 +2,7 @@
 
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
 <EmptyState
+  basePath=""
   intl={
     Object {
       "defaultFormats": Object {},
@@ -105,49 +106,25 @@ exports[`EmptyState component doesn't render child components when count is fals
     }
   }
 >
-  <EmptyIndex>
+  <EmptyStateLoading>
     <EuiEmptyPrompt
       body={
         <React.Fragment>
-          <p>
-            <FormattedMessage
-              defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-              id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-              values={
-                Object {
-                  "configureHeartbeatLink": <EuiLink
-                    color="primary"
-                    href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                    target="_blank"
-                    type="button"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Configure Heartbeat"
-                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                      values={Object {}}
-                    />
-                  </EuiLink>,
-                }
-              }
-            />
-          </p>
+          <EuiLoadingSpinner
+            size="xl"
+          />
+          <EuiSpacer />
+          <EuiTitle
+            size="l"
+            textTransform="none"
+          >
+            <h2>
+              Loading…
+            </h2>
+          </EuiTitle>
         </React.Fragment>
       }
       iconColor="subdued"
-      title={
-        <EuiTitle
-          size="l"
-          textTransform="none"
-        >
-          <h3>
-            <FormattedMessage
-              defaultMessage="No uptime data available"
-              id="xpack.uptime.emptyState.noDataTitle"
-              values={Object {}}
-            />
-          </h3>
-        </EuiTitle>
-      }
     >
       <div
         className="euiEmptyPrompt"
@@ -159,35 +136,6 @@ exports[`EmptyState component doesn't render child components when count is fals
           <span
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiTitle
-              size="m"
-              textTransform="none"
-            >
-              <EuiTitle
-                className="euiTitle euiTitle--medium"
-                size="l"
-                textTransform="none"
-              >
-                <h3
-                  className="euiTitle euiTitle--large euiTitle euiTitle--medium"
-                >
-                  <FormattedMessage
-                    defaultMessage="No uptime data available"
-                    id="xpack.uptime.emptyState.noDataTitle"
-                    values={Object {}}
-                  >
-                    No uptime data available
-                  </FormattedMessage>
-                </h3>
-              </EuiTitle>
-            </EuiTitle>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
             <EuiText
               grow={true}
               size="m"
@@ -195,58 +143,35 @@ exports[`EmptyState component doesn't render child components when count is fals
               <div
                 className="euiText euiText--medium"
               >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                    id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                    values={
-                      Object {
-                        "configureHeartbeatLink": <EuiLink
-                          color="primary"
-                          href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                          target="_blank"
-                          type="button"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Configure Heartbeat"
-                            id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                            values={Object {}}
-                          />
-                        </EuiLink>,
-                      }
-                    }
+                <EuiLoadingSpinner
+                  size="xl"
+                >
+                  <div
+                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                  />
+                </EuiLoadingSpinner>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <EuiTitle
+                  size="l"
+                  textTransform="none"
+                >
+                  <h2
+                    className="euiTitle euiTitle--large"
                   >
-                    <EuiLink
-                      color="primary"
-                      href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                      target="_blank"
-                      type="button"
-                    >
-                      <a
-                        className="euiLink euiLink--primary"
-                        href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                        rel="noopener"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Configure Heartbeat"
-                          id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                          values={Object {}}
-                        >
-                          Configure Heartbeat
-                        </FormattedMessage>
-                      </a>
-                    </EuiLink>
-                     to start logging uptime data.
-                  </FormattedMessage>
-                </p>
+                    Loading…
+                  </h2>
+                </EuiTitle>
               </div>
             </EuiText>
           </span>
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </EmptyIndex>
+  </EmptyStateLoading>
 </EmptyState>
 `;
 
@@ -264,8 +189,9 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 </Fragment>
 `;
 
-exports[`EmptyState component renders message while loading 1`] = `
+exports[`EmptyState component renders children while loading 1`] = `
 <EmptyState
+  basePath=""
   count={1}
   intl={
     Object {
@@ -371,98 +297,15 @@ exports[`EmptyState component renders message while loading 1`] = `
   }
   loading={true}
 >
-  <EmptyStateLoading>
-    <EuiEmptyPrompt
-      iconColor="subdued"
-      title={
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle
-              size="l"
-              textTransform="none"
-            >
-              <h3>
-                Loading…
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLoadingSpinner
-              size="xl"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    >
-      <div
-        className="euiEmptyPrompt"
-      >
-        <EuiTextColor
-          color="subdued"
-          component="span"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-          >
-            <EuiTitle
-              size="m"
-              textTransform="none"
-            >
-              <EuiFlexGroup
-                className="euiTitle euiTitle--medium"
-              >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiTitle euiTitle--medium"
-                >
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiTitle
-                        size="l"
-                        textTransform="none"
-                      >
-                        <h3
-                          className="euiTitle euiTitle--large"
-                        >
-                          Loading…
-                        </h3>
-                      </EuiTitle>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiLoadingSpinner
-                        size="xl"
-                      >
-                        <div
-                          className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                        />
-                      </EuiLoadingSpinner>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </EuiTitle>
-            <EuiSpacer
-              size="m"
-            >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-          </span>
-        </EuiTextColor>
-      </div>
-    </EuiEmptyPrompt>
-  </EmptyStateLoading>
+  <div>
+    Should appear even while loading...
+  </div>
 </EmptyState>
 `;
 
 exports[`EmptyState component renders the message when an error occurs 1`] = `
 <EmptyState
+  basePath=""
   count={1}
   error="An error occurred"
   intl={
@@ -571,73 +414,83 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
   <EmptyStateError
     errorMessage="An error occurred"
   >
-    <EuiEmptyPrompt
-      body={
-        <p>
-          An error occurred
-        </p>
-      }
-      iconColor="subdued"
-      title={
-        <EuiTitle
-          size="l"
-          textTransform="none"
-        >
-          <h3>
-            Error
-          </h3>
-        </EuiTitle>
-      }
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="m"
     >
       <div
-        className="euiEmptyPrompt"
+        className="euiPanel euiPanel--paddingMedium"
       >
-        <EuiTextColor
-          color="subdued"
-          component="span"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-          >
+        <EuiEmptyPrompt
+          body={
+            <p>
+              An error occurred
+            </p>
+          }
+          iconColor="subdued"
+          title={
             <EuiTitle
-              size="m"
+              size="l"
               textTransform="none"
             >
-              <EuiTitle
-                className="euiTitle euiTitle--medium"
-                size="l"
-                textTransform="none"
-              >
-                <h3
-                  className="euiTitle euiTitle--large euiTitle euiTitle--medium"
-                >
-                  Error
-                </h3>
-              </EuiTitle>
+              <h3>
+                Error
+              </h3>
             </EuiTitle>
-            <EuiSpacer
-              size="m"
+          }
+        >
+          <div
+            className="euiEmptyPrompt"
+          >
+            <EuiTextColor
+              color="subdued"
+              component="span"
             >
-              <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiText
-              grow={true}
-              size="m"
-            >
-              <div
-                className="euiText euiText--medium"
+              <span
+                className="euiTextColor euiTextColor--subdued"
               >
-                <p>
-                  An error occurred
-                </p>
-              </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <EuiTitle
+                    className="euiTitle euiTitle--medium"
+                    size="l"
+                    textTransform="none"
+                  >
+                    <h3
+                      className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                    >
+                      Error
+                    </h3>
+                  </EuiTitle>
+                </EuiTitle>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <EuiText
+                  grow={true}
+                  size="m"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <p>
+                      An error occurred
+                    </p>
+                  </div>
+                </EuiText>
+              </span>
+            </EuiTextColor>
+          </div>
+        </EuiEmptyPrompt>
       </div>
-    </EuiEmptyPrompt>
+    </EuiPanel>
   </EmptyStateError>
 </EmptyState>
 `;

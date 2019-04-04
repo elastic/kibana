@@ -20,8 +20,9 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(
         '2019-01-28 12:40:08.078',
+        '2019-01-29 12:40:08.078',
         'auto-http-0X131221E73F825974',
-        'https://www.google.com/'
+        'auto-http-0X131221E73F825974'
       );
     });
   });

@@ -11,7 +11,7 @@ import { EmptyState } from '../empty_state';
 describe('EmptyState component', () => {
   it('renders child components when count is truthy', () => {
     const component = shallowWithIntl(
-      <EmptyState count={1}>
+      <EmptyState basePath="" count={1}>
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
@@ -21,7 +21,7 @@ describe('EmptyState component', () => {
   });
   it(`doesn't render child components when count is falsey`, () => {
     const component = mountWithIntl(
-      <EmptyState count={undefined}>
+      <EmptyState basePath="">
         <div>Shouldn't be rendered</div>
       </EmptyState>
     );
@@ -29,16 +29,16 @@ describe('EmptyState component', () => {
   });
   it(`renders the message when an error occurs`, () => {
     const component = mountWithIntl(
-      <EmptyState error={'An error occurred'} count={1}>
+      <EmptyState basePath="" error={'An error occurred'} count={1}>
         <div>Shouldn't appear...</div>
       </EmptyState>
     );
     expect(component).toMatchSnapshot();
   });
-  it('renders message while loading', () => {
+  it('renders children while loading', () => {
     const component = mountWithIntl(
-      <EmptyState loading={true} count={1}>
-        <div>Shouldn't appear...</div>
+      <EmptyState basePath="" count={1} loading={true}>
+        <div>Should appear even while loading...</div>
       </EmptyState>
     );
     expect(component).toMatchSnapshot();
