@@ -17,7 +17,7 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 ## How to use it
 
 To track a user interaction, simply send a `POST` request to `/api/ui_metric/{APP_NAME}/{METRIC_TYPE}`,
-where `APP_MAME` and `METRIC_TYPE` are underscore-delimited strings. For example, to track the app
+where `APP_NAME` and `METRIC_TYPE` are underscore-delimited strings. For example, to track the app
 `my_app` and the metric `my_metric`, send a request to `/api/ui_metric/my_app/my_metric`.
 
 That's all you need to do!
