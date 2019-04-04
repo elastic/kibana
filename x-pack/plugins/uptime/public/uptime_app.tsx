@@ -149,14 +149,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   public componentWillMount() {
     this.setBreadcrumbs([overviewBreadcrumb]);
-    this.setBadge(
-      !uiCapabilities.uptime.save
-        ? {
-            text: 'Read Only',
-            tooltip: 'You lack the authority',
-          }
-        : undefined
-    );
+    this.setBadge(!uiCapabilities.uptime.save ? 'readOnly' : undefined);
   }
 
   public componentDidMount() {

@@ -34,19 +34,10 @@ uiRoutes
   });
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
-  badge: (i18n, uiCapabilities) => {
-    if (uiCapabilities.dev_tools.save) {
-      return undefined;
+  badge: (uiCapabilities) => {
+    if (!uiCapabilities.dev_tools.save) {
+      return 'readOnly';
     }
-
-    return {
-      text: i18n('kbn.devTools.badge.readOnly.text', {
-        defaultMessage: 'Read Only',
-      }),
-      tooltip: i18n('kbn.devTools.badge.readOnly.tooltip', {
-        defaultMessage: 'You lack the authority',
-      }),
-    };
   },
   k7Breadcrumbs: (i18n) => [
     {

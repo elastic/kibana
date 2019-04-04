@@ -36,6 +36,7 @@ const createSetupContractMock = () => {
     addApplicationClass: jest.fn(),
     removeApplicationClass: jest.fn(),
     getApplicationClasses$: jest.fn(),
+    addNamedBadge: jest.fn(),
     getBadge$: jest.fn(),
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
