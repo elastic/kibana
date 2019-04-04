@@ -25,7 +25,7 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getClusters } from '../../../store/selectors';
 import { connect } from 'react-redux';
 import { withTableProps } from '../../table/with_table_props';
-import { setActiveClusterUuid, setCcs, navigateWithLocalState } from '../../../store/actions';
+import { setActiveClusterUuid, setCcs } from '../../../store/actions';
 import { getStore } from '../../../store';
 import { withRouter } from 'react-router-dom';
 
@@ -261,7 +261,7 @@ const changeCluster = (history, clusterUuid, ccs) => {
   const store = getStore();
   store.dispatch(setActiveClusterUuid(clusterUuid));
   store.dispatch(setCcs(ccs));
-  store.dispatch(navigateWithLocalState(history, '/overview'));
+  history.push('/overview');
 };
 
 const licenseWarning = (scope, { title, text }) => {

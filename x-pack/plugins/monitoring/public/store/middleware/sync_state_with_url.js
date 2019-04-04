@@ -7,7 +7,7 @@ import qs from 'querystring';
 import { isEqual, isEmpty, pick } from 'lodash';
 import rison from 'rison-node';
 import { getLocalState, getDateIsSet } from '../selectors';
-import { updateDateFromUrl, navigateWithLocalState } from '../actions';
+import { updateDateFromUrl } from '../actions';
 
 function getUpdatedUrlWithState(state, newRoute = undefined) {
   const cleanState = pick(state, value => !!value);
@@ -71,12 +71,6 @@ export const syncStateWithUrl = store => next => action => {
   const willSyncFromUrl = (!getDateIsSet(state) || !isStateValid(localState)) && isStateValid(urlState);
   const willSyncToUrl = !willSyncFromUrl && !isEqual(urlState, localState);
   // console.log({ willSyncFromUrl, willSyncToUrl });
-
-  if (action.type === navigateWithLocalState().type) {
-    const newUrl = getUpdatedUrlWithState(localState, action.payload.path);
-    action.payload.history.push(newUrl);
-    return;
-  }
 
   if (willSyncFromUrl) {
     store.dispatch(updateDateFromUrl(urlState));

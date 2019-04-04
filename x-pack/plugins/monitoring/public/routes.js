@@ -77,8 +77,8 @@ export const routeList = [
       render: (props) => {
         console.log('rendering /home');
         if (props.clusters.length === 1) {
-          console.log('going to overview');
-          return <Redirect to="/overview" />;
+          // console.log('going to overview');
+          // return <Redirect to="/overview" />;
         }
 
         const cluster = getCluster(props);
