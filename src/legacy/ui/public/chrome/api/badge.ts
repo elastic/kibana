@@ -59,7 +59,7 @@ function createBadgeApi(chrome: { [key: string]: any }) {
       /**
        * Replace the badge with a new one
        */
-      set(newBadge: Badge | null) {
+      set(newBadge: Badge | undefined) {
         newPlatformChrome.setBadge(newBadge);
       },
     },
@@ -85,7 +85,7 @@ function createBadgeApi(chrome: { [key: string]: any }) {
 
         const badgeProvider = current.badge;
         if (!badgeProvider) {
-          newPlatformChrome.setBadge(null);
+          newPlatformChrome.setBadge(undefined);
           return;
         }
 

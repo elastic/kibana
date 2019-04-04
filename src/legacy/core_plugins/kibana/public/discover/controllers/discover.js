@@ -95,7 +95,7 @@ uiRoutes
       ),
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.discover.save) {
-        return null;
+        return undefined;
       }
 
       return {

@@ -13,8 +13,8 @@ import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 interface ExternalHeaderProps {
   breadcrumbs?: Breadcrumb[];
   setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
-  badge: Badge | null;
-  setBadge: (badge: Badge | null) => void;
+  badge: Badge | undefined;
+  setBadge: (badge: Badge | undefined) => void;
 }
 
 export class ExternalHeader extends React.Component<ExternalHeaderProps> {

@@ -46,7 +46,7 @@ routes
   .defaults(/.*/, {
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.maps.save) {
-        return null;
+        return undefined;
       }
 
       return {
