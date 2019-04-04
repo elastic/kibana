@@ -24,9 +24,7 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     data: [],
     ...indexingDetails
   });
-  if (!initializedIndex) {
-    throw(`Unable to create index: ${initializedIndex}`);
-  }
+
   await populateIndex({
     id: initializedIndex.id,
     data: parsedFile,
@@ -35,8 +33,7 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     mappings: {},
   });
   //create index pattern
-  const indexPatternResp = await createIndexPattern('', indexingDetails.index);
-  console.log(indexPatternResp);
+  return createIndexPattern('', indexingDetails.index);
 }
 
 function writeToIndex(indexingDetails) {
@@ -150,11 +147,13 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns) {
       title: indexPatternName,
     });
 
-    const id = await indexPatterns.create();
-
+    await indexPatterns.create();
+    const id = await getIndexPatternId(indexPatternName);
+    const indexPattern = await indexPatternService.get(id);
     return {
       success: true,
       id,
+      fields: indexPattern.fields
     };
   } catch (error) {
     console.error(error);
@@ -165,3 +164,16 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns) {
   }
 }
 
+async function getIndexPatternId(name) {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectSearch =
+    await savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
+  const indexPatternSavedObjects = savedObjectSearch.savedObjects;
+
+  if (indexPatternSavedObjects) {
+    const ip = indexPatternSavedObjects.find(i => i.attributes.title === name);
+    return (ip !== undefined) ? ip.id : undefined;
+  } else {
+    return undefined;
+  }
+}

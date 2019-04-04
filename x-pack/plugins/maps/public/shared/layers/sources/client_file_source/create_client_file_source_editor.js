@@ -8,15 +8,17 @@
 import React from 'react';
 import { JsonUploadAndParse } from '../../../../../../file_upload/public/';
 import { defaultSettings } from './default_index_settings';
-import _ from 'lodash';
 
-export function ClientFileCreateSourceEditor({ previewGeojsonFile, boolIndexData = false }) {
+export function ClientFileCreateSourceEditor({ previewGeojsonFile, boolIndexData = false,
+  viewIndexedData }) {
   return (
     <JsonUploadAndParse
       previewCallback={previewGeojsonFile}
       boolIndexData={boolIndexData}
       indexingDetails={defaultSettings}
       postProcessing={x => x}
+      onIndexSuccess={viewIndexedData}
+      // onIndexError={}
     />
   );
 }

@@ -16,17 +16,28 @@ import { parseFile } from '../util/file_parser';
 import { triggerIndexing } from '../util/indexing_service';
 import _ from 'lodash';
 
-export function JsonUploadAndParse({ postProcessing, previewCallback,
-  defaultMessage, boolIndexData = false, indexingDetails
+export function JsonUploadAndParse({
+  postProcessing,
+  previewCallback,
+  defaultMessage,
+  boolIndexData = false,
+  indexingDetails,
+  onIndexSuccess,
+  onIndexError,
 }) {
 
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
 
   if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, indexingDetails).then(() =>
-      setIndexedFile(parsedFile)
-    );
+    triggerIndexing(parsedFile, indexingDetails).then(resp => {
+      setIndexedFile(parsedFile);
+      if (resp.success && onIndexSuccess) {
+        onIndexSuccess(resp);
+      } else if (onIndexError) {
+        onIndexError();
+      } // No else
+    });
   }
 
   return (

@@ -8,6 +8,8 @@ import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { GEOJSON_FILE } from '../../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
+import { ESSearchSource } from '../es_search_source';
+import uuid from 'uuid/v4';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
@@ -22,6 +24,26 @@ export class GeojsonFileSource extends AbstractVectorSource {
       name
     };
   }
+
+  static viewIndexedData = (onPreviewSource, inspectorAdapters) => {
+    return ({ fields, id }) => {
+      const indexPatternId = id;
+      const geoFieldArr = fields.filter(
+        field => ['geo_point', 'geo_shape'].includes(field.type)
+      );
+      const geoField = geoFieldArr[0].name;
+      if (!indexPatternId) {
+        onPreviewSource(null);
+        return;
+      }
+      const source = new ESSearchSource({
+        id: uuid(),
+        indexPatternId,
+        geoField,
+      }, inspectorAdapters);
+      onPreviewSource(source);
+    };
+  };
 
   static previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
     return (geojsonFile, name) => {
@@ -40,7 +62,14 @@ export class GeojsonFileSource extends AbstractVectorSource {
       <ClientFileCreateSourceEditor
         previewGeojsonFile={
           GeojsonFileSource.previewGeojsonFile(
-            onPreviewSource, inspectorAdapters
+            onPreviewSource,
+            inspectorAdapters
+          )
+        }
+        viewIndexedData={
+          GeojsonFileSource.viewIndexedData(
+            onPreviewSource,
+            inspectorAdapters
           )
         }
         boolIndexData={boolIndexData}
