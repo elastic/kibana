@@ -32,6 +32,7 @@ interface WithSourceArgs {
   auditbeatIndicesExist: boolean;
   browserFields: BrowserFields;
   filebeatIndicesExist: boolean;
+  winbeatIndicesExist: boolean;
   indexPattern: StaticIndexPattern;
 }
 
@@ -91,6 +92,7 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
           return children({
             auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
             filebeatIndicesExist: get('source.status.filebeatIndicesExist', data),
+            winbeatIndicesExist: get('source.status.filebeatIndicesExist', data),
             browserFields: get('source.status.indexFields', data)
               ? this.memoizedBrowserFields(
                   indexPatternTitle.join(),
