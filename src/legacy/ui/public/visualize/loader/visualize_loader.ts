@@ -24,6 +24,7 @@
  */
 
 import chrome from '../../chrome';
+import uuid from 'uuid';
 import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
 import { IPrivate } from '../../private';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
@@ -140,6 +141,7 @@ export class VisualizeLoader {
       // lets add Private to the params, we'll need to pass it to visualize later
       Private: this.Private,
       pipelineDataLoader: this.pipelineDataLoader,
+      visInstanceId: uuid.v1(),
     };
 
     return new EmbeddedVisualizeHandler(element, savedObj, handlerParams);

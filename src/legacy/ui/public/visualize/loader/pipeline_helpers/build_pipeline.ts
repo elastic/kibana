@@ -20,8 +20,7 @@
 import { cloneDeep } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
-import { SearchSource } from 'ui/courier';
-import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
+import { AggConfig, RequestHandlerParams, Vis, VisParams, VisState } from 'ui/vis';
 
 interface SchemaFormat {
   id: string;
@@ -55,7 +54,13 @@ interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
+type buildVisFunction = (
+  visState: VisState,
+  schemas: Schemas,
+  uiState: any,
+  params: RequestHandlerParams
+) => string;
+
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
@@ -208,8 +213,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: (visState, schemas, uiState = {}) => {
-    const paramsJson = prepareJson('params', visState.params);
+  metrics: (visState, schemas, uiState = {}, params: RequestHandlerParams) => {
+    const paramsJson = prepareJson('params', {
+      ...visState.params,
+      visInstanceId: params.visInstanceId,
+    });
     const uiStateJson = prepareJson('uiState', uiState);
 
     return `tsvb ${paramsJson} ${uiStateJson}`;
@@ -333,10 +341,7 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = async (
-  vis: any,
-  params: { searchSource: any; timeRange?: any }
-) => {
+export const buildVislibDimensions = async (vis: any, params: RequestHandlerParams) => {
   const schemas = getSchemas(vis, params.timeRange);
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
@@ -368,12 +373,10 @@ export const buildVislibDimensions = async (
 
 // If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const getVisParams = async (
-  vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
-) => {
+export const getVisParams = async (vis: Vis, params: RequestHandlerParams) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
+
   if (buildVisConfig[vis.type.name]) {
     visConfig = {
       ...visConfig,
@@ -385,10 +388,7 @@ export const getVisParams = async (
   return visConfig;
 };
 
-export const buildPipeline = async (
-  vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
-) => {
+export const buildPipeline = async (vis: Vis, params: RequestHandlerParams) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
   const query = searchSource.getField('query');
@@ -420,7 +420,7 @@ export const buildPipeline = async (
 
   const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState, params);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);

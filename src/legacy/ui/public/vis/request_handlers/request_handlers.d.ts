@@ -23,7 +23,6 @@ import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { Filters, Query, TimeRange } from '../../visualize';
 import { AggConfigs } from '../agg_configs';
-import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;
@@ -38,6 +37,7 @@ export interface RequestHandlerParams {
   inspectorAdapters?: Adapters;
   metricsAtAllLevels?: boolean;
   visParams?: any;
+  visInstanceId?: string;
 }
 
 export type RequestHandler = <T>(params: RequestHandlerParams) => T;

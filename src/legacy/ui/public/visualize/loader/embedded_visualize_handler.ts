@@ -54,6 +54,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   queryFilter: any;
   autoFetch?: boolean;
   pipelineDataLoader?: boolean;
+  visInstanceId?: string;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -120,6 +121,7 @@ export class EmbeddedVisualizeHandler {
       autoFetch = true,
       pipelineDataLoader = false,
       Private,
+      visInstanceId,
     } = params;
 
     this.dataLoaderParams = {
@@ -129,6 +131,7 @@ export class EmbeddedVisualizeHandler {
       queryFilter,
       filters,
       uiState,
+      visInstanceId,
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };
@@ -241,6 +244,10 @@ export class EmbeddedVisualizeHandler {
     if (params.hasOwnProperty('query')) {
       fetchRequired = true;
       this.dataLoaderParams.query = params.query;
+    }
+
+    if (params.hasOwnProperty('visInstanceId')) {
+      this.dataLoaderParams.visInstanceId = params.visInstanceId;
     }
 
     if (fetchRequired) {
