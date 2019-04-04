@@ -44,23 +44,6 @@ export const MetricsExplorerToolbar = injectI18n(
   }: Props) => {
     return (
       <Toolbar>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <MetricsExploererKueryBar
-              derivedIndexPattern={derivedIndexPattern}
-              onSubmit={onFilterQuerySubmit}
-              value={options.filterQuery}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={currentTimerange.from}
-              end={currentTimerange.to}
-              onTimeChange={({ start, end }) => onTimeChange(start, end)}
-              onRefresh={onRefresh}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <MetricsExplorerMetrics
@@ -86,6 +69,23 @@ export const MetricsExplorerToolbar = injectI18n(
                 onGroupByChange(groupBy);
               }}
               isClearable={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <MetricsExploererKueryBar
+              derivedIndexPattern={derivedIndexPattern}
+              onSubmit={onFilterQuerySubmit}
+              value={options.filterQuery}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
+            <EuiSuperDatePicker
+              start={currentTimerange.from}
+              end={currentTimerange.to}
+              onTimeChange={({ start, end }) => onTimeChange(start, end)}
+              onRefresh={onRefresh}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

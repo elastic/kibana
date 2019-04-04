@@ -21,6 +21,7 @@ interface MetricProps {
   fields: StaticIndexPatternField[];
   isDeleteable: boolean;
   intl: InjectedIntl;
+  openFromStart?: boolean;
 }
 
 const createBadgeName = (metric: MetricsExplorerMetric) => {
@@ -28,8 +29,17 @@ const createBadgeName = (metric: MetricsExplorerMetric) => {
 };
 
 export const Metric = injectI18n(
-  ({ isDeleteable, id, metric, onChange, onDelete, fields, intl }: MetricProps) => {
-    const [isPopoverOpen, setPopoverState] = useState<boolean>(false);
+  ({
+    isDeleteable,
+    id,
+    metric,
+    onChange,
+    onDelete,
+    fields,
+    intl,
+    openFromStart = false,
+  }: MetricProps) => {
+    const [isPopoverOpen, setPopoverState] = useState<boolean>(openFromStart);
 
     const intlPrefix = 'xpack.infra.metricsExplorer';
     const backgroundColor = metric.color ? metric.color : '#999';
@@ -40,8 +50,8 @@ export const Metric = injectI18n(
     const openPopover = useCallback(() => setPopoverState(true), [isPopoverOpen]);
 
     const editMetricLabel = intl.formatMessage({
-      id: `${intlPrefix}.editmetric`,
-      defaultMessage: 'edit metric',
+      id: `${intlPrefix}.editMetric`,
+      defaultMessage: 'Edit Metric',
     });
 
     const button = (

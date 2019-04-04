@@ -37,7 +37,7 @@ export const MetricsExploererKueryBar = injectI18n(
         setValidation(validateQuery(query));
         setDraftQuery(query);
       },
-      [true]
+      [setValidation, setDraftQuery]
     );
 
     return (

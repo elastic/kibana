@@ -9,6 +9,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
+import { getUnusedColor, MetricsExplorerColorPalette } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
@@ -47,9 +48,10 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
 
   const handleAdd = useCallback(
     () => {
+      const usedColors = options.metrics.map(m => m.color || MetricsExplorerColorPalette.color0);
       onChange([
         ...options.metrics,
-        { aggregation: MetricsExplorerAggregation.count, color: '#3185FC' },
+        { aggregation: MetricsExplorerAggregation.count, color: getUnusedColor(usedColors) },
       ]);
     },
     [options]
@@ -59,6 +61,13 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
     id: 'xpack.infra.metricsExplorer.addMetricLabel',
     defaultMessage: 'Add Metric',
   });
+
+  const openFirstMetric =
+    options.metrics.length === 1 &&
+    options.metrics[0] &&
+    options.metrics[0].aggregation === MetricsExplorerAggregation.count &&
+    options.metrics[0].color === '#3185FC' &&
+    options.groupBy == null;
 
   return (
     <MetricsContainer>
@@ -71,6 +80,7 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
           onChange={handleChange}
           onDelete={handleDelete}
           isDeleteable={options.metrics.length > 1}
+          openFromStart={openFirstMetric}
         />
       ))}
       {options.metrics.length < 5 && (
