@@ -4,25 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import { ElasticsearchPanel } from './elasticsearch_panel';
 import { KibanaPanel } from './kibana_panel';
 import { LogstashPanel } from './logstash_panel';
 import { AlertsPanel } from './alerts_panel';
 import { BeatsPanel } from './beats_panel';
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
-export function Overview(props) {
-  const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+export class Overview extends Component {
+  componentWillMount() {
+    this.props.fetchData();
+  }
 
-  return (
-    <EuiPage>
-      <EuiPageBody>
+  render() {
+    const props = this.props;
+    const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
+    return (
+      <div>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
-
         { !isFromStandaloneCluster ?
           (
             <Fragment>
@@ -39,13 +42,10 @@ export function Overview(props) {
           )
           : null
         }
-
         <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
-
         <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
-
         <ApmPanel {...props.cluster.apm} changeUrl={props.changeUrl} />
-      </EuiPageBody>
-    </EuiPage>
-  );
+      </div>
+    );
+  }
 }

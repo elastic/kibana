@@ -7,8 +7,10 @@
 import { combineReducers } from 'redux';
 import { clusters } from './clusters';
 import { date } from './date';
+import { breadcrumbs } from './breadcrumbs';
 
 export const rootReducer = combineReducers({
   clusters,
   date,
+  breadcrumbs,
 });

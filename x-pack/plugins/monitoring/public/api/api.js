@@ -15,3 +15,11 @@ export const apiFetchClusters = async (date) => {
     body: JSON.stringify(date)
   });
 };
+
+export const apiFetchCluster = async (clusterUuid, date) => {
+  return await kfetch({
+    pathname: `${apiPrefix}/clusters/${clusterUuid}`,
+    method: 'POST',
+    body: JSON.stringify(date)
+  });
+};

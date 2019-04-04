@@ -8,5 +8,7 @@ import { createAction } from 'redux-actions';
 
 export * from './clusters';
 export * from './date';
+export * from './breadcrumbs';
 
 export const refreshActiveRouteData = createAction('refreshActiveRouteData', location => ({ location }));
+export const navigateWithLocalState = createAction('navigateWithLocalState', (history, path) => ({ history, path }));

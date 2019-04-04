@@ -8,7 +8,7 @@ import chrome from 'ui/chrome';
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
+
 import { I18nContext } from 'ui/i18n';
 import { MonitoringApp } from './app';
 import template from './monitoring.html';
@@ -34,11 +34,9 @@ uiSettings.overrideLocalDefault('timepicker:refreshIntervalDefaults', JSON.strin
 function renderReact() {
   render(
     <I18nContext>
-      <HashRouter>
-        <Provider store={buildStore()}>
-          <MonitoringApp />
-        </Provider>
-      </HashRouter>
+      <Provider store={buildStore()}>
+        <MonitoringApp />
+      </Provider>
     </I18nContext>,
     document.getElementById(REACT_APP_ROOT_ID)
   );

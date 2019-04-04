@@ -4,25 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import qs from 'querystring';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, pick } from 'lodash';
 import rison from 'rison-node';
-import { getDateForUrlComparison, getDateIsSet } from '../selectors';
-import { updateDateFromUrl } from '../actions';
+import { getLocalState, getDateIsSet } from '../selectors';
+import { updateDateFromUrl, navigateWithLocalState } from '../actions';
 
-function writeToUrl(state) {
-  const encodedState = rison.encode(state);
+function getUpdatedUrlWithState(state, newRoute = undefined) {
+  const cleanState = pick(state, value => !!value);
+  const encodedState = rison.encode(cleanState);
   const hash = window.location.hash;
   const [route, queryParamsAsString] = hash.split('?');
   const queryParams = qs.parse(queryParamsAsString);
   queryParams._g = encodedState;
   const updatedQueryParamsAsString = qs.stringify(queryParams);
-  const updatedHash = `${route}?${updatedQueryParamsAsString}`;
+  const updatedHash = `${newRoute || route}?${updatedQueryParamsAsString}`;
 
+  return updatedHash;
+}
+
+function writeToUrl(state) {
+  const updated = getUpdatedUrlWithState(state);
   if (window.history.pushState) {
-    window.history.pushState(null, null, updatedHash);
+    window.history.pushState(null, null, updated);
   }
   else {
-    window.location.hash = updatedHash;
+    window.location.hash = updated;
   }
 }
 
@@ -52,18 +58,30 @@ const actionsToIgnore = [
   updateDateFromUrl().type,
 ];
 
-export const syncStateToUrl = store => next => action => {
+export const syncStateWithUrl = store => next => action => {
+  const result = next(action);
   if (actionsToIgnore.includes(action.type)) {
-    return next(action);
+    return result;
   }
+
   const state = store.getState();
   const urlState = readFromUrl();
-  const localState = getDateForUrlComparison(state);
-  const isLocalSet = getDateIsSet(state);
-  if (!isLocalSet && isStateValid(urlState)) {
+  const localState = getLocalState(state);
+
+  const willSyncFromUrl = (!getDateIsSet(state) || !isStateValid(localState)) && isStateValid(urlState);
+  const willSyncToUrl = !willSyncFromUrl && !isEqual(urlState, localState);
+  // console.log({ willSyncFromUrl, willSyncToUrl });
+
+  if (action.type === navigateWithLocalState().type) {
+    const newUrl = getUpdatedUrlWithState(localState, action.payload.path);
+    action.payload.history.push(newUrl);
+    return;
+  }
+
+  if (willSyncFromUrl) {
     store.dispatch(updateDateFromUrl(urlState));
-  } else if (!isEqual(urlState, localState)) {
+  } else if (willSyncToUrl) {
     writeToUrl(localState);
   }
-  return next(action);
+  return result;
 };

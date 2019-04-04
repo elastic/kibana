@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getClusters = state => state.clusters.clusters;
-export const getActiveClusterUuid = state => state.clusters.activeClusterUuid;
-export const getCcs = state => state.clusters.ccs;
+export const getBreadcrumbs = state => state.breadcrumbs;

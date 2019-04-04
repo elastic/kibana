@@ -8,29 +8,28 @@ import React from 'react';
 import {
   EuiBreadcrumbs
 } from '@elastic/eui';
-import { withRouter } from 'react-router-dom';
-import { routeList } from '../../routes';
+import { getBreadcrumbs } from '../../store/selectors';
+import { connect } from 'react-redux';
+import { getRouterLinkProps } from '../../routing';
 
-function doesPathMatchRoute(path, route) {
-  return route.path === path; // this won't scale
-}
-
-const BreadcrumbsComponent = ({ location }) => {
-  const route = routeList.find(route => doesPathMatchRoute(location.pathname, route));
-  if (!route) {
-    return null;
-  }
-
-  const breadcrumbs = route.breadcrumbs.map(breadcrumb => ({
-    ...breadcrumb,
-    truncate: true
-  }));
+const BreadcrumbsComponent = ({ breadcrumbs }) => {
+  const updatedBreadcrumbs = breadcrumbs.map(breadcrumb => {
+    const { href, ...rest } = breadcrumb;
+    return {
+      ...rest,
+      ...href ? getRouterLinkProps(breadcrumb.href) : {}
+    };
+  });
 
   return (
     <EuiBreadcrumbs
-      breadcrumbs={breadcrumbs}
+      breadcrumbs={updatedBreadcrumbs}
     />
   );
 };
 
-export const Breadcrumbs = withRouter(BreadcrumbsComponent);
+export const Breadcrumbs = connect(
+  state => ({
+    breadcrumbs: getBreadcrumbs(state)
+  })
+)(BreadcrumbsComponent);

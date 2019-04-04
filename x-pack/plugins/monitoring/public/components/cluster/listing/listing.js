@@ -7,7 +7,7 @@ import React, { Fragment, Component } from 'react';
 import chrome from 'ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { capitalize } from 'lodash';
+import { capitalize, partial } from 'lodash';
 import {
   EuiHealth,
   EuiLink,
@@ -25,6 +25,9 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getClusters } from '../../../store/selectors';
 import { connect } from 'react-redux';
 import { withTableProps } from '../../table/with_table_props';
+import { setActiveClusterUuid, setCcs, navigateWithLocalState } from '../../../store/actions';
+import { getStore } from '../../../store';
+import { withRouter } from 'react-router-dom';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -254,13 +257,11 @@ const getColumns = (
   ];
 };
 
-const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
-  scope.$evalAsync(() => {
-    globalState.cluster_uuid = clusterUuid;
-    globalState.ccs = ccs;
-    globalState.save();
-    kbnUrl.changePath('/overview');
-  });
+const changeCluster = (history, clusterUuid, ccs) => {
+  const store = getStore();
+  store.dispatch(setActiveClusterUuid(clusterUuid));
+  store.dispatch(setCcs(ccs));
+  store.dispatch(navigateWithLocalState(history, '/overview'));
 };
 
 const licenseWarning = (scope, { title, text }) => {
@@ -364,7 +365,7 @@ class ListingUIComponent extends Component {
   }
 
   componentWillMount() {
-    this.props.fetchData();
+    // this.props.fetchData();
   }
 
   renderStandaloneClusterCallout(changeCluster, storage) {
@@ -418,27 +419,24 @@ class ListingUIComponent extends Component {
   }
 
   render() {
-    const { showLicenseExpiration, filterText, clusters, sorting, pagination, onTableChange } = this.props;
+    const { showLicenseExpiration, filterText, clusters, sorting, pagination, onTableChange, history } = this.props;
 
     if (!clusters) {
       return <h2>Loading</h2>;
     }
 
-
-    // const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
-    // const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
-    // const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
+    const _changeCluster = partial(changeCluster, history);
     const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
 
     return (
       <div>
-        {hasStandaloneCluster ? this.renderStandaloneClusterCallout(changeCluster) : null}
+        {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster) : null}
         <EuiMonitoringTable
           className="clusterTable"
           rows={clusters}
           columns={getColumns(
             showLicenseExpiration,
-            changeCluster,
+            _changeCluster,
             handleClickIncompatibleLicense,
             handleClickInvalidLicense
           )}
@@ -471,8 +469,12 @@ class ListingUIComponent extends Component {
   }
 }
 
-export const Listing = withTableProps(connect(
-  state => ({
-    clusters: getClusters(state)
-  }),
-)(ListingUIComponent));
+export const Listing = withRouter(
+  withTableProps(
+    connect(
+      state => ({
+        clusters: getClusters(state)
+      }),
+    )(ListingUIComponent)
+  )
+);

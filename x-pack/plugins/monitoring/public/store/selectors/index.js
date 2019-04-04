@@ -6,3 +6,16 @@
 
 export * from './clusters';
 export * from './date';
+export * from './breadcrumbs';
+
+import { getDateForUrlComparison } from './date';
+import { getActiveClusterUuid } from './clusters';
+
+export const getLocalState = state => {
+  const date = getDateForUrlComparison(state);
+  const activeClusterUuid = getActiveClusterUuid(state);
+  return {
+    ...date,
+    cluster_uuid: activeClusterUuid
+  };
+};
