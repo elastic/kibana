@@ -27,7 +27,7 @@ import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { FIELD_TYPES } from '../../../constants/fields';
+import { FIELD_TYPES } from '../../../common/field_types';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
