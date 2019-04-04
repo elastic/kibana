@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { uiModules } from '../../modules';
 import { toastNotifications } from '../../notify';
-import { UrlOverflowServiceProvider } from '../../error_url_overflow';
+import { UrlOverflowServiceProvider } from '../services/error_url_overflow';
 
 import { directivesProvider } from '../directives';
 

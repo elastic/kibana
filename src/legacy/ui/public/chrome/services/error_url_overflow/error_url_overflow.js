@@ -18,8 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uiRoutes from '../routes';
-import { KbnUrlProvider } from '../url';
+import uiRoutes from '../../../routes';
+import { KbnUrlProvider } from '../../../url';
 
 import template from './error_url_overflow.html';
 import { UrlOverflowServiceProvider } from './url_overflow_service';
