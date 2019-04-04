@@ -81,6 +81,7 @@ const SplitByTermsUi = props => {
             label={(<FormattedMessage
               id="tsvb.splits.terms.byLabel"
               defaultMessage="By"
+              description="This labels a field selector allowing the user to chose 'by' which field to group."
             />)}
           >
             <FieldSelect

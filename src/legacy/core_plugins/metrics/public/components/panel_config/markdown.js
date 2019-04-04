@@ -256,6 +256,7 @@ class MarkdownPanelConfigUi extends Component {
                 <FormattedMessage
                   id="tsvb.markdown.optionsTab.customCSSLabel"
                   defaultMessage="Custom CSS (supports Less)"
+                  description="CSS and Less are names of technologies and should not be translated."
                 />
               </span>
             </EuiTitle>
