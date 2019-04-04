@@ -29,8 +29,8 @@ function getMockRequest() {
 describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
-    const setup = setupRequest(mockRequest);
-    await setup.client('myType', { index: 'apm-*', body: { foo: 'bar' } });
+    const { client } = setupRequest(mockRequest);
+    await client('myType', { index: 'apm-*', body: { foo: 'bar' } });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'myType', {
       index: 'apm-*',
       body: {
@@ -46,17 +46,17 @@ describe('setupRequest', () => {
     });
   });
 
-  describe('omitLegacyData', () => {
+  describe('observer.version_major filter', () => {
     describe('if index is apm-*', () => {
-      it('should add `observer.version_major` filter if `omitLegacyData=true` ', async () => {
+      it('should merge `observer.version_major` filter with existing boolean filters', async () => {
         const { mockRequest, callWithRequestSpy } = getMockRequest();
-        const setup = setupRequest(mockRequest);
-        await setup.client('myType', {
+        const { client } = setupRequest(mockRequest);
+        await client('myType', {
           index: 'apm-*',
-          omitLegacyData: true,
           body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
         });
-        expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
           query: {
             bool: {
               filter: [
@@ -68,23 +68,10 @@ describe('setupRequest', () => {
         });
       });
 
-      it('should not add `observer.version_major` filter if `omitLegacyData=false` ', async () => {
-        const { mockRequest, callWithRequestSpy } = getMockRequest();
-        const setup = setupRequest(mockRequest);
-        await setup.client('myType', {
-          index: 'apm-*',
-          omitLegacyData: false,
-          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
-        });
-        expect(callWithRequestSpy.mock.calls[0][2].body).toEqual({
-          query: { bool: { filter: [{ term: 'someTerm' }] } }
-        });
-      });
-
       it('should add `observer.version_major` filter if none exists', async () => {
         const { mockRequest, callWithRequestSpy } = getMockRequest();
-        const setup = setupRequest(mockRequest);
-        await setup.client('myType', { index: 'apm-*' });
+        const { client } = setupRequest(mockRequest);
+        await client('myType', { index: 'apm-*' });
         const params = callWithRequestSpy.mock.calls[0][2];
         expect(params.body).toEqual({
           query: {
@@ -95,33 +82,25 @@ describe('setupRequest', () => {
         });
       });
 
-      it('should have `omitLegacyData=true` as default and merge boolean filters', async () => {
+      it('should not add `observer.version_major` filter if `includeLegacyData=true`', async () => {
         const { mockRequest, callWithRequestSpy } = getMockRequest();
-        const setup = setupRequest(mockRequest);
-        await setup.client('myType', {
+        const { client } = setupRequest(mockRequest);
+        await client('myType', {
           index: 'apm-*',
-          body: {
-            query: { bool: { filter: [{ term: 'someTerm' }] } }
-          }
+          includeLegacyData: true,
+          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
         });
         const params = callWithRequestSpy.mock.calls[0][2];
         expect(params.body).toEqual({
-          query: {
-            bool: {
-              filter: [
-                { term: 'someTerm' },
-                { range: { 'observer.version_major': { gte: 7 } } }
-              ]
-            }
-          }
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
         });
       });
     });
 
-    it('if index is not an APM index, it should not add `observer.version_major` filter ', async () => {
+    it('if index is not an APM index, it should not add `observer.version_major` filter', async () => {
       const { mockRequest, callWithRequestSpy } = getMockRequest();
-      const setup = setupRequest(mockRequest);
-      await setup.client('myType', {
+      const { client } = setupRequest(mockRequest);
+      await client('myType', {
         index: '.ml-*',
         body: {
           query: { bool: { filter: [{ term: 'someTerm' }] } }
@@ -144,8 +123,8 @@ describe('setupRequest', () => {
 
       // mock includeFrozen to return false
       mockRequest.getUiSettingsService = () => ({ get: async () => false });
-      const setup = setupRequest(mockRequest);
-      await setup.client('myType', {});
+      const { client } = setupRequest(mockRequest);
+      await client('myType', {});
       const params = callWithRequestSpy.mock.calls[0][2];
       expect(params.ignore_throttled).toBe(true);
     });
@@ -155,8 +134,8 @@ describe('setupRequest', () => {
 
       // mock includeFrozen to return true
       mockRequest.getUiSettingsService = () => ({ get: async () => true });
-      const setup = setupRequest(mockRequest);
-      await setup.client('myType', {});
+      const { client } = setupRequest(mockRequest);
+      await client('myType', {});
       const params = callWithRequestSpy.mock.calls[0][2];
       expect(params.ignore_throttled).toBe(false);
     });

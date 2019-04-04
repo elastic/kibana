@@ -18,12 +18,8 @@
  */
 
 import './editor/editor';
-import 'ui/draggable/draggable_container';
-import 'ui/draggable/draggable_item';
-import 'ui/draggable/draggable_handle';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
-import 'ui/filters/sort_prefix_first';
 import 'ui/filter_bar';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
