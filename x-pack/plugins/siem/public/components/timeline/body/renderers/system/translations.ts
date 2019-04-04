@@ -50,6 +50,67 @@ export const USING = i18n.translate('xpack.siem.system.usingDescription', {
   defaultMessage: 'using',
 });
 
-export const PROCESS_STARTED = i18n.translate('xpack.siem.system.startedProcessDescription', {
+export const PROCESS_STARTED = i18n.translate('xpack.siem.system.processStartedDescription', {
   defaultMessage: 'started process',
+});
+
+export const PROCESS_STOPPED = i18n.translate('xpack.siem.system.processStoppedDescription', {
+  defaultMessage: 'stopped process',
+});
+
+export const EXISTING_PROCESS = i18n.translate('xpack.siem.system.existingProcessDescription', {
+  defaultMessage: 'is running process',
+});
+
+export const SOCKET_OPENED = i18n.translate('xpack.siem.system.socketOpenedDescription', {
+  defaultMessage: 'opened a socket with',
+});
+
+export const SOCKET_CLOSED = i18n.translate('xpack.siem.system.socketClosedDescription', {
+  defaultMessage: 'closed a socket with',
+});
+
+export const NON_EXISTENT = i18n.translate('xpack.siem.system.nonExistentDescription', {
+  defaultMessage: 'an unknown process',
+});
+
+export const EXISTING_USER = i18n.translate('xpack.siem.system.existingUserDescription', {
+  defaultMessage: 'is an existing user',
+});
+
+export const EXISTING_SOCKET = i18n.translate('xpack.siem.system.existingSocketDescription', {
+  defaultMessage: 'is using an existing socket from',
+});
+
+// TODO: Redo this one
+export const EXISTING_PACKAGE = i18n.translate('xpack.siem.system.existingPackageDescription', {
+  defaultMessage: 'is using an existing package from',
+});
+
+export const INVALID = i18n.translate('xpack.siem.system.invalidDescription', {
+  defaultMessage: 'attempted invalid usage of',
+});
+
+export const USER_CHANGED = i18n.translate('xpack.siem.system.userChangedDescription', {
+  defaultMessage: 'user has changed',
+});
+
+export const HOST_CHANGED = i18n.translate('xpack.siem.system.hostDescription', {
+  defaultMessage: 'host',
+});
+
+export const USER_ADDED = i18n.translate('xpack.siem.system.userAddedDescription', {
+  defaultMessage: 'user was added',
+});
+
+export const PROCESS_ERROR = i18n.translate('xpack.siem.system.processErrorDescription', {
+  defaultMessage: 'encountered a process error with',
+});
+
+export const ERROR = i18n.translate('xpack.siem.system.errorDescription', {
+  defaultMessage: 'encountered an error with',
+});
+
+export const PACKAGE_INSTALLED = i18n.translate('xpack.siem.system.packageInstalledDescription', {
+  defaultMessage: 'installed package',
 });

@@ -421,13 +421,13 @@ export interface EventEcsFields {
 
   hash?: string | null;
 
-  id?: number | null;
+  id?: string | null;
 
   kind?: string | null;
 
   module?: string | null;
 
-  original?: string | null;
+  original?: (string | null)[] | null;
 
   outcome?: string | null;
 
@@ -2515,13 +2515,13 @@ export namespace EventEcsFieldsResolvers {
 
     hash?: HashResolver<string | null, TypeParent, Context>;
 
-    id?: IdResolver<number | null, TypeParent, Context>;
+    id?: IdResolver<string | null, TypeParent, Context>;
 
     kind?: KindResolver<string | null, TypeParent, Context>;
 
     module?: ModuleResolver<string | null, TypeParent, Context>;
 
-    original?: OriginalResolver<string | null, TypeParent, Context>;
+    original?: OriginalResolver<(string | null)[] | null, TypeParent, Context>;
 
     outcome?: OutcomeResolver<string | null, TypeParent, Context>;
 
@@ -2574,7 +2574,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IdResolver<
-    R = number | null,
+    R = string | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2589,7 +2589,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OriginalResolver<
-    R = string | null,
+    R = (string | null)[] | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

@@ -15,7 +15,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 1,
+      id: '1',
       action: 'Action',
       category: 'Access',
       module: 'nginx',
@@ -46,7 +46,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 3,
+      id: '3',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -77,7 +77,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 4,
+      id: '4',
       category: 'Attempted Administrator Privilege Gain',
       type: 'Alert',
       module: 'suricata',
@@ -118,7 +118,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 5,
+      id: '5',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -149,7 +149,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 6,
+      id: '6',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -176,7 +176,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 8,
+      id: '8',
       category: 'Web Application Attack',
       type: 'Alert',
       module: 'suricata',
@@ -217,7 +217,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 7,
+      id: '7',
       category: 'Access',
       type: 'HTTP Request',
       module: 'apache',
@@ -248,7 +248,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 9,
+      id: '9',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -279,7 +279,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 10,
+      id: '10',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -310,7 +310,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 11,
+      id: '11',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -341,7 +341,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 12,
+      id: '12',
       category: 'Access',
       type: 'HTTP Request',
       module: 'nginx',
@@ -372,7 +372,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 2,
+      id: '2',
       category: 'Authentication',
       type: 'Authentication Success',
       module: 'authlog',
@@ -403,7 +403,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['192.168.0.1'],
     },
     event: {
-      id: 13,
+      id: '13',
       category: 'Web Application Attack',
       type: 'Alert',
       module: 'suricata',

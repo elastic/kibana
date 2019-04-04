@@ -15,11 +15,15 @@ import { Args } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { getEmptyStringTag } from '../../../../empty_value';
 import { AuditdNetflow } from '../auditd_netflow';
 
-import { Details, TokensFlexItem } from '.';
-import { UserHostWorkingDir } from '.';
+import {
+  Details,
+  ProcessDraggableWithNonExistentProcess,
+  TokensFlexItem,
+  UserHostWorkingDir,
+} from '.';
+
 import * as i18n from './translations';
 
 interface Props {
@@ -74,7 +78,7 @@ export const SystemGenericFileLine = pure<Props>(
         {text}
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
-        <ProcessDraggable
+        <ProcessDraggableWithNonExistentProcess
           contextId={contextId}
           eventId={id}
           processPid={processPid}
@@ -126,93 +130,30 @@ export const SystemGenericFileDetails = pure<GenericDetailsProps>(
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
     const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
-
-    if (data.process != null) {
-      return (
-        <Details>
-          <SystemGenericFileLine
-            id={id}
-            contextId={contextId}
-            text={text}
-            hostName={hostName}
-            userName={userName}
-            filePath={filePath}
-            processTitle={processTitle}
-            workingDirectory={workingDirectory}
-            args={args}
-            session={session}
-            primary={primary}
-            processName={processName}
-            processPid={processPid}
-            processExecutable={processExecutable}
-            secondary={secondary}
-            fileIcon={fileIcon}
-            outcome={outcome}
-          />
-          <EuiSpacer size="s" />
-          <AuditdNetflow data={data} />
-        </Details>
-      );
-    } else {
-      return null;
-    }
-  }
-);
-
-interface ProcessDraggableProps {
-  contextId: string;
-  eventId: string;
-  processExecutable: string | undefined | null;
-  processPid?: string | undefined | null;
-  processName?: string | undefined | null;
-}
-
-export const ProcessDraggable = pure<ProcessDraggableProps>(
-  ({ contextId, eventId, processExecutable, processName, processPid }) => {
-    if (processExecutable != null) {
-      if (processExecutable === '') {
-        return getEmptyStringTag();
-      } else {
-        return (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.executable"
-            value={processExecutable}
-            iconType="console"
-          />
-        );
-      }
-    } else if (processName != null) {
-      if (processName === '') {
-        return getEmptyStringTag();
-      } else {
-        return (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.name"
-            value={processName}
-            iconType="console"
-          />
-        );
-      }
-    } else if (processPid != null) {
-      if (processPid === '') {
-        return getEmptyStringTag();
-      } else {
-        return (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.pid"
-            value={processExecutable}
-            iconType="number"
-          />
-        );
-      }
-    } else {
-      return null;
-    }
+    return (
+      <Details>
+        <SystemGenericFileLine
+          id={id}
+          contextId={contextId}
+          text={text}
+          hostName={hostName}
+          userName={userName}
+          filePath={filePath}
+          processTitle={processTitle}
+          workingDirectory={workingDirectory}
+          args={args}
+          session={session}
+          primary={primary}
+          processName={processName}
+          processPid={processPid}
+          processExecutable={processExecutable}
+          secondary={secondary}
+          fileIcon={fileIcon}
+          outcome={outcome}
+        />
+        <EuiSpacer size="s" />
+        <AuditdNetflow data={data} />
+      </Details>
+    );
   }
 );

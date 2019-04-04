@@ -73,7 +73,6 @@ const EVENT_ACTION_FIELD = 'event.action';
 const NETWORK_TRAFFIC = 'network_traffic';
 const NETWORK_FLOW = 'network_flow';
 const NETFLOW_FLOW = 'netflow_flow';
-const SOCKET_OPENED = 'socket_opened';
 
 export const eventCategoryMatches = (eventCategory: string | object | undefined | null): boolean =>
   `${eventCategory}`.toLowerCase() === NETWORK_TRAFFIC;
@@ -81,7 +80,7 @@ export const eventCategoryMatches = (eventCategory: string | object | undefined 
 export const eventActionMatches = (eventAction: string | object | undefined | null): boolean => {
   const action = `${eventAction}`.toLowerCase();
 
-  return action === NETWORK_FLOW || action === NETFLOW_FLOW || action === SOCKET_OPENED;
+  return action === NETWORK_FLOW || action === NETFLOW_FLOW;
 };
 
 export const netflowRowRenderer: RowRenderer = {

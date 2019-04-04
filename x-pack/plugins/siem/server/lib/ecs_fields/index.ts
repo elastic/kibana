@@ -234,6 +234,7 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
+  message: 'message',
   ...{ ...auditdMap },
   ...{ ...destinationFieldsMap },
   ...{ ...eventBaseFieldsMap },

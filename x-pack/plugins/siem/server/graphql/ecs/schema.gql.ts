@@ -17,7 +17,7 @@ export const ecsSchema = gql`
     duration: Float
     end: Date
     hash: String
-    id: Float
+    id: String
     kind: String
     module: String
     original: [String]

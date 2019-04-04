@@ -15,7 +15,7 @@ import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
 import { AuditdNetflow } from '../auditd_netflow';
 
-import { Details, TokensFlexItem, UserHostWorkingDir } from '.';
+import { Details, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
@@ -29,6 +29,9 @@ interface Props {
   secondary: string | null | undefined;
   processPid: string | null | undefined;
   processTitle: string | null | undefined;
+  processName: string | null | undefined;
+  message: string | null | undefined;
+  processExecutable: string | null | undefined;
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
@@ -40,9 +43,12 @@ export const SystemGenericLine = pure<Props>(
     contextId,
     hostName,
     userName,
+    message,
     primary,
     secondary,
     processPid,
+    processName,
+    processExecutable,
     processTitle,
     workingDirectory,
     args,
@@ -50,41 +56,56 @@ export const SystemGenericLine = pure<Props>(
     session,
     text,
   }) => (
-    <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <UserHostWorkingDir
-        contextId={contextId}
-        eventId={id}
-        userName={userName}
-        hostName={hostName}
-        workingDirectory={workingDirectory}
-      />
-      <TokensFlexItem grow={false} component="span">
-        {text}
-      </TokensFlexItem>
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
+    <>
+      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+        <UserHostWorkingDir
           contextId={contextId}
           eventId={id}
-          field="process.pid"
-          value={processPid}
-          iconType="number"
+          userName={userName}
+          hostName={hostName}
+          workingDirectory={workingDirectory}
         />
-      </TokensFlexItem>
-      {outcome != null && (
         <TokensFlexItem grow={false} component="span">
-          {i18n.WITH_RESULT}
+          {text}
         </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          <ProcessDraggable
+            contextId={contextId}
+            eventId={id}
+            processPid={processPid}
+            processName={processName}
+            processExecutable={processExecutable}
+          />
+        </TokensFlexItem>
+        {outcome != null && (
+          <TokensFlexItem grow={false} component="span">
+            {i18n.WITH_RESULT}
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={id}
+            field="event.outcome"
+            queryValue={outcome}
+            value={outcome}
+          />
+        </TokensFlexItem>
+      </EuiFlexGroup>
+      {message != null && (
+        <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              contextId={contextId}
+              eventId={id}
+              field="message"
+              queryValue={message}
+              value={message}
+            />
+          </TokensFlexItem>
+        </EuiFlexGroup>
       )}
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={id}
-          field="event.outcome"
-          queryValue={outcome}
-          value={outcome}
-        />
-      </TokensFlexItem>
-    </EuiFlexGroup>
+    </>
   )
 );
 
@@ -100,11 +121,14 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(
     // TODO: Do not check this in
     // console.log('data is:', JSON.stringify(data, null, 2));
     const id = data._id;
+    // TODO: Get message to populate and show it below the other text
+    const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
     const outcome: string | null | undefined = get('event.outcome', data);
-    const processExecutable: string | null | undefined = get('process.pid', data);
     const processPid: string | null | undefined = get('process.pid', data);
+    const processName: string | null | undefined = get('process.name', data);
+    const processExecutable: string | null | undefined = get('process.executable', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
@@ -119,9 +143,12 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(
           id={id}
           contextId={contextId}
           text={text}
+          message={message}
           hostName={hostName}
           userName={userName}
           processPid={processPid}
+          processExecutable={processExecutable}
+          processName={processName}
           processTitle={processTitle}
           workingDirectory={workingDirectory}
           args={args}

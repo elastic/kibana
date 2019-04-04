@@ -9,3 +9,4 @@ export * from './generic_details';
 export * from './generic_row_renderer';
 export * from './user_host_working_dir';
 export * from './generic_file_details';
+export * from './process_draggable';

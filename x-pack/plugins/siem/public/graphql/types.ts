@@ -392,13 +392,13 @@ export interface EventEcsFields {
 
   hash?: string | null;
 
-  id?: number | null;
+  id?: string | null;
 
   kind?: string | null;
 
   module?: string | null;
 
-  original?: string | null;
+  original?: (string | null)[] | null;
 
   outcome?: string | null;
 
@@ -1393,7 +1393,7 @@ export namespace GetEventsQuery {
 
     category?: string | null;
 
-    id?: number | null;
+    id?: string | null;
   };
 
   export type Host = {
@@ -2453,13 +2453,13 @@ export namespace GetTimelineQuery {
 
     hash?: string | null;
 
-    id?: number | null;
+    id?: string | null;
 
     kind?: string | null;
 
     module?: string | null;
 
-    original?: string | null;
+    original?: (string | null)[] | null;
 
     outcome?: string | null;
 
