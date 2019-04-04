@@ -21,7 +21,6 @@ import React from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
 function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
@@ -34,23 +33,26 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
       "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
   });
 
-  const label = (
-    <>
-      <FormattedMessage
-        id="common.ui.aggTypes.dropPartialBucketsLabel"
-        defaultMessage="Drop partial buckets"
-      />{' '}
-      <EuiIconTip position="right" content={content} type="questionInCircle" aria-label={content} />
-    </>
-  );
+  const label = i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
+    defaultMessage: 'Drop partial buckets',
+  });
 
   return (
-    <EuiFormRow label={label} fullWidth={true} className="visEditorSidebar__aggParamFormRow">
-      <EuiSwitch
-        checked={value}
-        data-test-subj="dropPartialBucketsCheckbox"
-        onChange={ev => setValue(ev.target.checked)}
-      />
+    <EuiFormRow className="visEditorSidebar__aggParamFormRow visEditorSidebar__switchControl">
+      <>
+        <EuiSwitch
+          label={label}
+          checked={value}
+          data-test-subj="dropPartialBucketsCheckbox"
+          onChange={ev => setValue(ev.target.checked)}
+        />
+        <EuiIconTip
+          position="right"
+          content={content}
+          type="questionInCircle"
+          aria-label={content}
+        />
+      </>
     </EuiFormRow>
   );
 }

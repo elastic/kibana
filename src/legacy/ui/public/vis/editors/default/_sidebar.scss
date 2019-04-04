@@ -224,4 +224,13 @@
 .visEditorSidebar__aggParamFormRow {
   margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
+
+  &.visEditorSidebar__switchControl {
+    flex-direction: row;
+
+    label{
+      display: initial;
+      margin-right: $euiSizeS;
+    }
+  }
 }
