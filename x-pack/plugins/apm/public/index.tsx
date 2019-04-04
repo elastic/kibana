@@ -6,22 +6,19 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 import 'react-vis/dist/style.css';
+import { PluginInitializerContext } from 'src/core/server';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
-import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
-import { Main } from './components/app/Main';
-import { history } from './components/shared/Links/url_helpers';
-import { LocationProvider } from './context/LocationContext';
 // @ts-ignore
 import configureStore from './store/config/configureStore';
+import { plugin } from './new-platform';
+import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
 
@@ -32,34 +29,22 @@ chrome.helpExtension.set(domElement => {
     ReactDOM.unmountComponentAtNode(domElement);
   };
 });
-const REACT_APP_ROOT_ID = 'react-apm-root';
-
-type PromiseResolver = (value?: {} | PromiseLike<{}> | undefined) => void;
 
 // @ts-ignore
 chrome.setRootTemplate(template);
-const store = configureStore();
-const checkForRoot = (resolve: PromiseResolver) => {
-  const ready = !!document.getElementById(REACT_APP_ROOT_ID);
-  if (ready) {
-    resolve();
-  } else {
-    setTimeout(() => checkForRoot(resolve), 10);
-  }
-};
-const waitForRoot = new Promise(resolve => checkForRoot(resolve));
 
-waitForRoot.then(() => {
-  ReactDOM.render(
-    <I18nContext>
-      <Provider store={store}>
-        <Router history={history}>
-          <LocationProvider history={history}>
-            <Main />
-          </LocationProvider>
-        </Router>
-      </Provider>
-    </I18nContext>,
-    document.getElementById(REACT_APP_ROOT_ID)
-  );
+const checkForRoot = () => {
+  return new Promise(resolve => {
+    const ready = !!document.getElementById(REACT_APP_ROOT_ID);
+    if (ready) {
+      resolve();
+    } else {
+      setTimeout(() => resolve(checkForRoot()), 10);
+    }
+  });
+};
+
+checkForRoot().then(() => {
+  const initializerContext = {} as PluginInitializerContext;
+  plugin(initializerContext).setup();
 });
