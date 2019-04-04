@@ -31,7 +31,7 @@ export class OverlayService {
 
   constructor(private readonly targetDomElement: HTMLElement) {}
 
-  public setup({ i18n }: Deps) {
+  public setup({ i18n }: Deps): OverlaySetup {
     return {
       openFlyout: this.flyoutService.openFlyout.bind(
         this.flyoutService,
@@ -47,7 +47,7 @@ export interface OverlaySetup {
     flyoutChildren: React.ReactNode,
     flyoutProps?: {
       closeButtonAriaLabel?: string;
-      'data-test-subject'?: string;
+      'data-test-subj'?: string;
     }
   ) => FlyoutRef;
 }
