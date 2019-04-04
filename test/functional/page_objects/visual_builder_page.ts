@@ -33,28 +33,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       fromTime = '2015-09-19 06:31:44.000',
       toTime = '2015-09-22 18:31:44.000'
     ) {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickVisualBuilderChart');
-      await PageObjects.visualize.clickVisualBuilder();
+      await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+    }
+
+    public async checkVisualBuilderIsPresent() {
+      await testSubjects.exists('tvbEditor', { timeout: 5000 });
+    }
+
+    public async checkMetricTabIsPresent() {
+      await testSubjects.exists('tsvbMetricValue', { timeout: 5000 });
+    }
+
+    public async checkGaugeTabIsPresent() {
+      await testSubjects.exists('tvbVisGaugeContainer', { timeout: 5000 });
+    }
+
+    public async checkTopNTabIsPresent() {
+      await testSubjects.exists('tvbVisTopNTable', { timeout: 5000 });
     }
 
     public async clickMetric() {
       const button = await testSubjects.find('metricTsvbTypeBtn');
       await button.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async clickMarkdown() {
       const button = await testSubjects.find('markdownTsvbTypeBtn');
       await button.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async getMetricValue() {
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
@@ -160,20 +171,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async clearOffsetSeries() {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async enterOffsetSeries(value: string) {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
       await el.type(value);
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getRhythmChartLegendValue() {
@@ -185,7 +193,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickGauge() {
       await testSubjects.click('gaugeTsvbTypeBtn');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getGaugeLabel() {
@@ -200,7 +207,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTopN() {
       await testSubjects.click('top_nTsvbTypeBtn');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async getTopNLabel() {
@@ -215,7 +221,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTable() {
       await testSubjects.click('tableTsvbTypeBtn');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async createNewAgg(nth = 0) {

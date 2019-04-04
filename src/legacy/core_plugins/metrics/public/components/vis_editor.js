@@ -107,7 +107,7 @@ class VisEditor extends Component {
 
     if (model) {
       return (
-        <div className="tvbEditor">
+        <div className="tvbEditor" data-test-subj="tvbEditor">
           <div className="tvbEditor--hideForReporting">
             <VisPicker model={model} onChange={this.handleChange} />
           </div>
