@@ -1376,9 +1376,9 @@ export const getSnappedShapes = (
 export const getConstrainedShapesWithPreexistingAnnotations = (snapped, transformed) =>
   snapped.concat(transformed.filter(s => s.type === 'annotation'));
 
-export const getGroupAction = action => {
+export const getGroupAction = (action, mouseIsDown) => {
   const event = action && action.event;
-  return event === 'group' || event === 'ungroup' ? event : null;
+  return !mouseIsDown && (event === 'group' || event === 'ungroup') ? event : null;
 };
 
 export const getGroupedSelectedShapes = ({ selectedShapes }) => selectedShapes;

@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import './parse_query';
+import { Plugin, PluginSetupContext } from 'kibana/public';
 
-export * from './lib/from_user';
-export * from './lib/to_user';
+export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup> {
+  public setup(core: PluginSetupContext, deps: {}) {
+    return {
+      getGreeting() {
+        return 'Hello from Plugin A!';
+      },
+    };
+  }
+}
+
+export type CorePluginAPluginSetup = ReturnType<CorePluginAPlugin['setup']>;

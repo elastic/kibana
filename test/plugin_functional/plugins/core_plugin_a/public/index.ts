@@ -17,29 +17,7 @@
  * under the License.
  */
 
-import { toUser } from './lib/to_user';
-import { fromUser } from './lib/from_user';
+import { PluginInitializer } from 'kibana/public';
+import { CorePluginAPlugin, CorePluginAPluginSetup } from './plugin';
 
-import { uiModules } from '../modules';
-uiModules
-  .get('kibana')
-  .directive('parseQuery', function () {
-
-    return {
-      restrict: 'A',
-      require: 'ngModel',
-      scope: {
-        'ngModel': '='
-      },
-      link: function ($scope, elem, attr, ngModel) {
-        const init = function () {
-          $scope.ngModel = fromUser($scope.ngModel);
-        };
-
-        ngModel.$parsers.push(fromUser);
-        ngModel.$formatters.push(toUser);
-
-        init();
-      }
-    };
-  });
+export const plugin: PluginInitializer<CorePluginAPluginSetup> = () => new CorePluginAPlugin();
