@@ -18,9 +18,6 @@ interface Props {
 
 export const MetricsExplorerColorPicker = injectI18n(
   ({ intl, colorPalete, value, onChange }: Props) => {
-    const handleChanage = useCallback((color: MetricsExplorerColorPalette) => onChange(color), [
-      onChange,
-    ]);
     const intlPrefix = 'xpack.infra.metricsExplorer.colorPicker';
     return (
       <Container>
@@ -37,7 +34,7 @@ export const MetricsExplorerColorPicker = injectI18n(
                 },
                 { number: index }
               )}
-              onClick={useCallback(() => handleChanage(color), [color])}
+              onClick={useCallback(() => onChange(color), [onChange])}
             />
           );
         })}

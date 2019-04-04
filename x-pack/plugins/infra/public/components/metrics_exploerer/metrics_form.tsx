@@ -56,7 +56,7 @@ export const MetricForm = injectI18n(
             (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
             MetricsExplorerAggregation.count,
         }),
-      [id, metric]
+      [metric]
     );
 
     const handleFieldChange = useCallback(
@@ -66,12 +66,12 @@ export const MetricForm = injectI18n(
           onChange(id, { ...metric, field });
         }
       },
-      [id, metric]
+      [metric]
     );
 
     const handleColorChange = useCallback(
       (color: MetricsExplorerColorPalette) => onChange(id, { ...metric, color }),
-      [id, metric]
+      [metric]
     );
 
     const handleMetricDelete = useCallback(() => onDelete(id), [id]);

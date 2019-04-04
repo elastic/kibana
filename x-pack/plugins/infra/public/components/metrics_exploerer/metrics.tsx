@@ -6,7 +6,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { getUnusedColor, MetricsExplorerColorPalette } from '../../../common/color_palette';
@@ -25,6 +25,7 @@ interface Props {
 }
 
 export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fields }: Props) => {
+  const [newMetric, setNewMetric] = useState<number | null>(null);
   const handleChange = useCallback(
     (id: number, metric: MetricsExplorerMetric) => {
       onChange(
@@ -35,26 +36,28 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
           return m;
         })
       );
+      setNewMetric(null);
     },
-    [options]
+    [options.metrics]
   );
 
   const handleDelete = useCallback(
     (id: number) => {
       onChange(options.metrics.filter((m, index) => index !== id));
     },
-    [options]
+    [options.metrics]
   );
 
   const handleAdd = useCallback(
     () => {
       const usedColors = options.metrics.map(m => m.color || MetricsExplorerColorPalette.color0);
+      setNewMetric(options.metrics.length);
       onChange([
         ...options.metrics,
         { aggregation: MetricsExplorerAggregation.count, color: getUnusedColor(usedColors) },
       ]);
     },
-    [options]
+    [options.metrics]
   );
 
   const addMetricLabel = intl.formatMessage({
@@ -80,7 +83,7 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
           onChange={handleChange}
           onDelete={handleDelete}
           isDeleteable={options.metrics.length > 1}
-          openFromStart={openFirstMetric}
+          openFromStart={openFirstMetric || newMetric === index}
         />
       ))}
       {options.metrics.length < 5 && (
