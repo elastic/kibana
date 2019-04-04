@@ -242,7 +242,6 @@
     "common.ui.aggTypes.otherBucket.labelForOtherBucketLabel": "其他存储桶的标签",
     "common.ui.aggTypes.otherBucket.showMissingValuesLabel": "显示缺失值",
     "common.ui.aggTypes.otherBucket.showMissingValuesTooltip": "仅对“字符串”类型的字段有效。启用后，在搜索中包括缺失值的文档。如果此存储桶在排名前 N 中，其将会显示在图表中。如果不在排名前 N 中，并且启用了“在单独的存储桶中对其他值分组”，Elasticsearch 会将缺失值添加到“其他”存储桶。",
-    "common.ui.aggTypes.paramNamePatternLabel": "{aggParamName} 模式",
     "common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage": "已保存的 {fieldParameter} 参数现在无效。请选择新字段。",
     "common.ui.aggTypes.paramTypes.field.requiredFieldParameterErrorMessage": "{fieldParameter} 是必需字段",
     "common.ui.aggTypes.percentsLabel": "百分数",
