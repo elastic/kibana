@@ -22,7 +22,6 @@ import template from './index.html';
 
 require('brace');
 
-require('ui/tooltip');
 require('ui/autoload/styles');
 
 require('./src/controllers/sense_controller');
