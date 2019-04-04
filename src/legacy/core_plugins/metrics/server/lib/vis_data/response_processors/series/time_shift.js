@@ -23,17 +23,18 @@ export default function timeShift(resp, panel, series) {
   return next => results => {
     if (/^([+-]?[\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {
       const matches = series.offset_time.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);
+
       if (matches) {
         const offsetValue = Number(matches[1]);
         const offsetUnit = matches[2];
+        const offset = moment.duration(offsetValue, offsetUnit).valueOf();
 
         results.forEach(item => {
           if (_.startsWith(item.id, series.id)) {
-            item.data = item.data.map(row => {
-              const timeWithOffset = row[0] + moment.duration(offsetValue, offsetUnit).valueOf();
-
-              return [timeWithOffset, row[1]];
-            });
+            item.data = item.data.map(([time, value]) => [
+              time + offset,
+              value
+            ]);
           }
         });
       }
