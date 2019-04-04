@@ -125,11 +125,11 @@ const start = async function () {
     let annotations = [];
 
     console.log('********* CHECKING IF FILE EXISTS');
-    console.log('path as passed', __dirname + 'target/errors.json');
-    console.log(path.relative(__dirname + 'target/errors.json'));
-    if(fs.existsSync(__dirname + 'target/errors.json')) {
+    console.log('path as passed', __dirname + '/target/errors.json');
+    //console.log(path.relative(__dirname + 'target/errors.json'));
+    if(fs.existsSync(__dirname + '/target/errors.json')) {
       console.log('FILE EXISTS');
-      annotations = JSON.parse(fs.readFileSync(__dirname + 'target/errors.json'));
+      annotations = JSON.parse(fs.readFileSync(__dirname + '/target/errors.json'));
     }else{
       console.log('DIDNT FIND FILE');
     }
