@@ -27,10 +27,10 @@ import { AggParamEditorProps } from './agg_param_editor_props';
 interface AggParamReactWrapperProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  indexedFields: FieldParamType[];
+  isInvalid: boolean;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
   value: T;
-  isInvalid: boolean;
-  indexedFields: FieldParamType[];
   onChange(value: T): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
@@ -40,24 +40,24 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
   const {
     agg,
     aggParam,
-    paramEditor: ParamEditor,
-    onChange,
-    value,
+    indexedFields,
     isInvalid,
+    paramEditor: ParamEditor,
+    value,
+    onChange,
     setValidity,
     setTouched,
-    indexedFields,
   } = props;
   return (
     <ParamEditor
-      value={value}
-      setValue={onChange}
-      aggParam={aggParam}
       agg={agg}
-      isInvalid={isInvalid}
+      aggParam={aggParam}
       indexedFields={indexedFields}
+      isInvalid={isInvalid}
+      value={value}
       setTouched={setTouched}
       setValidity={setValidity}
+      setValue={onChange}
     />
   );
 }

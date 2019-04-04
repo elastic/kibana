@@ -28,12 +28,12 @@ uiModules
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }],
     ['setTouched', { watchDepth: 'reference' }],
-    ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'value',
-    'isSubAggregation',
+    ['setValue', { watchDepth: 'reference' }],
     'aggHelpLink',
-    'isSelectInvalid'
+    'isSelectInvalid',
+    'isSubAggregation',
+    'value',
   ]))
   .directive('visAggSelect', function () {
     return {
@@ -44,21 +44,21 @@ uiModules
         return `<vis-agg-select-react-wrapper
             ng-if="setValidity"
             agg="agg"
-            value="paramValue"
-            set-touched="setTouched"
-            set-value="onChange"
-            is-sub-aggregation="isSubAggregation"
             agg-help-link="aggHelpLink"
             agg-type-options="aggTypeOptions"
             is-select-invalid="isSelectInvalid"
+            is-sub-aggregation="isSubAggregation"
+            value="paramValue"
             set-validity="setValidity"
+            set-value="onChange"
+            set-touched="setTouched"
           ></vis-agg-select-react-wrapper>`;
       },
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('agg', attr.agg);
-          $scope.$bind('isSubAggregation', attr.isSubAggregation);
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
+          $scope.$bind('isSubAggregation', attr.isSubAggregation);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           let _isSelectInvalid = false;
@@ -67,21 +67,23 @@ uiModules
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
+
             $scope.setValidity(true);
             $scope.isSelectInvalid = false;
           });
 
+          // The model can become touched either onBlur event or when the form is submitted.
           $scope.$watch(() => {
             return ngModelCtrl.$touched;
           }, (value) => {
             if (value === true) {
-              $scope.isSelectInvalid = _isSelectInvalid;
+              showValidation();
             }
           }, true);
 
           $scope.onChange = (value) => {
             if (!value) {
-              // We prevent clearing control's value if this field is required.
+              // We prevent to make the field empty.
               return;
             }
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
@@ -93,7 +95,7 @@ uiModules
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
-            $scope.isSelectInvalid = _isSelectInvalid;
+            showValidation();
           };
 
           $scope.setValidity = (isValid) => {
@@ -102,6 +104,10 @@ uiModules
             // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };
+
+          function showValidation() {
+            $scope.isSelectInvalid = _isSelectInvalid;
+          }
         }
       }
     };

@@ -29,13 +29,13 @@ import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
-  value: AggType;
-  setValue: (aggType: AggType) => void;
   aggTypeOptions: AggType[];
-  isSubAggregation: boolean;
   isSelectInvalid: boolean;
-  setTouched: () => void;
+  isSubAggregation: boolean;
+  value: AggType;
   setValidity: (isValid: boolean) => void;
+  setValue: (aggType: AggType) => void;
+  setTouched: () => void;
 }
 
 function DefaultEditorAggSelect({

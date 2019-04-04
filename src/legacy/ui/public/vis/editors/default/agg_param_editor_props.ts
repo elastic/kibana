@@ -27,10 +27,10 @@ import { AggConfig } from '../../agg_config';
 export interface AggParamEditorProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  value: T;
   indexedFields?: any[];
   isInvalid: boolean;
-  setValue(value?: T): void;
+  value: T;
   setValidity(isValid: boolean): void;
+  setValue(value?: T): void;
   setTouched(): void;
 }

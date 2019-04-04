@@ -28,17 +28,18 @@ import { AggParamEditorProps } from '../../vis/editors/default';
 import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
 import { FieldParamType } from '../param_types';
 
+const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
+
 function FieldParamEditor({
-  agg = {},
-  indexedFields = [],
+  agg,
   aggParam,
-  value,
-  setValue,
+  indexedFields = [],
   isInvalid,
-  setValidity,
+  value,
   setTouched,
+  setValidity,
+  setValue,
 }: AggParamEditorProps<FieldParamType>) {
-  const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
     : [];

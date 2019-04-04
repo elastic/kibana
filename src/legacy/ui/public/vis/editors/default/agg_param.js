@@ -26,15 +26,15 @@ uiModules
   .get('app/visualize')
   .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
     ['agg', { watchDepth: 'collection' }],
-    ['indexedFields', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
+    ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'value',
+    'field',
     'isInvalid',
-    'field'
+    'value',
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -57,13 +57,13 @@ uiModules
             param-editor="editorComponent"
             agg="agg"
             agg-param="aggParam"
+            field="agg.params.field"
+            indexed-fields="indexedFields"
+            is-invalid="isInvalid"
+            value="paramValue"
             on-change="onChange"
             set-touched="setTouched"
-            value="paramValue"
-            is-invalid="isInvalid"
             set-validity="setValidity"
-            indexed-fields="indexedFields"
-            field="agg.params.field"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -93,15 +93,17 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
+
               $scope.setValidity(true);
-              $scope.isInvalid = _isInvalid;
+              showValidation();
             }, true);
 
+            // The model can become touched either onBlur event or when the form is submitted.
             $scope.$watch(() => {
               return ngModelCtrl.$touched;
             }, (value) => {
               if (value === true) {
-                $scope.isInvalid = _isInvalid;
+                showValidation();
               }
             }, true);
           }
@@ -115,22 +117,21 @@ uiModules
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
 
-            if(ngModelCtrl) {
-              ngModelCtrl.$setDirty();
-            }
+            ngModelCtrl.$setDirty();
           };
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
-            $scope.isInvalid = _isInvalid;
           };
 
           $scope.setValidity = (isValid) => {
-            if(ngModelCtrl) {
-              _isInvalid = !isValid;
-              ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
-            }
+            _isInvalid = !isValid;
+            ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
           };
+
+          function showValidation() {
+            $scope.isInvalid = _isInvalid;
+          }
         }
       }
     };
