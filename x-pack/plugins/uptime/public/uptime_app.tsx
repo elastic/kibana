@@ -125,7 +125,7 @@ const Application = (props: UptimeAppProps) => {
             text: 'Read Only',
             tooltip: 'You lack the authority',
           }
-        : null
+        : undefined
     );
   }, []);
 

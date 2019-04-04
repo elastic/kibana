@@ -81,7 +81,7 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
-    const badge$ = new Rx.BehaviorSubject<ChromeBadge | null>(null);
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -190,7 +190,7 @@ export class ChromeService {
       /**
        * Override the current badge
        */
-      setBadge: (badge: ChromeBadge | null) => {
+      setBadge: (badge: ChromeBadge | undefined) => {
         badge$.next(badge);
       },
 

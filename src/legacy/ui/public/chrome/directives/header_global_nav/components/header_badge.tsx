@@ -22,11 +22,11 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
 interface Props {
-  badge$: Rx.Observable<ChromeBadge | null>;
+  badge$: Rx.Observable<ChromeBadge | undefined>;
 }
 
 interface State {
-  badge: ChromeBadge | null;
+  badge: ChromeBadge | undefined;
 }
 
 import { ChromeBadge } from '../../../../../../../core/public';
@@ -37,7 +37,7 @@ export class HeaderBadge extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { badge: null };
+    this.state = { badge: undefined };
   }
 
   public componentDidMount() {
@@ -58,7 +58,7 @@ export class HeaderBadge extends Component<Props, State> {
   }
 
   public render() {
-    if (this.state.badge === null) {
+    if (this.state.badge == null) {
       return null;
     }
 
