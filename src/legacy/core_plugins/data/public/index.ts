@@ -37,8 +37,13 @@ class DataService {
   }
 }
 
-// We temporarily export default here so that users importing from 'plugins/data'
-// will automatically receive the response value of the `setup` contract, mimicking
-// the data that will eventually be injected by the new platform.
+/**
+ * We temporarily export default here so that users importing from 'plugins/data'
+ * will automatically receive the response value of the `setup` contract, mimicking
+ * the data that will eventually be injected by the new platform.
+ */
 // tslint:disable no-default-export
 export default new DataService().setup();
+
+/** @public */
+export type DataSetup = ReturnType<DataService['setup']>;
