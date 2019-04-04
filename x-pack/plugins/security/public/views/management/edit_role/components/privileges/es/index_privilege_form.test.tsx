@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { EuiButtonIcon, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
