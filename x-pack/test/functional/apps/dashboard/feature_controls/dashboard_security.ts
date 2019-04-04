@@ -20,6 +20,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
+  const globalNav = getService('globalNav');
 
   describe('security', () => {
     before(async () => {
@@ -92,6 +93,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
         await testSubjects.existOrFail('newItemButton');
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
       });
 
       it(`create new dashboard shows addNew button`, async () => {
@@ -220,6 +225,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
         await testSubjects.missingOrFail('newItemButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read Only');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {

@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
@@ -73,6 +74,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
           await testSubjects.existOrFail('infrastructureChangeSourceConfigurationButton');
         });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
+        });
       });
 
       describe('infrastructure landing page with data', () => {
@@ -105,6 +110,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           it(`does not show link to view apm traces`, async () => {
             await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
           });
+        });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
         });
       });
 
@@ -178,6 +187,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
           await testSubjects.missingOrFail('infrastructureChangeSourceConfigurationButton');
         });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read Only');
+        });
       });
 
       describe('infrastructure landing page with data', () => {
@@ -210,6 +223,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           it(`does not show link to view apm traces`, async () => {
             await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
           });
+        });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read Only');
         });
       });
 
