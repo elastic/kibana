@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.0.0>>
 * <<release-notes-7.0.0-rc2>>
 * <<release-notes-7.0.0-rc1>>
 * <<release-notes-7.0.0-beta1>>
