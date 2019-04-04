@@ -13,6 +13,11 @@ import { Toast } from '@elastic/eui';
 // @public (undocumented)
 export type BasePathSetup = ReturnType<BasePathService['setup']>;
 
+// Warning: (ae-forgotten-export) The symbol "CapabilitiesService" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type CapabilitiesSetup = ReturnType<CapabilitiesService['setup']>;
+
 // @public (undocumented)
 export interface ChromeBrand {
     // (undocumented)
@@ -43,6 +48,8 @@ export type ChromeSetup = ReturnType<ChromeService['setup']>;
 export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
+    // (undocumented)
+    capabilities: CapabilitiesSetup;
     // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)

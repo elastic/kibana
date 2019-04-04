@@ -52,6 +52,7 @@ export {
   HttpSetup,
   FatalErrorsSetup,
   I18nSetup,
+  CapabilitiesSetup,
   ChromeSetup,
   ChromeBreadcrumb,
   ChromeBrand,

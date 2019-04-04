@@ -23,6 +23,7 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [BasePathSetup](./kibana-plugin-public.basepathsetup.md) |  |
+|  [CapabilitiesSetup](./kibana-plugin-public.capabilitiessetup.md) |  |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |  |

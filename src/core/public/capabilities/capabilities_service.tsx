@@ -23,6 +23,7 @@ interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
+/** @internal */
 export interface UICapabilities {
   navLinks: Record<string, boolean>;
   management: {
@@ -38,6 +39,9 @@ export interface UICapabilities {
 export class CapabilitiesService {
   public setup({ injectedMetadata }: StartDeps) {
     return {
+      /**
+       * Get the UI capabilities.
+       */
       getCapabilities: () =>
         deepFreeze<UICapabilities>(injectedMetadata.getInjectedVar(
           'uiCapabilities'
@@ -46,4 +50,5 @@ export class CapabilitiesService {
   }
 }
 
+/** @public */
 export type CapabilitiesSetup = ReturnType<CapabilitiesService['setup']>;
