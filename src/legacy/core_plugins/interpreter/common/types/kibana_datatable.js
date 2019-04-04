@@ -23,7 +23,6 @@ export const kibanaDatatable = () => ({
   name: 'kibana_datatable',
   from: {
     datatable: context => {
-      context.columns.forEach(c => c.id = c.name);
       return {
         type: 'kibana_datatable',
         rows: context.rows,

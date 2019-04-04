@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const visDimension = () => ({
-  name: 'vis_dimension',
+  name: 'visdimension',
   help: i18n.translate('interpreter.function.visDimension.help', {
     defaultMessage: 'Generates visConfig dimension object'
   }),

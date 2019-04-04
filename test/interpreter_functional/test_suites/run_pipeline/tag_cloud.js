@@ -43,7 +43,7 @@ export default function ({ getService, updateBaselines }) {
         dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
       });
 
-      it('with invalid data', async () => {
+      it.skip('with invalid data', async () => {
         const expression = 'tagcloud metric={vis_dimension 0}';
         await (await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
       });
