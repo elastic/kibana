@@ -79,7 +79,7 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
         annotation_level: 'failure',
         title,
         //message: stripAnsi(output).split('\n')[2].trim(),
-        message: JSON.stringify(runnable.addl)
+        message: JSON.stringify(runnable.addl, undefined, 2),
       });
     }
 
