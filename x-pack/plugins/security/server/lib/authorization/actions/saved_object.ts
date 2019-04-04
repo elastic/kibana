@@ -7,7 +7,15 @@
 import { isString } from 'lodash';
 
 export class SavedObjectActions {
-  public all = `saved_object:*`;
+  private readonly prefix: string;
+
+  constructor(versionNumber: string) {
+    this.prefix = `saved_object:${versionNumber}:`;
+  }
+
+  public get all(): string {
+    return `${this.prefix}*`;
+  }
 
   public get(type: string, operation: string): string {
     if (!type || !isString(type)) {
@@ -15,9 +23,9 @@ export class SavedObjectActions {
     }
 
     if (!operation || !isString(operation)) {
-      throw new Error('operation is required and must be a string');
+      throw new Error('type is required and must be a string');
     }
 
-    return `saved_object:${type}/${operation}`;
+    return `${this.prefix}${type}/${operation}`;
   }
 }
