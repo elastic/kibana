@@ -42,7 +42,14 @@ module.exports = {
           experimentalObjectRestSpread: true,
           jsx: true
         },
-        project: './tsconfig.json'
+        // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
+        // typescript eslint. As we are not using rules that need types information, we can safely
+        // disabling that feature setting the project to undefined. That issue is being addressed
+        // by the typescript eslint team. More info could be found here:
+        // https://github.com/typescript-eslint/typescript-eslint/issues/389
+        // https://github.com/typescript-eslint/typescript-eslint/issues/243
+        // https://github.com/typescript-eslint/typescript-eslint/pull/361
+        project: undefined
       },
 
       // NOTE: we can't override the extends option here to apply
@@ -179,12 +186,6 @@ module.exports = {
         },
         eslintConfigPrettierTypescriptEslintRules
       )
-    },
-    {
-      parserOptions: {
-        project: 'x-pack/tsconfig.json'
-      },
-      files: ['x-pack/**/*.{ts,tsx}'],
     },
   ]
 };
