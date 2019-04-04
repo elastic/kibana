@@ -37,7 +37,7 @@ describe('Create Follower index', () => {
   let exists;
   let component;
   let getUserActions;
-  // let form;
+  let form;
   let getFormErrorsMessages;
   let clickSaveForm;
   let setLoadRemoteClusteresResponse;
@@ -104,7 +104,9 @@ describe('Create Follower index', () => {
 
   describe('form validation', () => {
     beforeEach(async () => {
-      ({ component } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+      ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+
+      ({ clickSaveForm } = getUserActions('followerIndexForm'));
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
@@ -112,8 +114,8 @@ describe('Create Follower index', () => {
 
     describe('remote cluster', () => {
       // The implementation of the remote cluster "Select" + validation is
-      // done in the <RemoteClustersFormField /> component, just as with the <AutoFollowPatternAdd /> compoennt
-      // To avoid copy/pasting the same tests here, we will simple make sure that both component use the <RemoteClustersFormField />
+      // done inside the <RemoteClustersFormField /> component. The same component that we use in the <AutoFollowPatternAdd /> section.
+      // To avoid copy/pasting the same tests here, we simply make sure that both sections use the <RemoteClustersFormField />
       test('should use the same <RemoteClustersFormField /> component that in the <AutoFollowPatternAdd /> section', async () => {
         const { component: autoFollowPatternAddComponent } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions);
         await nextTick();
@@ -124,6 +126,14 @@ describe('Create Follower index', () => {
 
         expect(remoteClusterFormFieldFollowerIndex.length).toBe(1);
         expect(remoteClusterFormFieldAutoFollowPattern.length).toBe(1);
+      });
+    });
+
+    describe('leader index', () => {
+      test('should not allow spaces', () => {
+        form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', 'with space');
+        clickSaveForm();
+        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
       });
     });
   });
