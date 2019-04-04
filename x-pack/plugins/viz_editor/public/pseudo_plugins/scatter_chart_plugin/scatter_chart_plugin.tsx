@@ -18,7 +18,7 @@ import {
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
-import { columnSummary } from '../../common/components/config_panel/config_panel';
+import { AxisEditor } from './axis_editor';
 
 interface ScatterChartPrivateState {
   xAxis: Axis;
@@ -31,7 +31,10 @@ const updateScatterState = updatePrivateState<'scatterChart', ScatterChartPrivat
   'scatterChart'
 );
 
-function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>) {
+function configPanel({
+  visModel,
+  onChangeVisModel,
+}: VisualizationPanelProps<ScatterChartVisModel>) {
   if (!visModel.private.scatterChart) {
     return <>No chart configured</>;
   }
@@ -47,13 +50,13 @@ function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
+          <AxisEditor key={col} col={col} visModel={visModel} onChangeVisModel={onChangeVisModel} />
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
+          <AxisEditor key={col} col={col} visModel={visModel} onChangeVisModel={onChangeVisModel} />
         ))}
       </div>
     </>

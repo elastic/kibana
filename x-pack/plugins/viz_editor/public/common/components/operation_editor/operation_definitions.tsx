@@ -164,6 +164,7 @@ export const operations: OperationDefinition[] = [
     name: 'Values',
     type: 'column',
     applicableFields: fields => fields,
+    editor: fieldOperationEditor,
     toSelectClause(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
