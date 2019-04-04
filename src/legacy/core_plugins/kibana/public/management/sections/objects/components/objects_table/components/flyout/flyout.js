@@ -189,13 +189,10 @@ class FlyoutUI extends Component {
     return resolutions;
   }
 
-  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache, blockedList }) => {
+  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache }) => {
     const { isOverwriteAllChecked, unmatchedReferences } = this.state;
     const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
     if (!isOverwriteGranted && error.type === 'conflict') {
-      return;
-    }
-    if (blockedList.includes(`${obj.type}:${obj.id}`)) {
       return;
     }
     if (error.type === 'missing_references') {
@@ -243,18 +240,12 @@ class FlyoutUI extends Component {
     const replaceReferencesCache = new Map();
     const { file, isOverwriteAllChecked } = this.state;
     let { importCount: successImportCount, failedImports: importFailures } = this.state;
-    const blockedList = importFailures.reduce((result, { error }) => {
-      if (error.type === 'missing_references') {
-        return result.concat(error.blocking.map(obj => `${obj.type}:${obj.id}`));
-      }
-      return result;
-    }, []);
 
     function getOverwriteDecision({ obj }) {
       return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
     }
     const callMap = (failure) => {
-      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, blockedList, ...failure });
+      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, ...failure });
     };
 
     // Loop until all issues are resolved
@@ -271,6 +262,17 @@ class FlyoutUI extends Component {
       const retries = importFailures
         .map(callMap)
         .filter(obj => !!obj);
+      for (const { error, obj } of importFailures) {
+        if (error.type !== 'missing_references') {
+          continue;
+        }
+        if (!retries.some(retryObj => retryObj.type === obj.type && retryObj.id === obj.id)) {
+          continue;
+        }
+        for (const { type, id } of error.blocking || []) {
+          retries.push({ type, id });
+        }
+      }
       if (retries.length === 0) {
         // Scenario where skip everything, no other failures
         importFailures = [];

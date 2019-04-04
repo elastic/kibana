@@ -241,9 +241,9 @@ describe('ObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onExport();
+      await component.instance().onExport(true);
 
-      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects);
+      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
     });
 
     it('should allow the user to choose when exporting all', async () => {
@@ -261,7 +261,7 @@ describe('ObjectsTable', () => {
       component.find('Header').prop('onExportAll')();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
     });
 
     it('should export all', async () => {
@@ -284,7 +284,7 @@ describe('ObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByType).toHaveBeenCalledWith(INCLUDED_TYPES);
+      expect(fetchExportByType).toHaveBeenCalledWith(INCLUDED_TYPES, true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
     });
   });
