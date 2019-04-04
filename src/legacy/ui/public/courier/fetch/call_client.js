@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
+import { ErrorAllowExplicitIndexProvider } from '../error_allow_explicit_index';
 import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
 import { IsRequestProvider } from './is_request';
 import { RequestStatus } from './req_status';

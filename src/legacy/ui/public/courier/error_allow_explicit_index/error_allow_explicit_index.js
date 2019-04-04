@@ -20,8 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import uiRoutes from '../routes';
-import { KbnUrlProvider } from '../url';
+import uiRoutes from '../../routes';
+import { KbnUrlProvider } from '../../url';
 
 import template from './error_allow_explicit_index.html';
 
