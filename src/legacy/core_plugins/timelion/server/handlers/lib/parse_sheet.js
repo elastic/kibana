@@ -34,7 +34,7 @@ export default function parseSheet(sheet) {
         throw new Error(
           i18n.translate('timelion.serverSideErrors.sheetParseErrorMessage', {
             defaultMessage: 'Expected: {expectedDescription} at character {column}',
-            description: 'This would be for example: "Expected: a quote at character 5',
+            description: 'This would be for example: "Expected: a quote at character 5"',
             values: {
               expectedDescription: e.expected[0].description,
               column: e.column,
