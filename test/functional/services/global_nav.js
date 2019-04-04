@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
+
 export function GlobalNavProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
@@ -39,6 +41,17 @@ export function GlobalNavProvider({ getService }) {
 
     async getLastBreadcrumb() {
       return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
+    }
+
+    async badgeExistsOrFail(expectedText) {
+      await testSubjects.existOrFail('headerBadge');
+      const element = await testSubjects.find('headerBadge');
+      const actualText = await element.getVisibleText();
+      expect(actualText.toUpperCase()).to.equal(expectedText.toUpperCase());
+    }
+
+    async badgeMissingOrFail() {
+      await testSubjects.missingOrFail('headerBadge');
     }
   };
 }
