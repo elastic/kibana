@@ -44,6 +44,7 @@ export function AxisEditor({
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
         allowedOperations={['column']}
+        allowedColumnTypes={['number']}
       >
         {getOperationSummary(column)}
       </OperationEditor>

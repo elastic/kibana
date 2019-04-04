@@ -9,10 +9,18 @@ import { EuiSideNav } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
+import { getTypeForOperation } from '../../lib';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
 export function OperationEditor(props: OperationEditorProps) {
-  const { children, visModel, column, onColumnChange, allowedOperations } = props;
+  const {
+    children,
+    visModel,
+    column,
+    onColumnChange,
+    allowedOperations,
+    allowedColumnTypes,
+  } = props;
   const [state, setState] = useState({
     isOpen: false,
   });
@@ -31,6 +39,16 @@ export function OperationEditor(props: OperationEditorProps) {
       id: '0',
       items: operations
         .filter(({ type }) => (allowedOperations ? allowedOperations.includes(type) : true))
+        .filter(opDefinition =>
+          allowedColumnTypes
+            ? allowedColumnTypes.includes(
+                getTypeForOperation(
+                  opDefinition.toSelectClause(column, visModel.datasource.fields),
+                  visModel.datasource.fields
+                )
+              )
+            : true
+        )
         .map(op => ({
           name: op.name,
           id: op.type,

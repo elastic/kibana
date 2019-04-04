@@ -61,7 +61,7 @@ function getExpression(visModel: VisModel) {
     : `${visModel.editorPlugin}_chart { config }`;
 
   const fetchExpression = toDataFetchExpression
-    ? toDataFetchExpression(visModel, 'full')
+    ? toDataFetchExpression(visModel, 'edit')
     : `${visModel.editorPlugin}_chart { config }`;
 
   return `${fetchExpression} | ${renderExpression}`;

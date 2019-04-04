@@ -16,6 +16,7 @@ export function getTypeForOperation(op: SelectOperation, fields: DatasourceField
     case 'terms':
     case 'avg':
     case 'sum':
+    case 'column':
       return fields.find(field => field.name === op.argument.field)!.type;
     default:
       return 'string';
@@ -24,12 +25,6 @@ export function getTypeForOperation(op: SelectOperation, fields: DatasourceField
 
 export function getTypes(query: Query, fields: DatasourceField[]): string[] {
   return query.select.map(operation => {
-    if (operation.operation === 'column') {
-      const fieldName = operation.argument.field;
-      const fieldType = fields.find(field => field.name === fieldName)!.type;
-      return fieldType;
-    } else {
-      return getTypeForOperation(operation, fields);
-    }
+    return getTypeForOperation(operation, fields);
   });
 }

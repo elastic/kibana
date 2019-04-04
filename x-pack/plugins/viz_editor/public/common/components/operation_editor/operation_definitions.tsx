@@ -27,6 +27,7 @@ export interface OperationEditorProps {
   onColumnChange: (newColumn: SelectOperation) => void;
   visModel: any;
   allowedOperations?: Array<SelectOperation['operation']>;
+  allowedColumnTypes?: string[];
 }
 
 export interface OperationDefinition {

@@ -22,6 +22,14 @@ const operationTemplate: OperationTemplate = {
       interval: 'auto',
     },
   },
+  window: {
+    operation: 'window',
+    argument: {
+      field: '',
+      windowFunction: 'unweightedAvg',
+      windowSize: 5,
+    },
+  },
 };
 
 export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
