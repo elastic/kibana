@@ -251,7 +251,7 @@ class TableUI extends PureComponent {
         isDisabled={selectedSavedObjects.length === 0}
       >
         <FormattedMessage
-          id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+          id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
           defaultMessage="Export"
         />
       </EuiButton>

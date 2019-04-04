@@ -73,8 +73,6 @@ class FlyoutUI extends Component {
       conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
       conflictingRecord: undefined,
-      objectsToOverwrite: undefined,
-      objectsToRetry: undefined,
       error: undefined,
       file: undefined,
       importCount: 0,
@@ -112,11 +110,17 @@ class FlyoutUI extends Component {
     });
   };
 
+  /**
+   * Import
+   *
+   * Does the initial import of a file, resolveImportErrors then handles errors and retries
+   */
   import = async () => {
     const { intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
     this.setState({ isLoading: true, error: undefined });
 
+    // Import the file
     let response;
     try {
       response = await importFile(file, isOverwriteAllChecked);
@@ -131,26 +135,24 @@ class FlyoutUI extends Component {
       return;
     }
 
+    // Go through the failures and split between unmatchedReferences and failedImports
     const failedImports = [];
     const unmatchedReferences = new Map();
     for (const { error, ...obj } of response.errors || []) {
-      if (error.type === 'missing_references') {
-        for (const missingReference of error.references) {
-          if (missingReference.type !== 'index-pattern') {
-            // Currently only supports resolving conflicts on index patterns
-            continue;
-          }
-          const conflict = unmatchedReferences.get(`${missingReference.type}:${missingReference.id}`) || {
-            existingIndexPatternId: missingReference.id,
-            list: [],
-            newIndexPatternId: undefined,
-          };
-          conflict.list.push(obj);
-          unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
-        }
-        failedImports.push({ obj, error });
-      } else {
-        failedImports.push({ obj, error });
+      failedImports.push({ obj, error });
+      if (error.type !== 'missing_references') {
+        continue;
+      }
+      // Currently only supports resolving references on index patterns
+      const indexPatternRefs = error.references.filter(ref => ref.type === 'index-pattern');
+      for (const missingReference of indexPatternRefs) {
+        const conflict = unmatchedReferences.get(`${missingReference.type}:${missingReference.id}`) || {
+          existingIndexPatternId: missingReference.id,
+          list: [],
+          newIndexPatternId: undefined,
+        };
+        conflict.list.push(obj);
+        unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
       }
     }
 
@@ -165,11 +167,21 @@ class FlyoutUI extends Component {
       possibleRecordsToOverwrite: (response.errors || []).filter(obj => obj.error.type === 'conflict'),
     });
 
+    // Resolve import errors right away if there's no index patterns to match
+    // This will ask about overwriting each object, etc
     if (unmatchedReferences.size === 0) {
       this.resolveImportErrors();
     }
   }
 
+  /**
+   * Get Conflict Resolutions
+   *
+   * Function iterates through the objects, displays a modal for each asking the user if they wish to overwrite it or not.
+   *
+   * @param {array} objects List of objects to request the user if they wish to overwrite it
+   * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
+   */
   async getConflictResolutions(objects) {
     const resolutions = {};
     for (const { type, id, title } of objects) {
@@ -189,23 +201,29 @@ class FlyoutUI extends Component {
     return resolutions;
   }
 
-  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache }) => {
+  /**
+   * Map Import Failure To Retry Object
+   *
+   * Takes a single import failure and builds a retry object for the resolve import errors API. Returns undefined when failure should be skipped.
+   */
+  mapImportFailureToRetryObject = ({ failure, overwriteDecisionCache, replaceReferencesCache }) => {
     const { isOverwriteAllChecked, unmatchedReferences } = this.state;
-    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
-    if (!isOverwriteGranted && error.type === 'conflict') {
+    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${failure.obj.type}:${failure.obj.id}`] === true;
+
+    // Conflicts wihtout overwrite granted are skipped
+    if (!isOverwriteGranted && failure.error.type === 'conflict') {
       return;
     }
-    if (error.type === 'missing_references') {
-      const objReplaceReferences = replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [];
-      for (const reference of error.references) {
-        if (reference.type !== 'index-pattern') {
-          continue;
-        }
+
+    // Replace references if user chose a new reference
+    if (failure.error.type === 'missing_references') {
+      const objReplaceReferences = replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
+      const indexPatternRefs = failure.error.references.filter(obj => obj.type === 'index-pattern');
+      for (const reference of indexPatternRefs) {
         for (const unmatchedReference of unmatchedReferences) {
-          if (!unmatchedReference.newIndexPatternId || unmatchedReference.existingIndexPatternId !== reference.id) {
-            continue;
-          }
-          if (objReplaceReferences.some(replaceReference => replaceReference.from === reference.id)) {
+          const hasNewValue = !!unmatchedReference.newIndexPatternId;
+          const matchesIndexPatternId = unmatchedReference.existingIndexPatternId === reference.id;
+          if (!hasNewValue || !matchesIndexPatternId) {
             continue;
           }
           objReplaceReferences.push({
@@ -215,41 +233,49 @@ class FlyoutUI extends Component {
           });
         }
       }
-      replaceReferencesCache.set(`${obj.type}:${obj.id}`, objReplaceReferences);
+      replaceReferencesCache.set(`${failure.obj.type}:${failure.obj.id}`, objReplaceReferences);
+      // Skip if nothing to replace, the UI option selected would be --Skip Import--
       if (objReplaceReferences.length === 0) {
         return;
       }
     }
+
     return {
-      id: obj.id,
-      type: obj.type,
-      overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true,
-      replaceReferences: replaceReferencesCache.get(`${obj.type}:${obj.id}`) || [],
+      id: failure.obj.id,
+      type: failure.obj.type,
+      overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${failure.obj.type}:${failure.obj.id}`] === true,
+      replaceReferences: replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [],
     };
   }
 
+  /**
+   * Resolve Import Errors
+   *
+   * Function goes through the failedImports and tries to resolve the issues.
+   */
   resolveImportErrors = async () => {
     const { intl } = this.props;
+    let overwriteDecisionCache = {};
+    const replaceReferencesCache = new Map();
+    const { file, isOverwriteAllChecked } = this.state;
+    let { importCount: successImportCount, failedImports: importFailures } = this.state;
+
     this.setState({
       error: undefined,
       isLoading: true,
       loadingMessage: undefined,
     });
 
-    let overwriteDecisionCache = {};
-    const replaceReferencesCache = new Map();
-    const { file, isOverwriteAllChecked } = this.state;
-    let { importCount: successImportCount, failedImports: importFailures } = this.state;
-
-    function getOverwriteDecision({ obj }) {
+    const getOverwriteDecision = ({ obj }) => {
       return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
-    }
+    };
     const callMap = (failure) => {
-      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, ...failure });
+      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, failure });
     };
 
     // Loop until all issues are resolved
     while (importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))) {
+      // Ask for overwrites
       if (!isOverwriteAllChecked) {
         const result = await this.getConflictResolutions(
           importFailures
@@ -259,6 +285,8 @@ class FlyoutUI extends Component {
         );
         overwriteDecisionCache = { ...overwriteDecisionCache, ...result };
       }
+
+      // Build retries array
       const retries = importFailures
         .map(callMap)
         .filter(obj => !!obj);
@@ -273,11 +301,14 @@ class FlyoutUI extends Component {
           retries.push({ type, id });
         }
       }
+
+      // Scenario where we skip everything if nothing to retry
       if (retries.length === 0) {
-        // Scenario where skip everything, no other failures
         importFailures = [];
-        continue;
+        break;
       }
+
+      // Call API
       let response;
       try {
         response = await resolveImportErrors(file, retries);
@@ -291,6 +322,8 @@ class FlyoutUI extends Component {
         });
         return;
       }
+
+      // Handle API Response
       successImportCount += response.successCount;
       importFailures = [];
       for (const { error, ...obj } of response.errors || []) {
