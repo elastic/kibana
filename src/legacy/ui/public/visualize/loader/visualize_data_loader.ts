@@ -71,7 +71,7 @@ export class VisualizeDataLoader {
     const visParams = await getVisParams(this.vis, {
       searchSource: params.searchSource,
       timeRange: params.timeRange,
-    });
+    } as RequestHandlerParams);
 
     const filters = params.filters || [];
     const savedFilters = params.searchSource.getField('filter') || [];

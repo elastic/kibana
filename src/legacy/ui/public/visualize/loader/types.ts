@@ -121,6 +121,10 @@ export interface VisualizeLoaderParams {
    * cycle happens. Default value: `true`
    */
   autoFetch?: boolean;
+  /**
+   * Specifies the visualization instance id.
+   */
+  visInstanceId?: string;
 }
 
 /**
