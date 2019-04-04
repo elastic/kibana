@@ -22,6 +22,7 @@ import { relative } from 'path';
 import { format } from 'util';
 const fs = require('fs');
 const stripAnsi = require('strip-ansi');
+const path = require('path');
 
 export class MochaCheckReporter extends Mocha.reporters.Base {
   constructor(runner, options) {
@@ -62,7 +63,7 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
       }
 
       this.errors.push({
-        ...runnable.addl,
+        // ...runnable.addl,
         path,
         start_line: line,
         end_line: line,
@@ -75,6 +76,7 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
     onEnd = () => {
       fs.writeFileSync(__dirname + this.pathToRoot + '/target/errors.json', JSON.stringify(this.errors, undefined, 2));
       console.log('onEnd', JSON.stringify(this.errors, undefined, 2));
+      console.log(path.resolve(__dirname, this.pathToRoot, '/target/errors.json'));
     }
 }
 

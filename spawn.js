@@ -24,6 +24,7 @@ const App = require('@octokit/app');
 const request = require('@octokit/request');
 const stripAnsi = require('strip-ansi');
 const fs = require('fs');
+const path = require('path');
 
 // removing 8 chars for markdown triple backtick wrap
 const MAX_DETAIL_BYTES = 65535 - 8;
@@ -124,10 +125,15 @@ const start = async function () {
     let annotations = [];
 
     console.log('********* CHECKING IF FILE EXISTS');
+    console.log('path as passed', __dirname + 'target/errors.json');
+    console.log(path.relative(__dirname + 'target/errors.json'));
     if(fs.existsSync(__dirname + 'target/errors.json')) {
       console.log('FILE EXISTS');
       annotations = JSON.parse(fs.readFileSync(__dirname + 'target/errors.json'));
+    }else{
+      console.log('DIDNT FIND FILE');
     }
+
     console.log('annotations: ', annotations);
     clientWithAuth.checks.create({
       ...commonArgs,
