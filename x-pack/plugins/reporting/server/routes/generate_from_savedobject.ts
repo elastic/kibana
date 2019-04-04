@@ -7,12 +7,18 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
 import { get } from 'lodash';
+
+// @ts-ignore no module definition
 import { API_BASE_URL_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { JobDoc, JobDocOutput, JobParams, KbnServer } from '../../types';
-// @ts-ignore
+// @ts-ignore no module definition
+import { LevelLogger } from '../lib/level_logger';
+// @ts-ignore no module definition
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
-import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+
+import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
+import { JobDocPayload, JobDocOutputExecuted, JobParams, KbnServer } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
+import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 
 const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
 
@@ -85,55 +91,50 @@ export function registerGenerateCsvFromSavedObject(
       }),
     },
   };
-  const getDocumentPayload = getDocumentPayloadFactory(server);
 
-  // csv: immediate download
+  /*
+   * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
+   *  - re-use the createJob function to build up es query config
+   *  - re-use the executeJob function to run the scan and scroll queries and capture the entire CSV in a result object.
+   */
   server.route({
     path: `${BASE_GENERATE}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
+      const logger = LevelLogger.createStaticFromServer(server, ['reporting', 'savedobject-csv']);
+
+      const { savedObjectType, savedObjectId } = request.params;
+      const jobParams: JobParams = {
+        savedObjectType,
+        savedObjectId,
+        isImmediate: true,
+      };
+      const createJobFn = createJobFactory(server);
+      const executeJobFn = executeJobFactory(server, request);
+      const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
+      const {
+        content_type: jobOutputContentType,
+        content: jobOutputContent,
+        size: jobOutputSize,
+      }: JobDocOutputExecuted = await executeJobFn(jobDocPayload, request);
+
+      logger.info(`job output size: ${jobOutputSize} bytes`);
+
       /*
-       * 1. Queue a job with getJobFromRouteHandler
-       *   - `isImmediate: true` gets us the complete result data in payload.objects
-       * 2. Copy the completed data stashed in the job as output.content
-       *   - Makes the content available for download
-       * 3. Return a response with CSV content
+       * ESQueue worker function defaults `content` to null, even if the
+       * executeJob returned undefined.
+       *
+       * This converts null to undefined so the value can be sent to h.response()
        */
-      const queuedJob: QueuedJobPayload = await getJobFromRouteHandler(
-        handleRoute,
-        handleRouteError,
-        request,
-        h,
-        {
-          isImmediate: true,
-        }
-      );
-
-      // FIXME this is REALLY ugly
-      const jobSource: JobDoc = get(queuedJob, 'source.job');
-      const output: JobDocOutput = getDocumentPayload({
-        _source: {
-          ...jobSource,
-          status: 'completed',
-          output: {
-            content: jobSource.payload.objects,
-            content_type: 'text/csv',
-          },
-        },
-      });
-
-      const response: ResponseObject = h
-        .response(output.content)
-        .type(output.contentType)
-        .code(output.statusCode);
-
-      if (output.headers) {
-        Object.keys(output.headers).forEach(key => {
-          response.header(key, output.headers[key]);
-        });
+      if (jobOutputContent === null) {
+        logger.warn('CSV Job Execution created empty content result');
       }
+      const response = h
+        .response(jobOutputContent ? jobOutputContent : undefined)
+        .type(jobOutputContentType);
 
+      // Set header for buffer download, not streaming
       const { isBoom } = response as KibanaResponse;
       if (isBoom == null) {
         response.header('accept-ranges', 'none');

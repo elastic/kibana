@@ -132,7 +132,7 @@ export interface JobDocPayload {
 export interface JobDocOutput {
   content: string; // encoded content
   contentType: string;
-  headers: any;
+  headers?: any;
   size?: number;
   statusCode: number;
 }
@@ -147,6 +147,25 @@ export interface JobDoc {
 export interface JobSource {
   _id: string;
   _source: JobDoc;
+}
+
+/*
+ * A snake_cased field is the only significant difference in structure of
+ * JobDocOutputExecuted vs JobDocOutput.
+ *
+ * JobDocOutput is the structure of the object returned by getDocumentPayload
+ *
+ * data in the _source fields of the
+ * Reporting index.
+ *
+ * The ESQueueWorker internals have executed job objects returned with this
+ * structure. See `_formatOutput` in reporting/server/lib/esqueue/worker.js
+ */
+export interface JobDocOutputExecuted {
+  content_type: string; // vs `contentType` above
+  content: string | null; // defaultOutput is null
+  max_size_reached: boolean;
+  size: number;
 }
 
 export interface ESQueueWorker {

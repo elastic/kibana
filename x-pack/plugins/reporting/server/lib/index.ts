@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore untyped module
+export { LevelLogger } from './level_logger';
+// @ts-ignore untyped module
 export { createTaggedLogger } from './create_tagged_logger';
-// @ts-ignore
+// @ts-ignore untyped module
 export { cryptoFactory } from './crypto';
-// @ts-ignore
+// @ts-ignore untyped module
 export { oncePerServer } from './once_per_server';

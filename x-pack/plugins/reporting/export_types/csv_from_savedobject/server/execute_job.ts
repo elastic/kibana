@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
-import { CONTENT_TYPE_CSV } from '../../../common/constants';
-// @ts-ignore
-import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../server/lib';
-import { JobDocPayload, KbnServer, Logger } from '../../../types';
-import { createGenerateCsv } from './lib/generate_csv';
+import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 
-interface JobDocOutputPseudo {
-  content_type: 'text/csv';
-  content: string | null | undefined;
-}
+import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
+import { CONTENT_TYPE_CSV } from '../../../common/constants';
+import { createGenerateCsv } from './lib/generate_csv';
 
 interface FakeRequest {
   headers: any;
@@ -22,27 +18,31 @@ interface FakeRequest {
   server: KbnServer;
 }
 
-/*
- * @return {Object}: pseudo-JobDocOutput. See interface JobDocOutput
- */
-function executeJobFn(server: KbnServer) {
+type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
+
+function executeJobFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
-  const logger: Logger = {
-    debug: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'debug']),
-    warning: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'warning']),
-    error: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'error']),
-  };
-
+  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
   const generateCsv = createGenerateCsv(logger);
-  return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
-    const { basePath, objects, headers: serializedEncryptedHeaders, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
+
+  return async function executeJob(job: JobDocPayload, realRequest?: Request): Promise<JobDocOutputExecuted> {
+    const { basePath, jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
-    if (!isImmediate) {
-      logger.debug(`Execute job generating [${visType}] csv`);
+
+    logger.debug(`Execute job generating [${visType}] csv`);
+
+    let requestObject: Request | FakeRequest;
+    if (isImmediate && realRequest) {
+      logger.debug(`executing job from immediate API`);
+
+      requestObject = realRequest;
+    } else {
+      logger.debug(`executing job async using encrypted headers`);
 
       let decryptedHeaders;
+      const serializedEncryptedHeaders = job.headers;
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
       } catch (err) {
@@ -58,25 +58,33 @@ function executeJobFn(server: KbnServer) {
         );
       }
 
-      const fakeRequest: FakeRequest = {
+      requestObject = {
         headers: decryptedHeaders,
         getBasePath: () => basePath || serverBasePath,
         server,
       };
-
-      const content = await generateCsv(fakeRequest, server, visType as string, panel);
-      return {
-        content_type: CONTENT_TYPE_CSV,
-        content: content.result ? content.result.content : null,
-      };
     }
 
-    logger.debug(`Execute job using previously-generated [${visType}] csv`);
+    let content: string;
+    let maxSizeReached = false;
+    let size = 0;
+    try {
+      ({
+        result: { content, maxSizeReached, size },
+      } = await generateCsv(requestObject, server, visType as string, panel));
+    } catch (err) {
+      if (err.stack) {
+        logger.error(err.stack);
+      }
+      logger.error(`Generate CSV Error! ${err}`);
+      throw err;
+    }
 
-    // if job was created with "immediate", just return the data in the job doc
     return {
       content_type: CONTENT_TYPE_CSV,
-      content: objects,
+      content,
+      max_size_reached: maxSizeReached,
+      size,
     };
   };
 }

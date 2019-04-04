@@ -20,7 +20,7 @@ export interface SavedSearchGeneratorResult {
 
 export interface CsvResultFromSearch {
   type: string;
-  result: SavedSearchGeneratorResult | null;
+  result: SavedSearchGeneratorResult;
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;

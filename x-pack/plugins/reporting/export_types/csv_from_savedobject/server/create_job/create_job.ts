@@ -8,8 +8,8 @@ import { notFound, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
-import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../../server/lib';
-import { JobDocPayload, JobParams, KbnServer, Logger } from '../../../../types';
+import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
+import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -18,7 +18,6 @@ import {
   TimeRangeParams,
   VisObjectAttributesJSON,
 } from '../../';
-import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
 
 interface VisData {
@@ -27,21 +26,18 @@ interface VisData {
   panel: SearchPanel;
 }
 
-function createJobFn(server: KbnServer) {
+type CreateJobFn = (jobParams: JobParams, headers: any, req: Request) => Promise<JobDocPayload>;
+
+function createJobFn(server: KbnServer): CreateJobFn {
   const crypto = cryptoFactory(server);
-  const logger: Logger = {
-    debug: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'debug']),
-    warning: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'warning']),
-    error: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'error']),
-  };
-  const generateCsv = createGenerateCsv(logger);
+  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);;
 
   return async function createJob(
     jobParams: JobParams,
     headers: any,
     req: Request
   ): Promise<JobDocPayload> {
-    const { isImmediate, savedObjectType, savedObjectId } = jobParams;
+    const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();
 
@@ -88,18 +84,6 @@ function createJobFn(server: KbnServer) {
 
     let type: string = '';
     let result: any = null;
-
-    if (isImmediate) {
-      try {
-        ({ type, result } = await generateCsv(req, server, visType, panel));
-      } catch (err) {
-        if (err.stack) {
-          logger.error(err.stack);
-        }
-        logger.error(`Generate CSV Error! ${err}`);
-        throw err;
-      }
-    }
 
     return {
       jobParams: { ...jobParams, panel, visType },
