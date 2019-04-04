@@ -43,10 +43,10 @@ chrome.badge.set(
   uiCapabilities.canvas.save
     ? null
     : {
-        text: i18n.translate('kbn.canvas.badge.readOnly.text', {
+        text: i18n.translate('xpack.canvas.badge.readOnly.text', {
           defaultMessage: 'Read Only',
         }),
-        tooltip: i18n.translate('kbn.canvas.badge.readOnly.tooltip', {
+        tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
           defaultMessage: 'You lack the authority',
         }),
       }
