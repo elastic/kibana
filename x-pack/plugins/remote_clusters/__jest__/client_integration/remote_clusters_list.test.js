@@ -124,11 +124,11 @@ describe('<RemoteClusterList />', () => {
       expect(exists('remoteClusterListEmptyPrompt')).toBe(false);
     });
 
-    test('should have a button to create a follower index', () => {
+    test('should have a button to create a remote cluster', () => {
       expect(exists('remoteClusterCreateButton')).toBe(true);
     });
 
-    test('should list the follower indices in the table', () => {
+    test('should list the remote clusters in the table', () => {
       expect(tableCellsValues.length).toEqual(remoteClusters.length);
       expect(tableCellsValues).toEqual([
         [ '', // Empty because the first column is the checkbox to select the row
@@ -224,7 +224,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     describe('detail panel', () => {
-      test('should open a detail panel when clicking on a follower index', () => {
+      test('should open a detail panel when clicking on a remote cluster', () => {
         expect(exists('remoteClusterDetailFlyout')).toBe(false);
 
         clickRemoteClusterAt(0);
