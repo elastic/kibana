@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from 'x-pack/test/common/services';
+import { SpacesService } from '../../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // tslint:disable:no-default-export
