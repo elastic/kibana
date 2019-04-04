@@ -88,7 +88,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.7.1]]
 == {kib} 6.7.1
 
-coming[6.7.1]
 
 See <<breaking-changes, breaking changes>> for the changes to be aware of 
 when migrating your application from one version of Kibana to another.
