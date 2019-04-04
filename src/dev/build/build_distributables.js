@@ -26,7 +26,6 @@ import {
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
-  CleanPackagesTask,
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
@@ -115,7 +114,6 @@ export async function buildDistributables(options) {
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
   await run(RemoveWorkspacesTask);
-  await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);

@@ -21,10 +21,7 @@ import globSync from 'glob';
 import path from 'path';
 import { promisify } from 'util';
 
-import { getProjectPaths } from '../config';
-import { copyDirectory, unlink } from './fs';
 import { readPackageJson } from './package_json';
-import { getProjects } from './projects';
 
 const glob = promisify(globSync);
 
@@ -53,32 +50,6 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
   }
 
   return workspaceProjectsPaths;
-}
-
-export async function copyWorkspacePackages(rootPath: string): Promise<void> {
-  const workspaceProjects = await getWorkspaceProjects(rootPath);
-
-  for (const project of workspaceProjects.values()) {
-    const dest = path.resolve(rootPath, 'node_modules', project.name);
-
-    // Remove the symlink
-    await unlink(dest);
-    // Copy in the package
-    await copyDirectory(project.path, dest);
-  }
-}
-
-async function getWorkspaceProjects(rootPath: string) {
-  const projectPaths = getProjectPaths(rootPath, {});
-  const projects = await getProjects(rootPath, projectPaths);
-
-  for (const [key, project] of projects.entries()) {
-    if (!project.isWorkspaceProject) {
-      projects.delete(key);
-    }
-  }
-
-  return projects;
 }
 
 function packagesFromGlobPattern({ pattern, rootPath }: { pattern: string; rootPath: string }) {

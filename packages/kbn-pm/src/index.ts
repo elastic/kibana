@@ -19,4 +19,6 @@
 
 export { run } from './cli';
 export { buildProductionProjects, prepareExternalProjectDependencies } from './production';
-export { copyWorkspacePackages } from './utils/workspaces';
+export { getProjects } from './utils/projects';
+export { Project } from './utils/project';
+export { getProjectPaths } from './config';
