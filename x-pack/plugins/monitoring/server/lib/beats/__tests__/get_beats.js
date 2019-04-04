@@ -5,7 +5,7 @@
  */
 
 import { handleResponse } from '../get_beats';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('beats/get_beats', () => {
   it('Handles empty response', () => {

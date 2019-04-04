@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/license-header/require-license-header */
+/* eslint-disable @kbn/eslint/require-license-header */
 
 // This function was extracted from angular v1.3
 

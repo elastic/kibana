@@ -6,6 +6,7 @@
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService } from '../auth_scope_service';
+import { getErrorStatusCode } from '../errors';
 import { BasicAuthenticationProvider } from './providers/basic';
 import { SAMLAuthenticationProvider } from './providers/saml';
 import { TokenAuthenticationProvider } from './providers/token';
@@ -47,15 +48,6 @@ function getProviderOptions(server) {
 
     ...config.get('xpack.security.public')
   };
-}
-
-/**
- * Extracts error code from Boom and Elasticsearch "native" errors.
- * @param {Error} error Error instance to extract status code from.
- * @returns {number}
- */
-function getErrorStatusCode(error) {
-  return error.isBoom ? error.output.statusCode : error.statusCode;
 }
 
 /**
@@ -149,21 +141,24 @@ class Authenticator {
         ownsSession ? existingSession.state : null
       );
 
-      if (ownsSession || authenticationResult.state) {
+      if (ownsSession || authenticationResult.shouldUpdateState()) {
         // If authentication succeeds or requires redirect we should automatically extend existing user session,
         // unless authentication has been triggered by a system API request. In case provider explicitly returns new
         // state we should store it in the session regardless of whether it's a system API request or not.
         const sessionCanBeUpdated = (authenticationResult.succeeded() || authenticationResult.redirected())
-          && (authenticationResult.state || !isSystemApiRequest);
+          && (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
 
-        // If provider owned the session, but failed to authenticate anyway, that likely means
-        // that session is not valid and we should clear it.
-        if (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401) {
+        // If provider owned the session, but failed to authenticate anyway, that likely means that
+        // session is not valid and we should clear it. Also provider can specifically ask to clear
+        // session by setting it to `null` even if authentication attempt didn't fail.
+        if (authenticationResult.shouldClearState() || (
+          authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
+        ) {
           await this._session.clear(request);
         } else if (sessionCanBeUpdated) {
           await this._session.set(
             request,
-            authenticationResult.state
+            authenticationResult.shouldUpdateState()
               ? { state: authenticationResult.state, provider: providerType }
               : existingSession
           );

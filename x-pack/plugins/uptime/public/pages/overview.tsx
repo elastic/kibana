@@ -18,6 +18,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
 interface OverviewPageProps {
+  basePath: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 

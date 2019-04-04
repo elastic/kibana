@@ -48,9 +48,9 @@ interface BootstrapArgs {
 }
 
 /**
- * @interal
  *
- * @param options
+ * @internal
+ * @param param0 - options
  */
 export async function bootstrap({
   configs,
@@ -83,7 +83,7 @@ export async function bootstrap({
   }
 
   try {
-    await root.start();
+    await root.setup();
   } catch (err) {
     await shutdown(err);
   }

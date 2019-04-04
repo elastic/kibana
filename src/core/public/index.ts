@@ -17,24 +17,54 @@
  * under the License.
  */
 
-import { BasePathStart } from './base_path';
-import { ChromeStart } from './chrome';
-import { FatalErrorsStart } from './fatal_errors';
-import { HttpStart } from './http';
-import { I18nStart } from './i18n';
-import { InjectedMetadataStart } from './injected_metadata';
-import { NotificationsStart } from './notifications';
-import { UiSettingsClient } from './ui_settings';
+import { BasePathSetup } from './base_path';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
+import { FatalErrorsSetup } from './fatal_errors';
+import { HttpSetup } from './http';
+import { I18nSetup } from './i18n';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
-export { CoreSystem } from './core_system';
+export { CoreContext, CoreSystem } from './core_system';
 
-export interface CoreStart {
-  i18n: I18nStart;
-  injectedMetadata: InjectedMetadataStart;
-  fatalErrors: FatalErrorsStart;
-  notifications: NotificationsStart;
-  http: HttpStart;
-  basePath: BasePathStart;
-  uiSettings: UiSettingsClient;
-  chrome: ChromeStart;
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
+export interface CoreSetup {
+  i18n: I18nSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup;
+  notifications: NotificationsSetup;
+  http: HttpSetup;
+  basePath: BasePathSetup;
+  uiSettings: UiSettingsSetup;
+  chrome: ChromeSetup;
 }
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  ChromeSetup,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};
