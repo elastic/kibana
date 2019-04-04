@@ -31,7 +31,7 @@ import { FIELD_TYPES } from '../../../constants/fields';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
-const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fields }) => {
+export const SplitByTermsUI = ({ onChange, indexPattern, intl, model: seriesModel, fields }) => {
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
@@ -180,11 +180,12 @@ const SplitByTermsUi = ({ onChange, indexPattern, intl, model: seriesModel, fiel
   );
 };
 
-SplitByTermsUi.propTypes = {
+SplitByTermsUI.propTypes = {
+  intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPattern: PropTypes.string,
   fields: PropTypes.object
 };
 
-export const SplitByTerms = injectI18n(SplitByTermsUi);
+export const SplitByTerms = injectI18n(SplitByTermsUI);
