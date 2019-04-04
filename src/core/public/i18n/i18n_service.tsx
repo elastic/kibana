@@ -23,6 +23,10 @@ import { EuiContext } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
+interface EuiValues {
+  [key: string]: any;
+}
+
 /**
  * Service that is responsible for i18n capabilities.
  * @internal
@@ -30,8 +34,199 @@ import { I18nProvider } from '@kbn/i18n/react';
 export class I18nService {
   public setup() {
     const mapping = {
+      'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
+        defaultMessage: 'Select all rows',
+      }),
+      'euiBasicTable.selectThisRow': i18n.translate('core.euiBasicTable.selectThisRow', {
+        defaultMessage: 'Select this row',
+      }),
+      'euiBasicTable.tableDescription': (values: EuiValues) =>
+        i18n.translate('core.euiBasicTable.tableDescription', {
+          defaultMessage: 'Below is a table of {itemCount} items.',
+          values,
+        }),
+      'euiBottomBar.screenReaderAnnouncement': i18n.translate(
+        'core.euiBottomBar.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'There is a new menu opening with page level controls at the end of the document.',
+        }
+      ),
+      'euiCodeBlock.copyButton': i18n.translate('core.euiCodeBlock.copyButton', {
+        defaultMessage: 'Copy',
+      }),
+      'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
+        defaultMessage: 'Press Enter to start editing.',
+      }),
+      'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
+        defaultMessage: 'Press Enter to start interacting with the code.',
+      }),
+      'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
+        defaultMessage: "When you're done, press Escape to stop editing.",
+      }),
+      'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
+        defaultMessage: "When you're done, press Escape to stop interacting with the code.",
+      }),
+      'euiCollapsedItemActions.allActions': i18n.translate(
+        'core.euiCollapsedItemActions.allActions',
+        {
+          defaultMessage: 'All actions',
+        }
+      ),
+      'euiColorPicker.colorSelectionLabel': (values: EuiValues) =>
+        i18n.translate('core.euiColorPicker.colorSelectionLabel', {
+          defaultMessage: 'Color selection is {colorValue}',
+          values,
+        }),
+      'euiColorPicker.transparentColor': i18n.translate('core.euiColorPicker.transparentColor', {
+        defaultMessage: 'transparent',
+      }),
+      'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
+        'core.euiComboBoxOptionsList.allOptionsSelected',
+        {
+          defaultMessage: "You've selected all available options",
+        }
+      ),
+      'euiComboBoxOptionsList.alreadyAdded': (values: EuiValues) =>
+        i18n.translate('core.euiComboBoxOptionsList.alreadyAdded', {
+          defaultMessage: '{label} has already been added',
+          values,
+        }),
+      'euiComboBoxOptionsList.createCustomOption': (values: EuiValues) =>
+        i18n.translate('core.euiComboBoxOptionsList.createCustomOption', {
+          defaultMessage: 'Hit {key} to add {searchValue} as a custom option',
+          values,
+        }),
+      'euiComboBoxOptionsList.loadingOptions': i18n.translate(
+        'core.euiComboBoxOptionsList.loadingOptions',
+        {
+          defaultMessage: 'Loading options',
+        }
+      ),
+      'euiComboBoxOptionsList.noAvailableOptions': i18n.translate(
+        'core.euiComboBoxOptionsList.noAvailableOptions',
+        {
+          defaultMessage: "There aren't any options available",
+        }
+      ),
+      'euiComboBoxOptionsList.noMatchingOptions': (values: EuiValues) =>
+        i18n.translate('core.euiComboBoxOptionsList.noMatchingOptions', {
+          defaultMessage: "{searchValue} doesn't match any options",
+          values,
+        }),
+      'euiComboBoxPill.removeSelection': (values: EuiValues) =>
+        i18n.translate('core.euiComboBoxPill.removeSelection', {
+          defaultMessage: 'Remove {children} from selection in this group',
+          values,
+        }),
+      'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
+        defaultMessage: 'Please address the errors in your form.',
+      }),
+      'euiFormControlLayoutClearButton.label': i18n.translate(
+        'core.euiFormControlLayoutClearButton.label',
+        {
+          defaultMessage: 'Clear input',
+        }
+      ),
+      'euiHeaderAlert.dismiss': i18n.translate('core.euiHeaderAlert.dismiss', {
+        defaultMessage: 'Dismiss',
+      }),
+      'euiHeaderLinks.appNavigation': i18n.translate('core.euiHeaderLinks.appNavigation', {
+        defaultMessage: 'App navigation',
+      }),
+      'euiHeaderLinks.openNavigationMenu': i18n.translate(
+        'core.euiHeaderLinks.openNavigationMenu',
+        {
+          defaultMessage: 'Open navigation menu',
+        }
+      ),
+      'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
+        defaultMessage: 'Closes this modal window',
+      }),
+      'euiPagination.jumpToLastPage': (values: EuiValues) =>
+        i18n.translate('core.euiPagination.jumpToLastPage', {
+          defaultMessage: 'Jump to the last page, number {pageCount}',
+          values,
+        }),
+      'euiPagination.nextPage': i18n.translate('core.euiPagination.nextPage', {
+        defaultMessage: 'Next page',
+      }),
+      'euiPagination.pageOfTotal': (values: EuiValues) =>
+        i18n.translate('core.euiPagination.pageOfTotal', {
+          defaultMessage: 'Page {page} of {total}',
+          values,
+        }),
+      'euiPagination.previousPage': i18n.translate('core.euiPagination.previousPage', {
+        defaultMessage: 'Previous page',
+      }),
+      'euiPopover.screenReaderAnnouncement': i18n.translate(
+        'core.euiPopover.screenReaderAnnouncement',
+        {
+          defaultMessage: 'You are in a popup. To exit this popup, hit escape.',
+        }
+      ),
+      'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
+        defaultMessage: 'Step',
+      }),
+      'euiStep.incompleteStep': i18n.translate('core.euiStep.incompleteStep', {
+        defaultMessage: 'Incomplete Step',
+      }),
+      'euiStepHorizontal.buttonTitle': (values: EuiValues) => {
+        const { step, title, disabled, isComplete } = values;
+
+        let titleAppendix = '';
+        if (disabled) {
+          titleAppendix = ' is disabled';
+        } else if (isComplete) {
+          titleAppendix = ' is complete';
+        }
+
+        return i18n.translate('core.euiStepHorizontal.buttonTitle', {
+          defaultMessage: 'Step {step}: {title}{titleAppendix}',
+          values: {
+            step,
+            title,
+            titleAppendix,
+          },
+        });
+      },
+      'euiStepHorizontal.step': i18n.translate('core.euiStepHorizontal.step', {
+        defaultMessage: 'Step',
+      }),
+      'euiStepNumber.hasErrors': i18n.translate('core.euiStepNumber.hasErrors', {
+        defaultMessage: 'has errors',
+      }),
+      'euiStepNumber.hasWarnings': i18n.translate('core.euiStepNumber.hasWarnings', {
+        defaultMessage: 'has warnings',
+      }),
+      'euiStepNumber.isComplete': i18n.translate('core.euiStepNumber.isComplete', {
+        defaultMessage: 'complete',
+      }),
+      'euiSuperSelect.screenReaderAnnouncement': (values: EuiValues) =>
+        i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
+          defaultMessage:
+            'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
+          values,
+        }),
+      'euiSuperSelectControl.selectAnOption': (values: EuiValues) =>
+        i18n.translate('core.euiSuperSelectControl.selectAnOption', {
+          defaultMessage: 'Select an option: {selectedValue}, is selected',
+          values,
+        }),
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
+      }),
+      'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
+        defaultMessage: 'Sorting',
+      }),
+      'euiToast.dismissToast': i18n.translate('core.euiToast.dismissToast', {
+        defaultMessage: 'Dismiss toast',
+      }),
+      'euiToast.newNotification': i18n.translate('core.euiToast.newNotification', {
+        defaultMessage: 'A new notification appears',
+      }),
+      'euiToast.notification': i18n.translate('core.euiToast.notification', {
+        defaultMessage: 'Notification',
       }),
     };
 
