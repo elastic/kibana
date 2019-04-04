@@ -240,7 +240,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   tagcloud: (visState, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
     const { metric, bucket } = buildVisConfig.tagcloud(schemas);
-    let expr = `tagcloud metric={vis_dimension ${metric.accessor}} `;
+    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
 
     if (scale) {
       expr += `scale='${scale}' `;
@@ -259,7 +259,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
 
     if (bucket) {
-      expr += ` bucket={vis_dimension ${bucket.accessor} `;
+      expr += ` bucket={visdimension ${bucket.accessor} `;
       if (bucket.format) {
         expr += `format=${bucket.format.id} `;
         expr += prepareJson('formatParams', bucket.format.params);
