@@ -119,6 +119,7 @@ uiModules
           };
 
           $scope.setTouched = () => {
+            ngModelCtrl.$setTouched();
             $scope.isInvalid = _isInvalid;
           };
 
