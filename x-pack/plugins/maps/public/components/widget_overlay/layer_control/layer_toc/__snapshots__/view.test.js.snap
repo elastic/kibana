@@ -8,7 +8,7 @@ exports[`LayerTOC is rendered 1`] = `
     onDragEnd={[Function]}
   >
     <EuiDroppable
-      droppableId="layerTOC"
+      droppableId="mapLayerTOC"
       spacing="none"
     >
       <EuiDraggable
