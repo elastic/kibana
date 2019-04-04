@@ -19,9 +19,9 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
 
 function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
   if (agg.params.field.name !== agg.getIndexPattern().timeFieldName) {
@@ -38,22 +38,15 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
   });
 
   return (
-    <EuiFormRow className="visEditorSidebar__aggParamFormRow visEditorSidebar__switchControl">
-      <>
-        <EuiSwitch
-          label={label}
-          checked={value}
-          data-test-subj="dropPartialBucketsCheckbox"
-          onChange={ev => setValue(ev.target.checked)}
-        />
-        <EuiIconTip
-          position="right"
-          content={content}
-          type="questionInCircle"
-          aria-label={content}
-        />
-      </>
-    </EuiFormRow>
+    <EuiToolTip content={content} delay="long">
+      <EuiSwitch
+        label={label}
+        checked={value}
+        data-test-subj="dropPartialBucketsCheckbox"
+        onChange={ev => setValue(ev.target.checked)}
+        className="visEditorSidebar__switchControl"
+      />
+    </EuiToolTip>
   );
 }
 
