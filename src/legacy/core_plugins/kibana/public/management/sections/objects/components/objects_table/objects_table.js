@@ -291,13 +291,21 @@ class ObjectsTableUI extends Component {
   };
 
   onExport = async (includeReferencesDeep) => {
+    const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
     const blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
     saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.export.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
   };
 
   onExportAll = async () => {
+    const { intl } = this.props;
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
@@ -310,6 +318,13 @@ class ObjectsTableUI extends Component {
     );
     const blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
     saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.exportAll.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
+    this.setState({ isShowingExportAllOptionsModal: false });
   };
 
   finishImport = () => {

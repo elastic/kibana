@@ -108,6 +108,7 @@ class TableUI extends PureComponent {
     const { onExport } = this.props;
     const { isIncludeReferencesDeepChecked } = this.state;
     onExport(isIncludeReferencesDeepChecked);
+    this.setState({ isExportPopoverOpen: false });
   }
 
   render() {
