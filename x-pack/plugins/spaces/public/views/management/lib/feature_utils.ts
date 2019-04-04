@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../xpack_main/types';
 
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { Space } from '../../../../common/model/space';
 
 export function getEnabledFeatures(features: Feature[], space: Partial<Space>) {
   return features.filter(feature => !(space.disabledFeatures || []).includes(feature.id));

@@ -9,11 +9,11 @@ import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { idx } from '../../../../../common/idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};

@@ -7,7 +7,7 @@
 import { EuiButtonGroup, EuiButtonGroupProps, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../../../../../xpack_main/types';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';

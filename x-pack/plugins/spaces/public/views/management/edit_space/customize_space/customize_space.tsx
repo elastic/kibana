@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { isReservedSpace } from 'x-pack/plugins/spaces/common';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { isReservedSpace } from '../../../../../common';
+import { Space } from '../../../../../common/model/space';
 import { SpaceAvatar } from '../../../../components';
 import { SpaceValidator, toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';

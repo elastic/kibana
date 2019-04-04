@@ -16,9 +16,28 @@ const createMockConfig = (settings: Record<string, any> = {}) => {
   return mockConfig;
 };
 
+describe('#constructor', () => {
+  test('requires version to be a string', () => {
+    const mockConfig = createMockConfig();
+
+    expect(() => actionsFactory(mockConfig)).toThrowErrorMatchingInlineSnapshot(
+      `"version should be a string"`
+    );
+  });
+
+  test(`doesn't allow an empty string`, () => {
+    const mockConfig = createMockConfig({ 'pkg.version': '' });
+
+    expect(() => actionsFactory(mockConfig)).toThrowErrorMatchingInlineSnapshot(
+      `"version can't be an empty string"`
+    );
+  });
+});
+
 describe('#login', () => {
   test('returns login:', () => {
-    const mockConfig = createMockConfig();
+    const version = 'mock-version';
+    const mockConfig = createMockConfig({ 'pkg.version': version });
 
     const actions = actionsFactory(mockConfig);
 

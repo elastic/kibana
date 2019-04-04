@@ -5,11 +5,12 @@
  */
 // @ts-ignore
 import { EuiCheckbox, EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { Space } from 'x-pack/plugins/spaces/common/model/space';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../../xpack_main/types';
+import { Space } from '../../../../../common/model/space';
+import { ToggleAllFeatures } from './toggle_all_features';
 
 interface Props {
   space: Partial<Space>;
@@ -48,6 +49,20 @@ export class FeatureTable extends Component<Props, {}> {
     this.props.onChange(updatedSpace);
   };
 
+  private onChangeAll = (visible: boolean) => {
+    const updatedSpace: Partial<Space> = {
+      ...this.props.space,
+    };
+
+    if (visible) {
+      updatedSpace.disabledFeatures = [];
+    } else {
+      updatedSpace.disabledFeatures = this.props.features.map(feature => feature.id);
+    }
+
+    this.props.onChange(updatedSpace);
+  };
+
   private getColumns = () => [
     {
       field: 'feature',
@@ -66,12 +81,17 @@ export class FeatureTable extends Component<Props, {}> {
     },
     {
       field: 'space',
-      width: '80',
-      align: 'right',
-      name: this.props.intl.formatMessage({
-        id: 'xpack.spaces.management.enabledSpaceFeaturesEnabledColumnTitle',
-        defaultMessage: 'Show?',
-      }),
+      width: '150',
+      name: (
+        <span>
+          <FormattedMessage
+            id="xpack.spaces.management.enabledSpaceFeaturesEnabledColumnTitle"
+            defaultMessage="Show?"
+          />
+          <ToggleAllFeatures onChange={this.onChangeAll} />
+        </span>
+      ),
+
       render: (spaceEntry: Space, record: Record<string, any>) => {
         const checked = !(
           spaceEntry.disabledFeatures && spaceEntry.disabledFeatures.includes(record.feature.id)

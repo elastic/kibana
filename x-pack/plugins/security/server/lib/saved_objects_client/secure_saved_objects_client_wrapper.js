@@ -110,21 +110,22 @@ export class SecureSavedObjectsClientWrapper {
 
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actions = types.map(type => this._actions.savedObject.get(type, action));
+    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
+    const actions = Array.from(actionsToTypesMap.keys());
     const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missing = this._getMissingPrivileges(privileges);
+      const missingPrivileges = this._getMissingPrivileges(privileges);
       this._auditLogger.savedObjectsAuthorizationFailure(
         username,
         action,
         types,
-        missing,
+        missingPrivileges,
         args
       );
-      const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
+      const msg = `Unable to ${action} ${missingPrivileges.map(privilege => actionsToTypesMap.get(privilege)).sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
