@@ -21,41 +21,36 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-import { SearchRequestProvider } from '../search_request';
+import { SearchRequest } from '../search_request';
 
 describe('ui/courier/fetch search request', () => {
   beforeEach(ngMock.module('kibana'));
 
-  it('throws exception when created without errorHandler', ngMock.inject((Private) => {
-    const SearchReq = Private(SearchRequestProvider);
+  it('throws exception when created without errorHandler', () => {
 
     let caughtError = false;
     try {
-      new SearchReq({ source: {} });
+      new SearchRequest({ source: {} });
     } catch(error) {
       caughtError = true;
     }
     expect(caughtError).to.be(true);
-  }));
+  });
 
   describe('start', () => {
-    it('calls this.source.requestIsStarting(request)', ngMock.inject((Private) => {
-      const SearchReq = Private(SearchRequestProvider);
-
+    it('calls this.source.requestIsStarting(request)', () => {
       const spy = sinon.spy(() => Promise.resolve());
       const source = { requestIsStarting: spy };
 
-      const req = new SearchReq({ source, errorHandler: () => {} });
+      const req = new SearchRequest({ source, errorHandler: () => {} });
       expect(req.start()).to.have.property('then').a('function');
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWithExactly(spy, req);
-    }));
+    });
   });
 
   describe('clone', () => {
-    it('returns a search request with identical constructor arguments', ngMock.inject((Private) => {
-      const SearchRequest = Private(SearchRequestProvider);
-
+    it('returns a search request with identical constructor arguments', () => {
       const source = {};
       const errorHandler = () => {};
       const defer = {};
@@ -67,7 +62,7 @@ describe('ui/courier/fetch search request', () => {
       expect(clonedRequest.source).to.be(source);
       expect(clonedRequest.errorHandler).to.be(errorHandler);
       expect(clonedRequest.defer).to.be(defer);
-    }));
+    });
 
   });
 });

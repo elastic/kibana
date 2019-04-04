@@ -129,8 +129,6 @@ uiModules.get('app/discover')
             $scope.totalHitCount = resp.hits.total;
             $scope.pager = pagerFactory.create($scope.hits.length, 50, 1);
             calculateItemsOnPage();
-
-            return $scope.searchSource.onResults().then(onResults);
           }
 
           function startSearching() {
@@ -149,8 +147,10 @@ uiModules.get('app/discover')
                 inspectorRequest.json(body);
               });
             }
+            $scope.isLoading = true;
             $scope.searchSource.fetch()
               .then(resp => {
+                $scope.isLoading = false;
                 if (inspectorRequest) {
                   inspectorRequest
                     .stats(getResponseInspectorStats($scope.searchSource, resp))

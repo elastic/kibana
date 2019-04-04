@@ -55,7 +55,6 @@ export function FetchSoonProvider(Private, Promise) {
    * @async
    */
   this.fetchSearchRequests = (requests) => {
-    requests.forEach(req => req._setFetchRequested());
     requestsToFetch = [...requestsToFetch, ...requests];
     debouncedFetchNow(requests);
     return Promise.all(requests.map(req => req.getCompletePromise()));

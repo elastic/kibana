@@ -25,15 +25,13 @@ import { delay } from 'bluebird';
 
 import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
-import { SearchRequestProvider } from '../request';
+import { SearchRequest } from '../request';
 import { addSearchStrategy } from '../../search_strategy';
 
 describe('callClient', () => {
   NoDigestPromises.activateForSuite();
 
   const ABORTED = RequestStatus.ABORTED;
-
-  let SearchRequest;
   let callClient;
   let fakeSearch;
   let searchRequests;
@@ -89,7 +87,6 @@ describe('callClient', () => {
 
   beforeEach(ngMock.inject(Private => {
     callClient = Private(CallClientProvider);
-    SearchRequest = Private(SearchRequestProvider);
   }));
 
   describe('basic contract', () => {

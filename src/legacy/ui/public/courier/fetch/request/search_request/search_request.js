@@ -21,138 +21,61 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-export function SearchRequestProvider(Promise) {
-  return class SearchRequest {
-    constructor({ source, defer, errorHandler }) {
-      if (!errorHandler) {
-        throw new Error(
-          i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
-            defaultMessage: '{errorHandler} is required',
-            values: { errorHandler: 'errorHandler' }
-          })
-        );
-      }
-
-      this.errorHandler = errorHandler;
-      this.source = source;
-      this.defer = defer || Promise.defer();
-      this.abortedDefer = Promise.defer();
-      this.type = 'search';
-
-      // Track execution time.
-      this.moment = undefined;
-      this.ms = undefined;
-
-      // Lifecycle state.
-      this.started = false;
-      this.stopped = false;
-      this._isFetchRequested = false;
+export class SearchRequest {
+  constructor({ source, errorHandler }) {
+    if (!errorHandler) {
+      throw new Error(
+        i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
+          defaultMessage: '{errorHandler} is required',
+          values: { errorHandler: 'errorHandler' }
+        })
+      );
     }
 
-    /**
-     *  Called by the searchPoll to find requests that should be sent to the
-     *  fetchSoon module. When a module is sent to fetchSoon its _isFetchRequested flag
-     *  is set, and this consults that flag so requests are not send to fetchSoon
-     *  multiple times.
-     *
-     *  @return {Boolean}
-     */
-    canStart() {
-      if (this.stopped) {
-        return false;
-      }
+    this._promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
 
-      if (this._isFetchRequested) {
-        return false;
-      }
+    this.errorHandler = errorHandler;
+    this.source = source;
 
-      return true;
-    }
+    // Track execution time.
+    this.moment = undefined;
+    this.ms = undefined;
+  }
 
-    /**
-     *  Used to find requests that were previously sent to the fetchSoon module but
-     *  have not been started yet, so they can be started.
-     *
-     *  @return {Boolean}
-     */
-    isFetchRequestedAndPending() {
-      if (this.started) {
-        return false;
-      }
+  start() {
+    this.moment = moment();
+    return this.source.requestIsStarting(this);
+  }
 
-      return this._isFetchRequested;
-    }
+  getFetchParams() {
+    return this.source._flatten();
+  }
 
-    /**
-     *  Called by the fetchSoon module when this request has been sent to
-     *  be fetched. At that point the request is somewhere between `ready-to-start`
-     *  and `started`. The fetch module then waits a short period of time to
-     *  allow requests to build up in the request queue, and then immediately
-     *  fetches all requests that return true from `isFetchRequestedAndPending()`
-     *
-     *  @return {undefined}
-     */
-    _setFetchRequested() {
-      this._isFetchRequested = true;
-    }
+  handleResponse(resp) {
+    this.success = true;
+    this.resp = resp;
+  }
 
-    start() {
-      if (this.started) {
-        throw new TypeError(
-          i18n.translate('common.ui.courier.fetch.unableStartRequestErrorMessage', {
-            defaultMessage: 'Unable to start request because it has already started',
-          })
-        );
-      }
+  handleFailure(error) {
+    this.success = false;
+    this.resp = error;
+    this.resp = (error && error.resp) || error;
+    return this.errorHandler(this, error);
+  }
 
-      this.started = true;
-      this.moment = moment();
+  abort() {
+    this.aborted = true;
+  }
 
-      return this.source.requestIsStarting(this);
-    }
+  complete() {
+    this.ms = this.moment.diff() * -1;
+    this.resolve(this.resp);
+  }
 
-    getFetchParams() {
-      return this.source._flatten();
-    }
-
-    handleResponse(resp) {
-      this.success = true;
-      this.resp = resp;
-    }
-
-    handleFailure(error) {
-      this.success = false;
-      this.resp = error;
-      this.resp = (error && error.resp) || error;
-      return this.errorHandler(this, error);
-    }
-
-    _markStopped() {
-      if (this.stopped) return;
-      this.stopped = true;
-      this.source.requestIsStopped(this);
-    }
-
-    abort() {
-      this._markStopped();
-      this.defer = null;
-      this.aborted = true;
-      this.abortedDefer.resolve();
-      this.abortedDefer = null;
-    }
-
-    complete() {
-      this._markStopped();
-      this.ms = this.moment.diff() * -1;
-      this.defer.resolve(this.resp);
-    }
-
-    getCompletePromise() {
-      return this.defer.promise;
-    }
-
-    getCompleteOrAbortedPromise() {
-      return Promise.race([this.defer.promise, this.abortedDefer.promise]);
-    }
-  };
+  getCompletePromise() {
+    return this._promise;
+  }
 }

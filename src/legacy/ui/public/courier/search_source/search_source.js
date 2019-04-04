@@ -75,7 +75,7 @@ import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-quer
 
 import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { SearchRequestProvider } from '../fetch/request';
+import { SearchRequest } from '../fetch/request';
 
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
@@ -113,7 +113,6 @@ function isIndexPattern(val) {
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
-  const SearchRequest = Private(SearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -300,26 +299,13 @@ export function SearchSourceProvider(Promise, Private, config) {
      */
     fetch() {
       const self = this;
-      let req = _.first(self._myStartableQueued());
-
-      if (!req) {
-        const errorHandler = (request, error) => {
-          request.defer.reject(error);
-          request.abort();
-        };
-        req = self._createRequest({ errorHandler });
-      }
-
+      const errorHandler = (request, error) => {
+        request.reject(error);
+        request.abort();
+      };
+      const req = self._createRequest({ errorHandler });
       fetchSoon.fetchSearchRequests([req]);
       return req.getCompletePromise();
-    }
-
-    /**
-     * Fetch all pending requests for this source ASAP
-     * @async
-     */
-    fetchQueued() {
-      return fetchSoon.fetchSearchRequests(this._myStartableQueued());
     }
 
     /**
@@ -345,7 +331,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      *  @return {Promise<undefined>}
      */
     requestIsStarting(request) {
-      this.activeFetchCount = (this.activeFetchCount || 0) + 1;
       this.history = [request];
 
       const handlers = [...this._requestStartHandlers];
@@ -364,38 +349,9 @@ export function SearchSourceProvider(Promise, Private, config) {
         .then(_.noop);
     }
 
-    /**
-     * Put a request in to the courier that this Source should
-     * be fetched on the next run of the courier
-     * @return {Promise}
-     */
-    onResults() {
-      const self = this;
-
-      return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
-        defer.promise.then(resolve, reject);
-
-        const errorHandler = (request, error) => {
-          reject(error);
-          request.abort();
-        };
-        self._createRequest({ defer, errorHandler });
-      });
-    }
-
     async getSearchRequestBody() {
       const searchRequest = await this._flatten();
       return searchRequest.body;
-    }
-
-    /**
-     *  Called by requests of this search source when they are done
-     *  @param  {Courier.Request} request
-     *  @return {undefined}
-     */
-    requestIsStopped() {
-      this.activeFetchCount -= 1;
     }
 
     /**
@@ -411,9 +367,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      * PRIVATE APIS
      ******/
 
-    _myStartableQueued() {
-    }
-
     /**
      * Create a common search request object, which should
      * be put into the pending request queue, for this search
@@ -423,8 +376,8 @@ export function SearchSourceProvider(Promise, Private, config) {
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest({ defer, errorHandler }) {
-      return new SearchRequest({ source: this, defer, errorHandler });
+    _createRequest({ errorHandler }) {
+      return new SearchRequest({ source: this, errorHandler });
     }
 
     /**
