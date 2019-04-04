@@ -90,7 +90,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   }
 
-  public getPrivilegeForm = () => {
+  private getPrivilegeForm = () => {
     return (
       <Fragment>
         <EuiFlexGroup>
@@ -145,7 +145,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
-  public getFieldLevelControls = () => {
+  private getFieldLevelControls = () => {
     const {
       allowFieldLevelSecurity,
       allowDocumentLevelSecurity,
@@ -250,47 +250,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
-  public getDeniedFieldsControl = () => {
-    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
-
-    if (!allowFieldLevelSecurity) {
-      return null;
-    }
-
-    const { except = [] } = indexPrivilege.field_security || {};
-
-    if (allowFieldLevelSecurity) {
-      return (
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.security.management.editRoles.indexPrivilegeForm.deniedFieldsFormRowLabel"
-                defaultMessage="Denied fields (optional)"
-              />
-            }
-            fullWidth={true}
-            className="indexPrivilegeForm__deniedFieldsRow"
-          >
-            <Fragment>
-              <EuiComboBox
-                data-test-subj={`deniedFieldInput${this.props.formIndex}`}
-                options={availableFields ? availableFields.map(toOption) : []}
-                selectedOptions={except.map(toOption)}
-                onCreateOption={this.onCreateDeniedField}
-                onChange={this.onDeniedFieldsChange}
-                isDisabled={isReservedRole}
-              />
-            </Fragment>
-          </EuiFormRow>
-        </EuiFlexItem>
-      );
-    }
-
-    return null;
-  };
-
-  public getGrantedDocumentsControl = () => {
+  private getGrantedDocumentsControl = () => {
     const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
 
     if (!allowDocumentLevelSecurity) {
@@ -345,7 +305,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
-  public toggleDocumentQuery = () => {
+  private toggleDocumentQuery = () => {
     const willToggleOff = this.state.queryExpanded;
     const willToggleOn = !willToggleOff;
 
@@ -372,7 +332,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     }
   };
 
-  public toggleFieldSecurity = () => {
+  private toggleFieldSecurity = () => {
     const willToggleOff = this.state.fieldSecurityExpanded;
     const willToggleOn = !willToggleOff;
 
@@ -413,7 +373,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     }
   };
 
-  public onCreateIndexPatternOption = (option: any) => {
+  private onCreateIndexPatternOption = (option: any) => {
     const newIndexPatterns = this.props.indexPrivilege.names.concat([option]);
 
     this.props.onChange({
@@ -422,28 +382,28 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onIndexPatternsChange = (newPatterns: EuiComboBoxOptionProps[]) => {
+  private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       names: newPatterns.map(fromOption),
     });
   };
 
-  public onPrivilegeChange = (newPrivileges: EuiComboBoxOptionProps[]) => {
+  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
     });
   };
 
-  public onQueryChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  private onQueryChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       query: e.target.value,
     });
   };
 
-  public onCreateGrantedField = (grant: string) => {
+  private onCreateGrantedField = (grant: string) => {
     if (
       !this.props.indexPrivilege.field_security ||
       !this.props.indexPrivilege.field_security.grant
@@ -462,7 +422,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionProps[]) => {
+  private onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {
@@ -472,7 +432,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onCreateDeniedField = (except: string) => {
+  private onCreateDeniedField = (except: string) => {
     if (
       !this.props.indexPrivilege.field_security ||
       !this.props.indexPrivilege.field_security.except
@@ -491,7 +451,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionProps[]) => {
+  private onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {
