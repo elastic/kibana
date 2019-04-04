@@ -71,11 +71,11 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
   );
 }
 
-function toExpression(viewState: PieChartVisModel) {
+function toExpression(viewState: PieChartVisModel, mode: 'preview' | 'view' | 'edit' = 'view') {
   const legacyConfig = {
     type: 'pie',
-    addTooltip: true,
-    addLegend: true,
+    addTooltip: mode !== 'preview',
+    addLegend: mode !== 'preview',
     legendPosition: 'right',
     isDonut: true,
     labels: {
@@ -141,7 +141,7 @@ function getSuggestion(visModel: PieChartVisModel): Suggestion {
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as PieChartVisModel;
   return {
     pluginName: PLUGIN_NAME,
-    previewExpression: toExpression(prefilledVisModel),
+    previewExpression: toExpression(prefilledVisModel, 'preview'),
     score: 0.5,
     visModel: prefilledVisModel,
     title: 'Standard Pie Chart',
@@ -188,12 +188,13 @@ function getSuggestionsForField(
     };
 
     return {
-      previewExpression: toExpression(prefilledVisModel),
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
       score: 0.5,
       visModel: prefilledVisModel,
       title: `Pie Chart: ${formattedNameSlice} of ${field.name} vs ${formattedNameSize}`,
       iconType: 'visPie' as IconType,
       pluginName: PLUGIN_NAME,
+      category: 'Pie chart',
     };
   });
 }

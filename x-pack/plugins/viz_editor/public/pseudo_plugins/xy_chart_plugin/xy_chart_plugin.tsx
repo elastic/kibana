@@ -97,14 +97,15 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
   );
 }
 
-function toExpression(viewState: XyChartVisModel) {
+function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'edit' = 'view') {
   if (!viewState.private.xyChart) {
     return '';
   }
 
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
+  return `xy_chart hideTooltips=${mode === 'preview'} hideAxes=${mode ===
+    'preview'} displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
 function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
@@ -124,11 +125,13 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | '
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+      displayType: displayType || 'line',
     });
   } else {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
+      displayType: displayType || 'line',
     });
   }
 }
@@ -148,13 +151,14 @@ function getSuggestion(
     displayType
   ) as XyChartVisModel;
   return {
-    previewExpression: toExpression(prefilledVisModel),
+    previewExpression: toExpression(prefilledVisModel, 'preview'),
     score: 0.5,
     visModel: prefilledVisModel,
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: PLUGIN_NAME,
-  } as Suggestion;
+    category: 'XY Chart',
+  };
 }
 
 function getSuggestionsForField(
@@ -196,12 +200,13 @@ function getSuggestionsForField(
     };
 
     return {
-      previewExpression: toExpression(prefilledVisModel),
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
       score: 0.5,
       visModel: prefilledVisModel,
       title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,
       iconType: displayTypeIcon.line,
       pluginName: PLUGIN_NAME,
+      category: 'Line chart',
     };
   });
 }

@@ -10,13 +10,13 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageSideBar,
+  EuiPanel,
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +26,7 @@ import {
   editorRegistry,
   GetSuggestionsType,
   initialState,
+  Suggestion,
   VisModel,
 } from '../../../public';
 import { ExpressionRenderer } from '../expression_renderer';
@@ -60,11 +61,21 @@ function getExpression(visModel: VisModel) {
     ? toRenderExpression(visModel, 'edit')
     : `${visModel.editorPlugin}_chart { config }`;
 
-  const fetchExpression = toDataFetchExpression
-    ? toDataFetchExpression(visModel, 'edit')
-    : `${visModel.editorPlugin}_chart { config }`;
+  const fetchExpression = toDataFetchExpression(visModel, 'full');
 
   return `${fetchExpression} | ${renderExpression}`;
+}
+
+function addDataFetchingToSuggestion(suggestion: Suggestion): Suggestion {
+  const { visModel, previewExpression } = suggestion;
+  const datasourcePlugin = datasourceRegistry.getByName(suggestion.visModel.datasourcePlugin);
+  return {
+    ...suggestion,
+    previewExpression: `${datasourcePlugin.toExpression(
+      visModel,
+      'preview'
+    )} | ${previewExpression}`,
+  };
 }
 
 function reducer(state: RootState, action: Action): RootState {
@@ -117,7 +128,8 @@ export function Main(props: MainProps) {
         plugin.getSuggestionsForField
           ? plugin.getSuggestionsForField(datasourceName, field, visModel)
           : []
-      );
+      )
+      .map(addDataFetchingToSuggestion);
   };
 
   const panelProps = {
@@ -134,7 +146,10 @@ export function Main(props: MainProps) {
     .getAll()
     .flatMap(plugin =>
       plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
-    );
+    )
+    .map(addDataFetchingToSuggestion);
+
+  const hasData = Object.keys(state.visModel.queries).length > 0;
 
   return (
     <EuiPage>
@@ -171,13 +186,14 @@ export function Main(props: MainProps) {
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
-                {WorkspacePanel ? (
-                  <WorkspacePanel {...panelProps}>
+                {hasData &&
+                  (WorkspacePanel ? (
+                    <WorkspacePanel {...panelProps}>
+                      <ExpressionRenderer {...props} expression={expression} />
+                    </WorkspacePanel>
+                  ) : (
                     <ExpressionRenderer {...props} expression={expression} />
-                  </WorkspacePanel>
-                ) : (
-                  <ExpressionRenderer {...props} expression={expression} />
-                )}
+                  ))}
               </EuiFlexItem>
               {state.metadata.expressionMode ? (
                 <EuiFlexItem>
@@ -220,22 +236,30 @@ export function Main(props: MainProps) {
         <EuiPageSideBar>
           <ConfigPanel {...panelProps} />
 
-          <h4>Suggestions</h4>
-          <EuiListGroup>
-            {suggestions.map((suggestion, i) => (
-              <EuiListGroupItem
-                key={i}
-                label={suggestion.title}
-                iconType={suggestion.iconType}
-                onClick={() => {
-                  onChangeVisModel({
-                    ...suggestion.visModel,
-                    editorPlugin: suggestion.pluginName,
-                  });
-                }}
-              />
-            ))}
-          </EuiListGroup>
+          {hasData && (
+            <>
+              <h4>Suggestions</h4>
+              {suggestions.map((suggestion, i) => (
+                <EuiPanel
+                  key={i}
+                  onClick={() => {
+                    onChangeVisModel({
+                      ...suggestion.visModel,
+                      editorPlugin: suggestion.pluginName,
+                    });
+                  }}
+                  paddingSize="s"
+                >
+                  {suggestion.title}
+                  <ExpressionRenderer
+                    {...props}
+                    expression={suggestion.previewExpression}
+                    size="preview"
+                  />
+                </EuiPanel>
+              ))}
+            </>
+          )}
         </EuiPageSideBar>
       )}
     </EuiPage>
