@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import uiRoutes from '../routes';
+import uiRoutes from '../../routes';
 
 import template from './error_auto_create_index.html';
 
