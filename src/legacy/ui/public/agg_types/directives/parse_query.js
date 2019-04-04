@@ -17,7 +17,28 @@
  * under the License.
  */
 
-import './parse_query';
+import { toUser, fromUser } from '../../query_bar/lib';
+import { uiModules } from '../../modules';
 
-export * from './lib/from_user';
-export * from './lib/to_user';
+uiModules
+  .get('kibana')
+  .directive('parseQuery', function () {
+
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      scope: {
+        'ngModel': '='
+      },
+      link: function ($scope, elem, attr, ngModel) {
+        const init = function () {
+          $scope.ngModel = fromUser($scope.ngModel);
+        };
+
+        ngModel.$parsers.push(fromUser);
+        ngModel.$formatters.push(toUser);
+
+        init();
+      }
+    };
+  });
