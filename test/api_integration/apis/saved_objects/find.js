@@ -47,7 +47,7 @@ export default function ({ getService }) {
                     'title': 'Count of requests'
                   },
                   migrationVersion: {
-                    visualization: '7.0.0',
+                    visualization: '7.1.0',
                   },
                   references: [
                     {
