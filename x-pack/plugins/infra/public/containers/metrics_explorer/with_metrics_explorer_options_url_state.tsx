@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { isBoolean, set, values } from 'lodash';
+import { set, values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
 import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import { UrlStateContainer } from '../../utils/url_state';
@@ -21,9 +21,13 @@ interface MetricsExplorerUrlState {
 }
 
 export const WithMetricsExplorerOptionsUrlState = () => {
-  const { options, currentTimerange, setOptions, setTimeRange } = useContext(
+  const { options, currentTimerange, setOptions: setRawOptions, setTimeRange } = useContext(
     MetricsExplorerOptionsContainer.Context
   );
+
+  const setOptions = (value: MetricsExplorerOptions) => {
+    setRawOptions(value);
+  };
 
   const urlState = useMemo(
     () => ({
@@ -63,7 +67,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     limit: Joi.number()
       .min(1)
       .default(9),
-    afterKey: Joi.string(),
+    afterKey: Joi.string().allow(null),
     groupBy: Joi.string(),
     filterQuery: Joi.string(),
     metrics: Joi.array()

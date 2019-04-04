@@ -34,12 +34,10 @@ const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
 const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: [
     {
-      aggregation: MetricsExplorerAggregation.avg,
-      field: 'system.cpu.user.pct',
+      aggregation: MetricsExplorerAggregation.count,
       color: '#3185FC',
     },
   ],
-  groupBy: 'host.name',
 };
 
 export const useMetricsExplorerOptions = () => {

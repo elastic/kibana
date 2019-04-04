@@ -6,7 +6,7 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
@@ -32,10 +32,13 @@ export const MetricsExploererKueryBar = injectI18n(
     const [draftQuery, setDraftQuery] = useState<string>(value || '');
     const [isValid, setValidation] = useState<boolean>(true);
 
-    const handleChange = (query: string) => {
-      setValidation(validateQuery(query));
-      setDraftQuery(query);
-    };
+    const handleChange = useCallback(
+      (query: string) => {
+        setValidation(validateQuery(query));
+        setDraftQuery(query);
+      },
+      [true]
+    );
 
     return (
       <WithKueryAutocompletion indexPattern={derivedIndexPattern}>

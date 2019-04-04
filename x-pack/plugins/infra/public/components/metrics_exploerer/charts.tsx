@@ -91,6 +91,7 @@ export const MetricsExplorerCharts = injectI18n(
                 <EuiSeriesChart animateData={false} xType="time">
                   {options.metrics.map((metric, id) => (
                     <EuiLineSeries
+                      key={`metric_series_${id}`}
                       color={metric.color || '#999'}
                       lineSize={2}
                       name={`${series.id}-metric_${id}`}

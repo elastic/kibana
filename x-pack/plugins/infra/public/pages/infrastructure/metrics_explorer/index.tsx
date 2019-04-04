@@ -5,7 +5,7 @@
  */
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../../common/graphql/types';
 import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
@@ -39,36 +39,56 @@ export const MetricsExplorerPage = injectI18n(
       refreshSignal
     );
 
-    const handleRefresh = () => {
-      setRefreshSignal(refreshSignal + 1);
-    };
+    const handleRefresh = useCallback(
+      () => {
+        setRefreshSignal(refreshSignal + 1);
+      },
+      [refreshSignal]
+    );
 
-    const handleTimeChange = (start: string, end: string) => {
-      setOptions({ ...options, afterKey: null });
-      setTimeRange({ ...currentTimerange, from: start, to: end });
-    };
+    const handleTimeChange = useCallback(
+      (start: string, end: string) => {
+        setOptions({ ...options, afterKey: null });
+        setTimeRange({ ...currentTimerange, from: start, to: end });
+      },
+      [options, currentTimerange]
+    );
 
-    const handleGroupByChange = (groupBy: string | null) => {
-      setOptions({
-        ...options,
-        groupBy: groupBy || void 0,
-      });
-    };
+    const handleGroupByChange = useCallback(
+      (groupBy: string | null) => {
+        setOptions({
+          ...options,
+          groupBy: groupBy || void 0,
+        });
+      },
+      [options]
+    );
 
-    const handleFilterQuerySubmit = (query: string) => {
-      setOptions({
-        ...options,
-        filterQuery: query,
-      });
-    };
+    const handleFilterQuerySubmit = useCallback(
+      (query: string) => {
+        setOptions({
+          ...options,
+          filterQuery: query,
+        });
+      },
+      [options]
+    );
 
-    const handleMetricsChange = (metrics: MetricsExplorerMetric[]) => {
-      setOptions({
-        ...options,
-        afterKey: null, // since we are changing the metrics we need to reset the pagination
-        metrics,
-      });
-    };
+    const handleMetricsChange = useCallback(
+      (metrics: MetricsExplorerMetric[]) => {
+        setOptions({
+          ...options,
+          afterKey: null, // since we are changing the metrics we need to reset the pagination
+          metrics,
+        });
+      },
+      [options]
+    );
+
+    const handleLoadMore = useCallback(
+      (afterKey: string | null) => setOptions({ ...options, afterKey }),
+      [options]
+    );
 
     return (
       <div>
@@ -101,7 +121,7 @@ export const MetricsExplorerPage = injectI18n(
             loading={loading}
             data={data}
             options={options}
-            onLoadMore={(afterKey: string | null) => setOptions({ ...options, afterKey })}
+            onLoadMore={handleLoadMore}
             onRefetch={handleRefresh}
           />
         )}
