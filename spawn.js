@@ -134,7 +134,8 @@ const start = async function () {
       if(annotations[0] && annotations[0].screenshot) {
         console.log(annotations[0].screenshot);
         images.push({
-          alt: 'screenshot',
+          alt: `Failure: ${title}`,
+          caption: `Failure: ${title}`,
           image_url: annotations[0].screenshot,
         });
         delete annotations[0].screenshot;
