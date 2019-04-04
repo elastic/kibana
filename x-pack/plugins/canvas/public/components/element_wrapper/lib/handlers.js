@@ -4,31 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { setFilter } from '../../../state/actions/elements';
 
-export function createHandlers(element, pageId, dispatch) {
+export const createHandlers = dispatch => {
   let isComplete = false;
+  let oldElement;
   let completeFn = () => {};
 
-  return {
-    setFilter(text) {
-      dispatch(setFilter(text, element.id, pageId, true));
-    },
+  return (element, pageId) => {
+    // reset isComplete when element changes
+    if (!isEqual(oldElement, element)) {
+      isComplete = false;
+      oldElement = element;
+    }
 
-    getFilter() {
-      return element.filter;
-    },
+    return {
+      setFilter(text) {
+        dispatch(setFilter(text, element.id, pageId, true));
+      },
 
-    onComplete(fn) {
-      completeFn = fn;
-    },
+      getFilter() {
+        return element.filter;
+      },
 
-    done() {
-      if (isComplete) {
-        return;
-      } // don't emit if the element is already done
-      isComplete = true;
-      completeFn();
-    },
+      onComplete(fn) {
+        completeFn = fn;
+      },
+
+      done() {
+        // don't emit if the element is already done
+        if (isComplete) {
+          return;
+        }
+
+        isComplete = true;
+        completeFn();
+      },
+    };
   };
-}
+};
