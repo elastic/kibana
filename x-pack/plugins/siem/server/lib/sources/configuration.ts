@@ -62,6 +62,6 @@ const DEFAULT_SOURCE = {
   logAlias: 'filebeat-*',
   auditbeatAlias: 'auditbeat-*',
   packetbeatAlias: 'packetbeat-*',
-  winbeatAlias: 'winlogbeat-*',
+  winlogbeatAlias: 'winlogbeat-*',
   fields: DEFAULT_FIELDS,
 };

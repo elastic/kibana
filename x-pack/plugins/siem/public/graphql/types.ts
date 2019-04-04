@@ -72,8 +72,8 @@ export interface SourceConfiguration {
   auditbeatAlias: string;
   /** The alias to read packetbeat data from */
   packetbeatAlias: string;
-  /** The alias to read winbeat data from */
-  winbeatAlias: string;
+  /** The alias to read winlogbeat data from */
+  winlogbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -112,12 +112,12 @@ export interface SourceStatus {
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
   packetbeatIndices: string[];
-  /** Whether the configured winbeat alias exists */
-  winbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
-  winbeatIndicesExist: boolean;
-  /** The list of indices in the winbeat alias */
-  winbeatIndices: string[];
+  /** Whether the configured winlogbeat alias exists */
+  winlogbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
+  winlogbeatIndicesExist: boolean;
+  /** The list of indices in the winlogbeat alias */
+  winlogbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -1107,7 +1107,7 @@ export enum IndexType {
   FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
   PACKETBEAT = 'PACKETBEAT',
-  WINBEAT = 'WINBEAT',
+  WINLOGBEAT = 'WINLOGBEAT',
 }
 
 export enum Direction {
@@ -2228,7 +2228,7 @@ export namespace SourceQuery {
 
     packetbeatAlias: string;
 
-    winbeatAlias: string;
+    winlogbeatAlias: string;
   };
 
   export type Status = {
@@ -2246,11 +2246,11 @@ export namespace SourceQuery {
 
     filebeatIndices: string[];
 
-    winbeatIndicesExist: boolean;
+    winlogbeatIndicesExist: boolean;
 
-    winbeatAliasExists: boolean;
+    winlogbeatAliasExists: boolean;
 
-    winbeatIndices: string[];
+    winlogbeatIndices: string[];
 
     indexFields: IndexFields[];
   };

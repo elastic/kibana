@@ -21,7 +21,7 @@ describe('createOptions', () => {
         logAlias: 'log-alias',
         auditbeatAlias: 'auditbeat-alias',
         packetbeatAlias: 'packetbeat-alias',
-        winbeatAlias: 'winbeat-alias',
+        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',
@@ -63,7 +63,7 @@ describe('createOptions', () => {
         logAlias: 'log-alias',
         auditbeatAlias: 'auditbeat-alias',
         packetbeatAlias: 'packetbeat-alias',
-        winbeatAlias: 'winbeat-alias',
+        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',
@@ -96,7 +96,7 @@ describe('createOptions', () => {
         logAlias: 'log-alias',
         auditbeatAlias: 'auditbeat-alias',
         packetbeatAlias: 'packetbeat-alias',
-        winbeatAlias: 'winbeat-alias',
+        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',

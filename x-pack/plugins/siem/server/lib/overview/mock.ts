@@ -11,7 +11,7 @@ export const mockOptionsNetwork: RequestBasicOptions = {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
     packetbeatAlias: 'packetbeat-*',
-    winbeatAlias: 'winbeat-*',
+    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',
@@ -67,7 +67,7 @@ export const mockOptionsHost: RequestBasicOptions = {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
     packetbeatAlias: 'packetbeat-*',
-    winbeatAlias: 'winbeat-*',
+    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

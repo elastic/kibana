@@ -77,7 +77,7 @@ export const buildQuery = (options: RequestOptions) => {
       options.sourceConfiguration.logAlias,
       options.sourceConfiguration.auditbeatAlias,
       options.sourceConfiguration.packetbeatAlias,
-      options.sourceConfiguration.winbeatAlias,
+      options.sourceConfiguration.winlogbeatAlias,
     ],
     ignoreUnavailable: true,
     body: {

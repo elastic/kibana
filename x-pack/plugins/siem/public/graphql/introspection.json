@@ -701,8 +701,8 @@
             "deprecationReason": null
           },
           {
-            "name": "winbeatAlias",
-            "description": "The alias to read winbeat data from",
+            "name": "winlogbeatAlias",
+            "description": "The alias to read winlogbeat data from",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -969,8 +969,8 @@
             "deprecationReason": null
           },
           {
-            "name": "winbeatAliasExists",
-            "description": "Whether the configured winbeat alias exists",
+            "name": "winlogbeatAliasExists",
+            "description": "Whether the configured winlogbeat alias exists",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -981,8 +981,8 @@
             "deprecationReason": null
           },
           {
-            "name": "winbeatIndicesExist",
-            "description": "Whether the configured alias or wildcard pattern resolve to any winbeat indices",
+            "name": "winlogbeatIndicesExist",
+            "description": "Whether the configured alias or wildcard pattern resolve to any winlogbeat indices",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -993,8 +993,8 @@
             "deprecationReason": null
           },
           {
-            "name": "winbeatIndices",
-            "description": "The list of indices in the winbeat alias",
+            "name": "winlogbeatIndices",
+            "description": "The list of indices in the winlogbeat alias",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1090,7 +1090,12 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "WINBEAT", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "WINLOGBEAT",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },

@@ -56,19 +56,18 @@ export type SourceStatusPacketbeatIndicesResolver = ChildResolverOf<
   AppResolverOf<SourceStatusResolvers.PacketbeatIndicesResolver>,
   QuerySourceResolver
 >;
-
-export type SourceStatusWinbeatAliasExistsResolver = ChildResolverOf<
-  AppResolverOf<SourceStatusResolvers.WinbeatAliasExistsResolver>,
+export type SourceStatusWinlogbeatAliasExistsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinlogbeatAliasExistsResolver>,
   QuerySourceResolver
 >;
 
-export type SourceStatusWinbeatIndicesExistResolver = ChildResolverOf<
-  AppResolverOf<SourceStatusResolvers.WinbeatIndicesExistResolver>,
+export type SourceStatusWinlogbeatIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinlogbeatIndicesExistResolver>,
   QuerySourceResolver
 >;
 
-export type SourceStatusWinbeatIndicesResolver = ChildResolverOf<
-  AppResolverOf<SourceStatusResolvers.WinbeatIndicesResolver>,
+export type SourceStatusWinlogbeatIndicesResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinlogbeatIndicesResolver>,
   QuerySourceResolver
 >;
 
@@ -91,9 +90,9 @@ export const createSourceStatusResolvers = (libs: {
     packetbeatAliasExists: SourceStatusPacketbeatAliasExistsResolver;
     packetbeatIndicesExist: SourceStatusPacketbeatIndicesExistResolver;
     packetbeatIndices: SourceStatusPacketbeatIndicesResolver;
-    winbeatAliasExists: SourceStatusWinbeatAliasExistsResolver;
-    winbeatIndicesExist: SourceStatusWinbeatIndicesExistResolver;
-    winbeatIndices: SourceStatusWinbeatIndicesResolver;
+    winlogbeatAliasExists: SourceStatusWinlogbeatAliasExistsResolver;
+    winlogbeatIndicesExist: SourceStatusWinlogbeatIndicesExistResolver;
+    winlogbeatIndices: SourceStatusWinlogbeatIndicesResolver;
     indexFields: SourceStatusIndexFieldsResolver;
   };
 } => ({
@@ -125,14 +124,14 @@ export const createSourceStatusResolvers = (libs: {
     async packetbeatIndices(source, args, { req }) {
       return await libs.sourceStatus.getIndexNames(req, source.id, 'packetbeatAlias');
     },
-    async winbeatAliasExists(source, args, { req }) {
-      return await libs.sourceStatus.hasAlias(req, source.id, 'winbeatAlias');
+    async winlogbeatAliasExists(source, args, { req }) {
+      return await libs.sourceStatus.hasAlias(req, source.id, 'winlogbeatAlias');
     },
-    async winbeatIndicesExist(source, args, { req }) {
-      return await libs.sourceStatus.hasIndices(req, source.id, 'winbeatAlias');
+    async winlogbeatIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasIndices(req, source.id, 'winlogbeatAlias');
     },
-    async winbeatIndices(source, args, { req }) {
-      return await libs.sourceStatus.getIndexNames(req, source.id, 'winbeatAlias');
+    async winlogbeatIndices(source, args, { req }) {
+      return await libs.sourceStatus.getIndexNames(req, source.id, 'winlogbeatAlias');
     },
     async indexFields(source, args, { req }) {
       return libs.fields.getFields(req, source.id, defaultTo([IndexType.ANY], args.indexTypes));

@@ -46,12 +46,12 @@ export const sourceStatusSchema = gql`
     packetbeatIndicesExist: Boolean!
     "The list of indices in the packetbeat alias"
     packetbeatIndices: [String!]!
-    "Whether the configured winbeat alias exists"
-    winbeatAliasExists: Boolean!
-    "Whether the configured alias or wildcard pattern resolve to any winbeat indices"
-    winbeatIndicesExist: Boolean!
-    "The list of indices in the winbeat alias"
-    winbeatIndices: [String!]!
+    "Whether the configured winlogbeat alias exists"
+    winlogbeatAliasExists: Boolean!
+    "Whether the configured alias or wildcard pattern resolve to any winlogbeat indices"
+    winlogbeatIndicesExist: Boolean!
+    "The list of indices in the winlogbeat alias"
+    winlogbeatIndices: [String!]!
     "The list of fields defined in the index mappings"
     indexFields(indexTypes: [IndexType!] = [ANY]): [IndexField!]!
   }

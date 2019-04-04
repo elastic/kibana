@@ -101,8 +101,8 @@ export interface SourceConfiguration {
   auditbeatAlias: string;
   /** The alias to read packetbeat data from */
   packetbeatAlias: string;
-  /** The alias to read winbeat data from */
-  winbeatAlias: string;
+  /** The alias to read winlogbeat data from */
+  winlogbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -141,12 +141,12 @@ export interface SourceStatus {
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
   packetbeatIndices: string[];
-  /** Whether the configured winbeat alias exists */
-  winbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
-  winbeatIndicesExist: boolean;
-  /** The list of indices in the winbeat alias */
-  winbeatIndices: string[];
+  /** Whether the configured winlogbeat alias exists */
+  winlogbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
+  winlogbeatIndicesExist: boolean;
+  /** The list of indices in the winlogbeat alias */
+  winlogbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -1136,7 +1136,7 @@ export enum IndexType {
   FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
   PACKETBEAT = 'PACKETBEAT',
-  WINBEAT = 'WINBEAT',
+  WINLOGBEAT = 'WINLOGBEAT',
 }
 
 export enum Direction {
@@ -1465,8 +1465,8 @@ export namespace SourceConfigurationResolvers {
     auditbeatAlias?: AuditbeatAliasResolver<string, TypeParent, Context>;
     /** The alias to read packetbeat data from */
     packetbeatAlias?: PacketbeatAliasResolver<string, TypeParent, Context>;
-    /** The alias to read winbeat data from */
-    winbeatAlias?: WinbeatAliasResolver<string, TypeParent, Context>;
+    /** The alias to read winlogbeat data from */
+    winlogbeatAlias?: WinlogbeatAliasResolver<string, TypeParent, Context>;
     /** The field mapping to use for this source */
     fields?: FieldsResolver<SourceFields, TypeParent, Context>;
   }
@@ -1486,7 +1486,7 @@ export namespace SourceConfigurationResolvers {
     Parent = SourceConfiguration,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type WinbeatAliasResolver<
+  export type WinlogbeatAliasResolver<
     R = string,
     Parent = SourceConfiguration,
     Context = SiemContext
@@ -1566,12 +1566,12 @@ export namespace SourceStatusResolvers {
     packetbeatIndicesExist?: PacketbeatIndicesExistResolver<boolean, TypeParent, Context>;
     /** The list of indices in the packetbeat alias */
     packetbeatIndices?: PacketbeatIndicesResolver<string[], TypeParent, Context>;
-    /** Whether the configured winbeat alias exists */
-    winbeatAliasExists?: WinbeatAliasExistsResolver<boolean, TypeParent, Context>;
-    /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
-    winbeatIndicesExist?: WinbeatIndicesExistResolver<boolean, TypeParent, Context>;
-    /** The list of indices in the winbeat alias */
-    winbeatIndices?: WinbeatIndicesResolver<string[], TypeParent, Context>;
+    /** Whether the configured winlogbeat alias exists */
+    winlogbeatAliasExists?: WinlogbeatAliasExistsResolver<boolean, TypeParent, Context>;
+    /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
+    winlogbeatIndicesExist?: WinlogbeatIndicesExistResolver<boolean, TypeParent, Context>;
+    /** The list of indices in the winlogbeat alias */
+    winlogbeatIndices?: WinlogbeatIndicesResolver<string[], TypeParent, Context>;
     /** The list of fields defined in the index mappings */
     indexFields?: IndexFieldsResolver<IndexField[], TypeParent, Context>;
   }
@@ -1621,17 +1621,17 @@ export namespace SourceStatusResolvers {
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type WinbeatAliasExistsResolver<
+  export type WinlogbeatAliasExistsResolver<
     R = boolean,
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type WinbeatIndicesExistResolver<
+  export type WinlogbeatIndicesExistResolver<
     R = boolean,
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type WinbeatIndicesResolver<
+  export type WinlogbeatIndicesResolver<
     R = string[],
     Parent = SourceStatus,
     Context = SiemContext

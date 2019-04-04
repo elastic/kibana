@@ -91,7 +91,7 @@ describe('the ConfigurationSourcesAdapter', () => {
             logAlias: 'LOG_ALIAS',
             auditbeatAlias: 'AUDITBEAT_ALIAS',
             packetbeatAlias: 'PACKETBEAT_ALIAS',
-            winbeatAlias: 'WINBEAT_ALIAS',
+            winlogbeatAlias: 'WINLOGBEAT_ALIAS',
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },
