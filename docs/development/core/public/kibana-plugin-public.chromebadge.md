@@ -1,0 +1,18 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeBadge](./kibana-plugin-public.chromebadge.md)
+
+## ChromeBadge interface
+
+
+<b>Signature:</b>
+
+```typescript
+export interface ChromeBadge 
+```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [text](./kibana-plugin-public.chromebadge.text.md) | <code>string</code> |  |
+|  [tooltip](./kibana-plugin-public.chromebadge.tooltip.md) | <code>string</code> |  |
+

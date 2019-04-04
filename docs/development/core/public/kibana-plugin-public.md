@@ -13,6 +13,7 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the start lifecycle |

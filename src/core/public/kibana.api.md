@@ -14,6 +14,14 @@ import { Toast } from '@elastic/eui';
 export type BasePathSetup = ReturnType<BasePathService['setup']>;
 
 // @public (undocumented)
+export interface ChromeBadge {
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    tooltip: string;
+}
+
+// @public (undocumented)
 export interface ChromeBrand {
     // (undocumented)
     logo?: string;

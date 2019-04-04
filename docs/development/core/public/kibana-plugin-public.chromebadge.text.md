@@ -1,0 +1,9 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeBadge](./kibana-plugin-public.chromebadge.md) &gt; [text](./kibana-plugin-public.chromebadge.text.md)
+
+## ChromeBadge.text property
+
+<b>Signature:</b>
+
+```typescript
+text: string;
+```
