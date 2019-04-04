@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
-import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
+import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
+import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';

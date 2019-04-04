@@ -26,6 +26,7 @@ import { injectedMetadataServiceMock } from './injected_metadata/injected_metada
 import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
+import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
@@ -96,4 +97,10 @@ export const MockOverlayService = overlayServiceMock.create();
 export const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
 jest.doMock('./overlays', () => ({
   OverlayService: OverlayServiceConstructor,
+}));
+
+export const MockPluginsService = pluginsServiceMock.create();
+export const PluginsServiceConstructor = jest.fn().mockImplementation(() => MockPluginsService);
+jest.doMock('./plugins', () => ({
+  PluginsService: PluginsServiceConstructor,
 }));

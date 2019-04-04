@@ -19,6 +19,9 @@
 
 import './core.css';
 
+import { Subject } from 'rxjs';
+
+import { CoreSetup } from '.';
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
@@ -28,6 +31,7 @@ import { InjectedMetadataParams, InjectedMetadataService } from './injected_meta
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
+import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -37,6 +41,10 @@ interface Params {
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
+
+/** @internal */
+// tslint:disable-next-line no-empty-interface
+export interface CoreContext {}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -57,9 +65,10 @@ export class CoreSystem {
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
   private readonly overlay: OverlayService;
+  private readonly plugins: PluginsService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly notificationsTargetDomElement: HTMLDivElement;
+  private readonly notificationsTargetDomElement$: Subject<HTMLDivElement>;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
   private readonly overlayTargetDomElement: HTMLDivElement;
 
@@ -88,9 +97,9 @@ export class CoreSystem {
       },
     });
 
-    this.notificationsTargetDomElement = document.createElement('div');
+    this.notificationsTargetDomElement$ = new Subject();
     this.notifications = new NotificationsService({
-      targetDomElement: this.notificationsTargetDomElement,
+      targetDomElement$: this.notificationsTargetDomElement$.asObservable(),
     });
     this.http = new HttpService();
     this.basePath = new BasePathService();
@@ -98,6 +107,9 @@ export class CoreSystem {
     this.overlayTargetDomElement = document.createElement('div');
     this.overlay = new OverlayService(this.overlayTargetDomElement);
     this.chrome = new ChromeService({ browserSupportsCsp });
+
+    const core: CoreContext = {};
+    this.plugins = new PluginsService(core);
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -107,15 +119,8 @@ export class CoreSystem {
     });
   }
 
-  public setup() {
+  public async setup() {
     try {
-      // ensure the rootDomElement is empty
-      this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
-      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
-      this.rootDomElement.appendChild(this.overlayTargetDomElement);
-
       const i18n = this.i18n.setup();
       const notifications = this.notifications.setup({ i18n });
       const injectedMetadata = this.injectedMetadata.setup();
@@ -134,17 +139,34 @@ export class CoreSystem {
         notifications,
       });
 
-      this.legacyPlatform.setup({
+      const core: CoreSetup = {
+        basePath,
+        chrome,
+        fatalErrors,
+        http,
         i18n,
         injectedMetadata,
-        fatalErrors,
         notifications,
-        http,
-        basePath,
         uiSettings,
-        chrome,
         overlays,
-      });
+      };
+
+      await this.plugins.setup(core);
+
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+
+      const notificationsTargetDomElement = document.createElement('div');
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+
+      // Only provide the DOM element to notifications once it's attached to the page.
+      // This prevents notifications from timing out before being displayed.
+      this.notificationsTargetDomElement$.next(notificationsTargetDomElement);
+
+      this.legacyPlatform.setup(core);
 
       return { fatalErrors };
     } catch (error) {
@@ -154,6 +176,7 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+    this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
     this.uiSettings.stop();

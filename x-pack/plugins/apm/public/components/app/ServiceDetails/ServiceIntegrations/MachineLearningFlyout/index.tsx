@@ -8,10 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
-import { startMLJob } from 'x-pack/plugins/apm/public/services/rest/ml';
-import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { startMLJob } from '../../../../../services/rest/ml';
+import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
+import { IUrlParams } from '../../../../../store/urlParams';
+import { MLJobLink } from '../../../../shared/Links/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
 
 interface Props {

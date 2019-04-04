@@ -34,8 +34,7 @@ import {
   getAutocompleteProvider,
 } from '../../autocomplete_providers';
 import chrome from '../../chrome';
-import { fromUser, toUser } from '../../parse_query';
-import { matchPairs } from '../lib/match_pairs';
+import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
@@ -86,6 +85,7 @@ interface Props {
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
@@ -380,16 +380,21 @@ export class QueryBarUI extends Component<Props, State> {
     start,
     end,
     isInvalid,
+    isQuickSelection,
   }: {
     start: string;
     end: string;
     isInvalid: boolean;
+    isQuickSelection: boolean;
   }) => {
-    this.setState({
-      dateRangeFrom: start,
-      dateRangeTo: end,
-      isDateRangeInvalid: isInvalid,
-    });
+    this.setState(
+      {
+        dateRangeFrom: start,
+        dateRangeTo: end,
+        isDateRangeInvalid: isInvalid,
+      },
+      () => isQuickSelection && this.onSubmit()
+    );
   };
 
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -594,10 +599,17 @@ export class QueryBarUI extends Component<Props, State> {
                       }}
                       autoComplete="off"
                       spellCheck={false}
-                      aria-label={this.props.intl.formatMessage({
-                        id: 'common.ui.queryBar.searchInputAriaLabel',
-                        defaultMessage: 'Search input',
-                      })}
+                      aria-label={this.props.intl.formatMessage(
+                        {
+                          id: 'common.ui.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )}
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"

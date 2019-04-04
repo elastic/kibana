@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+
 import {
   BasePathServiceConstructor,
   ChromeServiceConstructor,
@@ -34,6 +37,7 @@ import {
   MockLegacyPlatformService,
   MockNotificationsService,
   MockOverlayService,
+  MockPluginsService,
   MockUiSettingsService,
   NotificationServiceConstructor,
   OverlayServiceConstructor,
@@ -41,6 +45,7 @@ import {
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
+
 jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
@@ -116,7 +121,7 @@ describe('constructor', () => {
 
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledWith({
-      targetDomElement: expect.any(HTMLElement),
+      targetDomElement$: expect.any(Observable),
     });
   });
 
@@ -200,15 +205,15 @@ describe('#stop', () => {
     expect(MockI18nService.stop).toHaveBeenCalled();
   });
 
-  it('clears the rootDomElement', () => {
+  it('clears the rootDomElement', async () => {
     const rootDomElement = document.createElement('div');
     const coreSystem = createCoreSystem({
       rootDomElement,
     });
 
-    coreSystem.setup();
+    await coreSystem.setup();
     expect(rootDomElement.innerHTML).not.toBe('');
-    coreSystem.stop();
+    await coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
@@ -216,57 +221,57 @@ describe('#stop', () => {
 describe('#setup()', () => {
   function setupCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
     const core = createCoreSystem({
+      ...defaultCoreSystemParams,
       rootDomElement,
     });
 
     return core.setup();
   }
 
-  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', () => {
+  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', async () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
-    setupCore(root);
+    await setupCore(root);
     expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
   });
 
-  it('calls injectedMetadata#setup()', () => {
-    setupCore();
-
+  it('calls injectedMetadata#setup()', async () => {
+    await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls http#setup()', () => {
-    setupCore();
+  it('calls http#setup()', async () => {
+    await setupCore();
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls basePath#setup()', () => {
-    setupCore();
+  it('calls basePath#setup()', async () => {
+    await setupCore();
     expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls uiSettings#setup()', () => {
-    setupCore();
+  it('calls uiSettings#setup()', async () => {
+    await setupCore();
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls i18n#setup()', () => {
-    setupCore();
+  it('calls i18n#setup()', async () => {
+    await setupCore();
     expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls fatalErrors#setup()', () => {
-    setupCore();
+  it('calls fatalErrors#setup()', async () => {
+    await setupCore();
     expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls notifications#setup()', () => {
-    setupCore();
+  it('calls notifications#setup()', async () => {
+    await setupCore();
     expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls chrome#setup()', () => {
-    setupCore();
+  it('calls chrome#setup()', async () => {
+    await setupCore();
     expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
   });
 
@@ -274,10 +279,15 @@ describe('#setup()', () => {
     setupCore();
     expect(MockOverlayService.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls plugin#setup()', async () => {
+    await setupCore();
+    expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('LegacyPlatform targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the legacyPlatformService', () => {
+  it('only mounts the element when set up, before setting up the legacyPlatformService', async () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
@@ -293,32 +303,35 @@ describe('LegacyPlatform targetDomElement', () => {
     expect(targetDomElement).toHaveProperty('parentElement', null);
 
     // setting up the core system should mount the targetDomElement as a child of the rootDomElement
-    core.setup();
+    await core.setup();
     expect(targetDomElementParentInSetup!).toBe(rootDomElement);
   });
 });
 
 describe('Notifications targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the notificationsService', () => {
+  it('only mounts the element when set up, before setting up the notificationsService', async () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    let targetDomElementParentInSetup: HTMLElement;
+    const [[{ targetDomElement$ }]] = NotificationServiceConstructor.mock.calls;
 
+    let targetDomElementParentInSetup: HTMLElement | null;
     MockNotificationsService.setup.mockImplementation(
       (): any => {
-        targetDomElementParentInSetup = targetDomElement.parentElement;
+        (targetDomElement$ as Observable<HTMLElement>).pipe(take(1)).subscribe({
+          next: targetDomElement => {
+            // The targetDomElement should already be a child once it's received by the NotificationsService
+            expect(targetDomElement.parentElement).not.toBeNull();
+            targetDomElementParentInSetup = targetDomElement.parentElement;
+          },
+        });
       }
     );
 
-    // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
-    const [[{ targetDomElement }]] = NotificationServiceConstructor.mock.calls;
-    expect(targetDomElement).toHaveProperty('parentElement', null);
-
     // setting up the core system should mount the targetDomElement as a child of the rootDomElement
-    core.setup();
+    await core.setup();
     expect(targetDomElementParentInSetup!).toBe(rootDomElement);
   });
 });
