@@ -17,24 +17,11 @@
  * under the License.
  */
 
-import 'angular';
-import '../chrome';
-import '../config';
-import '../courier';
-import '../es';
-import '../notify';
-import '../private';
-import '../promises';
-import '../modals';
-import '../state_management/app_state';
-import '../state_management/global_state';
-import '../storage';
-import '../style_compile';
-import '../url';
-import '../watch_multi';
-import '../react_components';
-import '../i18n';
+import { uiModules } from '../../modules';
+import { sortPrefixFirst } from '../../utils/sort_prefix_first';
 
-import '@elastic/ui-ace';
-import { uiModules } from 'ui/modules';
-uiModules.get('kibana', ['ui.ace']);
+uiModules
+  .get('kibana')
+  .filter('sortPrefixFirst', function () {
+    return sortPrefixFirst;
+  });
