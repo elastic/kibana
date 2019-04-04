@@ -12,6 +12,8 @@ export class DomPreview extends React.Component {
   static container = null;
   static content = null;
   static observer = null;
+  static original = null;
+  static updateTimeout = null;
 
   static propTypes = {
     elementId: PropTypes.string.isRequired,
@@ -27,27 +29,28 @@ export class DomPreview extends React.Component {
   }
 
   update = () => {
-    const original = document.querySelector(`#${this.props.elementId}`);
-
-    if (!original || !this.content || !this.container) {
+    if (!this.content || !this.container) {
       return;
     }
 
     if (!this.observer) {
-      const slowUpdate = debounce(this.update, 250);
-      const fastUpdate = debounce(this.update, 100);
-      this.observer = new MutationObserver(slowUpdate);
-      // configuration of the observer
-      const config = { attributes: true, childList: true, subtree: true };
-      // pass in the target node, as well as the observer options
-      this.observer.observe(original, config);
-      fastUpdate();
+      this.original = this.original || document.querySelector(`#${this.props.elementId}`);
+      if (this.original) {
+        const slowUpdate = debounce(this.update, 100);
+        this.observer = new MutationObserver(slowUpdate);
+        // configuration of the observer
+        const config = { attributes: true, childList: true, subtree: true };
+        // pass in the target node, as well as the observer options
+        this.observer.observe(this.original, config);
+      }
+      clearTimeout(this.updateTimeout); // to avoid the assumption that we fully control when `update` is called
+      this.updateTimeout = setTimeout(this.update, 30);
       return;
     }
 
-    const thumb = original.cloneNode(true);
+    const thumb = this.original.cloneNode(true);
 
-    const originalStyle = window.getComputedStyle(original, null);
+    const originalStyle = window.getComputedStyle(this.original, null);
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
     const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
@@ -64,7 +67,7 @@ export class DomPreview extends React.Component {
     this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
 
     // Copy canvas data
-    const originalCanvas = original.querySelectorAll('canvas');
+    const originalCanvas = this.original.querySelectorAll('canvas');
     const thumbCanvas = thumb.querySelectorAll('canvas');
 
     // Cloned canvas elements are blank and need to be explicitly redrawn
