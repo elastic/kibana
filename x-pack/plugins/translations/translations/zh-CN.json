@@ -7055,7 +7055,6 @@
     "xpack.remoteClusters.detailPanel.connectedNodesLabel": "已连接节点",
     "xpack.remoteClusters.detailPanel.editButtonLabel": "编辑",
     "xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel": "初始连接超时",
-    "xpack.remoteClusters.detailPanel.loadingLabel": "正在加载远程集群……",
     "xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel": "最大连接数",
     "xpack.remoteClusters.detailPanel.notFoundLabel": "找不到远程集群",
     "xpack.remoteClusters.detailPanel.removeButtonLabel": "删除",
