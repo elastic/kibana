@@ -68,7 +68,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
           all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: ['show', 'configureSource'],
+        ui: ['show', 'configureSource', 'save'],
       },
       read: {
         api: ['infra'],
