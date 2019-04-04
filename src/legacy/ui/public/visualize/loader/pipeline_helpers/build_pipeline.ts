@@ -216,7 +216,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   metrics: (visState, schemas, uiState = {}, params: RequestHandlerParams) => {
     const paramsJson = prepareJson('params', {
       ...visState.params,
-      visInstanceId: params.visInstanceId,
+      visInstanceId: params ? params.visInstanceId : '',
     });
     const uiStateJson = prepareJson('uiState', uiState);
 
