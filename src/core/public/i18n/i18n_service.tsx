@@ -40,10 +40,10 @@ export class I18nService {
       'euiBasicTable.selectThisRow': i18n.translate('core.euiBasicTable.selectThisRow', {
         defaultMessage: 'Select this row',
       }),
-      'euiBasicTable.tableDescription': (values: EuiValues) =>
+      'euiBasicTable.tableDescription': ({ itemCount }: EuiValues) =>
         i18n.translate('core.euiBasicTable.tableDescription', {
           defaultMessage: 'Below is a table of {itemCount} items.',
-          values,
+          values: { itemCount },
         }),
       'euiBottomBar.screenReaderAnnouncement': i18n.translate(
         'core.euiBottomBar.screenReaderAnnouncement',
@@ -73,10 +73,10 @@ export class I18nService {
           defaultMessage: 'All actions',
         }
       ),
-      'euiColorPicker.colorSelectionLabel': (values: EuiValues) =>
+      'euiColorPicker.colorSelectionLabel': ({ colorValue }: EuiValues) =>
         i18n.translate('core.euiColorPicker.colorSelectionLabel', {
           defaultMessage: 'Color selection is {colorValue}',
-          values,
+          values: { colorValue },
         }),
       'euiColorPicker.transparentColor': i18n.translate('core.euiColorPicker.transparentColor', {
         defaultMessage: 'transparent',
@@ -87,15 +87,15 @@ export class I18nService {
           defaultMessage: "You've selected all available options",
         }
       ),
-      'euiComboBoxOptionsList.alreadyAdded': (values: EuiValues) =>
+      'euiComboBoxOptionsList.alreadyAdded': ({ label }: EuiValues) =>
         i18n.translate('core.euiComboBoxOptionsList.alreadyAdded', {
           defaultMessage: '{label} has already been added',
-          values,
+          values: { label },
         }),
-      'euiComboBoxOptionsList.createCustomOption': (values: EuiValues) =>
+      'euiComboBoxOptionsList.createCustomOption': ({ key, searchValue }: EuiValues) =>
         i18n.translate('core.euiComboBoxOptionsList.createCustomOption', {
           defaultMessage: 'Hit {key} to add {searchValue} as a custom option',
-          values,
+          values: { key, searchValue },
         }),
       'euiComboBoxOptionsList.loadingOptions': i18n.translate(
         'core.euiComboBoxOptionsList.loadingOptions',
@@ -109,15 +109,15 @@ export class I18nService {
           defaultMessage: "There aren't any options available",
         }
       ),
-      'euiComboBoxOptionsList.noMatchingOptions': (values: EuiValues) =>
+      'euiComboBoxOptionsList.noMatchingOptions': ({ searchValue }: EuiValues) =>
         i18n.translate('core.euiComboBoxOptionsList.noMatchingOptions', {
           defaultMessage: "{searchValue} doesn't match any options",
-          values,
+          values: { searchValue },
         }),
-      'euiComboBoxPill.removeSelection': (values: EuiValues) =>
+      'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
         i18n.translate('core.euiComboBoxPill.removeSelection', {
           defaultMessage: 'Remove {children} from selection in this group',
-          values,
+          values: { children },
         }),
       'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
         defaultMessage: 'Please address the errors in your form.',
@@ -143,18 +143,18 @@ export class I18nService {
       'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
         defaultMessage: 'Closes this modal window',
       }),
-      'euiPagination.jumpToLastPage': (values: EuiValues) =>
+      'euiPagination.jumpToLastPage': ({ pageCount }: EuiValues) =>
         i18n.translate('core.euiPagination.jumpToLastPage', {
           defaultMessage: 'Jump to the last page, number {pageCount}',
-          values,
+          values: { pageCount },
         }),
       'euiPagination.nextPage': i18n.translate('core.euiPagination.nextPage', {
         defaultMessage: 'Next page',
       }),
-      'euiPagination.pageOfTotal': (values: EuiValues) =>
+      'euiPagination.pageOfTotal': ({ page, total }: EuiValues) =>
         i18n.translate('core.euiPagination.pageOfTotal', {
           defaultMessage: 'Page {page} of {total}',
-          values,
+          values: { page, total },
         }),
       'euiPagination.previousPage': i18n.translate('core.euiPagination.previousPage', {
         defaultMessage: 'Previous page',
@@ -171,9 +171,7 @@ export class I18nService {
       'euiStep.incompleteStep': i18n.translate('core.euiStep.incompleteStep', {
         defaultMessage: 'Incomplete Step',
       }),
-      'euiStepHorizontal.buttonTitle': (values: EuiValues) => {
-        const { step, title, disabled, isComplete } = values;
-
+      'euiStepHorizontal.buttonTitle': ({ step, title, disabled, isComplete }: EuiValues) => {
         let titleAppendix = '';
         if (disabled) {
           titleAppendix = ' is disabled';
@@ -202,16 +200,16 @@ export class I18nService {
       'euiStepNumber.isComplete': i18n.translate('core.euiStepNumber.isComplete', {
         defaultMessage: 'complete',
       }),
-      'euiSuperSelect.screenReaderAnnouncement': (values: EuiValues) =>
+      'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
         i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
           defaultMessage:
             'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
-          values,
+          values: { optionsCount },
         }),
-      'euiSuperSelectControl.selectAnOption': (values: EuiValues) =>
+      'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
         i18n.translate('core.euiSuperSelectControl.selectAnOption', {
           defaultMessage: 'Select an option: {selectedValue}, is selected',
-          values,
+          values: { selectedValue },
         }),
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
