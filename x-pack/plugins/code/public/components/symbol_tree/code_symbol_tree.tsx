@@ -10,7 +10,9 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import url from 'url';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
+
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem } from '../../common/types';
 import { SymbolWithMembers } from '../../reducers/symbol';
@@ -100,7 +102,10 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
             ))}
           <EuiFlexItem grow={1}>
             <Link
-              to={`${RepositoryUtils.locationToUrl(location)}?tab=structure`}
+              to={url.format({
+                pathname: RepositoryUtils.locationToUrl(location),
+                query: { tab: 'structure' },
+              })}
               className="code-link"
               onClick={this.getClickHandler(path)}
             >

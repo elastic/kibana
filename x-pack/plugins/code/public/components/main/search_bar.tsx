@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ParsedUrlQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
+import url from 'url';
+
 import { SearchScope } from '../../../model';
 import { MainRouteParams, SearchScopeText } from '../../common/types';
 import {
@@ -40,20 +43,21 @@ export class CodeSearchBar extends React.Component<Props> {
     new RepositorySuggestionsProvider(),
   ];
 
-  public onSubmit = (query: string) => {
+  public onSubmit = (queryString: string) => {
     const { history } = this.props;
-    if (query.trim().length === 0) {
+    if (queryString.trim().length === 0) {
       return;
     }
-    let qs = '';
+    const query: ParsedUrlQuery = {
+      q: queryString,
+    };
     if (this.props.repoScope) {
-      qs = `&repoScope=${this.props.repoScope.join(',')}`;
+      query.repoScope = this.props.repoScope.join(',');
     }
     if (this.state.searchScope === SearchScope.REPOSITORY) {
-      history.push(`/search?q=${query}&scope=${SearchScope.REPOSITORY}${qs}`);
-    } else {
-      history.push(`/search?q=${query}${qs}`);
+      query.scope = SearchScope.REPOSITORY;
     }
+    history.push(url.format({ pathname: '/search', query }));
   };
 
   public onSelect = (item: AutocompleteSuggestion) => {

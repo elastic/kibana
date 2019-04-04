@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiText, EuiToken, IconType } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Url from 'url';
+import url from 'url';
 
 import {
   AutocompleteSuggestion,
@@ -102,7 +102,7 @@ export class SuggestionsComponent extends Component<Props> {
           </EuiFlexGroup>
         );
 
-        const viewMoreUrl = Url.format({
+        const viewMoreUrl = url.format({
           pathname: '/search',
           query: {
             q: this.props.query,
