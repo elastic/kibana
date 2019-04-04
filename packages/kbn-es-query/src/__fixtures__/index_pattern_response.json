@@ -144,7 +144,9 @@
       "scripted": false,
       "searchable": true,
       "aggregatable": true,
-      "readFromDocValues": true
+      "readFromDocValues": true,
+      "parent": "machine.os",
+      "subType": "multi"
     },
     {
       "name": "geo.src",

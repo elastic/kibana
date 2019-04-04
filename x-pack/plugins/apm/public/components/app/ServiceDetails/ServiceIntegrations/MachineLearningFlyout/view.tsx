@@ -22,14 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import React from 'react';
-import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
-import {
-  FETCH_STATUS,
-  useFetcher
-} from 'x-pack/plugins/apm/public/hooks/useFetcher';
-import { getMLJob } from 'x-pack/plugins/apm/public/services/rest/ml';
+import { getMlJobId } from '../../../../../../common/ml_job_constants';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
+import { getMLJob } from '../../../../../services/rest/ml';
+import { KibanaLink } from '../../../../shared/Links/KibanaLink';
+import { MLJobLink } from '../../../../shared/Links/MLJobLink';
 import { TransactionSelect } from './TransactionSelect';
 
 interface Props {
