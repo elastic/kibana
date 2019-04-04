@@ -62,8 +62,10 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
         console.log = realLog;
       }
 
+      debugger;
       this.errors.push({
         // ...runnable.addl,
+        screenshot: runnable.addl.screenshot,
         path,
         start_line: line,
         end_line: line,
