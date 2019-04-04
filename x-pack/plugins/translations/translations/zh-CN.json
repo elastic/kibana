@@ -4548,8 +4548,6 @@
     "xpack.ml.accessDenied.retryButtonLabel": "重试",
     "xpack.ml.annotationsTable.annotationColumnName": "注释",
     "xpack.ml.annotationsTable.annotationsNotCreatedTitle": "没有为此作业创建注释",
-    "xpack.ml.annotationsTable.createdByColumnName": "创建者",
-    "xpack.ml.annotationsTable.creationDateColumnName": "创建日期",
     "xpack.ml.annotationsTable.fromColumnName": "从",
     "xpack.ml.annotationsTable.howToCreateAnnotationDescription": "要创建注释，请打开 {linkToSingleMetricView}",
     "xpack.ml.annotationsTable.howToCreateAnnotationDescription.singleMetricViewerLinkText": "Single Metric Viewer",
