@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CloneWorkerResult } from '../../model';
+import { CloneWorkerResult, Repository } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -26,10 +26,14 @@ export class UpdateWorker extends AbstractGitWorker {
   }
 
   public async executeJob(job: Job) {
-    const { uri } = job.payload;
-    this.log.info(`Execute update job for ${uri}`);
-    const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
-    return await repoService.update(uri);
+    const repo: Repository = job.payload;
+    this.log.info(`Execute update job for ${repo.uri}`);
+    const repoService = this.repoServiceFactory.newInstance(
+      this.serverOptions.repoPath,
+      this.serverOptions.credsPath,
+      this.log
+    );
+    return await repoService.update(repo);
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {

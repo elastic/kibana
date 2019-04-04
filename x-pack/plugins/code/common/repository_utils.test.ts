@@ -15,6 +15,7 @@ test('Repository url parsing', () => {
     url: 'https://github.com/apache/sqoop',
     name: 'sqoop',
     org: 'apache',
+    protocol: 'https',
   });
 
   // Valid git url with .git suffix.
@@ -23,6 +24,7 @@ test('Repository url parsing', () => {
     uri: 'github.com/apache/sqoop',
     url: 'https://github.com/apache/sqoop.git',
     name: 'sqoop',
+    protocol: 'https',
     org: 'apache',
   });
 
@@ -39,6 +41,7 @@ test('Repository url parsing', () => {
     url: 'git://a/b',
     name: 'b',
     org: '_',
+    protocol: 'git',
   });
 
   const repo5 = RepositoryUtils.buildRepository('git://a/b/c');
@@ -47,6 +50,7 @@ test('Repository url parsing', () => {
     url: 'git://a/b/c',
     name: 'c',
     org: 'b',
+    protocol: 'git',
   });
 
   const repo6 = RepositoryUtils.buildRepository('git@github.com:foo/bar.git');
@@ -54,6 +58,7 @@ test('Repository url parsing', () => {
     uri: 'github.com/foo/bar',
     url: 'git@github.com:foo/bar.git',
     name: 'bar',
+    protocol: 'ssh',
     org: 'foo',
   });
 
@@ -63,6 +68,7 @@ test('Repository url parsing', () => {
     url: 'ssh://git@github.com:foo/bar.git',
     name: 'bar',
     org: 'foo',
+    protocol: 'ssh',
   });
 });
 
@@ -73,6 +79,7 @@ test('Repository url parsing with non standard segments', () => {
     url: 'git://a/b/c/d',
     name: 'd',
     org: 'b_c',
+    protocol: 'git',
   });
 
   const repo2 = RepositoryUtils.buildRepository('git://a/b/c/d/e');
@@ -81,6 +88,7 @@ test('Repository url parsing with non standard segments', () => {
     url: 'git://a/b/c/d/e',
     name: 'e',
     org: 'b_c_d',
+    protocol: 'git',
   });
 
   const repo3 = RepositoryUtils.buildRepository('git://a');
@@ -88,6 +96,7 @@ test('Repository url parsing with non standard segments', () => {
     uri: 'a/_/_',
     url: 'git://a',
     name: '_',
+    protocol: 'git',
     org: '_',
   });
 });
@@ -99,6 +108,7 @@ test('Repository url parsing with port', () => {
     url: 'ssh://mine@mydomain.com:27017/gitolite-admin',
     name: 'gitolite-admin',
     org: 'mine',
+    protocol: 'ssh',
   });
 
   const repo2 = RepositoryUtils.buildRepository(
@@ -108,6 +118,7 @@ test('Repository url parsing with port', () => {
     uri: 'mydomain.com:27017/elastic/gitolite-admin',
     url: 'ssh://mine@mydomain.com:27017/elastic/gitolite-admin',
     name: 'gitolite-admin',
+    protocol: 'ssh',
     org: 'elastic',
   });
 });
