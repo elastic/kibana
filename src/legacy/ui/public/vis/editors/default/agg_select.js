@@ -27,6 +27,7 @@ uiModules
   .directive('visAggSelectReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggSelect), [
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }],
+    ['setTouched', { watchDepth: 'reference' }],
     ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'value',
@@ -41,8 +42,10 @@ uiModules
       require: '^ngModel',
       template: function () {
         return `<vis-agg-select-react-wrapper
+            ng-if="setValidity"
             agg="agg"
             value="paramValue"
+            set-touched="setTouched"
             set-value="onChange"
             is-sub-aggregation="isSubAggregation"
             agg-help-link="aggHelpLink"
@@ -58,14 +61,29 @@ uiModules
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
+          let _isSelectInvalid = false;
+
           $scope.$watch('agg.type', (value) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
-            $scope.isSelectInvalid = !value;
+            $scope.setValidity(true);
+            $scope.isSelectInvalid = false;
           });
 
+          $scope.$watch(() => {
+            return ngModelCtrl.$touched;
+          }, (value) => {
+            if (value === true) {
+              $scope.isSelectInvalid = _isSelectInvalid;
+            }
+          }, true);
+
           $scope.onChange = (value) => {
+            if (!value) {
+              // We prevent clearing control's value if this field is required.
+              return;
+            }
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onAggTypeChange($scope.agg, value);
@@ -73,9 +91,14 @@ uiModules
             ngModelCtrl.$setDirty();
           };
 
+          $scope.setTouched = () => {
+            ngModelCtrl.$setTouched();
+            $scope.isSelectInvalid = _isSelectInvalid;
+          };
+
           $scope.setValidity = (isValid) => {
-            // The field will be marked as invalid when the value is empty.
-            $scope.isSelectInvalid = !isValid;
+            // The field will be invalid when the value is empty.
+            _isSelectInvalid = !isValid;
             // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };

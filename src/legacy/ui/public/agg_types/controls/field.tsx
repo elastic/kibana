@@ -53,7 +53,6 @@ function FieldParamEditor({
   const errors = [];
 
   if (!indexedFields.length) {
-    setTouched();
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
         defaultMessage:

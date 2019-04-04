@@ -93,6 +93,8 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
+              $scope.setValidity(true);
+              $scope.isInvalid = _isInvalid;
             }, true);
 
             $scope.$watch(() => {

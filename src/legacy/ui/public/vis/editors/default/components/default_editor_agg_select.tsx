@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get, has, isFunction } from 'lodash';
+import { get, has } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -34,22 +34,21 @@ interface DefaultEditorAggSelectProps {
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
   isSelectInvalid: boolean;
+  setTouched: () => void;
   setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAggSelect({
-  agg = {},
-  value = { title: '' },
+  agg,
+  value,
   setValue,
-  aggTypeOptions = [],
+  aggTypeOptions,
   isSelectInvalid,
   isSubAggregation,
+  setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
-  const isAggTypeDefined = value && Boolean(value.title);
-  const selectedOptions: ComboBoxGroupedOption[] = isAggTypeDefined
-    ? [{ label: value.title, value }]
-    : [];
+  const selectedOptions: ComboBoxGroupedOption[] = value ? [{ label: value.title, value }] : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -68,7 +67,7 @@ function DefaultEditorAggSelect({
     aggHelpLink = get(documentationLinks, ['aggs', agg.type.name]);
   }
 
-  const helpLink = isAggTypeDefined && aggHelpLink && (
+  const helpLink = value && aggHelpLink && (
     <EuiLink
       href={aggHelpLink}
       target="_blank"
@@ -78,16 +77,14 @@ function DefaultEditorAggSelect({
       <FormattedMessage
         id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
         defaultMessage="{aggTitle} help"
-        values={{ aggTitle: isAggTypeDefined ? value.title : '' }}
+        values={{ aggTitle: value ? value.title : '' }}
       />
     </EuiLink>
   );
 
   useEffect(
     () => {
-      if (isFunction(setValidity)) {
-        setValidity(isAggTypeDefined);
-      }
+      setValidity(!!value);
     },
     [value]
   );
@@ -108,6 +105,7 @@ function DefaultEditorAggSelect({
         options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
+        onBlur={() => setTouched()}
         onChange={options => setValue(get(options, '0.value'))}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}
