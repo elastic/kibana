@@ -18,6 +18,7 @@ export interface KbnServer {
   plugins: Record<string, any>;
   route: any;
   log: any;
+  fieldFormatServiceFactory: (uiConfig: any) => any;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }
@@ -26,6 +27,20 @@ export interface KbnServer {
   uiSettingsServiceFactory: (
     { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
   ) => UiSettings;
+}
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentExtension: string;
+  createJobFactory: () => any;
+  executeJobFactory: () => any;
+  validLicenses: string[];
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export interface ConfigObject {
@@ -41,7 +56,7 @@ export interface Logger {
   debug: (message: string) => void;
   error: (message: string) => void;
   warning: (message: string) => void;
-  clone: (tags: string[]) => Logger;
+  clone?: (tags: string[]) => Logger;
 }
 
 export interface ViewZoomWidthHeight {
@@ -92,20 +107,41 @@ export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
 
-export interface ReportingJob {
-  headers?: Record<string, string>;
+// params that come into a request
+export interface JobParams {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
+  panel?: any; // has to be resolved by the request handler
+  visType?: string; // has to be resolved by the request handler
+}
+
+export interface JobDocPayload {
   basePath?: string;
-  urls?: string[];
-  relativeUrl?: string;
   forceNow?: string;
+  headers?: Record<string, string>;
+  jobParams: JobParams;
+  objects?: string | null; // string if completed job; null if incomplete job;
+  relativeUrl?: string;
   timeRange?: any;
-  objects?: [any];
+  title: string;
+  type: string;
+  urls?: string[];
+}
+
+export interface JobDocOutput {
+  content: string; // encoded content
+  contentType: string;
+  headers: any;
+  size?: number;
+  statusCode: number;
 }
 
 export interface JobDoc {
-  output: any;
   jobtype: string;
-  payload: ReportingJob;
+  output: JobDocOutput;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }
 
 export interface JobSource {

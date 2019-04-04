@@ -27,7 +27,15 @@ test(`omits blacklisted headers`, async () => {
   };
 
   const { filteredHeaders } = await omitBlacklistedHeaders({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     decryptedHeaders: {
       ...permittedHeaders,
       ...blacklistedHeaders,
