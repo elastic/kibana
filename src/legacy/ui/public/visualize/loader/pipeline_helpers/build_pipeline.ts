@@ -198,7 +198,11 @@ export const prepareJson = (variable: string, data: object): string => {
 };
 
 export const prepareString = (variable: string, data: string): string => {
-  return `${variable}='${data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
+  return `${variable}='${escapeString(data)}' `;
+};
+
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -220,8 +224,16 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${visConfig}`;
+    const { markdown, fontSize, openLinksInNewTab } = visState.params;
+    const escapedMarkdown = escapeString(markdown);
+    let expr = `markdownvis '${escapedMarkdown}' `;
+    if (fontSize) {
+      expr += ` fontSize=${fontSize} `;
+    }
+    if (openLinksInNewTab) {
+      expr += `openLinksInNewTab=${openLinksInNewTab} `;
+    }
+    return expr;
   },
   table: (visState, schemas) => {
     const visConfig = {
