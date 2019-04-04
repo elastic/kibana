@@ -59,7 +59,29 @@ function prefillPrivateState(visModel: UnknownVisModel) {
     private: {
       ...visModel.private,
       vegaChart: {
-        spec: '',
+        spec: `{
+          "$schema": "https://vega.github.io/schema/vega/v4.json",
+          "data": [{
+            "name": "table",
+            "values": EXPRESSION_DATA_HERE
+          }],
+        
+          "marks": [
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "text": {"value": "My Vega Chart"},
+                  "align": {"value": "center"},
+                  "baseline": {"value": "middle"},
+                  "xc": {"signal": "width/2"},
+                  "yc": {"signal": "height/2"},
+                  "fontSize": {"value": "14"}
+                }
+              }
+            }
+          ]
+        }`,
       },
     },
   };
@@ -74,6 +96,7 @@ function getSuggestion(visModel: VegaChartVisModel): Suggestion {
     visModel: prefilledVisModel,
     title: 'Vega Chart',
     iconType: 'visVega',
+    category: 'Vega Chart',
   };
 }
 

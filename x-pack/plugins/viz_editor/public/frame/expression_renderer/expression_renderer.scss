@@ -1,3 +1,11 @@
-.expressionRenderer, .expressionRenderer > .visualization {
-    min-height: 500px;
+.expressionRenderer-full {
+    &, & > .visualization, & > .elasticCharts {
+        min-height: 500px;
+    }
+}
+
+.expressionRenderer-preview {
+    &, & > .visualization, & > .elasticCharts {
+        min-height: 200px;
+    }
 }

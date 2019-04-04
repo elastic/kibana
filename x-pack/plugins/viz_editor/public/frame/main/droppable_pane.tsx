@@ -15,6 +15,8 @@ interface ModalProps {
   children: any;
   getAllSuggestionsForField: GetSuggestionsType<VisModel<any, any>>;
   onChangeVisModel: (newState: VisModel) => void;
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: { get: (renderer: string) => any };
 }
 
 export function DroppablePane({
@@ -22,6 +24,8 @@ export function DroppablePane({
   getAllSuggestionsForField,
   onChangeVisModel,
   children,
+  renderersRegistry,
+  getInterpreter,
 }: ModalProps) {
   // tslint:disable-next-line:no-shadowed-variable
   const initialState = {
@@ -52,7 +56,9 @@ export function DroppablePane({
       {children}
       {state.isOpen ? (
         <VisualizationModal
-          title={`Suggested visualizations for ${state.fieldName}`}
+          renderersRegistry={renderersRegistry}
+          getInterpreter={getInterpreter}
+          title={`How do you want to use ${state.fieldName}?`}
           suggestions={state.suggestions}
           onClose={() => closeModal()}
           onSelect={newVisModel => {

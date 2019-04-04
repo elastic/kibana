@@ -17,7 +17,7 @@ export interface DatasourcePanelProps<S extends VisModel = VisModel> {
 
 export interface DatasourcePlugin<S extends VisModel = VisModel> {
   name: string;
-  toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
+  toExpression: (visModel: S, mode?: 'preview' | 'full') => string;
   DataPanel: React.ComponentType<DatasourcePanelProps<S>>;
   icon: string;
 }

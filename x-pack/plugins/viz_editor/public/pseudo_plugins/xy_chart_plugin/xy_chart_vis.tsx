@@ -15,7 +15,10 @@ import {
   LineSeries,
   Position,
   ScaleType,
+  Settings,
+  TooltipType,
 } from '@elastic/charts';
+import '@elastic/charts/dist/style.css';
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
@@ -33,6 +36,14 @@ function sampleVisFunction() {
     args: {
       displayType: {
         types: ['string'],
+      },
+      hideAxes: {
+        types: ['boolean'],
+        default: false,
+      },
+      hideTooltips: {
+        types: ['boolean'],
+        default: false,
       },
     },
     context: { types: ['kibana_datatable'] },
@@ -60,6 +71,8 @@ function sampleVisFunction() {
             xColumnType === 'date' ? moment(row[xColumn]).valueOf() : row[xColumn],
             row[yColumn],
           ]),
+          showAxes: !args.hideAxes,
+          hideTooltips: args.hideTooltips,
         } as XyChartConfig,
       };
     },
@@ -73,6 +86,8 @@ interface XyChartConfig {
   yAxisName: string;
   xAxisType: 'ordinal' | 'linear' | 'time';
   data: Array<Array<string | number>>;
+  showAxes: boolean;
+  hideTooltips: boolean;
 }
 
 function getXScaleType(xAxisType: string) {
@@ -89,18 +104,23 @@ function XyChart(props: { config: XyChartConfig }) {
   const config = props.config;
   return (
     <Chart renderer="canvas">
-      <Axis
-        id={getAxisId('bottom')}
-        title={config.xAxisName}
-        position={Position.Bottom}
-        showOverlappingTicks={true}
-      />
-      <Axis
-        id={getAxisId('left')}
-        title={config.yAxisName}
-        position={Position.Left}
-        tickFormat={d => Number(d).toFixed(2)}
-      />
+      {config.hideTooltips && <Settings tooltipType={TooltipType.None} />}
+      {config.showAxes && (
+        <>
+          <Axis
+            id={getAxisId('bottom')}
+            title={config.xAxisName}
+            position={Position.Bottom}
+            showOverlappingTicks={true}
+          />
+          <Axis
+            id={getAxisId('left')}
+            title={config.yAxisName}
+            position={Position.Left}
+            tickFormat={d => Number(d).toFixed(2)}
+          />
+        </>
+      )}
 
       {config.seriesType === 'line' ? (
         <LineSeries
@@ -133,8 +153,6 @@ function sampleVisRenderer() {
     displayName: 'XY Chart',
     reuseDomNode: true,
     render: async (domNode: HTMLDivElement, config: any, handlers: any) => {
-      domNode.style.position = 'relative';
-      domNode.style.height = '500px';
       ReactDOM.render(<XyChart config={config} />, domNode);
     },
   };

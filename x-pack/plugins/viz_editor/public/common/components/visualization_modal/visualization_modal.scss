@@ -1,0 +1,11 @@
+.visualizationModal {
+    background-color: $euiColorLightestShade;
+    border-radius: 5px;
+    width: 75vw;
+}
+
+.visualizationModal_suggestions {
+    min-height: 500px;
+    height: 50vh;
+    overflow-y: auto;
+}

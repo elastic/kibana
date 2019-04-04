@@ -60,7 +60,7 @@ function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>
   );
 }
 
-function toExpression(visModel: ScatterChartVisModel) {
+function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'preview' = 'view') {
   if (
     !visModel.private.scatterChart ||
     !visModel.private.scatterChart.xAxis.columns[0] ||
@@ -107,7 +107,9 @@ function toExpression(visModel: ScatterChartVisModel) {
       }
     ],
 
-    "axes": [
+    ${
+      mode !== 'preview'
+        ? `"axes": [
       {
         "scale": "x",
         "grid": true,
@@ -124,7 +126,9 @@ function toExpression(visModel: ScatterChartVisModel) {
         "titlePadding": 5,
         "title": "${yAxis.title}"
       }
-    ],
+    ],`
+        : ''
+    }
 
     "marks": [
       {
@@ -196,12 +200,13 @@ function getChartSuggestions(visModel: ScatterChartVisModel): Suggestion[] {
 
   return [
     {
-      previewExpression: toExpression(prefilledVisModel),
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
       score: 0.5,
       visModel: prefilledVisModel,
       title: 'Basic Scatter Chart',
       iconType: 'visHeatmap',
       pluginName: 'scatter_chart',
+      category: 'Scatter Chart',
     },
   ];
 }
@@ -238,12 +243,13 @@ function getSuggestionsForField(
 
   return [
     {
-      previewExpression: toExpression(prefilledVisModel),
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
       score: 0.5,
       visModel: prefilledVisModel,
       title: `Scatter Chart: ${field.name} vs ${field.name}`,
       iconType: 'visHeatmap',
       pluginName: 'scatter_chart',
+      category: 'Scatter chart',
     },
   ];
 }
