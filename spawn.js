@@ -123,7 +123,9 @@ const start = async function () {
     const logs = prettyLogs(cmdLogs);
     let annotations = [];
 
+    console.log('********* CHECKING IF FILE EXISTS');
     if(fs.existsSync(__dirname + 'target/errors.json')) {
+      console.log('FILE EXISTS');
       annotations = JSON.parse(fs.readFileSync(__dirname + 'target/errors.json'));
     }
     console.log('annotations: ', annotations);
@@ -138,6 +140,7 @@ const start = async function () {
         annotations,
       }
     }).then((response) => {
+      console.log('RESPONSE: ', response);
       logRateLimit(response);
       process.exit(code);
     });

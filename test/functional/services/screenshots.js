@@ -67,7 +67,8 @@ export async function ScreenshotsProvider({ getService }) {
       return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
     }
 
-    async takeForFailure(name, el) {
+    async takeForFailure(name, el, error) {
+      error.addl.screenshot = resolve(FAILURE_DIRECTORY, `${name}.png`);
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
     }
 
