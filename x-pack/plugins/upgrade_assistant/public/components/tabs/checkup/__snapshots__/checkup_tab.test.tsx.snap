@@ -63,7 +63,7 @@ exports[`CheckupTab render with deprecations 1`] = `
     panelPaddingSize="l"
   >
     <EuiPageContentBody>
-      <InjectIntl(Component)
+      <InjectIntl(CheckupControlsUI)
         allDeprecations={
           Array [
             Object {
@@ -351,7 +351,7 @@ exports[`CheckupTab render with error 1`] = `
     panelPaddingSize="l"
   >
     <EuiPageContentBody>
-      <Component
+      <LoadingErrorBanner
         loadingError={[Error: something bad!]}
       />
     </EuiPageContentBody>

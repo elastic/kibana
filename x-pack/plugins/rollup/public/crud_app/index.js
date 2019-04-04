@@ -8,7 +8,6 @@ import React from 'react';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
@@ -24,7 +23,7 @@ const esSection = management.getSection('elasticsearch');
 
 esSection.register('rollup_jobs', {
   visible: true,
-  display: 'Rollup Jobs',
+  display: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
   order: 3,
   url: `#${CRUD_APP_BASE_PATH}/job_list`,
 });
@@ -33,9 +32,7 @@ const renderReact = async (elem) => {
   render(
     <I18nContext>
       <Provider store={rollupJobsStore}>
-        <HashRouter>
-          <App />
-        </HashRouter>
+        <App />
       </Provider>
     </I18nContext>,
     elem

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getErrorListQueryString } from '../../../../../plugins/uptime/public/components/queries/error_list/get_error_list';
 import errorList from './fixtures/error_list';
 import errorListFilteredById from './fixtures/error_list_filtered_by_id';
@@ -71,7 +71,7 @@ export default function ({ getService }) {
       expect(data).to.eql(errorListFilteredByPort);
     });
 
-    it('returns an error list filtered by port/scheme', async () => {
+    it('returns an error list filtered by port/type', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
         query: getErrorListQueryString,

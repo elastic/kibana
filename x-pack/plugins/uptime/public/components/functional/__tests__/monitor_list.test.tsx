@@ -443,8 +443,8 @@ describe('MonitorList component', () => {
     const { monitors } = monitorResult;
     const component = shallowWithIntl(
       <MonitorList
-        primaryColor="green"
         dangerColor="red"
+        successColor="success"
         loading={false}
         monitors={monitors || []}
       />

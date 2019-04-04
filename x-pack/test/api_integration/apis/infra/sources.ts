@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
