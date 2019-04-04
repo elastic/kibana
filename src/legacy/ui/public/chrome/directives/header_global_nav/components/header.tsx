@@ -24,7 +24,6 @@ import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
-  EuiBetaBadge,
   // @ts-ignore
   EuiHeader,
   // @ts-ignore
