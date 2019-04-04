@@ -22,7 +22,6 @@ import rison from 'rison-node';
 import { keyMap } from '../utils/key_map';
 import { SavedObjectRegistryProvider } from '../saved_objects/saved_object_registry';
 import { uiModules } from '../modules';
-import '../filters/label';
 import savedObjectFinderTemplate from '../partials/saved_object_finder.html';
 import './input_focus';
 import './paginate';
@@ -156,6 +155,10 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
       self.selector = {
         enabled: false,
         index: -1
+      };
+
+      self.getLabel = function () {
+        return _.words(self.properties.nouns).map(_.capitalize).join(' ');
       };
 
       //key handler for the filter text box
