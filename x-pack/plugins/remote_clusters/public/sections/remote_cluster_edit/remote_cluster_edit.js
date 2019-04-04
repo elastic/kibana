@@ -22,7 +22,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH, UIM_EDIT_START } from '../../constants';
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   buildListBreadcrumb,
   editBreadcrumb,
@@ -30,7 +30,6 @@ import {
   getRouter,
   getRouterLinkProps,
   redirect,
-  trackUiMetric,
 } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
@@ -78,7 +77,6 @@ export const RemoteClusterEdit = injectI18n(
       const { startEditingCluster } = this.props;
       const { clusterName } = this.state;
       startEditingCluster(clusterName);
-      trackUiMetric(UIM_EDIT_START);
     }
 
     componentWillUnmount() {

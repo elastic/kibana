@@ -11,4 +11,3 @@ export const UIM_CLUSTER_ADD = 'cluster_add';
 export const UIM_CLUSTER_UPDATE = 'cluster_update';
 export const UIM_CLUSTER_REMOVE = 'cluster_remove';
 export const UIM_SHOW_DETAILS_CLICK = 'show_details_click';
-export const UIM_EDIT_START = 'edit_start';
