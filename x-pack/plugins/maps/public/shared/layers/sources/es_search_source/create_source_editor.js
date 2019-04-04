@@ -190,15 +190,14 @@ export class CreateSourceEditor extends Component {
         <EuiCallOut
           title={
             i18n.translate('xpack.maps.source.esSearch.disableFilterByMapBoundsTitle', {
-              defaultMessage: `Dynamically filter for data in the visible map area has been disabled`
+              defaultMessage: `Dynamic data filter disabled`
             })
           }
         >
           <p>
             <FormattedMessage
               id="xpack.maps.source.esSearch.disableFilterByMapBoundsExplainMsg"
-              defaultMessage="Index '{indexPatternTitle}' currenlty has a limited number of documents
-               and does not need to be filtered by the visible map area."
+              defaultMessage="Index '{indexPatternTitle}' has a small number of documents and does not require filtering."
               values={{
                 indexPatternTitle: this.state.indexPattern ? this.state.indexPattern.title : this.state.indexPatternId,
               }}
@@ -207,7 +206,7 @@ export class CreateSourceEditor extends Component {
           <p>
             <FormattedMessage
               id="xpack.maps.source.esSearch.disableFilterByMapBoundsTurnOnMsg"
-              defaultMessage="Turn on dynamically filter by the visible map area if you expect the number of documents to increase."
+              defaultMessage="Turn on dynamic filtering if you expect the number of documents to increase."
             />
           </p>
         </EuiCallOut>
