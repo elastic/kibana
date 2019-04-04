@@ -30,23 +30,23 @@ export const config = (Joi) => {
         }).default()
       }).default()
     }).default(),
-    index_pattern: Joi.string().default('.monitoring-*-2-*,.monitoring-*-6-*'),
+    index_pattern: Joi.string().default('.monitoring-*-2-*,.monitoring-*-6-*,.monitoring-*-7-*'),
     kibana: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-kibana-2-*,.monitoring-kibana-6-*'),
+      index_pattern: Joi.string().default('.monitoring-kibana-2-*,.monitoring-kibana-6-*,.monitoring-kibana-7-*'),
       collection: Joi.object({
         enabled: Joi.boolean().default(true),
         interval: Joi.number().default(10000) // op status metrics get buffered at `ops.interval` and flushed to the bulk endpoint at this interval
       }).default()
     }).default(),
     logstash: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-logstash-2-*,.monitoring-logstash-6-*')
+      index_pattern: Joi.string().default('.monitoring-logstash-2-*,.monitoring-logstash-6-*,.monitoring-logstash-7-*')
     }).default(),
     beats: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-beats-6-*')
+      index_pattern: Joi.string().default('.monitoring-beats-6-*,.monitoring-beats-7-*')
     }).default(),
     cluster_alerts: Joi.object({
       enabled: Joi.boolean().default(true),
-      index: Joi.string().default('.monitoring-alerts-6'),
+      index: Joi.string().default('.monitoring-alerts-6,.monitoring-alerts-7'),
       email_notifications: Joi.object({
         enabled: Joi.boolean().default(true),
         email_address: Joi.string().email(),
@@ -63,7 +63,7 @@ export const config = (Joi) => {
     }).default(),
     elasticsearch: Joi.object({
       customHeaders: Joi.object().default({}),
-      index_pattern: Joi.string().default('.monitoring-es-2-*,.monitoring-es-6-*'),
+      index_pattern: Joi.string().default('.monitoring-es-2-*,.monitoring-es-6-*,.monitoring-es-7-*'),
       logQueries: Joi.boolean().default(false),
       requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
       sniffOnStart: Joi.boolean().default(false),
