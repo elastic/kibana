@@ -221,8 +221,8 @@ function getSuggestionsForField(
       q1: {
         datasourceRef: datasourceName,
         select: [
-          { operation: 'column', alias: field.name, argument: { field: field.name } },
-          { operation: 'column', alias: field.name, argument: { field: field.name } },
+          { operator: 'column', alias: field.name, argument: { field: field.name } },
+          { operator: 'column', alias: field.name, argument: { field: field.name } },
         ],
       },
     },

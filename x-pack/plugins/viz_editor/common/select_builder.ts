@@ -9,14 +9,14 @@ import { SelectOperation, SelectOperator } from './query_types';
 type OperationTemplate = { [operation in SelectOperator]: SelectOperation };
 
 const operationTemplate: OperationTemplate = {
-  count: { operation: 'count' },
-  terms: { operation: 'terms', argument: { field: '', size: 5 } },
-  avg: { operation: 'avg', argument: { field: '' } },
-  cardinality: { operation: 'cardinality', argument: { field: '' } },
-  sum: { operation: 'sum', argument: { field: '' } },
-  column: { operation: 'column', argument: { field: '' } },
+  count: { operator: 'count' },
+  terms: { operator: 'terms', argument: { field: '', size: 5 } },
+  avg: { operator: 'avg', argument: { field: '' } },
+  cardinality: { operator: 'cardinality', argument: { field: '' } },
+  sum: { operator: 'sum', argument: { field: '' } },
+  column: { operator: 'column', argument: { field: '' } },
   date_histogram: {
-    operation: 'date_histogram',
+    operator: 'date_histogram',
     argument: {
       field: '',
       interval: 'auto',

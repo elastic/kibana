@@ -15,7 +15,7 @@ import {
   Axis,
   EditorPlugin,
   getColumnIdByIndex,
-  getOperationsForField,
+  getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
@@ -162,7 +162,7 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
-  const operationNames = getOperationsForField(field);
+  const operationNames = getOperatorsForField(field);
 
   if (operationNames.length === 0) {
     return [] as Suggestion[];
@@ -179,10 +179,7 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef: datasourceName,
-          select: [
-            { ...firstOperation, alias: field.name },
-            { operation: 'count', alias: 'count' },
-          ],
+          select: [{ ...firstOperation, alias: field.name }, { operator: 'count', alias: 'count' }],
         },
       },
       editorPlugin: PLUGIN_NAME,
