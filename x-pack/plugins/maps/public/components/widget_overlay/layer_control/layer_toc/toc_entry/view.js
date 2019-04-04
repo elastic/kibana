@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -205,10 +205,10 @@ export class TOCEntry extends React.Component {
     }
 
     return (
-      <EuiFlexItem>
+      <Fragment>
         <EuiSpacer size="s"/>
         {tocDetails}
-      </EuiFlexItem>
+      </Fragment>
     );
   }
 

@@ -20,9 +20,13 @@ export class LayerTOC extends React.Component {
       return;
     }
 
-    const prevIndex = source.index;
-    // Layer list is displayed in reverse order so destination needs to reversed to get back to original reference.
-    const newIndex = this.props.layerList.length - destination.index - 1;
+    // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
+    const reverseIndex = (index) => {
+      return this.props.layerList.length - index - 1;
+    };
+
+    const prevIndex = reverseIndex(source.index);
+    const newIndex = reverseIndex(destination.index);
     const newOrder = [];
     for(let i = 0; i < this.props.layerList.length; i++) {
       newOrder.push(i);
@@ -33,8 +37,12 @@ export class LayerTOC extends React.Component {
   };
 
   _renderLayers() {
+    // Reverse layer list so first layer drawn on map is at the bottom and
+    // last layer drawn on map is at the top.
+    const reverseLayerList = [...this.props.layerList].reverse();
+
     if (this.props.isReadOnly) {
-      return this.props.layerList
+      return reverseLayerList
         .map((layer) => {
           return (
             <TOCEntry
@@ -42,14 +50,13 @@ export class LayerTOC extends React.Component {
               layer={layer}
             />
           );
-        })
-        .reverse();
+        });
     }
 
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="layerTOC" spacing="none">
-          {this.props.layerList.map((layer, idx) => (
+          {reverseLayerList.map((layer, idx) => (
             <EuiDraggable spacing="none" key={layer.getId()} index={idx} draggableId={layer.getId()} customDragHandle={true}>
               {(provided) => (
                 <TOCEntry
@@ -58,7 +65,7 @@ export class LayerTOC extends React.Component {
                 />
               )}
             </EuiDraggable>
-          )).reverse()}
+          ))}
         </EuiDroppable>
       </EuiDragDropContext>
     );
