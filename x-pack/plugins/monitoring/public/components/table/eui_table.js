@@ -33,6 +33,14 @@ export class EuiMonitoringTable extends React.PureComponent {
       return column;
     });
 
+    //TODO: Remove this once: https://github.com/elastic/eui/issues/1274 is implemented
+    if (props.pagination) {
+      props.pagination = {
+        pageIndex: props.pagination.index || 0,
+        pageSize: props.pagination.size || props.pagination.initialPageSize || 20,
+      };
+    }
+
     return (
       <div data-test-subj={`${this.props.className}Container`}>
         <EuiInMemoryTable
