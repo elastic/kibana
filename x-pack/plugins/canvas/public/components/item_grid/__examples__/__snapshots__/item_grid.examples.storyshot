@@ -14,7 +14,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(255, 255, 255)",
+          "background": "#fff",
         }
       }
     />
@@ -29,7 +29,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(102, 102, 102)",
+          "background": "#666",
         }
       }
     />
@@ -44,7 +44,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(0, 0, 0)",
+          "background": "#000",
         }
       }
     />
@@ -66,7 +66,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(255, 255, 255)",
+          "background": "#fff",
         }
       }
     >
@@ -100,7 +100,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(102, 102, 102)",
+          "background": "#666",
         }
       }
     >
@@ -134,7 +134,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(0, 0, 0)",
+          "background": "#000",
         }
       }
     >

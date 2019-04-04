@@ -24,6 +24,7 @@ interface Deps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
+/** @internal */
 export class BasePathService {
   public setup({ injectedMetadata }: Deps) {
     const basePath = injectedMetadata.getBasePath() || '';
@@ -71,4 +72,5 @@ export class BasePathService {
   }
 }
 
+/** @public */
 export type BasePathSetup = ReturnType<BasePathService['setup']>;

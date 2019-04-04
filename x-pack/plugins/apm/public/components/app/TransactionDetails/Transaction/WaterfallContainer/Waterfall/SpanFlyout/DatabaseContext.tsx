@@ -18,7 +18,7 @@ import SyntaxHighlighter, {
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import {
   borderRadius,
   fontFamilyCode,
