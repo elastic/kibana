@@ -7,7 +7,7 @@
 import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
 import React, { Fragment, useEffect, useState } from 'react';
-import { withApollo } from 'react-apollo';
+import { withApollo, WithApolloClient } from 'react-apollo';
 import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
 
 export interface UptimeGraphQLQueryProps<T> {
@@ -41,7 +41,7 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
     const { client, implementsCustomErrorState, variables, lastRefresh } = props;
     const fetch = () => {
       setLoading(true);
-      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(result => {
+      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then((result: any) => {
         setData(result.data);
         setLoading(result.loading);
         setErrors(result.errors);
