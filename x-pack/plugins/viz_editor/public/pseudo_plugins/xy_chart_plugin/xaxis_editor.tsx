@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { DatasourceField, SelectOperation } from '../../../common';
+import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary } from '../../common/components/operation_editor';
-import { selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function XAxisEditor({
   col,

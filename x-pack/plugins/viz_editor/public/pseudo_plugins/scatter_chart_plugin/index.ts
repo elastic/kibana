@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './field_config';
-export * from './vis_model';
-export * from './operation_display';
-export * from './operation_types';
+export { config } from './scatter_chart_plugin';

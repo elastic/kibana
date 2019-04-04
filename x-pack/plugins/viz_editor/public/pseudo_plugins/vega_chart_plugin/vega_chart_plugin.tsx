@@ -6,8 +6,14 @@
 
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
-import { UnknownVisModel, updatePrivateState, VisModel } from '../../common/lib';
-import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+import {
+  EditorPlugin,
+  Suggestion,
+  UnknownVisModel,
+  updatePrivateState,
+  VisModel,
+  VisualizationPanelProps,
+} from '../../../public';
 
 interface VegaChartPrivateState {
   spec: string;
@@ -19,7 +25,7 @@ const updateVegaState = updatePrivateState<'vegaChart', VegaChartPrivateState>('
 const updateSpec = (visModel: VegaChartVisModel, spec: string) =>
   updateVegaState(visModel, { spec });
 
-function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<VegaChartVisModel>) {
+function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<VegaChartVisModel>) {
   const [text, updateText] = useState(visModel.private.vegaChart.spec);
   return (
     <>

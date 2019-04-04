@@ -6,9 +6,10 @@
 
 import { IconType } from '@elastic/eui';
 import { DatasourceField } from '../common';
-import { UnknownVisModel, VisModel } from '../public/common/lib';
+import { UnknownVisModel, VisModel } from '../public';
 
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
+import { config as scatterChartConfig } from './pseudo_plugins/scatter_chart_plugin';
 import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';
 import { config as xyChartConfig } from './pseudo_plugins/xy_chart_plugin';
 
@@ -27,7 +28,7 @@ export type GetSuggestionsType<S extends VisModel> = (
   visModel: S
 ) => Array<Suggestion<S>>;
 
-export interface PanelComponentProps<S extends VisModel = VisModel> {
+export interface VisualizationPanelProps<S extends VisModel = VisModel> {
   visModel: S;
   onChangeVisModel: (visModel: S) => void;
 }
@@ -44,9 +45,9 @@ export interface PanelComponentProps<S extends VisModel = VisModel> {
 
 export interface EditorPlugin<S extends VisModel = VisModel> {
   name: string;
-  ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
-  HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
-  WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
+  ConfigPanel: React.ComponentType<VisualizationPanelProps<S>>;
+  HeaderPanel?: React.ComponentType<VisualizationPanelProps<S>>;
+  WorkspacePanel?: React.ComponentType<VisualizationPanelProps<S>>;
   toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
   getChartSuggestions?: (visModel: S) => Array<Suggestion<S>>;
   getInitialState: (visModel: UnknownVisModel) => S;
@@ -57,10 +58,11 @@ const pluginMap: { [key: string]: EditorPlugin<any> } = {
   xy_chart: xyChartConfig,
   pie_chart: pieChartConfig,
   vega_chart: vegaChartConfig,
+  scatter_chart: scatterChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
-export const registry = {
+export const editorRegistry = {
   getByName(pluginName: string) {
     if (pluginMap[pluginName]) {
       return pluginMap[pluginName];

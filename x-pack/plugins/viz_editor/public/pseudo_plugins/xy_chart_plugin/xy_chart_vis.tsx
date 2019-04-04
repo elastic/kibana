@@ -6,14 +6,21 @@
 
 // register all the stuff which the pipeline needs later
 
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  getAxisId,
+  getSpecId,
+  LineSeries,
+  Position,
+  ScaleType,
+} from '@elastic/charts';
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
-
-// @ts-ignore
-import { XyChart } from './xy_chart';
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
@@ -53,10 +60,71 @@ function sampleVisFunction() {
             xColumnType === 'date' ? moment(row[xColumn]).valueOf() : row[xColumn],
             row[yColumn],
           ]),
-        },
+        } as XyChartConfig,
       };
     },
   };
+}
+
+interface XyChartConfig {
+  title: string;
+  seriesType: 'line' | 'area';
+  xAxisName: string;
+  yAxisName: string;
+  xAxisType: 'ordinal' | 'linear' | 'time';
+  data: Array<Array<string | number>>;
+}
+
+function getXScaleType(xAxisType: string) {
+  if (xAxisType === 'time') {
+    return ScaleType.Time;
+  }
+  if (xAxisType === 'linear') {
+    return ScaleType.Linear;
+  }
+  return ScaleType.Ordinal;
+}
+
+function XyChart(props: { config: XyChartConfig }) {
+  const config = props.config;
+  return (
+    <Chart renderer="canvas">
+      <Axis
+        id={getAxisId('bottom')}
+        title={config.xAxisName}
+        position={Position.Bottom}
+        showOverlappingTicks={true}
+      />
+      <Axis
+        id={getAxisId('left')}
+        title={config.yAxisName}
+        position={Position.Left}
+        tickFormat={d => Number(d).toFixed(2)}
+      />
+
+      {config.seriesType === 'line' ? (
+        <LineSeries
+          id={getSpecId('lines')}
+          xScaleType={getXScaleType(config.xAxisType)}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={config.data}
+          yScaleToDataExtent={false}
+        />
+      ) : (
+        <AreaSeries
+          id={getSpecId('area')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={config.data}
+          yScaleToDataExtent={false}
+        />
+      )}
+    </Chart>
+  );
 }
 
 function sampleVisRenderer() {

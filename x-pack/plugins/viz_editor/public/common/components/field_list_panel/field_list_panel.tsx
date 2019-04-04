@@ -15,8 +15,8 @@ import {
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { DatasourceField } from '../../../../common/datasource';
-import { PanelComponentProps } from '../../../editor_plugin_registry';
+import { DatasourceField } from '../../../../common';
+import { VisualizationPanelProps } from '../../../../public';
 import { Draggable } from '../../components/draggable';
 
 interface State {
@@ -33,12 +33,12 @@ function sortFields(fieldA: DatasourceField, fieldB: DatasourceField) {
   return fieldA.name.toLowerCase() < fieldB.name.toLowerCase() ? -1 : 1;
 }
 
-export function FieldListPanel({ visModel }: PanelComponentProps) {
+export function FieldListPanel({ visModel }: VisualizationPanelProps) {
   const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
   function filterFields(field: DatasourceField) {
-    return field.name.includes(state.fieldsFilter);
+    return field.name.toLowerCase().includes(state.fieldsFilter.toLowerCase());
   }
   if (datasource === null) {
     return <div />;

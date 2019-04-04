@@ -11,18 +11,20 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { DatasourceField, fieldToOperation } from '../../../common';
-import { getOperationSummary } from '../../common/components/operation_editor';
 import {
   Axis,
+  EditorPlugin,
   getColumnIdByIndex,
+  getOperationsForField,
+  operationToName,
   selectColumn,
+  Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
-} from '../../common/lib';
-import { operationToName } from '../../common/lib';
-import { getOperationsForField } from '../../common/lib/field_config';
-import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
+  VisualizationPanelProps,
+} from '../../../public';
+import { getOperationSummary } from '../../common/components/operation_editor';
 
 const PLUGIN_NAME = 'pie_chart';
 
@@ -35,7 +37,7 @@ type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
 
 const updatePieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
 
-function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
+function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<PieChartVisModel>) {
   const {
     private: {
       pieChart: { sliceAxis, angleAxis },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './field_config';
-export * from './vis_model';
-export * from './operation_display';
-export * from './operation_types';
+export * from './app';
+export * from './common';
+export * from './datasource_plugin_registry';
+export * from './editor_plugin_registry';

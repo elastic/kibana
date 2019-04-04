@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { DatasourceField } from '../../../common';
+import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
-import { selectColumn, updateColumn, VisModel } from '../../common/lib';
 
 export function YAxisEditor({
   col,

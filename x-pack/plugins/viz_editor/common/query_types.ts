@@ -47,12 +47,10 @@ export interface DateHistogramOperation extends FieldOperation {
 
 export interface SumOperation extends FieldOperation {
   operation: 'sum';
-  // argument: Field;
 }
 
 export interface AvgOperation extends FieldOperation {
   operation: 'avg';
-  argument: Field;
 }
 
 export type WindowFunction =
@@ -78,7 +76,6 @@ export interface WindowOperation extends FieldOperation {
 
 export interface CardinalityOperation extends FieldOperation {
   operation: 'cardinality';
-  argument: Field;
 }
 
 export interface CountOperation extends Aliasable {
