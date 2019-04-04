@@ -19,6 +19,7 @@ query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: Stri
     count
     statusCode
     timestamp
+    name
   }
 }
 `;
