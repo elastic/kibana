@@ -19,8 +19,7 @@ import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
-import { KueryFilterQuery } from '../../../store';
-import { KqlMode } from '../../../store/local/timeline/model';
+import { KueryFilterQuery, timelineModel } from '../../../store';
 import { AutocompleteField } from '../../autocomplete_field';
 
 import { getPlaceholderText, modes, options } from './helpers';
@@ -41,7 +40,7 @@ interface Props {
   filterQueryDraft: KueryFilterQuery;
   indexPattern: StaticIndexPattern;
   isFilterQueryDraftValid: boolean;
-  kqlMode: KqlMode;
+  kqlMode: timelineModel.KqlMode;
   timelineId: string;
   updateKqlMode: (
     {
@@ -49,7 +48,7 @@ interface Props {
       kqlMode,
     }: {
       id: string;
-      kqlMode: KqlMode;
+      kqlMode: timelineModel.KqlMode;
     }
   ) => void;
   setKqlFilterQueryDraft: (expression: string) => void;
@@ -84,7 +83,9 @@ export const SearchOrFilter = pure<Props>(
               hasDividers={true}
               itemLayoutAlign="top"
               itemClassName={timelineSelectModeItemsClassName}
-              onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
+              onChange={(mode: timelineModel.KqlMode) =>
+                updateKqlMode({ id: timelineId, kqlMode: mode })
+              }
               options={options}
               valueOfSelected={kqlMode}
             />

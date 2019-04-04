@@ -17,8 +17,7 @@ import {
   timelineActions,
   timelineSelectors,
 } from '../../../store';
-import { KqlMode, TimelineModel } from '../../../store/local/timeline/model';
-import { State } from '../../../store/reducer';
+import { State, timelineModel } from '../../../store';
 
 import { SearchOrFilter } from './search_or_filter';
 
@@ -30,7 +29,7 @@ interface OwnProps {
 interface StateReduxProps {
   filterQueryDraft: KueryFilterQuery;
   isFilterQueryDraftValid: boolean;
-  kqlMode?: KqlMode;
+  kqlMode?: timelineModel.KqlMode;
 }
 
 interface DispatchProps {
@@ -40,7 +39,7 @@ interface DispatchProps {
   }>;
   updateKqlMode: ActionCreator<{
     id: string;
-    kqlMode: KqlMode;
+    kqlMode: timelineModel.KqlMode;
   }>;
   setKqlFilterQueryDraft: ActionCreator<{
     id: string;
@@ -104,7 +103,7 @@ const makeMapStateToProps = () => {
   const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
   const isFilterQueryDraftValid = timelineSelectors.isFilterQueryDraftValidSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel | {} = getTimeline(state, timelineId);
+    const timeline: timelineModel.TimelineModel | {} = getTimeline(state, timelineId);
     return {
       kqlMode: getOr('filter', 'kqlMode', timeline),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),

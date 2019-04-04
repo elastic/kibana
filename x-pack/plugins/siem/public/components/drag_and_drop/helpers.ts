@@ -8,9 +8,7 @@ import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { timelineActions } from '../../store';
-import { dragAndDropActions } from '../../store/local/drag_and_drop';
-import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
+import { dragAndDropActions, dragAndDropModel, timelineActions } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 
 export const draggableIdPrefix = 'draggableId';
@@ -71,7 +69,7 @@ export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean 
   destinationIsTimelineButton(result);
 
 interface AddProviderToTimelineParams {
-  dataProviders: IdToDataProvider;
+  dataProviders: dragAndDropModel.IdToDataProvider;
   result: DropResult;
   dispatch: Dispatch;
   addProvider?: ActionCreator<{

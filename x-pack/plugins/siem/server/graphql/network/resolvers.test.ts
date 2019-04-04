@@ -78,7 +78,7 @@ describe('Test Source Resolvers', () => {
 
     const mockGetFields = jest.fn();
     mockGetFields.mockResolvedValue({ fieldNodes: [mockNetworkTopNFlowFields] });
-    jest.mock('../../utils/build_query/fields', () => ({
+    jest.doMock('../../utils/build_query/fields', () => ({
       getFields: mockGetFields,
     }));
 
@@ -118,7 +118,7 @@ describe('Test Source Resolvers', () => {
 
     const mockGetFields = jest.fn();
     mockGetFields.mockResolvedValue({ fieldNodes: [mockNetworkDnsFields] });
-    jest.mock('../../utils/build_query/fields', () => ({
+    jest.doMock('../../utils/build_query/fields', () => ({
       getFields: mockGetFields,
     }));
 

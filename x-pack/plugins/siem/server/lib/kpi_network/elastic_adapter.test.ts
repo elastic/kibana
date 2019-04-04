@@ -33,7 +33,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
   describe('getKpiNetwork - call stack', () => {
     beforeAll(async () => {
       mockCallWithRequest.mockResolvedValue(mockResponse);
-      jest.mock('../framework', () => ({
+      jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
       mockBuildQuery = jest.spyOn(generalQueryDsl, 'buildGeneralQuery').mockReturnValue([]);
@@ -83,7 +83,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
   describe('Happy Path - get Data', () => {
     beforeAll(async () => {
       mockCallWithRequest.mockResolvedValue(mockResponse);
-      jest.mock('../framework', () => ({
+      jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
       EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
@@ -102,7 +102,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
   describe('Unhappy Path - No data', () => {
     beforeAll(async () => {
       mockCallWithRequest.mockResolvedValue(null);
-      jest.mock('../framework', () => ({
+      jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
       }));
       EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);

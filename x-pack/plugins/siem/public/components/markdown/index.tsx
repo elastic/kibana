@@ -17,22 +17,22 @@ const TableHeader = styled.thead`
 const markdownRenderers = {
   root: ({ children }: { children: React.ReactNode[] }) => (
     <EuiText data-test-subj="markdown-root" grow={false}>
-      {...children}
+      {children}
     </EuiText>
   ),
   table: ({ children }: { children: React.ReactNode[] }) => (
     <table data-test-subj="markdown-table" className="euiTable euiTable--responsive">
-      {...children}
+      {children}
     </table>
   ),
   tableHead: ({ children }: { children: React.ReactNode[] }) => (
-    <TableHeader data-test-subj="markdown-table-header">{...children}</TableHeader>
+    <TableHeader data-test-subj="markdown-table-header">{children}</TableHeader>
   ),
   tableRow: ({ children }: { children: React.ReactNode[] }) => (
-    <EuiTableRow data-test-subj="markdown-table-row">{...children}</EuiTableRow>
+    <EuiTableRow data-test-subj="markdown-table-row">{children}</EuiTableRow>
   ),
   tableCell: ({ children }: { children: React.ReactNode[] }) => (
-    <EuiTableRowCell data-test-subj="markdown-table-cell">{...children}</EuiTableRowCell>
+    <EuiTableRowCell data-test-subj="markdown-table-cell">{children}</EuiTableRowCell>
   ),
 };
 

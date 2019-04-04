@@ -23,7 +23,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
     };
-    jest.mock('../framework', () => ({
+    jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
     }));
 
@@ -50,7 +50,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
     };
-    jest.mock('../framework', () => ({
+    jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
     }));
 
@@ -84,7 +84,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
     };
-    jest.mock('../framework', () => ({
+    jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
     }));
 

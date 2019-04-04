@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  dragAndDropActions,
-  hostsActions,
-  inputsActions,
-  networkActions,
-  timelineActions,
-} from './local';
+export { appActions } from './app';
+export { dragAndDropActions } from './drag_and_drop';
+export { hostsActions } from './hosts';
+export { inputsActions } from './inputs';
+export { networkActions } from './network';
+export { timelineActions } from './timeline';

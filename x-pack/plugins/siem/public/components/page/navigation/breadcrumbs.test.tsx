@@ -9,7 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 // @ts-ignore Prevent auto-format from deleting - needed for 'chrome/ui' imports in host_details/ip_details
-jest.mock('ui/chrome', () => ({
+jest.doMock('ui/chrome', () => ({
   getBasePath: () => '',
 }));
 

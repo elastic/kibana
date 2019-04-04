@@ -21,7 +21,7 @@ import { mockUncommonProcessesData, mockUncommonProcessesFields } from './uncomm
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockUncommonProcessesFields] });
-jest.mock('../../utils/build_query/fields', () => ({
+jest.doMock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 

@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
-import { networkModel } from '../../store/local';
+import { networkModel } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 

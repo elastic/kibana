@@ -20,7 +20,7 @@ import { AuthenticationsResolversDeps, createAuthenticationsResolvers } from './
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockAuthenticationsFields] });
-jest.mock('../../utils/build_query/fields', () => ({
+jest.doMock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 

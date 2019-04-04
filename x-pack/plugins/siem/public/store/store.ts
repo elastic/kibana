@@ -14,14 +14,7 @@ import {
 } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 
-import {
-  createRootEpic,
-  globalPolicySelector,
-  globalTimeRangeSelector,
-  initialState,
-  reducer,
-  State,
-} from '.';
+import { createRootEpic, initialState, inputsSelectors, reducer, State } from '.';
 
 declare global {
   interface Window {
@@ -33,8 +26,8 @@ export const createStore = (state = initialState): Store<State, AnyAction> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies = {
-    selectGlobalPolicy: globalPolicySelector,
-    selectGlobalTimeRange: globalTimeRangeSelector,
+    selectGlobalPolicy: inputsSelectors.globalPolicySelector,
+    selectGlobalTimeRange: inputsSelectors.globalTimeRangeSelector,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
