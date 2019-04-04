@@ -21,7 +21,7 @@ export class LayerTOC extends React.Component {
     }
 
     const prevIndex = source.index;
-    // Layer list is displayed in reverse order so destination needs to reverses to get back to original reference.
+    // Layer list is displayed in reverse order so destination needs to reversed to get back to original reference.
     const newIndex = this.props.layerList.length - destination.index - 1;
     const newOrder = [];
     for(let i = 0; i < this.props.layerList.length; i++) {
