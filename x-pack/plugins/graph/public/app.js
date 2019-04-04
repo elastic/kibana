@@ -31,6 +31,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
+import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './angular-venn-simple.js';
@@ -80,6 +81,7 @@ uiRoutes
   .when('/home', {
     template: appTemplate,
     k7Breadcrumbs: getHomeBreadcrumbs,
+    badge: getReadonlyBadge,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
