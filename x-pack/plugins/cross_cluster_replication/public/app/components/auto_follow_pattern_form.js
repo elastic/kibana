@@ -661,6 +661,7 @@ export class AutoFollowPatternForm extends PureComponent {
           {renderLeaderIndexPatterns()}
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
+        <EuiSpacer />
         {renderFormErrorWarning()}
         {this.renderApiErrors()}
         {renderActions()}
