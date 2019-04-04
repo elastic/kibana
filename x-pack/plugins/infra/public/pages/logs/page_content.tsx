@@ -5,8 +5,8 @@
  */
 
 import React, { useContext } from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import { AutoSizer } from '../../components/auto_sizer';
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
@@ -36,7 +36,7 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
                 reportVisiblePositions,
                 targetPosition,
               }) => (
-                <WithStreamItems>
+                <WithStreamItems initializeOnMount={!isAutoReloading}>
                   {({
                     hasMoreAfterEnd,
                     hasMoreBeforeStart,
@@ -101,14 +101,14 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
   );
 };
 
-const LogPageEventStreamColumn = styled.div`
+const LogPageEventStreamColumn = euiStyled.div`
   flex: 1 0 0%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 `;
 
-const LogPageMinimapColumn = styled.div`
+const LogPageMinimapColumn = euiStyled.div`
   flex: 1 0 0%;
   overflow: hidden;
   min-width: 100px;

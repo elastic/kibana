@@ -395,7 +395,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       });
     }
 
-    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewDetector === true) {
+    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
       items.push(
         <EuiContextMenuItem
           key="view_series"

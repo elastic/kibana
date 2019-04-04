@@ -62,6 +62,7 @@ exports[`EmptyState should render normally 1`] = `
       iconSide="left"
       iconType="refresh"
       onClick={[Function]}
+      size="m"
       type="button"
     >
       <FormattedMessage

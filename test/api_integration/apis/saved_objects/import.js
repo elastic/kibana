@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
@@ -70,6 +70,7 @@ export default function ({ getService }) {
                   {
                     id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                     type: 'index-pattern',
+                    title: 'logstash-*',
                     error: {
                       type: 'conflict',
                     }
@@ -77,6 +78,7 @@ export default function ({ getService }) {
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     type: 'visualization',
+                    title: 'Count of requests',
                     error: {
                       type: 'conflict',
                     }
@@ -84,6 +86,7 @@ export default function ({ getService }) {
                   {
                     id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                     type: 'dashboard',
+                    title: 'Requests',
                     error: {
                       type: 'conflict',
                     }
@@ -161,6 +164,7 @@ export default function ({ getService }) {
                     id: '1',
                     error: {
                       type: 'missing_references',
+                      blocking: [],
                       references: [
                         {
                           type: 'index-pattern',

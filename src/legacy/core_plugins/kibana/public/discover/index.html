@@ -33,6 +33,7 @@
       <div data-transclude-slot="bottomRow" class="fullWidth">
         <search-bar
           query="state.query"
+          screen-title="screenTitle"
           on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
@@ -101,8 +102,6 @@
               ></h2>
               <div class="euiSpacer euiSpacer--m"></div>
               <div class="euiLoadingSpinner euiLoadingSpinner--large"></div>
-              <div class="euiSpacer euiSpacer--m"></div>
-              <div ng-show="fetchStatus">{{fetchStatus.complete}} / {{fetchStatus.total}}</div>
             </div>
           </div>
 
