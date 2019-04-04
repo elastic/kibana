@@ -17,14 +17,14 @@ import {
   getColumnIdByIndex,
   getOperationsForField,
   operationToName,
-  selectColumn,
   Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
-import { getOperationSummary } from '../../common/components/operation_editor';
+import { AngleAxisEditor } from './angleaxis_editor';
+import { SliceAxisEditor } from './sliceaxis_editor';
 
 const PLUGIN_NAME = 'pie_chart';
 
@@ -48,13 +48,23 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Slice pie by</span>
         {sliceAxis.columns.map(col => (
-          <span>{getOperationSummary(selectColumn(col, visModel))}</span>
+          <SliceAxisEditor
+            key={col}
+            col={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Size slices by</span>
         {angleAxis.columns.map(col => (
-          <span>{getOperationSummary(selectColumn(col, visModel))}</span>
+          <AngleAxisEditor
+            key={col}
+            col={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
     </>
