@@ -19,10 +19,13 @@
 
 import { kfetch } from 'ui/kfetch';
 
-export async function fetchExportObjects(objects) {
+export async function fetchExportObjects(objects, includeReferencesDeep = false) {
   return await kfetch({
     method: 'POST',
     pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({ objects }),
+    body: JSON.stringify({
+      objects,
+      includeReferencesDeep,
+    }),
   });
 }

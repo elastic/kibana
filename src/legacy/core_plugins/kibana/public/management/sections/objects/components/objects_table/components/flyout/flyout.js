@@ -189,10 +189,13 @@ class FlyoutUI extends Component {
     return resolutions;
   }
 
-  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache }) => {
+  mapImportFailureToRetryObject = ({ error, obj, overwriteDecisionCache, replaceReferencesCache, blockedList }) => {
     const { isOverwriteAllChecked, unmatchedReferences } = this.state;
     const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${obj.type}:${obj.id}`] === true;
     if (!isOverwriteGranted && error.type === 'conflict') {
+      return;
+    }
+    if (blockedList.includes(`${obj.type}:${obj.id}`)) {
       return;
     }
     if (error.type === 'missing_references') {
@@ -219,14 +222,6 @@ class FlyoutUI extends Component {
       if (objReplaceReferences.length === 0) {
         return;
       }
-    } else if (error.type === 'references_missing_references') {
-      const indexPatternsBeingReplaced = unmatchedReferences.filter(obj => !!obj.newIndexPatternId).map(obj => obj.existingIndexPatternId);
-      const referencesBeingReplaced = error.references.filter(({ type, id }) => {
-        return type === 'index-pattern' && indexPatternsBeingReplaced.includes(id);
-      });
-      if (referencesBeingReplaced.length === 0) {
-        return;
-      }
     }
     return {
       id: obj.id,
@@ -248,11 +243,18 @@ class FlyoutUI extends Component {
     const replaceReferencesCache = new Map();
     const { file, isOverwriteAllChecked } = this.state;
     let { importCount: successImportCount, failedImports: importFailures } = this.state;
+    const blockedList = importFailures.reduce((result, { error }) => {
+      if (error.type === 'missing_references') {
+        return result.concat(error.blocking.map(obj => `${obj.type}:${obj.id}`));
+      }
+      return result;
+    }, []);
+
     function getOverwriteDecision({ obj }) {
       return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
     }
     const callMap = (failure) => {
-      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, ...failure });
+      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, blockedList, ...failure });
     };
 
     // Loop until all issues are resolved

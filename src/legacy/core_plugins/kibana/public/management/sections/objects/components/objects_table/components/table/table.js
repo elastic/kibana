@@ -104,6 +104,12 @@ class TableUI extends PureComponent {
     }));
   }
 
+  onExportClick = () => {
+    const { onExport } = this.props;
+    const { isIncludeReferencesDeepChecked } = this.state;
+    onExport(isIncludeReferencesDeepChecked);
+  }
+
   render() {
     const {
       pageIndex,
@@ -115,7 +121,6 @@ class TableUI extends PureComponent {
       filterOptions,
       selectionConfig: selection,
       onDelete,
-      onExport,
       selectedSavedObjects,
       onTableChange,
       goInApp,
@@ -300,7 +305,7 @@ class TableUI extends PureComponent {
                 <EuiButton
                   key="exportSO"
                   iconType="exportAction"
-                  onClick={onExport}
+                  onClick={this.onExportClick}
                   fill
                 >
                   <FormattedMessage

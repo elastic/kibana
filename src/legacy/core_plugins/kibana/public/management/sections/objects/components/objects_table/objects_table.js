@@ -290,15 +290,15 @@ class ObjectsTableUI extends Component {
     });
   };
 
-  onExport = async () => {
+  onExport = async (includeReferencesDeep) => {
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
-    const blob = await fetchExportObjects(objectsToExport);
+    const blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
     saveAs(blob, 'export.ndjson');
   };
 
   onExportAll = async () => {
-    const { exportAllSelectedOptions } = this.state;
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -308,7 +308,7 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const blob = await fetchExportByType(exportTypes);
+    const blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
     saveAs(blob, 'export.ndjson');
   };
 
