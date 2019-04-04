@@ -188,7 +188,6 @@ function discoverController(
   Private,
   Promise,
   config,
-  courier,
   kbnUrl,
   localStorage,
   i18n,
@@ -708,9 +707,18 @@ function discoverController(
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
-        return courier.fetch();
+        return $scope.searchSource.fetch();
       })
-      .catch(notify.error);
+      .then(onResults)
+      .catch((error) => {
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          notify.error(error);
+        }
+      });
   };
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
@@ -755,8 +763,6 @@ function discoverController(
     });
 
     $scope.fetchStatus = fetchStatuses.COMPLETE;
-
-    return $scope.searchSource.onResults().then(onResults);
   }
 
   let inspectorRequest;
@@ -781,25 +787,6 @@ function discoverController(
       .stats(getResponseInspectorStats($scope.searchSource, resp))
       .ok({ json: resp });
   }
-
-  function startSearching() {
-    return $scope.searchSource.onResults()
-      .then(onResults)
-      .catch((error) => {
-        const fetchError = getPainlessError(error);
-
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          notify.error(error);
-        }
-
-        // Restart. This enables auto-refresh functionality.
-        startSearching();
-      });
-  }
-
-  startSearching();
 
   $scope.updateTime = function () {
     $scope.timeRange = {

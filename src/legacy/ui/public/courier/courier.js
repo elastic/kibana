@@ -25,7 +25,6 @@ import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
 
-import { searchRequestQueue } from './search_request_queue';
 import { FetchSoonProvider } from './fetch';
 
 uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
@@ -34,12 +33,8 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   class Courier {
     constructor() {
       const closeOnFatal = _.once(() => {
-        // And abort all pending requests.
-        searchRequestQueue.abortAll();
-
-        if (searchRequestQueue.getCount()) {
-          throw new Error('Aborting all pending requests failed.');
-        }
+        // Abort all pending requests
+        fetchSoon.abortAll();
       });
 
       addFatalErrorCallback(closeOnFatal);

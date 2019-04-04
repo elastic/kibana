@@ -19,8 +19,6 @@
 
 import moment from 'moment';
 
-import { searchRequestQueue } from '../../../search_request_queue';
-
 import { i18n } from '@kbn/i18n';
 
 export function SearchRequestProvider(Promise) {
@@ -49,8 +47,6 @@ export function SearchRequestProvider(Promise) {
       this.started = false;
       this.stopped = false;
       this._isFetchRequested = false;
-
-      searchRequestQueue.add(this);
     }
 
     /**
@@ -135,7 +131,6 @@ export function SearchRequestProvider(Promise) {
       if (this.stopped) return;
       this.stopped = true;
       this.source.requestIsStopped(this);
-      searchRequestQueue.remove(this);
     }
 
     abort() {

@@ -21,7 +21,6 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 
-import { searchRequestQueue } from '../../search_request_queue';
 import { SearchSourceProvider } from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
@@ -49,49 +48,18 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
-  beforeEach(() => searchRequestQueue.removeAll());
-  after(() => searchRequestQueue.removeAll());
 
   describe('#onResults()', function () {
-    it('adds a request to the searchRequestQueue', function () {
-      const searchSource = new SearchSource();
-
-      expect(searchRequestQueue.getCount()).to.be(0);
-      searchSource.onResults();
-      expect(searchRequestQueue.getCount()).to.be(1);
-    });
 
     it('returns a promise that is resolved with the results', function () {
-      const searchSource = new SearchSource();
-      const fakeResults = {};
-
-      const promise = searchSource.onResults().then((results) => {
-        expect(results).to.be(fakeResults);
-      });
-
-      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
-      searchRequest.defer.resolve(fakeResults);
-      return promise;
     });
   });
 
   describe('#destroy()', function () {
     it('aborts all startable requests', function () {
-      const searchSource = new SearchSource();
-      searchSource.onResults();
-      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
-      sinon.stub(searchRequest, 'canStart').returns(true);
-      searchSource.destroy();
-      expect(searchRequestQueue.getCount()).to.be(0);
     });
 
     it('aborts all non-startable requests', function () {
-      const searchSource = new SearchSource();
-      searchSource.onResults();
-      const searchRequest = searchRequestQueue.getSearchRequestAt(0);
-      sinon.stub(searchRequest, 'canStart').returns(false);
-      searchSource.destroy();
-      expect(searchRequestQueue.getCount()).to.be(0);
     });
   });
 

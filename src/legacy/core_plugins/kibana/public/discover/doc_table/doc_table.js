@@ -32,7 +32,7 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('app/discover')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier, i18n) {
+  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, i18n) {
     return {
       restrict: 'E',
       template: html,
@@ -149,7 +149,7 @@ uiModules.get('app/discover')
                 inspectorRequest.json(body);
               });
             }
-            $scope.searchSource.onResults()
+            $scope.searchSource.fetch()
               .then(resp => {
                 if (inspectorRequest) {
                   inspectorRequest
@@ -165,7 +165,6 @@ uiModules.get('app/discover')
               });
           }
           startSearching();
-          courier.fetch();
         });
 
         $scope.pageOfItems = [];

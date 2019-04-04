@@ -77,7 +77,6 @@ import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 
-import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
@@ -328,9 +327,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined}
      */
     cancelQueued() {
-      searchRequestQueue.getAll()
-        .filter(req => req.source === this)
-        .forEach(req => req.abort());
+      // Abort requests from this source
     }
 
     /**
@@ -415,9 +412,6 @@ export function SearchSourceProvider(Promise, Private, config) {
      ******/
 
     _myStartableQueued() {
-      return searchRequestQueue
-        .getStartable()
-        .filter(req => req.source === this);
     }
 
     /**
