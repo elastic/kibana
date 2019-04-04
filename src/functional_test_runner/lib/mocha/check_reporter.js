@@ -70,7 +70,9 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
         // `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/`
         // WORKSPACE	/var/lib/jenkins/workspace/elastic+kibana+pull-request/JOB/kibana-ciGroup4/node/immutable
 
-        screenshot: `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
+        //screenshot: `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
+        //screenshot: `https://storage.googleapis.com/kibana-ci-artifacts/jobs/%7BjobId%7D/%7BmatrixJobId%7D/%7BbuildNum%7D/kibana/${runnable.addl.screenshot}`,
+        screenshot: `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
         path,
         start_line: line,
         end_line: line,
