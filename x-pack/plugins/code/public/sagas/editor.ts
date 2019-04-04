@@ -48,7 +48,7 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
 
 function requestFindReferences(params: TextDocumentPositionParams) {
   return kfetch({
-    pathname: `/api/lsp/findReferences`,
+    pathname: `/api/code/lsp/findReferences`,
     method: 'POST',
     body: JSON.stringify(params),
   });

@@ -16,7 +16,7 @@ export class HoverComputer implements Computer<Hover> {
   private uri: string | null = null;
 
   constructor() {
-    const lspClient = new LspRestClient('/api/lsp');
+    const lspClient = new LspRestClient('/api/code/lsp');
     this.lspMethods = new TextDocumentMethods(lspClient);
   }
 
