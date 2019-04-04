@@ -5,7 +5,7 @@
  */
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 

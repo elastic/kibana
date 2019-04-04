@@ -31,7 +31,6 @@ export default function (kibana) {
       visTypes: [
         'plugins/metrics/kbn_vis_types',
       ],
-      interpreter: ['plugins/metrics/tsvb_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 

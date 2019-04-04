@@ -19,7 +19,7 @@
 
 // Load the kibana app dependencies.
 import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { timefilter } from 'ui/timefilter';

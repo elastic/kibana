@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { WatchHistoryItem } from '../watch_history_item';
 
 describe('watch_history_item', () => {

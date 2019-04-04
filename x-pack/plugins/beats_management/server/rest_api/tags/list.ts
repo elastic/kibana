@@ -5,11 +5,10 @@
  */
 
 import * as Joi from 'joi';
-import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -26,13 +25,17 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
+  handler: async (request: any) => {
     let tags: BeatTag[];
-    tags = await libs.tags.getAll(
-      request.user,
-      request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-    );
+    try {
+      tags = await libs.tags.getAll(
+        request.user,
+        request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+      );
+    } catch (err) {
+      return wrapEsError(err);
+    }
 
-    return { list: tags, success: true, page: -1, total: -1 };
+    return tags;
   },
 });

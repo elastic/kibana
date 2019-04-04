@@ -20,7 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
 import $ from 'jquery';

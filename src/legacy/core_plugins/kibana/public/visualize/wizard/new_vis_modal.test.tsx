@@ -20,7 +20,13 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { settingsGet } from './new_vis_modal.test.mocks';
+const settingsGet = jest.fn();
+
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: settingsGet,
+  }),
+}));
 
 import { NewVisModal } from './new_vis_modal';
 

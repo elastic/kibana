@@ -18,7 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -35,54 +35,74 @@ class VisEditorVisualization extends Component {
       panelInterval: 0,
     };
 
+    this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.onSizeHandleKeyDown = this.onSizeHandleKeyDown.bind(this);
+
     this._visEl = React.createRef();
     this._subscription = null;
   }
 
-  handleMouseDown = () => {
-    window.addEventListener('mouseup', this.handleMouseUp);
+  handleMouseDown() {
     this.setState({ dragging: true });
-  };
+  }
 
-  handleMouseUp = () => {
-    window.removeEventListener('mouseup', this.handleMouseUp);
+  handleMouseUp() {
     this.setState({ dragging: false });
-  };
+  }
 
-  handleMouseMove = (event) => {
-    if (this.state.dragging) {
-      this.setState((prevState) => ({
-        height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY),
-      }));
+  componentWillMount() {
+    this.handleMouseMove = (event) => {
+      if (this.state.dragging) {
+        this.setState((prevState) => ({
+          height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY),
+        }));
+      }
+    };
+    window.addEventListener('mousemove', this.handleMouseMove);
+    window.addEventListener('mouseup', this.handleMouseUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    if (this._handler) {
+      this._handler.destroy();
     }
-  };
-
-  async _loadVisualization() {
-    const loader = await getVisualizeLoader();
-
-    if (!this._visEl.current) {
-      // In case the visualize loader isn't done before the component is unmounted.
-      return;
+    if (this._subscription) {
+      this._subscription.unsubscribe();
     }
+  }
 
-    const {
-      uiState,
-      timeRange,
-      appState,
-      savedObj,
-      onDataChange
-    } = this.props;
-
-    this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
-      listenOnChange: false,
-      uiState,
-      timeRange,
-      appState,
+  onUpdate = () => {
+    this._handler.update({
+      timeRange: this.props.timeRange,
     });
+  };
 
-    this._subscription = this._handler.data$.subscribe((data) => {
-      this.setPanelInterval(data.visData);
-      onDataChange(data);
+  _loadVisualization() {
+    getVisualizeLoader().then(loader => {
+      if (!this._visEl.current) {
+        // In case the visualize loader isn't done before the component is unmounted.
+        return;
+      }
+
+      this._loader = loader;
+      this._handler = this._loader.embedVisualizationWithSavedObject(this._visEl.current, this.props.savedObj, {
+        uiState: this.props.uiState,
+        listenOnChange: false,
+        timeRange: this.props.timeRange,
+        appState: this.props.appState,
+      });
+
+      this._subscription = this._handler.data$.subscribe((data) => {
+        this.setPanelInterval(data.visData);
+        this.props.onDataChange(data);
+      });
+
+      if (this._handlerUpdateHasAlreadyBeenTriggered) {
+        this.onUpdate();
+      }
     });
   }
 
@@ -94,13 +114,26 @@ class VisEditorVisualization extends Component {
     }
   }
 
+  componentDidUpdate() {
+    if (!this._handler) {
+      this._handlerUpdateHasAlreadyBeenTriggered = true;
+      return;
+    }
+
+    this.onUpdate();
+  }
+
+  componentDidMount() {
+    this._loadVisualization();
+  }
+
   /**
    * Resize the chart height when pressing up/down while the drag handle
    * for resizing has the focus.
    * We use 15px steps to do the scaling and make sure the chart has at least its
    * defined minimum width (MIN_CHART_HEIGHT).
    */
-  onSizeHandleKeyDown = (ev) => {
+  onSizeHandleKeyDown(ev) {
     const { keyCode } = ev;
     if (keyCode === keyCodes.UP || keyCode === keyCodes.DOWN) {
       ev.preventDefault();
@@ -141,41 +174,9 @@ class VisEditorVisualization extends Component {
     }
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('mouseup', this.handleMouseUp);
-    if (this._handler) {
-      this._handler.destroy();
-    }
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
-  }
-
-  componentDidMount() {
-    window.addEventListener('mousemove', this.handleMouseMove);
-    this._loadVisualization();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this._handler && !isEqual(this.props.timeRange, prevProps.timeRange)) {
-      this._handler.update({
-        timeRange: this.props.timeRange,
-      });
-    }
-  }
-
   render() {
-    const {
-      dirty,
-      autoApply,
-      title,
-      description,
-      onToggleAutoApply,
-      onCommit
-    } = this.props;
+    const { dirty, autoApply } = this.props;
     const style = { height: this.state.height };
-
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
@@ -208,7 +209,7 @@ class VisEditorVisualization extends Component {
               defaultMessage="Auto apply"
             />)}
             checked={autoApply}
-            onChange={onToggleAutoApply}
+            onChange={this.props.onToggleAutoApply}
           />
         </EuiFlexItem>
 
@@ -219,7 +220,9 @@ class VisEditorVisualization extends Component {
               <FormattedMessage
                 id="tsvb.visEditorVisualization.panelInterval"
                 defaultMessage="Interval: {panelInterval}"
-                values={{ panelInterval }}
+                values={{
+                  panelInterval: panelInterval,
+                }}
               />
             </p>
           </EuiText>
@@ -236,7 +239,7 @@ class VisEditorVisualization extends Component {
 
         {!autoApply &&
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty}>
+          <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>
             <FormattedMessage
               id="tsvb.visEditorVisualization.applyChangesLabel"
               defaultMessage="Apply changes"
@@ -254,8 +257,8 @@ class VisEditorVisualization extends Component {
           className="tvbEditorVisualization"
           data-shared-items-container
           data-shared-item
-          data-title={title}
-          data-description={description}
+          data-title={this.props.title}
+          data-description={this.props.description}
           data-render-complete="disabled"
           ref={this._visEl}
         />
@@ -281,13 +284,17 @@ class VisEditorVisualization extends Component {
 
 VisEditorVisualization.propTypes = {
   model: PropTypes.object,
+  onBrush: PropTypes.func,
+  onChange: PropTypes.func,
   onCommit: PropTypes.func,
+  onUiState: PropTypes.func,
   uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
+  dateFormat: PropTypes.string,
   appState: PropTypes.object,
 };
 

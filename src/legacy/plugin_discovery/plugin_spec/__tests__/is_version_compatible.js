@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { isVersionCompatible } from '../is_version_compatible';
 

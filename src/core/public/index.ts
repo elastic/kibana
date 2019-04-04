@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { UiSettingsSetup } from './ui_settings';
+import { BasePathStart } from './base_path';
+import { ChromeStart } from './chrome';
+import { FatalErrorsStart } from './fatal_errors';
+import { HttpStart } from './http';
+import { I18nStart } from './i18n';
+import { InjectedMetadataStart } from './injected_metadata';
+import { NotificationsStart } from './notifications';
+import { UiSettingsClient } from './ui_settings';
 
 export { CoreSystem } from './core_system';
 
-export interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
+export interface CoreStart {
+  i18n: I18nStart;
+  injectedMetadata: InjectedMetadataStart;
+  fatalErrors: FatalErrorsStart;
+  notifications: NotificationsStart;
+  http: HttpStart;
+  basePath: BasePathStart;
+  uiSettings: UiSettingsClient;
+  chrome: ChromeStart;
 }

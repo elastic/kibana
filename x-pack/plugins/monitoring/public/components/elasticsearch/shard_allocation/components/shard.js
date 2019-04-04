@@ -13,34 +13,25 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 
 function getColor(classes) {
-  const classList = classes.split(' ');
-
-  if (classList.includes('emergency')) {
-    return 'danger';
-  }
-
-  if (classList.includes('unassigned')) {
-    if (classList.includes('replica')) {
-      return 'warning';
+  return classes.split(' ').reduce((color, cls) => {
+    if (color) {
+      return color;
     }
-    return 'danger';
-  }
 
-  if (classList.includes('relocating')) {
-    return 'accent';
-  }
-
-  if (classList.includes('initializing')) {
-    return 'default';
-  }
-
-  if (classList.includes('primary')) {
-    return 'primary';
-  }
-
-  if (classList.includes('replica')) {
-    return 'secondary';
-  }
+    switch (cls) {
+      case 'primary':
+        return 'hollow';
+      case 'replica':
+        return 'secondary';
+      case 'relocation':
+        return 'accent';
+      case 'initializing':
+        return 'default';
+      case 'emergency':
+      case 'unassigned':
+        return 'danger';
+    }
+  }, null);
 }
 
 export class Shard extends React.Component {

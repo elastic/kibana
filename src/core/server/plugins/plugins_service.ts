@@ -21,29 +21,23 @@ import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
+import { Plugin, PluginName } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export interface PluginsServiceSetup {
-  contracts: Map<PluginName, unknown>;
-  uiPlugins: {
-    public: Map<PluginName, DiscoveredPlugin>;
-    internal: Map<PluginName, DiscoveredPluginInternal>;
-  };
+export type PluginsServiceStart = Map<PluginName, unknown>;
+
+/** @internal */
+export interface PluginsServiceStartDeps {
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 /** @internal */
-export interface PluginsServiceSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-}
-
-/** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup> {
+export class PluginsService implements CoreService<PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -52,8 +46,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
-  public async setup(deps: PluginsServiceSetupDeps) {
-    this.log.debug('Setting up plugins service');
+  public async start(deps: PluginsServiceStartDeps) {
+    this.log.debug('Starting plugins service');
 
     const config = await this.coreContext.configService
       .atPath('plugins', PluginsConfig)
@@ -66,16 +60,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
 
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
-      return {
-        contracts: new Map(),
-        uiPlugins: this.pluginsSystem.uiPlugins(),
-      };
+      return new Map();
     }
 
-    return {
-      contracts: await this.pluginsSystem.setupPlugins(deps),
-      uiPlugins: this.pluginsSystem.uiPlugins(),
-    };
+    return await this.pluginsSystem.startPlugins(deps);
   }
 
   public async stop() {
@@ -117,7 +105,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
           }
 
-          pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
+          pluginEnableStatuses.set(plugin.name, {
+            plugin,
+            isEnabled,
+          });
         })
       )
       .toPromise();

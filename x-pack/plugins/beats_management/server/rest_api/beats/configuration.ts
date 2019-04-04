@@ -5,9 +5,8 @@
  */
 import Joi from 'joi';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { BaseReturnType, ReturnTypeList } from '../../../common/return_types';
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -20,43 +19,44 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (
-    request: FrameworkRequest
-  ): Promise<BaseReturnType | ReturnTypeList<ConfigurationBlock>> => {
+  handler: async (request: any, h: any) => {
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 
     let beat;
     let configurationBlocks: ConfigurationBlock[];
-    beat = await libs.beats.getById(libs.framework.internalUser, beatId);
-    if (beat === null) {
-      return { error: { message: `Beat "${beatId}" not found`, code: 404 }, success: false };
-    }
+    try {
+      beat = await libs.beats.getById(libs.framework.internalUser, beatId);
+      if (beat === null) {
+        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
+      }
 
-    const isAccessTokenValid = beat.access_token === accessToken;
-    if (!isAccessTokenValid) {
-      return { error: { message: 'Invalid access token', code: 401 }, success: false };
-    }
+      const isAccessTokenValid = beat.access_token === accessToken;
+      if (!isAccessTokenValid) {
+        return h.response({ message: 'Invalid access token' }).code(401);
+      }
 
-    await libs.beats.update(libs.framework.internalUser, beat.id, {
-      last_checkin: new Date(),
-    });
+      await libs.beats.update(libs.framework.internalUser, beat.id, {
+        last_checkin: new Date(),
+      });
 
-    if (beat.tags) {
-      const result = await libs.configurationBlocks.getForTags(
-        libs.framework.internalUser,
-        beat.tags,
-        -1
-      );
+      if (beat.tags) {
+        const result = await libs.configurationBlocks.getForTags(
+          libs.framework.internalUser,
+          beat.tags,
+          -1
+        );
 
-      configurationBlocks = result.blocks;
-    } else {
-      configurationBlocks = [];
+        configurationBlocks = result.blocks;
+      } else {
+        configurationBlocks = [];
+      }
+    } catch (err) {
+      return wrapEsError(err);
     }
 
     return {
-      list: configurationBlocks,
-      success: true,
+      configuration_blocks: configurationBlocks,
     };
   },
 });

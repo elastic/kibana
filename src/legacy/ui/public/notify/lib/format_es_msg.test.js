@@ -18,7 +18,7 @@
  */
 
 import { formatESMsg } from './format_es_msg';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('formatESMsg', () => {
   test('should return undefined if passed a basic error', () => {

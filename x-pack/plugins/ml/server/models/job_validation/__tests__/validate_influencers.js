@@ -6,7 +6,7 @@
 
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { validateInfluencers } from '../validate_influencers';
 
 describe('ML - validateInfluencers', () => {

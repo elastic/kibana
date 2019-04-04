@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { uniq } from 'lodash';
 import sinon from 'sinon';
 

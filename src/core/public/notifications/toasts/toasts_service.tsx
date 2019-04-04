@@ -21,23 +21,23 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Toast } from '@elastic/eui';
-import { I18nSetup } from '../../i18n';
+import { I18nStart } from '../../i18n';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsSetup } from './toasts_start';
+import { ToastsStart } from './toasts_start';
 
 interface Params {
   targetDomElement: HTMLElement;
 }
 
 interface Deps {
-  i18n: I18nSetup;
+  i18n: I18nStart;
 }
 
 export class ToastsService {
   constructor(private readonly params: Params) {}
 
-  public setup({ i18n }: Deps) {
-    const toasts = new ToastsSetup();
+  public start({ i18n }: Deps) {
+    const toasts = new ToastsStart();
 
     render(
       <i18n.Context>

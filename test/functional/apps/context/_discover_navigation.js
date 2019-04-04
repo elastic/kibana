@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const TEST_DISCOVER_START_TIME = '2015-09-19 06:31:44.000';
 const TEST_DISCOVER_END_TIME = '2015-09-23 18:31:44.000';

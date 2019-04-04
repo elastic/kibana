@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { InjectedMetadataStart } from '../injected_metadata';
 import { modifyUrl } from '../utils';
 
 interface Deps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export class BasePathService {
-  public setup({ injectedMetadata }: Deps) {
+  public start({ injectedMetadata }: Deps) {
     const basePath = injectedMetadata.getBasePath() || '';
 
     return {
@@ -71,4 +71,4 @@ export class BasePathService {
   }
 }
 
-export type BasePathSetup = ReturnType<BasePathService['setup']>;
+export type BasePathStart = ReturnType<BasePathService['start']>;

@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
-import { EntityCell } from '../entity_cell';
+import { EntityCell } from './entity_cell';
 import {
   getMultiBucketImpactLabel,
   getSeverity,
@@ -215,23 +215,6 @@ function getDetailsItems(anomaly, examples, filter) {
 
   return items;
 }
-// anomalyInfluencers: [ {fieldName: fieldValue}, {fieldName: fieldValue}, ... ]
-function getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay) {
-  const items = [];
-
-  for (let i = 0; i < numToDisplay; i++) {
-    Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
-      const value = anomalyInfluencers[i][influencerFieldName];
-
-      items.push({
-        title: influencerFieldName,
-        description: getFilterEntity(influencerFieldName, value, influencerFilter)
-      });
-    });
-  }
-
-  return items;
-}
 
 export class AnomalyDetails extends Component {
   static propTypes = {
@@ -241,7 +224,6 @@ export class AnomalyDetails extends Component {
     isAggregatedData: PropTypes.bool,
     filter: PropTypes.func,
     influencersLimit: PropTypes.number,
-    influencerFilter: PropTypes.func,
     tabIndex: PropTypes.number.isRequired
   };
 
@@ -494,7 +476,7 @@ export class AnomalyDetails extends Component {
 
   renderInfluencers() {
     const anomalyInfluencers = this.props.anomaly.influencers;
-    let listItems = [];
+    const listItems = [];
     let othersCount = 0;
     let numToDisplay = 0;
     if (anomalyInfluencers !== undefined) {
@@ -508,7 +490,14 @@ export class AnomalyDetails extends Component {
         othersCount = 0;
       }
 
-      listItems = getInfluencersItems(anomalyInfluencers, this.props.influencerFilter, numToDisplay);
+      for (let i = 0; i < numToDisplay; i++) {
+        Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
+          listItems.push({
+            title: influencerFieldName,
+            description: anomalyInfluencers[i][influencerFieldName]
+          });
+        });
+      }
     }
 
     if (listItems.length > 0) {

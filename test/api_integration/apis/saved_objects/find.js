@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -46,17 +46,7 @@ export default function ({ getService }) {
                   attributes: {
                     'title': 'Count of requests'
                   },
-                  migrationVersion: {
-                    visualization: '7.0.0',
-                  },
-                  references: [
-                    {
-                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                      type: 'index-pattern',
-                    },
-                  ],
-                  updated_at: '2017-09-21T18:51:23.794Z',
+                  references: [],
                 }
               ]
             });

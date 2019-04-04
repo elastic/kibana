@@ -16,42 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
+import { InjectedMetadataService, InjectedMetadataStart } from './injected_metadata_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InjectedMetadataSetup> = {
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<InjectedMetadataStart> = {
     getBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
     getCspConfig: jest.fn(),
     getLegacyMetadata: jest.fn(),
-    getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
   };
-  setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
-  setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
-  setupContract.getLegacyMetadata.mockReturnValue({
+  startContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+  startContract.getKibanaVersion.mockReturnValue('kibanaVersion');
+  startContract.getLegacyMetadata.mockReturnValue({
     uiSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },
     },
   } as any);
-  setupContract.getPlugins.mockReturnValue([]);
-  return setupContract;
+  return startContract;
 };
 
 type InjectedMetadataServiceContract = PublicMethodsOf<InjectedMetadataService>;
 const createMock = () => {
   const mocked: jest.Mocked<InjectedMetadataServiceContract> = {
-    setup: jest.fn(),
+    start: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const injectedMetadataServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

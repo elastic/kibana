@@ -26,7 +26,7 @@ import {
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
   PHASE_SHRINK_ENABLED,
-} from '../../../../constants';
+} from '../../../../store/constants';
 import { SetPriorityInput } from '../set_priority_input';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';

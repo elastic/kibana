@@ -258,7 +258,6 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             iconSide="left"
             isDisabled={false}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -542,7 +541,6 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             iconSide="left"
             isDisabled={false}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -804,7 +802,6 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             iconSide="left"
             isDisabled={true}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <FormattedMessage

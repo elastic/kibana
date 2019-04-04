@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 const Joi = require('joi');
 
 export default function ({ getService }) {

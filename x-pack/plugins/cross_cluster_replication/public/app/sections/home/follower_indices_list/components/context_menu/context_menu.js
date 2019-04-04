@@ -103,7 +103,7 @@ export class ContextMenu extends PureComponent {
             values={{ followerIndicesLength }}
           />
         </EuiPopoverTitle>
-        <EuiContextMenuPanel data-test-subj="followerIndexActionContextMenu">
+        <EuiContextMenuPanel>
 
           {
             activeFollowerIndices.length ? (

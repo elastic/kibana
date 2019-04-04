@@ -19,7 +19,7 @@
 
 import { noop } from 'lodash';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { Collector } from '../collector';
 import { CollectorSet } from '../collector_set';
 

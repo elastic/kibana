@@ -23,7 +23,7 @@ import { readFileSync } from 'fs';
 
 import del from 'del';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import Wreck from 'wreck';
 
 import { ToolingLog } from '@kbn/dev-utils';

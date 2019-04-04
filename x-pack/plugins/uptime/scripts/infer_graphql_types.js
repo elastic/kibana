@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../src/setup_node_env');
-
 const { resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
 const { generate } = require('graphql-code-generator');
@@ -22,6 +20,7 @@ async function main() {
       config: CONFIG_PATH,
       out: OUTPUT_INTROSPECTION_PATH,
       overwrite: true,
+      require: ['ts-node/register'],
       schema: SCHEMA_PATH,
       template: 'graphql-codegen-introspection-template',
     },

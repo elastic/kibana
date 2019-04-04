@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially

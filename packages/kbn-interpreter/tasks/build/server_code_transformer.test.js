@@ -28,14 +28,15 @@ describe('js support', () => {
   it('transpiles js file', () => {
     const transformer = createServerCodeTransformer();
     expect(transformer(JS_FIXTURE, JS_FIXTURE_PATH)).toMatchInlineSnapshot(`
-"\\"use strict\\";
+"'use strict';
 
-var _util = _interopRequireDefault(require(\\"util\\"));
+var _util = require('util');
+
+var _util2 = _interopRequireDefault(_util);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/* eslint-disable */
-console.log(_util.default.format('hello world'));"
+console.log(_util2.default.format('hello world')); /* eslint-disable */"
 `);
   });
 

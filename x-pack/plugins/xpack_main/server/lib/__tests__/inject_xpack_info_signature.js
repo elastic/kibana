@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { injectXPackInfoSignature } from '../inject_xpack_info_signature';
 
 describe('injectXPackInfoSignature()', () => {

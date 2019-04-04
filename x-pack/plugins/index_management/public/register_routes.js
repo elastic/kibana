@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { setHttpClient } from './services/api';
 import { setUrlService } from './services/navigation';
@@ -27,7 +28,9 @@ const renderReact = async (elem) => {
   render(
     <I18nContext>
       <Provider store={indexManagementStore()}>
-        <App />
+        <HashRouter>
+          <App />
+        </HashRouter>
       </Provider>
     </I18nContext>,
     elem

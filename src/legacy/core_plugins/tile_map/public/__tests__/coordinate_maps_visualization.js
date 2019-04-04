@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';

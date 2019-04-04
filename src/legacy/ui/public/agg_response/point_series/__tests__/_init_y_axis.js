@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { initYAxis } from '../_init_y_axis';
 
 describe('initYAxis', function () {

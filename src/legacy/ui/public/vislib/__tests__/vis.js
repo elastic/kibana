@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { startTestServers } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';

@@ -17,26 +17,73 @@
  * under the License.
  */
 
-import {
-  BasePathServiceConstructor,
-  ChromeServiceConstructor,
-  FatalErrorsServiceConstructor,
-  HttpServiceConstructor,
-  I18nServiceConstructor,
-  InjectedMetadataServiceConstructor,
-  LegacyPlatformServiceConstructor,
-  MockBasePathService,
-  MockChromeService,
-  MockFatalErrorsService,
-  MockHttpService,
-  MockI18nService,
-  MockInjectedMetadataService,
-  MockLegacyPlatformService,
-  MockNotificationsService,
-  MockUiSettingsService,
-  NotificationServiceConstructor,
-  UiSettingsServiceConstructor,
-} from './core_system.test.mocks';
+import { basePathServiceMock } from './base_path/base_path_service.mock';
+import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+import { httpServiceMock } from './http/http_service.mock';
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
+import { notificationServiceMock } from './notifications/notifications_service.mock';
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+
+const MockLegacyPlatformService = legacyPlatformServiceMock.create();
+const LegacyPlatformServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockLegacyPlatformService);
+jest.mock('./legacy', () => ({
+  LegacyPlatformService: LegacyPlatformServiceConstructor,
+}));
+
+const MockInjectedMetadataService = injectedMetadataServiceMock.create();
+const InjectedMetadataServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockInjectedMetadataService);
+jest.mock('./injected_metadata', () => ({
+  InjectedMetadataService: InjectedMetadataServiceConstructor,
+}));
+
+const MockFatalErrorsService = fatalErrorsServiceMock.create();
+const FatalErrorsServiceConstructor = jest.fn().mockImplementation(() => MockFatalErrorsService);
+jest.mock('./fatal_errors', () => ({
+  FatalErrorsService: FatalErrorsServiceConstructor,
+}));
+
+const MockI18nService = i18nServiceMock.create();
+const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
+jest.mock('./i18n', () => ({
+  I18nService: I18nServiceConstructor,
+}));
+
+const MockNotificationsService = notificationServiceMock.create();
+const NotificationServiceConstructor = jest.fn().mockImplementation(() => MockNotificationsService);
+jest.mock('./notifications', () => ({
+  NotificationsService: NotificationServiceConstructor,
+}));
+
+const MockHttpService = httpServiceMock.create();
+const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
+jest.mock('./http', () => ({
+  HttpService: HttpServiceConstructor,
+}));
+
+const MockBasePathService = basePathServiceMock.create();
+const BasePathServiceConstructor = jest.fn().mockImplementation(() => MockBasePathService);
+jest.mock('./base_path', () => ({
+  BasePathService: BasePathServiceConstructor,
+}));
+
+const MockUiSettingsService = uiSettingsServiceMock.create();
+const UiSettingsServiceConstructor = jest.fn().mockImplementation(() => MockUiSettingsService);
+jest.mock('./ui_settings', () => ({
+  UiSettingsService: UiSettingsServiceConstructor,
+}));
+
+const MockChromeService = chromeServiceMock.create();
+const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
+jest.mock('./chrome', () => ({
+  ChromeService: ChromeServiceConstructor,
+}));
 
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
@@ -203,105 +250,105 @@ describe('#stop', () => {
       rootDomElement,
     });
 
-    coreSystem.setup();
+    coreSystem.start();
     expect(rootDomElement.innerHTML).not.toBe('');
     coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
 
-describe('#setup()', () => {
-  function setupCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
+describe('#start()', () => {
+  function startCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    return core.setup();
+    return core.start();
   }
 
   it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
-    setupCore(root);
+    startCore(root);
     expect(root.innerHTML).toBe('<div></div><div></div>');
   });
 
-  it('calls injectedMetadata#setup()', () => {
-    setupCore();
+  it('calls injectedMetadata#start()', () => {
+    startCore();
 
-    expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
+    expect(MockInjectedMetadataService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls http#setup()', () => {
-    setupCore();
-    expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
+  it('calls http#start()', () => {
+    startCore();
+    expect(MockHttpService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls basePath#setup()', () => {
-    setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
+  it('calls basePath#start()', () => {
+    startCore();
+    expect(MockBasePathService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls uiSettings#setup()', () => {
-    setupCore();
-    expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  it('calls uiSettings#start()', () => {
+    startCore();
+    expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls i18n#setup()', () => {
-    setupCore();
-    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
+  it('calls i18n#start()', () => {
+    startCore();
+    expect(MockI18nService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls fatalErrors#setup()', () => {
-    setupCore();
-    expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
+  it('calls fatalErrors#start()', () => {
+    startCore();
+    expect(MockFatalErrorsService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls notifications#setup()', () => {
-    setupCore();
-    expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
+  it('calls notifications#start()', () => {
+    startCore();
+    expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls chrome#setup()', () => {
-    setupCore();
-    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  it('calls chrome#start()', () => {
+    startCore();
+    expect(MockChromeService.start).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('LegacyPlatform targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the legacyPlatformService', () => {
+  it('only mounts the element when started, before starting the legacyPlatformService', () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    let targetDomElementParentInSetup: HTMLElement;
-    MockLegacyPlatformService.setup.mockImplementation(() => {
-      targetDomElementParentInSetup = targetDomElement.parentElement;
+    let targetDomElementParentInStart: HTMLElement;
+    MockLegacyPlatformService.start.mockImplementation(() => {
+      targetDomElementParentInStart = targetDomElement.parentElement;
     });
 
     // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
     const [[{ targetDomElement }]] = LegacyPlatformServiceConstructor.mock.calls;
     expect(targetDomElement).toHaveProperty('parentElement', null);
 
-    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
-    core.setup();
-    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
+    // starting the core system should mount the targetDomElement as a child of the rootDomElement
+    core.start();
+    expect(targetDomElementParentInStart!).toBe(rootDomElement);
   });
 });
 
 describe('Notifications targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the notificationsService', () => {
+  it('only mounts the element when started, before starting the notificationsService', () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    let targetDomElementParentInSetup: HTMLElement;
+    let targetDomElementParentInStart: HTMLElement;
 
-    MockNotificationsService.setup.mockImplementation(
+    MockNotificationsService.start.mockImplementation(
       (): any => {
-        targetDomElementParentInSetup = targetDomElement.parentElement;
+        targetDomElementParentInStart = targetDomElement.parentElement;
       }
     );
 
@@ -309,8 +356,8 @@ describe('Notifications targetDomElement', () => {
     const [[{ targetDomElement }]] = NotificationServiceConstructor.mock.calls;
     expect(targetDomElement).toHaveProperty('parentElement', null);
 
-    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
-    core.setup();
-    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
+    // starting the core system should mount the targetDomElement as a child of the rootDomElement
+    core.start();
+    expect(targetDomElementParentInStart!).toBe(rootDomElement);
   });
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getAriaName } from '../get_aria_name';
 
 describe('Settings', function () {

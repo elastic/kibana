@@ -17,7 +17,44 @@
  * under the License.
  */
 
-import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.test.mocks';
+function mockClass<T>(
+  module: string,
+  Class: { new (...args: any[]): T },
+  setup: (instance: any, args: any[]) => void
+) {
+  const MockClass = jest.fn(function(this: any, ...args: any[]) {
+    setup(this, args);
+  });
+
+  // define the mock name which is used in some snapshots
+  MockClass.mockName(`Mock${Class.name}`);
+
+  // define the class name for the MockClass which is used in other snapshots
+  Object.defineProperty(MockClass, 'name', {
+    value: `Mock${Class.name}`,
+  });
+
+  jest.mock(module, () => ({
+    [Class.name]: MockClass,
+  }));
+
+  return MockClass;
+}
+
+// Mock the UiSettingsApi class
+import { UiSettingsApi } from './ui_settings_api';
+const MockUiSettingsApi = mockClass('./ui_settings_api', UiSettingsApi, inst => {
+  inst.stop = jest.fn();
+  inst.getLoadingCount$ = jest.fn().mockReturnValue({
+    loadingCountObservable: true,
+  });
+});
+
+// Mock the UiSettingsClient class
+import { UiSettingsClient } from './ui_settings_client';
+const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient, inst => {
+  inst.stop = jest.fn();
+});
 
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -25,48 +62,48 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 
-const httpSetup = httpServiceMock.createSetupContract();
+const httpStart = httpServiceMock.createStartContract();
 
 const defaultDeps = {
-  notifications: notificationServiceMock.createSetupContract(),
-  http: httpSetup,
-  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-  basePath: basePathServiceMock.createSetupContract(),
+  notifications: notificationServiceMock.createStartContract(),
+  http: httpStart,
+  injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+  basePath: basePathServiceMock.createStartContract(),
 };
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('#setup', () => {
+describe('#start', () => {
   it('returns an instance of UiSettingsClient', () => {
-    const setup = new UiSettingsService().setup(defaultDeps);
-    expect(setup).toBeInstanceOf(MockUiSettingsClient);
+    const start = new UiSettingsService().start(defaultDeps);
+    expect(start).toBeInstanceOf(MockUiSettingsClient);
   });
 
   it('constructs UiSettingsClient and UiSettingsApi', () => {
-    new UiSettingsService().setup(defaultDeps);
+    new UiSettingsService().start(defaultDeps);
 
     expect(MockUiSettingsApi).toMatchSnapshot('UiSettingsApi args');
     expect(MockUiSettingsClient).toMatchSnapshot('UiSettingsClient args');
   });
 
   it('passes the uiSettings loading count to the loading count api', () => {
-    new UiSettingsService().setup(defaultDeps);
+    new UiSettingsService().start(defaultDeps);
 
-    expect(httpSetup.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
+    expect(httpStart.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
   });
 });
 
 describe('#stop', () => {
-  it('runs fine if service never set up', () => {
+  it('runs fine if service never started', () => {
     const service = new UiSettingsService();
     expect(() => service.stop()).not.toThrowError();
   });
 
   it('stops the uiSettingsClient and uiSettingsApi', () => {
     const service = new UiSettingsService();
-    const client = service.setup(defaultDeps);
+    const client = service.start(defaultDeps);
     const [[{ api }]] = MockUiSettingsClient.mock.calls;
     jest.spyOn(client, 'stop');
     jest.spyOn(api, 'stop');

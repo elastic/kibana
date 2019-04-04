@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import * as and from '../and';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';

@@ -27,7 +27,7 @@
 
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');

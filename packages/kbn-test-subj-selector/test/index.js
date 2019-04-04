@@ -18,7 +18,7 @@
  */
 
 const testSubjSelector = require('../');
-const expect = require('@kbn/expect');
+const expect = require('expect.js');
 
 describe('testSubjSelector()', function() {
   it('converts subjectSelectors to cssSelectors', function() {

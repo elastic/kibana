@@ -6,7 +6,7 @@
 
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import { set } from 'lodash';
 import { checkLicense, isBasicLicense } from '../check_license';

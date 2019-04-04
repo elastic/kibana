@@ -20,9 +20,9 @@
 import { Server } from 'hapi';
 
 import { ConfigService } from '../../core/server/config';
-import { ElasticsearchServiceSetup } from '../../core/server/elasticsearch';
+import { ElasticsearchServiceStart } from '../../core/server/elasticsearch';
 import { HttpServerInfo } from '../../core/server/http/';
-import { PluginsServiceSetup } from '../../core/server/plugins/plugins_service';
+import { PluginsServiceStart } from '../../core/server/plugins/plugins_service';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -62,11 +62,11 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 type Unpromise<T> = T extends Promise<infer U> ? U : T;
 export default class KbnServer {
   public readonly newPlatform: {
-    setup: {
+    start: {
       core: {
-        elasticsearch: ElasticsearchServiceSetup;
+        elasticsearch: ElasticsearchServiceStart;
       };
-      plugins: PluginsServiceSetup;
+      plugins: PluginsServiceStart;
     };
     stop: null;
     params: {

@@ -17,6 +17,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+function flattenPanelTree(tree, array = []) {
+  array.push(tree);
+
+  if (tree.items) {
+    tree.items.forEach(item => {
+      if (item.panel) {
+        flattenPanelTree(item.panel, array);
+        item.panel = item.panel.id;
+      }
+    });
+  }
+
+  return array;
+}
+
 function cleanDisplayName(displayName) {
   if (!displayName) {
     return displayName;
@@ -123,70 +138,49 @@ export class LayerTocActions extends Component {
   _getPanels() {
 
     const visibilityToggle = this._getVisbilityIcon();
-    const actionItems = [
-      {
-        name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
-          defaultMessage: 'Fit to data',
-        }),
-        icon: (
-          <EuiIcon
-            type="search"
-            size="m"
-          />
-        ),
-        'data-test-subj': 'fitToBoundsButton',
-        toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
-          defaultMessage: 'Layer does not support fit to data',
-        }),
-        disabled: !this.state.supportsFitToBounds,
-        onClick: () => {
-          this._closePopover();
-          this.props.fitToBounds();
-        },
-      },
-      {
-        name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
-          defaultMessage: 'Hide layer',
-        }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
-          defaultMessage: 'Show layer',
-        }),
-        icon: visibilityToggle,
-        'data-test-subj': 'layerVisibilityToggleButton',
-        onClick: () => {
-          this._closePopover();
-          this.props.toggleVisible();
-        }
-      }
-    ];
-
-    if (!this.props.isReadOnly) {
-      actionItems.push({
-        name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
-          defaultMessage: 'Clone layer',
-        }),
-        icon: (
-          <EuiIcon
-            type="copy"
-            size="m"
-          />
-        ),
-        'data-test-subj': 'cloneLayerButton',
-        onClick: () => {
-          this._closePopover();
-          this.props.cloneLayer();
-        }
-      });
-    }
-
-    const actionsPanel = {
+    const panelTree = {
       id: 0,
       title: i18n.translate('xpack.maps.layerTocActions.layerActionsTitle', {
         defaultMessage: 'Layer actions',
       }),
-      items: actionItems,
+      items: [
+        {
+          name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
+            defaultMessage: 'Fit to data',
+          }),
+          icon: (
+            <EuiIcon
+              type="search"
+              size="m"
+            />
+          ),
+          'data-test-subj': 'fitToBoundsButton',
+          toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
+            defaultMessage: 'Layer does not support fit to data',
+          }),
+          disabled: !this.state.supportsFitToBounds,
+          onClick: () => {
+            this._closePopover();
+            this.props.fitToBounds();
+          },
+        },
+        {
+          name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
+            defaultMessage: 'Hide layer',
+          }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
+            defaultMessage: 'Show layer',
+          }),
+          icon: visibilityToggle,
+          'data-test-subj': 'layerVisibilityToggleButton',
+          onClick: () => {
+            this._closePopover();
+            this.props.toggleVisible();
+          }
+        }
+      ],
     };
 
-    return [actionsPanel];
+    return flattenPanelTree(panelTree);
   }
 
   render() {

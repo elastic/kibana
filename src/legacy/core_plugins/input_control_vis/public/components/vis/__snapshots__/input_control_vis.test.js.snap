@@ -48,7 +48,6 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         fill={true}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -146,7 +145,6 @@ exports[`Clear btns enabled when there are values 1`] = `
         fill={true}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -244,7 +242,6 @@ exports[`Renders list control 1`] = `
         fill={true}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -348,7 +345,6 @@ exports[`Renders range control 1`] = `
         fill={true}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage

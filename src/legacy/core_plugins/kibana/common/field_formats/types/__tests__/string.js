@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { createStringFormat } from '../string';
 import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
 

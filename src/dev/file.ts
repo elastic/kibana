@@ -48,10 +48,6 @@ export class File {
     return this.ext === '.ts' || this.ext === '.tsx';
   }
 
-  public isTypescriptAmbient() {
-    return this.path.endsWith('.d.ts');
-  }
-
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
   }

@@ -24,11 +24,16 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
-import { mockRender } from './fatal_errors_service.test.mocks';
+const mockRender = jest.fn();
+jest.mock('react-dom', () => {
+  return {
+    render: mockRender,
+  };
+});
 
 import { FatalErrorsService } from './fatal_errors_service';
 
-function setupService() {
+function setup() {
   const rootDomElement = document.createElement('div');
 
   const injectedMetadata = {
@@ -63,7 +68,7 @@ afterEach(() => {
 
 describe('#add()', () => {
   it('calls stopCoreSystem() param', () => {
-    const { stopCoreSystem, fatalErrors } = setupService();
+    const { stopCoreSystem, fatalErrors } = setup();
 
     expect(stopCoreSystem).not.toHaveBeenCalled();
     expect(() => {
@@ -74,7 +79,7 @@ describe('#add()', () => {
   });
 
   it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
-    const { fatalErrors, rootDomElement } = setupService();
+    const { fatalErrors, rootDomElement } = setup();
 
     rootDomElement.innerHTML = `
       <h1>Loading...</h1>
@@ -91,21 +96,21 @@ describe('#add()', () => {
   });
 });
 
-describe('setup.add()', () => {
+describe('start.add()', () => {
   it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
-    const { fatalErrors, i18n } = setupService();
+    const { fatalErrors, i18n } = setup();
 
     jest.spyOn(fatalErrors, 'add').mockImplementation(() => undefined as never);
 
     expect(fatalErrors.add).not.toHaveBeenCalled();
-    const { add } = fatalErrors.setup({ i18n });
+    const { add } = fatalErrors.start({ i18n });
     add('foo', 'bar');
     expect(fatalErrors.add).toHaveBeenCalledTimes(1);
     expect(fatalErrors.add).toHaveBeenCalledWith('foo', 'bar');
   });
 
   it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
-    const { fatalErrors, i18n, rootDomElement } = setupService();
+    const { fatalErrors, i18n, rootDomElement } = setup();
 
     rootDomElement.innerHTML = `
       <h1>Loading...</h1>
@@ -115,7 +120,7 @@ describe('setup.add()', () => {
     expect(mockRender).not.toHaveBeenCalled();
     expect(rootDomElement.children).toHaveLength(2);
 
-    const { add } = fatalErrors.setup({ i18n });
+    const { add } = fatalErrors.start({ i18n });
 
     expect(() => add(new Error('foo'))).toThrowError();
     expect(rootDomElement).toMatchSnapshot('fatal error screen container');
@@ -123,14 +128,14 @@ describe('setup.add()', () => {
   });
 });
 
-describe('setup.get$()', () => {
+describe('start.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
-    const { fatalErrors, i18n } = setupService();
+    const { fatalErrors, i18n } = setup();
 
-    const setup = fatalErrors.setup({ i18n });
+    const start = fatalErrors.start({ i18n });
 
     const onError = jest.fn();
-    setup.get$().subscribe(onError);
+    start.get$().subscribe(onError);
 
     expect(onError).not.toHaveBeenCalled();
     expect(() => {

@@ -4,31 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  FETCH_STATUS,
-  useFetcher
-} from 'x-pack/plugins/apm/public/hooks/useFetcher';
-import { loadLicense } from 'x-pack/plugins/apm/public/services/rest/xpack';
+import { STATUS } from '../../../../constants/index';
+import { LicenceRequest } from '../../../../store/reactReduxRequest/license';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-const initialLicense = {
-  features: {
-    watcher: { is_available: false },
-    ml: { is_available: false }
-  },
-  license: { is_active: false }
-};
-export const LicenseContext = React.createContext(initialLicense);
+export const LicenseCheck: React.FunctionComponent = ({ children }) => {
+  return (
+    <LicenceRequest
+      render={({ data: licenseData, status: licenseStatus }) => {
+        const hasValidLicense = licenseData.license.is_active;
+        if (licenseStatus === STATUS.SUCCESS && !hasValidLicense) {
+          return <InvalidLicenseNotification />;
+        }
 
-export const LicenseCheck: React.FC = ({ children }) => {
-  const { data = initialLicense, status } = useFetcher(() => loadLicense(), []);
-  const hasValidLicense = data.license.is_active;
-
-  // if license is invalid show an error message
-  if (status === FETCH_STATUS.SUCCESS && !hasValidLicense) {
-    return <InvalidLicenseNotification />;
-  }
-
-  // render rest of application and pass down license via context
-  return <LicenseContext.Provider value={data} children={children} />;
+        return children;
+      }}
+    />
+  );
 };

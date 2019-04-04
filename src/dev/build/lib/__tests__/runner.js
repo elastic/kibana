@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { createRunner } from '../runner';

@@ -40,7 +40,6 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTablePagination,
-  IconType,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +60,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionC
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
   name: string;
-  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
+  getIconForSavedObject(savedObject: SimpleSavedObject<T>): string | undefined;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }

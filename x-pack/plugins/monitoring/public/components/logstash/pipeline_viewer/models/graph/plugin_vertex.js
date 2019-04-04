@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { last, get, omit } from 'lodash';
 import { Vertex } from './vertex';
 
 export const TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT = 2;
@@ -44,36 +44,28 @@ export class PluginVertex extends Vertex {
   }
 
   get latestMillisPerEvent() {
-    return get(this.stats, 'millis_per_event');
+    const latestMillisPerEventBucket = last(get(this.stats, 'millis_per_event.data', [])) || [];
+    return latestMillisPerEventBucket[1];
   }
 
   get percentOfTotalProcessorTime() {
-    return get(this.stats, 'percent_of_total_processor_duration');
-  }
-
-  get eventsPerMillisecond() {
-    return this.isInput
-      ? this.stats.events_out_per_millisecond
-      : this.stats.events_in_per_millisecond;
+    const latestPercentOfTotalProcessorDurationBucket = last(get(this.stats, 'percent_of_total_processor_duration.data', [])) || [];
+    return latestPercentOfTotalProcessorDurationBucket[1];
   }
 
   get eventsPerSecond() {
-    if (!this.eventsPerMillisecond.hasOwnProperty('data')) {
-      return this.eventsPerMillisecond * 1000;
-    }
-
-    const eps = { ...this.eventsPerMillisecond }; // Clone the object so we don't modify the original one
-    eps.data = this.eventsPerMillisecond.data.map(([timestamp, value]) => [ timestamp, value * 1000]);
-    return eps;
+    const eventsPerMillisecond = this.isInput
+      ? this.stats.events_out_per_millisecond
+      : this.stats.events_in_per_millisecond;
+    return {
+      ...omit(eventsPerMillisecond, 'data'),
+      data: get(eventsPerMillisecond, 'data', []).map(([x, y]) => [x, y * 1000])
+    };
   }
 
   get latestEventsPerSecond() {
-    if (!this.eventsPerSecond.hasOwnProperty('data')) {
-      return this.eventsPerSecond;
-    }
-
-    const numTimeseriesBuckets = this.eventsPerSecond.data.length;
-    return this.eventsPerSecond.data[numTimeseriesBuckets - 1][1];
+    const latestBucket = last(get(this.eventsPerSecond, 'data', [])) || [];
+    return latestBucket[1];
   }
 
   isTimeConsuming() {

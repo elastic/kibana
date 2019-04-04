@@ -144,7 +144,6 @@ export class TOCEntry extends React.Component {
 
   _renderLayerHeader() {
     const {
-      cloneLayer,
       isReadOnly,
       layer,
       zoom,
@@ -182,10 +181,6 @@ export class TOCEntry extends React.Component {
               toggleVisible(layer.getId());
             }}
             displayName={this.state.displayName}
-            cloneLayer={() => {
-              cloneLayer(layer.getId());
-            }}
-            isReadOnly={this.props.isReadOnly}
           />
         </EuiFlexItem>
         <EuiFlexItem>

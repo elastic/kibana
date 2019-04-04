@@ -18,7 +18,6 @@
  */
 
 import { keyMap } from '../utils/key_map';
-import '../fancy_forms';
 import { uiModules } from '../modules';
 
 const INVALID = {}; // invalid flag

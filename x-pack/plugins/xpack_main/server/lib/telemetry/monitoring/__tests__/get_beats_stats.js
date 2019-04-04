@@ -6,7 +6,7 @@
 
 import { fetchBeatsStats, processResults } from '../get_beats_stats';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import beatsStatsResultSet from './fixtures/beats_stats_results';
 
 const getBaseOptions = () => ({

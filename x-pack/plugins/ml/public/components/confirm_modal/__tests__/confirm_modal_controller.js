@@ -7,7 +7,7 @@
 
 
 import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const mockModalInstance = { close: function () {}, dismiss: function () {} };
 

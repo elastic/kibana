@@ -299,7 +299,6 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
                           type="button"
                         >
                           <button
@@ -667,7 +666,6 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
                           type="button"
                         >
                           <button
@@ -1035,7 +1033,6 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
-                          size="m"
                           type="button"
                         >
                           <button

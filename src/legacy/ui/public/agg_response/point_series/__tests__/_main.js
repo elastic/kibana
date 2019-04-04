@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { buildPointSeriesData } from '../point_series';
 
 describe('pointSeriesChartDataFromTable', function () {

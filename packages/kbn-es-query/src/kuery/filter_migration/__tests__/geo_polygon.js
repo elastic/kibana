@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { convertGeoPolygon } from '../geo_polygon';
 
 describe('filter to kuery migration', function () {

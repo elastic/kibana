@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import getUrl from '../get_url';
 
 describe('getUrl', function () {

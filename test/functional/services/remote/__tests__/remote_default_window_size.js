@@ -19,7 +19,7 @@
 
 import { fork } from 'child_process';
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const FTR_SCRIPT = require.resolve('../../../../../scripts/functional_test_runner');
 const CONFIG_PATH = require.resolve('./fixtures/several_nested_window_size_changes/config.js');

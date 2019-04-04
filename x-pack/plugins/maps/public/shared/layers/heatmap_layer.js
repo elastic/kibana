@@ -106,9 +106,8 @@ export class HeatmapLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
-  async getBounds(dataFilters) {
-    const searchFilters = this._getSearchFilters(dataFilters);
-    return await this._source.getBoundsForFilters(searchFilters);
+  async getBounds(filters) {
+    return await this._source.getBoundsForFilters(filters);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -120,52 +119,45 @@ export class HeatmapLayer extends AbstractLayer {
       return;
     }
 
-    const searchFilters = this._getSearchFilters(dataFilters);
-
     const sourceDataRequest = this.getSourceDataRequest();
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
-    const isSamePrecision = meta.geogridPrecision === searchFilters.geogridPrecision;
+    const geogridPrecision = this._source.getGeoGridPrecision(dataFilters.zoom);
+    const isSamePrecision = meta.geogridPrecision === geogridPrecision;
 
-    const isSameTime = _.isEqual(meta.timeFilters, searchFilters.timeFilters);
+    const isSameTime = _.isEqual(meta.timeFilters, dataFilters.timeFilters);
 
-    const updateDueToRefreshTimer = searchFilters.refreshTimerLastTriggeredAt
-      && !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
+    const updateDueToRefreshTimer = dataFilters.refreshTimerLastTriggeredAt
+      && !_.isEqual(meta.refreshTimerLastTriggeredAt, dataFilters.refreshTimerLastTriggeredAt);
 
-    const updateDueToExtent = this.updateDueToExtent(this._source, meta, searchFilters);
+    const updateDueToExtent = this.updateDueToExtent(this._source, meta, dataFilters);
 
-    const updateDueToQuery = searchFilters.query
-      && !_.isEqual(meta.query, searchFilters.query);
-    const updateDueToLayerQuery = searchFilters.layerQuery
-      && !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+    const updateDueToQuery = dataFilters.query
+      && !_.isEqual(meta.query, dataFilters.query);
 
-    const updateDueToFilters = searchFilters.filters
-      && !_.isEqual(meta.filters, searchFilters.filters);
+    const updateDueToFilters = dataFilters.filters
+      && !_.isEqual(meta.filters, dataFilters.filters);
 
-    const updateDueToMetricChange = !_.isEqual(meta.metric, searchFilters.metric);
+    const metricPropertyKey = this._getPropKeyOfSelectedMetric();
+    const updateDueToMetricChange = !_.isEqual(meta.metric, metricPropertyKey);
 
     if (isSamePrecision
       && isSameTime
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
-      && !updateDueToLayerQuery
       && !updateDueToFilters
       && !updateDueToMetricChange
     ) {
       return;
     }
 
-    await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
-  }
-
-  _getSearchFilters(dataFilters) {
-    return {
+    const searchFilters = {
       ...dataFilters,
-      layerQuery: this.getQuery(),
-      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      metric: this._getPropKeyOfSelectedMetric()
+      geogridPrecision,
+      metric: metricPropertyKey
     };
+    await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {

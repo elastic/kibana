@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../inequality';
 
@@ -33,6 +33,7 @@ describe('greater_than model validator directive', function () {
     $rootScope = _$rootScope_;
   }));
 
+  // no value is the same as 0
   describe('without value', function () {
     let element;
     beforeEach(function () {
@@ -56,33 +57,6 @@ describe('greater_than model validator directive', function () {
       $rootScope.value = '-10';
       $rootScope.$digest();
       expect(element.hasClass('ng-valid')).to.be.ok();
-    });
-  });
-
-  describe('with string values', function () {
-    let element;
-    beforeEach(function () {
-      html = `<input type="text" ng-model="value" greater-than="'10'" />`;
-      element = $compile(html)($rootScope);
-    });
-
-    it('should be valid for greater than 10', function () {
-      $rootScope.value = '15';
-      $rootScope.$digest();
-      expect(element.hasClass('ng-valid')).to.be.ok();
-    });
-
-    it('should be invalid for 10', function () {
-      $rootScope.value = '10';
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
-    });
-
-    // Edge case because '5' > '10' as strings
-    it('should be invalid less than 10', function () {
-      $rootScope.value = '5';
-      $rootScope.$digest();
-      expect(element.hasClass('ng-invalid')).to.be.ok();
     });
   });
 
@@ -111,14 +85,7 @@ describe('greater_than model validator directive', function () {
         $rootScope.$digest();
         expect(element.hasClass('ng-invalid')).to.be.ok();
       });
-
-      it('should be valid for empty model values', () => {
-        [undefined, null, ''].forEach(val => {
-          $rootScope.value = val;
-          $rootScope.$digest();
-          expect(element.hasClass('ng-valid')).to.be.ok();
-        });
-      });
     });
   });
+
 });

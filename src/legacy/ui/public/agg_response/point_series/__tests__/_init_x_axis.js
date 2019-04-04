@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { initXAxis } from '../_init_x_axis';
 import { makeFakeXAspect } from '../_fake_x_aspect';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { stdDeviationMetricAgg } from '../../metrics/std_deviation';
 import { VisProvider } from '../../../vis';

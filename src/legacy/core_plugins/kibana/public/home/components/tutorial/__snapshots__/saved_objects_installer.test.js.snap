@@ -146,7 +146,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -258,7 +257,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
                       type="button"
                     >
                       <button
@@ -464,7 +462,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -614,7 +611,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
                       type="button"
                     >
                       <button
@@ -706,7 +702,6 @@ exports[`renders 1`] = `
                 iconSide="left"
                 isLoading={false}
                 onClick={[Function]}
-                size="m"
                 type="button"
               >
                 Load Kibana objects

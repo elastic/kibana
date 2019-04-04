@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { IndexPatternsIntervalsProvider } from '../_intervals';
 

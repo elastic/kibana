@@ -19,7 +19,7 @@
 
 import { resolve, sep } from 'path';
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { File } from '../file';
 

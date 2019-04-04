@@ -65,27 +65,13 @@ export interface ITransactionChartData {
   noHits: boolean;
   tpmSeries: ITpmBucket[] | IEmptySeries[];
   responseTimeSeries: TimeSerie[] | IEmptySeries[];
-  hasMLJob: boolean;
 }
 
-const INITIAL_DATA = {
-  apmTimeseries: {
-    totalHits: 0,
-    responseTimes: {
-      avg: [],
-      p95: [],
-      p99: []
-    },
-    tpmBuckets: [],
-    overallAvgDuration: undefined
-  },
-  anomalyTimeseries: undefined
-};
-
 export function getTransactionCharts(
-  { start, end, transactionType }: IUrlParams,
-  timeseriesResponse: TimeSeriesAPIResponse = INITIAL_DATA
-): ITransactionChartData {
+  urlParams: IUrlParams,
+  timeseriesResponse: TimeSeriesAPIResponse
+) {
+  const { start, end, transactionType } = urlParams;
   const { apmTimeseries, anomalyTimeseries } = timeseriesResponse;
   const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = noHits
@@ -96,22 +82,26 @@ export function getTransactionCharts(
     ? getEmptySerie(start, end)
     : getResponseTimeSeries(apmTimeseries, anomalyTimeseries);
 
-  return {
+  const chartsResult: ITransactionChartData = {
     noHits,
     tpmSeries,
-    responseTimeSeries,
-    hasMLJob: timeseriesResponse.anomalyTimeseries !== undefined
+    responseTimeSeries
   };
+
+  return chartsResult;
 }
 
-export type MemoryMetricSeries = ReturnType<typeof getMemorySeries>;
+export interface IMemoryChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[] | IEmptySeries[];
+}
 
 export function getMemorySeries(
-  { start, end }: IUrlParams,
+  urlParams: IUrlParams,
   memoryChartResponse: MetricsChartAPIResponse['memory']
 ) {
+  const { start, end } = urlParams;
   const { series, overallValues, totalHits } = memoryChartResponse;
-  const seriesList =
+  const seriesList: IMemoryChartData['series'] =
     totalHits === 0
       ? getEmptySerie(start, end)
       : [
@@ -142,12 +132,14 @@ export function getMemorySeries(
         ];
 
   return {
-    totalHits: memoryChartResponse.totalHits,
+    ...memoryChartResponse,
     series: seriesList
   };
 }
 
-export type CPUMetricSeries = ReturnType<typeof getCPUSeries>;
+export interface ICPUChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[];
+}
 
 export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
   const { series, overallValues } = CPUChartResponse;
@@ -191,7 +183,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
     }
   ];
 
-  return { totalHits: CPUChartResponse.totalHits, series: seriesList };
+  return { ...CPUChartResponse, series: seriesList };
 }
 
 interface TimeSerie {

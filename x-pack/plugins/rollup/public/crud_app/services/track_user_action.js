@@ -13,16 +13,8 @@ export function trackUserAction(actionType) {
   getHttp().post(userActionUri);
 }
 
-/**
- * Transparently return provided request Promise, while allowing us to track
- * a successful completion of the request.
- */
 export function trackUserRequest(request, actionType) {
   // Only track successful actions.
-  return request.then(response => {
-    trackUserAction(actionType);
-    // We return the response immediately without waiting for the tracking request to resolve,
-    // to avoid adding additional latency.
-    return response;
-  });
+  request.then(() => trackUserAction(actionType));
+  return request;
 }

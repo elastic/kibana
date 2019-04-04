@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { isConfigVersionUpgradeable } from '../is_config_version_upgradeable';
 import { pkg } from '../../../../utils';

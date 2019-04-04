@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
+const mockWriteFileAsync = jest.fn();
+const mockMakeDirAsync = jest.fn();
+jest.mock('./utils', () => ({
+  // Jest typings don't define `requireActual` for some reason.
+  ...(jest as any).requireActual('./utils'),
+  writeFileAsync: mockWriteFileAsync,
+  makeDirAsync: mockMakeDirAsync,
+}));
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';

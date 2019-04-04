@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { toEditableConfig } from '../to_editable_config';
 
 describe('Settings', function () {

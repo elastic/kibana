@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('#getKibanaVersion', () => {
@@ -44,7 +43,7 @@ describe('#getKibanaBuildNumber', () => {
   });
 });
 
-describe('setup.getCspConfig()', () => {
+describe('start.getCspConfig()', () => {
   it('returns injectedMetadata.csp', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
@@ -54,7 +53,7 @@ describe('setup.getCspConfig()', () => {
       },
     } as any);
 
-    const contract = injectedMetadata.setup();
+    const contract = injectedMetadata.start();
     expect(contract.getCspConfig()).toEqual({
       warnLegacyBrowsers: true,
     });
@@ -69,7 +68,7 @@ describe('setup.getCspConfig()', () => {
       },
     } as any);
 
-    const csp = injectedMetadata.setup().getCspConfig();
+    const csp = injectedMetadata.start().getCspConfig();
     expect(() => {
       // @ts-ignore TS knows this shouldn't be possible
       csp.warnLegacyBrowsers = false;
@@ -77,44 +76,7 @@ describe('setup.getCspConfig()', () => {
   });
 });
 
-describe('setup.getPlugins()', () => {
-  it('returns injectedMetadata.uiPlugins', () => {
-    const injectedMetadata = new InjectedMetadataService({
-      injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
-      },
-    } as any);
-
-    const plugins = injectedMetadata.setup().getPlugins();
-    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
-  });
-
-  it('returns frozen version of uiPlugins', () => {
-    const injectedMetadata = new InjectedMetadataService({
-      injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
-      },
-    } as any);
-
-    const plugins = injectedMetadata.setup().getPlugins();
-    expect(() => {
-      plugins.pop();
-    }).toThrowError();
-    expect(() => {
-      plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
-    }).toThrowError();
-    expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
-      plugins[0].name = 'changed';
-    }).toThrowError();
-    expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
-      plugins[0].newProp = 'changed';
-    }).toThrowError();
-  });
-});
-
-describe('setup.getLegacyMetadata()', () => {
+describe('start.getLegacyMetadata()', () => {
   it('returns injectedMetadata.legacyMetadata', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
@@ -122,7 +84,7 @@ describe('setup.getLegacyMetadata()', () => {
       },
     } as any);
 
-    const contract = injectedMetadata.setup();
+    const contract = injectedMetadata.start();
     expect(contract.getLegacyMetadata()).toBe('foo');
   });
 
@@ -135,7 +97,7 @@ describe('setup.getLegacyMetadata()', () => {
       },
     } as any);
 
-    const legacyMetadata = injectedMetadata.setup().getLegacyMetadata();
+    const legacyMetadata = injectedMetadata.start().getLegacyMetadata();
     expect(legacyMetadata).toEqual({
       foo: true,
     });
@@ -146,9 +108,9 @@ describe('setup.getLegacyMetadata()', () => {
   });
 });
 
-describe('setup.getInjectedVar()', () => {
+describe('start.getInjectedVar()', () => {
   it('returns values from injectedMetadata.vars', () => {
-    const setup = new InjectedMetadataService({
+    const start = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -159,20 +121,20 @@ describe('setup.getInjectedVar()', () => {
           },
         },
       },
-    } as any).setup();
+    } as any).start();
 
-    expect(setup.getInjectedVar('foo')).toEqual({
+    expect(start.getInjectedVar('foo')).toEqual({
       bar: '1',
     });
-    expect(setup.getInjectedVar('foo.bar')).toBe('1');
-    expect(setup.getInjectedVar('baz:box')).toEqual({
+    expect(start.getInjectedVar('foo.bar')).toBe('1');
+    expect(start.getInjectedVar('baz:box')).toEqual({
       foo: 2,
     });
-    expect(setup.getInjectedVar('')).toBe(undefined);
+    expect(start.getInjectedVar('')).toBe(undefined);
   });
 
   it('returns read-only values', () => {
-    const setup = new InjectedMetadataService({
+    const start = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -180,9 +142,9 @@ describe('setup.getInjectedVar()', () => {
           },
         },
       },
-    } as any).setup();
+    } as any).start();
 
-    const foo: any = setup.getInjectedVar('foo');
+    const foo: any = start.getInjectedVar('foo');
     expect(() => {
       foo.bar = 2;
     }).toThrowErrorMatchingInlineSnapshot(
@@ -196,9 +158,9 @@ describe('setup.getInjectedVar()', () => {
   });
 });
 
-describe('setup.getInjectedVars()', () => {
+describe('start.getInjectedVars()', () => {
   it('returns all injected vars, readonly', () => {
-    const setup = new InjectedMetadataService({
+    const start = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -206,9 +168,9 @@ describe('setup.getInjectedVars()', () => {
           },
         },
       },
-    } as any).setup();
+    } as any).start();
 
-    const vars: any = setup.getInjectedVars();
+    const vars: any = start.getInjectedVars();
     expect(() => {
       vars.foo = 2;
     }).toThrowErrorMatchingInlineSnapshot(

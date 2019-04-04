@@ -436,7 +436,6 @@ export const applyLocalTransforms = (shapes, transformIntents) => {
   return shapes.map(shapeApplyLocalTransforms(transformIntents));
 };
 
-// eslint-disable-next-line
 const getUpstreamTransforms = (shapes, shape) =>
   shape.parent
     ? getUpstreamTransforms(shapes, shapes.find(s => s.id === shape.parent)).concat([

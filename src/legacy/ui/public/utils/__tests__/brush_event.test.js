@@ -38,7 +38,7 @@ jest.mock('ui/chrome',
 
 import _ from 'lodash';
 import moment from 'moment';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { onBrushEvent } from '../brush_event';
 import { timefilter } from 'ui/timefilter';
 

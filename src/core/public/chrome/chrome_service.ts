@@ -22,8 +22,8 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { NotificationsSetup } from '../notifications';
+import { InjectedMetadataStart } from '../injected_metadata';
+import { NotificationsStart } from '../notifications';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -49,9 +49,9 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface SetupDeps {
-  injectedMetadata: InjectedMetadataSetup;
-  notifications: NotificationsSetup;
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStart;
+  notifications: NotificationsStart;
 }
 
 export class ChromeService {
@@ -62,7 +62,7 @@ export class ChromeService {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 
-  public setup({ injectedMetadata, notifications }: SetupDeps) {
+  public start({ injectedMetadata, notifications }: StartDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
     const brand$ = new Rx.BehaviorSubject<Brand>({});
@@ -202,4 +202,4 @@ export class ChromeService {
   }
 }
 
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
+export type ChromeStart = ReturnType<ChromeService['start']>;

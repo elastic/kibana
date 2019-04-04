@@ -5,26 +5,30 @@
  */
 
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { ReturnTypeBulkUpsert, ReturnTypeList } from '../../../../common/return_types';
 import { FrontendConfigBlocksAdapter } from './adapter_types';
 
 export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
   constructor(private db: ConfigurationBlock[]) {}
 
-  public async upsert(blocks: ConfigurationBlock[]): Promise<ReturnTypeBulkUpsert> {
+  public async upsert(blocks: ConfigurationBlock[]) {
     this.db = this.db.concat(blocks);
-    return {
+    return blocks.map(() => ({
       success: true,
-      results: blocks.map(() => ({
-        success: true,
-        action: 'created',
-      })),
-    } as ReturnTypeBulkUpsert;
+      blockID: Math.random()
+        .toString(36)
+        .substring(7),
+    }));
   }
-  public async getForTags(tagIds: string[]): Promise<ReturnTypeList<ConfigurationBlock>> {
+  public async getForTags(
+    tagIds: string[]
+  ): Promise<{
+    error?: string;
+    blocks: ConfigurationBlock[];
+    page: number;
+    total: number;
+  }> {
     return {
-      success: true,
-      list: this.db.filter(block => tagIds.includes(block.tag)),
+      blocks: this.db.filter(block => tagIds.includes(block.tag)),
       page: 0,
       total: this.db.filter(block => tagIds.includes(block.tag)).length,
     };

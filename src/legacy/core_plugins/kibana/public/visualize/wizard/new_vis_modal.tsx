@@ -20,7 +20,6 @@
 import React from 'react';
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
@@ -65,26 +64,13 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       return null;
     }
 
-    const visNewVisDialogAriaLabel = i18n.translate(
-      'kbn.visualize.newVisWizard.helpTextAriaLabel',
-      {
-        defaultMessage:
-          'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
-      }
-    );
-
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
           <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
         </EuiModal>
       ) : (
-        <EuiModal
-          onClose={this.onCloseModal}
-          className="visNewVisDialog"
-          aria-label={visNewVisDialogAriaLabel}
-          role="menu"
-        >
+        <EuiModal onClose={this.onCloseModal} className="visNewVisDialog">
           <TypeSelection
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}

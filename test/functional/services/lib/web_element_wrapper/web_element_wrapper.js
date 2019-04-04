@@ -19,7 +19,6 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { delay } from 'bluebird';
-import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -389,20 +388,22 @@ export class WebElementWrapper {
   }
 
   /**
-   * Waits for all elements inside this element matching the given CSS selector to be destroyed.
+   * Waits for all elements inside this element matching the given CSS class name to be destroyed.
    *
    * @param {string} className
    * @return {Promise<void>}
    */
-  async waitForDeletedByCssSelector(selector) {
-    await this._driver.manage().setTimeouts({ implicit: 1000 });
-    await this._driver.wait(async () => {
-      const found = await this._webElement.findElements(this._By.css(selector));
-      return found.length === 0;
+  async waitForDeletedByClassName(className) {
+    await this._driver.wait(() => {
+      return this._webElement.findElements(this._By.className(className)).then((children) => {
+        if (children.length <= 0) {
+          return true;
+        }
+        return false;
+      });
     },
     this._defaultFindTimeout,
-    `The element with ${selector} selector was still present after ${this._defaultFindTimeout} sec.`);
-    await this._driver.manage().setTimeouts({ implicit: this._defaultFindTimeout });
+    `The element with ${className} className was still present when it should have disappeared.`);
   }
 
   /**
@@ -441,20 +442,5 @@ export class WebElementWrapper {
     };
 
     return $;
-  }
-
-  /**
-   * Creates the screenshot of the element
-   *
-   * @returns {Promise<void>}
-   */
-  async takeScreenshot() {
-    const screenshot = await this._driver.takeScreenshot();
-    const buffer = Buffer.from(screenshot.toString(), 'base64');
-    const { width, height, x, y } = await this.getPosition();
-    const src = PNG.sync.read(buffer);
-    const dst = new PNG({ width, height });
-    PNG.bitblt(src, dst, x, y, width, height, 0, 0);
-    return PNG.sync.write(dst);
   }
 }

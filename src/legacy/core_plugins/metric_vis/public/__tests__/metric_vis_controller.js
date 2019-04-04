@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { MetricVisComponent } from '../metric_vis_controller';
 
 describe('metric vis controller', function () {

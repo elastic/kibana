@@ -17,39 +17,39 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../../../../core/public/base_path';
-import { ChromeSetup } from '../../../../core/public/chrome';
-import { FatalErrorsSetup } from '../../../../core/public/fatal_errors';
-import { HttpSetup } from '../../../../core/public/http';
-import { I18nSetup } from '../../../../core/public/i18n';
-import { InjectedMetadataSetup } from '../../../../core/public/injected_metadata';
-import { NotificationsSetup } from '../../../../core/public/notifications';
-import { UiSettingsSetup } from '../../../../core/public/ui_settings';
+import { BasePathStart } from '../../../../core/public/base_path';
+import { ChromeStart } from '../../../../core/public/chrome';
+import { FatalErrorsStart } from '../../../../core/public/fatal_errors';
+import { HttpStart } from '../../../../core/public/http';
+import { I18nStart } from '../../../../core/public/i18n';
+import { InjectedMetadataStart } from '../../../../core/public/injected_metadata';
+import { NotificationsStart } from '../../../../core/public/notifications';
+import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
-interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
+interface CoreStart {
+  i18n: I18nStart;
+  injectedMetadata: InjectedMetadataStart;
+  fatalErrors: FatalErrorsStart;
+  notifications: NotificationsStart;
+  http: HttpStart;
+  basePath: BasePathStart;
+  uiSettings: UiSettingsClient;
+  chrome: ChromeStart;
 }
 
 const runtimeContext = {
-  setup: {
-    core: null as CoreSetup | null,
+  start: {
+    core: null as CoreStart | null,
     plugins: {},
   },
 };
 
-export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
+export function __newPlatformInit__(core: CoreStart) {
+  if (runtimeContext.start.core) {
     throw new Error('New platform core api was already initialized');
   }
 
-  runtimeContext.setup.core = core;
+  runtimeContext.start.core = core;
 }
 
 export function getNewPlatform() {

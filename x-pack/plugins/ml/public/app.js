@@ -13,7 +13,6 @@ import 'ui/courier';
 import 'ui/angular-bootstrap';
 import 'ui/persisted_log';
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
 
 import 'plugins/ml/access_denied';
 import 'plugins/ml/lib/angular_bootstrap_patch';

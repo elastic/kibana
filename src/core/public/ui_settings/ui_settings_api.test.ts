@@ -26,7 +26,7 @@ import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const basePath = basePathServiceMock.createSetupContract();
+  const basePath = basePathServiceMock.createStartContract();
   basePath.addToPath.mockImplementation(path => `/foo/bar${path}`);
 
   const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');

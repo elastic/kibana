@@ -6,7 +6,7 @@
 
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getMetricChangeDescription } from '../metric_change_description';
 
 

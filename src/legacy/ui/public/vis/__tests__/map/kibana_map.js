@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { KibanaMap } from '../../map/kibana_map';
 import { KibanaMapLayer } from '../../map/kibana_map_layer';
 import L from 'leaflet';

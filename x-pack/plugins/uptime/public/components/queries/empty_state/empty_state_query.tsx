@@ -13,18 +13,12 @@ import { EmptyState } from '../../functional/empty_state';
 import { getDocCountQuery } from './get_doc_count';
 
 interface EmptyStateProps {
-  basePath: string;
   children: JSX.Element[];
 }
 
 type Props = EmptyStateProps & UptimeCommonProps;
 
-export const EmptyStateQuery = ({
-  autorefreshInterval,
-  autorefreshIsPaused,
-  basePath,
-  children,
-}: Props) => (
+export const EmptyStateQuery = ({ autorefreshInterval, autorefreshIsPaused, children }: Props) => (
   <Query
     query={getDocCountQuery}
     pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
@@ -33,7 +27,6 @@ export const EmptyStateQuery = ({
       const count = get(data, 'getDocCount.count', 0);
       return (
         <EmptyState
-          basePath={basePath}
           children={children}
           count={count}
           error={

@@ -69,104 +69,99 @@ export class DetailPanel extends Component {
     return (
       <Fragment>
         <EuiFlyoutBody>
-          <section>
-            <EuiDescriptionList>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
+                defaultMessage="Settings"
+              />
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiDescriptionList>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
+                      defaultMessage="Status"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {isPaused ? (
+                    <EuiHealth color="subdued">
                       <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
-                        defaultMessage="Status"
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
+                        defaultMessage="Paused"
                       />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailStatus">
-                    {isPaused ? (
-                      <EuiHealth color="subdued">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
-                          defaultMessage="Paused"
-                        />
-                      </EuiHealth>
-                    ) : (
-                      <EuiHealth color="success">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
-                          defaultMessage="Active"
-                        />
-                      </EuiHealth>
-                    )}
-                  </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiSpacer size="s" />
-
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
+                    </EuiHealth>
+                  ) : (
+                    <EuiHealth color="success">
                       <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
-                        defaultMessage="Remote cluster"
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
+                        defaultMessage="Active"
                       />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailRemoteCluster">
-                    {remoteCluster}
-                  </EuiDescriptionListDescription>
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
-                        defaultMessage="Leader index"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailLeaderIndex">
-                    {leaderIndex}
-                  </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionList>
-          </section>
-
-          <EuiSpacer size="l" />
-
-          <section
-            aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
-            data-test-subj="ccrFollowerIndexDetailPanelSettingsSection"
-          >
-            <EuiTitle size="s">
-              <h3 id="ccrFollowerIndexDetailSettingsTitle">
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
-                  defaultMessage="Settings"
-                />
-              </h3>
-            </EuiTitle>
+                    </EuiHealth>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiSpacer size="s" />
 
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
+                      defaultMessage="Remote cluster"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {remoteCluster}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
+                      defaultMessage="Leader index"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {leaderIndex}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             {isPaused ? (
-              <EuiCallOut
-                size="s"
-                title={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
-                    defaultMessage="A paused follower index does not have settings or shard statistics."
-                  />
-                }
-              />
+              <Fragment>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
+                      defaultMessage="A paused follower index does not have settings or shard statistics."
+                    />
+                  }
+                />
+              </Fragment>
             ) : (
-              <EuiDescriptionList data-test-subj="ccrFollowerIndexDetailPanelSettingsValues">
+              <Fragment>
+                <EuiSpacer size="s" />
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>
@@ -178,7 +173,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxReadReqOpCount">
+                    <EuiDescriptionListDescription>
                       {maxReadRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -193,7 +188,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxOutstandingReadReq">
+                    <EuiDescriptionListDescription>
                       {maxOutstandingReadRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -212,7 +207,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxReadReqSize">
+                    <EuiDescriptionListDescription>
                       {maxReadRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -227,7 +222,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteReqOpCount">
+                    <EuiDescriptionListDescription>
                       {maxWriteRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -246,7 +241,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteReqSize">
+                    <EuiDescriptionListDescription>
                       {maxWriteRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -261,7 +256,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxOutstandingWriteReq">
+                    <EuiDescriptionListDescription>
                       {maxOutstandingWriteRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -280,7 +275,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteBufferCount">
+                    <EuiDescriptionListDescription>
                       {maxWriteBufferCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -295,7 +290,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteBufferSize">
+                    <EuiDescriptionListDescription>
                       {maxWriteBufferSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -314,7 +309,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxRetryDelay">
+                    <EuiDescriptionListDescription>
                       {maxRetryDelay}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -329,18 +324,16 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailReadPollTimeout">
+                    <EuiDescriptionListDescription>
                       {readPollTimeout}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiDescriptionList>
+              </Fragment>
             )}
-          </section>
 
-          <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
 
-          <section data-test-subj="ccrFollowerIndexDetailPanelShardsStatsSection">
             {shards && shards.map((shard, i) => (
               <Fragment key={i}>
                 <EuiSpacer size="m" />
@@ -366,11 +359,10 @@ export class DetailPanel extends Component {
                   editorProps={{
                     $blockScrolling: Infinity
                   }}
-                  data-test-subj={`ccrFollowerIndexDetailPanelShardsStats${i}`}
                 />
               </Fragment>
             ))}
-          </section>
+          </EuiDescriptionList>
         </EuiFlyoutBody>
       </Fragment>
     );
@@ -518,11 +510,7 @@ export class DetailPanel extends Component {
       >
 
         <EuiFlyoutHeader>
-          <EuiTitle
-            size="m"
-            id="followerIndexDetailsFlyoutTitle"
-            data-test-subj="followerIndexDetailsFlyoutTitle"
-          >
+          <EuiTitle size="m" id="followerIndexDetailsFlyoutTitle">
             <h2>{followerIndexId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>

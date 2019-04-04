@@ -8,8 +8,6 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
-import uuid from 'uuid/v4';
-import { copyPersistentState } from '../../store/util';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -36,7 +34,7 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.id = _.get(options, 'id', uuid());
+    layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
@@ -52,28 +50,8 @@ export class AbstractLayer {
     }
   }
 
-  async cloneDescriptor() {
-    const clonedDescriptor = copyPersistentState(this._descriptor);
-    // layer id is uuid used to track styles/layers in mapbox
-    clonedDescriptor.id = uuid();
-    const displayName = await this.getDisplayName();
-    clonedDescriptor.label = `Clone of ${displayName}`;
-    clonedDescriptor.sourceDescriptor = this._source.cloneDescriptor();
-    if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach(joinDescriptor => {
-        // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
-      });
-    }
-    return clonedDescriptor;
-  }
-
   isJoinable() {
     return this._source.isJoinable();
-  }
-
-  supportsElasticsearchFilters() {
-    return this._source.supportsElasticsearchFilters();
   }
 
   async supportsFitToBounds() {
@@ -138,10 +116,6 @@ export class AbstractLayer {
 
   getAlpha() {
     return this._descriptor.alpha;
-  }
-
-  getQuery() {
-    return this._descriptor.query;
   }
 
   getZoomConfig() {

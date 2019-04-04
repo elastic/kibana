@@ -38,10 +38,10 @@ import {
   PanelStateMap,
 } from './types';
 
-export const getPanels = (dashboard: DashboardState): Readonly<PanelStateMap> => dashboard.panels;
+export const getPanels = (dashboard: DashboardState): PanelStateMap => dashboard.panels;
 
 export const getPanel = (dashboard: DashboardState, panelId: PanelId): PanelState =>
-  getPanels(dashboard)[panelId] as PanelState;
+  getPanels(dashboard)[panelId];
 
 export const getPanelType = (dashboard: DashboardState, panelId: PanelId): string =>
   getPanel(dashboard, panelId).type;

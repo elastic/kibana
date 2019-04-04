@@ -82,6 +82,7 @@ export class CMBeatsDomain {
     }
 
     const user = typeof userOrToken === 'string' ? this.framework.internalUser : userOrToken;
+
     await this.adapter.update(user, {
       ...beat,
       ...beatData,

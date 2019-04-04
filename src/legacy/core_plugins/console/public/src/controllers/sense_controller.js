@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DocTitleProvider } from 'ui/doc_title';
-import { applyResizeCheckerToEditors } from '../sense_editor_resize';
+import 'ui/doc_title';
+import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
@@ -30,12 +30,11 @@ const module = require('ui/modules').get('app/sense');
 
 module.run(function (Private, $rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    return applyResizeCheckerToEditors($rootScope, $el, ...editors);
+    return useResizeChecker($rootScope, $el, ...editors);
   };
 });
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
-  const docTitle = Private(DocTitleProvider);
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
@@ -54,9 +53,6 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       $scope.getDocumentation();
     });
     $scope.getDocumentation();
-
-    // expose method for React Consumption
-    $scope.getRequestsAsCURL = input.getRequestsAsCURL;
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {

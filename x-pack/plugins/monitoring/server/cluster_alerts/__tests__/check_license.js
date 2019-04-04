@@ -5,7 +5,7 @@
  */
 
 import { checkLicense, checkLicenseGenerator } from '../check_license';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 
 describe('Monitoring Check License', () => {

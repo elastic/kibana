@@ -22,7 +22,8 @@
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { mockPackage } from './config_service.test.mocks';
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../package.json', () => mockPackage);
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 

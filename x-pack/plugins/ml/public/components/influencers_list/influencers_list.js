@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
 import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
-import { EntityCell } from '../entity_cell';
 
 
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {
@@ -48,7 +47,7 @@ function getTooltipContent(maxScoreLabel, totalScoreLabel) {
   );
 }
 
-function Influencer({ influencerFieldName, influencerFilter, valueData }) {
+function Influencer({ influencerFieldName, valueData }) {
   const maxScorePrecise = valueData.maxAnomalyScore;
   const maxScore = parseInt(maxScorePrecise);
   const maxScoreLabel = (maxScore !== 0) ? maxScore : '< 1';
@@ -68,11 +67,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
     <div>
       <div className="field-label">
         {(influencerFieldName !== 'mlcategory') ? (
-          <EntityCell
-            entityName={influencerFieldName}
-            entityValue={valueData.influencerFieldValue}
-            filter={influencerFilter}
-          />
+          <div className="field-value">{valueData.influencerFieldValue}</div>
         ) : (
           <div className="field-value">mlcategory {valueData.influencerFieldValue}</div>
         )}
@@ -107,16 +102,14 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
 }
 Influencer.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
-  influencerFilter: PropTypes.func,
   valueData: PropTypes.object.isRequired
 };
 
-function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues }) {
+function InfluencersByName({ influencerFieldName, fieldValues }) {
   const influencerValues = fieldValues.map(valueData => (
     <Influencer
       key={valueData.influencerFieldValue}
       influencerFieldName={influencerFieldName}
-      influencerFilter={influencerFilter}
       valueData={valueData}
     />
   ));
@@ -133,11 +126,10 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
 }
 InfluencersByName.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
-  influencerFilter: PropTypes.func,
   fieldValues: PropTypes.array.isRequired
 };
 
-export function InfluencersList({ influencers, influencerFilter }) {
+export function InfluencersList({ influencers }) {
 
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
@@ -161,7 +153,6 @@ export function InfluencersList({ influencers, influencerFilter }) {
     <InfluencersByName
       key={influencerFieldName}
       influencerFieldName={influencerFieldName}
-      influencerFilter={influencerFilter}
       fieldValues={influencers[influencerFieldName]}
     />
   ));
@@ -173,6 +164,5 @@ export function InfluencersList({ influencers, influencerFilter }) {
   );
 }
 InfluencersList.propTypes = {
-  influencers: PropTypes.object,
-  influencerFilter: PropTypes.func,
+  influencers: PropTypes.object
 };

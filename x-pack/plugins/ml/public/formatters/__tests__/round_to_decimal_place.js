@@ -5,7 +5,7 @@
  */
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { roundToDecimalPlace } from '../round_to_decimal_place';
 
 describe('ML - roundToDecimalPlace formatter', () => {

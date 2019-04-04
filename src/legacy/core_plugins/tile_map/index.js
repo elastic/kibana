@@ -25,7 +25,6 @@ export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       visTypes: ['plugins/tile_map/tile_map_vis'],
-      interpreter: ['plugins/tile_map/tilemap_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     init(server) {

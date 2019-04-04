@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');

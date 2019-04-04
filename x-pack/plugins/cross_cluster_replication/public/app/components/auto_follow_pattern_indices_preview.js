@@ -36,7 +36,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
       />
       <ul>
         {indicesPreview.map(({ followPattern: { prefix, suffix, template } }, i) => (
-          <li key={i} data-test-subj="ccrAutoFollowPatternIndexPreview">
+          <li key={i}>
             {prefix}<strong>{template}</strong>{suffix}
           </li>
         ))}

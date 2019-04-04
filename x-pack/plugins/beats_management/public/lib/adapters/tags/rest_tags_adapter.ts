@@ -6,12 +6,6 @@
 
 import { uniq } from 'lodash';
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
-import {
-  ReturnTypeBulkDelete,
-  ReturnTypeBulkGet,
-  ReturnTypeList,
-  ReturnTypeUpsert,
-} from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
@@ -20,9 +14,7 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
     try {
-      return (await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
-        `/api/beats/tags/${uniq(tagIds).join(',')}`
-      )).items;
+      return await this.REST.get<BeatTag[]>(`/api/beats/tags/${uniq(tagIds).join(',')}`);
     } catch (e) {
       return [];
     }
@@ -30,20 +22,20 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getAll(ESQuery: string): Promise<BeatTag[]> {
     try {
-      return (await this.REST.get<ReturnTypeList<BeatTag>>(`/api/beats/tags`, { ESQuery })).list;
+      return await this.REST.get<BeatTag[]>(`/api/beats/tags`, { ESQuery });
     } catch (e) {
       return [];
     }
   }
 
   public async delete(tagIds: string[]): Promise<boolean> {
-    return (await this.REST.delete<ReturnTypeBulkDelete>(
+    return (await this.REST.delete<{ success: boolean }>(
       `/api/beats/tags/${uniq(tagIds).join(',')}`
     )).success;
   }
 
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
-    const response = await this.REST.put<ReturnTypeUpsert<BeatTag>>(`/api/beats/tag/${tag.id}`, {
+    const response = await this.REST.put<{ success: boolean }>(`/api/beats/tag/${tag.id}`, {
       color: tag.color,
       name: tag.name,
     });
@@ -53,9 +45,9 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getAssignable(beats: CMBeat[]) {
     try {
-      return (await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
+      return await this.REST.get<BeatTag[]>(
         `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
-      )).items;
+      );
     } catch (e) {
       return [];
     }

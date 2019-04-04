@@ -7,29 +7,29 @@
 import { flatten } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
-import { ReturnTypeBulkGet } from '../../../common/return_types';
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createAssignableTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags/assignable/{beatIds}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkGet<BeatTag>> => {
+  handler: async (request: any) => {
     const beatIdString: string = request.params.beatIds;
     const beatIds = beatIdString.split(',').filter((id: string) => id.length > 0);
 
     let tags: BeatTag[];
-    const beats = await libs.beats.getByIds(request.user, beatIds);
-    tags = await libs.tags.getNonConflictingTags(
-      request.user,
-      flatten(beats.map(beat => beat.tags))
-    );
+    try {
+      const beats = await libs.beats.getByIds(request.user, beatIds);
+      tags = await libs.tags.getNonConflictingTags(
+        request.user,
+        flatten(beats.map(beat => beat.tags))
+      );
+    } catch (err) {
+      return wrapEsError(err);
+    }
 
-    return {
-      items: tags,
-      success: true,
-    };
+    return tags;
   },
 });

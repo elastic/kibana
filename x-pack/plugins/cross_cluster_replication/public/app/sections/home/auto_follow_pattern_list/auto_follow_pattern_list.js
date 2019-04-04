@@ -135,7 +135,7 @@ export class AutoFollowPatternList extends PureComponent {
   }
 
   renderContent(isEmpty) {
-    const { apiError, apiStatus, isAuthorized } = this.props;
+    const { apiError, isAuthorized } = this.props;
 
     if (!isAuthorized) {
       return (
@@ -170,17 +170,6 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (isEmpty) {
       return this.renderEmpty();
-    }
-
-    if (apiStatus === API_STATUS.LOADING) {
-      return (
-        <SectionLoading dataTestSubj="ccrAutoFollowPatternLoading">
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
-            defaultMessage="Loading auto-follow patterns..."
-          />
-        </SectionLoading>
-      );
     }
 
     return this.renderList();
@@ -222,7 +211,6 @@ export class AutoFollowPatternList extends PureComponent {
             />
           </EuiButton>
         }
-        data-test-subj="ccrAutoFollowPatternEmptyPrompt"
       />
     );
   }
@@ -231,9 +219,21 @@ export class AutoFollowPatternList extends PureComponent {
     const {
       selectAutoFollowPattern,
       autoFollowPatterns,
+      apiStatus,
     } = this.props;
 
     const { isDetailPanelOpen } = this.state;
+
+    if (apiStatus === API_STATUS.LOADING) {
+      return (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
+            defaultMessage="Loading auto-follow patterns..."
+          />
+        </SectionLoading>
+      );
+    }
 
     return (
       <Fragment>

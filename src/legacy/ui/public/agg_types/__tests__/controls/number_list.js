@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import simulateKeys from 'test_utils/simulate_keys';
 import ngMock from 'ng_mock';
 import '../../../number_list';

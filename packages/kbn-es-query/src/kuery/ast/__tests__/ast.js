@@ -18,7 +18,7 @@
  */
 
 import * as ast from '../ast';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { nodeTypes } from '../../node_types/index';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { shallow } from 'enzyme';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import { Loading } from '../loading';

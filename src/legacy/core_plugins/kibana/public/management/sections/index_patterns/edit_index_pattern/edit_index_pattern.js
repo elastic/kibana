@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
-import { DocTitleProvider } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -171,7 +170,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, config, indexPatterns, Private, AppState, confirmModal) {
+    $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
@@ -183,7 +182,6 @@ uiModules.get('apps/management')
     $scope.indexPatternListProvider = indexPatternListProvider;
     $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
-    const docTitle = Private(DocTitleProvider);
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {

@@ -18,7 +18,7 @@
  */
 
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('build query', function () {
 

@@ -16,33 +16,15 @@ jest.mock('./join_editor', () => ({
   }
 }));
 
-jest.mock('./filter_editor', () => ({
-  JoinEditor: () => {
-    return (<div>mockFilterEditor</div>);
-  }
-}));
-
 jest.mock('./flyout_footer', () => ({
   FlyoutFooter: () => {
     return (<div>mockFlyoutFooter</div>);
   }
 }));
 
-jest.mock('./layer_errors', () => ({
-  LayerErrors: () => {
-    return (<div>mockLayerErrors</div>);
-  }
-}));
-
-jest.mock('./layer_settings', () => ({
-  LayerSettings: () => {
-    return (<div>mockLayerSettings</div>);
-  }
-}));
-
-jest.mock('./source_settings', () => ({
-  SourceSettings: () => {
-    return (<div>mockSourceSettings</div>);
+jest.mock('./settings_panel', () => ({
+  SettingsPanel: () => {
+    return (<div>mockSettingsPanel</div>);
   }
 }));
 
@@ -60,8 +42,7 @@ const mockLayer = {
     ];
   },
   isJoinable: () => { return true; },
-  supportsElasticsearchFilters: () => { return false; },
-  getLayerTypeIconName: () => { return 'vector'; },
+  getLayerTypeIconName: () => { return 'vector'; }
 };
 
 const defaultProps = {

@@ -55,8 +55,6 @@ export interface UptimePersistedState {
 }
 
 export interface UptimeAppProps {
-  // TODO: if we add a context to the Uptime UI, this should be included in it
-  basePath: string;
   darkMode: boolean;
   graphQLClient: UMGraphQLClient;
   initialDateRangeStart: string;
@@ -67,7 +65,6 @@ export interface UptimeAppProps {
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
-  renderGlobalHelpControls(): void;
 }
 
 interface UptimeAppState {
@@ -136,12 +133,8 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.setBreadcrumbs([overviewBreadcrumb]);
   }
 
-  public componentDidMount() {
-    this.props.renderGlobalHelpControls();
-  }
-
   public render() {
-    const { basePath, routerBasename, graphQLClient } = this.props;
+    const { routerBasename, graphQLClient } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
@@ -208,6 +201,26 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     </div>
                   </EuiHeaderSectionItem>
                 </EuiHeaderSection>
+                <EuiHeaderSection side="right">
+                  <EuiHeaderSection>
+                    <EuiHeaderLinks>
+                      <EuiHeaderLink
+                        aria-label={i18n.translate('xpack.uptime.header.helpLinkAriaLabel', {
+                          defaultMessage: 'Go to our discuss page',
+                        })}
+                        iconType="help"
+                        href="https://discuss.elastic.co/c/uptime"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="xpack.uptime.header.helpLinkText"
+                          defaultMessage="Discuss"
+                          description="The link is to a support form called 'Discuss', where users can submit feedback."
+                        />
+                      </EuiHeaderLink>
+                    </EuiHeaderLinks>
+                  </EuiHeaderSection>
+                </EuiHeaderSection>
               </EuiHeader>
               <EuiPageContent>
                 <Switch>
@@ -216,7 +229,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     path="/"
                     render={props => (
                       <OverviewPage
-                        basePath={basePath}
                         {...props}
                         {...this.state}
                         setBreadcrumbs={this.setBreadcrumbs}

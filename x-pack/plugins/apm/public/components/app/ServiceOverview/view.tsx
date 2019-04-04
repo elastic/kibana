@@ -5,32 +5,59 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React from 'react';
+import React, { Component } from 'react';
+import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceList } from '../../../services/rest/apm/services';
+import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { loadAgentStatus } from '../../../services/rest/apm/status_check';
+import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 
 interface Props {
   urlParams: IUrlParams;
+  serviceList: RRRRenderResponse<IServiceListItem[]>;
 }
 
-export function ServiceOverview({ urlParams }: Props) {
-  const { start, end, kuery } = urlParams;
-  const { data: agentStatus = true } = useFetcher(() => loadAgentStatus(), []);
-  const { data: serviceListData } = useFetcher(
-    () => loadServiceList({ start, end, kuery }),
-    [start, end, kuery]
-  );
+interface State {
+  // any data submitted from APM agents found (not just in the given time range)
+  historicalDataFound: boolean;
+}
 
-  return (
-    <EuiPanel>
-      <ServiceList
-        items={serviceListData}
-        noItemsMessage={<NoServicesMessage historicalDataFound={agentStatus} />}
-      />
-    </EuiPanel>
-  );
+export class ServiceOverview extends Component<Props, State> {
+  public state = { historicalDataFound: true };
+
+  public async checkForHistoricalData() {
+    const result = await loadAgentStatus();
+    this.setState({ historicalDataFound: result.dataFound });
+  }
+
+  public componentDidMount() {
+    this.checkForHistoricalData();
+  }
+
+  public render() {
+    const { urlParams } = this.props;
+
+    // Render method here uses this.props.serviceList instead of received "data" from RRR
+    // to make it easier to test -- mapStateToProps uses the RRR selector so the data
+    // is the same either way
+    return (
+      <EuiPanel>
+        <ServiceListRequest
+          urlParams={urlParams}
+          render={() => (
+            <ServiceList
+              items={this.props.serviceList.data}
+              noItemsMessage={
+                <NoServicesMessage
+                  historicalDataFound={this.state.historicalDataFound}
+                />
+              }
+            />
+          )}
+        />
+      </EuiPanel>
+    );
+  }
 }

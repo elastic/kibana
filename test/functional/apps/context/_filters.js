@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_TYPE = '_doc';

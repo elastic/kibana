@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getErrorStatusCode } from '../../errors';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -27,23 +26,15 @@ import { DeauthenticationResult } from '../deauthentication_result';
  */
 
 /**
- * If request with access token fails with `401 Unauthorized` then this token is no
- * longer valid and we should try to refresh it. Another use case that we should
- * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
- * document has been removed and ES responds with `500 Internal Server Error`.
+ * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
+ * has been rejected because of expired token, otherwise returns `false`.
  * @param {Object} err Error returned from Elasticsearch.
  * @returns {boolean}
  */
 function isAccessTokenExpiredError(err) {
-  const errorStatusCode = getErrorStatusCode(err);
-  return (
-    errorStatusCode === 401 ||
-    (errorStatusCode === 500 &&
-      err &&
-      err.body &&
-      err.body.error &&
-      err.body.error.reason === 'token document is missing and must be present')
-  );
+  return err.body
+    && err.body.error
+    && err.body.error.reason === 'token expired';
 }
 
 /**
@@ -100,7 +91,10 @@ export class TokenAuthenticationProvider {
     // finally, if authentication still can not be handled for this
     // request/state combination, redirect to the login page if appropriate
     if (authenticationResult.notHandled() && canRedirectRequest(request)) {
-      authenticationResult = AuthenticationResult.redirectTo(this._getLoginPageURL(request));
+      const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
+      authenticationResult = AuthenticationResult.redirectTo(
+        `${this._options.basePath}/login?next=${nextURL}`
+      );
     }
 
     return authenticationResult;
@@ -362,30 +356,7 @@ export class TokenAuthenticationProvider {
       // it's called with this request once again down the line (e.g. in the next authentication provider).
       delete request.headers.authorization;
 
-      // If refresh fails with `400` then refresh token is no longer valid and we should clear session
-      // and redirect user to the login page to re-authenticate.
-      if (getErrorStatusCode(err) === 400 && canRedirectRequest(request)) {
-        this._options.log(
-          ['debug', 'security', 'token'],
-          'Clearing session since both access and refresh tokens are expired.'
-        );
-
-        // Set state to `null` to let `Authenticator` know that we want to clear current session.
-        return AuthenticationResult.redirectTo(this._getLoginPageURL(request), null);
-      }
-
       return AuthenticationResult.failed(err);
     }
-  }
-
-  /**
-   * Constructs login page URL using current url path as `next` query string parameter.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {string}
-   * @private
-   */
-  _getLoginPageURL(request) {
-    const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
-    return `${this._options.basePath}/login?next=${nextURL}`;
   }
 }

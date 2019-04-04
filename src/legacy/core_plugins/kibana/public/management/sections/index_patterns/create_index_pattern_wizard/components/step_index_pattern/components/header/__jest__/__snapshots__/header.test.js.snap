@@ -101,7 +101,6 @@ exports[`Header should mark the input as invalid 1`] = `
         iconType="arrowRight"
         isDisabled={true}
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -212,7 +211,6 @@ exports[`Header should render normally 1`] = `
         iconType="arrowRight"
         isDisabled={false}
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage

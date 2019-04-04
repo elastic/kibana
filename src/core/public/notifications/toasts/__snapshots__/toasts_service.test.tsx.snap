@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#setup() renders the GlobalToastList into the targetDomElement param 1`] = `
+exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
     <I18nContext>

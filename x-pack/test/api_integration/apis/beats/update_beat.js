@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
@@ -25,7 +25,6 @@ export default function ({ getService }) {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
         'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
         'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI';
-
       const version =
         chance.integer({ min: 1, max: 10 }) +
         '.' +
@@ -63,14 +62,9 @@ export default function ({ getService }) {
       await supertest
         .put(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
+        .set('kbn-beats-access-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(204);
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
@@ -94,7 +88,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(401);
 
-      expect(body.error.message).to.be('Invalid access token');
+      expect(body.message).to.be('Invalid access token');
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
@@ -117,7 +111,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(404);
 
-      expect(body.error.message).to.be('Beat not found');
+      expect(body.message).to.be('Beat not found');
     });
   });
 }

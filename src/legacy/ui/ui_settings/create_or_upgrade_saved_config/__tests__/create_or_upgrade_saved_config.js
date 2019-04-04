@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import Chance from 'chance';
 
 import * as getUpgradeableConfigNS from '../get_upgradeable_config';

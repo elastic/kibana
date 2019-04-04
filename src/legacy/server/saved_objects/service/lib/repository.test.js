@@ -1224,15 +1224,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          _source: [
-            'foo.title',
-            'namespace',
-            'type',
-            'references',
-            'migrationVersion',
-            'updated_at',
-            'title',
-          ],
+          _source: ['foo.title', 'namespace', 'type', 'title'],
         })
       );
 

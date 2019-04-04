@@ -25,11 +25,6 @@ export const EXPLORER_ACTION = {
   RELOAD: 'reload',
 };
 
-export const FILTER_ACTION = {
-  ADD: '+',
-  REMOVE: '-',
-};
-
 export const APP_STATE_ACTION = {
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_SELECTION: 'clearSelection',

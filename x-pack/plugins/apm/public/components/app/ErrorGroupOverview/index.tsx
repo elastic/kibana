@@ -15,12 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { ErrorDistribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { useFetcher } from '../../../hooks/useFetcher';
-import {
-  loadErrorDistribution,
-  loadErrorGroupList
-} from '../../../services/rest/apm/error_groups';
+import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
 import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {
@@ -32,50 +29,23 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   urlParams,
   location
 }) => {
-  const {
-    serviceName,
-    start,
-    end,
-    errorGroupId,
-    kuery,
-    sortField,
-    sortDirection
-  } = urlParams;
-  const { data: errorDistributionData } = useFetcher(
-    () =>
-      loadErrorDistribution({ serviceName, start, end, errorGroupId, kuery }),
-    [serviceName, start, end, errorGroupId, kuery]
-  );
-
-  const { data: errorGroupListData } = useFetcher(
-    () =>
-      loadErrorGroupList({
-        serviceName,
-        start,
-        end,
-        sortField,
-        sortDirection,
-        kuery
-      }),
-    [serviceName, start, end, sortField, sortDirection, kuery]
-  );
-
-  if (!errorDistributionData || !errorGroupListData) {
-    return null;
-  }
-
   return (
     <React.Fragment>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences'
-                }
+            <ErrorDistributionRequest
+              urlParams={urlParams}
+              render={({ data }) => (
+                <ErrorDistribution
+                  distribution={data}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                    {
+                      defaultMessage: 'Error occurrences'
+                    }
+                  )}
+                />
               )}
             />
           </EuiPanel>
@@ -89,11 +59,15 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
           <h3>Errors</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-
-        <ErrorGroupList
+        <ErrorGroupOverviewRequest
           urlParams={urlParams}
-          items={errorGroupListData}
-          location={location}
+          render={({ data }) => (
+            <ErrorGroupList
+              urlParams={urlParams}
+              items={data}
+              location={location}
+            />
+          )}
         />
       </EuiPanel>
     </React.Fragment>

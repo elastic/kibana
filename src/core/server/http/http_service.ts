@@ -28,10 +28,10 @@ import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
 /** @internal */
-export type HttpServiceSetup = HttpServerInfo;
+export type HttpServiceStart = HttpServerInfo;
 
 /** @internal */
-export class HttpService implements CoreService<HttpServiceSetup> {
+export class HttpService implements CoreService<HttpServerInfo> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private configSubscription?: Subscription;
@@ -45,7 +45,7 @@ export class HttpService implements CoreService<HttpServiceSetup> {
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
-  public async setup() {
+  public async start() {
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -64,9 +64,6 @@ export class HttpService implements CoreService<HttpServiceSetup> {
       await this.httpsRedirectServer.start(config);
     }
 
-    // The HttpService's setup method calls `start` on HttpServer because it is
-    // a more appropriate name. In the future, starting the server should be moved
-    // to the `start` lifecycle handler of HttpService.
     return await this.httpServer.start(config);
   }
 

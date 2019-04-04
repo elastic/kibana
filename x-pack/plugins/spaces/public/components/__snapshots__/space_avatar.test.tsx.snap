@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`removes aria-label when instructed not to announce the space name 1`] = `
-<SpaceAvatar
+<Component
   announceSpaceName={false}
   space={
     Object {
@@ -36,7 +36,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
       title=""
     />
   </EuiAvatar>
-</SpaceAvatar>
+</Component>
 `;
 
 exports[`renders with a space name entirely made of whitespace 1`] = `

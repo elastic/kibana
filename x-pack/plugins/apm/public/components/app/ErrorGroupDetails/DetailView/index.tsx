@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
+import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
@@ -23,6 +24,7 @@ import {
   history,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
@@ -47,13 +49,16 @@ const HeaderContainer = styled.div`
 `;
 
 interface Props {
-  errorGroup: ErrorGroupAPIResponse;
+  errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
   urlParams: IUrlParams;
   location: Location;
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
-  const { transaction, error, occurrencesCount } = errorGroup;
+  if (errorGroup.status !== STATUS.SUCCESS) {
+    return null;
+  }
+  const { transaction, error, occurrencesCount } = errorGroup.data;
 
   if (!error) {
     return null;

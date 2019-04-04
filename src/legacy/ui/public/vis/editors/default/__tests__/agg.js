@@ -20,7 +20,7 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../agg';
 

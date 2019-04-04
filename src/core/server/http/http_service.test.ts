@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { mockHttpServer } from './http_service.test.mocks';
+const mockHttpServer = jest.fn();
+
+jest.mock('./http_server', () => ({
+  HttpServer: mockHttpServer,
+}));
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -30,7 +34,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-test('creates and sets up http server', async () => {
+test('creates and starts http server', async () => {
   const config = {
     host: 'example.org',
     port: 1234,
@@ -51,12 +55,12 @@ test('creates and sets up http server', async () => {
   expect(mockHttpServer.mock.instances.length).toBe(1);
   expect(httpServer.start).not.toHaveBeenCalled();
 
-  await service.setup();
+  await service.start();
 
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
-test('logs error if already set up', async () => {
+test('logs error if already started', async () => {
   const config = { ssl: {} } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -70,7 +74,7 @@ test('logs error if already set up', async () => {
 
   const service = new HttpService(config$.asObservable(), logger);
 
-  await service.setup();
+  await service.start();
 
   expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
@@ -89,7 +93,7 @@ test('stops http server', async () => {
 
   const service = new HttpService(config$.asObservable(), logger);
 
-  await service.setup();
+  await service.start();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
 
@@ -121,7 +125,7 @@ test('register route handler', () => {
   expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
-test('throws if registering route handler after http server is set up', () => {
+test('throws if registering route handler after http server is started', () => {
   const config = {} as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -143,7 +147,7 @@ test('throws if registering route handler after http server is set up', () => {
   expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
-test('returns http server contract on setup', async () => {
+test('returns http server contract on start', async () => {
   const httpServer = {
     server: {},
     options: { someOption: true },
@@ -157,5 +161,5 @@ test('returns http server contract on setup', async () => {
 
   const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
 
-  expect(await service.setup()).toBe(httpServer);
+  expect(await service.start()).toBe(httpServer);
 });

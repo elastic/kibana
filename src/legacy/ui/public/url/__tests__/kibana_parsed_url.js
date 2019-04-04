@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { KibanaParsedUrl } from '../kibana_parsed_url';
 

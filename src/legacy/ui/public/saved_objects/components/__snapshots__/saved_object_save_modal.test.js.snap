@@ -56,7 +56,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         fill={false}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -73,7 +72,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         isDisabled={false}
         isLoading={false}
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage

@@ -43,7 +43,6 @@ export function getProjectPaths(rootPath: string, options: IProjectPathOptions) 
   // In anyway, have a plugin declaring their own dependencies is the
   // correct and the expect behavior.
   projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
-  projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
 
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));

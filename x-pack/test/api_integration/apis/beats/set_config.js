@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
@@ -31,7 +31,7 @@ export default function ({ getService }) {
             config: { elasticsearch: { hosts: ['localhost:9200'], username: 'foo' } },
           },
         ])
-        .expect(200);
+        .expect(201);
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         id: `tag:${tagId}`,

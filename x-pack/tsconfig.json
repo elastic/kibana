@@ -32,7 +32,8 @@
     },
     "types": [
       "node",
-      "jest"
+      "jest",
+      "@kbn/test/types/expect.js"
     ]
   }
 }

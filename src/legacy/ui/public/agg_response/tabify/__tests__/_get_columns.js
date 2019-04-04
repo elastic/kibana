@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
 import { VisProvider } from '../../../vis';

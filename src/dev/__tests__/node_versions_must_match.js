@@ -21,7 +21,7 @@ import fs from 'fs';
 import { engines } from '../../../package.json';
 import { promisify } from 'util';
 const readFile = promisify(fs.readFile);
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('All configs should use a single version of Node', () => {
   it('should compare .node-version and .nvmrc', async () => {

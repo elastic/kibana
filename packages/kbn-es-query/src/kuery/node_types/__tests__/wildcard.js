@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import * as wildcard from '../wildcard';
 
 describe('kuery node types', function () {

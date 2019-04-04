@@ -771,7 +771,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         fill={true}
                                         iconSide="left"
                                         onClick={[Function]}
-                                        size="m"
                                         type="button"
                                       >
                                         <button
@@ -1040,7 +1039,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
                               type="button"
                             >
                               <button
@@ -1535,7 +1533,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
                               type="button"
                             >
                               <button
@@ -2030,7 +2027,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
                               type="button"
                             >
                               <button
@@ -2525,7 +2521,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
                               type="button"
                             >
                               <button
@@ -3020,7 +3015,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               iconSide="left"
                               isLoading={false}
                               onClick={[Function]}
-                              size="m"
                               type="button"
                             >
                               <button

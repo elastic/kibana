@@ -19,7 +19,7 @@
 
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
@@ -34,7 +34,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
-  const comboBox = getService('comboBox');
 
   class VisualizePage {
 
@@ -432,14 +431,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
-      const comboBoxElement = await find.byCssSelector(`
+      const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        [data-test-subj="defaultEditorAggSelect"]
-      `);
+        .agg-select
+      `;
 
-      await comboBox.setElement(comboBoxElement, myString);
+      await retry.try(async () => {
+        await find.clickByCssSelector(selector);
+        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
+        await input.type(myString);
+        await input.pressKeys(browser.keys.RETURN);
+      });
       await PageObjects.common.sleep(500);
     }
 
@@ -477,12 +481,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // So to modify a metric or aggregation tests need to keep track of the
       // order they are added.
       await this.toggleOpenEditor(index);
-
-      // select our agg
       const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
-      await comboBox.setElement(aggSelect, agg);
-
+        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
+      // open agg selection list
+      await aggSelect.click();
+      // select our agg
+      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
+      await aggItem.click();
       const fieldSelect = await find
         .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
       // open field selection list

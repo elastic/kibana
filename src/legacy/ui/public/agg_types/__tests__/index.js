@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import './agg_type';
 import './agg_params';
 import './buckets/_histogram';

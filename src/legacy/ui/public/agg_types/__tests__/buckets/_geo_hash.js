@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import { geoHashBucketAgg } from '../../buckets/geo_hash';
 import * as AggConfigModule from '../../../vis/agg_config';

@@ -45,10 +45,10 @@ export async function ScreenshotsProvider({ getService }) {
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
      * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
      */
-    async compareAgainstBaseline(name, updateBaselines, el) {
+    async compareAgainstBaseline(name, updateBaselines) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
-      await this._take(sessionPath, el);
+      await this._take(sessionPath);
 
       const baselinePath = resolve(BASELINE_DIRECTORY, `${name}.png`);
       const failurePath = resolve(FAILURE_DIRECTORY, `${name}.png`);
@@ -63,19 +63,21 @@ export async function ScreenshotsProvider({ getService }) {
       }
     }
 
-    async take(name, el) {
-      return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
+    async take(name) {
+      return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`));
     }
 
-    async takeForFailure(name, el) {
-      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
+    async takeForFailure(name) {
+      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
     }
 
-    async _take(path, el) {
+    async _take(path) {
       try {
         log.info(`Taking screenshot "${path}"`);
-        const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
-        await fcb(cb => mkdirp(dirname(path), cb));
+        const [screenshot] = await Promise.all([
+          browser.takeScreenshot(),
+          fcb(cb => mkdirp(dirname(path), cb)),
+        ]);
         await fcb(cb => writeFile(path, screenshot, 'base64', cb));
       } catch (err) {
         log.error('SCREENSHOT FAILED');

@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { convertGeoBoundingBox } from '../geo_bounding_box';
 
 describe('filter to kuery migration', function () {

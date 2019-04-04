@@ -20,7 +20,7 @@
 
 import _ from 'lodash';
 import collectBranch from '../_collect_branch';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 describe('collectBranch()', function () {
   let results;
   const convert = function (name) {

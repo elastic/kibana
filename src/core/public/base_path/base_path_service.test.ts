@@ -20,85 +20,85 @@
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { BasePathService } from './base_path_service';
 
-function setupService(options: any = {}) {
+function setup(options: any = {}) {
   const injectedBasePath: string =
     options.injectedBasePath === undefined ? '/foo/bar' : options.injectedBasePath;
 
   const service = new BasePathService();
 
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+  const injectedMetadata = injectedMetadataServiceMock.createStartContract();
   injectedMetadata.getBasePath.mockReturnValue(injectedBasePath);
 
-  const setupContract = service.setup({
+  const start = service.start({
     injectedMetadata,
   });
 
   return {
     service,
-    setupContract,
+    start,
     injectedBasePath,
   };
 }
 
-describe('setup.get()', () => {
+describe('start.get()', () => {
   it('returns an empty string if no basePath is injected', () => {
-    const { setupContract } = setupService({ injectedBasePath: null });
-    expect(setupContract.get()).toBe('');
+    const { start } = setup({ injectedBasePath: null });
+    expect(start.get()).toBe('');
   });
 
   it('returns the injected basePath', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.get()).toBe('/foo/bar');
+    const { start } = setup();
+    expect(start.get()).toBe('/foo/bar');
   });
 });
 
-describe('setup.addToPath()', () => {
+describe('start.addToPath()', () => {
   it('adds the base path to the path if it is relative and starts with a slash', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.addToPath('/a/b')).toBe('/foo/bar/a/b');
+    const { start } = setup();
+    expect(start.addToPath('/a/b')).toBe('/foo/bar/a/b');
   });
 
   it('leaves the query string and hash of path unchanged', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.addToPath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
+    const { start } = setup();
+    expect(start.addToPath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
   });
 
   it('returns the path unchanged if it does not start with a slash', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.addToPath('a/b')).toBe('a/b');
+    const { start } = setup();
+    expect(start.addToPath('a/b')).toBe('a/b');
   });
 
   it('returns the path unchanged it it has a hostname', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.addToPath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
+    const { start } = setup();
+    expect(start.addToPath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
   });
 });
 
-describe('setup.removeFromPath()', () => {
+describe('start.removeFromPath()', () => {
   it('removes the basePath if relative path starts with it', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.removeFromPath('/foo/bar/a/b')).toBe('/a/b');
+    const { start } = setup();
+    expect(start.removeFromPath('/foo/bar/a/b')).toBe('/a/b');
   });
 
   it('leaves query string and hash intact', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.removeFromPath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
+    const { start } = setup();
+    expect(start.removeFromPath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
   });
 
   it('ignores urls with hostnames', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.removeFromPath('http://localhost:5601/foo/bar/a/b')).toBe(
+    const { start } = setup();
+    expect(start.removeFromPath('http://localhost:5601/foo/bar/a/b')).toBe(
       'http://localhost:5601/foo/bar/a/b'
     );
   });
 
   it('returns slash if path is just basePath', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.removeFromPath('/foo/bar')).toBe('/');
+    const { start } = setup();
+    expect(start.removeFromPath('/foo/bar')).toBe('/');
   });
 
   it('returns full path if basePath is not its own segment', () => {
-    const { setupContract } = setupService();
-    expect(setupContract.removeFromPath('/foo/barhop')).toBe('/foo/barhop');
+    const { start } = setup();
+    expect(start.removeFromPath('/foo/barhop')).toBe('/foo/barhop');
   });
 });

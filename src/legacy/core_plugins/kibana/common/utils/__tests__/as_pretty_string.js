@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { asPrettyString } from '../as_pretty_string';
 
 describe('asPrettyString', () => {

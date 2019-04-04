@@ -208,17 +208,6 @@ module.exports = function (grunt) {
       ],
     },
 
-    interpreterFunctionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/interpreter_functional/config.js',
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
-      ],
-    },
-
     pluginFunctionalTestsRelease: {
       cmd: process.execPath,
       args: [

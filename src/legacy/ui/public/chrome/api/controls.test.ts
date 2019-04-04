@@ -22,7 +22,7 @@ import * as Rx from 'rxjs';
 import { chromeServiceMock } from '../../../../../core/public/mocks';
 import { __newPlatformInit__, initChromeControlsApi } from './controls';
 
-const newPlatformChrome = chromeServiceMock.createSetupContract();
+const newPlatformChrome = chromeServiceMock.createStartContract();
 
 __newPlatformInit__(newPlatformChrome);
 

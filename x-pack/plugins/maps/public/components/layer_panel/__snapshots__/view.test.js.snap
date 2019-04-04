@@ -82,9 +82,10 @@ exports[`LayerPanel is rendered 1`] = `
   <EuiFlyoutBody
     className="mapLayerPanel__body"
   >
-    <LayerErrors />
-    <LayerSettings />
-    <SourceSettings />
+    <SettingsPanel />
+    <EuiSpacer
+      size="s"
+    />
     <EuiPanel
       grow={true}
       hasShadow={false}
@@ -103,7 +104,6 @@ exports[`LayerPanel is rendered 1`] = `
           "getImmutableSourceProperties": [Function],
           "getLayerTypeIconName": [Function],
           "isJoinable": [Function],
-          "supportsElasticsearchFilters": [Function],
         }
       }
     />

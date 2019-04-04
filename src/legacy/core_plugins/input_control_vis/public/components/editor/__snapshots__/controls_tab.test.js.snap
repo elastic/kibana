@@ -126,7 +126,6 @@ exports[`renders ControlsTab 1`] = `
             iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <FormattedMessage

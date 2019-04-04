@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { assign, pluck } from 'lodash';
 import $ from 'jquery';
 

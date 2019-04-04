@@ -18,7 +18,7 @@
  */
 
 import { formatMsg } from './format_msg';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('formatMsg', () => {
   test('should prepend the second argument to result', () => {

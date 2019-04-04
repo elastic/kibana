@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { makeNestedLabel } from '../../../metrics/lib/make_nested_label';
 
 describe('metric agg make_nested_label', function () {

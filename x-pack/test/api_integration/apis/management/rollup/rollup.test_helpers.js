@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
+import { initElasticsearchIndicesHelpers, getRandomString, wait } from './lib';
 import { API_BASE_PATH, ROLLUP_INDEX_NAME, INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 const jobsCreated = [];
@@ -81,21 +81,63 @@ export const registerHelpers = ({ supertest, es }) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
-      .post(`${API_BASE_PATH}/stop?waitForCompletion=true`)
+      .post(`${API_BASE_PATH}/stop`)
       .set('kbn-xsrf', 'xxx')
       .send({ jobIds });
   };
 
   const loadJobs = () => supertest.get(`${API_BASE_PATH}/jobs`);
 
-  const stopAllJobs = () => (
+  const waitForJobsToStop = (attempt = 0) => (
     loadJobs()
       .then(async ({ body: { jobs } }) => {
-        const jobIds = jobs.map(job => job.config.id);
+        const jobBeingStopped = jobs.filter(job => job.status.job_state !== 'stopped' && job.status.job_state !== 'started');
 
-        await stopJob(jobIds);
+        if (!jobBeingStopped.length) {
+          return;
+        }
 
-        return jobIds;
+        if (attempt < 3 && jobBeingStopped.length) {
+          await wait(500);
+          return waitForJobsToStop(++attempt);
+        }
+
+        throw new Error('Error while waiting for Rollup Jobs to stop');
+      }));
+
+  const stopAllJobStarted = (jobIds = jobsStarted, attempt = 0) => (
+    stopJob(jobIds)
+      .then(waitForJobsToStop)
+      .then(loadJobs)
+      .then(({ body: { jobs } }) => {
+        // We make sure that there are no more jobs started
+        // as trying to delete a job that is started will throw an exception
+        const jobsStillStarted = jobs.filter(job => job.status.job_state === 'started').map(job => job.config.id);
+
+        if (jobsStillStarted.length && attempt < 3) {
+          return stopAllJobStarted(jobsStillStarted, ++attempt);
+        } else if(jobsStillStarted.length) {
+          throw new Error('Error trying to stop jobs started');
+        }
+      })
+  );
+
+  const deleteJobsCreated = (ids = jobsCreated, attempt = 0) => (
+    deleteJob(ids)
+      .then((response) => {
+        if (response.status !== 200 && response.status !== 404) {
+          throw response;
+        }
+      })
+      .then(loadJobs)
+      .then(({ body: { jobs } }) => {
+        if (jobs.length && attempt < 3) {
+          // There are still some jobs left to delete.
+          // Call recursively until all rollup jobs are removed.
+          return deleteJobsCreated(jobs.map(job => job.config.id), ++attempt);
+        } else if (jobs.length) {
+          throw new Error('Error trying to delete Jobs created');
+        }
       })
   );
 
@@ -113,7 +155,7 @@ export const registerHelpers = ({ supertest, es }) => {
   const cleanUp = () => (
     Promise.all([
       deleteAllIndices(),
-      stopAllJobs().then(deleteJob),
+      stopAllJobStarted().then(deleteJobsCreated),
       deleteIndicesGeneratedByJobs(),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
@@ -124,7 +166,6 @@ export const registerHelpers = ({ supertest, es }) => {
   return {
     createIndexWithMappings,
     getJobPayload,
-    loadJobs,
     createJob,
     deleteJob,
     startJob,

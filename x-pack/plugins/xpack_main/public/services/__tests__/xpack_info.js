@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { MockWindowProvider } from './_mock_window';

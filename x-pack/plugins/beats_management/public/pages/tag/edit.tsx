@@ -22,7 +22,7 @@ interface TagPageState {
   beatsTags: BeatTag[];
   configuration_blocks: {
     error?: string | undefined;
-    list: ConfigurationBlock[];
+    blocks: ConfigurationBlock[];
     page: number;
     total: number;
   };
@@ -47,7 +47,7 @@ class TagEditPageComponent extends React.PureComponent<
         hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: {
-        list: [],
+        blocks: [],
         page: 0,
         total: 0,
       },
@@ -160,12 +160,7 @@ class TagEditPageComponent extends React.PureComponent<
     const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], page);
 
     this.setState({
-      configuration_blocks: blocksResponse as {
-        error?: string | undefined;
-        list: ConfigurationBlock[];
-        page: number;
-        total: number;
-      },
+      configuration_blocks: blocksResponse,
     });
   };
 
@@ -194,7 +189,7 @@ class TagEditPageComponent extends React.PureComponent<
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>
-    this.state.configuration_blocks.list
+    this.state.configuration_blocks.blocks
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }

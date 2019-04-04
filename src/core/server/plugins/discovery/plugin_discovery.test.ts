@@ -17,7 +17,17 @@
  * under the License.
  */
 
-import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.test.mocks';
+const mockReaddir = jest.fn();
+const mockReadFile = jest.fn();
+const mockStat = jest.fn();
+jest.mock('fs', () => ({
+  readdir: mockReaddir,
+  readFile: mockReadFile,
+  stat: mockStat,
+}));
+
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../../package.json', () => mockPackage);
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';

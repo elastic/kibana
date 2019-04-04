@@ -61,7 +61,7 @@ class TagCreatePageComponent extends React.PureComponent<
           <TagEdit
             tag={this.state.tag}
             configuration_blocks={{
-              list: this.state.configuration_blocks.slice(
+              blocks: this.state.configuration_blocks.slice(
                 blockStartingIndex,
                 5 + blockStartingIndex
               ),
@@ -140,8 +140,8 @@ class TagCreatePageComponent extends React.PureComponent<
     const createBlocksResponse = await this.props.libs.configBlocks.upsert(
       this.state.configuration_blocks.map(block => ({ ...block, tag: this.state.tag.id }))
     );
-    const creationError = createBlocksResponse.results.reduce(
-      (err: string, resp) => (!err ? (err = resp.error ? resp.error.message : '') : err),
+    const creationError = createBlocksResponse.reduce(
+      (err: string, resp: any) => (!err ? (err = resp.error || '') : err),
       ''
     );
     if (creationError) {

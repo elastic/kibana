@@ -56,23 +56,6 @@ describe('LayerTocActions', () => {
       .toMatchSnapshot();
   });
 
-  test('should not show edit actions in read only mode', async () => {
-    const component = shallowWithIntl(
-      <LayerTocActions
-        {...defaultProps}
-        isReadOnly={true}
-      />
-    );
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component)
-      .toMatchSnapshot();
-  });
-
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
     const component = shallowWithIntl(

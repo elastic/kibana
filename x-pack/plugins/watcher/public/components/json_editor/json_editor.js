@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './json_editor.html';
-import 'ui/directives/json_input';
 import 'ace';
 
 const app = uiModules.get('xpack/watcher');

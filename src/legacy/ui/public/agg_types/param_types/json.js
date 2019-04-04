@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { RawJsonParamEditor } from '../controls/raw_json';
+import editorHtml from '../controls/raw_json.html';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
 
@@ -30,7 +30,7 @@ function JsonParamType(config) {
   JsonParamType.Super.call(this, config);
 }
 
-JsonParamType.prototype.editorComponent = RawJsonParamEditor;
+JsonParamType.prototype.editor = editorHtml;
 
 /**
  * Write the aggregation parameter.

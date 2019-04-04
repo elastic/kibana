@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
 import { stateMonitorFactory } from '../state_monitor_factory';

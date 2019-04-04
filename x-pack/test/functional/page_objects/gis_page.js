@@ -55,7 +55,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('Wait for layers to load');
       const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
-        await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
+        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
       });
     }
 
@@ -170,8 +170,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await this.waitForLayersToLoad();
-      // there is no way to wait for canvas been reloaded
-      await PageObjects.common.sleep(5000);
     }
 
     async getView() {
@@ -230,19 +228,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
       }
-    }
-
-    async setLayerQuery(layerName, query) {
-      await this.openLayerPanel(layerName);
-      await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-      const filterEditorContainer = await testSubjects.find('mapFilterEditor');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
-      await queryBarInFilterEditor.click();
-      const input = await find.activeElement();
-      await input.clearValue();
-      await input.type(query);
-      await testSubjects.click('mapFilterEditorSubmitButton');
-      await this.waitForLayersToLoad();
     }
 
     async selectVectorSource() {

@@ -18,7 +18,7 @@
  */
 
 import { onlyDisabled } from '../only_disabled';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('Filter Bar Directive', function () {
   describe('onlyDisabled()', function () {

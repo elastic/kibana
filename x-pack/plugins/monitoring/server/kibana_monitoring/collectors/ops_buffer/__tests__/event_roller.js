@@ -5,7 +5,7 @@
  */
 
 import { EventRoller } from '../event_roller';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const events = [
   {

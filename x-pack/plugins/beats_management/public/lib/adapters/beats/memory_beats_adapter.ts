@@ -5,9 +5,14 @@
  */
 
 import { omit } from 'lodash';
+
 import { CMBeat } from '../../../../common/domain_types';
-import { ReturnTypeBulkAction } from '../../../../common/return_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
+import {
+  BeatsRemovalReturn,
+  BeatsTagAssignment,
+  CMAssignmentReturn,
+  CMBeatsAdapter,
+} from './adapter_types';
 
 export class MemoryBeatsAdapter implements CMBeatsAdapter {
   private beatsDB: CMBeat[];
@@ -41,9 +46,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
     return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']))[0];
   }
-  public async removeTagsFromBeats(
-    removals: BeatsTagAssignment[]
-  ): Promise<ReturnTypeBulkAction['results']> {
+  public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
     const beatIds = removals.map(r => r.beatId);
 
     const response = this.beatsDB
@@ -73,9 +76,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     }));
   }
 
-  public async assignTagsToBeats(
-    assignments: BeatsTagAssignment[]
-  ): Promise<ReturnTypeBulkAction['results']> {
+  public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
     const beatIds = assignments.map(r => r.beatId);
 
     this.beatsDB

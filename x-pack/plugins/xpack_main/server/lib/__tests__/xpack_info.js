@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'crypto';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 

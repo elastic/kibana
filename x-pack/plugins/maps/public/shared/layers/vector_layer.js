@@ -107,10 +107,9 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(dataFilters) {
+  async getBounds(filters) {
     if (this._source.isBoundsAware()) {
-      const searchFilters = this._getSearchFilters(dataFilters);
-      return await this._source.getBoundsForFilters(searchFilters);
+      return await this._source.getBoundsForFilters(filters);
     }
     return this._getBoundsBasedOnData();
   }
@@ -204,11 +203,9 @@ export class VectorLayer extends AbstractLayer {
 
     let updateDueToQuery = false;
     let updateDueToFilters = false;
-    let updateDueToLayerQuery = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
       updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
-      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
     }
 
     let updateDueToPrecisionChange = false;
@@ -224,11 +221,10 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFields
       && !updateDueToQuery
       && !updateDueToFilters
-      && !updateDueToLayerQuery
       && !updateDueToPrecisionChange;
   }
 
-  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const joinSource = join.getJoinSource();
     const sourceDataId = join.getSourceId();
@@ -269,7 +265,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
     });
     return await Promise.all(joinSyncs);
   }
@@ -287,7 +283,6 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      layerQuery: this.getQuery()
     };
   }
 

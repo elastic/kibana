@@ -19,7 +19,9 @@
 
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 
-import { mockReadFile } from './plugin_manifest_parser.test.mocks';
+const mockReadFile = jest.fn();
+const mockStat = jest.fn();
+jest.mock('fs', () => ({ readFile: mockReadFile, stat: mockStat }));
 
 import { resolve } from 'path';
 import { parseManifest } from './plugin_manifest_parser';

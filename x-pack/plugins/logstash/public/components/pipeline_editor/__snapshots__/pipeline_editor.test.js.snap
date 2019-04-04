@@ -291,7 +291,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -310,7 +309,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -615,7 +613,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -634,7 +631,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -939,7 +935,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -958,7 +953,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1234,7 +1228,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1253,7 +1246,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1571,7 +1563,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1590,7 +1581,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1866,7 +1856,6 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1885,7 +1874,6 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage

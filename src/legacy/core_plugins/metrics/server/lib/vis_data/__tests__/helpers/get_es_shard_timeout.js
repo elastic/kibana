@@ -27,7 +27,7 @@ describe('getEsShardTimeout', () => {
     const req = {
       server: {
         newPlatform: {
-          setup: {
+          start: {
             core: {
               elasticsearch: { legacy: { config$: of({ shardTimeout: moment.duration(12345) }) } }
             }

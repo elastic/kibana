@@ -13,7 +13,7 @@ import {
   detailPanel,
 } from './middleware';
 
-export function createRollupJobsStore(initialState = {}) {
+function createRollupJobsStore(initialState = {}) {
   const enhancers = [ applyMiddleware(thunk, detailPanel) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());

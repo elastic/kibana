@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { addToSiri } from '../_add_to_siri';
 
 describe('addToSiri', function () {

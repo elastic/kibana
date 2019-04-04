@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
-import { createPluginSetupContext } from './plugin_context';
-import { PluginsServiceSetupDeps } from './plugins_service';
+import { Plugin, PluginName } from './plugin';
+import { createPluginStartContext } from './plugin_context';
+import { PluginsServiceStartDeps } from './plugins_service';
 
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, Plugin>();
   private readonly log: Logger;
-  // `satup`, the past-tense version of the noun `setup`.
-  private readonly satupPlugins: PluginName[] = [];
+  private readonly startedPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-system');
@@ -40,14 +37,14 @@ export class PluginsSystem {
     this.plugins.set(plugin.name, plugin);
   }
 
-  public async setupPlugins(deps: PluginsServiceSetupDeps) {
+  public async startPlugins(deps: PluginsServiceStartDeps) {
     const exposedValues = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return exposedValues;
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    this.log.info(`Starting [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
 
     for (const pluginName of sortedPlugins) {
       const plugin = this.plugins.get(pluginName)!;
@@ -55,7 +52,7 @@ export class PluginsSystem {
         continue;
       }
 
-      this.log.debug(`Setting up plugin "${pluginName}"...`);
+      this.log.debug(`Starting plugin "${pluginName}"...`);
 
       const exposedDependencyValues = [
         ...plugin.requiredDependencies,
@@ -70,67 +67,32 @@ export class PluginsSystem {
 
       exposedValues.set(
         pluginName,
-        await plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
+        await plugin.start(
+          createPluginStartContext(this.coreContext, deps, plugin),
           exposedDependencyValues
         )
       );
 
-      this.satupPlugins.push(pluginName);
+      this.startedPlugins.push(pluginName);
     }
 
     return exposedValues;
   }
 
   public async stopPlugins() {
-    if (this.plugins.size === 0 || this.satupPlugins.length === 0) {
+    if (this.plugins.size === 0 || this.startedPlugins.length === 0) {
       return;
     }
 
     this.log.info(`Stopping all plugins.`);
 
-    // Stop plugins in the reverse order of when they were set up.
-    while (this.satupPlugins.length > 0) {
-      const pluginName = this.satupPlugins.pop()!;
+    // Stop plugins in the reverse order of when they were started.
+    while (this.startedPlugins.length > 0) {
+      const pluginName = this.startedPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
       await this.plugins.get(pluginName)!.stop();
     }
-  }
-
-  /**
-   * Get a Map of all discovered UI plugins in topological order.
-   */
-  public uiPlugins() {
-    const internal = new Map<PluginName, DiscoveredPluginInternal>(
-      [...this.getTopologicallySortedPluginNames().keys()]
-        .filter(pluginName => this.plugins.get(pluginName)!.includesUiPlugin)
-        .map(pluginName => {
-          const plugin = this.plugins.get(pluginName)!;
-          return [
-            pluginName,
-            {
-              id: pluginName,
-              path: plugin.path,
-              configPath: plugin.manifest.configPath,
-              requiredPlugins: plugin.manifest.requiredPlugins,
-              optionalPlugins: plugin.manifest.optionalPlugins,
-            },
-          ] as [PluginName, DiscoveredPluginInternal];
-        })
-    );
-
-    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      [...internal.entries()].map(
-        ([pluginName, plugin]) =>
-          [
-            pluginName,
-            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
-          ] as [PluginName, DiscoveredPlugin]
-      )
-    );
-
-    return { public: publicPlugins, internal };
   }
 
   /**

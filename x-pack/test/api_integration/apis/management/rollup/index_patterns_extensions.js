@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import querystring from 'querystring';
 
 import { registerHelpers } from './rollup.test_helpers';

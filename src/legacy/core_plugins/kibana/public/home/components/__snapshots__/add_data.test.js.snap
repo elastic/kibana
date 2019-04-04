@@ -47,22 +47,14 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addAmpButtonLabel"
-          >
-            APM automatically collects in-depth performance metrics and errors from inside your applications.
-          </span>
-        }
+        description="APM automatically collects in-depth performance metrics and errors from inside your applications."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addAmpButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial/apm"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -89,22 +81,14 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -131,22 +115,14 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
+        description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -173,22 +149,14 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addSecurityButtonLabel"
-          >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
-          </span>
-        }
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -344,22 +312,14 @@ exports[`isNewKibanaInstance 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -386,22 +346,14 @@ exports[`isNewKibanaInstance 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
+        description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -428,22 +380,14 @@ exports[`isNewKibanaInstance 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addSecurityButtonLabel"
-          >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
-          </span>
-        }
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -599,22 +543,14 @@ exports[`mlEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addAmpButtonLabel"
-          >
-            APM automatically collects in-depth performance metrics and errors from inside your applications.
-          </span>
-        }
+        description="APM automatically collects in-depth performance metrics and errors from inside your applications."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addAmpButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial/apm"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -641,22 +577,14 @@ exports[`mlEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -683,22 +611,14 @@ exports[`mlEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
+        description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -725,22 +645,14 @@ exports[`mlEnabled 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addSecurityButtonLabel"
-          >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
-          </span>
-        }
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -935,22 +847,14 @@ exports[`render 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addLogDataButtonLabel"
-          >
-            Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-          </span>
-        }
+        description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -977,22 +881,14 @@ exports[`render 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addMetricsButtonLabel"
-          >
-            Collect metrics from the operating system and services running on your servers.
-          </span>
-        }
+        description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage
@@ -1019,22 +915,14 @@ exports[`render 1`] = `
     >
       <EuiCard
         className="homAddData__card"
-        description={
-          <span
-            id="aria-describedby.addSecurityButtonLabel"
-          >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
-          </span>
-        }
+        description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
             iconSide="left"
-            size="m"
             type="button"
           >
             <FormattedMessage

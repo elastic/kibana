@@ -18,7 +18,7 @@
  */
 
 import { isEqual } from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 // expect.js's `eql` method provides nice error messages but sometimes misses things
 // since it only tests loose (==) equality. This function uses lodash's `isEqual` as a

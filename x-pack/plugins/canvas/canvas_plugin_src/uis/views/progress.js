@@ -15,8 +15,6 @@ export const progress = () => ({
   args: [
     {
       name: 'shape',
-      displayName: 'Shape',
-      help: 'Shape of the progress indicator',
       argType: 'select',
       options: {
         choices: Object.keys(shapes).map(key => ({

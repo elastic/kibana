@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { get } from 'lodash';
 import { elementsReducer } from '../elements';
 import { actionCreator } from './fixtures/action_creator';

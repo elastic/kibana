@@ -18,11 +18,11 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { BaseParamType } from '../../param_types/base';
 import { StringParamType } from '../../param_types/string';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default describe('String', function () {
   const paramName = 'json_test';
   let aggParam;

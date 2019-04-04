@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
+
 
 import {
   EuiButton,
@@ -23,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -34,6 +36,7 @@ import {
   AutoFollowPatternDeleteProvider,
 } from '../../../../../components';
 
+import { API_STATUS } from '../../../../../constants';
 import routing from '../../../../../services/routing';
 
 export class DetailPanel extends Component {
@@ -44,154 +47,155 @@ export class DetailPanel extends Component {
     closeDetailPanel: PropTypes.func.isRequired,
   }
 
-  renderAutoFollowPattern({ followIndexPatternPrefix, followIndexPatternSuffix, remoteCluster, leaderIndexPatterns }) {
+  renderAutoFollowPattern() {
+    const {
+      autoFollowPattern: {
+        followIndexPatternPrefix,
+        followIndexPatternSuffix,
+        remoteCluster,
+        leaderIndexPatterns,
+      },
+    } = this.props;
+
+    let indexManagementFilter;
+    if(followIndexPatternPrefix) {
+      indexManagementFilter = `name:${followIndexPatternPrefix}`;
+    } else if(followIndexPatternSuffix) {
+      indexManagementFilter = `name:${followIndexPatternSuffix}`;
+    }
+    const indexManagementUri = getIndexListUri(indexManagementFilter);
+
     return (
-      <section
-        aria-labelledby="ccrAutoFollowPatternDetailSettingsTitle"
-        data-test-subj="ccrAutoFollowPatternDetailPanelSettingsSection"
-      >
-        <EuiTitle size="s">
-          <h3 id="ccrAutoFollowPatternDetailSettingsTitle">
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.statusTitle"
-              defaultMessage="Settings"
-            />
-          </h3>
-        </EuiTitle>
-
-        <EuiSpacer size="s" />
-
-        <EuiDescriptionList data-test-subj="ccrAutoFollowPatternDetailPanelSettingsValues">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.remoteClusterLabel"
-                    defaultMessage="Remote cluster"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailRemoteCluster">
-                {remoteCluster}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel"
-                    defaultMessage="Leader patterns"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailLeaderIndexPatterns">
-                {leaderIndexPatterns.join(', ')}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <Fragment>
+        <EuiFlyoutBody>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.statusTitle"
+                defaultMessage="Settings"
+              />
+            </h3>
+          </EuiTitle>
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixLabel"
-                    defaultMessage="Prefix"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailPatternPrefix">
-                {followIndexPatternPrefix || (
-                  <em>
+          <EuiDescriptionList>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue"
-                      defaultMessage="No prefix"
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.remoteClusterLabel"
+                      defaultMessage="Remote cluster"
                     />
-                  </em>
-                )}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixLabel"
-                    defaultMessage="Suffix"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {remoteCluster}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
 
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailPatternSuffix">
-                {followIndexPatternSuffix || (
-                  <em>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixEmptyValue"
-                      defaultMessage="No suffix"
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel"
+                      defaultMessage="Leader patterns"
                     />
-                  </em>
-                )}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionList>
-      </section>
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {leaderIndexPatterns.join(', ')}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixLabel"
+                      defaultMessage="Prefix"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {followIndexPatternPrefix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue"
+                        defaultMessage="No prefix"
+                      />
+                    </em>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixLabel"
+                      defaultMessage="Suffix"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {followIndexPatternSuffix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixEmptyValue"
+                        defaultMessage="No suffix"
+                      />
+                    </em>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <AutoFollowPatternIndicesPreview
+              prefix={followIndexPatternPrefix}
+              suffix={followIndexPatternSuffix}
+              leaderIndexPatterns={leaderIndexPatterns}
+            />
+
+            <EuiSpacer size="l" />
+
+            <EuiLink
+              href={indexManagementUri}
+              data-test-subj="ccrAutoFollowPatternDetailsViewIndexManagementButton"
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
+                defaultMessage="View your follower indices in Index Management"
+              />
+            </EuiLink>
+          </EuiDescriptionList>
+          <EuiSpacer size="l" />
+          {this.renderAutoFollowPatternErrors()}
+        </EuiFlyoutBody>
+      </Fragment>
     );
   }
 
-  renderIndicesPreview(prefix, suffix, leaderIndexPatterns) {
-    return (
-      <section data-test-subj="ccrAutoFollowPatternDetailPanelIndicesPreviewSection">
-        <AutoFollowPatternIndicesPreview
-          prefix={prefix}
-          suffix={suffix}
-          leaderIndexPatterns={leaderIndexPatterns}
-        />
-      </section>
-    );
-  }
+  renderAutoFollowPatternErrors() {
+    const { autoFollowPattern } = this.props;
 
-  renderAutoFollowPatternNotFound() {
-    return (
-      <EuiFlyoutBody>
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="alert" color="danger" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.notFoundLabel"
-                  defaultMessage="Auto-follow pattern not found"
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
-    );
-  }
-
-  renderAutoFollowPatternErrors(autoFollowPattern) {
     if (!autoFollowPattern.errors.length) {
       return null;
     }
 
     return (
-      <section data-test-subj="ccrAutoFollowPatternDetailErrors">
+      <Fragment>
         <EuiFlexGroup
           justifyContent="flexStart"
           alignItems="center"
@@ -202,7 +206,7 @@ export class DetailPanel extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="ccrAutoFollowPatternDetailsTitleErrors">
+            <EuiTitle size="s">
               <h3>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.recentErrorsTitle"
@@ -216,71 +220,78 @@ export class DetailPanel extends Component {
         <EuiText>
           <ul>
             {autoFollowPattern.errors.map((error, i) => (
-              <li
-                key={i}
-                data-test-subj="ccrAutoFollowPatternDetailRecentError"
-              >
-                {error.autoFollowException.reason}
-              </li>
+              <li key={i}>{error.autoFollowException.reason}</li>
             ))}
           </ul>
         </EuiText>
-      </section>
+      </Fragment>
     );
   }
 
-  renderFlyoutBody() {
-    const { autoFollowPattern } = this.props;
+  renderContent() {
+    const {
+      apiStatus,
+      autoFollowPattern,
+    } = this.props;
+
+    if (apiStatus === API_STATUS.LOADING) {
+      return (
+        <EuiFlyoutBody>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.loadingLabel"
+                    defaultMessage="Loading auto-follow pattern…"
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+      );
+    }
 
     if (!autoFollowPattern) {
-      return this.renderAutoFollowPatternNotFound();
+      return (
+        <EuiFlyoutBody>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="m" type="alert" color="danger" />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.notFoundLabel"
+                    defaultMessage="Auto-follow pattern not found"
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+      );
     }
 
-    const {
-      followIndexPatternPrefix,
-      followIndexPatternSuffix,
-      leaderIndexPatterns,
-    } = autoFollowPattern;
-
-    let indexManagementFilter;
-
-    if(followIndexPatternPrefix) {
-      indexManagementFilter = `name:${followIndexPatternPrefix}`;
-    } else if(followIndexPatternSuffix) {
-      indexManagementFilter = `name:${followIndexPatternSuffix}`;
-    }
-
-    const indexManagementUri = getIndexListUri(indexManagementFilter);
-
-    return (
-      <EuiFlyoutBody>
-        {this.renderAutoFollowPattern(autoFollowPattern)}
-
-        <EuiSpacer size="m" />
-
-        {this.renderIndicesPreview(followIndexPatternPrefix, followIndexPatternSuffix, leaderIndexPatterns)}
-
-        <EuiSpacer size="l" />
-
-        <EuiLink
-          href={indexManagementUri}
-          data-test-subj="ccrAutoFollowPatternDetailsViewIndexManagementButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
-            defaultMessage="View your follower indices in Index Management"
-          />
-        </EuiLink>
-
-        <EuiSpacer size="l" />
-
-        {this.renderAutoFollowPatternErrors(autoFollowPattern)}
-
-      </EuiFlyoutBody>
-    );
+    return this.renderAutoFollowPattern();
   }
 
-  renderFlyoutFooter() {
+  renderFooter() {
     const {
       autoFollowPattern,
       closeDetailPanel,
@@ -295,6 +306,7 @@ export class DetailPanel extends Component {
               flush="left"
               onClick={closeDetailPanel}
               data-test-subj="ccrAutoFollowPatternDetailsFlyoutCloseButton"
+
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel"
@@ -357,17 +369,13 @@ export class DetailPanel extends Component {
       >
 
         <EuiFlyoutHeader>
-          <EuiTitle
-            size="m"
-            id="autoFollowPatternDetailsFlyoutTitle"
-            data-test-subj="autoFollowPatternDetailsFlyoutTitle"
-          >
+          <EuiTitle size="m" id="autoFollowPatternDetailsFlyoutTitle">
             <h2>{autoFollowPatternId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        {this.renderFlyoutBody()}
-        {this.renderFlyoutFooter()}
+        {this.renderContent()}
+        {this.renderFooter()}
       </EuiFlyout>
     );
   }

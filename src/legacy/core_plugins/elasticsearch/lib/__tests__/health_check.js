@@ -19,7 +19,7 @@
 
 import Promise from 'bluebird';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 

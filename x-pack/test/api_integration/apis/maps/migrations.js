@@ -5,7 +5,7 @@
  */
 /* eslint  max-len: 0 */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

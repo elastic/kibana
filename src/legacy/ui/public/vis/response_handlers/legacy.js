@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
-
 /**
  * The LegacyResponseHandler is not registered as a response handler and can't be used
  * as such anymore. Since the function itself is still used as a utility in the table
@@ -41,7 +39,6 @@ const LegacyResponseHandlerProvider = function () {
         if (split) {
           converted.direction = dimensions.splitRow ? 'row' : 'column';
           const splitColumnIndex = split[0].accessor;
-          const splitColumnFormatter = getFormat(split[0].format);
           const splitColumn = table.columns[splitColumnIndex];
           const splitMap = {};
           let splitIndex = 0;
@@ -53,7 +50,7 @@ const LegacyResponseHandlerProvider = function () {
               splitMap[splitValue] = splitIndex++;
               const tableGroup = {
                 $parent: converted,
-                title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+                title: `${splitValue}: ${splitColumn.name}`,
                 name: splitColumn.name,
                 key: splitValue,
                 column: splitColumnIndex,

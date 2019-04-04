@@ -35,8 +35,5 @@ export function includedFields(type, fields) {
     .map(f => `${sourceType}.${f}`)
     .concat('namespace')
     .concat('type')
-    .concat('references')
-    .concat('migrationVersion')
-    .concat('updated_at')
     .concat(fields); // v5 compatibility
 }

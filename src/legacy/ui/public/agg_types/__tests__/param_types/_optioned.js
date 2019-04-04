@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { BaseParamType } from '../../param_types/base';
 import { OptionedParamType } from '../../param_types/optioned';
 

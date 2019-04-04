@@ -19,11 +19,11 @@
 
 import * as Rx from 'rxjs';
 
-import { Brand, ChromeSetup } from '../../../../../core/public/chrome';
+import { Brand, ChromeStart } from '../../../../../core/public/chrome';
 
-let newPlatformChrome: ChromeSetup;
+let newPlatformChrome: ChromeStart;
 
-export function __newPlatformInit__(instance: ChromeSetup) {
+export function __newPlatformInit__(instance: ChromeStart) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/theme is already initialized');
   }

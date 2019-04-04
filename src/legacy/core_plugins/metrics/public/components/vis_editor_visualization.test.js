@@ -35,9 +35,13 @@ describe('getVisualizeLoader', () => {
       }
     };
     const loaderMock = {
-      embedVisualizationWithSavedObject: () => handlerMock,
+      embedVisualizationWithSavedObject: () => {
+        return handlerMock;
+      }
     };
-    require('ui/visualize/loader/visualize_loader').getVisualizeLoader = async () => loaderMock;
+    require('ui/visualize/loader/visualize_loader').getVisualizeLoader = async () => {
+      return loaderMock;
+    };
   });
 
   it('should not call _handler.update until getVisualizeLoader returns _handler', async () => {
@@ -46,25 +50,12 @@ describe('getVisualizeLoader', () => {
     );
 
     // Set prop to force DOM change and componentDidUpdate to be triggered
-    wrapper.setProps({
-      timeRange: {
-        from: '2019-03-20T20:35:37.637Z',
-        to: '2019-03-23T18:40:16.486Z'
-      }
-    });
-
-    expect(updateStub).not.toHaveBeenCalled();
+    wrapper.setProps({ dirty: true });
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
-
-    // Set prop to force DOM change and componentDidUpdate to be triggered
-    wrapper.setProps({
-      timeRange: {
-        from: 'now/d',
-        to: 'now/d'
-      }
-    });
+    // Ensure the state changes are reflected
+    wrapper.update();
 
     expect(updateStub).toHaveBeenCalled();
   });

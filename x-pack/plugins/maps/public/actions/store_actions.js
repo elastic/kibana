@@ -69,12 +69,6 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
   };
 }
 
-function getLayerById(layerId, state) {
-  return getLayerList(state).find(layer => {
-    return layerId === layer.getId();
-  });
-}
-
 async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
@@ -125,18 +119,6 @@ export function replaceLayerList(newLayerList) {
   };
 }
 
-export function cloneLayer(layerId) {
-  return async (dispatch, getState) => {
-    const layer = getLayerById(layerId, getState());
-    if (!layer) {
-      return;
-    }
-
-    const clonedDescriptor = await layer.cloneDescriptor();
-    dispatch(addLayer(clonedDescriptor));
-  };
-}
-
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
@@ -179,7 +161,9 @@ export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
     //e.g. if a layer was invisible at start-up, it won't have any data loaded
-    const layer = getLayerById(layerId, getState());
+    const layer = getLayerList(getState()).find(layer => {
+      return layerId === layer.getId();
+    });
     if (!layer) {
       return;
     }
@@ -352,7 +336,9 @@ export function clearMouseCoordinates() {
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
-    const targetLayer = getLayerById(layerId, getState());
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
 
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
@@ -445,7 +431,9 @@ export function updateSourceProp(layerId, propName, value) {
 
 export function syncDataForLayer(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerById(layerId, getState());
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
@@ -493,19 +481,6 @@ export function updateLayerAlpha(id, alpha) {
   };
 }
 
-export function setLayerQuery(id, query) {
-  return (dispatch) => {
-    dispatch({
-      type: UPDATE_LAYER_PROP,
-      id,
-      propName: 'query',
-      newValue: query,
-    });
-
-    dispatch(syncDataForLayer(id));
-  };
-}
-
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
@@ -517,7 +492,9 @@ export function removeSelectedLayer() {
 
 export function removeLayer(layerId) {
   return (dispatch, getState) => {
-    const layerGettingRemoved = getLayerById(layerId, getState());
+    const layerGettingRemoved = getLayerList(getState()).find(layer => {
+      return layerId === layer.getId();
+    });
     if (!layerGettingRemoved) {
       return;
     }
@@ -569,7 +546,9 @@ export function triggerRefreshTimer() {
 
 export function clearMissingStyleProperties(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerById(layerId, getState());
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
     if (!targetLayer) {
       return;
     }

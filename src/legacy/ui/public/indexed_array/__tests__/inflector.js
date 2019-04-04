@@ -18,7 +18,7 @@
  */
 
 import { inflector } from '../inflector';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('IndexedArray Inflector', function () {
   it('returns a function', function () {

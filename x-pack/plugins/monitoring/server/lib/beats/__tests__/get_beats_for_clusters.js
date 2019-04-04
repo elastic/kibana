@@ -5,7 +5,7 @@
  */
 
 import { handleResponse } from '../get_beats_for_clusters';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('get_beats_for_clusters', () => {
   it('Handles empty aggregation', () => {

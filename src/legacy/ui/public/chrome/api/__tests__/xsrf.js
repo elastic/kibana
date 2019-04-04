@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 

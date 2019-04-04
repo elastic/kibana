@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReturnTypeBulkAction } from '../../common/return_types';
 import { CMBeat } from './../../common/domain_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from './adapters/beats/adapter_types';
+import {
+  BeatsRemovalReturn,
+  BeatsTagAssignment,
+  CMAssignmentReturn,
+  CMBeatsAdapter,
+} from './adapters/beats/adapter_types';
 import { ElasticsearchLib } from './elasticsearch';
 
 export class BeatsLib {
@@ -52,14 +56,14 @@ export class BeatsLib {
   /** unassign tags from beats using an array of tags and beats */
   public removeTagsFromBeats = async (
     removals: BeatsTagAssignment[]
-  ): Promise<ReturnTypeBulkAction['results']> => {
+  ): Promise<BeatsRemovalReturn[]> => {
     return await this.adapter.removeTagsFromBeats(removals);
   };
 
   /** assign tags from beats using an array of tags and beats */
   public assignTagsToBeats = async (
     assignments: BeatsTagAssignment[]
-  ): Promise<ReturnTypeBulkAction['results']> => {
+  ): Promise<CMAssignmentReturn[]> => {
     return await this.adapter.assignTagsToBeats(assignments);
   };
 }

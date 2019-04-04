@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const assertStatsAndMetrics = body => {
   expect(body.kibana.name).to.be.a('string');

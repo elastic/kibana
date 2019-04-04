@@ -168,6 +168,6 @@ export interface FrameworkRouteOptions<
 export type FrameworkRouteHandler<
   RouteRequest extends KibanaServerRequest,
   RouteResponse extends FrameworkResponse
-> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
+> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => void;
 
 export type FrameworkResponse = Lifecycle.ReturnValue;

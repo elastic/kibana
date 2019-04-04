@@ -6,7 +6,7 @@
 
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { validateModelMemoryLimit } from '../validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {

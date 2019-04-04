@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { CoreSetup } from '../';
+import { CoreStart } from '../';
 
 export interface LegacyPlatformParams {
   targetDomElement: HTMLElement;
@@ -31,12 +31,12 @@ export interface LegacyPlatformParams {
  * the legacy platform by injecting parts of the new platform
  * services into the legacy platform modules, like ui/modules,
  * and then bootstrapping the ui/chrome or ui/test_harness to
- * setup either the app or browser tests.
+ * start either the app or browser tests.
  */
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public setup(core: CoreSetup) {
+  public start(core: CoreStart) {
     const {
       i18n,
       injectedMetadata,

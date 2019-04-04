@@ -60,7 +60,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
     );
 
     this.setState({
-      configuration_blocks: blocksResult.list,
+      configuration_blocks: blocksResult.blocks,
       tags,
     });
   }

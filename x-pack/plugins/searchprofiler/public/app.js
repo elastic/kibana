@@ -18,7 +18,6 @@ import _ from 'lodash';
 import 'ace';
 import 'angular-ui-ace';
 import 'plugins/searchprofiler/directives';
-import './components/searchprofiler_tabs_directive';
 import { Range } from './range';
 import { nsToPretty } from 'plugins/searchprofiler/filters/ns_to_pretty';
 import { msToPretty } from 'plugins/searchprofiler/filters/ms_to_pretty';
@@ -150,10 +149,10 @@ function profileVizController($scope, $route, $interval, $http, HighlightService
         return id.replace('[', '').replace(']', '');
       });
     }
+    $scope.hasAggregations = data[0].aggregations != null && data[0].aggregations.length > 0;
+    $scope.hasSearch = data[0].searches != null && data[0].searches.length > 0;
     $scope.profileResponse = data;
-
-    const hasAggregations = data[0].aggregations != null && data[0].aggregations.length > 0;
-    if (!hasAggregations) {
+    if (!$scope.hasAggregations) {
       // No aggs, reset back to search panel
       $scope.activateTab('search');
     }
@@ -164,7 +163,7 @@ function profileVizController($scope, $route, $interval, $http, HighlightService
     $scope.resetHighlightPanel();
     // Reset active tab map
     $scope.activeTab = {};
-    if (tab === 'aggregations') {
+    if (tab === 'aggregations' && $scope.hasAggregations) {
       $scope.activeTab.aggregations = true;
     } else {
       // Everything has a search, so default to this

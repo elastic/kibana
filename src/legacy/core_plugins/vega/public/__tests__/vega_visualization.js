@@ -18,7 +18,7 @@
  */
 
 import Promise from 'bluebird';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { VegaVisualizationProvider } from '../vega_visualization';

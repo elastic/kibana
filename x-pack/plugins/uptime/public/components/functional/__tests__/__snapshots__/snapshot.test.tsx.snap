@@ -111,7 +111,7 @@ exports[`Snapshot component renders without errors 1`] = `
         }
       }
     >
-      <SnapshotHistogram
+      <Component
         dangerColor="#F050F0"
         histogram={
           Array [

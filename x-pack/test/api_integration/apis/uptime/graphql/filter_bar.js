@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getFilterBarQueryString } from '../../../../../plugins/uptime/public/components/queries/filter_bar/get_filter_bar';
 import filterList from './fixtures/filter_list';
 

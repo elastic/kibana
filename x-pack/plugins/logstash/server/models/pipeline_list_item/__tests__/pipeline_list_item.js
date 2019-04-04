@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { PipelineListItem } from '../pipeline_list_item';
 
 describe('pipeline_list_item', () => {

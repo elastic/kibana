@@ -21,7 +21,7 @@ import angular from 'angular';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/private';
 import '../../components/field_chooser/field_chooser';

@@ -55,7 +55,6 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import '../timepicker';
 import '../watch_multi';
 import '../directives/input_focus';
 import { uiModules } from '../modules';

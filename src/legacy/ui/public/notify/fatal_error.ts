@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { FatalErrorsSetup } from '../../../../core/public/fatal_errors';
+import { FatalErrorsStart } from '../../../../core/public/fatal_errors';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-let newPlatformFatalErrors: FatalErrorsSetup;
+let newPlatformFatalErrors: FatalErrorsStart;
 
-export function __newPlatformInit__(instance: FatalErrorsSetup) {
+export function __newPlatformInit__(instance: FatalErrorsStart) {
   if (newPlatformFatalErrors) {
     throw new Error('ui/notify/fatal_error already initialized with new platform apis');
   }

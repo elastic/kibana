@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { mapRequests } from '../map_requests';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('Map requests', () => {
   it('flatten ports', () => {

@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import { aggResponseIndex } from '../../../agg_response';
 import { VislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';

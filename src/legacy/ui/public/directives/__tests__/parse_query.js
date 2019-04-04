@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 // Load the kibana app dependencies.

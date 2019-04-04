@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { set } from 'lodash';
 import { MissingRequiredError } from '../error_missing_required';
 import { ElasticsearchMetric } from '../metrics';

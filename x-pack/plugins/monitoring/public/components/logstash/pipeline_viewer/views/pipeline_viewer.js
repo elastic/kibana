@@ -27,15 +27,36 @@ class PipelineViewerUi extends React.Component {
     };
   }
 
+  onShowVertexDetails = (vertex) => {
+    if (vertex === this.state.detailDrawer.vertex) {
+      this.onHideVertexDetails();
+    }
+    else {
+      this.setState({
+        detailDrawer: {
+          vertex
+        }
+      });
+    }
+  }
+
+  onHideVertexDetails = () => {
+    this.setState({
+      detailDrawer: {
+        vertex: null
+      }
+    });
+  }
+
   renderDetailDrawer = () => {
-    if (!this.props.detailVertex) {
+    if (!this.state.detailDrawer.vertex) {
       return null;
     }
 
     return (
       <DetailDrawer
-        vertex={this.props.detailVertex}
-        onHide={() => this.props.setDetailVertexId(undefined)}
+        vertex={this.state.detailDrawer.vertex}
+        onHide={this.onHideVertexDetails}
         timeseriesTooltipXValueFormatter={this.props.timeseriesTooltipXValueFormatter}
       />
     );
@@ -58,7 +79,8 @@ class PipelineViewerUi extends React.Component {
               iconType="logstashInput"
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.inputsTitle', defaultMessage: 'Inputs' })}
               elements={inputs}
-              onShowVertexDetails={this.props.setDetailVertexId}
+              onShowVertexDetails={this.onShowVertexDetails}
+              detailVertex={this.state.detailDrawer.vertex}
             />
             <EuiSpacer />
             <Queue queue={queue} />
@@ -67,14 +89,16 @@ class PipelineViewerUi extends React.Component {
               iconType="logstashFilter"
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.filtersTitle', defaultMessage: 'Filters' })}
               elements={filters}
-              onShowVertexDetails={this.props.setDetailVertexId}
+              onShowVertexDetails={this.onShowVertexDetails}
+              detailVertex={this.state.detailDrawer.vertex}
             />
             <EuiSpacer />
             <StatementSection
               iconType="logstashOutput"
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.outputsTitle', defaultMessage: 'Outputs' })}
               elements={outputs}
-              onShowVertexDetails={this.props.setDetailVertexId}
+              onShowVertexDetails={this.onShowVertexDetails}
+              detailVertex={this.state.detailDrawer.vertex}
             />
             { this.renderDetailDrawer() }
           </EuiPageContent>

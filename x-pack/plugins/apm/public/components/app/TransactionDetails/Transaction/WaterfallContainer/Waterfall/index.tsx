@@ -67,11 +67,6 @@ export class Waterfall extends Component<Props> {
   public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
-    const errorCount =
-      item.docType === 'transaction'
-        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
-        : 0;
-
     return (
       <WaterfallItem
         key={item.id}
@@ -80,7 +75,6 @@ export class Waterfall extends Component<Props> {
         item={item}
         totalDuration={waterfall.duration}
         isSelected={item.id === urlParams.waterfallItemId}
-        errorCount={errorCount}
         onClick={() => this.onOpenFlyout(item)}
       />
     );

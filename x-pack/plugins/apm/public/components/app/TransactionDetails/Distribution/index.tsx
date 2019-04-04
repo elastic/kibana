@@ -52,7 +52,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 
 interface Props {
   location: Location;
-  distribution?: ITransactionDistributionAPIResponse;
+  distribution: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
@@ -95,44 +95,8 @@ export class TransactionDistribution extends Component<Props> {
         );
   };
 
-  public redirectToTransactionType() {
-    const { urlParams, location, distribution } = this.props;
-
-    if (
-      !distribution ||
-      !distribution.defaultSample ||
-      urlParams.traceId ||
-      urlParams.transactionId
-    ) {
-      return;
-    }
-
-    const { traceId, transactionId } = distribution.defaultSample;
-
-    history.replace({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        traceId,
-        transactionId
-      })
-    });
-  }
-
-  public componentDidMount() {
-    this.redirectToTransactionType();
-  }
-
-  public componentDidUpdate() {
-    this.redirectToTransactionType();
-  }
-
   public render() {
     const { location, distribution, urlParams } = this.props;
-
-    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
-      return null;
-    }
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -199,7 +163,7 @@ export class TransactionDistribution extends Component<Props> {
           bucketIndex={bucketIndex}
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
-              history.push({
+              history.replace({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);

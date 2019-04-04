@@ -48,7 +48,6 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
     return new MapEmbeddable({
       onEmbeddableStateChanged,
-      embeddableConfig: panelMetadata.embeddableConfig,
       savedMap,
       editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
       indexPatterns,

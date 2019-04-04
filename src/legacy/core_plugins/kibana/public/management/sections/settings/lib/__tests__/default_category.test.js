@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { DEFAULT_CATEGORY } from '../default_category';
 
 describe('Settings', function () {

@@ -39,7 +39,6 @@ exports[`Header should render normally 1`] = `
       fill={false}
       href=""
       iconSide="left"
-      size="m"
       type="button"
     >
       <FormattedMessage

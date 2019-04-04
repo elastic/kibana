@@ -10,7 +10,7 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@kbn/expect": "1.0.0",
+    "expect.js": "^0.3.1",
     "mocha": "^2.3.4"
   }
 }

@@ -7,12 +7,9 @@
 import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
-import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { LayerErrors } from './layer_errors';
-import { LayerSettings } from './layer_settings';
-import { SourceSettings } from './source_settings';
+import { SettingsPanel } from './settings_panel';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -88,21 +85,6 @@ export class LayerPanel extends React.Component {
         hasLoadedSourcePropsForLayer: true,
       });
     }
-  }
-
-  _renderFilterSection() {
-    if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiPanel>
-          <FilterEditor/>
-        </EuiPanel>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
   }
 
   _renderJoinSection() {
@@ -193,19 +175,10 @@ export class LayerPanel extends React.Component {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody className="mapLayerPanel__body">
-
-          <LayerErrors/>
-
-          <LayerSettings/>
-
-          <SourceSettings/>
-
-          {this._renderFilterSection()}
-
+          <SettingsPanel/>
+          <EuiSpacer size="s" />
           {this._renderJoinSection()}
-
           <StyleTabs layer={selectedLayer}/>
-
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">

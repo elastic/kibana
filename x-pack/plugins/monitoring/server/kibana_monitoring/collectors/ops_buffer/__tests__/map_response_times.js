@@ -6,7 +6,7 @@
 
 import { isEqual } from 'lodash';
 import { mapResponseTimes } from '../map_response_times';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 describe('Map response times', () => {
   it('flatten ports', () => {

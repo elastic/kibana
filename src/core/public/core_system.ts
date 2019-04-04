@@ -38,7 +38,7 @@ interface Params {
 }
 
 /**
- * The CoreSystem is the root of the new platform, and setups all parts
+ * The CoreSystem is the root of the new platform, and starts all parts
  * of Kibana in the UI, including the LegacyPlatform which is managed
  * by the LegacyPlatformService. As we migrate more things to the new
  * platform the CoreSystem will get many more Services.
@@ -102,7 +102,7 @@ export class CoreSystem {
     });
   }
 
-  public setup() {
+  public start() {
     try {
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
@@ -110,24 +110,24 @@ export class CoreSystem {
       this.rootDomElement.appendChild(this.notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
 
-      const i18n = this.i18n.setup();
-      const notifications = this.notifications.setup({ i18n });
-      const injectedMetadata = this.injectedMetadata.setup();
-      const fatalErrors = this.fatalErrors.setup({ i18n });
-      const http = this.http.setup({ fatalErrors });
-      const basePath = this.basePath.setup({ injectedMetadata });
-      const uiSettings = this.uiSettings.setup({
+      const i18n = this.i18n.start();
+      const notifications = this.notifications.start({ i18n });
+      const injectedMetadata = this.injectedMetadata.start();
+      const fatalErrors = this.fatalErrors.start({ i18n });
+      const http = this.http.start({ fatalErrors });
+      const basePath = this.basePath.start({ injectedMetadata });
+      const uiSettings = this.uiSettings.start({
         notifications,
         http,
         injectedMetadata,
         basePath,
       });
-      const chrome = this.chrome.setup({
+      const chrome = this.chrome.start({
         injectedMetadata,
         notifications,
       });
 
-      this.legacyPlatform.setup({
+      this.legacyPlatform.start({
         i18n,
         injectedMetadata,
         fatalErrors,

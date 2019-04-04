@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { handleResponse } from '../get_ml_jobs';
 
 describe('Get ML Jobs', () => {

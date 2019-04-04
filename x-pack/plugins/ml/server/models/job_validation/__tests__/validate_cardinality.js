@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { validateCardinality } from '../validate_cardinality';
 
 import mockFareQuoteCardinality from './mock_farequote_cardinality';

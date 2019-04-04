@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import Chance from 'chance';
 
 import { Storage } from '../../storage';

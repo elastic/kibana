@@ -8,7 +8,12 @@ import _ from 'lodash';
 
 import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import {
+  fetchSearchSourceAndRecordWithInspector,
+  SearchSource,
+} from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
+import { timefilter } from 'ui/timefilter/timefilter';
 import { i18n } from '@kbn/i18n';
 
 const TERMS_AGG_NAME = 'join';
@@ -91,14 +96,42 @@ export class ESJoinSource extends AbstractESSource {
     }
 
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const timeAware = await this.isTimeAware();
+
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
-    searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
-    const requestDesc = this.getJoinDescription(leftSourceName, leftFieldName);
-    const rawEsData = await this._runEsQuery(requestName, searchSource, requestDesc);
+    let rawEsData;
+    try {
+      const searchSource = new SearchSource();
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 0);
+      searchSource.setField('filter', () => {
+        const filters = [];
+        if (timeAware) {
+          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+        }
+        return filters;
+      });
+      searchSource.setField('query', searchFilters.query);
+
+      const dsl = aggConfigs.toDsl();
+      searchSource.setField('aggs', dsl);
+      rawEsData = await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
+        searchSource,
+        requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        requestId: this._descriptor.id,
+        requestDesc: this.getJoinDescription(leftSourceName, leftFieldName),
+      });
+    } catch (error) {
+      throw new Error(i18n.translate('xpack.maps.source.esJoin.errorMessage', {
+        defaultMessage: `Elasticsearch search request failed, error: {message}`,
+        values: {
+          message: error.message
+        }
+      }));
+    }
 
     const metricPropertyNames = configStates
       .filter(configState => {

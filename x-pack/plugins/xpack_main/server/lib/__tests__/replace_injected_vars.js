@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
 

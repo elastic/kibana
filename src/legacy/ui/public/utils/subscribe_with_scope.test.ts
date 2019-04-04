@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockFatalError } from './subscribe_with_scope.test.mocks';
+
+const mockFatalError = jest.fn();
+jest.mock('ui/notify/fatal_error', () => ({
+  fatalError: mockFatalError,
+}));
 
 import * as Rx from 'rxjs';
 import { subscribeWithScope } from './subscribe_with_scope';

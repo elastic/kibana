@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import { setupAndTeardownInjectorStub } from 'test_utils/stub_get_active_injector';

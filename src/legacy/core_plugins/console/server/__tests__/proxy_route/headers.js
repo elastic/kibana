@@ -21,7 +21,7 @@ import { request } from 'http';
 
 import sinon from 'sinon';
 import Wreck from 'wreck';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';

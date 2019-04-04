@@ -21,7 +21,6 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
       iconSide="left"
       isDisabled={true}
       onClick={[Function]}
-      size="m"
       type="button"
     >
       <FormattedMessage
@@ -55,7 +54,6 @@ exports[`AddFilter should render normally 1`] = `
       iconSide="left"
       isDisabled={true}
       onClick={[Function]}
-      size="m"
       type="button"
     >
       <FormattedMessage

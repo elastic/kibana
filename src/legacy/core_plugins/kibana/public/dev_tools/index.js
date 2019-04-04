@@ -20,7 +20,6 @@
 import uiRoutes from 'ui/routes';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import 'ui/directives/kbn_href';
 import './directives/dev_tools_app';
 
 uiRoutes

@@ -18,7 +18,7 @@
  */
 
 import RouteManager from '../route_manager';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import _ from 'lodash';

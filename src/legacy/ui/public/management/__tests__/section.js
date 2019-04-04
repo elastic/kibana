@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { ManagementSection } from '../section';
 import { IndexedArray } from '../../indexed_array';

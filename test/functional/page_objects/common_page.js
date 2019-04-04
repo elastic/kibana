@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import getUrl from '../../../src/test_utils/get_url';
 

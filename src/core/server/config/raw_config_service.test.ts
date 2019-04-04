@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { mockGetConfigFromFiles } from './raw_config_service.test.mocks';
+const mockGetConfigFromFiles = jest.fn();
+
+jest.mock('./read_config', () => ({
+  getConfigFromFiles: mockGetConfigFromFiles,
+}));
 
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '.';

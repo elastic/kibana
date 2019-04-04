@@ -48,12 +48,12 @@ export class Root {
     this.server = new Server(this.configService, this.logger, this.env);
   }
 
-  public async setup() {
-    this.log.debug('setting up root');
+  public async start() {
+    this.log.debug('starting root');
 
     try {
       await this.setupLogging();
-      await this.server.setup();
+      await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;

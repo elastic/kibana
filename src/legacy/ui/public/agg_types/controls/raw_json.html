@@ -1,0 +1,23 @@
+<div class="form-group regex">
+    <span class="hintbox-label">
+      <label for="visEditorRawJson{{agg.id}}">
+        <span
+          i18n-id="common.ui.aggTypes.jsonInputLabel"
+          i18n-default-message="JSON Input"
+        ></span>
+        <icon-tip
+          position="'right'"
+          content="::'common.ui.aggTypes.jsonInputTooltip' | i18n: { defaultMessage: 'Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example \'shard_size\' on a terms aggregation.' }"
+        ></icon-tip>
+      </label>
+    </span>
+  <p>
+    <textarea
+      type="text"
+      id="visEditorRawJson{{agg.id}}"
+      class="form-control"
+      ng-model="agg.params.json"
+      validate-json
+      ></textarea>
+  </p>
+</div>

@@ -25,7 +25,6 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/search_bar';
 import 'ui/apply_filters';
-import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';

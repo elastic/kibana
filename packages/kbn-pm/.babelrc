@@ -1,14 +1,10 @@
 {
   "presets": [
-    "@babel/typescript",
-    ["@babel/preset-env", {
+    "stage-3",
+    ["env", {
       "targets": {
         "node": "current"
       }
     }]
-  ],
-  "plugins": [
-    "@babel/proposal-class-properties",
-    "@babel/proposal-object-rest-spread"
   ]
 }

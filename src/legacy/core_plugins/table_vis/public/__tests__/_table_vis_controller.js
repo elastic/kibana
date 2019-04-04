@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';

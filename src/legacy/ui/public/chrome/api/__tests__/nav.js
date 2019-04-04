@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { initChromeNavApi } from '../nav';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';

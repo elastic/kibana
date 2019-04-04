@@ -47,7 +47,7 @@ jest.mock('ui/timefilter/lib/parse_querystring',
   }), { virtual: true });
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import moment from 'moment';
 import { timefilter } from './timefilter';
 

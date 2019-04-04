@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_INDEX_PRIORITY,
-} from '../../../constants';
+} from '../../../store/constants';
 import { ErrableFormRow } from '../form_errors';
 import { FormattedMessage } from '@kbn/i18n/react';
 export const SetPriorityInput = props => {

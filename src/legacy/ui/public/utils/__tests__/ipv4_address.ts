@@ -17,7 +17,7 @@
  * under the License.
  */
 // @ts-ignore
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import Ipv4Address from '../ipv4_address';
 
 describe('Ipv4Address', () => {

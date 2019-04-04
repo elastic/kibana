@@ -5,11 +5,10 @@
  */
 
 import Joi from 'joi';
-import { CMBeat } from 'x-pack/plugins/beats_management/common/domain_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
-import { BaseReturnType, ReturnTypeUpdate } from '../../../common/return_types';
-import { FrameworkRequest, internalUser } from '../../lib/adapters/framework/adapter_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
+import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file (include who did the verification as well) https://github.com/elastic/kibana/issues/26024
 export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
@@ -39,54 +38,34 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }),
     },
   },
-  handler: async (
-    request: FrameworkRequest
-  ): Promise<BaseReturnType | ReturnTypeUpdate<CMBeat>> => {
+  handler: async (request: FrameworkRequest, h: any) => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;
     const userOrToken = accessToken || request.user;
 
     if (request.user.kind === 'unauthenticated' && request.payload.active !== undefined) {
-      return {
-        error: {
-          message: 'access-token is not a valid auth type to change beat status',
-          code: 401,
-        },
-        success: false,
-      };
+      return h
+        .response({ message: 'access-token is not a valid auth type to change beat status' })
+        .code(401);
     }
 
-    const status = await libs.beats.update(userOrToken, beatId, {
-      ...request.payload,
-      host_ip: remoteAddress,
-    });
+    try {
+      const status = await libs.beats.update(userOrToken, beatId, {
+        ...request.payload,
+        host_ip: remoteAddress,
+      });
 
-    switch (status) {
-      case 'beat-not-found':
-        return {
-          error: {
-            message: 'Beat not found',
-            code: 404,
-          },
-          success: false,
-        };
-      case 'invalid-access-token':
-        return {
-          error: {
-            message: 'Invalid access token',
-            code: 401,
-          },
-          success: false,
-        };
+      switch (status) {
+        case 'beat-not-found':
+          return h.response({ message: 'Beat not found', success: false }).code(404);
+        case 'invalid-access-token':
+          return h.response({ message: 'Invalid access token', success: false }).code(401);
+      }
+
+      return h.response({ success: true }).code(204);
+    } catch (err) {
+      return wrapEsError(err);
     }
-
-    const beat = await libs.beats.getById(internalUser, beatId);
-
-    return {
-      item: beat,
-      action: 'updated',
-      success: true,
-    };
   },
 });

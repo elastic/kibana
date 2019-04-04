@@ -57,10 +57,10 @@ export function SpanFlyout({
   const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
   const dbContext = idx(span, _ => _.span.db);
   const httpContext = idx(span, _ => _.span.http);
-  const spanLabels = span.labels;
-  const labels = keys(spanLabels).map(key => ({
+  const labels = span.labels;
+  const tags = keys(labels).map(key => ({
     key,
-    value: get(spanLabels, key)
+    value: get(labels, key)
   }));
 
   return (
@@ -123,11 +123,11 @@ export function SpanFlyout({
                 )
               },
               {
-                id: 'labels',
+                id: 'tags',
                 name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  'xpack.apm.transactionDetails.spanFlyout.tagsTabLabel',
                   {
-                    defaultMessage: 'Labels'
+                    defaultMessage: 'Tags'
                   }
                 ),
                 content: (
@@ -144,7 +144,7 @@ export function SpanFlyout({
                           field: 'value'
                         }
                       ]}
-                      items={labels}
+                      items={tags}
                     />
                   </Fragment>
                 )

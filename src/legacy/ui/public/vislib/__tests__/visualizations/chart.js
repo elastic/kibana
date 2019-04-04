@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VislibVisProvider } from '../../vis';
 import '../../../persisted_state';

@@ -68,7 +68,6 @@ export default async (kbnServer, server, config) => {
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    workers: config.get('optimize.workers'),
   });
 
   server.log(

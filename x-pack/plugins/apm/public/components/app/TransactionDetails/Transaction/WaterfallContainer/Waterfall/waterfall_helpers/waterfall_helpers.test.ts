@@ -96,12 +96,13 @@ describe('waterfall_helpers', () => {
 
     it('should return full waterfall', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorsPerTransaction = {
+      const errorCountsByTransactionId = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        hits,
+        errorCountsByTransactionId,
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(6);
@@ -111,12 +112,13 @@ describe('waterfall_helpers', () => {
 
     it('should return partial waterfall', () => {
       const entryTransactionId = 'myTransactionId2';
-      const errorsPerTransaction = {
+      const errorCountsByTransactionId = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        hits,
+        errorCountsByTransactionId,
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(4);
@@ -126,12 +128,13 @@ describe('waterfall_helpers', () => {
 
     it('getTransactionById', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorsPerTransaction = {
+      const errorCountsByTransactionId = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        { trace: hits, errorsPerTransaction },
+        hits,
+        errorCountsByTransactionId,
         entryTransactionId
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');

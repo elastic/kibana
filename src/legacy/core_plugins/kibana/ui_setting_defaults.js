@@ -302,6 +302,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'courier:maxSegmentCount': {
+      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
+        defaultMessage: 'Maximum segment count',
+      }),
+      value: 30,
+      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
+        defaultMessage:
+          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
+          'This setting attempts to prevent the list of segments from getting too long, ' +
+          'which might cause requests to take much longer to process.',
+      }),
+      category: ['search'],
+    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -310,8 +323,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When disabled, all filters are applied to all visualizations. ' +
-          'When enabled, filter(s) will be ignored for a visualization ' +
+          'When set to false, all filters are applied to all visualizations. ' +
+          'When set to true, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],

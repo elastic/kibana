@@ -12,7 +12,6 @@ import { UMBreadcrumb } from '../../../breadcrumbs';
 import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
-import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -39,11 +38,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.defaultAutorefreshIsPaused = autorefreshIsPaused || true;
   }
 
-  /**
-   * This function will acquire all the existing data from Kibana
-   * services and persisted state expected by the plugin's props
-   * interface. It then renders the plugin.
-   */
   public render = (
     renderComponent: BootstrapUptimeApp,
     createGraphQLClient: CreateGraphQLClient
@@ -55,14 +49,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
-
-          // configure breadcrumbs
           let kibanaBreadcrumbs: UMBreadcrumb[] = [];
           chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
             kibanaBreadcrumbs = breadcrumbs;
           });
-
-          // set up route with current base path
           const basePath = chrome.getBasePath();
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
@@ -84,35 +74,16 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           if ($location.absUrl().indexOf(PLUGIN.ROUTER_BASE_NAME) === -1) {
             $window.location.replace(routerBasename);
           }
-
-          // determine whether dark mode is enabled
-          const darkMode = config.get('theme:darkMode', false) || false;
-
-          // get current persisted state, if any
           const persistedState = this.initializePersistedState();
-
-          /**
-           * We pass this global help setup as a prop to the app, because for
-           * localization it's necessary to have the provider mounted before
-           * we can render our help links, as they rely on i18n.
-           */
-          const renderGlobalHelpControls = () =>
-            // render Uptime feedback link in global help menu
-            chrome.helpExtension.set((element: HTMLDivElement) => {
-              ReactDOM.render(renderUptimeKibanaGlobalHelp(), element);
-              return () => ReactDOM.unmountComponentAtNode(element);
-            });
-
+          const darkMode = config.get('theme:darkMode', false) || false;
           const {
             autorefreshIsPaused,
             autorefreshInterval,
             dateRangeStart,
             dateRangeEnd,
           } = persistedState;
-
           ReactDOM.render(
             renderComponent({
-              basePath,
               darkMode,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
@@ -123,7 +94,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               initialDateRangeStart: dateRangeStart,
               initialDateRangeEnd: dateRangeEnd,
               persistState: this.updatePersistedState,
-              renderGlobalHelpControls,
             }),
             elem
           );

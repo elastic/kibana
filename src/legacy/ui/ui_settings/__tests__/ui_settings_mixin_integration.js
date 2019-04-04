@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { Config } from '../../../server/config';
 

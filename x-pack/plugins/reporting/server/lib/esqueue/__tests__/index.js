@@ -5,7 +5,7 @@
  */
 
 import events from 'events';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { noop, times } from 'lodash';

@@ -24,7 +24,7 @@ import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
 import { LoggerFactory } from '../logging';
 import { Plugin, PluginManifest } from './plugin';
-import { PluginsServiceSetupDeps } from './plugins_service';
+import { PluginsServiceStartDeps } from './plugins_service';
 
 /**
  * Context that's available to plugins during initialization stage.
@@ -43,9 +43,9 @@ export interface PluginInitializerContext {
 }
 
 /**
- * Context passed to the plugins `setup` method.
+ * Context passed to the plugins `start` method.
  */
-export interface PluginSetupContext {
+export interface PluginStartContext {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
@@ -106,24 +106,24 @@ export function createPluginInitializerContext(
 }
 
 /**
- * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
- * This facade should be safe to use only within `setup` itself.
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
+ * This facade should be safe to use only within `start` itself.
  *
- * This is called for each plugin when it's set up, so each plugin gets its own
+ * This is called for each plugin when it's started, so each plugin gets its own
  * version of these values.
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
- * @param deps Dependencies that Plugins services gets during setup.
+ * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
-export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
-  deps: PluginsServiceSetupDeps,
+  deps: PluginsServiceStartDeps,
   plugin: Plugin<TPlugin, TPluginDependencies>
-): PluginSetupContext {
+): PluginStartContext {
   return {
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,

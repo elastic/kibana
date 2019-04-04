@@ -18,6 +18,6 @@
  */
 
 module.exports = {
-  presets: ['@kbn/babel-preset/node_preset'],
+  presets: ['@kbn/babel-preset/node_preset_7'],
   ignore: ['**/*.test.js'],
 };

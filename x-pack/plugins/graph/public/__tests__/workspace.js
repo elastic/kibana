@@ -5,7 +5,7 @@
  */
 
 const gws = require('../graphClientWorkspace.js');
-const expect = require('@kbn/expect');
+const expect = require('expect.js');
 describe('graphui-workspace', function () {
 
   describe('createWorkspace()', function () {

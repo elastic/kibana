@@ -21,7 +21,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { PersistedStateError } from '../../errors';
 import '..';
 

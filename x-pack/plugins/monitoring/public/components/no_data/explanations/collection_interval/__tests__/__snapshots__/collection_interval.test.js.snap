@@ -286,7 +286,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   isCollectionIntervalUpdating={true}
   property="xpack.monitoring.collection.interval"
 >
-  <WhatIs>
+  <Component>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -330,7 +330,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
         </EuiText>
       </span>
     </EuiTextColor>
-  </WhatIs>
+  </Component>
   <EuiHorizontalRule
     size="half"
   >
@@ -452,7 +452,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             iconSide="left"
             isLoading={true}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <button
@@ -609,7 +608,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   isCollectionIntervalUpdating={false}
   property="xpack.monitoring.collection.interval"
 >
-  <WhatIs>
+  <Component>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -653,7 +652,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
         </EuiText>
       </span>
     </EuiTextColor>
-  </WhatIs>
+  </Component>
   <EuiHorizontalRule
     size="half"
   >
@@ -775,7 +774,6 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             iconSide="left"
             isLoading={false}
             onClick={[Function]}
-            size="m"
             type="button"
           >
             <button

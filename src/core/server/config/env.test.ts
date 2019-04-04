@@ -17,7 +17,20 @@
  * under the License.
  */
 
-import { mockPackage } from './env.test.mocks';
+jest.mock('process', () => ({
+  cwd() {
+    return '/test/cwd';
+  },
+}));
+
+jest.mock('path', () => ({
+  resolve(...pathSegments: string[]) {
+    return pathSegments.join('/');
+  },
+}));
+
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../package.json', () => mockPackage);
 
 import { Env } from '.';
 import { getEnvOptions } from './__mocks__/env';

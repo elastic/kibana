@@ -15,21 +15,27 @@ import { LOGGING_TAG } from '../../common/constants';
  */
 
 export function exposeClient(server) {
-  const config = hasMonitoringCluster(server) ? server.config().get('xpack.monitoring.elasticsearch') : {};
+  const monitoringEsConfig = server.config().get('xpack.monitoring.elasticsearch');
+
+  let config;
+  let configSource;
+  if (!Boolean(monitoringEsConfig.hosts && monitoringEsConfig.hosts.length)) {
+    config = {};
+    configSource = 'production';
+  } else {
+    config = { ...monitoringEsConfig };
+    configSource = 'monitoring';
+  }
+
   const cluster = server.plugins.elasticsearch.createCluster('monitoring', {
     ...config,
     plugins: [monitoringBulk],
-    logQueries: Boolean(config.logQueries),
+    logQueries: Boolean(monitoringEsConfig.logQueries),
   });
 
   server.events.on('stop', bindKey(cluster, 'close'));
-  const configSource = hasMonitoringCluster(server) ? 'monitoring' : 'production';
-  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
-}
 
-export function hasMonitoringCluster(server) {
-  const hosts = server.config().get('xpack.monitoring.elasticsearch.hosts');
-  return Boolean(hosts && hosts.length);
+  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
 }
 
 

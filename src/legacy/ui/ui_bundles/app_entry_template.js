@@ -33,7 +33,7 @@ import 'dll/set_csp_nonce';
 __webpack_nonce__ = window.__kbnNonce__;
 
 // import global polyfills
-import '@babel/polyfill';
+import 'babel-polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
@@ -56,7 +56,7 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       }
     });
 
-    const coreStart = coreSystem.setup();
+    const coreStart = coreSystem.start();
 
     if (i18nError) {
       coreStart.fatalErrors.add(i18nError);

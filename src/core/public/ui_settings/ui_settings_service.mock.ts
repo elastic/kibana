@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsService, UiSettingsSetup } from './ui_settings_service';
+import { UiSettingsService, UiSettingsStart } from './ui_settings_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PublicMethodsOf<UiSettingsSetup>> = {
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<PublicMethodsOf<UiSettingsStart>> = {
     getAll: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
@@ -35,21 +35,21 @@ const createSetupContractMock = () => {
     stop: jest.fn(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return (setupContract as unknown) as UiSettingsSetup;
+  return (startContract as unknown) as UiSettingsStart;
 };
 
 type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
   const mocked: jest.Mocked<UiSettingsServiceContract> = {
-    setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const uiSettingsServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

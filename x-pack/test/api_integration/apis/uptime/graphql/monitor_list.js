@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import monitorList from './fixtures/monitor_list';
 import monitorListDownFiltered from './fixtures/monitor_list_down_filtered';
 import monitorListUpFiltered from './fixtures/monitor_list_up_filtered';

@@ -23,7 +23,7 @@ export class ConfigBlocksLib {
 
   public getForTags = async (tagIds: string[], page: number) => {
     const result = await this.adapter.getForTags(tagIds, page);
-    result.list = this.jsonConfigToUserYaml(result.list);
+    result.blocks = this.jsonConfigToUserYaml(result.blocks);
     return result;
   };
 

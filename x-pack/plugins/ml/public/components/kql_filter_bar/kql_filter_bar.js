@@ -8,29 +8,16 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiText
-} from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { metadata } from 'ui/metadata';
-import { getSuggestions, getKqlQueryValues } from './utils';
+import { getSuggestions } from './utils';
 
-function getErrorWithLink(errorMessage) {
-  return (
-    <EuiText>
-      {`${errorMessage} Input must be valid `}
-      <EuiLink
-        href={`https://www.elastic.co/guide/en/kibana/${metadata.branch}/kuery-query.html`}
-        target="_blank"
-      >
-        {'Kibana Query Language'}
-      </EuiLink>
-      {' (KQL) syntax.'}
-    </EuiText>);
+
+function convertKueryToEsQuery(kuery, indexPattern) {
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, indexPattern);
 }
-
 export class KqlFilterBar extends Component {
   state = {
     error: null,
@@ -73,24 +60,51 @@ export class KqlFilterBar extends Component {
   onSubmit = inputValue => {
     const { indexPattern } = this.props;
     const { onSubmit } = this.props;
+    const filteredFields = [];
 
     try {
-      // returns object with properties:  { influencersFilterQuery, filteredFields, queryString, isAndOperator }
-      const kqlQueryValues = getKqlQueryValues(inputValue, indexPattern);
-      onSubmit(kqlQueryValues);
+      const ast = fromKueryExpression(inputValue);
+      const query = convertKueryToEsQuery(inputValue, indexPattern);
+
+      if (!query) {
+        return;
+      }
+
+      // if ast.type == 'function' then layout of ast.arguments:
+      // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
+      if (ast && Array.isArray(ast.arguments)) {
+
+        ast.arguments.forEach((arg) => {
+          if (arg.arguments !== undefined) {
+            arg.arguments.forEach((nestedArg) => {
+              if (typeof nestedArg.value === 'string') {
+                filteredFields.push(nestedArg.value);
+              }
+            });
+          } else if (typeof arg.value === 'string') {
+            filteredFields.push(arg.value);
+          }
+        });
+
+      }
+
+      onSubmit({
+        influencersFilterQuery: query,
+        filteredFields,
+        queryString: inputValue
+      });
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
-      const errorWithLink = getErrorWithLink(e.message);
       const errorMessage = i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessage', {
         defaultMessage: 'Invalid kuery syntax'
       });
-      this.setState({ error: (e.message ? errorWithLink : errorMessage) });
+      this.setState({ error: (e.message ? e.message : errorMessage) });
     }
   };
 
   render() {
     const { error } = this.state;
-    const { initialValue, placeholder, valueExternal } = this.props;
+    const { initialValue, placeholder } = this.props;
 
     return (
       <Fragment>
@@ -102,7 +116,6 @@ export class KqlFilterBar extends Component {
           placeholder={placeholder}
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
-          valueExternal={valueExternal}
         />
         { error &&
           <EuiCallOut color="danger">
@@ -117,7 +130,6 @@ KqlFilterBar.propTypes = {
   indexPattern: PropTypes.object.isRequired,
   initialValue: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  valueExternal: PropTypes.string
+  placeholder: PropTypes.string
 };
 

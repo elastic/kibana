@@ -34,7 +34,7 @@ interface TagEditProps {
   tag: BeatTag;
   configuration_blocks: {
     error?: string | undefined;
-    list: ConfigurationBlock[];
+    blocks: ConfigurationBlock[];
     page: number;
     total: number;
   };

@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VislibComponentsLabelsLabelsProvider } from '../../components/labels/labels';
 import { VislibComponentsLabelsDataArrayProvider } from '../../components/labels/data_array';

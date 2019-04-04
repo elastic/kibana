@@ -22,7 +22,6 @@ import _ from 'lodash';
 import { timefilter } from 'ui/timefilter';
 
 import '../es';
-import '../listen';
 import '../index_patterns';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';

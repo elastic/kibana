@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
+import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
 
-const createSetupContractMock = () => {
-  const setupContract: ElasticsearchServiceSetup = {
+const createStartContractMock = () => {
+  const startContract: ElasticsearchServiceStart = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
@@ -32,21 +31,21 @@ const createSetupContractMock = () => {
     adminClient$: new BehaviorSubject({} as ClusterClient),
     dataClient$: new BehaviorSubject({} as ClusterClient),
   };
-  return setupContract;
+  return startContract;
 };
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
   const mocked: jest.Mocked<ElasticsearchServiceContract> = {
-    setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
 
 export const elasticsearchServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

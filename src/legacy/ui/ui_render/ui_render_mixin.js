@@ -213,12 +213,6 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedVarsOverrides
     });
 
-    // Get the list of new platform plugins.
-    // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
-    const uiPlugins = [
-      ...kbnServer.newPlatform.setup.plugins.uiPlugins.public.entries()
-    ].map(([id, plugin]) => ({ id, plugin }));
-
     const nonce = await generateCSPNonce();
 
     const response = h.view('ui_app', {
@@ -248,8 +242,6 @@ export function uiRenderMixin(kbnServer, server, config) {
             defaultInjectedVars,
           ),
         ),
-
-        uiPlugins,
 
         legacyMetadata,
       },

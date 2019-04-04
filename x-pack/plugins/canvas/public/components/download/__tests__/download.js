@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { render } from 'enzyme';
 import { Download } from '../';
 

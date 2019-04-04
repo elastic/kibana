@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import { extractAppPathAndId } from '../extract_app_path_and_id';
 
