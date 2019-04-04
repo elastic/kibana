@@ -193,17 +193,52 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
 };
 
 export const prepareJson = (variable: string, data: object): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${JSON.stringify(data)
     .replace(/\\/g, `\\\\`)
     .replace(/'/g, `\\'`)}' `;
 };
 
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+};
+
 export const prepareString = (variable: string, data: string): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const escapeString = (data: string): string => {
-  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
+export const prepareValue = (variable: string, data: any) => {
+  if (data === undefined) {
+    return '';
+  }
+  switch (typeof data) {
+    case 'string':
+      return prepareString(variable, data);
+    case 'object':
+      return prepareJson(variable, data);
+    default:
+      return `${variable}=${data} `;
+  }
+};
+
+export const prepareDimension = (variable: string, data: any) => {
+  if (data === undefined) {
+    return '';
+  }
+
+  let expr = `${variable}={visdimension ${data.accessor} `;
+  if (data.format) {
+    expr += prepareValue('format', data.format.id);
+    expr += prepareJson('formatParams', data.format.params);
+  }
+  expr += '} ';
+
+  return expr;
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -247,11 +282,38 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.metric(schemas),
-    };
-    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
+    const {
+      percentageMode,
+      useRanges,
+      colorSchema,
+      metricColorMode,
+      colorsRange,
+      labels,
+      invertColors,
+      style,
+    } = visState.params.metric;
+    const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
+
+    let expr = `metricvis `;
+    expr += prepareValue('percentage', percentageMode);
+    expr += prepareValue('colorSchema', colorSchema);
+    expr += prepareValue('colorMode', metricColorMode);
+    expr += prepareValue('useRanges', useRanges);
+    expr += prepareValue('colorRange', colorsRange);
+    expr += prepareValue('invertColors', invertColors);
+    expr += prepareValue('showLabels', labels.show);
+    expr += prepareValue('labelColor', style.labelColor);
+    expr += prepareValue('bgColor', style.bgColor);
+    expr += prepareValue('bgFill', style.bgFill);
+    expr += prepareValue('fontSize', style.fontSize);
+    expr += prepareValue('subText', style.subText);
+    expr += prepareDimension('bucket', bucket);
+
+    metrics.forEach(metric => {
+      expr += prepareDimension('metric', metric);
+    });
+
+    return expr;
   },
   tagcloud: (visState, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;

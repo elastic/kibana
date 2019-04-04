@@ -21,7 +21,7 @@ import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
 export const metric = () => ({
-  name: 'kibana_metric',
+  name: 'metricvis',
   type: 'render',
   context: {
     types: [
@@ -32,13 +32,86 @@ export const metric = () => ({
     defaultMessage: 'Metric visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+    percentage: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('metricVis.function.percentage.help', {
+        defaultMessage: 'Shows metric in percentage mode. Dont forget to set colorRange.'
+      })
+    },
+    colorSchema: {
+      types: ['string'],
+      default: '"Green to Red"',
+      help: i18n.translate('metricVis.function.colorSchema.help', {
+        defaultMessage: 'Color schema to use'
+      })
+    },
+    colorMode: {
+      types: ['string'],
+      default: '"None"',
+      options: ['None', 'Label', 'Background'],
+      help: i18n.translate('metricVis.function.colorMode.help', {
+        defaultMessage: 'Which part of metric to color'
+      })
+    },
+    colorRange: {
+      types: ['string'],
+      default: '"[{ from: 0, to: 10000 }]"',
+      help: i18n.translate('metricVis.function.colorRange.help', {
+        defaultMessage: 'Color ranges'
+      })
+    },
+    useRanges: {
+      types: ['boolean'],
+      default: false,
+    },
+    invertColors: {
+      types: ['boolean'],
+      default: false,
+    },
+    showLabels: {
+      types: ['boolean'],
+      default: true,
+    },
+    bgFill: {
+      types: ['string'],
+      default: '"#000"',
+    },
+    fontSize: {
+      types: ['number'],
+      default: 60,
+    },
+    subText: {
+      types: ['string'],
+      default: '""',
+      help: i18n.translate('metricVis.function.subText.help', {
+        defaultMessage: 'Custom text to show under the metric'
+      })
+    },
+    metric: {
+      types: ['vis_dimension'],
+      help: i18n.translate('metricVis.function.metric.help', {
+        defaultMessage: 'metric dimension configuration'
+      }),
+      required: true,
+      multi: true,
+    },
+    bucket: {
+      types: ['vis_dimension'],
+      help: i18n.translate('metricVis.function.bucket.help', {
+        defaultMessage: 'bucket dimension configuration'
+      }),
     },
   },
   fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+
+    const dimensions = {
+      metrics: args.metric,
+    };
+
+    if (args.bucket) {
+      dimensions.bucket = args.bucket;
+    }
 
     return {
       type: 'render',
@@ -46,7 +119,27 @@ export const metric = () => ({
       value: {
         visData: context,
         visType: 'metric',
-        visConfig,
+        visConfig: {
+          metric: {
+            percentageMode: args.percentage,
+            useRanges: args.useRanges,
+            colorSchema: args.colorSchema,
+            metricColorMode: args.colorMode,
+            colorsRange: JSON.parse(args.colorRange),
+            labels: {
+              show: args.showLabels,
+            },
+            invertColors: args.invertColors,
+            style: {
+              bgFill: args.bgFill,
+              bgColor: args.colorMode === 'Background',
+              labelColor: args.colorMode === 'Label',
+              subText: args.subText,
+              fontSize: args.fontSize,
+            }
+          },
+          dimensions,
+        },
         params: {
           listenOnChange: true,
         }
