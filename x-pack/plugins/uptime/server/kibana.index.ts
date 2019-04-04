@@ -43,7 +43,7 @@ export const initServerWithKibana = (server: KibanaServer) => {
           all: [],
           read: ['config'],
         },
-        ui: [],
+        ui: ['save'],
       },
       read: {
         api: ['uptime'],

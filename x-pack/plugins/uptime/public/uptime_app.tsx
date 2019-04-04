@@ -27,9 +27,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { uiCapabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
-import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBadge, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
 interface UptimeAppColors {
@@ -66,6 +67,7 @@ export interface UptimeAppProps {
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
+  updateBadge: UMUpdateBadge;
   persistState(state: UptimePersistedState): void;
   renderGlobalHelpControls(): void;
 }
@@ -92,6 +94,7 @@ interface SuperDateRangePickerRefreshChangedEvent {
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   private setBreadcrumbs: UMUpdateBreadcrumbs;
+  private setBadge: UMUpdateBadge;
   constructor(props: UptimeAppProps) {
     super(props);
 
@@ -103,9 +106,11 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialDateRangeEnd: dateRangeEnd,
       kibanaBreadcrumbs,
       updateBreadcrumbs,
+      updateBadge,
     } = props;
 
     this.setBreadcrumbs = updateBreadcrumbs;
+    this.setBadge = updateBadge;
 
     let colors: UptimeAppColors;
     if (darkMode) {
@@ -134,6 +139,14 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   public componentWillMount() {
     this.setBreadcrumbs([overviewBreadcrumb]);
+    this.setBadge(
+      !uiCapabilities.uptime.save
+        ? {
+            text: 'Read Only',
+            tooltip: 'You lack the authority',
+          }
+        : null
+    );
   }
 
   public componentDidMount() {
@@ -149,7 +162,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             <EuiPage className="app-wrapper-panel" data-test-subj="uptimeApp">
               <EuiHeader>
                 {/*
-              // @ts-ignore TODO no typings for grow prop */}
+                // @ts-ignore TODO no typings for grow prop */}
                 <EuiHeaderSection grow={true}>
                   <EuiHeaderSectionItem border="right">
                     <EuiHeaderLogo
