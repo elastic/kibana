@@ -32,6 +32,7 @@ interface AggParamReactWrapperProps<T> {
   isInvalid: boolean;
   indexedFields: FieldParamType[];
   onChange(value: T): void;
+  setTouched(): void;
   setValidity(isValid: boolean): void;
 }
 
@@ -44,6 +45,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
     value,
     isInvalid,
     setValidity,
+    setTouched,
     indexedFields,
   } = props;
   return (
@@ -54,6 +56,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
       agg={agg}
       isInvalid={isInvalid}
       indexedFields={indexedFields}
+      setTouched={setTouched}
       setValidity={setValidity}
     />
   );

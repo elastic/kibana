@@ -36,6 +36,7 @@ function FieldParamEditor({
   setValue,
   isInvalid,
   setValidity,
+  setTouched,
 }: AggParamEditorProps<FieldParamType>) {
   const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
   const selectedOptions: ComboBoxGroupedOption[] = value
@@ -52,6 +53,7 @@ function FieldParamEditor({
   const errors = [];
 
   if (!indexedFields.length) {
+    setTouched();
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
         defaultMessage:
@@ -89,6 +91,7 @@ function FieldParamEditor({
         isClearable={false}
         isInvalid={isInvalid}
         onChange={onChange}
+        onBlur={setTouched}
         data-test-subj="visDefaultEditorField"
         fullWidth={true}
       />

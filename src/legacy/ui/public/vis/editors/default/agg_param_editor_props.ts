@@ -32,4 +32,5 @@ export interface AggParamEditorProps<T> {
   isInvalid: boolean;
   setValue(value?: T): void;
   setValidity(isValid: boolean): void;
+  setTouched(): void;
 }

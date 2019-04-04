@@ -77,7 +77,10 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
 
           this.el.one('renderComplete', resolve);
           // track state of editable vis vs. "actual" vis
-          $scope.stageEditableVis = () => {
+          $scope.stageEditableVis = (isValid) => {
+            if (isValid === false) {
+              return;
+            }
             $scope.oldState = $scope.vis.getSerializableState($scope.state);
             $scope.vis.setCurrentState($scope.state);
             $scope.vis.updateState();

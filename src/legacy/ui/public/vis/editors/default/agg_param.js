@@ -30,6 +30,7 @@ uiModules
     ['aggParam', { watchDepth: 'reference' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid',
@@ -57,6 +58,7 @@ uiModules
             agg="agg"
             agg-param="aggParam"
             on-change="onChange"
+            set-touched="setTouched"
             value="paramValue"
             is-invalid="isInvalid"
             set-validity="setValidity"
@@ -75,6 +77,7 @@ uiModules
           $scope.$bind('indexedFields', attr.indexedFields);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
+          let _isInvalid = false;
           $scope.config = config;
 
           $scope.optionEnabled = function (option) {
@@ -90,6 +93,14 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
+            }, true);
+
+            $scope.$watch(() => {
+              return ngModelCtrl.$touched;
+            }, (value) => {
+              if (value === true) {
+                $scope.isInvalid = _isInvalid;
+              }
             }, true);
           }
 
@@ -107,9 +118,13 @@ uiModules
             }
           };
 
+          $scope.setTouched = () => {
+            $scope.isInvalid = _isInvalid;
+          };
+
           $scope.setValidity = (isValid) => {
             if(ngModelCtrl) {
-              $scope.isInvalid = !isValid;
+              _isInvalid = !isValid;
               ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
             }
           };
