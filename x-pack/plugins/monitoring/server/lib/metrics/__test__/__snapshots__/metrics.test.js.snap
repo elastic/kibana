@@ -3016,6 +3016,11 @@ Object {
     "app": "logstash",
     "calculation": [Function],
     "dateHistogramSubAggs": Object {
+      "missing_pipeline_id": Object {
+        "missing": Object {
+          "field": "logstash_stats.pipelines.id",
+        },
+      },
       "pipelines_nested": Object {
         "aggs": Object {
           "by_pipeline_id": Object {
@@ -3039,11 +3044,6 @@ Object {
         },
         "nested": Object {
           "path": "logstash_stats.pipelines",
-        },
-      },
-      "with_no_pipeline": Object {
-        "missing": Object {
-          "field": "logstash_stats.pipelines.id",
         },
       },
     },
@@ -3379,6 +3379,11 @@ Object {
     "app": "logstash",
     "calculation": [Function],
     "dateHistogramSubAggs": Object {
+      "missing_pipeline_id": Object {
+        "missing": Object {
+          "field": "logstash_stats.pipelines.id",
+        },
+      },
       "pipelines_nested": Object {
         "aggs": Object {
           "by_pipeline_id": Object {
@@ -3402,11 +3407,6 @@ Object {
         },
         "nested": Object {
           "path": "logstash_stats.pipelines",
-        },
-      },
-      "with_no_pipeline": Object {
-        "missing": Object {
-          "field": "logstash_stats.pipelines.id",
         },
       },
     },

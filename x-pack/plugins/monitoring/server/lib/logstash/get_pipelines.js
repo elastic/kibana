@@ -52,10 +52,17 @@ export function _handleResponse(response) {
   return pipelines;
 }
 
-export async function logstashPipelineWithoutPipelineFieldsExists(req, logstashIndexPattern) {
+/**
+ * Will return true if there are monitoring documents for a pipeline without an ID.
+ */
+export async function getClusterHasPipelineWithoutId(req, logstashIndexPattern) {
   const metricResponse = await getMetrics(req, logstashIndexPattern, ['logstash_cluster_no_pipelines_count']);
   const noPipelinesCount = get(metricResponse, 'logstash_cluster_no_pipelines_count', []);
-  return noPipelinesCount.reduce((acc, { data }) =>  acc || data.some(([_a, b]) => b === true), false);
+  return noPipelinesCount.reduce(
+    (acc, { data }) =>
+      acc || data.some(([_timeseriesPoint, hasPipelineMissingId]) => hasPipelineMissingId === true),
+    false
+  );
 }
 
 export async function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMetricKey) {

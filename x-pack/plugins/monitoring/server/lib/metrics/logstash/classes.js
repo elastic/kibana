@@ -372,7 +372,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     });
 
     this.dateHistogramSubAggs = {
-      with_no_pipeline: {
+      missing_pipeline_id: {
         missing: {
           field: 'logstash_stats.pipelines.id',
         },
