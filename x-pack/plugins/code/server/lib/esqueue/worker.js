@@ -71,6 +71,8 @@ export class Worker extends events.EventEmitter {
       continuePollingOnError: true,
       pollFrequencyErrorMultiplier: opts.intervalErrorMultiplier,
     });
+    // Reset all the existing processing jobs of this particular type.
+    this._resetProcessingJobs();
     this._startJobPolling();
   }
 
@@ -371,6 +373,52 @@ export class Worker extends events.EventEmitter {
       })
       .catch((err) => {
         this.debug('Error claiming jobs', err);
+      });
+  }
+
+  _resetProcessingJobs() {
+    const nowTime = moment().toISOString();
+    const query = {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              minimum_should_match: 1,
+              must: { term: { jobtype: this.jobtype } },
+              should: [
+                {
+                  bool: {
+                    must: [
+                      // Conditioned on the 'processing' jobs which have not
+                      // expired yet.
+                      { term: { status: 'processing' } },
+                      { range: { process_expiration: { gt: nowTime } } }
+                    ],
+                  },
+                },
+              ],
+            }
+          }
+        }
+      },
+      script: {
+        source: `ctx._source.status = "${constants.JOB_STATUS_PENDING}"`,
+        lang: 'painless',
+      }
+    };
+
+    return this.client.updateByQuery({
+      index: `${this.queue.index}-*`,
+      version: true,
+      body: query
+    })
+      .then((results) => {
+        return results.updated;
+      })
+      .catch((err) => {
+        this.debug('job querying failed', err);
+        this.emit(constants.EVENT_WORKER_RESET_PROCESSING_JOB_ERROR, this._formatErrorParams(err));
+        throw err;
       });
   }
 
