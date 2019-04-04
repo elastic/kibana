@@ -26,6 +26,7 @@ export interface OperationEditorProps {
   column: SelectOperation;
   onColumnChange: (newColumn: SelectOperation) => void;
   visModel: any;
+  allowedOperations?: Array<SelectOperation['operation']>;
 }
 
 export interface OperationDefinition {
@@ -33,7 +34,7 @@ export interface OperationDefinition {
   name: string;
 
   // The type of the operation (e.g. 'sum', 'avg', etc)
-  type: string;
+  type: SelectOperation['operation'];
 
   // Filter the fields list down to only those supported by this
   // operation (e.g. numbers for sum operations, dates for histograms)

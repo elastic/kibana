@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
 export function OperationEditor(props: OperationEditorProps) {
-  const { children, visModel, column, onColumnChange } = props;
+  const { children, visModel, column, onColumnChange, allowedOperations } = props;
   const [state, setState] = useState({
     isOpen: false,
   });
@@ -29,14 +29,16 @@ export function OperationEditor(props: OperationEditorProps) {
     {
       name: '',
       id: '0',
-      items: operations.map(op => ({
-        name: op.name,
-        id: op.type,
-        isSelected: op.type === column.operation,
-        onClick() {
-          changeOperation(op.type);
-        },
-      })),
+      items: operations
+        .filter(({ type }) => (allowedOperations ? allowedOperations.includes(type) : true))
+        .map(op => ({
+          name: op.name,
+          id: op.type,
+          isSelected: op.type === column.operation,
+          onClick() {
+            changeOperation(op.type);
+          },
+        })),
     },
   ];
 

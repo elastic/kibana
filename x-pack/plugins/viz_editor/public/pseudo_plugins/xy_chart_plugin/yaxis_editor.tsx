@@ -47,6 +47,7 @@ export function YAxisEditor({
         onColumnChange={newColumn => {
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
+        allowedOperations={['avg', 'cardinality', 'count', 'sum', 'window']}
       >
         {getOperationSummary(column)}
       </OperationEditor>
