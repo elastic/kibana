@@ -6,6 +6,7 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [FlyoutRef](./kibana-plugin-public.flyoutref.md) | A FlyoutSession describes the session of one opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call <code>close()</code> when it should be closed. Since a flyout could also be closed without calling this method (e.g. because the user closes it), you must listen to the "closed" event on this instance. It will be emitted whenever the flyout will be closed and you should throw away your reference to this instance whenever you receive that event. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
@@ -16,6 +17,7 @@
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the start lifecycle |
+|  [OverlaySetup](./kibana-plugin-public.overlaysetup.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) | The available core services passed to a plugin's <code>Plugin#setup</code> method. |

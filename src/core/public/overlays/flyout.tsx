@@ -28,7 +28,7 @@ import { I18nSetup } from '../i18n';
 /**
  * A FlyoutSession describes the session of one opened flyout panel. It offers
  * methods to close the flyout panel again. If you open a flyout panel you should make
- * sure you call {@link FlyoutRef#close} when it should be closed.
+ * sure you call `close()` when it should be closed.
  * Since a flyout could also be closed without calling this method (e.g. because
  * the user closes it), you must listen to the "closed" event on this instance.
  * It will be emitted whenever the flyout will be closed and you should throw
@@ -39,7 +39,7 @@ import { I18nSetup } from '../i18n';
 export class FlyoutRef {
   /**
    * An Observable that will emit and complete once this flyout is closed,
-   * by the user or by closing it from the outside via valling {@link #close}.
+   * by the user or by closing it from the outside via valling `close()`.
    */
   public readonly onClose$: Observable<void>;
 
@@ -68,7 +68,7 @@ export class FlyoutService {
 
   /**
    * Opens a flyout panel with the given component inside. You can use
-   * {@link FlyoutRef#close} on the return value to close the flyout.
+   * `close()` on the returned FlyoutRef to close the flyout.
    *
    * @param flyoutChildren - Mounts the children inside a flyout panel
    * @return {FlyoutRef} A reference to the opened flyout panel.

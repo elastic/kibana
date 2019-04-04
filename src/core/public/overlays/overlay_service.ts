@@ -26,6 +26,7 @@ interface Deps {
   i18n: I18nSetup;
 }
 
+/** @internal */
 export class OverlayService {
   private flyoutService: FlyoutService = new FlyoutService();
 
@@ -42,6 +43,7 @@ export class OverlayService {
   }
 }
 
+/** @public */
 export interface OverlaySetup {
   openFlyout: (
     flyoutChildren: React.ReactNode,

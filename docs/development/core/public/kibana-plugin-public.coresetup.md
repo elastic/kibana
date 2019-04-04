@@ -21,5 +21,6 @@ export interface CoreSetup
 |  [i18n](./kibana-plugin-public.coresetup.i18n.md) | <code>I18nSetup</code> |  |
 |  [injectedMetadata](./kibana-plugin-public.coresetup.injectedmetadata.md) | <code>InjectedMetadataSetup</code> |  |
 |  [notifications](./kibana-plugin-public.coresetup.notifications.md) | <code>NotificationsSetup</code> |  |
+|  [overlays](./kibana-plugin-public.coresetup.overlays.md) | <code>OverlaySetup</code> |  |
 |  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | <code>UiSettingsSetup</code> |  |
 
