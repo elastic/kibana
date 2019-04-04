@@ -121,7 +121,7 @@ export const WorkpadPage = compose(
         }
       }
       // instead of just combining `element` with `shape`, we make property transfer explicit
-      return element ? { ...shape, filter: element.filter } : shape;
+      return element ? { ...shape, filter: element.filter, expression: element.expression } : shape;
     });
     return {
       elements,
