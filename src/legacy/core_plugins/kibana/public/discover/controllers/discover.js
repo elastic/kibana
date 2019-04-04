@@ -382,6 +382,7 @@ function discoverController(
   const $state = $scope.state = new AppState(getStateDefaults());
 
   $scope.filters = queryFilter.getFilters();
+  $scope.screenTitle = savedSearch.title;
 
   $scope.onFiltersUpdated = filters => {
     // The filters will automatically be set when the queryFilter emits an update event (see below)

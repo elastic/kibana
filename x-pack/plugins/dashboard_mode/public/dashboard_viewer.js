@@ -30,6 +30,7 @@ import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
