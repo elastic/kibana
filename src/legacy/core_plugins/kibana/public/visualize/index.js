@@ -33,19 +33,10 @@ uiRoutes
   .defaults(/visualize/, {
     requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
-    badge: (i18n, uiCapabilities) => {
-      if (uiCapabilities.visualize.save) {
-        return undefined;
+    badge: (uiCapabilities) => {
+      if (!uiCapabilities.visualize.save) {
+        return 'readOnly';
       }
-
-      return {
-        text: i18n('kbn.visualize.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
-        }),
-        tooltip: i18n('kbn.visualize.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
-        }),
-      };
     }
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {

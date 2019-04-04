@@ -86,6 +86,7 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
+    setBadge,
   } = props;
 
   let colors: UptimeAppColors;
@@ -120,12 +121,7 @@ const Application = (props: UptimeAppProps) => {
     setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
     setBadge(
-      !uiCapabilities.uptime.save
-        ? {
-            text: 'Read Only',
-            tooltip: 'You lack the authority',
-          }
-        : undefined
+      !uiCapabilities.uptime.save ? 'readOnly' : undefined
     );
   }, []);
 

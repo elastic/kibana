@@ -63,19 +63,10 @@ uiRoutes
     template: indexTemplate,
     k7Breadcrumbs: getBreadcrumbs,
     requireUICapability: 'management.kibana.settings',
-    badge: (i18n, uiCapabilities) => {
-      if (uiCapabilities.advancedSettings.save) {
-        return undefined;
+    badge: (uiCapabilities) => {
+      if (!uiCapabilities.advancedSettings.save) {
+        return 'readOnly';
       }
-
-      return {
-        text: i18n('kbn.management.advancedSettings.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
-        }),
-        tooltip: i18n('kbn.management.advancedSettings.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
-        }),
-      };
     }
   });
 

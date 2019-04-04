@@ -58,19 +58,10 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true,
     requireUICapability: 'dashboard.show',
-    badge: (i18n, uiCapabilities) => {
-      if (uiCapabilities.dashboard.showWriteControls) {
-        return undefined;
+    badge: (uiCapabilities) => {
+      if (!uiCapabilities.dashboard.showWriteControls) {
+        return 'readOnly';
       }
-
-      return {
-        text: i18n('kbn.dashboard.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
-        }),
-        tooltip: i18n('kbn.dashboard.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
-        }),
-      };
     }
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
