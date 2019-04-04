@@ -9,14 +9,14 @@ customizable actions when an alerts' conditions are met. This includes providing
 data from the context of the alert itself. For instance creating a github issue 
 with details from the ES query that generated the alert. For that same type of 
 alert we do not want to restrict it to integrating only with github but rather 
-allow the user to choose whatever action(s) they would like to perform when 
-that alert is triggered. 
+allow the user to choose whatever action(s) they would like when that alert is 
+triggered.
 
-The action service therefore will be responsible for 
-handling the integrations such as with github, slack, email, and PagerDuty. 
-Allowing the alert service to focus on handling the querying and conditional 
-logic. Separating the two concerns will allow for alerts to more easily support 
-any number of integrations for a specific **action type**. 
+The action service therefore will be responsible for handling the integrations 
+such as with github, slack, email, and PagerDuty. Allowing the alert service 
+to focus on handling the querying and conditional logic. Separating the two 
+concerns will allow for alerts to more easily support any number of 
+integrations for a specific **action types**. 
 
 # Basic example
 
@@ -46,9 +46,9 @@ fire an action without knowing the specifics of a particular service.
 The following might help illustrate the relationship
 
 - Alert task queries ES and checks some condition
-  - Condition met
-  - alert task fires an `preconfigured action instatnce` passing only required fields
-  - action service invokes handler/handlers for preconfigured actions
+  - when Condition met
+    - alert task fires a `preconfigured action instance` passing only required fields
+    - action service invokes handler/handlers for preconfigured actions
 
 We also want to be able to support multiple configurations for each integration.
 Such as multiple slacks and/or slack channels. Multiple send email addresses
