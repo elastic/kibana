@@ -17,57 +17,76 @@
  * under the License.
  */
 
-import { createObjectsFilter } from './create_objects_filter';
+import { splitOverwrites } from './split_overwrites';
 
-describe('createObjectsFilter()', () => {
-  test('filter should return false when contains empty parameters', () => {
-    const fn = createObjectsFilter([]);
-    expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
-  });
-
-  test('filter should return true for objects that are being retried', () => {
-    const fn = createObjectsFilter([
+describe('splitOverwrites()', () => {
+  test('should split array accordingly', () => {
+    const retries = [
       {
         type: 'a',
         id: '1',
-        overwrite: false,
+        overwrite: true,
         replaceReferences: [],
       },
-    ]);
-    expect(
-      fn({
-        type: 'a',
-        id: '1',
-        attributes: {},
-        references: [],
-      })
-    ).toEqual(true);
-  });
-
-  test(`filter should return false for objects that aren't being retried`, () => {
-    const fn = createObjectsFilter([
       {
-        type: 'a',
-        id: '1',
-        overwrite: false,
-        replaceReferences: [],
-      },
-    ]);
-    expect(
-      fn({
-        type: 'b',
-        id: '1',
-        attributes: {},
-        references: [],
-      })
-    ).toEqual(false);
-    expect(
-      fn({
-        type: 'a',
         id: '2',
+        type: 'b',
+        overwrite: false,
+        replaceReferences: [],
+      },
+      {
+        type: 'c',
+        id: '3',
+        overwrite: true,
+        replaceReferences: [],
+      },
+    ];
+    const savedObjects = [
+      {
+        id: '1',
+        type: 'a',
         attributes: {},
         references: [],
-      })
-    ).toEqual(false);
+      },
+      {
+        id: '2',
+        type: 'b',
+        attributes: {},
+        references: [],
+      },
+      {
+        id: '3',
+        type: 'c',
+        attributes: {},
+        references: [],
+      },
+    ];
+    const result = splitOverwrites(savedObjects, retries);
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "objectsToNotOverwrite": Array [
+    Object {
+      "attributes": Object {},
+      "id": "2",
+      "references": Array [],
+      "type": "b",
+    },
+  ],
+  "objectsToOverwrite": Array [
+    Object {
+      "attributes": Object {},
+      "id": "1",
+      "references": Array [],
+      "type": "a",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "3",
+      "references": Array [],
+      "type": "c",
+    },
+  ],
+}
+`);
   });
 });
