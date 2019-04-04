@@ -116,7 +116,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               darkMode,
               setBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
-              updateBadge: chrome.badge.set,
+              setBadge: chrome.badge.set,
               routerBasename,
               client: graphQLClient,
               initialAutorefreshIsPaused: autorefreshIsPaused,
