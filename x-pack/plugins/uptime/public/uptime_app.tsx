@@ -25,9 +25,10 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { uiCapabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
-import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBadge, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
 
@@ -56,6 +57,7 @@ export interface UptimeAppProps {
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
+  setBadge: UMUpdateBadge;
   persistState(state: UptimePersistedState): void;
   renderGlobalHelpControls(): void;
 }
@@ -117,6 +119,14 @@ const Application = (props: UptimeAppProps) => {
   useEffect(() => {
     setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
+    setBadge(
+      !uiCapabilities.uptime.save
+        ? {
+            text: 'Read Only',
+            tooltip: 'You lack the authority',
+          }
+        : null
+    );
   }, []);
 
   const refreshApp = () => {
