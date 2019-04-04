@@ -48,7 +48,7 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
 
 function requestFindReferences(params: TextDocumentPositionParams) {
   return kfetch({
-    pathname: `../api/lsp/findReferences`,
+    pathname: `/api/lsp/findReferences`,
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -120,7 +120,7 @@ function* handleFile(repoUri: string, file: string, revision: string) {
 }
 
 function fetchRepo(repoUri: string) {
-  return kfetch({ pathname: `../api/code/repo/${repoUri}` });
+  return kfetch({ pathname: `/api/code/repo/${repoUri}` });
 }
 
 function* loadRepoSaga(action: any) {

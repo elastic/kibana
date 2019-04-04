@@ -109,13 +109,13 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
   });
 
   server.route({
-    path: '/api/code/repo/{uri*3}/raw/{rev}/{path*}',
+    path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
     async handler(req, h: hapi.ResponseToolkit) {
       const fileResolver = new GitOperations(options.repoPath);
-      const { uri, path, rev } = req.params;
+      const { uri, path, ref } = req.params;
       try {
-        const blob = await fileResolver.fileContent(uri, path, rev);
+        const blob = await fileResolver.fileContent(uri, path, ref);
         if (blob.isBinary()) {
           return h.response(blob.content()).type('application/octet-stream');
         } else {

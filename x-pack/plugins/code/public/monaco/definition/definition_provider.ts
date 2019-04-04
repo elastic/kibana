@@ -12,7 +12,7 @@ import { Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
 
 export function provideDefinition(monaco: any, model: editor.ITextModel, position: any) {
-  const lspClient = new LspRestClient('../api/lsp');
+  const lspClient = new LspRestClient('/api/lsp');
   const lspMethods = new TextDocumentMethods(lspClient);
   function handleLocation(location: Location): languages.Location {
     return {

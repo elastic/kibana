@@ -52,7 +52,7 @@ export class TextModelResolverService implements ITextModelService {
     const repo = `${resource.authority}${resource.path}`;
     const revision = resource.query;
     const file = resource.fragment;
-    const response = await fetch(`../api/code/repo/${repo}/blob/${revision}/${file}`);
+    const response = await fetch(`/api/code/repo/${repo}/blob/${revision}/${file}`);
     if (response.status === 200) {
       const contentType = response.headers.get('Content-Type');
 

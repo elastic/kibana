@@ -31,7 +31,7 @@ import { cloneCompletedPattern } from './status';
 
 function fetchStatus(repoUri: string) {
   return kfetch({
-    pathname: `../api/code/repo/status/${repoUri}`,
+    pathname: `/api/code/repo/status/${repoUri}`,
   });
 }
 

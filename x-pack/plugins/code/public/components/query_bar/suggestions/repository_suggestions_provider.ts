@@ -29,7 +29,7 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
         queryParams.repoScope = repoScope.join(',');
       }
       const res = await kfetch({
-        pathname: `../api/code/suggestions/repo`,
+        pathname: `/api/code/suggestions/repo`,
         method: 'get',
         query: queryParams,
       });

@@ -12,7 +12,7 @@ import { loadUserProfile, loadUserProfileFailed, loadUserProfileSuccess } from '
 
 function requestUserProfile() {
   return kfetch({
-    pathname: `../api/security/v1/me`,
+    pathname: `/api/security/v1/me`,
     method: 'get',
   });
 }

@@ -52,7 +52,7 @@ function requestDocumentSearch(payload: DocumentSearchPayload) {
 
   if (query && query.length > 0) {
     return kfetch({
-      pathname: `../api/code/search/doc`,
+      pathname: `/api/code/search/doc`,
       method: 'get',
       query: queryParams,
     });
@@ -76,7 +76,7 @@ function* handleDocumentSearch(action: Action<DocumentSearchPayload>) {
 
 function requestRepositorySearch(q: string) {
   return kfetch({
-    pathname: `../api/code/search/repo`,
+    pathname: `/api/code/search/repo`,
     method: 'get',
     query: { q },
   });

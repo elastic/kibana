@@ -21,7 +21,6 @@ export const code = (kibana: any) =>
     uiExports: {
       app: {
         title: 'Code',
-        description: 'Code Search Plugin',
         main: 'plugins/code/app',
         euiIconType: 'codeApp',
       },

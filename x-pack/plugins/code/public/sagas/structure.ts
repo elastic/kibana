@@ -9,7 +9,7 @@ import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
 
 function requestStructure(uri?: string) {
-  const lspClient = new LspRestClient('../api/lsp');
+  const lspClient = new LspRestClient('/api/lsp');
   const lspMethods = new TextDocumentMethods(lspClient);
   return lspMethods.documentSymbol.send({
     textDocument: {
