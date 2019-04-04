@@ -8,8 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
-import { UIM_APP_LOAD } from '../common';
-import { CRUD_APP_BASE_PATH } from './constants';
+import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 

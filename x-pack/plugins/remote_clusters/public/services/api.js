@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../../common';
+import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../constants';
 import { trackUserRequest } from './track_ui_metric';
 
 let httpClient;

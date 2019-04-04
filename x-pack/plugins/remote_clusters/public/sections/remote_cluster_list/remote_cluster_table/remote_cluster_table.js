@@ -20,8 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { UIM_SHOW_DETAILS_CLICK } from '../../../../common';
-import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { getRouterLinkProps, trackUiMetric } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 

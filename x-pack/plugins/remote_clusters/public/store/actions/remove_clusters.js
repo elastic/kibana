@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import { UIM_CLUSTER_REMOVE } from '../../../common';
+import { UIM_CLUSTER_REMOVE } from '../../constants';
 
 import {
   removeClusterRequest as sendRemoveClusterRequest,

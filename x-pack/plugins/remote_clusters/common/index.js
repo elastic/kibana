@@ -7,13 +7,3 @@
 export const PLUGIN = {
   ID: 'remote_clusters'
 };
-
-export {
-  UIM_APP_NAME,
-  UIM_APP_LOAD,
-  UIM_CLUSTER_ADD,
-  UIM_CLUSTER_UPDATE,
-  UIM_CLUSTER_REMOVE,
-  UIM_SHOW_DETAILS_CLICK,
-  UIM_EDIT_START,
-} from './ui_metric';

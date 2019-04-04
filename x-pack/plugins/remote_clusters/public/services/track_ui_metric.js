@@ -5,7 +5,7 @@
  */
 
 import { createUiMetricUri } from '../../../../common/ui_metric';
-import { UIM_APP_NAME } from '../../common';
+import { UIM_APP_NAME } from '../constants';
 import { getHttpClient } from './api';
 
 export function trackUiMetric(actionType) {

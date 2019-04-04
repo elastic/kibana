@@ -22,8 +22,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { UIM_EDIT_START } from '../../../common';
-import { CRUD_APP_BASE_PATH } from '../../constants';
+import { CRUD_APP_BASE_PATH, UIM_EDIT_START } from '../../constants';
 import {
   buildListBreadcrumb,
   editBreadcrumb,
