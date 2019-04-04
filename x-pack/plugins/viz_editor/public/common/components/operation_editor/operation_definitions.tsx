@@ -74,6 +74,7 @@ function fieldOperationEditor({ column, visModel, onColumnChange }: OperationEdi
       onChange={e =>
         onColumnChange({
           ...operation,
+          alias: e.target.value,
           argument: {
             ...argument,
             field: e.target.value,
@@ -172,6 +173,7 @@ export const operations: OperationDefinition[] = [
     ): ColumnOperation {
       return {
         operation: 'column',
+        alias: getFieldName(currentOperation, fields),
         argument: { field: getFieldName(currentOperation, fields) },
       };
     },

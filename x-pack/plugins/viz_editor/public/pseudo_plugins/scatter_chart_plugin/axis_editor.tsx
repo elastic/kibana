@@ -21,7 +21,11 @@ export function AxisEditor({
 }) {
   const onDropField = (field: DatasourceField) => {
     onChangeVisModel(
-      updateColumn(col, { operation: 'column', argument: { field: field.name } }, visModel)
+      updateColumn(
+        col,
+        { operation: 'column', alias: field.name, argument: { field: field.name } },
+        visModel
+      )
     );
   };
 
