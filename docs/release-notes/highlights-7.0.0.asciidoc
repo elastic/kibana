@@ -102,7 +102,7 @@ You can also easily move objects from one {kib} instance to another or
 between Spaces.
 
 [float]
-=== Canvas enhancments
+=== Canvas enhancements
 
 Canvas has two notable improvements: an expandable expression editor and 
 additional keyboard shortcuts. 
