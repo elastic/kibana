@@ -25,7 +25,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  static viewIndexedData = (onPreviewSource, inspectorAdapters) => {
+  static viewIndexedData = (addAndViewSource, inspectorAdapters) => {
     return ({ fields, id }) => {
       const indexPatternId = id;
       const geoFieldArr = fields.filter(
@@ -33,7 +33,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
       );
       const geoField = geoFieldArr[0].name;
       if (!indexPatternId) {
-        onPreviewSource(null);
+        addAndViewSource(null);
         return;
       }
       const source = new ESSearchSource({
@@ -41,7 +41,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         indexPatternId,
         geoField,
       }, inspectorAdapters);
-      onPreviewSource(source);
+      addAndViewSource(source);
     };
   };
 
@@ -57,7 +57,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   };
 
-  static renderEditor({ onPreviewSource, inspectorAdapters }, boolIndexData) {
+  static renderEditor({ onPreviewSource, inspectorAdapters, addAndViewSource }, boolIndexData) {
     return (
       <ClientFileCreateSourceEditor
         previewGeojsonFile={
@@ -68,7 +68,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         }
         viewIndexedData={
           GeojsonFileSource.viewIndexedData(
-            onPreviewSource,
+            addAndViewSource,
             inspectorAdapters
           )
         }

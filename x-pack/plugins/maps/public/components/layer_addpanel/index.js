@@ -33,7 +33,7 @@ function mapDispatchToProps(dispatch) {
     closeFlyout: () => {
       dispatch(clearTransientLayerStateAndCloseFlyout());
     },
-    previewLayer: async (layer) => {
+    previewLayer: async (layer, temp = true) => {
       //this removal always needs to happen prior to adding the new layer
       //many source editors allow users to modify the settings in the add-source wizard
       //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
@@ -41,7 +41,8 @@ function mapDispatchToProps(dispatch) {
       await dispatch(removeTransientLayer());
       dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
-      dispatch(setTransientLayer(layer.getId()));
+      temp && dispatch(setTransientLayer(layer.getId()));
+      !temp && dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     removeTransientLayer: () => {
       dispatch(setSelectedLayer(null));

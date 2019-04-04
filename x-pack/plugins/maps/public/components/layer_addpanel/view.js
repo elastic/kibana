@@ -34,7 +34,7 @@ export class AddLayerPanel extends Component {
     indexingTriggered: false,
   }
 
-  _previewLayer = source => {
+  _previewLayer = (source, temp = true) => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
@@ -44,7 +44,7 @@ export class AddLayerPanel extends Component {
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
     },
-    () => this.props.previewLayer(this.state.layer));
+    () => this.props.previewLayer(this.state.layer, temp));
   };
 
   _clearSource = () => {
@@ -128,10 +128,16 @@ export class AddLayerPanel extends Component {
     );
   }
 
-  _getEditorProperties = () => {
+  _getEditorProperties = (importView = false) => {
     return {
       onPreviewSource: this._previewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
+      ...(importView
+        ? {
+          addAndViewSource: source => this._previewLayer(source, false)
+        }
+        : {}
+      )
     };
   }
 
@@ -182,7 +188,7 @@ export class AddLayerPanel extends Component {
         <EuiPanel>
           {
             GeojsonFileSource.renderEditor(
-              this._getEditorProperties(),
+              this._getEditorProperties(true),
               this.state.indexingTriggered
             )
           }
