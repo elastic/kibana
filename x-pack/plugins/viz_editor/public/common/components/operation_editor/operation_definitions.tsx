@@ -39,7 +39,7 @@ export interface OperationDefinition {
 
   // Filter the fields list down to only those supported by this
   // operation (e.g. numbers for sum operations, dates for histograms)
-  applicableFields: (fields: DatasourceField[]) => DatasourceField[];
+  applicableFields: (fields: DatasourceField[], props: OperationEditorProps) => DatasourceField[];
 
   // Provide a textual summary of the operation, maybe should return
   // a React component instead of a string?
@@ -56,12 +56,13 @@ export interface OperationDefinition {
   editor?: (props: OperationEditorProps) => React.ReactElement;
 }
 
-function fieldOperationEditor({ column, visModel, onColumnChange }: OperationEditorProps) {
+function fieldOperationEditor(props: OperationEditorProps) {
+  const { column, visModel, onColumnChange } = props;
   const operation = column as FieldOperation;
   const { argument } = operation;
   const opDefinition = getOperationDefinition(column.operation);
   const options = opDefinition
-    .applicableFields(visModel.datasource.fields)
+    .applicableFields(visModel.datasource.fields, props)
     .map((f: DatasourceField) => ({
       value: f.name,
       text: f.name,
@@ -86,12 +87,13 @@ function fieldOperationEditor({ column, visModel, onColumnChange }: OperationEdi
   );
 }
 
-function windowOperationEditor({ column, visModel, onColumnChange }: OperationEditorProps) {
+function windowOperationEditor(props: OperationEditorProps) {
+  const { column, visModel, onColumnChange } = props;
   const operation = column as WindowOperation;
   const { argument } = operation;
   const opDefinition = getOperationDefinition(column.operation);
   const options = opDefinition
-    .applicableFields(visModel.datasource.fields)
+    .applicableFields(visModel.datasource.fields, props)
     .map((f: DatasourceField) => ({
       value: f.name,
       text: f.name,
@@ -165,7 +167,8 @@ export const operations: OperationDefinition[] = [
   {
     name: 'Values',
     type: 'column',
-    applicableFields: fields => fields,
+    applicableFields: (fields, { allowedColumnTypes }) =>
+      fields.filter(({ type }) => (allowedColumnTypes ? allowedColumnTypes.includes(type) : true)),
     editor: fieldOperationEditor,
     toSelectClause(
       currentOperation: SelectOperation | undefined,
