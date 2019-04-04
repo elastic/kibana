@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import '../filters/uriescape';
-import '../filters/rison';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
