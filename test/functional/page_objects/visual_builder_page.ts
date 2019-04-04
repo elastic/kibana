@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -40,19 +41,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkVisualBuilderIsPresent() {
-      await testSubjects.exists('tvbEditor', { timeout: 5000 });
+      expect(await testSubjects.exists('tvbEditor', { timeout: 5000 })).to.be(true);
     }
 
     public async checkMetricTabIsPresent() {
-      await testSubjects.exists('tsvbMetricValue', { timeout: 5000 });
+      expect(await testSubjects.exists('tsvbMetricValue', { timeout: 5000 })).to.be(true);
     }
 
     public async checkGaugeTabIsPresent() {
-      await testSubjects.exists('tvbVisGaugeContainer', { timeout: 5000 });
+      expect(await testSubjects.exists('tvbVisGaugeContainer', { timeout: 5000 })).to.be(true);
     }
 
     public async checkTopNTabIsPresent() {
-      await testSubjects.exists('tvbVisTopNTable', { timeout: 5000 });
+      expect(await testSubjects.exists('tvbVisTopNTable', { timeout: 5000 })).to.be(true);
     }
 
     public async clickMetric() {
