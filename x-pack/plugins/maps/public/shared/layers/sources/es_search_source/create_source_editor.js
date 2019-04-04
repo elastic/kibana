@@ -17,13 +17,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { kfetch } from 'ui/kfetch';
 import { GIS_API_PATH } from '../../../../../common/constants';
-import { DEFAULT_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 function filterGeoField(field) {
   return ['geo_point', 'geo_shape'].includes(field.type);
 }
-
-const DOC_COUNT_UNSET = -1;
+const RESET_INDEX_PATTERN_STATE = {
+  indexPattern: undefined,
+  geoField: undefined,
+  filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
+  showFilterByBoundsSwitch: false,
+};
 
 export class CreateSourceEditor extends Component {
 
@@ -33,12 +37,8 @@ export class CreateSourceEditor extends Component {
 
   state = {
     isLoadingIndexPattern: false,
-    indexPatternId: '',
-    geoField: '',
     noGeoIndexPatternsExist: false,
-    indexDocCount: DOC_COUNT_UNSET,
-    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
-    showFilterByBoundsSwitch: false,
+    ...RESET_INDEX_PATTERN_STATE,
   };
 
   componentWillUnmount() {
@@ -59,28 +59,18 @@ export class CreateSourceEditor extends Component {
   loadIndexPattern = (indexPatternId) => {
     this.setState({
       isLoadingIndexPattern: true,
-      indexPattern: undefined,
-      geoField: undefined,
-      indexDocCount: DOC_COUNT_UNSET,
-      filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
-      showFilterByBoundsSwitch: false,
+      ...RESET_INDEX_PATTERN_STATE
     }, this.debouncedLoad.bind(null, indexPatternId));
   };
 
   loadIndexDocCount = async (indexPatternTitle) => {
-    try {
-      const { count } = await kfetch({
-        pathname: `../${GIS_API_PATH}/indexCount`,
-        query: {
-          index: indexPatternTitle
-        }
-      });
-      return count;
-    } catch (error) {
-      // retrieving index count is a nice to have and is not essential
-      // do not interrupt user flow if unable to retrieve count
-      return DOC_COUNT_UNSET;
-    }
+    const { count } = await kfetch({
+      pathname: `../${GIS_API_PATH}/indexCount`,
+      query: {
+        index: indexPatternTitle
+      }
+    });
+    return count;
   }
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
@@ -96,10 +86,14 @@ export class CreateSourceEditor extends Component {
       return;
     }
 
-    // Turn off filterByMapBounds when index contains a limited number of documents
-    const indexDocCount = await this.loadIndexDocCount(indexPattern.title);
-    const showFilterByBoundsSwitch = indexDocCount !== DOC_COUNT_UNSET && indexDocCount <= DEFAULT_LIMIT;
-    const filterByMapBounds = !showFilterByBoundsSwitch;
+    let indexHasSmallDocCount = false;
+    try {
+      const indexDocCount = await this.loadIndexDocCount(indexPattern.title);
+      indexHasSmallDocCount = indexDocCount <= DEFAULT_ES_DOC_LIMIT;
+    }  catch (error) {
+      // retrieving index count is a nice to have and is not essential
+      // do not interrupt user flow if unable to retrieve count
+    }
 
     if (!this._isMounted) {
       return;
@@ -114,9 +108,8 @@ export class CreateSourceEditor extends Component {
     this.setState({
       isLoadingIndexPattern: false,
       indexPattern: indexPattern,
-      indexDocCount,
-      filterByMapBounds,
-      showFilterByBoundsSwitch
+      filterByMapBounds: !indexHasSmallDocCount, // Turn off filterByMapBounds when index contains a limited number of documents
+      showFilterByBoundsSwitch: indexHasSmallDocCount
     });
 
     //make default selection
