@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve, dirname } from 'path';
+import { resolve, dirname, relative } from 'path';
 import { writeFile, readFileSync } from 'fs';
 import { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
@@ -68,7 +68,7 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async takeForFailure(name, el, error) {
-      error.addl.screenshot = resolve(FAILURE_DIRECTORY, `${name}.png`);
+      error.addl.screenshot = relative(process.env.WORKSPACE + '/kibana', resolve(FAILURE_DIRECTORY, `${name}.png`));
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
     }
 

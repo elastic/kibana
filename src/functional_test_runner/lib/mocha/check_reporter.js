@@ -65,7 +65,12 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
       debugger;
       this.errors.push({
         // ...runnable.addl,
-        screenshot: runnable.addl.screenshot,
+        // https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/JOB=kibana-ciGroup4,node=immutable/8142/kibana/test/functional/screenshots/failure/dashboard%20app%20using%20legacy%20data%20bwc%20shared%20urls%206_0%20urls%20loads%20an%20unsaved%20dashboard.png
+        //todo parse out base path
+        // `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/`
+        // WORKSPACE	/var/lib/jenkins/workspace/elastic+kibana+pull-request/JOB/kibana-ciGroup4/node/immutable
+
+        screenshot: `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
         path,
         start_line: line,
         end_line: line,
