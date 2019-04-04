@@ -250,6 +250,46 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
+  public getDeniedFieldsControl = () => {
+    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
+
+    if (!allowFieldLevelSecurity) {
+      return null;
+    }
+
+    const { except = [] } = indexPrivilege.field_security || {};
+
+    if (allowFieldLevelSecurity) {
+      return (
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.indexPrivilegeForm.deniedFieldsFormRowLabel"
+                defaultMessage="Denied fields (optional)"
+              />
+            }
+            fullWidth={true}
+            className="indexPrivilegeForm__deniedFieldsRow"
+          >
+            <Fragment>
+              <EuiComboBox
+                data-test-subj={`deniedFieldInput${this.props.formIndex}`}
+                options={availableFields ? availableFields.map(toOption) : []}
+                selectedOptions={except.map(toOption)}
+                onCreateOption={this.onCreateDeniedField}
+                onChange={this.onDeniedFieldsChange}
+                isDisabled={isReservedRole}
+              />
+            </Fragment>
+          </EuiFormRow>
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
+  };
+
   public getGrantedDocumentsControl = () => {
     const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
 
