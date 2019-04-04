@@ -58,8 +58,8 @@ export class BlameWidget implements Editor.IContentWidget {
   private update() {
     const { fontSize, lineHeight } = this.editor.getConfiguration().fontInfo;
     this.domNode.style.position = 'relative';
-    this.domNode.style.left = '-362px';
-    this.domNode.style.width = '300px';
+    this.domNode.style.left = '-332px';
+    this.domNode.style.width = '316px';
     this.domNode.style.fontSize = `${fontSize}px`;
     this.domNode.style.lineHeight = `${lineHeight}px`;
     const element = React.createElement(
