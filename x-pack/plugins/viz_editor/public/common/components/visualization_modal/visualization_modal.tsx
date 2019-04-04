@@ -48,7 +48,7 @@ export function VisualizationModal({
       [category: string]: Suggestion[];
     }
   );
-  const [filter, setFilter] = useState<string | undefined>(undefined);
+  const [filter, setFilter] = useState<string | null>(null);
 
   return (
     <>
@@ -64,7 +64,7 @@ export function VisualizationModal({
                 <EuiFacetGroup style={{ maxWidth: 200 }}>
                   <EuiFacetButton
                     onClick={() => {
-                      setFilter(undefined);
+                      setFilter(null);
                     }}
                     buttonRef={null as any}
                     quantity={suggestions.length}
