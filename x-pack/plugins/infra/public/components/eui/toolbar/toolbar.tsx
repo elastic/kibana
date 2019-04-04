@@ -6,9 +6,9 @@
 
 import { EuiPanel } from '@elastic/eui';
 
-import styled from 'styled-components';
+import euiStyled from '../../../../../../common/eui_styled_components';
 
-export const Toolbar = styled(EuiPanel).attrs({
+export const Toolbar = euiStyled(EuiPanel).attrs({
   grow: false,
   paddingSize: 'none',
 })`

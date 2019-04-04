@@ -9,7 +9,7 @@ import { ApolloError } from 'apollo-client';
 import { get } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
+import { Ping } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { EmptyStatusBar, MonitorStatusBar } from '../../functional';

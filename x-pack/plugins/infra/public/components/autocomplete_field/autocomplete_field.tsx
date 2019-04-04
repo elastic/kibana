@@ -11,10 +11,10 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -296,11 +296,11 @@ const FixedEuiFieldSearch: React.SFC<
     }
 > = EuiFieldSearch as any;
 
-const AutocompleteContainer = styled.div`
+const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = styled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   paddingSize: 'none',
   hasShadow: true,
 })`

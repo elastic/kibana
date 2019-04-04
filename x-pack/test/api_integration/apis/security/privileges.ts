@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -134,6 +134,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/search/read',
                   'ui:visualize/show',
                   'ui:visualize/createShortUrl',
+                  'ui:visualize/delete',
                   'ui:visualize/save',
                   'allHack:',
                 ],
@@ -798,6 +799,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:savedObjectsManagement/visualization/read',
                 'ui:visualize/show',
                 'ui:visualize/createShortUrl',
+                'ui:visualize/delete',
                 'ui:visualize/save',
                 'ui:catalogue/dashboard',
                 'ui:navLinks/kibana:dashboard',
@@ -1088,6 +1090,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:savedObjectsManagement/visualization/read',
                 'ui:visualize/show',
                 'ui:visualize/createShortUrl',
+                'ui:visualize/delete',
                 'ui:visualize/save',
                 'ui:catalogue/dashboard',
                 'ui:navLinks/kibana:dashboard',

@@ -19,16 +19,22 @@
 
 import { BasePathSetup } from './base_path';
 import { CapabilitiesSetup } from './capabilities';
-import { ChromeSetup } from './chrome';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { UiSettingsSetup } from './ui_settings';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
+/** @interal */
 export { CoreSystem } from './core_system';
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
 export interface CoreSetup {
   i18n: I18nSetup;
   injectedMetadata: InjectedMetadataSetup;
@@ -40,3 +46,23 @@ export interface CoreSetup {
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
 }
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  ChromeSetup,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};

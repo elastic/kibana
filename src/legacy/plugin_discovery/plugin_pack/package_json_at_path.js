@@ -22,6 +22,7 @@ import * as Rx from 'rxjs';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { isNewPlatformPlugin } from '../../../core/server/plugins';
 
 import { isDirectory } from './lib';

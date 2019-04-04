@@ -1,0 +1,18 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeBrand](./kibana-plugin-public.chromebrand.md)
+
+## ChromeBrand interface
+
+
+<b>Signature:</b>
+
+```typescript
+export interface ChromeBrand 
+```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [logo](./kibana-plugin-public.chromebrand.logo.md) | <code>string</code> |  |
+|  [smallLogo](./kibana-plugin-public.chromebrand.smalllogo.md) | <code>string</code> |  |
+

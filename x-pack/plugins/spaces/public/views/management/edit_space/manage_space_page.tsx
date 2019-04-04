@@ -22,7 +22,7 @@ import { uiCapabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';

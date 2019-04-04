@@ -25,8 +25,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../../../xpack_main/types';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,
@@ -142,6 +142,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     ];
 
     const baseExplanation = calculatedPrivileges.base;
+
+    const hasSelectedSpaces = this.state.selectedSpaceIds.length > 0;
 
     return (
       <EuiForm>
@@ -263,6 +265,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               allowedPrivileges,
               baseExplanation
             )}`}
+            disabled={!hasSelectedSpaces}
           />
         </EuiFormRow>
 
@@ -291,7 +294,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
           spacesIndex={this.state.editingIndex}
-          disabled={this.state.selectedBasePrivilege.length > 0}
+          disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
         />
 
         {this.requiresGlobalPrivilegeWarning() && (

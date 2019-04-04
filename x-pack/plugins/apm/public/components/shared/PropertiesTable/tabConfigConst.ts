@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 
 export type PropertyTabKey =
   | keyof Transaction

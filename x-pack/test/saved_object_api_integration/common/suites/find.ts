@@ -102,7 +102,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
             title: 'Count of requests',
           },
           migrationVersion: {
-            visualization: '7.0.0',
+            visualization: '7.1.0',
           },
           references: [
             {
