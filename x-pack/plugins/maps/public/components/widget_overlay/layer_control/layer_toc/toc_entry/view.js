@@ -156,7 +156,9 @@ export class TOCEntry extends React.Component {
     if (!isReadOnly) {
       sortIcon = (
         <EuiFlexItem grow={false}>
-          <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
+          <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
+            <EuiIcon type="grab"/>
+          </span>
         </EuiFlexItem>
       );
     }
