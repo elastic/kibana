@@ -141,7 +141,10 @@ export function registerCanvasUsageCollector(server) {
         size: 10000, // elasticsearch index.max_result_window default value
         index,
         ignoreUnavailable: true,
-        filterPath: ['hits.hits._source.canvas-workpad'],
+        filterPath: [
+          'hits.hits._source.canvas-workpad',
+          '-hits.hits._source.canvas-workpad.assets',
+        ],
         body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
       };
 
