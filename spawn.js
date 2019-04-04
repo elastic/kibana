@@ -131,6 +131,13 @@ const start = async function () {
     if(fs.existsSync(__dirname + '/target/errors.json')) {
       console.log('FILE EXISTS');
       annotations = JSON.parse(fs.readFileSync(__dirname + '/target/errors.json'));
+      annotations.forEach(annotation => annotation.screenshot &&
+        images.push({
+          alt: `Failure: ${annotation.title}`,
+          caption: `Failure: ${annotation.title}`,
+          image_url: annotation.screenshot,
+        }));
+      /*
       if(annotations[0] && annotations[0].screenshot) {
         console.log(annotations[0].screenshot);
         images.push({
@@ -140,6 +147,7 @@ const start = async function () {
         });
         delete annotations[0].screenshot;
       }
+      */
     }else{
       console.log('DIDNT FIND FILE');
     }
