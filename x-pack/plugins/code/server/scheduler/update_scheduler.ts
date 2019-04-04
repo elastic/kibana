@@ -35,13 +35,14 @@ export class UpdateScheduler extends AbstractScheduler {
   // all repositories and execute update. Later we can repeat the one we used
   // before for task throttling.
   protected async executeSchedulingJob(repo: Repository) {
-    this.log.info(`Schedule update repo request for ${repo.uri}`);
+    this.log.debug(`Try to schedule update repo request for ${repo.uri}`);
     try {
       // This repository is too soon to execute the next update job.
       if (repo.nextUpdateTimestamp && new Date() < new Date(repo.nextUpdateTimestamp)) {
         this.log.debug(`Repo ${repo.uri} is too soon to execute the next update job.`);
         return;
       }
+      this.log.info(`Start to schedule update repo request for ${repo.uri}`);
 
       const cloneStatus = await this.objectClient.getRepositoryGitStatus(repo.uri);
       // Schedule update job only when the repo has been fully cloned already

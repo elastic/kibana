@@ -212,8 +212,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // Initialize schedulers.
   const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
   const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
-  if (!serverOptions.disableScheduler) {
-    updateScheduler.start();
+  updateScheduler.start();
+  if (!serverOptions.disableIndexScheduler) {
     indexScheduler.start();
   }
   // check code node repos on disk
