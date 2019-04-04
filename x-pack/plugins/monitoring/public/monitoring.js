@@ -6,6 +6,7 @@
 
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import 'ui/kbn_top_nav';
 import 'ui/autoload/all';
 import 'plugins/monitoring/filters';
 import 'plugins/monitoring/services/clusters';

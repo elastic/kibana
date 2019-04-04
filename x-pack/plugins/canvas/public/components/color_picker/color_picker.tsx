@@ -5,43 +5,32 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
-import { ColorManager } from '../color_manager';
+import { ColorManager, Props as ColorManagerProps } from '../color_manager';
 import { ColorPalette } from '../color_palette';
 
-export interface Props {
+export interface Props extends ColorManagerProps {
   /**
    * An array of hexadecimal color values. Non-hex will be ignored.
    * @default []
    */
   colors?: string[];
-  /** The function to call when the Add Color button is clicked. The button will not appear if there is no handler. */
-  onAddColor?: (value: string) => void;
-  /** The function to call when the color is changed. */
-  onChange: (value: string) => void;
-  /** The function to call when the Remove Color button is clicked. The button will not appear if there is no handler. */
-  onRemoveColor?: (value: string) => void;
-  /**
-   * The value of the color in the selector. Should be hexadecimal. If it is not in the colors array, it will be ignored.
-   * @default ''
-   */
-  value?: string;
 }
 
-export const ColorPicker: SFC<Props> = ({
+export const ColorPicker: FunctionComponent<Props> = ({
   colors = [],
-  value = '',
+  hasButtons = false,
   onAddColor,
   onChange,
   onRemoveColor,
+  value = '',
 }) => {
   const tc = tinycolor(value);
-  const isValidColor = tc.isValid() && tc.getFormat() === 'hex';
+  const isValidColor = tc.isValid();
 
   colors = colors.filter(color => {
-    const providedColor = tinycolor(color);
-    return providedColor.isValid() && providedColor.getFormat() === 'hex';
+    return tinycolor(color).isValid();
   });
 
   let canRemove = false;
@@ -61,6 +50,7 @@ export const ColorPicker: SFC<Props> = ({
         value={value}
         onAddColor={canAdd ? onAddColor : undefined}
         onRemoveColor={canRemove ? onRemoveColor : undefined}
+        hasButtons={hasButtons}
       />
     </div>
   );
@@ -68,6 +58,7 @@ export const ColorPicker: SFC<Props> = ({
 
 ColorPicker.propTypes = {
   colors: PropTypes.array,
+  hasButtons: PropTypes.bool,
   onAddColor: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onRemoveColor: PropTypes.func,

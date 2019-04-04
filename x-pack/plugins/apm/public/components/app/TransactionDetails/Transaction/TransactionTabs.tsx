@@ -10,15 +10,11 @@ import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
 import { HeightRetainer } from '../../../shared/HeightRetainer';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
   getCurrentTab,
@@ -61,7 +57,9 @@ export function TransactionTabs({
   const agentName = transaction.agent.name;
 
   return (
-    <HeightRetainer>
+    <HeightRetainer
+      key={`${transaction.trace.id}:${transaction.transaction.id}`}
+    >
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
