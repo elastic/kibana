@@ -10,8 +10,6 @@ import { Request } from 'hapi';
 import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
 // @ts-ignore
-import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map';
-// @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   IndexPatternSavedObject,
@@ -88,11 +86,12 @@ const getTimebasedParts = (
   let timeFilter: any | null;
   let timezone: string | null;
 
-  if (indexPatternSavedObject.timeFieldName) {
-    includes = [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns];
+  const { timeFieldName: indexPatternTimeField } = indexPatternSavedObject;
+  if (indexPatternTimeField) {
+    includes = [indexPatternTimeField, ...savedSearchObjectAttr.columns];
     timeFilter = {
       range: {
-        [indexPatternSavedObject.timeFieldName]: {
+        [indexPatternTimeField]: {
           format: 'epoch_millis',
           gte: moment(timerange.min).valueOf(),
           lte: moment(timerange.max).valueOf(),
@@ -124,7 +123,7 @@ export async function generateCsvSearch(
   logger: Logger,
   searchPanel: SearchPanel
 ): Promise<CsvResultFromSearch> {
-  const { savedObjects, uiSettingsServiceFactory, fieldFormatServiceFactory } = server;
+  const { savedObjects, uiSettingsServiceFactory } = server;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
@@ -164,7 +163,7 @@ export async function generateCsvSearch(
     index: indexPatternSavedObject.title,
     body: {
       _source: { includes },
-      docvalue_fields: [],
+      docvalue_fields: [indexPatternSavedObject.timeFieldName],
       query: buildEsQuery(
         indexPatternSavedObject,
         searchSourceQuery,
@@ -179,18 +178,13 @@ export async function generateCsvSearch(
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const callCluster = (...params: any[]) => callWithRequest(req, ...params);
   const config = server.config();
-  const [formatsMap, uiSettings] = await Promise.all([
-    fieldFormatServiceFactory(uiConfig).then((fieldFormats: any) => {
-      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
-    }),
-    getUiSettings(uiConfig),
-  ]);
+  const uiSettings = await getUiSettings(uiConfig);
 
   const generateCsvParams: GenerateCsvParams = {
     searchRequest,
     callEndpoint: callCluster,
     fields: includes,
-    formatsMap,
+    formatsMap: new Map(), // no field formatting in this API
     metaFields: [],
     conflictedTypesFields: [],
     cancellationToken: [],
