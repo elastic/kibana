@@ -24,13 +24,15 @@ import { filter, map } from 'rxjs/operators';
 import { UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
-interface Params {
+/** @public */
+interface UiSettingsClientParams {
   api: UiSettingsApi;
   onUpdateError: UiSettingsClient['onUpdateError'];
   defaults: UiSettingsState;
   initialSettings?: UiSettingsState;
 }
 
+/** @public */
 export class UiSettingsClient {
   private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly saved$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
@@ -40,7 +42,7 @@ export class UiSettingsClient {
   private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
-  constructor(readonly params: Params) {
+  constructor(readonly params: UiSettingsClientParams) {
     this.api = params.api;
     this.onUpdateError = params.onUpdateError;
     this.defaults = cloneDeep(params.defaults);
