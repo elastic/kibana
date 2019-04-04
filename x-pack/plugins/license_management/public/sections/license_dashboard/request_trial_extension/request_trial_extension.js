@@ -17,7 +17,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
       If you’d like to continuing using Security, Machine Learning, and our
       other awesome{' '}
       <EuiLink
-        href="https://www.elastic.co/subscriptions/xpack"
+        href="https://www.elastic.co/subscriptions"
         target="_blank"
       >
         platinum features

@@ -57,7 +57,7 @@ export default () => {
           <KuiCardFooter>
             <KuiLinkButton
               buttonType="primary"
-              href="https://www.elastic.co/subscriptions/xpack"
+              href="https://www.elastic.co/subscriptions"
               target="_blank"
             >
               Pteradactyl!
@@ -79,7 +79,7 @@ export default () => {
           <KuiCardFooter>
             <KuiLinkButton
               buttonType="basic"
-              href="https://www.elastic.co/subscriptions/xpack"
+              href="https://www.elastic.co/subscriptions"
               target="_blank"
             >
               Magnolia!
@@ -126,7 +126,7 @@ export default () => {
           <KuiCardFooter>
             <KuiLinkButton
               buttonType="primary"
-              href="https://www.elastic.co/subscriptions/xpack"
+              href="https://www.elastic.co/subscriptions"
               target="_blank"
             >
               Pteradactyl!
@@ -148,7 +148,7 @@ export default () => {
           <KuiCardFooter>
             <KuiLinkButton
               buttonType="basic"
-              href="https://www.elastic.co/subscriptions/xpack"
+              href="https://www.elastic.co/subscriptions"
               target="_blank"
             >
               Magnolia!
