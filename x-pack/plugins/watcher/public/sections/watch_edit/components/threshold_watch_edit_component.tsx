@@ -39,17 +39,6 @@ const firstFieldOption = {
   }),
   value: '',
 };
-const getTitle = (watch: any) => {
-  if (watch.isNew) {
-    const typeName = watch.typeName.toLowerCase();
-    return i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.createNewTypeOfWatchTitle', {
-      defaultMessage: 'Create a new {typeName}',
-      values: { typeName },
-    });
-  } else {
-    return watch.name;
-  }
-};
 const getFields = async (indices: string[]) => {
   return await fetchFields(indices);
 };
@@ -125,9 +114,11 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
 const ThresholdWatchEditUi = ({
   intl,
   savedObjectsClient,
+  pageTitle,
 }: {
   intl: InjectedIntl;
   savedObjectsClient: any;
+  pageTitle: string;
 }) => {
   // hooks
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -164,7 +155,7 @@ const ThresholdWatchEditUi = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h1>{getTitle(watch)}</h1>
+            <h1>{pageTitle}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
@@ -229,7 +220,7 @@ const ThresholdWatchEditUi = ({
                   setWatch(new ThresholdWatch(watch));
                   const indices = selected.map(s => s.value as string);
                   const theFields = await getFields(indices);
-                  setFields(theFieldsO);
+                  setFields(theFields);
 
                   setTimeFieldOptions(getTimeFieldOptions(fields));
                 }}

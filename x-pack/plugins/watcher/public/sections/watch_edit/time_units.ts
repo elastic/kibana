@@ -12,6 +12,14 @@ interface TimeUnit {
   labelSingular: string;
 }
 export const timeUnits: { [key: string]: TimeUnit } = {
+  [COMMON_TIME_UNITS.MILLISECOND]: {
+    labelPlural: i18n.translate('xpack.watcher.timeUnits.millisecondPluralLabel', {
+      defaultMessage: 'milliseconds',
+    }),
+    labelSingular: i18n.translate('xpack.watcher.timeUnits.millisecondSingularLabel', {
+      defaultMessage: 'millisecond',
+    }),
+  },
   [COMMON_TIME_UNITS.SECOND]: {
     labelPlural: i18n.translate('xpack.watcher.timeUnits.secondPluralLabel', {
       defaultMessage: 'seconds',
