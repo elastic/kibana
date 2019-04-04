@@ -108,12 +108,16 @@ export interface SourceStatus {
   filebeatIndices: string[];
   /** Whether the configured packetbeat alias exists */
   packetbeatAliasExists: boolean;
-  /** Whether the configured winbeat alias exists */
-  winbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
   packetbeatIndices: string[];
+  /** Whether the configured winbeat alias exists */
+  winbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
+  winbeatIndicesExist: boolean;
+  /** The list of indices in the winbeat alias */
+  winbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -2223,6 +2227,8 @@ export namespace SourceQuery {
     logAlias: string;
 
     packetbeatAlias: string;
+
+    winbeatAlias: string;
   };
 
   export type Status = {
@@ -2239,6 +2245,12 @@ export namespace SourceQuery {
     filebeatAliasExists: boolean;
 
     filebeatIndices: string[];
+
+    winbeatIndicesExist: boolean;
+
+    winbeatAliasExists: boolean;
+
+    winbeatIndices: string[];
 
     indexFields: IndexFields[];
   };

@@ -26,10 +26,23 @@ export const mocksSource = [
             auditbeatAlias: 'auditbeat-*',
             logAlias: 'filebeat-*',
             packetbeatAlias: 'packetbeat-*',
+            winbeatAlias: 'winbeat-*',
           },
           status: {
             auditbeatIndicesExist: true,
             auditbeatAliasExists: true,
+            winbeatAliasExists: true,
+            winbeatIndicesExist: true,
+            winbeatIndices: [
+              'winbeat-7.0.0-2019.02.17',
+              'winbeat-7.0.0-2019.02.18',
+              'winbeat-7.0.0-2019.02.19',
+              'winbeat-7.0.0-2019.02.20',
+              'winbeat-7.0.0-2019.02.21',
+              'winbeat-7.0.0-2019.02.21-000001',
+              'winbeat-7.0.0-2019.02.22',
+              'winbeat-8.0.0-2019.02.19-000001',
+            ],
             auditbeatIndices: [
               'auditbeat-7.0.0-2019.02.17',
               'auditbeat-7.0.0-2019.02.18',

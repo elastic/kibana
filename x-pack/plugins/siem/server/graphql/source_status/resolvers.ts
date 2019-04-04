@@ -57,6 +57,21 @@ export type SourceStatusPacketbeatIndicesResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type SourceStatusWinbeatAliasExistsResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinbeatAliasExistsResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusWinbeatIndicesExistResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinbeatIndicesExistResolver>,
+  QuerySourceResolver
+>;
+
+export type SourceStatusWinbeatIndicesResolver = ChildResolverOf<
+  AppResolverOf<SourceStatusResolvers.WinbeatIndicesResolver>,
+  QuerySourceResolver
+>;
+
 export type SourceStatusIndexFieldsResolver = ChildResolverOf<
   AppResolverOf<SourceStatusResolvers.IndexFieldsResolver>,
   QuerySourceResolver
@@ -76,6 +91,9 @@ export const createSourceStatusResolvers = (libs: {
     packetbeatAliasExists: SourceStatusPacketbeatAliasExistsResolver;
     packetbeatIndicesExist: SourceStatusPacketbeatIndicesExistResolver;
     packetbeatIndices: SourceStatusPacketbeatIndicesResolver;
+    winbeatAliasExists: SourceStatusWinbeatAliasExistsResolver;
+    winbeatIndicesExist: SourceStatusWinbeatIndicesExistResolver;
+    winbeatIndices: SourceStatusWinbeatIndicesResolver;
     indexFields: SourceStatusIndexFieldsResolver;
   };
 } => ({
@@ -106,6 +124,15 @@ export const createSourceStatusResolvers = (libs: {
     },
     async packetbeatIndices(source, args, { req }) {
       return await libs.sourceStatus.getIndexNames(req, source.id, 'packetbeatAlias');
+    },
+    async winbeatAliasExists(source, args, { req }) {
+      return await libs.sourceStatus.hasAlias(req, source.id, 'winbeatAlias');
+    },
+    async winbeatIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasIndices(req, source.id, 'winbeatAlias');
+    },
+    async winbeatIndices(source, args, { req }) {
+      return await libs.sourceStatus.getIndexNames(req, source.id, 'winbeatAlias');
     },
     async indexFields(source, args, { req }) {
       return libs.fields.getFields(req, source.id, defaultTo([IndexType.ANY], args.indexTypes));

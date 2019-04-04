@@ -137,12 +137,16 @@ export interface SourceStatus {
   filebeatIndices: string[];
   /** Whether the configured packetbeat alias exists */
   packetbeatAliasExists: boolean;
-  /** Whether the configured winbeat alias exists */
-  winbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
   packetbeatIndicesExist: boolean;
   /** The list of indices in the packetbeat alias */
   packetbeatIndices: string[];
+  /** Whether the configured winbeat alias exists */
+  winbeatAliasExists: boolean;
+  /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
+  winbeatIndicesExist: boolean;
+  /** The list of indices in the winbeat alias */
+  winbeatIndices: string[];
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -1558,12 +1562,16 @@ export namespace SourceStatusResolvers {
     filebeatIndices?: FilebeatIndicesResolver<string[], TypeParent, Context>;
     /** Whether the configured packetbeat alias exists */
     packetbeatAliasExists?: PacketbeatAliasExistsResolver<boolean, TypeParent, Context>;
-    /** Whether the configured winbeat alias exists */
-    winbeatAliasExists?: WinbeatAliasExistsResolver<boolean, TypeParent, Context>;
     /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
     packetbeatIndicesExist?: PacketbeatIndicesExistResolver<boolean, TypeParent, Context>;
     /** The list of indices in the packetbeat alias */
     packetbeatIndices?: PacketbeatIndicesResolver<string[], TypeParent, Context>;
+    /** Whether the configured winbeat alias exists */
+    winbeatAliasExists?: WinbeatAliasExistsResolver<boolean, TypeParent, Context>;
+    /** Whether the configured alias or wildcard pattern resolve to any winbeat indices */
+    winbeatIndicesExist?: WinbeatIndicesExistResolver<boolean, TypeParent, Context>;
+    /** The list of indices in the winbeat alias */
+    winbeatIndices?: WinbeatIndicesResolver<string[], TypeParent, Context>;
     /** The list of fields defined in the index mappings */
     indexFields?: IndexFieldsResolver<IndexField[], TypeParent, Context>;
   }
@@ -1603,17 +1611,27 @@ export namespace SourceStatusResolvers {
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type WinbeatAliasExistsResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type PacketbeatIndicesExistResolver<
     R = boolean,
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatIndicesResolver<
+    R = string[],
+    Parent = SourceStatus,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinbeatAliasExistsResolver<
+    R = boolean,
+    Parent = SourceStatus,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinbeatIndicesExistResolver<
+    R = boolean,
+    Parent = SourceStatus,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinbeatIndicesResolver<
     R = string[],
     Parent = SourceStatus,
     Context = SiemContext

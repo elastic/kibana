@@ -937,18 +937,6 @@
             "deprecationReason": null
           },
           {
-            "name": "winbeatAliasExists",
-            "description": "Whether the configured winbeat alias exists",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "packetbeatIndicesExist",
             "description": "Whether the configured alias or wildcard pattern resolve to any packetbeat indices",
             "args": [],
@@ -963,6 +951,50 @@
           {
             "name": "packetbeatIndices",
             "description": "The list of indices in the packetbeat alias",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winbeatAliasExists",
+            "description": "Whether the configured winbeat alias exists",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winbeatIndicesExist",
+            "description": "Whether the configured alias or wildcard pattern resolve to any winbeat indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winbeatIndices",
+            "description": "The list of indices in the winbeat alias",
             "args": [],
             "type": {
               "kind": "NON_NULL",

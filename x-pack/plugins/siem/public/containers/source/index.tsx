@@ -67,7 +67,13 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
           const winbeatAlias = get('source.configuration.winbeatAlias', data);
           let indexPatternTitle: string[] = [];
           if (indexTypes.includes(IndexType.ANY)) {
-            indexPatternTitle = [...indexPatternTitle, logAlias, auditbeatAlias, packetbeatAlias];
+            indexPatternTitle = [
+              ...indexPatternTitle,
+              logAlias,
+              auditbeatAlias,
+              packetbeatAlias,
+              winbeatAlias,
+            ];
           } else {
             if (indexTypes.includes(IndexType.AUDITBEAT)) {
               indexPatternTitle = [...indexPatternTitle, auditbeatAlias];
