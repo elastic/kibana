@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './operation_builder';
+export * from './rich_select_operation';
 export * from './operation_display';
 export * from './operation_types';

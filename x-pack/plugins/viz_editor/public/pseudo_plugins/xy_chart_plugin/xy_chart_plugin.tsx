@@ -183,7 +183,10 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef: datasourceName,
-          select: [{ ...firstOperation, alias: field.name }, { operator: 'count', alias: 'count' }],
+          select: [
+            { ...firstOperation, alias: field.name },
+            { operator: 'count', alias: 'count', argument: {} },
+          ],
         },
       },
       editorPlugin: PLUGIN_NAME,

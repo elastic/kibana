@@ -9,7 +9,7 @@ import { SelectOperation, SelectOperator } from './query_types';
 type OperationTemplate = { [operation in SelectOperator]: SelectOperation };
 
 const operationTemplate: OperationTemplate = {
-  count: { operator: 'count' },
+  count: { operator: 'count', argument: {} },
   terms: { operator: 'terms', argument: { field: '', size: 5 } },
   avg: { operator: 'avg', argument: { field: '' } },
   cardinality: { operator: 'cardinality', argument: { field: '' } },
@@ -24,12 +24,25 @@ const operationTemplate: OperationTemplate = {
   },
 };
 
-export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
-  const template: SelectOperation = operationTemplate[operator];
+export function getOperationTemplate(operator: SelectOperator) {
+  const template: SelectOperation = { ...operationTemplate[operator] };
 
   if ('argument' in template) {
+    // Deep clone
+    template.argument = { ...template.argument };
+  }
+
+  return template;
+}
+
+export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
+  const template: SelectOperation = getOperationTemplate(operator);
+
+  if ('field' in template.argument) {
     template.argument.field = field.name;
   }
+
+  template.alias = field.name;
 
   return template;
 }

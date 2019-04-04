@@ -30,6 +30,11 @@ export type FieldOperation = Aliasable & {
   argument: Field;
 };
 
+export interface CountOperation extends Aliasable {
+  operator: 'count';
+  argument: {}; // For compatibility with all operations
+}
+
 export interface ColumnOperation extends FieldOperation {
   operator: 'column';
   argument: Field & {
@@ -55,10 +60,6 @@ export interface CardinalityOperation extends FieldOperation {
   operator: 'cardinality';
 }
 
-export interface CountOperation extends Aliasable {
-  operator: 'count';
-}
-
 export interface TermsOperation extends FieldOperation {
   operator: 'terms';
   argument: Field & {
@@ -70,10 +71,10 @@ export type SelectOperation =
   | ColumnOperation
   | DateHistogramOperation
   | SumOperation
-  | CountOperation
   | AvgOperation
   | CardinalityOperation
-  | TermsOperation;
+  | TermsOperation
+  | CountOperation;
 
 // ----------------------------------------
 // Where clause
