@@ -24,6 +24,8 @@ import { NotesButton } from '../../properties/helpers';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 
+// Test comment to see if build works
+
 interface Props {
   actionsColumnWidth: number;
   associateNote: AssociateNote;
