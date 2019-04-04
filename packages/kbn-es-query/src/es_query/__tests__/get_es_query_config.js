@@ -21,23 +21,39 @@ import expect from '@kbn/expect';
 import { getEsQueryConfig } from '../get_es_query_config';
 
 const config = {
-  get: item => {
+  get(item) {
     return config[item];
   },
-  'query:allowLeadingWildcards': { allowLeadingWildcards: true },
-  'query:queryString:options': { queryStringOptions: '' },
-  'courier:ignoreFilterIfFieldNotInIndex': { ignoreFilterIfFieldNotInIndex: true },
-  'dateFormat:tz': { dateFormatTZ: 'Browser' },
+  'query:allowLeadingWildcards': {
+    allowLeadingWildcards: true,
+  },
+  'query:queryString:options': {
+    queryStringOptions: '',
+  },
+  'courier:ignoreFilterIfFieldNotInIndex': {
+    ignoreFilterIfFieldNotInIndex: true,
+  },
+  'dateFormat:tz': {
+    dateFormatTZ: 'Browser',
+  },
 };
 
 describe('getEsQueryConfig', function () {
   it('should return the parameters of an Elasticsearch query config requested', function () {
     const result = getEsQueryConfig(config);
     const expected = {
-      allowLeadingWildcards: { allowLeadingWildcards: true },
-      dateFormatTZ: { dateFormatTZ: 'Browser' },
-      ignoreFilterIfFieldNotInIndex: { ignoreFilterIfFieldNotInIndex: true },
-      queryStringOptions: { queryStringOptions: '' },
+      allowLeadingWildcards: {
+        allowLeadingWildcards: true,
+      },
+      dateFormatTZ: {
+        dateFormatTZ: 'Browser',
+      },
+      ignoreFilterIfFieldNotInIndex: {
+        ignoreFilterIfFieldNotInIndex: true,
+      },
+      queryStringOptions: {
+        queryStringOptions: '',
+      },
     };
     expect(result).to.eql(expected);
     expect(result).to.have.keys(

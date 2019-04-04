@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import { decorateQuery } from '../decorate_query';
 
-// TINA WIP
 describe('Query decorator', function () {
   it('should be a function', function () {
     expect(decorateQuery).to.be.a(Function);

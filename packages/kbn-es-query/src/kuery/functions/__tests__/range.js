@@ -22,7 +22,6 @@ import * as range from '../range';
 import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
-// TINA check tests
 let indexPattern;
 
 describe('kuery functions', function () {

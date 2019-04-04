@@ -23,7 +23,6 @@ import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
-// TINA check tests
 let indexPattern;
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');

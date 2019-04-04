@@ -24,7 +24,7 @@ import * as isFunction from '../../functions/is';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
 import { nodeTypes } from '../../node_types';
-// TINA check tests
+
 describe('kuery node types', function () {
 
   describe('function', function () {
