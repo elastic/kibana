@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'elasticsearch';
-import { ESFilter } from 'elasticsearch';
+import { BucketAgg, ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -13,9 +12,11 @@ import {
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
 import { idx } from '../../../../common/idx';
+import { PromiseReturnType } from '../../../../typings/common';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
+export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export async function getServicesItems(setup: Setup) {
   const { start, end, esFilterQuery, client, config } = setup;
 

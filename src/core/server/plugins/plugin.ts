@@ -26,6 +26,8 @@ import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
  * that use it as a key or value more obvious.
+ *
+ * @public
  */
 export type PluginName = string;
 
@@ -135,6 +137,7 @@ type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginNa
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ *
  * @internal
  */
 export class Plugin<

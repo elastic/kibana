@@ -27,18 +27,24 @@ import { UiSettingsClient } from './ui_settings_client';
 
 import { i18n } from '@kbn/i18n';
 
-interface Deps {
+interface UiSettingsServiceDeps {
   notifications: NotificationsSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   basePath: BasePathSetup;
 }
 
+/** @internal */
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public setup({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsSetup {
+  public setup({
+    notifications,
+    http,
+    injectedMetadata,
+    basePath,
+  }: UiSettingsServiceDeps): UiSettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
@@ -73,4 +79,5 @@ export class UiSettingsService {
   }
 }
 
+/** @public */
 export type UiSettingsSetup = UiSettingsClient;
