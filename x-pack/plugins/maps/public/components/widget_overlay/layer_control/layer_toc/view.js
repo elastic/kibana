@@ -53,19 +53,21 @@ export class LayerTOC extends React.Component {
         });
     }
 
+    const draggableLayers = reverseLayerList.map((layer, idx) => (
+      <EuiDraggable spacing="none" key={layer.getId()} index={idx} draggableId={layer.getId()} customDragHandle={true}>
+        {(provided) => (
+          <TOCEntry
+            layer={layer}
+            dragHandleProps={provided.dragHandleProps}
+          />
+        )}
+      </EuiDraggable>
+    ));
+
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="layerTOC" spacing="none">
-          {reverseLayerList.map((layer, idx) => (
-            <EuiDraggable spacing="none" key={layer.getId()} index={idx} draggableId={layer.getId()} customDragHandle={true}>
-              {(provided) => (
-                <TOCEntry
-                  layer={layer}
-                  dragHandleProps={provided.dragHandleProps}
-                />
-              )}
-            </EuiDraggable>
-          ))}
+          {draggableLayers}
         </EuiDroppable>
       </EuiDragDropContext>
     );
