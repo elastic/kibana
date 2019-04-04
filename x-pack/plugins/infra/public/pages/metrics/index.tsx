@@ -119,7 +119,10 @@ export const MetricDetail = injectUICapabilities(
                         ];
                         return (
                           <ColumnarPage>
-                            <Header breadcrumbs={breadcrumbs} />
+                            <Header
+                              breadcrumbs={breadcrumbs}
+                              readOnlyBadge={!uiCapabilities.infrastructure.save}
+                            />
                             <SourceConfigurationFlyout
                               shouldAllowEdit={
                                 uiCapabilities.infrastructure.configureSource as boolean

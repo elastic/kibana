@@ -64,6 +64,7 @@ export const SnapshotPage = injectUICapabilities(
                   }),
                 },
               ]}
+              readOnlyBadge={!uiCapabilities.infrastructure.save}
             />
             <SourceConfigurationFlyout
               shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}

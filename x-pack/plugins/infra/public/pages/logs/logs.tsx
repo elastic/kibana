@@ -58,6 +58,7 @@ export const LogsPage = injectUICapabilities(
                     }),
                   },
                 ]}
+                readOnlyBadge={!uiCapabilities.logs.save}
               />
               <WithSource>
                 {({

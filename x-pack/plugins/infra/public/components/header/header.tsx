@@ -12,12 +12,18 @@ import { ExternalHeader } from './external_header';
 
 interface HeaderProps {
   breadcrumbs?: Breadcrumb[];
+  readOnlyBadge?: boolean;
 }
 
-export const Header = ({ breadcrumbs = [] }: HeaderProps) => (
+export const Header = ({ breadcrumbs = [], readOnlyBadge = false }: HeaderProps) => (
   <WithKibanaChrome>
-    {({ setBreadcrumbs }) => (
-      <ExternalHeader breadcrumbs={breadcrumbs} setBreadcrumbs={setBreadcrumbs} />
+    {({ setBreadcrumbs, setBadge }) => (
+      <ExternalHeader
+        breadcrumbs={breadcrumbs}
+        setBreadcrumbs={setBreadcrumbs}
+        badge={readOnlyBadge ? { text: 'Read Only', tooltip: 'You lack the authority' } : null}
+        setBadge={setBadge}
+      />
     )}
   </WithKibanaChrome>
 );
