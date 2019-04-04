@@ -32,11 +32,12 @@ export const makeEmptyStateQuery = ({ basePath, children, data, errors, loading 
   return (
     <EmptyState
       basePath={basePath}
-      children={children}
       count={count}
       error={formatUptimeGraphQLErrorList(errors || [])}
       loading={loading}
-    />
+    >
+      {children}
+    </EmptyState>
   );
 };
 
