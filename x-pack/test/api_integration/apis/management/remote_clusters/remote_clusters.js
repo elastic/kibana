@@ -48,6 +48,7 @@ export default function ({ getService }) {
           isConfiguredByNode: false,
         });
       });
+
       it('should not allow us to re-add an existing remote cluster', async () => {
         const uri = `${API_BASE_PATH}`;
 
@@ -142,7 +143,79 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body).to.eql({ success: true });
+        expect(body).to.eql({
+          itemsDeleted: ['test_cluster'],
+          errors: [],
+        });
+      });
+
+      it('should allow us to delete multiple remote clusters', async () => {
+        // Create clusters to delete.
+        await supertest
+          .post(API_BASE_PATH)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'test_cluster1',
+            seeds: [
+              NODE_SEED
+            ],
+            skipUnavailable: true,
+          })
+          .expect(200);
+
+        await supertest
+          .post(API_BASE_PATH)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'test_cluster2',
+            seeds: [
+              NODE_SEED
+            ],
+            skipUnavailable: true,
+          })
+          .expect(200);
+
+        const uri = `${API_BASE_PATH}/test_cluster1,test_cluster2`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: ['test_cluster1', 'test_cluster2'],
+          errors: [],
+        });
+      });
+
+      it(`should tell us which remote clusters couldn't be deleted`, async () => {
+        const uri = `${API_BASE_PATH}/test_cluster_doesnt_exist`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: [],
+          errors: [{
+            name: 'test_cluster_doesnt_exist',
+            error: {
+              isBoom: true,
+              isServer: false,
+              data: null,
+              output: {
+                statusCode: 404,
+                payload: {
+                  statusCode: 404,
+                  error: 'Not Found',
+                  message: 'There is no remote cluster with that name.',
+                },
+                headers: {},
+              },
+            },
+          }],
+        });
       });
     });
   });

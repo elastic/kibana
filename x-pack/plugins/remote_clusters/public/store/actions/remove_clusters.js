@@ -24,25 +24,25 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     type: REMOVE_CLUSTERS_START,
   });
 
-  const removalSuccesses = [];
-  const removalErrors = [];
-  const removeClusterRequests = names.map(name => {
-    sendRemoveClusterRequest(name)
-      .then(() => removalSuccesses.push(name))
-      .catch(() => removalErrors.push(name));
-  });
+  let removalSuccesses;
+  let removalErrors;
 
   await Promise.all([
-    ...removeClusterRequests,
+    sendRemoveClusterRequest(names.join(','))
+      .then((response) => {
+        const { itemsDeleted, errors } = response.data;
+        removalSuccesses = itemsDeleted;
+        removalErrors = errors;
+      }),
     // Wait at least half a second to avoid a weird flicker of the saving feedback.
     new Promise(resolve => setTimeout(resolve, 500)),
   ]);
 
-  if(removalErrors.length > 0) {
+  if (removalErrors.length > 0) {
     if (removalErrors.length === 1) {
       toastNotifications.addDanger(i18n.translate('xpack.remoteClusters.removeAction.errorSingleNotificationTitle', {
         defaultMessage: `Error removing remote cluster '{name}'`,
-        values: { name: removalErrors[0] },
+        values: { name: removalErrors[0].name },
       }));
     } else {
       toastNotifications.addDanger(i18n.translate('xpack.remoteClusters.removeAction.errorMultipleNotificationTitle', {
@@ -52,7 +52,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     }
   }
 
-  if(removalSuccesses.length > 0) {
+  if (removalSuccesses.length > 0) {
     if (removalSuccesses.length === 1) {
       toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
         defaultMessage: `Remote cluster '{name}' was removed`,
@@ -61,7 +61,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     } else {
       toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
         defaultMessage: '{count} remote clusters were removed',
-        values: { count: names.length },
+        values: { count: removalSuccesses.length },
       }));
     }
   }

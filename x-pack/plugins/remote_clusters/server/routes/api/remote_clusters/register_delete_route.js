@@ -20,43 +20,58 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/remote_clusters/{name}',
     method: 'DELETE',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { name } = request.params;
+      const names = name.split(',');
 
-      // Check if cluster does exist
-      try {
-        const existingCluster = await doesClusterExist(callWithRequest, name);
-        if(!existingCluster) {
-          return wrapCustomError(new Error('There is no remote cluster with that name.'), 404);
-        }
-      } catch (err) {
-        return wrapCustomError(err, 400);
-      }
+      const itemsDeleted = [];
+      const errors = [];
 
-      try {
-        const deleteClusterPayload = serializeCluster({ name });
-        const response = await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
-        const acknowledged = get(response, 'acknowledged');
-        const cluster = get(response, `persistent.cluster.remote.${name}`);
+      await Promise.all(names.map((clusterName) => (
+        new Promise(async (resolve, reject) => {
+          // Check if cluster does exist
+          try {
+            const existingCluster = await doesClusterExist(callWithRequest, clusterName);
+            if (!existingCluster) {
+              return reject(wrapCustomError(new Error('There is no remote cluster with that name.'), 404));
+            }
+          } catch (err) {
+            return reject(wrapCustomError(err, 400));
+          }
 
-        if (acknowledged && !cluster) {
-          return { success: true };
-        }
+          try {
+            const deleteClusterPayload = serializeCluster({ name: clusterName });
+            const response = await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
+            const acknowledged = get(response, 'acknowledged');
+            const cluster = get(response, `persistent.cluster.remote.${clusterName}`);
 
-        // If for some reason the ES response still returns the cluster information,
-        // return an error. This shouldn't happen.
-        return wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400);
-      } catch (err) {
-        if (isEsError(err)) {
-          return wrapEsError(err);
-        }
+            if (acknowledged && !cluster) {
+              return resolve();
+            }
 
-        return wrapUnknownError(err);
-      }
-    },
-    config: {
-      pre: [ licensePreRouting ]
+            // If for some reason the ES response still returns the cluster information,
+            // return an error. This shouldn't happen.
+            reject(wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400));
+          } catch (err) {
+            if (isEsError(err)) {
+              return reject(wrapEsError(err));
+            }
+
+            reject(wrapUnknownError(err));
+          }
+        })
+          .then(() => itemsDeleted.push(clusterName))
+          .catch(err => errors.push({ name: clusterName, error: err }))
+      )));
+
+      return {
+        itemsDeleted,
+        errors,
+      };
     }
   });
 }
