@@ -92,7 +92,7 @@ export const RemoteClusterTable = injectI18n(
         render: (name, { isConfiguredByNode }) => {
           const link = (
             <EuiLink
-              data-test-subj={`remoteClusterTableRowName-${name}`}
+              data-test-subj="remoteClustersTableListClusterLink"
               onClick={() => openDetailPanel(name)}
             >
               {name}
@@ -106,7 +106,7 @@ export const RemoteClusterTable = injectI18n(
                   {link}
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="remoteClustersTableListClusterDefinedByNodeTooltip">
                   <EuiIconTip
                     type="iInCircle"
                     color="subdued"
@@ -172,7 +172,7 @@ export const RemoteClusterTable = injectI18n(
                 <RemoveClusterButtonProvider clusterNames={[name]}>
                   {(removeCluster) => (
                     <EuiButtonIcon
-                      data-test-subj={`remoteClusterTableRowRemoveButton-${name}`}
+                      data-test-subj="remoteClusterTableRowRemoveButton"
                       aria-label={label}
                       iconType="trash"
                       color="danger"
@@ -199,7 +199,7 @@ export const RemoteClusterTable = injectI18n(
                 delay="long"
               >
                 <EuiButtonIcon
-                  data-test-subj={`remoteClusterTableRowEditButton-${name}`}
+                  data-test-subj="remoteClusterTableRowEditButton"
                   aria-label={label}
                   iconType="pencil"
                   color="primary"
@@ -227,6 +227,7 @@ export const RemoteClusterTable = injectI18n(
               <EuiButton
                 color="danger"
                 onClick={removeCluster}
+                data-test-subj="remoteClusterBulkDeleteButton"
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterList.table.removeButtonLabel"
@@ -267,6 +268,7 @@ export const RemoteClusterTable = injectI18n(
           sorting={sorting}
           selection={selection}
           isSelectable={true}
+          data-test-subj="remoteClusterListTable"
         />
       );
     }

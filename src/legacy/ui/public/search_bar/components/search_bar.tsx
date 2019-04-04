@@ -47,6 +47,7 @@ interface Props {
   onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   filters: Filter[];
@@ -153,6 +154,7 @@ class SearchBarUI extends Component<Props, State> {
         {this.props.showQueryBar ? (
           <QueryBar
             query={this.props.query}
+            screenTitle={this.props.screenTitle}
             onSubmit={this.props.onQuerySubmit}
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}

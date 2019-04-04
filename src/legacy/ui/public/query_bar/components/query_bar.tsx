@@ -28,6 +28,7 @@ import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
+
 import {
   EuiButton,
   EuiFieldText,
@@ -37,19 +38,21 @@ import {
   EuiOutsideClickDetector,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+
 // @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
+
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
+
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from '../../autocomplete_providers';
 import chrome from '../../chrome';
-import { fromUser, toUser } from '../../parse_query';
-import { matchPairs } from '../lib/match_pairs';
+import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
@@ -83,6 +86,7 @@ interface Props {
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
@@ -596,10 +600,17 @@ export class QueryBarUI extends Component<Props, State> {
                       }}
                       autoComplete="off"
                       spellCheck={false}
-                      aria-label={this.props.intl.formatMessage({
-                        id: 'common.ui.queryBar.searchInputAriaLabel',
-                        defaultMessage: 'Search input',
-                      })}
+                      aria-label={this.props.intl.formatMessage(
+                        {
+                          id: 'common.ui.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )}
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
