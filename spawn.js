@@ -132,6 +132,7 @@ const start = async function () {
       console.log('FILE EXISTS');
       annotations = JSON.parse(fs.readFileSync(__dirname + '/target/errors.json'));
       if(annotations[0] && annotations[0].screenshot) {
+        console.log(annotations[0].screenshot);
         images.push({
           alt: 'screenshot',
           image_url: annotations[0].screenshot,
@@ -152,11 +153,7 @@ const start = async function () {
         summary: `.`,
         text: `\`\`\`\n${logs}\n\`\`\``,
         annotations,
-        // images,
-        images: [{
-          alt: 'screenshot',
-          image_url: 'https://www.google.com/logos/doodles/2019/hugh-masekelas-80th-birthday-5429979563687936-l.png',
-        }],
+        images,
       },
       /*
       images: [{
