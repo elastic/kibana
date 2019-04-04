@@ -120,7 +120,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await panelActions.expectMissingEditPanelAction();
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
+      it(`Permalinks shows create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
       });
