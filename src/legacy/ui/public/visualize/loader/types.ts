@@ -132,5 +132,5 @@ export interface VisualizeLoaderParams {
  */
 export type VisualizeUpdateParams = Pick<
   VisualizeLoaderParams,
-  'timeRange' | 'dataAttrs' | 'filters' | 'query'
+  'timeRange' | 'dataAttrs' | 'filters' | 'query' | 'visInstanceId'
 >;
