@@ -179,7 +179,7 @@ const kibanaFeatures: Feature[] = [
           all: ['index-pattern'],
           read: ['config'],
         },
-        ui: ['createNew'],
+        ui: ['save'],
       },
       read: {
         savedObject: {
