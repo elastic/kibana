@@ -190,7 +190,7 @@ export class CreateSourceEditor extends Component {
           <p>
             <FormattedMessage
               id="xpack.maps.source.esSearch.disableFilterByMapBoundsExplainMsg"
-              defaultMessage="Index '{indexPatternTitle}' has a small number of documents and does not require filtering."
+              defaultMessage="Index '{indexPatternTitle}' has a small number of documents and does not require dynamic filtering."
               values={{
                 indexPatternTitle: this.state.indexPattern ? this.state.indexPattern.title : this.state.indexPatternId,
               }}
