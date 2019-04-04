@@ -1,0 +1,30 @@
+.configPanel {
+  margin-left: 8px;
+  min-width: 256px;
+}
+
+.configPanel-axis {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.configPanel-axis-title {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.configPanel-summary {
+  background: white;
+  padding: 8px;
+  display: flex;
+}
+
+.configPanel-summary-text {
+  margin-left: 8px;
+}
+
+.configPanel-summary-subtitle {
+  display: block;
+}
