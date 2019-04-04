@@ -66,7 +66,7 @@ export class LayerTOC extends React.Component {
 
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
-        <EuiDroppable droppableId="layerTOC" spacing="none">
+        <EuiDroppable droppableId="mapLayerTOC" spacing="none">
           {draggableLayers}
         </EuiDroppable>
       </EuiDragDropContext>
