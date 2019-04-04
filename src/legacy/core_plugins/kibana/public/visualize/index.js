@@ -39,7 +39,7 @@ uiRoutes
     requireUICapability: 'visualize.show',
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.visualize.save) {
-        return null;
+        return undefined;
       }
 
       return {

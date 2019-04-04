@@ -36,7 +36,7 @@ uiRoutes
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
   badge: (i18n, uiCapabilities) => {
     if (uiCapabilities.dev_tools.save) {
-      return null;
+      return undefined;
     }
 
     return {

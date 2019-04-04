@@ -60,7 +60,7 @@ uiRoutes
     requireUICapability: 'dashboard.show',
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.dashboard.showWriteControls) {
-        return null;
+        return undefined;
       }
 
       return {

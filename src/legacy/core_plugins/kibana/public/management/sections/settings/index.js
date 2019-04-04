@@ -65,7 +65,7 @@ uiRoutes
     requireUICapability: 'management.kibana.settings',
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.advancedSettings.save) {
-        return null;
+        return undefined;
       }
 
       return {

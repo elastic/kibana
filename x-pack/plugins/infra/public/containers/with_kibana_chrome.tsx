@@ -15,7 +15,7 @@ interface WithKibanaChromeProps {
   children: RendererFunction<
     {
       setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => void;
-      setBadge: (badge: Badge | null) => void;
+      setBadge: (badge: Badge | undefined) => void;
     } & WithKibanaChromeState
   >;
 }

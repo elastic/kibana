@@ -88,7 +88,7 @@ uiRoutes
     requireUICapability: 'management.kibana.index_patterns',
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.indexPatterns.save) {
-        return null;
+        return undefined;
       }
 
       return {

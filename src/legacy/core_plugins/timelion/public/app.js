@@ -74,7 +74,7 @@ require('ui/routes')
     ),
     badge: (i18n, uiCapabilities) => {
       if (uiCapabilities.timelion.save) {
-        return null;
+        return undefined;
       }
 
       return {

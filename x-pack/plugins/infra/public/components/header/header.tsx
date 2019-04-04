@@ -36,7 +36,7 @@ export const Header = injectI18n(
                     id: 'xpack.infra.header.badge.readOnly.tooltip',
                   }),
                 }
-              : null
+              : undefined
           }
           setBadge={setBadge}
         />
