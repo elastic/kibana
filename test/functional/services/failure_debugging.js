@@ -64,7 +64,7 @@ export async function FailureDebuggingProvider({ getService }) {
     test.addl = {};
 
     await Promise.all([
-      screenshots.takeForFailure(name),
+      screenshots.takeForFailure(name, undefined, error),
       logCurrentUrl(test),
       savePageHtml(name, test),
       logBrowserConsole(test),
