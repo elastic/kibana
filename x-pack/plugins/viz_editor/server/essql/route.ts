@@ -11,6 +11,34 @@
 import { Legacy } from 'kibana';
 import { API_PREFIX } from '../../common';
 
+export function normalizeType(type: string) {
+  const normalTypes = {
+    string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
+    number: [
+      'float',
+      'half_float',
+      'scaled_float',
+      'double',
+      'integer',
+      'long',
+      'short',
+      'byte',
+      'token_count',
+      '_version',
+    ],
+    date: ['date', 'datetime'],
+    boolean: ['boolean'],
+    null: ['null'],
+  } as any;
+
+  const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));
+
+  if (normalizedType) {
+    return normalizedType;
+  }
+  throw new Error(`Canvas does not yet support type: ${type}`);
+}
+
 /**
  * Expose a RESTful endpoint that runs an Elasticsearch query based on our
  * query model, and returns a tabular result.
@@ -32,7 +60,7 @@ export function route(server: Legacy.Server) {
         },
       });
 
-      return result.columns;
+      return result.columns.map((column: any) => ({ ...column, type: normalizeType(column.type) }));
     },
   });
 }
