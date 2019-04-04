@@ -5,7 +5,9 @@
  */
 import { Router } from '../../../../../server/lib/create_router';
 import { registerRepositoriesRoutes } from './repositories';
+import { registerSnapshotsRoutes } from './snapshots';
 
 export const registerRoutes = (router: Router): void => {
   registerRepositoriesRoutes(router);
+  registerSnapshotsRoutes(router);
 };
