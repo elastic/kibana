@@ -19,6 +19,7 @@
 
 import { FlyoutService } from './flyout';
 
+import { FlyoutRef } from '..';
 import { I18nSetup } from '../i18n';
 
 interface Deps {
@@ -41,4 +42,12 @@ export class OverlayService {
   }
 }
 
-export type OverlaySetup = ReturnType<OverlayService['setup']>;
+export interface OverlaySetup {
+  openFlyout: (
+    flyoutChildren: React.ReactNode,
+    flyoutProps?: {
+      closeButtonAriaLabel?: string;
+      'data-test-subject'?: string;
+    }
+  ) => FlyoutRef;
+}
