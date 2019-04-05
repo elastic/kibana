@@ -15,8 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
-
-const DEFAULT_LIMIT = 2048;
+import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
 
@@ -50,8 +49,8 @@ export class ESSearchSource extends AbstractESSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
-      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
+      limit: _.get(descriptor, 'limit', DEFAULT_ES_DOC_LIMIT),
+      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     }, inspectorAdapters);
   }
@@ -167,7 +166,7 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatProperties(properties) {
+  async filterAndFormatPropertiesToHtml(properties) {
     const filteredProperties = {};
     this._descriptor.tooltipProperties.forEach(propertyName => {
       filteredProperties[propertyName] = _.get(properties, propertyName, '-');
@@ -186,8 +185,9 @@ export class ESSearchSource extends AbstractESSource {
       if (!field) {
         return;
       }
-
-      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+      const htmlConverter = field.format.getConverterFor('html');
+      filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
+        field.format.convert(filteredProperties[propertyName]);
     });
 
     return filteredProperties;
@@ -200,7 +200,7 @@ export class ESSearchSource extends AbstractESSource {
   async getStringFields() {
     const indexPattern = await this._getIndexPattern();
     const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string';
+      return field.type === 'string' && field.subType !== 'multi';
     });
     return stringFields.map(stringField => {
       return { name: stringField.name, label: stringField.name };

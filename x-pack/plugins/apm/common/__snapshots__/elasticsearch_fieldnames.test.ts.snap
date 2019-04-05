@@ -56,7 +56,7 @@ exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
-exports[`Error TRANSACTION_TYPE 1`] = `undefined`;
+exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
 exports[`Error URL_FULL 1`] = `undefined`;
 

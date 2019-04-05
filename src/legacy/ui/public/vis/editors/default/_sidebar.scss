@@ -30,8 +30,8 @@
 .visEditorSidebar__indexPattern {
   font-weight: $euiFontWeightBold;
   padding: $euiSizeXS $euiSizeS;
-  background-color: shade($euiColorPrimary, 60%);
-  color: $euiColorGhost;
+  background-color: shadeOrTint($euiColorPrimary, 60%, 60%);
+  color: $euiColorEmptyShade;
   line-height: $euiSizeL;
 }
 
@@ -221,3 +221,7 @@
   }
 }
 
+.visEditorSidebar__aggParamFormRow {
+  margin-top: $euiSizeS;
+  margin-bottom: $euiSizeS;
+}

@@ -77,13 +77,9 @@ elif platform.system() == 'Windows':
   archive_file('headless_shell.exe')
   archive_file('dbghelp.dll')
   archive_file('icudtl.dat')
-  archive_file('natives_blob.bin')
-  archive_file('snapshot_blob.bin')
 elif platform.system() == 'Darwin':
   archive_file('headless_shell')
-  archive_file('natives_blob.bin')
-  archive_file('snapshot_blob.bin')
-  archive_file('Helpers/crashpad_handler')
+  archive_file('Helpers/chrome_crashpad_handler')
 
 archive.close()
 

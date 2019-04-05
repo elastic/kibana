@@ -132,6 +132,9 @@ export default function (kibana) {
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
+        'sample-data-telemetry': {
+          isNamespaceAgnostic: true,
+        },
       },
 
       injectDefaultVars(server, options) {

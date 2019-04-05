@@ -21,17 +21,22 @@ import { cloneDeep } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
-import { AggConfig, Vis, VisState } from 'ui/vis';
+import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 
 interface SchemaFormat {
   id: string;
   params?: any;
 }
 
+interface SchemaConfigParams {
+  precision?: number;
+  useGeocentroid?: boolean;
+}
+
 interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
-  params: any;
+  params: SchemaConfigParams;
   aggType: string;
 }
 
@@ -51,7 +56,7 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
-type buildVisConfigFunction = (schemas: Schemas) => VisState;
+type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -104,43 +109,39 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   };
 
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
-    const schema = {
-      accessor,
-      format: {},
-      params: {},
-      aggType: agg.type.name,
-    };
-
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
     }
+
+    const hasSubAgg = [
+      'derivative',
+      'moving_avg',
+      'serial_diff',
+      'cumulative_sum',
+      'sum_bucket',
+      'avg_bucket',
+      'min_bucket',
+      'max_bucket',
+    ].includes(agg.type.name);
+
+    const format = createFormat(
+      hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
+    );
+
+    const params: SchemaConfigParams = {};
+
     if (agg.type.name === 'geohash_grid') {
-      schema.params = {
-        precision: agg.params.precision,
-        useGeocentroid: agg.params.useGeocentroid,
-      };
+      params.precision = agg.params.precision;
+      params.useGeocentroid = agg.params.useGeocentroid;
     }
 
-    if (
-      [
-        'derivative',
-        'moving_avg',
-        'serial_diff',
-        'cumulative_sum',
-        'sum_bucket',
-        'avg_bucket',
-        'min_bucket',
-        'max_bucket',
-      ].includes(agg.type.name)
-    ) {
-      const subAgg = agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg];
-      schema.format = createFormat(subAgg);
-    } else {
-      schema.format = createFormat(agg);
-    }
-
-    return schema;
+    return {
+      accessor,
+      format,
+      params,
+      aggType: agg.type.name,
+    };
   };
 
   let cnt = 0;
@@ -170,7 +171,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     }
     if (schemaName === 'split') {
       schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
-      skipMetrics = true;
+      skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
       schemas[schemaName] = [];
@@ -219,14 +220,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const expression = prepareString('expression', visState.params.markdown);
     const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${expression}${visConfig}`;
+    return `kibana_markdown ${visConfig}`;
   },
   table: (visState, schemas) => {
     const visConfig = {
       ...visState.params,
-      ...buildVisConfig.table(schemas),
+      ...buildVisConfig.table(schemas, visState.params),
     };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
@@ -238,11 +238,35 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.tagcloud(schemas),
-    };
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+    const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
+    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
+    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel) {
+      expr += `showLabel=${showLabel} `;
+    }
+
+    if (bucket) {
+      expr += ` bucket={visdimension ${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `format=${bucket.format.id} `;
+        expr += prepareJson('formatParams', bucket.format.params);
+      }
+      expr += '} ';
+    }
+    return expr;
   },
   region_map: (visState, schemas) => {
     const visConfig = {
@@ -268,14 +292,24 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: schemas => {
+  table: (schemas, visParams = {}) => {
     const visConfig = {} as any;
+    const metrics = schemas.metric;
+    const buckets = schemas.bucket || [];
     visConfig.dimensions = {
-      metrics: schemas.metric,
-      buckets: schemas.bucket || [],
+      metrics,
+      buckets,
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
+
+    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
+      // Handle case where user wants to see partial rows but not metrics at all levels.
+      // This requires calculating how many metrics will come back in the tabified response,
+      // and removing all metrics from the dimensions except the last set.
+      const metricsPerBucket = metrics.length / buckets.length;
+      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
+    }
     return visConfig;
   },
   metric: schemas => {
@@ -323,8 +357,11 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = (vis: any, timeRange?: any) => {
-  const schemas = getSchemas(vis, timeRange);
+export const buildVislibDimensions = async (
+  vis: any,
+  params: { searchSource: any; timeRange?: any }
+) => {
+  const schemas = getSchemas(vis, params.timeRange);
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -341,6 +378,12 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
       dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
+    } else if (xAgg.type.name === 'histogram') {
+      const intervalParam = xAgg.type.params.byName.interval;
+      const output = { params: {} as any };
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
+      intervalParam.write(xAgg, output);
+      dimensions.x.params.interval = output.params.interval;
     }
   }
 
@@ -349,21 +392,24 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
 
 // If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
+export const getVisParams = async (
+  vis: Vis,
+  params: { searchSource: SearchSource; timeRange?: any }
+) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
   if (buildVisConfig[vis.type.name]) {
     visConfig = {
       ...visConfig,
-      ...buildVisConfig[vis.type.name](schemas),
+      ...buildVisConfig[vis.type.name](schemas, visConfig),
     };
   } else if (vislibCharts.includes(vis.type.name)) {
-    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+    visConfig.dimensions = await buildVislibDimensions(vis, params);
   }
   return visConfig;
 };
 
-export const buildPipeline = (
+export const buildPipeline = async (
   vis: Vis,
   params: { searchSource: SearchSource; timeRange?: any }
 ) => {
@@ -392,7 +438,7 @@ export const buildPipeline = (
     pipeline += `esaggs
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.requiresPartialRows || false}
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
@@ -401,14 +447,14 @@ export const buildPipeline = (
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
-    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+    visConfig.dimensions = await buildVislibDimensions(vis, params);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'} `;
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
       pipeline += `${prepareString('index', indexPattern.id)}`;
     }

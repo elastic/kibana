@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
+import 'ui/listen';
 import 'ui/search_bar';
 import 'ui/apply_filters';
 
@@ -141,6 +142,7 @@ app.directive('dashboardApp', function ($injector) {
           refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
+        $scope.screenTitle = dashboardStateManager.getTitle();
 
         const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {
@@ -242,7 +244,7 @@ app.directive('dashboardApp', function ($injector) {
           // a reload, since no state changes will cause it.
           dashboardStateManager.requestReload();
         } else {
-          $scope.model.query = migrateLegacyQuery(query);
+          $scope.model.query = query;
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }
         $scope.refresh();
@@ -282,7 +284,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (query) => {
+      $scope.$watch('model.query', (newQuery) => {
+        const query = migrateLegacyQuery(newQuery);
         $scope.updateQueryAndFetch({ query });
       });
 
@@ -478,7 +481,7 @@ app.directive('dashboardApp', function ($injector) {
           showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
-        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, embeddableFactories);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({

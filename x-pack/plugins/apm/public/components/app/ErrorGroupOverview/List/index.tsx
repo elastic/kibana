@@ -11,9 +11,9 @@ import { Location } from 'history';
 import moment from 'moment';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ErrorGroupListAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_groups';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
+import { IUrlParams } from '../../../../store/urlParams';
 import {
   fontFamilyCode,
   fontSizes,

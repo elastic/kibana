@@ -127,7 +127,7 @@ export default new Datasource('es', {
       });
     }
 
-    const esShardTimeout = await tlConfig.server.newPlatform.start.core.elasticsearch.legacy.config$.pipe(
+    const esShardTimeout = await tlConfig.server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(
       first(),
       map(config => config.shardTimeout.asMilliseconds())
     ).toPromise();

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { pairs } from 'd3-array';
-import expect from 'expect.js';
 import gql from 'graphql-tag';
 
 import { KbnTestProvider } from './types';

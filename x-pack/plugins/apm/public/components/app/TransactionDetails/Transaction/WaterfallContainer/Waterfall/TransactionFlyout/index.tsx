@@ -18,11 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { idx } from '../../../../../../../../common/idx';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { IUrlParams } from '../../../../../../../store/urlParams';
+import { DROPPED_SPANS_DOCS } from '../../../../../../../utils/documentation/apm-get-started';
+import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';

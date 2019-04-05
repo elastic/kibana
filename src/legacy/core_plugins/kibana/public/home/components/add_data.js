@@ -44,46 +44,59 @@ const basePath = chrome.getBasePath();
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
   const renderCards = () => {
-    const apmTitle = intl.formatMessage({
-      id: 'kbn.home.addData.apm.nameTitle', defaultMessage: 'APM'
-    });
-    const apmDescription = intl.formatMessage({
-      id: 'kbn.home.addData.apm.nameDescription',
-      defaultMessage: 'APM automatically collects in-depth performance metrics and errors from inside your applications.'
-    });
-    const loggingTitle = intl.formatMessage({
-      id: 'kbn.home.addData.logging.nameTitle', defaultMessage: 'Logging'
-    });
-    const loggingDescription = intl.formatMessage({
-      id: 'kbn.home.addData.logging.nameDescription',
-      defaultMessage: 'Ingest logs from popular data sources and easily visualize in preconfigured dashboards.'
-    });
-    const metricsTitle = intl.formatMessage({
-      id: 'kbn.home.addData.metrics.nameTitle', defaultMessage: 'Metrics'
-    });
-    const metricsDescription = intl.formatMessage({
-      id: 'kbn.home.addData.metrics.nameDescription',
-      defaultMessage: 'Collect metrics from the operating system and services running on your servers.'
-    });
-    const securityTitle = intl.formatMessage({
-      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security analytics'
-    });
-    const securityDescription = intl.formatMessage({
-      id: 'kbn.home.addData.security.nameDescription',
-      defaultMessage: 'Centralize security events for interactive investigation in ready-to-go visualizations.'
-    });
+    const ampData = {
+      title: intl.formatMessage({
+        id: 'kbn.home.addData.apm.nameTitle', defaultMessage: 'APM'
+      }),
+      description: intl.formatMessage({
+        id: 'kbn.home.addData.apm.nameDescription',
+        defaultMessage: 'APM automatically collects in-depth performance metrics and errors from inside your applications.'
+      }),
+      ariaDescribedby: 'aria-describedby.addAmpButtonLabel'
+    };
+    const loggingData = {
+      title: intl.formatMessage({
+        id: 'kbn.home.addData.logging.nameTitle', defaultMessage: 'Logging'
+      }),
+      description: intl.formatMessage({
+        id: 'kbn.home.addData.logging.nameDescription',
+        defaultMessage: 'Ingest logs from popular data sources and easily visualize in preconfigured dashboards.'
+      }),
+      ariaDescribedby: 'aria-describedby.addLogDataButtonLabel'
+    };
+    const metricsData = {
+      title: intl.formatMessage({
+        id: 'kbn.home.addData.metrics.nameTitle', defaultMessage: 'Metrics'
+      }),
+      description: intl.formatMessage({
+        id: 'kbn.home.addData.metrics.nameDescription',
+        defaultMessage: 'Collect metrics from the operating system and services running on your servers.'
+      }),
+      ariaDescribedby: 'aria-describedby.addMetricsButtonLabel'
+    };
+    const securityData = {
+      title: intl.formatMessage({
+        id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security analytics'
+      }),
+      description: intl.formatMessage({
+        id: 'kbn.home.addData.security.nameDescription',
+        defaultMessage: 'Centralize security events for interactive investigation in ready-to-go visualizations.'
+      }),
+      ariaDescribedby: 'aria-describedby.addSecurityButtonLabel'
+    };
 
     const getApmCard = () =>  (
       <EuiFlexItem grow={false}>
         <EuiCard
           className="homAddData__card"
           icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
-          title={apmTitle}
-          description={apmDescription}
+          title={ampData.title}
+          description={<span id={ampData.ariaDescribedby}>{ampData.description}</span>}
           footer={
             <EuiButton
               className="homAddData__button"
               href="#/home/tutorial/apm"
+              aria-describedby={ampData.ariaDescribedby}
             >
               <FormattedMessage
                 id="kbn.home.addData.apm.addApmButtonLabel"
@@ -104,12 +117,13 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
-            title={loggingTitle}
-            description={loggingDescription}
+            title={loggingData.title}
+            description={<span id={loggingData.ariaDescribedby}>{loggingData.description}</span>}
             footer={
               <EuiButton
                 className="homAddData__button"
                 href="#/home/tutorial_directory/logging"
+                aria-describedby={loggingData.ariaDescribedby}
               >
                 <FormattedMessage
                   id="kbn.home.addData.logging.addLogDataButtonLabel"
@@ -124,12 +138,13 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
-            title={metricsTitle}
-            description={metricsDescription}
+            title={metricsData.title}
+            description={<span id={metricsData.ariaDescribedby}>{metricsData.description}</span>}
             footer={
               <EuiButton
                 className="homAddData__button"
                 href="#/home/tutorial_directory/metrics"
+                aria-describedby={metricsData.ariaDescribedby}
               >
                 <FormattedMessage
                   id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
@@ -144,12 +159,13 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
-            title={securityTitle}
-            description={securityDescription}
+            title={securityData.title}
+            description={<span id={securityData.ariaDescribedby}>{securityData.description}</span>}
             footer={
               <EuiButton
                 className="homAddData__button"
                 href="#/home/tutorial_directory/security"
+                aria-describedby={securityData.ariaDescribedby}
               >
                 <FormattedMessage
                   id="kbn.home.addData.security.addSecurityEventsButtonLabel"

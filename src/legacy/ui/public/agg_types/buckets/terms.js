@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -47,28 +48,6 @@ const orderAggSchema = (new Schemas([
     aggFilter: aggFilter
   }
 ])).all[0];
-
-function isNotType(type) {
-  return function (agg) {
-    const field = agg.params.field;
-    return !field || field.type !== type;
-  };
-}
-
-const migrateIncludeExcludeFormat = {
-  serialize: function (value) {
-    if (!value || _.isString(value)) return value;
-    else return value.pattern;
-  },
-  write: function (aggConfig, output) {
-    const value = aggConfig.params[this.name];
-    if (_.isObject(value)) {
-      output.params[this.name] = value.pattern;
-    } else if (value) {
-      output.params[this.name] = value;
-    }
-  }
-};
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',
@@ -233,7 +212,7 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {
@@ -311,6 +290,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', { defaultMessage: 'Exclude' }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),
@@ -318,6 +298,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'include',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', { defaultMessage: 'Include' }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),

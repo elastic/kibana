@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#tilemap returns an object with the correct structure 1`] = `
+Object {
+  "as": "visualization",
+  "type": "render",
+  "value": Object {
+    "params": Object {
+      "listenOnChange": true,
+    },
+    "visConfig": Object {
+      "addTooltip": true,
+      "colorSchema": "Yellow to Red",
+      "dimensions": Object {
+        "geocentroid": null,
+        "geohash": null,
+        "metric": Object {
+          "accessor": 0,
+          "aggType": "count",
+          "format": Object {
+            "id": "number",
+          },
+          "params": Object {},
+        },
+      },
+      "heatClusterSize": 1.5,
+      "isDesaturated": true,
+      "legendPosition": "bottomright",
+      "mapCenter": Array [
+        0,
+        0,
+      ],
+      "mapType": "Scaled Circle Markers",
+      "mapZoom": 2,
+      "wms": Object {
+        "enabled": false,
+        "options": Object {
+          "format": "image/png",
+          "transparent": true,
+        },
+      },
+    },
+    "visData": Object {
+      "featureCollection": Object {
+        "features": Array [],
+        "type": "FeatureCollection",
+      },
+      "meta": Object {
+        "geohashGridDimensionsAtEquator": null,
+        "geohashPrecision": null,
+        "max": null,
+        "min": null,
+      },
+    },
+    "visType": "tile_map",
+  },
+}
+`;

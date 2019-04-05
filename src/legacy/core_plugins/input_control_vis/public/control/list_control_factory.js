@@ -48,7 +48,7 @@ const termsAgg = ({ field, size, direction, query }) => {
       source: field.script,
       lang: field.lang
     };
-    terms.valueType = field.type === 'number' ? 'float' : field.type;
+    terms.value_type = field.type === 'number' ? 'float' : field.type;
   } else {
     terms.field = field.name;
   }
@@ -58,8 +58,8 @@ const termsAgg = ({ field, size, direction, query }) => {
   }
 
   return {
-    'termsAgg': {
-      'terms': terms
+    termsAgg: {
+      terms: terms
     }
   };
 };

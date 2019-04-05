@@ -2,99 +2,96 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Check History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiBadge
-        color="primary"
-        iconSide="left"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiPanel
     grow={true}
     hasShadow={false}
-    paddingSize="l"
+    paddingSize="s"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      justifyContent="spaceBetween"
     >
       <EuiFlexItem
-        component="div"
-        grow={true}
+        grow={false}
       >
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Status"
-          labelType="label"
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
         >
-          <EuiComboBox
-            compressed={false}
-            fullWidth={false}
-            isClearable={false}
-            onChange={[MockFunction]}
-            options={
-              Array [
-                Object {
-                  "label": "All",
-                  "value": "",
-                },
-              ]
-            }
-            selectedOptions={
-              Array [
-                Object {
-                  "label": "All",
-                  "value": "",
-                },
-              ]
-            }
-            singleSelection={
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiTitle
+              size="xs"
+              textTransform="none"
+            >
+              <h4>
+                <FormattedMessage
+                  defaultMessage="History"
+                  id="xpack.uptime.pingList.checkHistoryTitle"
+                  values={Object {}}
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiBadge
+              color="hollow"
+              iconSide="left"
+            >
+              9231
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem
+            style={
               Object {
-                "asPlainText": true,
+                "minWidth": 200,
               }
             }
-          />
-        </EuiFormRow>
+          >
+            <EuiComboBox
+              aria-label="Status"
+              compressed={false}
+              fullWidth={false}
+              isClearable={false}
+              onChange={[MockFunction]}
+              options={
+                Array [
+                  Object {
+                    "label": "All",
+                    "value": "",
+                  },
+                ]
+              }
+              selectedOptions={
+                Array [
+                  Object {
+                    "label": "All",
+                    "value": "",
+                  },
+                ]
+              }
+              singleSelection={
+                Object {
+                  "asPlainText": true,
+                }
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
+    <EuiSpacer
+      size="s"
+    />
     <EuiInMemoryTable
       columns={
         Array [
@@ -104,23 +101,13 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "field": "timestamp",
-            "name": "Timestamp",
-            "render": [Function],
-          },
-          Object {
+            "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",
           },
           Object {
-            "dataType": "string",
-            "field": "monitor.id",
-            "name": "Id",
-            "width": "20%",
-          },
-          Object {
             "field": "monitor.duration.us",
-            "name": "Duration ms",
+            "name": "Duration",
             "render": [Function],
           },
           Object {
@@ -133,8 +120,10 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
+            "align": "right",
             "field": "http.response.status_code",
             "name": "Response code",
+            "render": [Function],
           },
         ]
       }
@@ -335,7 +324,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
       loading={false}
       pagination={
         Object {
-          "initialPageSize": 10,
+          "initialPageSize": 20,
           "pageSizeOptions": Array [
             5,
             10,

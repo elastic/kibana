@@ -8,13 +8,14 @@ import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
 import { connect } from 'react-redux';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../typings/common';
 import { getKibanaHref, KibanaHrefArgs } from './url_helpers';
 
 interface Props extends KibanaHrefArgs {
   disabled?: boolean;
   to?: StringMap;
   className?: string;
+  [prop: string]: any;
 }
 
 /**

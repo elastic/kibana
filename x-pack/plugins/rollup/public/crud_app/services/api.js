@@ -5,9 +5,17 @@
  */
 
 import chrome from 'ui/chrome';
-import { UA_ROLLUP_JOB_CREATE } from '../../../common';
+import {
+  UIM_JOB_CREATE,
+  UIM_JOB_DELETE,
+  UIM_JOB_DELETE_MANY,
+  UIM_JOB_START,
+  UIM_JOB_START_MANY,
+  UIM_JOB_STOP,
+  UIM_JOB_STOP_MANY,
+} from '../../../common';
 import { getHttp } from './http_provider';
-import { trackUserRequest } from './track_user_action';
+import { trackUserRequest } from './track_ui_metric';
 
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
@@ -18,23 +26,29 @@ export async function loadJobs() {
 
 export async function startJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/start`, body);
+  const request = getHttp().post(`${apiPrefix}/start`, body);
+  const actionType = jobIds.length > 1 ? UIM_JOB_START_MANY : UIM_JOB_START;
+  return await trackUserRequest(request, actionType);
 }
 
 export async function stopJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/stop`, body);
+  const request = getHttp().post(`${apiPrefix}/stop`, body);
+  const actionType = jobIds.length > 1 ? UIM_JOB_STOP_MANY : UIM_JOB_STOP;
+  return await trackUserRequest(request, actionType);
 }
 
 export async function deleteJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/delete`, body);
+  const request = getHttp().post(`${apiPrefix}/delete`, body);
+  const actionType = jobIds.length > 1 ? UIM_JOB_DELETE_MANY : UIM_JOB_DELETE;
+  return await trackUserRequest(request, actionType);
 }
 
 export async function createJob(job) {
   const body = { job };
   const request = getHttp().put(`${apiPrefix}/create`, body);
-  return await trackUserRequest(request, UA_ROLLUP_JOB_CREATE);
+  return await trackUserRequest(request, UIM_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {

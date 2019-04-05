@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets } from './get_buckets';
-import { IBucket } from './get_buckets/transform';
 
-export interface ITransactionDistributionAPIResponse {
-  totalHits: number;
-  buckets: IBucket[];
-  bucketSize: number;
-  defaultSample?: IBucket['sample'];
-}
-
+export type ITransactionDistributionAPIResponse = PromiseReturnType<
+  typeof getDistribution
+>;
 export async function getDistribution(
   serviceName: string,
   transactionName: string,
@@ -23,7 +19,7 @@ export async function getDistribution(
   transactionId: string,
   traceId: string,
   setup: Setup
-): Promise<ITransactionDistributionAPIResponse> {
+) {
   const bucketSize = await calculateBucketSize(
     serviceName,
     transactionName,

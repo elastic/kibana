@@ -8,9 +8,22 @@ export const PLUGIN = {
   ID: 'rollup'
 };
 
-export const UA_APP_NAME = 'rollup-job-wizard';
-export const UA_ROLLUP_JOB_CREATE = 'create';
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
-export const USER_ACTIONS = [
-  UA_ROLLUP_JOB_CREATE,
-];
+export {
+  UIM_APP_NAME,
+  UIM_APP_LOAD,
+  UIM_JOB_CREATE,
+  UIM_JOB_DELETE,
+  UIM_JOB_DELETE_MANY,
+  UIM_JOB_START,
+  UIM_JOB_START_MANY,
+  UIM_JOB_STOP,
+  UIM_JOB_STOP_MANY,
+  UIM_SHOW_DETAILS_CLICK,
+  UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
+  UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
+  UIM_DETAIL_PANEL_JSON_TAB_CLICK,
+} from './ui_metric';
