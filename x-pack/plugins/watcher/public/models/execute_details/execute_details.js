@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TIME_UNITS } from '../../../common/constants';
+import moment from 'moment';
+
 export class ExecuteDetails {
   constructor(props = {}) {
-    this.triggeredTime = props.triggeredTime;
+    this.triggeredTimeValue = props.triggeredTimeValue;
+    this.triggeredTimeUnit = props.triggeredTimeUnit;
+    this.scheduledTimeValue = props.scheduledTimeValue;
+    this.scheduledTimeUnit = props.scheduledTimeUnit;
     this.scheduledTime = props.scheduledTime;
     this.ignoreCondition = props.ignoreCondition;
     this.alternativeInput = props.alternativeInput;
@@ -14,14 +20,36 @@ export class ExecuteDetails {
     this.recordExecution = props.recordExecution;
   }
 
-  get upstreamJson() {
-    const triggerData = {
-      triggeredTime: this.triggeredTime,
-      scheduledTime: this.scheduledTime,
-    };
+  formatTime(timeUnit, value) {
+    let timeValue = moment();
+    switch (timeUnit) {
+      case TIME_UNITS.SECOND:
+        timeValue = timeValue.add(value, 'seconds');
+        break;
+      case TIME_UNITS.MINUTE:
+        timeValue = timeValue.add(value, 'minutes');
+        break;
+      case TIME_UNITS.HOUR:
+        timeValue = timeValue.add(value, 'hours');
+        break;
+      case TIME_UNITS.MILLISECOND:
+        timeValue = timeValue.add(value, 'milliseconds');
+        break;
+    }
+    return timeValue.format();
+  }
 
+  get upstreamJson() {
+    const hasTriggerTime = this.triggeredTimeValue !== '';
+    const hasScheduleTime = this.scheduledTimeValue !== '';
+    const formattedTriggerTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
+    const formattedScheduleTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
+    const triggerData = {
+      triggeredTime: formattedTriggerTime,
+      scheduledTime: formattedScheduleTime,
+    };
     return {
-      triggerData: triggerData,
+      triggerData,
       ignoreCondition: this.ignoreCondition,
       alternativeInput: this.alternativeInput,
       actionModes: this.actionModes,

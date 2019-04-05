@@ -18,7 +18,7 @@ export class ExecuteDetails {
   get upstreamJson() {
     const triggerData = {
       triggered_time: this.triggerData.triggeredTime,
-      scheduled_time: this.triggerData.scheduledTime
+      scheduled_time: this.triggerData.scheduledTime,
     };
 
     const result = {

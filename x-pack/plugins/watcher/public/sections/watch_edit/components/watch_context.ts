@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TIME_UNITS: { [key: string]: string } = {
-  MILLISECOND: 'ms',
-  SECOND: 's',
-  MINUTE: 'm',
-  HOUR: 'h',
-  DAY: 'd',
-};
+import React from 'react';
+export const WatchContext = React.createContext({} as any);
