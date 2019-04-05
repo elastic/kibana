@@ -11,7 +11,7 @@ import { commitRoutePattern } from './patterns';
 
 function requestCommit(repo: string, commitId: string) {
   return kfetch({
-    pathname: `../api/code/repo/${repo}/diff/${commitId}`,
+    pathname: `/api/code/repo/${repo}/diff/${commitId}`,
   });
 }
 

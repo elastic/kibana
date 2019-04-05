@@ -12,7 +12,7 @@ import { loadBlame, loadBlameFailed, LoadBlamePayload, loadBlameSuccess } from '
 import { blamePattern } from './patterns';
 
 function requestBlame(repoUri: string, revision: string, path: string) {
-  return kfetch({ pathname: `../api/code/repo/${repoUri}/blame/${revision}/${path}` });
+  return kfetch({ pathname: `/api/code/repo/${repoUri}/blame/${revision}/${path}` });
 }
 
 function* handleFetchBlame(action: Action<LoadBlamePayload>) {

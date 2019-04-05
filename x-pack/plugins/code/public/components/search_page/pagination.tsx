@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
-import Url from 'url';
+import url from 'url';
 
 import { history } from '../../utils/url';
 
@@ -22,7 +22,7 @@ export class Pagination extends React.PureComponent<Props> {
     const { query } = this.props;
     const queries = querystring.parse(history.location.search.replace('?', ''));
     history.push(
-      Url.format({
+      url.format({
         pathname: '/search',
         query: {
           ...queries,

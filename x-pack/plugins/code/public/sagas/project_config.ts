@@ -19,7 +19,7 @@ import { loadConfigsFailed, loadConfigsSuccess } from '../actions/project_config
 
 function putProjectConfig(repoUri: string, config: RepositoryConfig) {
   return kfetch({
-    pathname: `../api/code/repo/config/${repoUri}`,
+    pathname: `/api/code/repo/config/${repoUri}`,
     method: 'PUT',
     body: JSON.stringify(config),
   });
@@ -41,7 +41,7 @@ export function* watchSwitchProjectLanguageServer() {
 
 function fetchConfigs(repoUri: string) {
   return kfetch({
-    pathname: `../api/code/repo/config/${repoUri}`,
+    pathname: `/api/code/repo/config/${repoUri}`,
   });
 }
 

@@ -33,7 +33,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
         queryParams.repoScope = repoScope.join(',');
       }
       const res = await kfetch({
-        pathname: `../api/code/suggestions/symbol`,
+        pathname: `/api/code/suggestions/symbol`,
         method: 'get',
         query: queryParams,
       });

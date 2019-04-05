@@ -10,7 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
-import Url from 'url';
+import url from 'url';
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { DocumentSearchResult, SearchScope } from '../../../model';
@@ -92,7 +92,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     const queries = querystring.parse(history.location.search.replace('?', ''));
     return () => {
       history.push(
-        Url.format({
+        url.format({
           pathname: '/search',
           query: {
             ...queries,
@@ -121,7 +121,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     const queries = querystring.parse(history.location.search.replace('?', ''));
     return () => {
       history.push(
-        Url.format({
+        url.format({
           pathname: '/search',
           query: {
             ...queries,

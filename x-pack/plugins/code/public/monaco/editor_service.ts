@@ -35,7 +35,7 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
   public static async findSymbolByQname(qname: string) {
     try {
       const response = await kfetch({
-        pathname: `/api/lsp/symbol/${qname}`,
+        pathname: `/api/code/lsp/symbol/${qname}`,
         method: 'GET',
       });
       return response as SymbolSearchResult;

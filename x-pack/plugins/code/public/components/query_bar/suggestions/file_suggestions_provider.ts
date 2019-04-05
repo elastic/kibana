@@ -28,7 +28,7 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
         queryParams.repoScope = repoScope.join(',');
       }
       const res = await kfetch({
-        pathname: `../api/code/suggestions/doc`,
+        pathname: `/api/code/suggestions/doc`,
         method: 'get',
         query: queryParams,
       });

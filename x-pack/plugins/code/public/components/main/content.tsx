@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
+import chrome from 'ui/chrome';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree, FileTreeItemType, SearchScope, WorkerReservedProgress } from '../../../model';
@@ -157,7 +158,7 @@ class CodeContent extends React.PureComponent<Props> {
   public openRawFile = () => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
-    window.open(`../api/code/repo/${repoUri}/blob/${revision}/${path}`);
+    window.open(chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`));
   };
 
   public renderButtons = () => {

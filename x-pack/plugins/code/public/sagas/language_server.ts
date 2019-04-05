@@ -18,13 +18,13 @@ import {
 
 function fetchLangServers() {
   return kfetch({
-    pathname: '../api/code/install',
+    pathname: '/api/code/install',
   });
 }
 
 function installLanguageServer(languageServer: string) {
   return kfetch({
-    pathname: `../api/code/install/${languageServer}`,
+    pathname: `/api/code/install/${languageServer}`,
     method: 'POST',
   });
 }

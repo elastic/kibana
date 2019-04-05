@@ -12,7 +12,7 @@ import { Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
 
 export function provideDefinition(monaco: any, model: editor.ITextModel, position: any) {
-  const lspClient = new LspRestClient('../api/lsp');
+  const lspClient = new LspRestClient('/api/code/lsp');
   const lspMethods = new TextDocumentMethods(lspClient);
   function handleLocation(location: Location): languages.Location {
     return {
@@ -27,7 +27,7 @@ export function provideDefinition(monaco: any, model: editor.ITextModel, positio
   }
 
   async function handleQname(qname: string) {
-    const res: any = await kfetch({ pathname: `/api/lsp/symbol/${qname}` });
+    const res: any = await kfetch({ pathname: `/api/code/lsp/symbol/${qname}` });
     if (res.symbols) {
       return res.symbols.map((s: DetailSymbolInformation) =>
         handleLocation(s.symbolInformation.location)
