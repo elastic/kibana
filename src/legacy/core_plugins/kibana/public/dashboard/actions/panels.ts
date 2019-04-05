@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
 import { PanelId, PanelsMap, PanelState } from '../selectors';
@@ -24,8 +26,8 @@ import { PanelId, PanelsMap, PanelState } from '../selectors';
 export enum PanelActionTypeKeys {
   DELETE_PANEL = 'DELETE_PANEL',
   UPDATE_PANEL = 'UPDATE_PANEL',
-  RESET_PANEl_TITLE = 'RESET_PANEl_TITLE',
-  SET_PANEl_TITLE = 'SET_PANEl_TITLE',
+  RESET_PANEL_TITLE = 'RESET_PANEL_TITLE',
+  SET_PANEL_TITLE = 'SET_PANEL_TITLE',
   UPDATE_PANELS = 'UPDATE_PANELS',
   SET_PANELS = 'SET_PANELS',
 }
@@ -40,7 +42,7 @@ export interface UpdatePanelsAction
   extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, PanelsMap> {}
 
 export interface ResetPanelTitleAction
-  extends KibanaAction<PanelActionTypeKeys.RESET_PANEl_TITLE, PanelId> {}
+  extends KibanaAction<PanelActionTypeKeys.RESET_PANEL_TITLE, PanelId> {}
 
 export interface SetPanelTitleActionPayload {
   panelId: PanelId;
@@ -48,7 +50,7 @@ export interface SetPanelTitleActionPayload {
 }
 
 export interface SetPanelTitleAction
-  extends KibanaAction<PanelActionTypeKeys.SET_PANEl_TITLE, SetPanelTitleActionPayload> {}
+  extends KibanaAction<PanelActionTypeKeys.SET_PANEL_TITLE, SetPanelTitleActionPayload> {}
 
 export interface SetPanelsAction extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
 
@@ -62,9 +64,9 @@ export type PanelActions =
 
 export const deletePanel = createAction<PanelId>(PanelActionTypeKeys.DELETE_PANEL);
 export const updatePanel = createAction<PanelState>(PanelActionTypeKeys.UPDATE_PANEL);
-export const resetPanelTitle = createAction<PanelId>(PanelActionTypeKeys.RESET_PANEl_TITLE);
+export const resetPanelTitle = createAction<PanelId>(PanelActionTypeKeys.RESET_PANEL_TITLE);
 export const setPanelTitle = createAction<SetPanelTitleActionPayload>(
-  PanelActionTypeKeys.SET_PANEl_TITLE
+  PanelActionTypeKeys.SET_PANEL_TITLE
 );
 export const updatePanels = createAction<PanelsMap>(PanelActionTypeKeys.UPDATE_PANELS);
 export const setPanels = createAction<PanelsMap>(PanelActionTypeKeys.SET_PANELS);

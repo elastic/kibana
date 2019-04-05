@@ -42,7 +42,7 @@ export class CidrMask {
 
   public getRange() {
     const variableBits = NUM_BITS - this.prefixLength;
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     const fromAddress = ((this.initialAddress.valueOf() >> variableBits) << variableBits) >>> 0; // >>> 0 coerces to unsigned
     const numAddresses = Math.pow(2, variableBits);
     return {

@@ -34,6 +34,7 @@ export interface SemanticVersion {
 
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
+  // eslint-disable-next-line @typescript-eslint/camelcase
   public static convertPanelDataPre_6_1(panel: {
     panelIndex: any; // earlier versions allowed panelIndex to be a number or a string
     gridData: GridData;
@@ -76,6 +77,7 @@ export class PanelUtils {
   // 1) decrease column height from 100 to 20.
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
+  // eslint-disable-next-line @typescript-eslint/camelcase
   public static convertPanelDataPre_6_3(
     panel: {
       gridData: { w: number; x: number; h: number; y: number };
