@@ -5,35 +5,35 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import { Location } from 'history';
 import React from 'react';
+import chrome from 'ui/chrome';
+import url from 'url';
 import { getMlJobId } from '../../../../common/ml_job_constants';
-import { getRisonHref } from './rison_helpers';
+import { useLocation } from '../../../hooks/useLocation';
+import { getRisonString } from './rison_helpers';
 
 interface Props {
   serviceName: string;
   transactionType?: string;
-  location: Location;
 }
 
 export const MLJobLink: React.SFC<Props> = ({
   serviceName,
   transactionType,
-  location,
   children
 }) => {
-  const pathname = '/app/ml';
-  const hash = '/timeseriesexplorer';
+  const location = useLocation();
   const jobId = getMlJobId(serviceName, transactionType);
   const query = {
     _g: { ml: { jobIds: [jobId] } }
   };
 
-  const href = getRisonHref({
-    location,
-    pathname,
-    hash,
-    query
+  const risonSearch = getRisonString(location.search, query);
+
+  const href = url.format({
+    pathname: chrome.addBasePath('/app/ml'),
+    hash: `/timeseriesexplorer?${risonSearch}`
   });
+
   return <EuiLink children={children} href={href} />;
 };

@@ -25,7 +25,7 @@ export function DiscoverLink({ query, ...rest }: Props) {
     return null;
   }
 
-  const risonQuery = getRisonString(location.search, {
+  const risonSearch = getRisonString(location.search, {
     ...query,
     _a: {
       ...query._a,
@@ -35,7 +35,7 @@ export function DiscoverLink({ query, ...rest }: Props) {
 
   const href = url.format({
     pathname: chrome.addBasePath('/app/kibana'),
-    hash: `/discover?${risonQuery}`
+    hash: `/discover?${risonSearch}`
   });
 
   return <EuiLink {...rest} href={href} />;

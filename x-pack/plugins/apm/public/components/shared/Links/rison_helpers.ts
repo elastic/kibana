@@ -33,8 +33,7 @@ export interface RisonHrefArgs {
 }
 
 function createG(query: RisonAPMQueryParams) {
-  const { _g: nextG = {} } = query;
-  const g: RisonDecoded['_g'] = { ...nextG };
+  const g: RisonDecoded['_g'] = { ...query._g };
 
   if (typeof query.rangeFrom !== 'undefined') {
     set(g, 'time.from', encodeURIComponent(query.rangeFrom));
@@ -60,7 +59,8 @@ export function getRisonString(
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
-    ...pick(currentQuery, PERSISTENT_APM_PARAMS)
+    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
+    ...query
   };
 
   const g = createG(nextQuery);
