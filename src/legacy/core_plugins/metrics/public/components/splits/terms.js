@@ -40,7 +40,7 @@ const SplitByTermsUi = props => {
     label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
   };
   const terms = {
-    value: '_term',
+    value: '_key',
     label: intl.formatMessage({ id: 'tsvb.splits.terms.termsLabel', defaultMessage: 'Terms' })
   };
 
@@ -81,6 +81,7 @@ const SplitByTermsUi = props => {
             label={(<FormattedMessage
               id="tsvb.splits.terms.byLabel"
               defaultMessage="By"
+              description="This labels a field selector allowing the user to chose 'by' which field to group."
             />)}
           >
             <FieldSelect

@@ -147,7 +147,7 @@ describe('NetworkTopNFlow Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().local.network.page.queries!.topNFlow.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
         direction: 'desc',
         field: 'bytes',
       });
@@ -159,7 +159,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().local.network.page.queries!.topNFlow.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
         direction: 'asc',
         field: 'packets',
       });

@@ -54,6 +54,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "name": "Hide layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -117,6 +126,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "name": "Hide layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -142,6 +160,78 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
       <EuiLoadingSpinner
         size="m"
       />
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  hasArrow={true}
+  id="contextMenu"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="none"
+  withTitle={true}
+>
+  <EuiContextMenu
+    data-test-subj="layerTocActionsPanellayer1"
+    initialPanelId={0}
+    panels={
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "data-test-subj": "fitToBoundsButton",
+              "disabled": false,
+              "icon": <EuiIcon
+                size="m"
+                type="search"
+              />,
+              "name": "Fit to data",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "layerVisibilityToggleButton",
+              "icon": <EuiIcon
+                size="m"
+                type="eye"
+              />,
+              "name": "Hide layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+            },
+          ],
+          "title": "Layer actions",
+        },
+      ]
+    }
+  />
+</EuiPopover>
+`;
+
+exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
+<EuiPopover
+  anchorPosition="leftUp"
+  button={
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
+      flush="left"
+      iconSide="left"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      <div>
+        icon mock
+      </div>
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -250,6 +340,15 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
               "name": "Hide layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -311,6 +410,15 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
                 type="eyeClosed"
               />,
               "name": "Show layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
               "onClick": [Function],
             },
           ],
@@ -378,6 +486,15 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
                 type="eye"
               />,
               "name": "Hide layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
               "onClick": [Function],
             },
           ],

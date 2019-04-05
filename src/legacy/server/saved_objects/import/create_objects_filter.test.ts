@@ -20,34 +20,45 @@
 import { createObjectsFilter } from './create_objects_filter';
 
 describe('createObjectsFilter()', () => {
-  test('filters should return false when contains empty parameters', () => {
-    const fn = createObjectsFilter([], [], []);
+  test('filter should return false when contains empty parameters', () => {
+    const fn = createObjectsFilter([]);
     expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
   });
 
-  test('filters should exclude skips', () => {
-    const fn = createObjectsFilter(
-      [
-        {
-          type: 'a',
-          id: '1',
-        },
-      ],
-      [],
-      [
-        {
-          type: 'b',
-          from: '1',
-          to: '2',
-        },
-      ]
-    );
+  test('filter should return true for objects that are being retried', () => {
+    const fn = createObjectsFilter([
+      {
+        type: 'a',
+        id: '1',
+        overwrite: false,
+        replaceReferences: [],
+      },
+    ]);
     expect(
       fn({
         type: 'a',
         id: '1',
         attributes: {},
-        references: [{ name: 'ref_0', type: 'b', id: '1' }],
+        references: [],
+      })
+    ).toEqual(true);
+  });
+
+  test(`filter should return false for objects that aren't being retried`, () => {
+    const fn = createObjectsFilter([
+      {
+        type: 'a',
+        id: '1',
+        overwrite: false,
+        replaceReferences: [],
+      },
+    ]);
+    expect(
+      fn({
+        type: 'b',
+        id: '1',
+        attributes: {},
+        references: [],
       })
     ).toEqual(false);
     expect(
@@ -55,131 +66,8 @@ describe('createObjectsFilter()', () => {
         type: 'a',
         id: '2',
         attributes: {},
-        references: [{ name: 'ref_0', type: 'b', id: '1' }],
-      })
-    ).toEqual(true);
-  });
-
-  test('filter should include references to replace', () => {
-    const fn = createObjectsFilter(
-      [],
-      [],
-      [
-        {
-          type: 'b',
-          from: '1',
-          to: '2',
-        },
-      ]
-    );
-    expect(
-      fn({
-        type: 'a',
-        id: '1',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'b',
-            id: '1',
-          },
-        ],
-      })
-    ).toEqual(true);
-    expect(
-      fn({
-        type: 'a',
-        id: '1',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'b',
-            id: '2',
-          },
-        ],
+        references: [],
       })
     ).toEqual(false);
-  });
-
-  test('filter should include objects to overwrite', () => {
-    const fn = createObjectsFilter(
-      [],
-      [
-        {
-          type: 'a',
-          id: '1',
-        },
-      ],
-      []
-    );
-    expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(true);
-    expect(fn({ type: 'a', id: '2', attributes: {}, references: [] })).toEqual(false);
-  });
-
-  test('filter should work with skips, overwrites and replaceReferences', () => {
-    const fn = createObjectsFilter(
-      [
-        {
-          type: 'a',
-          id: '1',
-        },
-      ],
-      [
-        {
-          type: 'a',
-          id: '2',
-        },
-      ],
-      [
-        {
-          type: 'b',
-          from: '1',
-          to: '2',
-        },
-      ]
-    );
-    expect(
-      fn({
-        type: 'a',
-        id: '1',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'b',
-            id: '1',
-          },
-        ],
-      })
-    ).toEqual(false);
-    expect(
-      fn({
-        type: 'a',
-        id: '2',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'b',
-            id: '2',
-          },
-        ],
-      })
-    ).toEqual(true);
-    expect(
-      fn({
-        type: 'a',
-        id: '3',
-        attributes: {},
-        references: [
-          {
-            name: 'ref_0',
-            type: 'b',
-            id: '1',
-          },
-        ],
-      })
-    ).toEqual(true);
   });
 });

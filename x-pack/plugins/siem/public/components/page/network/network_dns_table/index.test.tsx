@@ -68,7 +68,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </MockedProvider>
       );
 
-      expect(store.getState().local.network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
         direction: 'desc',
         field: 'queryCount',
       });
@@ -80,7 +80,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().local.network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
         direction: 'asc',
         field: 'dnsName',
       });

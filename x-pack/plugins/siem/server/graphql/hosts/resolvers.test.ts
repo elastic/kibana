@@ -21,7 +21,7 @@ import { createHostsResolvers, HostsResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockHostsFields] });
-jest.mock('../../utils/build_query/fields', () => ({
+jest.doMock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 

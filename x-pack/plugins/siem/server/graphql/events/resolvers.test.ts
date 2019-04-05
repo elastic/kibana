@@ -25,7 +25,7 @@ import { createEventsResolvers, EventsResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockEventsFields] });
-jest.mock('../../utils/build_query/fields', () => ({
+jest.doMock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 

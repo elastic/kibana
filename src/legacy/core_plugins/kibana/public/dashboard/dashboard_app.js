@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
+import 'ui/listen';
 import 'ui/search_bar';
 import 'ui/apply_filters';
 
@@ -141,6 +142,7 @@ app.directive('dashboardApp', function ($injector) {
           refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
+        $scope.screenTitle = dashboardStateManager.getTitle();
 
         const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {

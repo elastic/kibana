@@ -25,7 +25,7 @@ import { fatalError } from './fatal_error';
 import { banners } from './banners';
 import { Notifier } from './notifier';
 import template from './partials/toaster.html';
-import '../filters/markdown';
+import './filters/markdown';
 import './directives/truncated';
 import { FormattedMessage } from '@kbn/i18n/react';
 

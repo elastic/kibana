@@ -20,7 +20,7 @@ import { createKpiNetworkResolvers, KpiNetworkResolversDeps } from './resolvers'
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockKpiNetworkFields] });
-jest.mock('../../utils/build_query/fields', () => ({
+jest.doMock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 

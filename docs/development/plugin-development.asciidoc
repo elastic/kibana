@@ -9,6 +9,7 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 * <<development-plugin-resources>>
 * <<development-uiexports>>
 * <<development-plugin-functional-tests>>
+* <<development-plugin-localization>>
 * <<development-visualize-index>>
 * <<add-data-guide>>
 
@@ -18,6 +19,8 @@ include::plugin/development-plugin-resources.asciidoc[]
 include::plugin/development-uiexports.asciidoc[]
 
 include::plugin/development-plugin-functional-tests.asciidoc[]
+
+include::plugin/development-plugin-localization.asciidoc[]
 
 include::visualize/development-visualize-index.asciidoc[]
 
