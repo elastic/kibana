@@ -12,7 +12,7 @@ function isRawDocumentQuery(query: Query) {
 }
 
 function queryToEsAggsConfigs(query: Query): any {
-  return [...query.select].map((selectOperation, index) => {
+  return query.select.map((selectOperation, index) => {
     switch (selectOperation.operator) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
@@ -41,7 +41,6 @@ function queryToEsAggsConfigs(query: Query): any {
           type: 'sum',
         };
       case 'terms':
-      case 'column':
         return {
           id: String(index),
           enabled: true,
