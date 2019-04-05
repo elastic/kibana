@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IpOverviewType } from '../../graphql/types';
+import { FlowTarget } from '../../graphql/types';
 
 import { getIpOverviewAgg } from './elasticsearch_adapter';
 import { IpOverviewHit } from './types';
@@ -311,22 +311,19 @@ describe('elasticsearch_adapter', () => {
 
     test('will return a destination correctly', () => {
       const destination = getIpOverviewAgg(
-        IpOverviewType.destination,
+        FlowTarget.destination,
         responseAggs.aggregations.destination!
       );
       expect(destination).toEqual(formattedDestination);
     });
 
     test('will return a source correctly', () => {
-      const destination = getIpOverviewAgg(
-        IpOverviewType.source,
-        responseAggs.aggregations.source!
-      );
+      const destination = getIpOverviewAgg(FlowTarget.source, responseAggs.aggregations.source!);
       expect(destination).toEqual(formattedSource);
     });
 
     test('will return an empty source correctly', () => {
-      const destination = getIpOverviewAgg(IpOverviewType.source, {});
+      const destination = getIpOverviewAgg(FlowTarget.source, {});
       expect(destination).toEqual(formattedEmptySource);
     });
   });

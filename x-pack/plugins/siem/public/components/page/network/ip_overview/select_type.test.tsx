@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { IpOverviewType } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../graphql/types';
 
 import { IpOverviewId } from '.';
 import { SelectType } from './select_type';
@@ -21,7 +21,7 @@ describe('IP Overview Select direction', () => {
       const wrapper = shallow(
         <SelectType
           id={`${IpOverviewId}-select-type`}
-          selectedType={IpOverviewType.source}
+          selectedType={FlowTarget.source}
           onChangeType={mockOnChange}
           isLoading={false}
         />
@@ -36,7 +36,7 @@ describe('IP Overview Select direction', () => {
       const wrapper = mount(
         <SelectType
           id={`${IpOverviewId}-select-type`}
-          selectedType={IpOverviewType.source}
+          selectedType={FlowTarget.source}
           onChangeType={mockOnChange}
           isLoading={false}
         />

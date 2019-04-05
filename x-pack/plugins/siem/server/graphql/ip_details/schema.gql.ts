@@ -7,11 +7,6 @@
 import gql from 'graphql-tag';
 
 export const ipOverviewSchema = gql`
-  enum IpOverviewType {
-    destination
-    source
-  }
-
   type AutonomousSystem {
     as_org: String
     asn: String
@@ -27,8 +22,10 @@ export const ipOverviewSchema = gql`
   }
 
   type IpOverviewData {
-    source: Overview
+    client: Overview
     destination: Overview
+    server: Overview
+    source: Overview
   }
 
   extend type Source {
@@ -47,7 +44,7 @@ export const domainsSchema = gql`
 
   input DomainsSortField {
     field: DomainsFields!
-    direction: Direction!
+    flowDirection: FlowDirection!
   }
 
   type DomainsNetworkField {
@@ -87,13 +84,13 @@ export const domainsSchema = gql`
 
   extend type Source {
     Domains(
-      direction: FlowDirection!
       filterQuery: String
       id: String
       ip: String!
       pagination: PaginationInput!
       sort: DomainsSortField!
-      type: FlowType!
+      flowDirection: FlowDirection!
+      flowTarget: FlowTarget!
       timerange: TimerangeInput!
     ): DomainsData!
   }

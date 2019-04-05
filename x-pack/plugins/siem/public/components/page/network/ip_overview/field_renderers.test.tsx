@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { GetIpOverviewQuery, HostEcsFields, IpOverviewType } from '../../../../graphql/types';
+import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
@@ -77,10 +77,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          {autonomousSystemRenderer(
-            mockData.complete.source!.autonomousSystem!,
-            IpOverviewType.source
-          )}
+          {autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)}
         </TestProviders>
       );
 
@@ -89,16 +86,14 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-string field provided', () => {
       const wrapper = mount(
-        <TestProviders>
-          {autonomousSystemRenderer(halfEmptyMock, IpOverviewType.source)}
-        </TestProviders>
+        <TestProviders>{autonomousSystemRenderer(halfEmptyMock, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
       const wrapper = mount(
-        <TestProviders>{autonomousSystemRenderer(emptyMock, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{autonomousSystemRenderer(emptyMock, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -136,13 +131,13 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -185,19 +180,19 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.name is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyNameHost, IpOverviewType.source)}</TestProviders>
+        <TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });

@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsSortField, FlowDirection, FlowType } from '../../graphql/types';
+import { DomainsSortField, FlowDirection, FlowTarget } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { DomainsRequestOptions } from './index';
 
 // TODO: Extract as helper -- shared with query_top_n_flow
-const getOppositeField = (type: FlowType): FlowType => {
+const getOppositeField = (type: FlowTarget): FlowTarget => {
   switch (type) {
-    case FlowType.source:
-      return FlowType.destination;
-    case FlowType.destination:
-      return FlowType.source;
-    case FlowType.server:
-      return FlowType.client;
-    case FlowType.client:
-      return FlowType.server;
+    case FlowTarget.source:
+      return FlowTarget.destination;
+    case FlowTarget.destination:
+      return FlowTarget.source;
+    case FlowTarget.server:
+      return FlowTarget.client;
+    case FlowTarget.client:
+      return FlowTarget.server;
     default:
       return type;
   }
@@ -27,7 +27,7 @@ const getOppositeField = (type: FlowType): FlowType => {
 
 const getAggs = (
   ip: string,
-  type: FlowType,
+  type: FlowTarget,
   flowDirection: FlowDirection,
   domainsSortField: DomainsSortField,
   limit: number
@@ -38,7 +38,7 @@ const getAggs = (
         field: `${getOppositeField(type)}.domain`,
         size: 20,
         order: {
-          [domainsSortField.field]: domainsSortField.direction,
+          [domainsSortField.field]: domainsSortField.flowDirection,
         },
       },
       aggs: {
@@ -114,7 +114,7 @@ export const buildDomainsQuery = ({
   domainsSortField,
   filterQuery,
   flowDirection,
-  flowType,
+  flowTarget,
   pagination: { limit },
   sourceConfiguration: {
     fields: { timestamp },
@@ -126,7 +126,7 @@ export const buildDomainsQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
-    { term: { [`${getOppositeField(flowType)}.ip`]: ip } },
+    { term: { [`${getOppositeField(flowTarget)}.ip`]: ip } },
   ];
 
   const dslQuery = {
@@ -135,7 +135,7 @@ export const buildDomainsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        ...getAggs(ip, flowType, flowDirection, domainsSortField, limit),
+        ...getAggs(ip, flowTarget, flowDirection, domainsSortField, limit),
       },
       query: {
         bool: {
@@ -143,7 +143,7 @@ export const buildDomainsQuery = ({
           must_not: [
             {
               exists: {
-                field: `${flowType}.bytes`,
+                field: `${flowTarget}.bytes`,
               },
             },
           ],

@@ -9,24 +9,24 @@ import gql from 'graphql-tag';
 export const domainsQuery = gql`
   query GetDomainsQuery(
     $sourceId: ID!
-    $direction: FlowDirection!
     $filterQuery: String
+    $flowDirection: FlowDirection!
+    $flowTarget: FlowTarget!
     $ip: String!
     $pagination: PaginationInput!
     $sort: DomainsSortField!
     $timerange: TimerangeInput!
-    $type: FlowType!
   ) {
     source(id: $sourceId) {
       id
       Domains(
-        direction: $direction
         filterQuery: $filterQuery
+        flowDirection: $flowDirection
+        flowTarget: $flowTarget
         ip: $ip
         pagination: $pagination
         sort: $sort
         timerange: $timerange
-        type: $type
       ) {
         totalCount
         edges {

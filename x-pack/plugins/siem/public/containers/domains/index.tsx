@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { FlowDirection, FlowType } from '../../../server/graphql/types';
+import { FlowDirection, FlowTarget } from '../../../server/graphql/types';
 import { DomainsEdges, DomainsSortField, GetDomainsQuery, PageInfo } from '../../graphql/types';
 import { inputsModel, networkModel } from '../../store';
 import { createFilter } from '../helpers';
@@ -35,8 +35,8 @@ export interface DomainsComponentReduxProps {
   limit: number;
   ip: string;
   domainsSortField: DomainsSortField;
-  flowType: FlowType;
   flowDirection: FlowDirection;
+  flowTarget: FlowTarget;
 }
 
 type DomainsProps = OwnProps & DomainsComponentReduxProps;
@@ -58,7 +58,7 @@ class DomainsComponentQuery extends QueryTemplate<
       endDate,
       limit,
       poll,
-      flowType,
+      flowTarget,
       flowDirection,
     } = this.props;
     return (
@@ -75,9 +75,9 @@ class DomainsComponentQuery extends QueryTemplate<
             to: endDate!,
           },
           ip,
-          direction: flowDirection,
+          flowDirection,
+          flowTarget,
           sort: domainsSortField,
-          type: flowType,
           pagination: {
             limit,
             cursor: null,

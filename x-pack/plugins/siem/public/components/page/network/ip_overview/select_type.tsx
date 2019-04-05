@@ -8,27 +8,27 @@ import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { IpOverviewType } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../graphql/types';
 
 import * as i18n from './translations';
 
 const toggleTypeOptions = (id: string) => [
   {
-    id: `${id}-${IpOverviewType.source}`,
-    value: IpOverviewType.source,
+    id: `${id}-${FlowTarget.source}`,
+    value: FlowTarget.source,
     inputDisplay: i18n.AS_SOURCE,
   },
   {
-    id: `${id}-${IpOverviewType.destination}`,
-    value: IpOverviewType.destination,
+    id: `${id}-${FlowTarget.destination}`,
+    value: FlowTarget.destination,
     inputDisplay: i18n.AS_DESTINATION,
   },
 ];
 
 interface Props {
   id: string;
-  selectedType: IpOverviewType;
-  onChangeType: (value: IpOverviewType) => void;
+  selectedType: FlowTarget;
+  onChangeType: (value: FlowTarget) => void;
   isLoading: boolean;
 }
 

@@ -14,7 +14,7 @@ import {
   DomainsEdges,
   DomainsSortField,
   FlowDirection,
-  FlowType,
+  FlowTarget,
   NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
@@ -41,7 +41,7 @@ interface OwnProps {
 interface DomainsTableReduxProps {
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
-  flowType: FlowType;
+  flowTarget: FlowTarget;
   ip: string;
   limit: number;
 }
@@ -60,7 +60,7 @@ interface DomainsTableReduxProps {
 //     networkType: networkModel.NetworkType;
 //   }>;
 //   updateTopNFlowType: ActionCreator<{
-//     topNFlowType: FlowType;
+//     topNFlowType: FlowTarget;
 //     networkType: networkModel.NetworkType;
 //   }>;
 // }
@@ -106,7 +106,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       startDate,
       flowDirection,
       domainsSortField,
-      flowType,
+      flowTarget,
       type,
     } = this.props;
 
@@ -117,7 +117,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     return (
       <LoadMoreTable
-        columns={getDomainsTableColumns(startDate, flowDirection, flowType, type, DomainsTableId)}
+        columns={getDomainsTableColumns(startDate, flowDirection, flowTarget, type, DomainsTableId)}
         loadingTitle={i18n.DOMAINS}
         loading={loading}
         pageOfItems={data}
@@ -144,7 +144,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
                   <SelectType
                     id={`${DomainsTableId}-select-type`}
                     selectedDirection={flowDirection}
-                    selectedType={flowType}
+                    selectedType={flowTarget}
                     onChangeType={this.onChangeDomainsType}
                     isLoading={loading}
                   />

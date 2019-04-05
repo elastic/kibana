@@ -5,7 +5,7 @@
  */
 
 import {
-  IpOverviewType,
+  FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
@@ -47,7 +47,7 @@ export interface NetworkPageModel {
 
 // IP Details Models
 export interface IpOverviewQuery {
-  flowType: IpOverviewType;
+  flowTarget: FlowTarget;
 }
 
 interface IpOverviewQueries {

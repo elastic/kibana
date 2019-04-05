@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { IpOverviewData, IpOverviewType, Overview } from '../../../../graphql/types';
+import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -54,12 +54,12 @@ interface OwnProps {
 }
 
 interface IpOverviewReduxProps {
-  flowType: IpOverviewType;
+  flowTarget: FlowTarget;
 }
 
 interface IpOverViewDispatchProps {
   updateIpOverviewFlowType: ActionCreator<{
-    flowType: IpOverviewType;
+    flowTarget: FlowTarget;
   }>;
 }
 
@@ -67,22 +67,22 @@ type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps
 
 class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {
-    const { ip, data, loading, flowType } = this.props;
-    const typeData: Overview = data[flowType]!;
+    const { ip, data, loading, flowTarget } = this.props;
+    const typeData: Overview = data[flowTarget]!;
 
     const descriptionLists: Readonly<DescriptionList[][]> = [
       [
         {
           title: i18n.LOCATION,
           description: locationRenderer(
-            [`${flowType}.geo.city_name`, `${flowType}.geo.region_name`],
+            [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
             data
           ),
         },
         {
           title: i18n.AUTONOMOUS_SYSTEM,
           description: typeData
-            ? autonomousSystemRenderer(typeData.autonomousSystem, flowType)
+            ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
             : getEmptyTagValue(),
         },
       ],
@@ -117,7 +117,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
           <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
             <SelectType
               id={`${IpOverviewId}-select-type`}
-              selectedType={flowType}
+              selectedType={flowTarget}
               onChangeType={this.onChangeType}
               isLoading={loading}
             />
@@ -158,8 +158,8 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
     );
   };
 
-  private onChangeType = (flowType: IpOverviewType) => {
-    this.props.updateIpOverviewFlowType({ flowType });
+  private onChangeType = (flowTarget: FlowTarget) => {
+    this.props.updateIpOverviewFlowType({ flowTarget });
   };
 }
 

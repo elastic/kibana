@@ -7,7 +7,7 @@
 import { defaultWidth } from '../components/timeline/body';
 import {
   Direction,
-  IpOverviewType,
+  FlowTarget,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
@@ -70,7 +70,7 @@ export const mockGlobalState: State = {
       filterQueryDraft: null,
       queries: {
         ipOverview: {
-          flowType: IpOverviewType.source,
+          flowTarget: FlowTarget.source,
         },
       },
     },

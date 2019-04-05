@@ -5,7 +5,7 @@
  */
 
 import { DomainsSortField } from '../../../public/graphql/types';
-import { DomainsData, FlowDirection, FlowType, IpOverviewData } from '../../graphql/types';
+import { DomainsData, FlowDirection, FlowTarget, IpOverviewData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 
 import { IpDetailsAdapter } from './types';
@@ -19,7 +19,7 @@ export interface IpOverviewRequestOptions extends RequestOptions {
 export interface DomainsRequestOptions extends RequestOptions {
   ip: string;
   domainsSortField: DomainsSortField;
-  flowType: FlowType;
+  flowTarget: FlowTarget;
   flowDirection: FlowDirection;
 }
 

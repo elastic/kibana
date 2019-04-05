@@ -768,9 +768,13 @@ export interface HostItem {
 }
 
 export interface IpOverviewData {
-  source?: Overview | null;
+  client?: Overview | null;
 
   destination?: Overview | null;
+
+  server?: Overview | null;
+
+  source?: Overview | null;
 }
 
 export interface Overview {
@@ -1025,7 +1029,7 @@ export interface SortField {
 export interface DomainsSortField {
   field: DomainsFields;
 
-  direction: Direction;
+  flowDirection: FlowDirection;
 }
 
 export interface NetworkTopNFlowSortField {
@@ -1097,8 +1101,6 @@ export interface IpOverviewSourceArgs {
   ip: string;
 }
 export interface DomainsSourceArgs {
-  direction: FlowDirection;
-
   filterQuery?: string | null;
 
   id?: string | null;
@@ -1109,7 +1111,9 @@ export interface DomainsSourceArgs {
 
   sort: DomainsSortField;
 
-  type: FlowType;
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
 }
@@ -1190,11 +1194,6 @@ export enum Direction {
   desc = 'desc',
 }
 
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
-}
-
 export enum DomainsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
@@ -1203,7 +1202,12 @@ export enum DomainsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export enum FlowType {
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
+}
+
+export enum FlowTarget {
   client = 'client',
   destination = 'destination',
   server = 'server',
@@ -1245,11 +1249,6 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export enum IpOverviewType {
-  destination = 'destination',
-  source = 'source',
 }
 
 // ====================================================
@@ -1394,13 +1393,13 @@ export namespace GetAuthenticationsQuery {
 export namespace GetDomainsQuery {
   export type Variables = {
     sourceId: string;
-    direction: FlowDirection;
-    filterQuery?: string | null;
     ip: string;
+    filterQuery?: string | null;
+    flowDirection: FlowDirection;
+    flowTarget: FlowTarget;
     pagination: PaginationInput;
     sort: DomainsSortField;
     timerange: TimerangeInput;
-    type: FlowType;
   };
 
   export type Query = {

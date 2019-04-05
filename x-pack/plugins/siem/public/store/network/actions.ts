@@ -7,7 +7,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import {
-  IpOverviewType,
+  FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
@@ -66,5 +66,5 @@ export const applyNetworkFilterQuery = actionCreator<{
 
 // IP Overview Actions
 export const updateIpOverviewFlowType = actionCreator<{
-  flowType: IpOverviewType;
+  flowTarget: FlowTarget;
 }>('UPDATE_IP_OVERVIEW_FLOW_TYPE');

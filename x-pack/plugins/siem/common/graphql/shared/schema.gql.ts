@@ -35,7 +35,7 @@ export const sharedSchema = gql`
     desc
   }
 
-  enum FlowType {
+  enum FlowTarget {
     client
     destination
     server

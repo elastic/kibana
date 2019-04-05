@@ -8,7 +8,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   Direction,
-  IpOverviewType,
+  FlowTarget,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
@@ -60,7 +60,7 @@ export const initialNetworkState: NetworkState = {
   details: {
     queries: {
       ipOverview: {
-        flowType: IpOverviewType.source,
+        flowTarget: FlowTarget.source,
       },
     },
     filterQuery: null,
@@ -182,7 +182,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       filterQuery,
     },
   }))
-  .case(updateIpOverviewFlowType, (state, { flowType }) => ({
+  .case(updateIpOverviewFlowType, (state, { flowTarget }) => ({
     ...state,
     [NetworkType.details]: {
       ...state[NetworkType.details],
@@ -190,7 +190,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         ...state[NetworkType.details].queries,
         ipOverview: {
           ...state[NetworkType.details].queries.ipOverview,
-          flowType,
+          flowTarget,
         },
       },
     },

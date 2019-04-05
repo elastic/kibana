@@ -10,9 +10,9 @@ import React from 'react';
 
 import {
   AutonomousSystem,
+  FlowTarget,
   HostEcsFields,
   IpOverviewData,
-  IpOverviewType,
   Overview,
 } from '../../../../graphql/types';
 import { DefaultDraggable } from '../../../draggables';
@@ -53,20 +53,20 @@ export const dateRenderer = (fieldName: string, data: Overview): React.ReactElem
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
-  flowType: IpOverviewType
+  flowTarget: FlowTarget
 ): React.ReactElement =>
   as && as.as_org && as.asn ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowType}.autonomous_system.as_org`}
-          field={`${flowType}.autonomous_system.as_org`}
+          id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
+          field={`${flowTarget}.autonomous_system.as_org`}
           value={as.as_org}
         />{' '}
         /
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowType}.autonomous_system.asn`}
-          field={`${flowType}.autonomous_system.asn`}
+          id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
+          field={`${flowTarget}.autonomous_system.asn`}
           value={as.asn}
         />
       </EuiFlexItem>
