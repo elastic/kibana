@@ -6,7 +6,7 @@
 
 import createContainer from 'constate-latest';
 import { useState } from 'react';
-import { MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
@@ -36,7 +36,7 @@ const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: [
     {
       aggregation: MetricsExplorerAggregation.count,
-      color: MetricsExplorerColorPalette.color0,
+      color: MetricsExplorerColor.color0,
     },
   ],
 };

@@ -9,7 +9,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback, useState } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { getUnusedColor, MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { MetricsExplorerColor, sampleColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
@@ -38,26 +38,26 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
       );
       setNewMetric(null);
     },
-    [options.metrics]
+    [options, onChange, setNewMetric]
   );
 
   const handleDelete = useCallback(
     (id: number) => {
       onChange(options.metrics.filter((m, index) => index !== id));
     },
-    [options.metrics]
+    [options, onChange]
   );
 
   const handleAdd = useCallback(
     () => {
-      const usedColors = options.metrics.map(m => m.color || MetricsExplorerColorPalette.color0);
+      const usedColors = options.metrics.map(m => m.color || MetricsExplorerColor.color0);
       setNewMetric(options.metrics.length);
       onChange([
         ...options.metrics,
-        { aggregation: MetricsExplorerAggregation.count, color: getUnusedColor(usedColors) },
+        { aggregation: MetricsExplorerAggregation.count, color: sampleColor(usedColors) },
       ]);
     },
-    [options.metrics]
+    [options, onChange, setNewMetric]
   );
 
   const addMetricLabel = intl.formatMessage({
@@ -69,7 +69,7 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
     options.metrics.length === 1 &&
     options.metrics[0] &&
     options.metrics[0].aggregation === MetricsExplorerAggregation.count &&
-    options.metrics[0].color === '#3185FC' &&
+    options.metrics[0].color === MetricsExplorerColor.color0 &&
     options.groupBy == null;
 
   return (

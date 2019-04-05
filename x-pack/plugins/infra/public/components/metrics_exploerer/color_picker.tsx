@@ -7,41 +7,38 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 
 interface Props {
   intl: InjectedIntl;
-  colorPalete: MetricsExplorerColorPalette[];
-  value: MetricsExplorerColorPalette;
-  onChange: (color: MetricsExplorerColorPalette) => void;
+  value: MetricsExplorerColor;
+  onChange: (color: MetricsExplorerColor) => void;
 }
 
-export const MetricsExplorerColorPicker = injectI18n(
-  ({ intl, colorPalete, value, onChange }: Props) => {
-    const intlPrefix = 'xpack.infra.metricsExplorer.colorPicker';
-    return (
-      <Container>
-        {colorPalete.map((color, index) => {
-          const Swatch = color === value ? SwatchSelected : SwatchContainer;
-          return (
-            <Swatch
-              key={color}
-              color={color}
-              aria-label={intl.formatMessage(
-                {
-                  id: `${intlPrefix}.swatchLabel`,
-                  defaultMessage: 'color {number}',
-                },
-                { number: index }
-              )}
-              onClick={useCallback(() => onChange(color), [onChange])}
-            />
-          );
-        })}
-      </Container>
-    );
-  }
-);
+export const MetricsExplorerColorPicker = injectI18n(({ intl, value, onChange }: Props) => {
+  const intlPrefix = 'xpack.infra.metricsExplorer.colorPicker';
+  return (
+    <Container>
+      {Object.values(MetricsExplorerColor).map((color, index) => {
+        const Swatch = color === value ? SwatchSelected : SwatchContainer;
+        return (
+          <Swatch
+            key={color}
+            color={colorTransformer(color)}
+            aria-label={intl.formatMessage(
+              {
+                id: `${intlPrefix}.swatchLabel`,
+                defaultMessage: 'color {number}',
+              },
+              { number: index }
+            )}
+            onClick={useCallback(() => onChange(color), [onChange])}
+          />
+        );
+      })}
+    </Container>
+  );
+});
 
 const Container = euiStyled.div`
   display: flex;
@@ -49,7 +46,7 @@ const Container = euiStyled.div`
 `;
 
 interface SwatchProps {
-  color: MetricsExplorerColorPalette;
+  color: string;
 }
 
 const SwatchContainer = euiStyled<SwatchProps, 'button'>('button')`

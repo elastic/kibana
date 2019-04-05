@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { set, values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
-import { MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
@@ -79,7 +79,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
             .required(),
           field: Joi.string(),
           rate: Joi.bool().default(false),
-          color: Joi.string().valid(values(MetricsExplorerColorPalette)),
+          color: Joi.string().valid(values(MetricsExplorerColor)),
           label: Joi.string(),
         })
       )

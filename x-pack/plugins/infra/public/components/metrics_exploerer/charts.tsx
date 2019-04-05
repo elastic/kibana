@@ -27,6 +27,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isNumber } from 'lodash';
 import React from 'react';
+import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { NoData } from '../empty_states/no_data';
@@ -92,7 +93,10 @@ export const MetricsExplorerCharts = injectI18n(
                   {options.metrics.map((metric, id) => (
                     <EuiLineSeries
                       key={`metric_series_${id}`}
-                      color={metric.color || '#999'}
+                      color={
+                        (metric.color && colorTransformer(metric.color)) ||
+                        colorTransformer(MetricsExplorerColor.color0)
+                      }
                       lineSize={2}
                       name={`${series.id}-metric_${id}`}
                       data={series.rows.map(row => ({

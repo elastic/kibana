@@ -6,7 +6,7 @@
 
 import * as Joi from 'joi';
 import { values } from 'lodash';
-import { MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerAggregation } from './types';
 
 export const metricsExplorerSchema = Joi.object({
@@ -24,7 +24,7 @@ export const metricsExplorerSchema = Joi.object({
           .required(),
         field: Joi.string(),
         rate: Joi.bool().default(false),
-        color: Joi.string().valid(values(MetricsExplorerColorPalette)),
+        color: Joi.string().valid(values(MetricsExplorerColor)),
         label: Joi.string(),
       })
     )

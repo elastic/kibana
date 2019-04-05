@@ -10,6 +10,7 @@ import { getLuminance } from 'polished';
 import React, { useCallback, useState } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
+import { colorTransformer, MetricsExplorerColor } from '../../..//common/color_palette';
 import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import { MetricForm } from './metrics_form';
 
@@ -42,12 +43,14 @@ export const Metric = injectI18n(
     const [isPopoverOpen, setPopoverState] = useState<boolean>(openFromStart);
 
     const intlPrefix = 'xpack.infra.metricsExplorer';
-    const backgroundColor = metric.color ? metric.color : '#999';
+    const backgroundColor = metric.color
+      ? colorTransformer(metric.color)
+      : colorTransformer(MetricsExplorerColor.color0);
     const textColor = getLuminance(backgroundColor) < 0.45 ? '#FFF' : '#000';
     const buttonColor = getLuminance(backgroundColor) < 0.45 ? 'ghost' : 'text';
 
-    const closePopover = useCallback(() => setPopoverState(false), [isPopoverOpen]);
-    const openPopover = useCallback(() => setPopoverState(true), [isPopoverOpen]);
+    const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
+    const openPopover = useCallback(() => setPopoverState(true), [setPopoverState]);
 
     const editMetricLabel = intl.formatMessage({
       id: `${intlPrefix}.editMetric`,

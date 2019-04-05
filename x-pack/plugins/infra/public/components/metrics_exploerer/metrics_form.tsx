@@ -18,7 +18,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
-import { colorPalette, MetricsExplorerColorPalette } from '../../../common/color_palette';
+import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
@@ -56,7 +56,7 @@ export const MetricForm = injectI18n(
             (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
             MetricsExplorerAggregation.count,
         }),
-      [metric]
+      [metric, onChange]
     );
 
     const handleFieldChange = useCallback(
@@ -66,15 +66,15 @@ export const MetricForm = injectI18n(
           onChange(id, { ...metric, field });
         }
       },
-      [metric]
+      [metric, onChange]
     );
 
     const handleColorChange = useCallback(
-      (color: MetricsExplorerColorPalette) => onChange(id, { ...metric, color }),
-      [metric]
+      (color: MetricsExplorerColor) => onChange(id, { ...metric, color }),
+      [metric, onChange]
     );
 
-    const handleMetricDelete = useCallback(() => onDelete(id), [id]);
+    const handleMetricDelete = useCallback(() => onDelete(id), [id, onDelete]);
 
     const fieldType =
       metric.aggregation === MetricsExplorerAggregation.cardinality ? 'string' : 'number';
@@ -110,26 +110,16 @@ export const MetricForm = injectI18n(
             isClearable={false}
           />
         </EuiFormRow>
-        <EuiFormRow>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id={`${intlPrefix}.seriesColorLabel`}
-                    defaultMessage="Series Color"
-                  />
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <MetricsExplorerColorPicker
-                value={metric.color || MetricsExplorerColorPalette.color0}
-                onChange={handleColorChange}
-                colorPalete={colorPalette}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: `${intlPrefix}.colorLabel`,
+            defaultMessage: 'Metric Color',
+          })}
+        >
+          <MetricsExplorerColorPicker
+            value={metric.color || MetricsExplorerColor.color0}
+            onChange={handleColorChange}
+          />
         </EuiFormRow>
         {isDeleteable && (
           <React.Fragment>
