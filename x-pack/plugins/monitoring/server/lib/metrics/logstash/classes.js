@@ -354,13 +354,22 @@ export class LogstashPipelineNodeWithoutPipelineCountMetric extends LogstashMetr
     });
 
     this.dateHistogramSubAggs = {
-      with_no_pipeline: {
-        missing: {
-          field: 'logstash_stats.pipelines.id',
+      logstash_uuid: {
+        terms: {
+          field: 'logstash_stats.logstash.uuid',
+          size: 1000,
         },
-      }
+        aggs: {
+          with_no_pipeline: {
+            nested: {
+              path: 'logstash_stats.pipelines',
+            },
+          },
+        },
+      },
     };
-    this.calculation = bucket => !!_.get(bucket, 'with_no_pipeline.doc_count', undefined);
+    this.calculation = bucket =>
+      _.get(bucket, 'doc_count', 0) > 0 && _.get(bucket, 'with_no_pipeline.doc_count', 0) === 0;
   }
 }
 

@@ -66,6 +66,11 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
               size: config.get('xpack.monitoring.max_bucket_size')
             },
             aggs: {
+              missing_pipelines_field: {
+                nested: {
+                  path: 'logstash_stats.pipelines',
+                },
+              },
               latest_report: {
                 terms: {
                   field: 'logstash_stats.timestamp',
@@ -124,11 +129,6 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
               field: 'logstash_stats.logstash.version',
               size: config.get('xpack.monitoring.max_bucket_size')
             }
-          },
-          missing_pipeline_id: {
-            missing: {
-              field: 'logstash_stats.pipelines.id',
-            },
           },
           pipelines_nested: {
             nested: {
@@ -191,9 +191,13 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
         const aggregations = get(result, 'aggregations', {});
         const logstashUuids =  get(aggregations, 'logstash_uuids.buckets', []);
         const logstashVersions = get(aggregations, 'logstash_versions.buckets', []);
-        // there can only be one pipeline with no ID, because multiple pipelines weren't possible
-        // until the introduction of pipeline ID
-        const missingPipelineIdCount = get(aggregations, 'missing_pipeline_id.doc_count', 0) ? 1 : 0;
+        // if there are monitoring documents, but none get nested by pipeliens field, we can assume
+        // that this is a result of an older pipeline, which normally we wouldn't count
+        const singularPipelinesCount = logstashUuids.reduce(
+          (accumulator, { doc_count: total, missing_pipelines_field: { doc_count: nestedPipelineCount } }) =>
+            total > 0 && nestedPipelineCount === 0 ? accumulator + 1 : accumulator,
+          0
+        );
 
         // everything is initialized such that it won't impact any rollup
         let eventsInTotal = 0;
@@ -220,7 +224,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
             avg_memory: memory,
             avg_memory_used: memoryUsed,
             max_uptime: maxUptime,
-            pipeline_count: get(aggregations, 'pipelines_nested.pipelines.value', 0) + missingPipelineIdCount,
+            pipeline_count: get(aggregations, 'pipelines_nested.pipelines.value', 0) + singularPipelinesCount,
             queue_types: getQueueTypes(get(aggregations, 'pipelines_nested.queue_types.buckets', [])),
             versions: logstashVersions.map(versionBucket => versionBucket.key)
           }
