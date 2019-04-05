@@ -81,6 +81,7 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
         title,
         //message: stripAnsi(output).split('\n')[2].trim(),
         // message: '```\n' + JSON.stringify(runnable.addl, undefined, 2) + '```\n',
+        message: 'hi',
         raw_details: `url: ${runnable.addl.currentUrl}\n\nhtml content: ${runnable.addl.htmlFileName}\n\nbrowser console:\n${runnable.addl.browserOutput}`
       });
     }
