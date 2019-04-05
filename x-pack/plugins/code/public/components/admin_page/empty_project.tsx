@@ -14,9 +14,9 @@ export const EmptyProject = ({ isAdmin }: { isAdmin: boolean }) => (
     <EuiSpacer size="xl" />
     <div className="code-projects-tab__empty_header">
       <EuiText>
-        <h1>You don't have any projects yet.</h1>
+        <h1>You don't have any projects yet</h1>
       </EuiText>
-      <EuiText color="subdued">{isAdmin && <p>Let's import your first one.</p>}</EuiText>
+      <EuiText color="subdued">{isAdmin && <p>Let's import your first one</p>}</EuiText>
     </div>
     {isAdmin && <ImportProject />}
     <EuiSpacer />

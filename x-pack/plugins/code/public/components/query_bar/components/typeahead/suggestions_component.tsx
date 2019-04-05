@@ -32,6 +32,15 @@ export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
+  private viewMoreUrl() {
+    return url.format({
+      pathname: '/search',
+      query: {
+        q: this.props.query,
+      },
+    });
+  }
+
   public render() {
     if (!this.props.show || isEmpty(this.props.suggestionGroups)) {
       return null;
@@ -42,7 +51,9 @@ export class SuggestionsComponent extends Component<Props> {
         <div className="kbnTypeahead">
           <div className="kbnTypeahead__popover">
             {this.renderSuggestionGroups()}
-            <div className="codeSearch__full-text-button">Press ⮐ Return for Full Text Search</div>
+            <Link to={this.viewMoreUrl()}>
+              <div className="codeSearch__full-text-button">Press ⮐ Return for Full Text Search</div>
+            </Link>
           </div>
         </div>
       </div>
@@ -102,15 +113,9 @@ export class SuggestionsComponent extends Component<Props> {
           </EuiFlexGroup>
         );
 
-        const viewMoreUrl = url.format({
-          pathname: '/search',
-          query: {
-            q: this.props.query,
-          },
-        });
         const viewMore = (
           <div className="codeSearch-suggestion__link">
-            <Link to={viewMoreUrl}>View More</Link>
+            <Link to={this.viewMoreUrl()}>View More</Link>
           </div>
         );
 

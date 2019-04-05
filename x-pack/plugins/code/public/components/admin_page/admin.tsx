@@ -68,7 +68,7 @@ class AdminPage extends React.PureComponent<Props, State> {
     },
     {
       id: AdminTabs.languageServers,
-      name: 'Language Servers',
+      name: 'Language servers',
       disabled: false,
     },
   ];

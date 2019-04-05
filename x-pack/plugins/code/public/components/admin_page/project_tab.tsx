@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -153,7 +154,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       <EuiOverlayMask>
         <EuiModal onClose={this.closeModal}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Add New Project</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>Add new project</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiTitle size="xs">
@@ -176,9 +177,9 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton onClick={this.closeModal}>Cancel</EuiButton>
+            <EuiButtonEmpty onClick={this.closeModal}>Cancel</EuiButtonEmpty>
             <EuiButton fill onClick={this.submitImportProject} disabled={this.props.importLoading}>
-              Import Project
+              Import project
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
