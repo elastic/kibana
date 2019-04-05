@@ -4,100 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
-
-import * as i18n from './translations';
-
-interface ListItemType {
-  label: JSX.Element;
-}
-
-const listContent: ListItemType[] = [
-  {
-    label: (
-      <FormattedMessage
-        id="xpack.siem.overview.feature.documentation"
-        defaultMessage="Check out the {link}"
-        values={{
-          link: (
-            <EuiLink href="#">
-              <FormattedMessage
-                id="xpack.siem.overview.feature.documentation.link"
-                defaultMessage="Documentation"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-  {
-    label: (
-      <FormattedMessage
-        id="xpack.siem.overview.feature.dataIngestion"
-        defaultMessage="Learn about {link}"
-        values={{
-          link: (
-            <EuiLink href="#">
-              <FormattedMessage
-                id="xpack.siem.overview.feature.dataIngestion.link"
-                defaultMessage="Data Ingestion"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-  {
-    label: (
-      <FormattedMessage
-        id="xpack.siem.overview.feature.blog"
-        defaultMessage="Go to {blog} and {video}"
-        values={{
-          blog: (
-            <EuiLink href="#">
-              <FormattedMessage
-                id="xpack.siem.overview.feature.blog.blog"
-                defaultMessage="Blog Posts"
-              />
-            </EuiLink>
-          ),
-          video: (
-            <EuiLink href="#">
-              <FormattedMessage
-                id="xpack.siem.overview.feature.blog.video"
-                defaultMessage="Videos"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-];
 
 export const Summary = pure(() => (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <StyledEuiFlexItem grow={false}>
-      <EuiTitle size="s">
-        <h3>{i18n.FEATURE_OVERVIEW_HEADING}</h3>
-      </EuiTitle>
-      <EuiText>
-        <ol>
-          {listContent.map(({ label }, i) => (
-            <li key={`${i}-${label}`}>{label}</li>
-          ))}
-        </ol>
-      </EuiText>
-    </StyledEuiFlexItem>
-  </EuiFlexGroup>
-));
+  <EuiFlexItem>
+    <EuiText>
+      <h2>
+        <FormattedMessage id="xpack.siem.overview.startedTitle" defaultMessage="Getting Started" />
+      </h2>
 
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  min-width: 350px;
-`;
+      <p>
+        <FormattedMessage
+          id="xpack.siem.overview.startedText"
+          defaultMessage="Welcome to Elastic's Security &amp; Information Management (SIEM) application. Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
+          values={{
+            docs: <EuiLink href="#">documentation</EuiLink>,
+            data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
+            blog: <EuiLink href="#">blog posts</EuiLink>,
+            videos: <EuiLink href="#">videos</EuiLink>,
+          }}
+        />
+      </p>
+
+      <h2>
+        <FormattedMessage id="xpack.siem.overview.feedbackTitle" defaultMessage="Feedback" />
+      </h2>
+
+      <p>
+        <FormattedMessage
+          id="xpack.siem.overview.feedbackText"
+          defaultMessage="If you have input or suggestions regarding your experience with Elastic SIEM, please feel free to {feedback}."
+          values={{
+            feedback: <EuiLink href="#">submit feedback online</EuiLink>,
+          }}
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+));
