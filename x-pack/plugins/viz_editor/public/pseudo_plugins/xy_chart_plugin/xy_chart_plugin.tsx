@@ -209,10 +209,10 @@ function buildViewModel(
   yAxis: SelectOperation[]
 ): XyChartVisModel {
   const formattedNameX = xAxis
-    .map(op => operationToName(op.operation) + ('argument' in op ? ` of ${op.argument.field}` : ''))
+    .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
     .join(' split by ');
   const formattedNameY = yAxis
-    .map(op => operationToName(op.operation) + ('argument' in op ? ` of ${op.argument.field}` : ''))
+    .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
     .join(' split by ');
 
   return {
