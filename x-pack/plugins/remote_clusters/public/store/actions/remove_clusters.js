@@ -22,13 +22,13 @@ import { getDetailPanelClusterName } from '../selectors';
 function getErrorTitle(count, name = null) {
   if (count === 1) {
     if (name) {
-      return i18n.translate('xpack.remoteClusters.removeAction.failureSingleNotificationTitle', {
+      return i18n.translate('xpack.remoteClusters.removeAction.errorSingleNotificationTitle', {
         defaultMessage: `Error removing remote cluster '{name}'`,
         values: { name },
       });
     }
   } else {
-    return i18n.translate('xpack.remoteClusters.removeAction.failureMultipleNotificationTitle', {
+    return i18n.translate('xpack.remoteClusters.removeAction.errorMultipleNotificationTitle', {
       defaultMessage: `Error removing '{count}' remote clusters`,
       values: { count },
     });
