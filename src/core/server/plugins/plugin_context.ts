@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
+import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
 import { Plugin, PluginManifest } from './plugin';
 import { PluginsServiceSetupDeps } from './plugins_service';
@@ -49,6 +50,10 @@ export interface PluginSetupContext {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+  };
+  http?: {
+    registerAuth: HttpServiceSetup['registerAuth'];
+    registerOnRequest: HttpServiceSetup['registerOnRequest'];
   };
 }
 
@@ -129,5 +134,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
     },
+    http: deps.http
+      ? {
+          registerAuth: deps.http.registerAuth,
+          registerOnRequest: deps.http.registerOnRequest,
+        }
+      : undefined,
   };
 }

@@ -18,16 +18,32 @@
  */
 
 import { Server, ServerOptions } from 'hapi';
+import hapiAuthCookie from 'hapi-auth-cookie';
 
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
+import { adoptToHapiAuthFormat, Authenticate } from './lifecycle/auth';
+import { adoptToHapiOnRequestFormat, OnRequest } from './lifecycle/on_request';
 import { Router } from './router';
+
+import { SessionStorage } from './session_storage';
+
+export interface CookieOptions {
+  name: string;
+  password: string;
+  validate: (sessionValue: any) => boolean | Promise<boolean>;
+  isSecure: boolean;
+  sessionTimeout: number;
+  path?: string;
+}
 
 export interface HttpServerInfo {
   server: Server;
   options: ServerOptions;
+  registerAuth: (fn: Authenticate, cookieOptions: CookieOptions) => void;
+  registerOnRequest: (fn: OnRequest) => void;
 }
 
 export class HttpServer {
@@ -48,7 +64,7 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public async start(config: HttpConfig) {
+  public async start(config: HttpConfig): Promise<HttpServerInfo> {
     this.log.debug('starting http server');
 
     const serverOptions = getServerOptions(config);
@@ -77,7 +93,12 @@ export class HttpServer {
     // Return server instance with the connection options so that we can properly
     // bridge core and the "legacy" Kibana internally. Once this bridge isn't
     // needed anymore we shouldn't return anything from this method.
-    return { server: this.server, options: serverOptions };
+    return {
+      server: this.server,
+      options: serverOptions,
+      registerOnRequest: this.registerOnRequest,
+      registerAuth: this.registerAuth,
+    };
   }
 
   public async stop() {
@@ -127,4 +148,46 @@ export class HttpServer {
     const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
+
+  private registerOnRequest = (fn: OnRequest) => {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
+  };
+
+  private registerAuth = async (fn: Authenticate, cookieOptions: CookieOptions) => {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    await this.server.register({ plugin: hapiAuthCookie });
+
+    this.server.auth.strategy('security-cookie', 'cookie', {
+      cookie: cookieOptions.name,
+      password: cookieOptions.password,
+      validateFunc: async (req, session) => ({ valid: await cookieOptions.validate(session) }),
+      isSecure: cookieOptions.isSecure,
+      path: cookieOptions.path,
+      clearInvalid: true,
+      isHttpOnly: true,
+      isSameSite: false,
+    });
+
+    const sessionStorage = new SessionStorage(request =>
+      this.server!.auth.test('security-cookie', request)
+    );
+
+    this.server.auth.scheme('login', () => ({
+      authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
+    }));
+    this.server.auth.strategy('session', 'login');
+
+    // The default means that the `session` strategy that is based on `login` schema defined above will be
+    // automatically assigned to all routes that don't contain an auth config.
+    // should be applied for all routes if they don't specify auth strategy in route declaration
+    // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
+    this.server.auth.default('session');
+  };
 }

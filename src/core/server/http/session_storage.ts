@@ -19,8 +19,8 @@
 
 import { Request } from 'hapi';
 
-export type ScopedAuthSession = ReturnType<AuthSession['asScoped']>;
-export class AuthSession {
+export type ScopedSessionStorage = ReturnType<SessionStorage['asScoped']>;
+export class SessionStorage {
   constructor(private readonly sessionGetter: (request: Request) => Promise<any>) {}
   public asScoped(request: Request) {
     // NOTE: probably need bind here. request.cookieAuth.set.bind(request.cookieAuth)
@@ -28,9 +28,9 @@ export class AuthSession {
       // Retrieves session value from the session storage.
       get: () => this.sessionGetter(request),
       // Puts current session value into the session storage.
-      set: request.cookieAuth.set,
+      set: (session: object) => request.cookieAuth.set(session),
       // Clears current session.
-      clear: request.cookieAuth.clear,
+      clear: () => request.cookieAuth.clear(),
     };
   }
 }
