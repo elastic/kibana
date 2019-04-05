@@ -39,8 +39,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const expectedResponse = {
         errors: [],
         snapshots: [
-          { repositories: ['fooRepository'], id: 'snapshot1' },
-          { repositories: ['barRepository'], id: 'snapshot2' },
+          { repositories: ['fooRepository'], id: 'snapshot1', summary: {} },
+          { repositories: ['barRepository'], id: 'snapshot2', summary: {} },
         ],
       };
 
@@ -49,10 +49,10 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       ).resolves.toEqual(expectedResponse);
     });
 
-    test('returns empty array if no snapshots returned from ES', async () => {
+    test('returns empty arrays if no snapshots returned from ES', async () => {
       const mockSnapshotGetRepositoryEsResponse = {};
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
-      const expectedResponse: any[] = [];
+      const expectedResponse = { errors: [], snapshots: [] };
 
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -86,7 +86,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         snapshots: [{ snapshot }],
       };
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
-      const expectedResponse = { repository, snapshot };
+      const expectedResponse = { snapshot };
 
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
