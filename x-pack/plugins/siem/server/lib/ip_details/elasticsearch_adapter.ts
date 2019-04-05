@@ -17,7 +17,8 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
 import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
-import { buildQuery } from './query.dsl';
+import { buildDomainsQuery } from './query_domains.dsl';
+import { buildQuery } from './query_overview.dsl';
 import { IpDetailsAdapter, IpOverviewHit, OverviewHit } from './types';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
@@ -43,8 +44,25 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
+    const response = await this.framework.callWithRequest<DomainsData, TermAggregation>(
+      request,
+      'search',
+      buildDomainsQuery(options)
+    );
+    // const { cursor, limit } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
+    // const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
+    // const hasNextPage = networkTopNFlowEdges.length > limit;
+    // const beginning = cursor != null ? parseInt(cursor, 10) : 0;
+    // const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
+
+    // tslint:disable-next-line:no-console
+    console.log(JSON.stringify(response, null, 2));
+
     return {
-      domain_name: 'hiii2',
+      edges: [],
+      totalCount,
+      pageInfo: {},
     };
   }
 }

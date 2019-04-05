@@ -79,7 +79,7 @@ export interface Source {
 
   IpOverview?: IpOverviewData | null;
 
-  Domains?: DomainsData | null;
+  Domains: DomainsData;
 
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -815,7 +815,53 @@ export interface AutonomousSystem {
 }
 
 export interface DomainsData {
-  domain_name?: string | null;
+  edges: DomainsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface DomainsEdges {
+  node: DomainsNode;
+
+  cursor: CursorType;
+}
+
+export interface DomainsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  source?: DomainsItem | null;
+
+  destination?: DomainsItem | null;
+
+  client?: DomainsItem | null;
+
+  server?: DomainsItem | null;
+
+  network?: DomainsNetworkField | null;
+}
+
+export interface DomainsItem {
+  uniqueIpCount?: number | null;
+
+  domainName?: string | null;
+
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+}
+
+export interface DomainsNetworkField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface KpiNetworkData {
@@ -997,6 +1043,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface DomainsSortField {
+  field: DomainsFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1066,11 +1118,21 @@ export interface IpOverviewSourceArgs {
   ip: string;
 }
 export interface DomainsSourceArgs {
-  id?: string | null;
+  direction: FlowDirection;
 
   filterQuery?: string | null;
 
+  id?: string | null;
+
   ip: string;
+
+  pagination: PaginationInput;
+
+  sort: DomainsSortField;
+
+  type: FlowType;
+
+  timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1148,6 +1210,37 @@ export enum Direction {
   desc = 'desc',
 }
 
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
+}
+
+export enum DomainsFields {
+  dnsName = 'dnsName',
+  queryCount = 'queryCount',
+  uniqueDomains = 'uniqueDomains',
+  dnsBytesIn = 'dnsBytesIn',
+  dnsBytesOut = 'dnsBytesOut',
+}
+
+export enum FlowType {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -1164,17 +1257,6 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
 }
 
 export enum NetworkDnsFields {
@@ -1245,7 +1327,7 @@ export namespace SourceResolvers {
 
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
 
-    Domains?: DomainsResolver<DomainsData | null, TypeParent, Context>;
+    Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -1364,17 +1446,28 @@ export namespace SourceResolvers {
     ip: string;
   }
 
-  export type DomainsResolver<
-    R = DomainsData | null,
-    Parent = Source,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context, DomainsArgs>;
+  export type DomainsResolver<R = DomainsData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    DomainsArgs
+  >;
   export interface DomainsArgs {
-    id?: string | null;
+    direction: FlowDirection;
 
     filterQuery?: string | null;
 
+    id?: string | null;
+
     ip: string;
+
+    pagination: PaginationInput;
+
+    sort: DomainsSortField;
+
+    type: FlowType;
+
+    timerange: TimerangeInput;
   }
 
   export type KpiNetworkResolver<
@@ -3866,12 +3959,165 @@ export namespace AutonomousSystemResolvers {
 
 export namespace DomainsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DomainsData> {
-    domain_name?: DomainNameResolver<string | null, TypeParent, Context>;
+    edges?: EdgesResolver<DomainsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
   }
 
+  export type EdgesResolver<
+    R = DomainsEdges[],
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsEdges> {
+    node?: NodeResolver<DomainsNode, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<
+    R = DomainsNode,
+    Parent = DomainsEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = DomainsEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsNodeResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsNode> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    source?: SourceResolver<DomainsItem | null, TypeParent, Context>;
+
+    destination?: DestinationResolver<DomainsItem | null, TypeParent, Context>;
+
+    client?: ClientResolver<DomainsItem | null, TypeParent, Context>;
+
+    server?: ServerResolver<DomainsItem | null, TypeParent, Context>;
+
+    network?: NetworkResolver<DomainsNetworkField | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = DomainsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<
+    R = Date | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ClientResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ServerResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NetworkResolver<
+    R = DomainsNetworkField | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsItem> {
+    uniqueIpCount?: UniqueIpCountResolver<number | null, TypeParent, Context>;
+
+    domainName?: DomainNameResolver<string | null, TypeParent, Context>;
+
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type UniqueIpCountResolver<
+    R = number | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type DomainNameResolver<
     R = string | null,
-    Parent = DomainsData,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FirstSeenResolver<
+    R = Date | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsNetworkFieldResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsNetworkField> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+
+    transport?: TransportResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TransportResolver<
+    R = string | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = NetworkDirectionEcs[] | null,
+    Parent = DomainsNetworkField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsData, IpOverviewData } from '../../graphql/types';
+import { DomainsSortField } from '../../../public/graphql/types';
+import { DomainsData, FlowDirection, FlowType, IpOverviewData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 
 import { IpDetailsAdapter } from './types';
@@ -17,6 +18,9 @@ export interface IpOverviewRequestOptions extends RequestOptions {
 
 export interface DomainsRequestOptions extends RequestOptions {
   ip: string;
+  domainsSortField: DomainsSortField;
+  flowType: FlowType;
+  flowDirection: FlowDirection;
 }
 
 export class IpDetails {

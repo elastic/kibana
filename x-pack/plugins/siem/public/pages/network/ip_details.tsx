@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { manageQuery } from '../../components/page/manage_query';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { GlobalTime } from '../../containers/global_time';
@@ -26,12 +27,13 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
+const DomainsTableManage = manageQuery(DomainsTable);
+
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
 }
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
-
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
