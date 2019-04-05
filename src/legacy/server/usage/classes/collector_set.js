@@ -43,7 +43,7 @@ export class CollectorSet {
      * Define as instance properties to allow enclosing the server object
      */
     this.makeStatsCollector = options => new Collector(server, options);
-    this.makeUsageCollector = options => new UsageCollector(server, { ...options, isUsageCollector: true });
+    this.makeUsageCollector = options => new UsageCollector(server, options);
     this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
   }
 
@@ -66,6 +66,11 @@ export class CollectorSet {
 
   getCollectorByType(type) {
     return this._collectors.find(c => c.type === type);
+  }
+
+  // isUsageCollector(x: UsageCollector | any): x is UsageCollector {
+  isUsageCollector(x) {
+    return x instanceof UsageCollector;
   }
 
   /*

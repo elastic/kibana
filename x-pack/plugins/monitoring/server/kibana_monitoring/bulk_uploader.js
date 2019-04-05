@@ -6,6 +6,7 @@
 
 import { defaultsDeep, isEmpty, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
+
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -44,6 +45,7 @@ export class BulkUploader {
     this._interval = interval;
     this._lastFetchUsageTime = null;
     this._usageInterval = server.plugins.xpack_main.telemetryCollectionInterval;
+
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),
       info: message => server.log(['info', ...LOGGING_TAGS], message),
@@ -63,9 +65,8 @@ export class BulkUploader {
    * @param {CollectorSet} collectorSet object to use for initial the fetch/upload and fetch/uploading on interval
    * @return undefined
    */
-  start(collectorSet) {
+start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
-
     const filterCollectorSet = _collectorSet => {
       const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
       if (!filterUsage) {
@@ -78,7 +79,7 @@ export class BulkUploader {
           return false;
         }
         // Only collect usage data at the same interval as telemetry would (default to once a day)
-        if (filterUsage && c.isUsageCollector) {
+        if (filterUsage && _collectorSet.isUsageCollector(c)) {
           return false;
         }
         return true;
