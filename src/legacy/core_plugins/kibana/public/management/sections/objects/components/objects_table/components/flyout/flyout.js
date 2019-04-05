@@ -166,7 +166,9 @@ class FlyoutUI extends Component {
       unmatchedReferences: Array.from(unmatchedReferences.values()),
       isLoading: false,
       importCount: response.successCount,
-      wasImportSuccessful: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error && issue.error.type === 'conflict'),
+      // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
+      // returned errors of type missing_references.
+      wasImportSuccessful: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error.type === 'conflict'),
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       possibleRecordsToOverwrite: (response.errors || []).filter(obj => obj.error.type === 'conflict'),
@@ -213,7 +215,7 @@ class FlyoutUI extends Component {
    */
   mapImportFailureToRetryObject = ({ failure, overwriteDecisionCache, replaceReferencesCache }) => {
     const { isOverwriteAllChecked, unmatchedReferences } = this.state;
-    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache[`${failure.obj.type}:${failure.obj.id}`] === true;
+    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true;
 
     // Conflicts wihtout overwrite granted are skipped
     if (!isOverwriteGranted && failure.error.type === 'conflict') {
@@ -248,7 +250,7 @@ class FlyoutUI extends Component {
     return {
       id: failure.obj.id,
       type: failure.obj.type,
-      overwrite: isOverwriteAllChecked || overwriteDecisionCache[`${failure.obj.type}:${failure.obj.id}`] === true,
+      overwrite: isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true,
       replaceReferences: replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [],
     };
   }
@@ -260,7 +262,7 @@ class FlyoutUI extends Component {
    */
   resolveImportErrors = async () => {
     const { intl } = this.props;
-    let overwriteDecisionCache = {};
+    const overwriteDecisionCache = new Map();
     const replaceReferencesCache = new Map();
     const { file, isOverwriteAllChecked } = this.state;
     let { importCount: successImportCount, failedImports: importFailures } = this.state;
@@ -271,8 +273,11 @@ class FlyoutUI extends Component {
       loadingMessage: undefined,
     });
 
+    const doesntHaveOverwriteDecision = ({ obj }) => {
+      return !overwriteDecisionCache.has(`${obj.type}:${obj.id}`);
+    };
     const getOverwriteDecision = ({ obj }) => {
-      return !overwriteDecisionCache.hasOwnProperty(`${obj.type}:${obj.id}`);
+      return overwriteDecisionCache.get(`${obj.type}:${obj.id}`);
     };
     const callMap = (failure) => {
       return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, failure });
@@ -285,10 +290,12 @@ class FlyoutUI extends Component {
         const result = await this.getConflictResolutions(
           importFailures
             .filter(({ error }) => error.type === 'conflict')
-            .filter(getOverwriteDecision)
+            .filter(doesntHaveOverwriteDecision)
             .map(({ obj }) => obj)
         );
-        overwriteDecisionCache = { ...overwriteDecisionCache, ...result };
+        for (const key of Object.keys(result)) {
+          overwriteDecisionCache.set(key, result[key]);
+        }
       }
 
       // Build retries array
@@ -309,7 +316,7 @@ class FlyoutUI extends Component {
 
       // Scenario where we skip everything if nothing to retry
       if (retries.length === 0) {
-        // Canceld overwrites aren't failures anymore
+        // Cancelled overwrites aren't failures anymore
         importFailures = importFailures.filter(failure => failure.error.type !== 'conflict' || getOverwriteDecision(failure));
         break;
       }

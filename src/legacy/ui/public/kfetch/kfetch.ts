@@ -65,13 +65,10 @@ export async function kfetch(
           throw new KFetchError(res, await getBodyAsJson(res));
         }
         const contentType = res.headers.get('content-type');
-        if (contentType && contentType.split(';')[0] === 'application/json') {
-          return await getBodyAsJson(res);
-        }
         if (contentType && contentType.split(';')[0] === 'application/ndjson') {
           return await getBodyAsBlob(res);
         }
-        return res;
+        return await getBodyAsJson(res);
       });
     }
   );
