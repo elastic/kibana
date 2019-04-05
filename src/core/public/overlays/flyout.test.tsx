@@ -49,13 +49,14 @@ describe('FlyoutService', () => {
       it('replaces the current flyout with a new one', () => {
         flyoutService.openFlyout(i18nMock, <span>Flyout content 2</span>);
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
       });
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
         flyoutService.openFlyout(i18nMock, <span>Flyout content 2</span>);
-        await ref1.close();
+        await ref1.onClose;
         expect(onCloseComplete).toBeCalledTimes(1);
       });
     });

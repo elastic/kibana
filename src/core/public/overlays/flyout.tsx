@@ -89,6 +89,7 @@ export class FlyoutService {
     // If there is an active flyout session close it before opening a new one.
     if (this.activeFlyout) {
       this.activeFlyout.close();
+      this.cleanupDom();
     }
 
     const flyout = new FlyoutRef();
@@ -96,9 +97,7 @@ export class FlyoutService {
     // If a flyout gets closed through it's FlyoutRef, remove it from the dom
     flyout.onClose.then(() => {
       if (this.activeFlyout === flyout) {
-        unmountComponentAtNode(this.targetDomElement);
-        this.targetDomElement.innerHTML = '';
-        this.activeFlyout = null;
+        this.cleanupDom();
       }
     });
 
@@ -113,4 +112,17 @@ export class FlyoutService {
 
     return flyout;
   };
+
+  /**
+   * Using React.Render to re-render into a target DOM element will replace
+   * the content of the target but won't call unmountComponent on any
+   * components inside the target or any of their children. So we properly
+   * cleanup the DOM here to prevent subtle bugs in child components which
+   * depend on unmounting for cleanup behaviour.
+   */
+  private cleanupDom(): void {
+    unmountComponentAtNode(this.targetDomElement);
+    this.targetDomElement.innerHTML = '';
+    this.activeFlyout = null;
+  }
 }
