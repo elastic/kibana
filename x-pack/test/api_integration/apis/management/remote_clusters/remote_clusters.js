@@ -177,14 +177,19 @@ export default function ({ getService }) {
 
         const uri = `${API_BASE_PATH}/test_cluster1,test_cluster2`;
 
-        const { body } = await supertest
+        const {
+          body: { itemsDeleted, errors }
+        } = await supertest
           .delete(uri)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body).to.eql({
-          itemsDeleted: ['test_cluster1', 'test_cluster2'],
-          errors: [],
+        expect(errors).to.eql([]);
+
+        // The order isn't guaranteed, so we assert against individual names instead of asserting
+        // against the value of the array itself.
+        ['test_cluster1', 'test_cluster2'].forEach(clusterName => {
+          expect(itemsDeleted.includes(clusterName)).to.be(true);
         });
       });
 
