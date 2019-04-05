@@ -73,7 +73,7 @@ export class WorkpadTemplates extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Template Name',
+        name: 'Template name',
         sortable: true,
         width: '30%',
         dataType: 'string',
