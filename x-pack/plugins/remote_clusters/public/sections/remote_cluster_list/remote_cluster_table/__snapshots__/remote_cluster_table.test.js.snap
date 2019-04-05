@@ -55,7 +55,7 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
   <td
     class="euiTableRowCell"
     data-header="Connection"
-    width="160px"
+    width="240px"
   >
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -305,7 +305,7 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
   <td
     class="euiTableRowCell"
     data-header="Connection"
-    width="160px"
+    width="240px"
   >
     <div
       class="euiTableCellContent euiTableCellContent--overflowingContent"
