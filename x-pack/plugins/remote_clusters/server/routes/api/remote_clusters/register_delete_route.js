@@ -18,55 +18,78 @@ export function registerDeleteRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/remote_clusters/{name}',
+    path: '/api/remote_clusters/{nameOrNames}',
     method: 'DELETE',
     config: {
       pre: [ licensePreRouting ]
     },
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { name } = request.params;
-      const names = name.split(',');
+      const { nameOrNames } = request.params;
+      const names = nameOrNames.split(',');
 
       const itemsDeleted = [];
       const errors = [];
 
-      await Promise.all(names.map((clusterName) => (
-        new Promise(async (resolve, reject) => {
-          // Check if cluster does exist
-          try {
-            const existingCluster = await doesClusterExist(callWithRequest, clusterName);
-            if (!existingCluster) {
-              return reject(wrapCustomError(new Error('There is no remote cluster with that name.'), 404));
-            }
-          } catch (err) {
-            return reject(wrapCustomError(err, 400));
+      // Validator that returns an error if the remote cluster does not exist.
+      const validateClusterDoesExist = async (name) => {
+        try {
+          const existingCluster = await doesClusterExist(callWithRequest, name);
+          if (!existingCluster) {
+            return wrapCustomError(new Error('There is no remote cluster with that name.'), 404);
+          }
+        } catch (error) {
+          return wrapCustomError(error, 400);
+        }
+      };
+
+      // Send the request to delete the cluster and return an error if it could not be deleted.
+      const sendRequestToDeleteCluster = async (name) => {
+        try {
+          const body = serializeCluster({ name });
+          const response = await callWithRequest('cluster.putSettings', { body });
+          const acknowledged = get(response, 'acknowledged');
+          const cluster = get(response, `persistent.cluster.remote.${name}`);
+
+          if (acknowledged && !cluster) {
+            return null;
           }
 
-          try {
-            const deleteClusterPayload = serializeCluster({ name: clusterName });
-            const response = await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
-            const acknowledged = get(response, 'acknowledged');
-            const cluster = get(response, `persistent.cluster.remote.${clusterName}`);
-
-            if (acknowledged && !cluster) {
-              return resolve();
-            }
-
-            // If for some reason the ES response still returns the cluster information,
-            // return an error. This shouldn't happen.
-            reject(wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400));
-          } catch (err) {
-            if (isEsError(err)) {
-              return reject(wrapEsError(err));
-            }
-
-            reject(wrapUnknownError(err));
+          // If for some reason the ES response still returns the cluster information,
+          // return an error. This shouldn't happen.
+          return wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400);
+        } catch (error) {
+          if (isEsError(error)) {
+            return wrapEsError(error);
           }
-        })
-          .then(() => itemsDeleted.push(clusterName))
-          .catch(err => errors.push({ name: clusterName, error: err }))
-      )));
+
+          return wrapUnknownError(error);
+        }
+      };
+
+      const deleteCluster = async (clusterName) => {
+        try {
+          // Validate that the cluster exists
+          let error = await validateClusterDoesExist(clusterName);
+
+          if (!error) {
+            // Delete the cluster
+            error = await sendRequestToDeleteCluster(clusterName);
+          }
+
+          if (error) {
+            throw error;
+          }
+
+          // If we are here, it means that everything went well...
+          itemsDeleted.push(clusterName);
+        } catch (error) {
+          errors.push({ name: clusterName, error });
+        }
+      };
+
+      // Delete all our cluster in parallel
+      await Promise.all(names.map(deleteCluster));
 
       return {
         itemsDeleted,
