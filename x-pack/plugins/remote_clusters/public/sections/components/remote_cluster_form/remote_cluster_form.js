@@ -139,6 +139,10 @@ export const RemoteClusterForm = injectI18n(
       return hasErrors;
     };
 
+    onSeedsChange = (seeds) => {
+      this.onFieldsChange({ seeds });
+    };
+
     renderSeeds() {
       const {
         areErrorsVisible,
@@ -178,7 +182,7 @@ export const RemoteClusterForm = injectI18n(
           <SeedsFormRow
             value={seeds}
             errors={areErrorsVisible ? errorsSeeds : undefined}
-            onChange={(seeds) => this.onFieldsChange({ seeds })}
+            onChange={this.onSeedsChange}
           />
         </EuiDescribedFormGroup>
       );

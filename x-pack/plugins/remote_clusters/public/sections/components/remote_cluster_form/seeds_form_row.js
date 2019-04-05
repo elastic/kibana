@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,7 @@ import {
 import { transportPortUrl } from '../../../services/documentation_links';
 import { validateSeed } from './validators';
 
-export class SeedsFormRow extends Component {
+export class SeedsFormRow extends PureComponent {
   static propTypes = {
     value: PropTypes.array,
     errors: PropTypes.node,
@@ -30,12 +30,8 @@ export class SeedsFormRow extends Component {
     errors: [],
   }
 
-  constructor(...args) {
-    super(...args);
-
-    this.state = {
-      localSeedErrors: [],
-    };
+  state = {
+    localSeedErrors: [],
   }
 
   onCreateSeed = (newSeed) => {
