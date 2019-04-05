@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
@@ -60,10 +60,6 @@ class VisEditor extends Component {
   };
 
   handleChange = async (partialModel) => {
-    if (isEmpty(partialModel)) {
-      return;
-    }
-
     const nextModel = { ...this.state.model, ...partialModel };
     this.props.vis.params = nextModel;
 
