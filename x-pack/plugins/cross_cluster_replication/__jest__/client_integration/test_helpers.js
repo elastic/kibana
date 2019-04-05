@@ -26,7 +26,7 @@ const $q = { defer: () => ({ resolve() {} }) };
 // axios has a $http like interface so using it to simulate $http
 setHttpClient(axios.create(), $q);
 
-const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
+const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) => {
   const userActions = {
     // Follower indices LIST
     followerIndicesList() {
@@ -136,8 +136,13 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         find('ccrFollowerIndexFormSubmitButton').simulate('click');
       };
 
+      const toggleAdvancedSettings = () => {
+        form.selectCheckBox('ccrFollowerIndexFormCustomAdvancedSettingsToggle');
+      };
+
       return {
         clickSaveForm,
+        toggleAdvancedSettings,
       };
     }
   };
@@ -241,6 +246,11 @@ export const registerHttpRequestMockHelpers = server => {
     );
   };
 
+  const setGetClusterIndicesResponse = (response = []) => {
+    server.respondWith('GET', '/api/index_management/indices',
+      [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]);
+  };
+
   return {
     setLoadFollowerIndicesResponse,
     setLoadAutoFollowPatternsResponse,
@@ -248,5 +258,6 @@ export const registerHttpRequestMockHelpers = server => {
     setAutoFollowStatsResponse,
     setLoadRemoteClusteresResponse,
     setGetAutoFollowPatternResponse,
+    setGetClusterIndicesResponse,
   };
 };

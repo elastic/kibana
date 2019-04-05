@@ -159,6 +159,13 @@ export class FollowerIndexForm extends PureComponent {
   onIndexNameChange = ({ name }) => {
     this.onFieldsChange({ name });
 
+    const error = indexNameValidator(name);
+    if (error) {
+      // If there is a client side error
+      // there is no need to validate the name
+      return;
+    }
+
     if (!name || !name.trim()) {
       this.setState({
         isValidatingIndexName: false,
