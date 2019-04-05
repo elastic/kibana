@@ -45,8 +45,7 @@ export async function FailureDebuggingProvider({ getService }) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await browser.getPageSource();
-    const htmlOutputUrl = `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${htmlOutputFileName}`;
-    test.addl.htmlFileName = relative(process.env.WORKSPACE + '/kibana', htmlOutputFileName);
+    test.addl.htmlFileName = `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${htmlOutputFileName}`;
     log.info(`Saving page source to: ${htmlOutputFileName}`);
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
