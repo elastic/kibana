@@ -22,58 +22,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { toastNotifications } from 'ui/notify';
 import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
-import { getActionType } from '../../../../common/lib/get_action_type';
-import { BaseWatch, ExecutedWatchResults } from '../../../../common/types/watch_types';
+import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { executeWatch } from '../../../lib/api';
 import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
 import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
-interface TableDataRow {
-  actionId: string | undefined;
-  actionMode: string | undefined;
-  type: string;
-}
-
-interface TableData extends Array<TableDataRow> {}
-
-const EXECUTE_DETAILS_INITIAL_STATE = {
-  triggeredTimeValue: 0,
-  triggeredTimeUnit: TIME_UNITS.MILLISECOND,
-  scheduledTimeValue: 0,
-  scheduledTimeUnit: TIME_UNITS.SECOND,
-  ignoreCondition: false,
-};
-
 const INPUT_OVERRIDE_ID = 'simulateExecutionInputOverride';
-
-function getTableData(watch: BaseWatch) {
-  const actions = watch.watch && watch.watch.actions;
-  return map(actions, (action, actionId) => {
-    const type = getActionType(action);
-    return {
-      actionId,
-      type,
-      actionMode: ACTION_MODES.SIMULATE,
-    };
-  });
-}
-
-function getActionModes(items: TableData) {
-  const result = items.reduce((itemsAccum: any, item) => {
-    if (item.actionId) {
-      itemsAccum[item && item.actionId] = item.actionMode;
-    }
-    return itemsAccum;
-  }, {});
-  return result;
-}
 
 export const JsonWatchEditSimulate = ({
   executeWatchJsonString,
@@ -83,6 +43,9 @@ export const JsonWatchEditSimulate = ({
   isShowingErrors,
   setIsShowingErrors,
   isDisabled,
+  executeDetails,
+  setExecuteDetails,
+  watchActions,
 }: {
   executeWatchJsonString: string;
   setExecuteWatchJsonString: (json: string) => void;
@@ -91,17 +54,17 @@ export const JsonWatchEditSimulate = ({
   isShowingErrors: boolean;
   setIsShowingErrors: (isShowingErrors: boolean) => void;
   isDisabled: boolean;
+  executeDetails: ExecutedWatchDetails;
+  setExecuteDetails: (details: ExecutedWatchDetails) => void;
+  watchActions: Array<{
+    actionId: string;
+    actionMode: string;
+    type: string;
+  }>;
 }) => {
   const { watch } = useContext(WatchContext);
-  const tableData = getTableData(watch);
 
   // hooks
-  const [executeDetails, setExecuteDetails] = useState(
-    new ExecuteDetails({
-      ...EXECUTE_DETAILS_INITIAL_STATE,
-      actionModes: getActionModes(tableData),
-    })
-  );
   const [executeResults, setExecuteResults] = useState<ExecutedWatchResults | null>(null);
 
   const columns = [
@@ -451,7 +414,7 @@ export const JsonWatchEditSimulate = ({
             fullWidth
           >
             <EuiBasicTable
-              items={tableData}
+              items={watchActions}
               itemId="simulateExecutionActionModesTable"
               columns={columns}
             />

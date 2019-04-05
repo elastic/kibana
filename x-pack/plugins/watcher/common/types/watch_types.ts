@@ -16,10 +16,10 @@ export interface ExecutedWatchResults {
 }
 
 export interface ExecutedWatchDetails {
-  triggerData: {
-    triggeredTime: Date;
-    scheduledTime: Date;
-  };
+  scheduledTimeValue: string | undefined;
+  scheduledTimeUnit: string;
+  triggeredTimeValue: string | undefined;
+  triggeredTimeUnit: string;
   ignoreCondition: boolean;
   alternativeInput: any;
   actionModes: {

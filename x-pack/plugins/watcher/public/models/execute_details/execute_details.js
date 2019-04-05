@@ -42,18 +42,17 @@ export class ExecuteDetails {
   get upstreamJson() {
     const hasTriggerTime = this.triggeredTimeValue !== '';
     const hasScheduleTime = this.scheduledTimeValue !== '';
-    const formattedTriggerTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
-    const formattedScheduleTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
-    const triggerData = {
-      triggeredTime: formattedTriggerTime,
-      scheduledTime: formattedScheduleTime,
-    };
+    const triggeredTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
+    const scheduledTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
     return {
-      triggerData,
+      triggerData: {
+        triggeredTime,
+        scheduledTime,
+      },
       ignoreCondition: this.ignoreCondition,
       alternativeInput: this.alternativeInput,
       actionModes: this.actionModes,
-      recordExecution: this.recordExecution
+      recordExecution: this.recordExecution,
     };
   }
 }

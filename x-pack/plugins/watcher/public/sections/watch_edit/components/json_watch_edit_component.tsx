@@ -16,10 +16,53 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import { WATCH_TAB_ID_EDIT, WATCH_TAB_ID_SIMULATE, WATCH_TABS } from '../../../../common/constants';
+import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
+import { getActionType } from 'x-pack/plugins/watcher/common/lib/get_action_type';
+import { BaseWatch, ExecutedWatchDetails } from 'x-pack/plugins/watcher/common/types/watch_types';
+import {
+  ACTION_MODES,
+  TIME_UNITS,
+  WATCH_TAB_ID_EDIT,
+  WATCH_TAB_ID_SIMULATE,
+  WATCH_TABS,
+} from '../../../../common/constants';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
 import { WatchContext } from './watch_context';
+interface WatchAction {
+  actionId: string;
+  actionMode: string;
+  type: string;
+}
+
+interface WatchActions extends Array<WatchAction> {}
+
+const EXECUTE_DETAILS_INITIAL_STATE = {
+  triggeredTimeValue: 0,
+  triggeredTimeUnit: TIME_UNITS.MILLISECOND,
+  scheduledTimeValue: 0,
+  scheduledTimeUnit: TIME_UNITS.SECOND,
+  ignoreCondition: false,
+};
+
+function getActions(watch: BaseWatch) {
+  const actions = (watch.watch && watch.watch.actions) || {};
+  return Object.keys(actions).map(actionKey => ({
+    actionId: actionKey,
+    type: getActionType(actions[actionKey]),
+    actionMode: ACTION_MODES.SIMULATE,
+  }));
+}
+
+function getActionModes(items: WatchActions) {
+  const result = items.reduce((itemsAccum: any, item) => {
+    if (item.actionId) {
+      itemsAccum[item && item.actionId] = item.actionMode;
+    }
+    return itemsAccum;
+  }, {});
+  return result;
+}
 
 const JsonWatchEditUi = ({
   pageTitle,
@@ -31,6 +74,7 @@ const JsonWatchEditUi = ({
   licenseService: any;
 }) => {
   const { watch } = useContext(WatchContext);
+  const watchActions = getActions(watch);
   // hooks
   const [selectedTab, setSelectedTab] = useState<string>(WATCH_TAB_ID_EDIT);
   const [watchErrors, setWatchErrors] = useState<{ [key: string]: string[] }>({
@@ -43,6 +87,12 @@ const JsonWatchEditUi = ({
   const [executeWatchErrors, setExecuteWatchErrors] = useState<{ [key: string]: string[] }>({
     simulateExecutionInputOverride: [],
   });
+  const [executeDetails, setExecuteDetails] = useState(
+    new ExecuteDetails({
+      ...EXECUTE_DETAILS_INITIAL_STATE,
+      actionModes: getActionModes(watchActions),
+    })
+  );
   // ace editor requires json to be in string format
   const [watchJsonString, setWatchJsonString] = useState<string>(
     JSON.stringify(watch.watch, null, 2)
@@ -72,6 +122,8 @@ const JsonWatchEditUi = ({
       <EuiSpacer size="l" />
       {selectedTab === WATCH_TAB_ID_SIMULATE && (
         <JsonWatchEditSimulate
+          executeDetails={executeDetails}
+          setExecuteDetails={(details: ExecutedWatchDetails) => setExecuteDetails(details)}
           executeWatchJsonString={executeWatchJsonString}
           setExecuteWatchJsonString={(json: string) => setExecuteWatchJsonString(json)}
           errors={executeWatchErrors}
@@ -81,6 +133,7 @@ const JsonWatchEditUi = ({
             setIsShowingExecuteWatchErrors(isShowingErrors)
           }
           isDisabled={isShowingExecuteWatchErrors || isShowingWatchErrors}
+          watchActions={watchActions}
         />
       )}
       {selectedTab === WATCH_TAB_ID_EDIT && (
