@@ -26,8 +26,7 @@ import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
 import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
-import { RangeDatePicker } from '../../components/range_date_picker';
-import { RangeDatePicker2 } from '../../components/range_date_picker/index2';
+import { SuperDatePicker } from '../../components/super_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
@@ -85,10 +84,7 @@ export const HomePage = pure(() => (
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <RangeDatePicker id="global" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <RangeDatePicker2 id="global" />
+                          <SuperDatePicker id="global" />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
                           <AppSettings />

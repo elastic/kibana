@@ -13,47 +13,41 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, State } from '../../store';
 
-interface RangeDatePickerStateRedux {
+interface SuperDatePickerStateRedux {
   start: number;
   end: number;
   isLoading: boolean;
 }
 
-interface RangeDatePickerDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
+interface SuperDatePickerDispatchProps {
+  setAbsoluteSuperDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
 }
 interface OwnProps {
   id: string;
   disabled?: boolean;
 }
 
-type RangeDatePickerProps = OwnProps & RangeDatePickerDispatchProps & RangeDatePickerStateRedux;
+type SuperDatePickerProps = OwnProps & SuperDatePickerDispatchProps & SuperDatePickerStateRedux;
 
 interface TimeArgs {
   end: string;
   start: string;
 }
-interface RefreshArgs extends TimeArgs {
-  refreshInterval: number;
-}
 
-interface RefreshChangeArgs {
-  isPaused: boolean;
-  refreshInterval: number;
-}
-
-interface RangeDatePickerState extends RefreshChangeArgs {
+interface SuperDatePickerState {
   isAutoRefreshOnly: boolean;
   isLoading: boolean;
+  isPaused: boolean;
   recentlyUsedRanges: TimeArgs[];
+  refreshInterval: number;
   showUpdateButton: boolean;
 }
 
-const RangeDatePickerComponents = class extends Component<
-  RangeDatePickerProps,
-  RangeDatePickerState
+const SuperDatePickerComponents = class extends Component<
+  SuperDatePickerProps,
+  SuperDatePickerState
 > {
-  constructor(props: RangeDatePickerProps) {
+  constructor(props: SuperDatePickerProps) {
     super(props);
 
     const { isLoading } = props;
@@ -62,7 +56,7 @@ const RangeDatePickerComponents = class extends Component<
       isLoading,
       isPaused: false,
       recentlyUsedRanges: [],
-      refreshInterval: 1000,
+      refreshInterval: 300000,
       showUpdateButton: true,
     };
   }
@@ -75,8 +69,6 @@ const RangeDatePickerComponents = class extends Component<
           end={new Date(end).toISOString()}
           isLoading={this.state.isLoading}
           isPaused={this.state.isPaused}
-          onRefresh={this.onRefresh}
-          onRefreshChange={this.onRefreshChange}
           onTimeChange={this.onTimeChange}
           recentlyUsedRanges={this.state.recentlyUsedRanges}
           refreshInterval={this.state.refreshInterval}
@@ -95,13 +87,13 @@ const RangeDatePickerComponents = class extends Component<
   };
 
   private onTimeChange = ({ start, end }: TimeArgs) => {
-    const { id, setAbsoluteRangeDatePicker } = this.props;
-    setAbsoluteRangeDatePicker({
+    const { id, setAbsoluteSuperDatePicker } = this.props;
+    setAbsoluteSuperDatePicker({
       id,
       from: this.formatDate(start),
       to: this.formatDate(end),
     });
-    this.setState((prevState: RangeDatePickerState) => {
+    this.setState((prevState: SuperDatePickerState) => {
       const recentlyUsedRanges = prevState.recentlyUsedRanges.filter(recentlyUsedRange => {
         const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
         return !isDuplicate;
@@ -115,27 +107,12 @@ const RangeDatePickerComponents = class extends Component<
     }, this.startLoading);
   };
 
-  private onRefresh = ({ start, end, refreshInterval }: RefreshArgs) => {
-    return new Promise(resolve => {
-      setTimeout(resolve, 100);
-    }).then(() => {
-      console.log(start, end, refreshInterval);
-    });
-  };
-
   private startLoading = () => {
     setTimeout(this.stopLoading, 1000);
   };
 
   private stopLoading = () => {
     this.setState({ isLoading: false });
-  };
-
-  private onRefreshChange = ({ isPaused, refreshInterval }: RefreshChangeArgs) => {
-    this.setState({
-      isPaused,
-      refreshInterval,
-    });
   };
 };
 
@@ -148,9 +125,9 @@ const mapStateToProps = (state: State, { id }: OwnProps) => {
   };
 };
 
-export const RangeDatePicker2 = connect(
+export const SuperDatePicker = connect(
   mapStateToProps,
   {
-    setAbsoluteRangeDatePicker: inputsActions.setAbsoluteRangeDatePicker,
+    setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
   }
-)(RangeDatePickerComponents);
+)(SuperDatePickerComponents);
