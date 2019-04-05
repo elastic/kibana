@@ -72,7 +72,9 @@ export class ScopedClusterClient {
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
+    if (this.headers || clientParams.headers) {
+      clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
+    }
     return this.scopedAPICaller(endpoint, clientParams, options);
   }
 }

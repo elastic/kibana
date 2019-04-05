@@ -107,6 +107,34 @@ describe('#callAsCurrentUser', () => {
     scopedAPICaller.mockClear();
 
     await expect(
+      clusterClient.callAsCurrentUser('security.authenticate', {
+        some: 'some',
+        headers: { additionalHeader: 'Oh Yes!' },
+      })
+    ).resolves.toBe(mockResponse);
+    expect(scopedAPICaller).toHaveBeenCalledTimes(1);
+    expect(scopedAPICaller).toHaveBeenCalledWith(
+      'security.authenticate',
+      { some: 'some', headers: { one: '1', additionalHeader: 'Oh Yes!' } },
+      undefined
+    );
+    scopedAPICaller.mockClear();
+
+    await expect(
+      clusterClient.callAsCurrentUser('security.authenticate', {
+        some: 'some',
+        headers: { one: '2' },
+      })
+    ).resolves.toBe(mockResponse);
+    expect(scopedAPICaller).toHaveBeenCalledTimes(1);
+    expect(scopedAPICaller).toHaveBeenCalledWith(
+      'security.authenticate',
+      { some: 'some', headers: { one: '1' } },
+      undefined
+    );
+    scopedAPICaller.mockClear();
+
+    await expect(
       clusterClient.callAsCurrentUser('ping', undefined, { wrap401Errors: true })
     ).resolves.toBe(mockResponse);
     expect(scopedAPICaller).toHaveBeenCalledTimes(1);
