@@ -101,8 +101,8 @@ export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
 export class FlyoutRef {
     // (undocumented)
     constructor();
-    close(): void;
-    readonly onClose$: Observable<void>;
+    close(): Promise<void>;
+    readonly onClose: Promise<void>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts

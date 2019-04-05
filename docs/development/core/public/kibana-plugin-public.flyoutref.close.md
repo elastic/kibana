@@ -2,14 +2,14 @@
 
 ## FlyoutRef.close() method
 
-Closes the referenced flyout if it's still open by emiting and completing the `onClose()` Observable. If the flyout had already been closed this method does nothing.
+Closes the referenced flyout if it's still open which in turn will resolve the `onClose` Promise. If the flyout had already been closed this method does nothing.
 
 <b>Signature:</b>
 
 ```typescript
-close(): void;
+close(): Promise<void>;
 ```
 <b>Returns:</b>
 
-`void`
+`Promise<void>`
 

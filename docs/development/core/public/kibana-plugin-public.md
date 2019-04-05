@@ -6,7 +6,7 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [FlyoutRef](./kibana-plugin-public.flyoutref.md) | A FlyoutSession describes the session of one opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call <code>close()</code> when it should be closed. Since a flyout could also be closed without calling this method (e.g. because the user closes it), you must listen to the "closed" event on this instance. It will be emitted whenever the flyout will be closed and you should throw away your reference to this instance whenever you receive that event. |
+|  [FlyoutRef](./kibana-plugin-public.flyoutref.md) | A FlyoutRef is a reference to an opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call <code>close()</code> when it should be closed. Since a flyout could also be closed by a user or from another flyout being opened, you must bind to the <code>onClose</code> Promise on the FlyoutRef instance. The Promise will resolve whenever the flyout was closed at which point you should discard the FlyoutRef. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 

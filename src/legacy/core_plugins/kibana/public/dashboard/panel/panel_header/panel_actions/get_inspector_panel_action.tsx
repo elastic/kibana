@@ -77,11 +77,10 @@ export function getInspectorPanelAction({
           }
         };
         // In case the inspector gets closed (otherwise), restore the original destroy function
-        session.onClose$.pipe(
-          finalize(() => {
-            embeddable.destroy = originalDestroy;
-          })
-        );
+        const restoreEmbeddableDestroy = () => {
+          embeddable.destroy = originalDestroy;
+        };
+        session.onClose.then(restoreEmbeddableDestroy, restoreEmbeddableDestroy);
       },
     }
   );

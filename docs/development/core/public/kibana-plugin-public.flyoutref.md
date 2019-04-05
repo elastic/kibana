@@ -2,7 +2,7 @@
 
 ## FlyoutRef class
 
-A FlyoutSession describes the session of one opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call `close()` when it should be closed. Since a flyout could also be closed without calling this method (e.g. because the user closes it), you must listen to the "closed" event on this instance. It will be emitted whenever the flyout will be closed and you should throw away your reference to this instance whenever you receive that event.
+A FlyoutRef is a reference to an opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call `close()` when it should be closed. Since a flyout could also be closed by a user or from another flyout being opened, you must bind to the `onClose` Promise on the FlyoutRef instance. The Promise will resolve whenever the flyout was closed at which point you should discard the FlyoutRef.
 
 <b>Signature:</b>
 
@@ -14,11 +14,11 @@ export declare class FlyoutRef
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [onClose$](./kibana-plugin-public.flyoutref.onclose$.md) |  | <code>Observable&lt;void&gt;</code> | An Observable that will emit and complete once this flyout is closed, by the user or by closing it from the outside via valling <code>close()</code>. |
+|  [onClose](./kibana-plugin-public.flyoutref.onclose.md) |  | <code>Promise&lt;void&gt;</code> | An Promise that will resolve once this flyout is closed.<!-- -->Flyouts can close from user interaction, calling <code>close()</code> on the flyout reference or another call to <code>openFlyout()</code> replacing your flyout. |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [close()](./kibana-plugin-public.flyoutref.close.md) |  | Closes the referenced flyout if it's still open by emiting and completing the <code>onClose()</code> Observable. If the flyout had already been closed this method does nothing. |
+|  [close()](./kibana-plugin-public.flyoutref.close.md) |  | Closes the referenced flyout if it's still open which in turn will resolve the <code>onClose</code> Promise. If the flyout had already been closed this method does nothing. |
 

@@ -22,43 +22,46 @@
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { I18nSetup } from '../i18n';
 
 /**
- * A FlyoutSession describes the session of one opened flyout panel. It offers
- * methods to close the flyout panel again. If you open a flyout panel you should make
+ * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
+ * close the flyout panel again. If you open a flyout panel you should make
  * sure you call `close()` when it should be closed.
- * Since a flyout could also be closed without calling this method (e.g. because
- * the user closes it), you must listen to the "closed" event on this instance.
- * It will be emitted whenever the flyout will be closed and you should throw
- * away your reference to this instance whenever you receive that event.
+ * Since a flyout could also be closed by a user or from another flyout being
+ * opened, you must bind to the `onClose` Promise on the FlyoutRef instance.
+ * The Promise will resolve whenever the flyout was closed at which point you
+ * should discard the FlyoutRef.
  *
  * @public
  */
 export class FlyoutRef {
   /**
-   * An Observable that will emit and complete once this flyout is closed,
-   * by the user or by closing it from the outside via valling `close()`.
+   * An Promise that will resolve once this flyout is closed.
+   *
+   * Flyouts can close from user interaction, calling `close()` on the flyout
+   * reference or another call to `openFlyout()` replacing your flyout.
    */
-  public readonly onClose$: Observable<void>;
+  public readonly onClose: Promise<void>;
 
   private closeSubject = new Subject<void>();
 
   constructor() {
-    this.onClose$ = this.closeSubject.asObservable();
+    this.onClose = this.closeSubject.toPromise();
   }
 
   /**
-   * Closes the referenced flyout if it's still open by emiting and completing
-   * the `onClose()` Observable.
-   * If the flyout had already been closed this method does nothing.
+   * Closes the referenced flyout if it's still open which in turn will
+   * resolve the `onClose` Promise. If the flyout had already been
+   * closed this method does nothing.
    */
-  public close(): void {
+  public close(): Promise<void> {
     if (!this.closeSubject.closed) {
       this.closeSubject.next();
       this.closeSubject.complete();
     }
+    return this.onClose;
   }
 }
 
@@ -82,20 +85,27 @@ export class FlyoutService {
       'data-test-subj'?: string;
     } = {}
   ): FlyoutRef => {
+    const cleanupDom = () => {
+      unmountComponentAtNode(targetDomElement);
+      targetDomElement.innerHTML = '';
+      this.activeFlyout = null;
+    };
+
     // If there is an active flyout session close it before opening a new one.
     if (this.activeFlyout) {
       this.activeFlyout.close();
+      cleanupDom();
     }
 
-    const flyout = (this.activeFlyout = new FlyoutRef());
+    const flyout = new FlyoutRef();
 
-    flyout.onClose$.subscribe({
-      complete: () => {
-        unmountComponentAtNode(targetDomElement);
-        targetDomElement.innerHTML = '';
-        this.activeFlyout = null;
-      },
+    flyout.onClose.then(() => {
+      if (this.activeFlyout === flyout) {
+        cleanupDom();
+      }
     });
+
+    this.activeFlyout = flyout;
 
     render(
       <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
