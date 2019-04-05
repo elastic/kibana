@@ -11,10 +11,8 @@ import React, { useCallback, useState } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../..//common/color_palette';
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
+import { createMetricLabel } from './create_metric_label';
 import { MetricForm } from './metrics_form';
 
 interface MetricProps {
@@ -27,13 +25,6 @@ interface MetricProps {
   intl: InjectedIntl;
   openFromStart?: boolean;
 }
-
-const createBadgeName = (metric: MetricsExplorerMetric) => {
-  if (metric.aggregation === MetricsExplorerAggregation.count) {
-    return 'count()';
-  }
-  return `${metric.aggregation}(${metric.field || ''})`;
-};
 
 export const Metric = injectI18n(
   ({
@@ -75,7 +66,7 @@ export const Metric = injectI18n(
 
     return (
       <MetricBadge style={{ color: textColor, backgroundColor }}>
-        <EuiText size="xs">{createBadgeName(metric)}</EuiText>
+        <EuiText size="xs">{createMetricLabel(metric)}</EuiText>
         <EuiToolTip content={editMetricLabel}>
           <EuiPopover
             closePopover={closePopover}

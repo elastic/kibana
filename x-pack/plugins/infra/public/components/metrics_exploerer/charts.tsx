@@ -11,6 +11,7 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   EuiAreaSeries,
@@ -27,11 +28,13 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isNumber } from 'lodash';
 import React from 'react';
+import euiStyled from '../../../../..//common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { NoData } from '../empty_states/no_data';
 import { InfraLoadingPanel } from '../loading';
+import { createMetricLabel } from './create_metric_label';
 
 interface Props {
   loading: boolean;
@@ -82,11 +85,13 @@ export const MetricsExplorerCharts = injectI18n(
       <div>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
           {data.series.map(series => (
-            <EuiFlexItem key={series.id} style={{ padding: 16 }}>
+            <EuiFlexItem key={series.id} style={{ padding: 16, minWidth: 0 }}>
               {data.series.length > 1 ? (
-                <EuiTitle size="xs">
-                  <h4>{series.id}</h4>
-                </EuiTitle>
+                <EuiToolTip content={series.id}>
+                  <EuiTitle size="xs">
+                    <ChartTitle>{series.id}</ChartTitle>
+                  </EuiTitle>
+                </EuiToolTip>
               ) : null}
               <div style={{ height: data.series.length > 1 ? 200 : 400 }}>
                 <EuiSeriesChart animateData={false} xType="time">
@@ -98,7 +103,7 @@ export const MetricsExplorerCharts = injectI18n(
                         colorTransformer(MetricsExplorerColor.color0)
                       }
                       lineSize={2}
-                      name={`${series.id}-metric_${id}`}
+                      name={createMetricLabel(metric)}
                       data={series.rows.map(row => ({
                         x: row.timestamp,
                         y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
@@ -147,3 +152,9 @@ export const MetricsExplorerCharts = injectI18n(
     );
   }
 );
+
+const ChartTitle = euiStyled.h4`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { DATES } from './constants';
 const { min, max } = DATES['7.0.0'].hosts;
 import { first } from 'lodash';
-import { MetricsExplorerResponse } from 'x-pack/plugins/infra/server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse } from '../../../../plugins/infra/server/routes/metrics_explorer/types';
 import { KbnTestProvider } from './types';
 
 const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
