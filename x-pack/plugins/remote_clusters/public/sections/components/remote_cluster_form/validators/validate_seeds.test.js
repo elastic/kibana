@@ -7,12 +7,8 @@
 import { validateSeeds } from './validate_seeds';
 
 describe('validateSeeds', () => {
-  test(`rejects empty seeds when there's no input`, () => {
-    expect(validateSeeds([], '')).toMatchSnapshot();
-  });
-
-  test(`accepts empty seeds when there's input`, () => {
-    expect(validateSeeds([], 'input')).toBe(null);
+  test(`rejects empty seeds`, () => {
+    expect(validateSeeds([])).toMatchSnapshot();
   });
 
   test(`accepts existing seeds`, () => {
