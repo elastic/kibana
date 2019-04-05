@@ -91,11 +91,9 @@ export class FlyoutService {
 
     flyout.onClose$.subscribe({
       complete: () => {
-        if (this.activeFlyout === flyout) {
-          unmountComponentAtNode(targetDomElement);
-          targetDomElement.innerHTML = '';
-          this.activeFlyout = null;
-        }
+        unmountComponentAtNode(targetDomElement);
+        targetDomElement.innerHTML = '';
+        this.activeFlyout = null;
       },
     });
 
