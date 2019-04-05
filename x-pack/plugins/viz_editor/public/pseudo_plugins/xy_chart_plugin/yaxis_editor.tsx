@@ -6,8 +6,8 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { DatasourceField } from '../../../common';
-import { selectColumn, updateColumn, VisModel } from '../../../public';
+import { DatasourceField, fieldToOperation, SelectOperator } from '../../../common';
+import { getOperatorsForField, selectColumn, updateColumn, VisModel } from '../../../public';
 import { columnSummary } from '../../common/components/config_panel';
 import { Draggable } from '../../common/components/draggable';
 
@@ -21,46 +21,38 @@ export function YAxisEditor({
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
   const currentOperation: any = selectColumn(col, visModel) || { operation: 'count' };
-  const fieldName = currentOperation.argument && currentOperation.argument.field;
-  const onDropField = (field: DatasourceField) => {
-    const operation = fieldName
-      ? { ...currentOperation, argument: { ...currentOperation.argument, field: field.name } }
-      : { operation: 'sum', argument: { field: field.name } };
+
+  const fieldName = 'argument' in currentOperation ? currentOperation.argument.field : '';
+
+  const field = visModel.datasource.fields.find((f: DatasourceField) => f.name === fieldName);
+
+  const onDropField = (droppedField: DatasourceField) => {
+    const operation = fieldToOperation(droppedField, getOperatorsForField(droppedField)[0]);
 
     onChangeVisModel(updateColumn(col, operation, visModel));
   };
 
   const onChangeOperation = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const operationName = e.target.value;
-    const operation = {
-      ...currentOperation,
-      operation: operationName,
-    };
+    if (!field) {
+      return;
+    }
+
+    const operationName = e.target.value as SelectOperator;
+    const operation = fieldToOperation(field, operationName);
 
     onChangeVisModel(updateColumn(col, operation, visModel));
   };
 
-  const options = [
-    {
-      value: 'count',
-      text: 'Count',
-    },
-    {
-      value: 'avg',
-      text: `Average of ${fieldName}`,
-    },
-    {
-      value: 'sum',
-      text: `Sum of ${fieldName}`,
-    },
-  ];
+  const options = field
+    ? getOperatorsForField(field).map(opName => ({
+        value: opName,
+        text: `${opName} of ${fieldName}`,
+      }))
+    : currentOperation;
 
   return (
-    <Draggable
-      canHandleDrop={(f: DatasourceField) => f && f.type === 'number'}
-      onDrop={onDropField}
-    >
-      {fieldName ? (
+    <Draggable canHandleDrop={(f: DatasourceField) => !!f} onDrop={onDropField}>
+      {field ? (
         <EuiSelect
           options={options}
           value={currentOperation.operation}

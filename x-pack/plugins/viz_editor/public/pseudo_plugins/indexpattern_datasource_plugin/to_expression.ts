@@ -12,7 +12,7 @@ function isRawDocumentQuery(query: Query) {
 }
 
 function queryToEsAggsConfigs(query: Query): any {
-  return [...query.select].reverse().map((selectOperation, index) => {
+  return query.select.map((selectOperation, index) => {
     switch (selectOperation.operator) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
@@ -59,7 +59,7 @@ function queryToEsAggsConfigs(query: Query): any {
           schema: 'segment',
           params: {
             field: selectOperation.argument.field,
-            interval: 'd',
+            interval: selectOperation.argument.interval,
           },
         };
     }

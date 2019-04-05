@@ -22,14 +22,13 @@ export function getTypeForOperation(op: SelectOperation, fields: DatasourceField
   }
 }
 
-export function getTypes(query: Query, fields: DatasourceField[]): string[] {
+export function getTypes(query: Query, fields: DatasourceField[]) {
   return query.select.map(operation => {
     if (operation.operator === 'column') {
       const fieldName = operation.argument.field;
       const fieldType = fields.find(field => field.name === fieldName)!.type;
       return fieldType;
-    } else {
-      return getTypeForOperation(operation, fields);
     }
+    return getTypeForOperation(operation, fields);
   });
 }

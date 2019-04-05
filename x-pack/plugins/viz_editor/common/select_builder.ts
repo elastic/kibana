@@ -19,17 +19,30 @@ const operationTemplate: OperationTemplate = {
     operator: 'date_histogram',
     argument: {
       field: '',
-      interval: 'auto',
+      interval: 'd',
     },
   },
 };
 
+export function getOperationTemplate(operator: SelectOperator) {
+  const template: SelectOperation = { ...operationTemplate[operator] };
+
+  if ('argument' in template) {
+    // Deep clone
+    template.argument = { ...template.argument };
+  }
+
+  return template;
+}
+
 export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
-  const template: SelectOperation = operationTemplate[operator];
+  const template: SelectOperation = getOperationTemplate(operator);
 
   if ('argument' in template) {
     template.argument.field = field.name;
   }
+
+  template.alias = field.name;
 
   return template;
 }
