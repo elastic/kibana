@@ -90,8 +90,8 @@ describe('useMetricsTime hook', () => {
       });
 
       const timeRange = getLastHookValue().timeRange;
-      expect(timeRange.from).not.toBe(from);
-      expect(timeRange.to).not.toBe(to);
+      expect(timeRange.from).toBeGreaterThan(from);
+      expect(timeRange.to).toBeGreaterThan(to);
       expect(timeRange.to - timeRange.from).toBe(RANGE);
     });
   });
