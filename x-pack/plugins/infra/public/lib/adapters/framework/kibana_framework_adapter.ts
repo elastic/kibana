@@ -24,9 +24,7 @@ const BREADCRUMBS_ELEMENT_ID = 'react-infra-breadcrumbs';
 
 export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   public appState: object;
-  public dateFormat?: string;
   public kbnVersion?: string;
-  public scaledDateFormat?: string;
   public timezone?: string;
 
   private adapterService: KibanaAdapterServiceProvider;
@@ -131,8 +129,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     ) => {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
-      this.dateFormat = config.get('dateFormat');
-      this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 
     uiRoutes.enable();

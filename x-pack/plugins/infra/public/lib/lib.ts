@@ -33,9 +33,7 @@ export type InfraApolloClient = ApolloClient<NormalizedCacheObject>;
 export interface InfraFrameworkAdapter {
   // Insstance vars
   appState?: object;
-  dateFormat?: string;
   kbnVersion?: string;
-  scaledDateFormat?: string;
   timezone?: string;
 
   // Methods
