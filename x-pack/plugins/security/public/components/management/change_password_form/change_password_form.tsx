@@ -307,6 +307,9 @@ export class ChangePasswordForm extends Component<Props, State> {
     this.setState({
       currentPasswordError: false,
       shouldValidate: false,
+      newPassword: '',
+      currentPassword: '',
+      confirmPassword: '',
     });
     if (this.props.onChangePassword) {
       this.props.onChangePassword();
