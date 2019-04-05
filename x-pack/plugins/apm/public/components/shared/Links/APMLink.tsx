@@ -6,19 +6,23 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
 import url from 'url';
+import { useLocation } from '../../../hooks/useLocation';
+import { APMQueryParams, getSearchWithCurrentTimeRange } from './url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
+  query?: APMQueryParams;
 }
 
-const KibanaLink: React.FC<Props> = ({ path, ...rest }) => {
+const APMLink: React.FC<Props> = ({ path, query, ...rest }) => {
+  const { search } = useLocation();
+  const nextSearch = getSearchWithCurrentTimeRange(search, query);
   const href = url.format({
-    pathname: chrome.addBasePath('/app/kibana'),
-    hash: path
+    pathname: '',
+    hash: `${path}?${nextSearch}`
   });
   return <EuiLink {...rest} href={href} />;
 };
 
-export { KibanaLink };
+export { APMLink };

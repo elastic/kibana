@@ -22,7 +22,7 @@ import { ITransactionChartData } from '../../../../store/selectors/chartSelector
 import { IUrlParams } from '../../../../store/urlParams';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 import { LicenseContext } from '../../../app/Main/LicenseCheck';
-import { MLJobLink } from '../../Links/MLJobLink';
+import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';

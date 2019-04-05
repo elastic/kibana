@@ -29,6 +29,19 @@ export const PERSISTENT_APM_PARAMS = [
   'refreshInterval'
 ];
 
+export function getSearchWithCurrentTimeRange(
+  currentSearch: string,
+  query: StringMap<any> = {}
+) {
+  const currentQuery = toQuery(currentSearch);
+  const nextQuery = {
+    ...TIMEPICKER_DEFAULTS,
+    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
+    ...query
+  };
+  return fromQuery(nextQuery);
+}
+
 function getSearchString(
   location: Location,
   pathname: string,

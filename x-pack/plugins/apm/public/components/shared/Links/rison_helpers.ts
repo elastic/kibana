@@ -46,7 +46,7 @@ function createG(query: RisonAPMQueryParams) {
 
 export function getRisonString(
   currentSearch: Location['search'],
-  query: RisonDecoded
+  query: RisonDecoded = {}
 ) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
