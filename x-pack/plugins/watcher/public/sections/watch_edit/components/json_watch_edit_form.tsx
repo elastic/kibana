@@ -65,7 +65,7 @@ export const JsonWatchEditForm = ({
 }) => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   // hooks
-  const [modal, setModal] = useState<{ message: string } | null>(null);
+  const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
   return (
     <Fragment>
       <ConfirmWatchesModal

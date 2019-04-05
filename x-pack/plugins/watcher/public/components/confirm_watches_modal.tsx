@@ -11,19 +11,18 @@ export const ConfirmWatchesModal = ({
   modalOptions,
   callback,
 }: {
-  modalOptions: { message: string } | null;
+  modalOptions: { title: string; message: string } | null;
   callback: (isConfirmed?: boolean) => void;
 }) => {
   if (!modalOptions) {
     return null;
   }
+  const { title, message } = modalOptions;
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         buttonColor="danger"
-        title={i18n.translate('xpack.watcher.sections.watchEdit.json.saveConfirmModal.title', {
-          defaultMessage: 'Confirm save',
-        })}
+        title={title}
         onCancel={() => callback()}
         onConfirm={() => {
           callback(true);
@@ -37,7 +36,7 @@ export const ConfirmWatchesModal = ({
           { defaultMessage: 'Save' }
         )}
       >
-        {modalOptions.message}
+        {message}
       </EuiConfirmModal>
     </EuiOverlayMask>
   );

@@ -83,6 +83,12 @@ export async function validateActionsAndSaveWatch(
   if (warning) {
     return {
       error: {
+        title: i18n.translate(
+          'xpack.watcher.sections.watchEdit.json.saveConfirmModal.validationTitleText',
+          {
+            defaultMessage: 'This watch has an invalid action',
+          }
+        ),
         message: warning.message,
       },
     };
@@ -106,11 +112,11 @@ export async function onWatchSave(
     if (existingWatch) {
       return {
         error: {
-          message: i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionText',
+          title: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchTitleText',
             {
               defaultMessage:
-                'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
+                'A watch with ID "{watchId}" {watchNameMessageFragment} already exists',
               values: {
                 watchId: existingWatch.id,
                 watchNameMessageFragment: existingWatch.name
@@ -125,6 +131,12 @@ export async function onWatchSave(
                     )
                   : '',
               },
+            }
+          ),
+          message: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchDescriptionText',
+            {
+              defaultMessage: 'Saving this watch will overwrite previous content.',
             }
           ),
         },

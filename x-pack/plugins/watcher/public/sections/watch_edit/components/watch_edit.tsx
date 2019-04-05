@@ -21,7 +21,7 @@ const getTitle = (watch: BaseWatch) => {
     return i18n.translate(
       'xpack.watcher.sections.watchEdit.json.titlePanel.createNewTypeOfWatchTitle',
       {
-        defaultMessage: 'Create a new {typeName}',
+        defaultMessage: 'Create {typeName}',
         values: { typeName },
       }
     );
