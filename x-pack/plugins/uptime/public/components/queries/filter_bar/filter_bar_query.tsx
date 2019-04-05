@@ -4,43 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Query } from 'react-apollo';
+import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
+import { UptimeSearchBarQueryChangeHandler } from '../../../pages/overview';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { FilterBar, FilterBarLoading } from '../../functional';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getFilterBarQuery } from './get_filter_bar';
 
-interface FilterBarProps {
-  updateQuery: (query: object | undefined) => void;
+interface FilterBarQueryResult {
+  filterBar?: FilterBarType;
 }
 
-type Props = FilterBarProps & UptimeCommonProps;
+interface FilterBarProps {
+  currentQuery?: object;
+  updateQuery: UptimeSearchBarQueryChangeHandler;
+}
 
-export const FilterBarQuery = ({
-  autorefreshInterval,
-  autorefreshIsPaused,
-  dateRangeStart,
-  dateRangeEnd,
-  updateQuery,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getFilterBarQuery}
-    variables={{ dateRangeStart, dateRangeEnd }}
-  >
-    {({ loading, error, data }) => {
-      if (loading) {
-        return <FilterBarLoading />;
-      }
-      if (error) {
-        return i18n.translate('xpack.uptime.filterBar.errorMessage', {
-          values: { message: error.message },
-          defaultMessage: 'Error {message}',
-        });
-      }
-      const { filterBar } = data;
-      return <FilterBar filterBar={filterBar} updateQuery={updateQuery} />;
-    }}
-  </Query>
+type Props = FilterBarProps & UptimeCommonProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
+
+export const makeFilterBarQuery = ({ currentQuery, data, updateQuery }: Props) => {
+  if (data && data.filterBar) {
+    return (
+      <FilterBar currentQuery={currentQuery} filterBar={data.filterBar} updateQuery={updateQuery} />
+    );
+  }
+  return <FilterBarLoading />;
+};
+
+export const FilterBarQuery = withUptimeGraphQL<FilterBarQueryResult, FilterBarProps>(
+  makeFilterBarQuery,
+  getFilterBarQuery
 );

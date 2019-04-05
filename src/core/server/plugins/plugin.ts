@@ -204,6 +204,7 @@ export class Plugin<
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);

@@ -19,7 +19,7 @@
 
 function mockClass<T>(
   module: string,
-  Class: { new (...args: any[]): T },
+  Class: new (...args: any[]) => T,
   setup: (instance: any, args: any[]) => void
 ) {
   const MockClass = jest.fn(function(this: any, ...args: any[]) {
