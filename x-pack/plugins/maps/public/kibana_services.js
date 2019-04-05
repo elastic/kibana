@@ -6,13 +6,10 @@
 
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
-import { timefilter } from 'ui/timefilter/timefilter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
-export const timeService = timefilter;
 export let indexPatternService;
 export let SearchSource;
-
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(

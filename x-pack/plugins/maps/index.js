@@ -39,7 +39,6 @@ export function maps(kibana) {
       injectDefaultVars(server) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
-
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,

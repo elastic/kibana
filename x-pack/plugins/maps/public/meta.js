@@ -17,8 +17,6 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 let meta = null;
 let loadingMetaPromise = null;
 let isLoaded = false;
-
-
 export async function getDataSources() {
   if (meta) {
     return meta;
