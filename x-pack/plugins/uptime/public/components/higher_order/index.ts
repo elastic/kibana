@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { INDEX_NAMES } from './index_names';
-export { PLUGIN } from './plugin';
-export { QUERY } from './query';
+export { UptimeGraphQLQueryProps, withUptimeGraphQL } from './uptime_graphql_query';
