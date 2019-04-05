@@ -533,5 +533,17 @@ Timelion application no longer appears by default in the {kib} side navigation.
 visualizations and want to add Timelion back in the side
 navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
 
+[float]
+==== Machine learning wizards use the ECS to recognize {auditbeat} and {filebeat} data
 
+Starting with 7.0, the fields exported by Beats conform to the
+{ecs-ref}/index.html[Elastic Common Schema (ECS)]. Many of the exported fields
+have been renamed. When you create {ml} jobs in {kib}, it recognizes certain
+types of data from {filebeat} and {auditbeat}, but only when that data uses the
+Elastic Common Schema. For more information, see
+{beats-ref}/upgrading-6-to-7.html#enable-ecs-compatibility[Enabling the compatibility layer for ECS fields]
+and <<ml-jobs>>.
+
+NOTE: You can still manually create {ml} jobs, dashboards, and visualizations
+for data that does not conform to the ECS.  
 
