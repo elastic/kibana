@@ -56,7 +56,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
 
     this.onTableChange = ({ page, sort }) => {
       setLocalStorageData(storage, {
-        page,
+        page: { pageIndex: page.index || 0, pageSize: page.size || 20 },
         sort: {
           sort
         }
