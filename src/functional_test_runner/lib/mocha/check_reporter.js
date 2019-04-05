@@ -72,14 +72,16 @@ export class MochaCheckReporter extends Mocha.reporters.Base {
 
         //screenshot: `https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
         //screenshot: `https://storage.googleapis.com/kibana-ci-artifacts/jobs/%7BjobId%7D/%7BmatrixJobId%7D/%7BbuildNum%7D/kibana/${runnable.addl.screenshot}`,
-        screenshot: `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
+        //screenshot: `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${runnable.addl.screenshot}`,
+        screenshot: runnable.addl.screenshot,
         path,
         start_line: line,
         end_line: line,
         annotation_level: 'failure',
         title,
         //message: stripAnsi(output).split('\n')[2].trim(),
-        message: '```\n' + JSON.stringify(runnable.addl, undefined, 2) + '```\n',
+        // message: '```\n' + JSON.stringify(runnable.addl, undefined, 2) + '```\n',
+        message: `url: ${runnable.addl.currentUrl}\nhtml content: ${runnable.addl.htmlFileName}\nbrowser console:\n${runnable.addl.browserOutput}`
       });
     }
 

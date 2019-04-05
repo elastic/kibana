@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { writeFile } from 'fs';
 import mkdirp from 'mkdirp';
 import del from 'del';
@@ -45,7 +45,7 @@ export async function FailureDebuggingProvider({ getService }) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await browser.getPageSource();
-    test.addl.htmlFileName = htmlOutputFileName;
+    test.addl.htmlFileName = relative(process.env.WORKSPACE + '/kibana', htmlOutputFileName);
     log.info(`Saving page source to: ${htmlOutputFileName}`);
     await writeFileAsync(htmlOutputFileName, pageSource);
   }

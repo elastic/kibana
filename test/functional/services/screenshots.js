@@ -68,8 +68,10 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async takeForFailure(name, el, error) {
-      error.addl.screenshot = relative(process.env.WORKSPACE + '/kibana', resolve(FAILURE_DIRECTORY, `${name}.png`));
-      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
+      const pngPath = resolve(FAILURE_DIRECTORY, `${name}.png`);
+      //error.addl.screenshot = relative(process.env.WORKSPACE + '/kibana', pngPath);
+      error.addl.screenshot = `https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+pull-request/${process.env.JOB_BASE_NAME}/${process.env.BUILD_ID}/kibana/${pngPath}`;
+      await this._take(pngPath, el);
     }
 
     async _take(path, el) {
