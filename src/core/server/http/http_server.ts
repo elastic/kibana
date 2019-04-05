@@ -31,7 +31,7 @@ import { CookieOptions, createCookieSessionStorageFor } from './session_storage'
 export interface HttpServerInfo {
   server: Server;
   options: ServerOptions;
-  registerAuth: (fn: Authenticate, cookieOptions: CookieOptions) => void;
+  registerAuth: <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) => void;
   registerOnRequest: (fn: OnRequest) => void;
 }
 
@@ -146,12 +146,12 @@ export class HttpServer {
     this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
   };
 
-  private registerAuth = async (fn: Authenticate, cookieOptions: CookieOptions) => {
+  private registerAuth = async <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) => {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
 
-    const sessionStorage = await createCookieSessionStorageFor(this.server, cookieOptions);
+    const sessionStorage = await createCookieSessionStorageFor<T>(this.server, cookieOptions);
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, sessionStorage),

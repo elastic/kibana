@@ -57,13 +57,13 @@ const toolkit = {
   rejected: AuthResult.rejected,
 };
 
-export type Authenticate = (
+export type Authenticate<T> = (
   request: Request,
-  sessionStorage: ScopedSessionStorage,
+  sessionStorage: ScopedSessionStorage<T>,
   t: typeof toolkit
 ) => Promise<AuthResult>;
 
-export function adoptToHapiAuthFormat(fn: Authenticate, sessionStorage: SessionStorage) {
+export function adoptToHapiAuthFormat<T>(fn: Authenticate<T>, sessionStorage: SessionStorage<T>) {
   return async function interceptAuth(
     req: Request,
     h: ResponseToolkit

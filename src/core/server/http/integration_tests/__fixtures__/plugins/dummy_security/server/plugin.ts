@@ -19,9 +19,19 @@
 import Boom from 'boom';
 import { Authenticate, CoreSetup } from '../../../../../../../../core/server';
 
+interface User {
+  id: string;
+  roles?: string[];
+}
+
+interface Storage {
+  value: User;
+  expires: number;
+}
+
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
-    const authenticate: Authenticate = async (request, sessionStorage, t) => {
+    const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
       if (request.path === '/auth/has_session') {
         const prevSession = await sessionStorage.get();
         const userData = prevSession.value;
@@ -42,7 +52,7 @@ export class DummySecurityPlugin {
     const cookieOptions = {
       name: 'sid',
       password: 'something_at_least_32_characters',
-      validate: () => true,
+      validate: (session: Storage) => true,
       isSecure: false,
       path: '/',
       sessionTimeout: 10000000,

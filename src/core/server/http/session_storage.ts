@@ -20,31 +20,31 @@
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 
-export interface CookieOptions {
+export interface CookieOptions<T> {
   name: string;
   password: string;
-  validate: (sessionValue: any) => boolean | Promise<boolean>;
+  validate: (sessionValue: T) => boolean | Promise<boolean>;
   isSecure: boolean;
   sessionTimeout: number;
   path?: string;
 }
 
-export class ScopedSessionStorage {
+export class ScopedSessionStorage<T extends Record<string, any>> {
   constructor(
-    private readonly sessionGetter: () => Promise<any>,
+    private readonly sessionGetter: () => Promise<T>,
     private readonly request: Request
   ) {}
   /**
    * Retrieves session value from the session storage.
    */
-  public async get() {
+  public async get(): Promise<T> {
     return await this.sessionGetter();
   }
   /**
    * Puts current session value into the session storage.
    * @param sessionValue - value to put store into
    */
-  public set(sessionValue: object) {
+  public set(sessionValue: T) {
     return this.request.cookieAuth.set(sessionValue);
   }
   /**
@@ -55,20 +55,27 @@ export class ScopedSessionStorage {
   }
 }
 
-export interface SessionStorage {
-  asScoped: (request: Request) => ScopedSessionStorage;
+export interface SessionStorage<T> {
+  asScoped: (request: Request) => ScopedSessionStorage<T>;
 }
 
-export async function createCookieSessionStorageFor(
+/**
+ * Creates object with SessionStorage interface, which abstract the way of
+ * session storage implementation.
+ *
+ * @param server - hapi server to create SessionStorage for
+ * @param cookieOptions - cookies configuration
+ */
+export async function createCookieSessionStorageFor<T>(
   server: Server,
-  cookieOptions: CookieOptions
-): Promise<SessionStorage> {
+  cookieOptions: CookieOptions<T>
+): Promise<SessionStorage<T>> {
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
     password: cookieOptions.password,
-    validateFunc: async (req, session) => ({ valid: await cookieOptions.validate(session) }),
+    validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
     isSecure: cookieOptions.isSecure,
     path: cookieOptions.path,
     clearInvalid: true,
@@ -78,7 +85,10 @@ export async function createCookieSessionStorageFor(
 
   return {
     asScoped(request: Request) {
-      return new ScopedSessionStorage(() => server.auth.test('security-cookie', request), request);
+      return new ScopedSessionStorage<T>(
+        () => server.auth.test('security-cookie', request),
+        request
+      );
     },
   };
 }
