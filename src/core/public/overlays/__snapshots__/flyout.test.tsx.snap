@@ -11,18 +11,20 @@ Array [
 exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
-    <EuiFlyout
-      closeButtonAriaLabel="Closes this dialog"
-      hideCloseButton={false}
-      maxWidth={false}
-      onClose={[Function]}
-      ownFocus={false}
-      size="m"
-    >
-      <span>
-        Flyout content
-      </span>
-    </EuiFlyout>,
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
     <div />,
   ],
 ]
@@ -31,33 +33,37 @@ Array [
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
   Array [
-    <EuiFlyout
-      closeButtonAriaLabel="Closes this dialog"
-      hideCloseButton={false}
-      maxWidth={false}
-      onClose={[Function]}
-      ownFocus={false}
-      size="m"
-    >
-      <span>
-        Flyout content 1
-      </span>
-    </EuiFlyout>,
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content 1
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
     <div />,
   ],
   Array [
-    <EuiFlyout
-      closeButtonAriaLabel="Closes this dialog"
-      hideCloseButton={false}
-      maxWidth={false}
-      onClose={[Function]}
-      ownFocus={false}
-      size="m"
-    >
-      <span>
-        Flyout content 2
-      </span>
-    </EuiFlyout>,
+    <mockConstructor>
+      <EuiFlyout
+        closeButtonAriaLabel="Closes this dialog"
+        hideCloseButton={false}
+        maxWidth={false}
+        onClose={[Function]}
+        ownFocus={false}
+        size="m"
+      >
+        <span>
+          Flyout content 2
+        </span>
+      </EuiFlyout>
+    </mockConstructor>,
     <div />,
   ],
 ]

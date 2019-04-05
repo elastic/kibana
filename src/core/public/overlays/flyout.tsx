@@ -104,9 +104,11 @@ export class FlyoutService {
     this.activeFlyout = flyout;
 
     render(
-      <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
-        {flyoutChildren}
-      </EuiFlyout>,
+      <i18n.Context>
+        <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
+          {flyoutChildren}
+        </EuiFlyout>
+      </i18n.Context>,
       this.targetDomElement
     );
 
