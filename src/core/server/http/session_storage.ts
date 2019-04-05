@@ -17,20 +17,68 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
+import { Request, Server } from 'hapi';
+import hapiAuthCookie from 'hapi-auth-cookie';
 
-export type ScopedSessionStorage = ReturnType<SessionStorage['asScoped']>;
-export class SessionStorage {
-  constructor(private readonly sessionGetter: (request: Request) => Promise<any>) {}
-  public asScoped(request: Request) {
-    // NOTE: probably need bind here. request.cookieAuth.set.bind(request.cookieAuth)
-    return {
-      // Retrieves session value from the session storage.
-      get: () => this.sessionGetter(request),
-      // Puts current session value into the session storage.
-      set: (session: object) => request.cookieAuth.set(session),
-      // Clears current session.
-      clear: () => request.cookieAuth.clear(),
-    };
+export interface CookieOptions {
+  name: string;
+  password: string;
+  validate: (sessionValue: any) => boolean | Promise<boolean>;
+  isSecure: boolean;
+  sessionTimeout: number;
+  path?: string;
+}
+
+export class ScopedSessionStorage {
+  constructor(
+    private readonly sessionGetter: () => Promise<any>,
+    private readonly request: Request
+  ) {}
+  /**
+   * Retrieves session value from the session storage.
+   */
+  public async get() {
+    return await this.sessionGetter();
   }
+  /**
+   * Puts current session value into the session storage.
+   * @param sessionValue - value to put store into
+   */
+  public set(sessionValue: object) {
+    return this.request.cookieAuth.set(sessionValue);
+  }
+  /**
+   * Clears current session.
+   */
+  public clear() {
+    return this.request.cookieAuth.clear();
+  }
+}
+
+export interface SessionStorage {
+  asScoped: (request: Request) => ScopedSessionStorage;
+}
+
+export async function createCookieSessionStorageFor(
+  server: Server,
+  cookieOptions: CookieOptions
+): Promise<SessionStorage> {
+  await server.register({ plugin: hapiAuthCookie });
+
+  server.auth.strategy('security-cookie', 'cookie', {
+    cookie: cookieOptions.name,
+    password: cookieOptions.password,
+    validateFunc: async (req, session) => ({ valid: await cookieOptions.validate(session) }),
+    isSecure: cookieOptions.isSecure,
+    path: cookieOptions.path,
+    clearInvalid: true,
+    isHttpOnly: true,
+    isSameSite: false,
+  });
+
+  return {
+    asScoped(request: Request) {
+      return new ScopedSessionStorage(() => server.auth.test('security-cookie', request), request);
+    },
+  };
 }

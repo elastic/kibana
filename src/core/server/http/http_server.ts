@@ -18,7 +18,6 @@
  */
 
 import { Server, ServerOptions } from 'hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
 
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
@@ -27,17 +26,7 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, Authenticate } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequest } from './lifecycle/on_request';
 import { Router } from './router';
-
-import { SessionStorage } from './session_storage';
-
-export interface CookieOptions {
-  name: string;
-  password: string;
-  validate: (sessionValue: any) => boolean | Promise<boolean>;
-  isSecure: boolean;
-  sessionTimeout: number;
-  path?: string;
-}
+import { CookieOptions, createCookieSessionStorageFor } from './session_storage';
 
 export interface HttpServerInfo {
   server: Server;
@@ -162,22 +151,7 @@ export class HttpServer {
       throw new Error('Server is not created yet');
     }
 
-    await this.server.register({ plugin: hapiAuthCookie });
-
-    this.server.auth.strategy('security-cookie', 'cookie', {
-      cookie: cookieOptions.name,
-      password: cookieOptions.password,
-      validateFunc: async (req, session) => ({ valid: await cookieOptions.validate(session) }),
-      isSecure: cookieOptions.isSecure,
-      path: cookieOptions.path,
-      clearInvalid: true,
-      isHttpOnly: true,
-      isSameSite: false,
-    });
-
-    const sessionStorage = new SessionStorage(request =>
-      this.server!.auth.test('security-cookie', request)
-    );
+    const sessionStorage = await createCookieSessionStorageFor(this.server, cookieOptions);
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
