@@ -71,7 +71,7 @@ export default function ({ getService }) {
       expect(data).to.eql(errorListFilteredByPort);
     });
 
-    it('returns an error list filtered by port/scheme', async () => {
+    it('returns an error list filtered by port/type', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
         query: getErrorListQueryString,

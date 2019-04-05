@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 // linear algebra
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
