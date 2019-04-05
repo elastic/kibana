@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/33504
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 
