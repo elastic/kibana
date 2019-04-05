@@ -159,11 +159,13 @@ export async function generateCsvSearch(
         },
       };
     }, {});
+  const { timeFieldName: indexPatternTimeField } = indexPatternSavedObject;
+  const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
   const searchRequest: SearchRequest = {
     index: indexPatternSavedObject.title,
     body: {
       _source: { includes },
-      docvalue_fields: [indexPatternSavedObject.timeFieldName],
+      docvalue_fields: docValueFields,
       query: buildEsQuery(
         indexPatternSavedObject,
         searchSourceQuery,
