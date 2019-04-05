@@ -4,11 +4,11 @@
   .field-label {
     font-size: $euiFontSizeXS;
     text-align: left;
+    max-height: $euiFontSizeS;
+    max-width: calc(100% - 102px); // SASSTODO: Calc proper value
 
     .field-value {
       @include euiTextTruncate;
-
-      max-width: calc(100% - 34px); // SASSTODO: Calc proper value
       display: inline-block;
       vertical-align: bottom;
     }
@@ -29,7 +29,7 @@
 
     .progress-bar {
       height: $euiSizeXS / 2;
-      margin-top: $euiSizeS;
+      margin-top: $euiSizeM;
       text-align: right;
       line-height: 18px; // SASSTODO: Calc porper value
       display: inline-block;
@@ -93,7 +93,7 @@
     line-height: 14px;
     border-radius: $euiBorderRadius;
     padding: $euiSizeXS / 2;
-    margin-top: 1px;
+    margin-top: 3px;
     display: inline-block;
     border: $euiBorderThin;
   }

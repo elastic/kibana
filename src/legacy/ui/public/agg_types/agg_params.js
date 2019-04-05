@@ -21,7 +21,6 @@ import '../filters/label';
 import { IndexedArray } from '../indexed_array';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
-import { RegexParamType } from './param_types/regex';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
@@ -30,7 +29,6 @@ import { createLegacyClass } from '../utils/legacy_class';
 const paramTypeMap = {
   field: FieldParamType,
   optioned: (OptionedParamType),
-  regex: (RegexParamType),
   string: (StringParamType),
   json: (JsonParamType),
   _default: (BaseParamType)

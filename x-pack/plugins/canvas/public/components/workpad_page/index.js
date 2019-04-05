@@ -41,6 +41,7 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
+// eslint-disable-next-line
 const getRootElementId = (lookup, id) => {
   if (!lookup.has(id)) {
     return null;
@@ -114,7 +115,7 @@ const layoutProps = ({ forceUpdate, page, elements: pageElements }) => {
       }
     }
     // instead of just combining `element` with `shape`, we make property transfer explicit
-    return element ? { ...shape, filter: element.filter } : shape;
+    return element ? { ...shape, filter: element.filter, expression: element.expression } : shape;
   });
   return {
     elements,
@@ -147,6 +148,7 @@ export const WorkpadPage = compose(
   ),
   withProps(animationProps),
   withState('_forceUpdate', 'forceUpdate'), // TODO: phase out this solution
+  withState('canvasOrigin', 'saveCanvasOrigin'),
   withProps(layoutProps), // Updates states; needs to have both local and global
   withHandlers(groupHandlerCreators),
   withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state

@@ -6,9 +6,6 @@
 
 import './kibana_services';
 
-import './vendor/jquery_ui_sortable.js';
-import './vendor/jquery_ui_sortable.css';
-
 // import the uiExports that we want to "use"
 import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
@@ -19,6 +16,8 @@ import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
+import 'ui/kbn_top_nav';
+import 'ui/query_bar/directive';
 import { uiModules } from 'ui/modules';
 import { DocTitleProvider } from 'ui/doc_title';
 import 'ui/autoload/styles';

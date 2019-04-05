@@ -8,11 +8,9 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import createHistory from 'history/createHashHistory';
 import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import PropTypes from 'prop-types';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -27,51 +25,6 @@ export function toJson(wrapper: ReactWrapper) {
     noKey: true,
     mode: 'deep'
   });
-}
-
-const defaultRoute = {
-  match: { path: '/', url: '/', params: {}, isExact: true },
-  location: { pathname: '/', search: '', hash: '', key: '4yyjf5' }
-};
-
-export function mountWithRouterAndStore(
-  Component: React.ReactElement,
-  storeState = {},
-  route = defaultRoute
-) {
-  const store = createMockStore(storeState);
-  const history = createHistory();
-
-  const options = {
-    context: {
-      store,
-      router: {
-        history,
-        route
-      }
-    },
-    childContextTypes: {
-      store: PropTypes.object.isRequired,
-      router: PropTypes.object.isRequired
-    }
-  };
-
-  return mount(Component, options);
-}
-
-export function mountWithStore(Component: React.ReactElement, storeState = {}) {
-  const store = createMockStore(storeState);
-
-  const options = {
-    context: {
-      store
-    },
-    childContextTypes: {
-      store: PropTypes.object.isRequired
-    }
-  };
-
-  return mount(Component, options);
 }
 
 export function mockMoment() {
@@ -90,11 +43,6 @@ export function mockMoment() {
     });
 }
 
-// Await this when you need to "flush" promises to immediately resolve or throw in tests
-export async function asyncFlush() {
-  return new Promise(resolve => setTimeout(resolve, 0));
-}
-
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(
   Component: React.FunctionComponent<{}>,
@@ -109,18 +57,19 @@ export async function getRenderedHref(
     </Provider>
   );
 
-  await asyncFlush();
+  await tick();
 
   return mounted.render().attr('href');
 }
 
 export function mockNow(date: string) {
   const fakeNow = new Date(date).getTime();
-  const realDateNow = global.Date.now.bind(global.Date);
-
-  global.Date.now = jest.fn(() => fakeNow);
-
-  return () => {
-    global.Date.now = realDateNow;
-  };
+  return jest.spyOn(Date, 'now').mockReturnValue(fakeNow);
 }
+
+export function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Await this when you need to "flush" promises to immediately resolve or throw in tests
+export const tick = () => new Promise(resolve => setImmediate(resolve, 0));

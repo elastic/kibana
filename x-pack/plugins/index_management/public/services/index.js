@@ -8,4 +8,4 @@ export * from './api';
 export { sortTable } from './sort_table';
 export { filterItems } from './filter_items';
 export { healthToColor } from './health_to_color';
-export { trackUserAction } from './track_user_action';
+export { trackUiMetric } from './track_ui_metric';
