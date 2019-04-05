@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SelectOperator } from 'x-pack/plugins/viz_editor/common';
+import { SelectOperator } from '../../../../common';
 
 type OperationPrettyNames = { [operation in SelectOperator]: string };
 
