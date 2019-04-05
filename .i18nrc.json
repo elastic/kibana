@@ -48,5 +48,7 @@
     "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
-  "exclude": []
+  "exclude": [
+    "src/legacy/ui/ui_render/ui_render_mixin.js"
+  ]
 }
