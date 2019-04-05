@@ -4,27 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { KibanaRisonLink } from '../KibanaRisonLink';
-import { RisonAPMQueryParams } from '../rison_helpers';
-import { QueryWithIndexPattern } from './QueryWithIndexPattern';
+import chrome from 'ui/chrome';
+import url from 'url';
+import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
+import { useLocation } from '../../../../hooks/useLocation';
+import { getRisonString, RisonDecoded } from '../rison_helpers';
 
 interface Props {
-  query: RisonAPMQueryParams;
+  query: RisonDecoded;
   children: React.ReactNode;
 }
 
 export function DiscoverLink({ query, ...rest }: Props) {
-  return (
-    <QueryWithIndexPattern query={query}>
-      {queryWithIndexPattern => (
-        <KibanaRisonLink
-          pathname={'/app/kibana'}
-          hash={'/discover'}
-          query={queryWithIndexPattern}
-          {...rest}
-        />
-      )}
-    </QueryWithIndexPattern>
-  );
+  const apmIndexPattern = useAPMIndexPattern();
+  const location = useLocation();
+
+  if (!apmIndexPattern.id) {
+    return null;
+  }
+
+  const risonQuery = getRisonString(location.search, {
+    ...query,
+    _a: {
+      ...query._a,
+      index: apmIndexPattern.id
+    }
+  });
+
+  const href = url.format({
+    pathname: chrome.addBasePath('/app/kibana'),
+    hash: `/discover?${risonQuery}`
+  });
+
+  return <EuiLink {...rest} href={href} />;
 }

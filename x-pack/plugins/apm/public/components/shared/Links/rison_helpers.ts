@@ -53,6 +53,32 @@ function createG(query: RisonAPMQueryParams) {
   return g;
 }
 
+export function getRisonString(
+  currentSearch: Location['search'],
+  query: RisonDecoded
+) {
+  const currentQuery = toQuery(currentSearch);
+  const nextQuery = {
+    ...TIMEPICKER_DEFAULTS,
+    ...pick(currentQuery, PERSISTENT_APM_PARAMS)
+  };
+
+  const g = createG(nextQuery);
+  const encodedG = rison.encode(g);
+  const encodedA = query._a ? rison.encode(query._a) : '';
+  const risonValues = [];
+
+  if (encodedG) {
+    risonValues.push(`_g=${encodedG}`);
+  }
+
+  if (encodedA) {
+    risonValues.push(`_a=${encodedA}`);
+  }
+
+  return risonValues.join('&');
+}
+
 export function getRisonHref({
   location,
   pathname,
