@@ -27,39 +27,31 @@ function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;
-
-      this.state = {
-        savedObj: savedObj,
-        vis: savedObj.vis,
-        isLoaded: false,
-      };
+      this.savedObj = savedObj;
+      this.vis = savedObj.vis;
+      this.vis.fields = {};
     }
 
-    getDefaultIndexPattern = async () => {
+    setDefaultIndexPattern = async () => {
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-
-      return indexPattern.attributes.title;
-    };
-
-    getComponent = () => {
-      return this.state.vis.type.editorConfig.component;
+      this.vis.params.default_index_pattern = indexPattern.attributes.title;
     };
 
     async render(params) {
-      const Component = this.getComponent();
+      const Component = this.vis.type.editorConfig.component;
 
-      // ReactEditorController it's a not React component! Not all hooks supported
-      !this.state.isLoaded && await this.componentDidMount();
+      await this.setDefaultIndexPattern();
+      const visFields = await fetchIndexPatternFields(this.vis.params, this.vis.fields);
 
       render(
         <I18nContext>
           <Component
             config={config}
-            vis={this.state.vis}
-            visFields={this.state.vis.fields}
-            visParams={this.state.vis.params}
-            savedObj={this.state.savedObj}
+            vis={this.vis}
+            visFields={visFields}
+            visParams={this.vis.params}
+            savedObj={this.savedObj}
             timeRange={params.timeRange}
             renderComplete={() => {}}
             isEditorMode={true}
@@ -69,11 +61,7 @@ function ReactEditorControllerProvider(Private, config) {
         this.el);
     }
 
-    async componentDidMount() {
-      this.state.vis.params.default_index_pattern = await this.getDefaultIndexPattern();
-      this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
-      this.state.isLoaded = true;
-    }
+    resize() {}
 
     destroy() {
       unmountComponentAtNode(this.el);
@@ -82,7 +70,7 @@ function ReactEditorControllerProvider(Private, config) {
 
   return {
     name: 'react_editor',
-    handler: ReactEditorController,
+    handler: ReactEditorController
   };
 }
 

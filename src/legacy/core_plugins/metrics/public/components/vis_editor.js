@@ -21,14 +21,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import { isEqual } from 'lodash';
 import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -39,8 +37,7 @@ class VisEditor extends Component {
       model: props.visParams,
       dirty: false,
       autoApply: true,
-      visFields: props.visFields,
-      extractedIndexPatterns: ['']
+      visFields: props.visFields
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.Subject();
@@ -62,30 +59,17 @@ class VisEditor extends Component {
   handleChange = async (partialModel) => {
     const nextModel = { ...this.state.model, ...partialModel };
     this.props.vis.params = nextModel;
-
     if (this.state.autoApply) {
       this.props.vis.updateState();
     }
-
-    let newState = {
+    this.setState({
       model: nextModel,
-      dirty: !this.state.autoApply,
-    };
-
-    if (this.props.isEditorMode) {
-      const { params, fields } = this.props.vis;
-      const extractedIndexPatterns = extractIndexPatterns(params, fields);
-
-      if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        newState = {
-          ...newState,
-          visFields: await fetchFields(extractedIndexPatterns),
-          extractedIndexPatterns: extractedIndexPatterns
-        };
-      }
-    }
-
-    this.setState(newState);
+      dirty: !this.state.autoApply
+    });
+    const { params, fields } = this.props.vis;
+    fetchIndexPatternFields(params, fields).then(visFields => {
+      this.setState({ visFields });
+    });
   };
 
   handleCommit = () => {

@@ -30,28 +30,27 @@ export async function fetchFields(indexPatterns = ['*']) {
         pathname: '/api/metrics/fields',
         query: {
           index: pattern,
-        },
+        }
       });
     }));
     const fields = patterns.reduce((cumulatedFields, currentPattern, index) => {
       return {
         ...cumulatedFields,
-        [currentPattern]: indexFields[index],
+        [currentPattern]: indexFields[index]
       };
     }, {});
     return fields;
-  } catch (error) {
+  } catch(error) {
     toastNotifications.addDanger({
       title: i18n.translate('tsvb.fetchFields.loadIndexPatternFieldsErrorMessage', {
-        defaultMessage: 'Unable to load index_pattern fields',
+        defaultMessage: 'Unable to load index_pattern fields'
       }),
       text: error.message,
     });
   }
 }
 
-export async function fetchIndexPatternFields({ params, fields = {} }) {
+export async function fetchIndexPatternFields(params, fields) {
   const indexPatterns = extractIndexPatterns(params, fields);
-
   return await fetchFields(indexPatterns);
 }
