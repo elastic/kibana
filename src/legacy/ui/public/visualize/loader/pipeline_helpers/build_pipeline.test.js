@@ -170,15 +170,15 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const params = {};
 
       it('without buckets', () => {
-        const schemas = { metric: [0] };
+        const schemas = { metric: [{ accessor: 0 }] };
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with buckets', () => {
         const schemas = {
-          metric: [0],
-          segment: [1, 2]
+          metric: [{ accessor: 0 }],
+          segment: [{ accessor: 1 }]
         };
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
