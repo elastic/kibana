@@ -53,7 +53,6 @@ import { getFromSavedObject, isFilterable } from 'ui/index_patterns/static_utils
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
 import * as types from 'ui/index_patterns/index.d.ts';
 
-
 /**
  * Index Patterns Service
  *
@@ -62,7 +61,7 @@ import * as types from 'ui/index_patterns/index.d.ts';
  * and re-exported here. Once the index patterns code actually moves to
  * this plugin, the imports above can simply be updated to point to their
  * corresponding local directory.
- * 
+ *
  * @internal
  */
 export class IndexPatternsService {

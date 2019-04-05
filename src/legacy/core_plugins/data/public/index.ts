@@ -42,7 +42,7 @@ class DataService {
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-// tslint:disable no-default-export
+// eslint-disable-next-line import/no-default-export
 export default new DataService().setup();
 
 /** @public */

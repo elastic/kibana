@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 
-// tslint:disable-next-line
+// eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'data',
