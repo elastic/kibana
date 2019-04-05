@@ -16,32 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ElasticsearchServiceSetup } from './elasticsearch';
-import { Authenticate, HttpServiceSetup, KibanaRequest, OnRequest, Router } from './http';
-import { PluginsServiceSetup } from './plugins';
-
-export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
-export { Logger, LoggerFactory } from './logging';
-export {
-  DiscoveredPlugin,
-  PluginInitializerContext,
-  PluginName,
-  PluginSetupContext,
-} from './plugins';
-
-export interface CoreSetup {
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-  plugins: PluginsServiceSetup;
-}
-
-export {
-  Router,
-  Authenticate,
-  OnRequest,
-  KibanaRequest,
-  ElasticsearchServiceSetup,
-  HttpServiceSetup,
-  PluginsServiceSetup,
-};
+import { DummySecurityPlugin } from './plugin';
+export const plugin = () => new DummySecurityPlugin();

@@ -1,0 +1,57 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import Boom from 'boom';
+import { Authenticate, CoreSetup } from '../../../../../../../../core/server';
+
+export class DummySecurityPlugin {
+  public setup(core: CoreSetup) {
+    const authenticate: Authenticate = async (request, sessionStorage, t) => {
+      if (request.path === '/auth/has_session') {
+        const prevSession = await sessionStorage.get();
+        const userData = prevSession.value;
+        sessionStorage.set({ value: userData, expires: Date.now() + 1000 });
+
+        return t.authenticated({ credentials: userData });
+      }
+
+      if (request.headers.authorization) {
+        const user = { id: '42' };
+        sessionStorage.set({ value: user, expires: Date.now() + 1000 });
+        return t.authenticated({ credentials: user });
+      } else {
+        return t.rejected(Boom.unauthorized());
+      }
+    };
+
+    const cookieOptions = {
+      name: 'sid',
+      password: 'something_at_least_32_characters',
+      validate: () => true,
+      isSecure: false,
+      path: '/',
+      sessionTimeout: 10000000,
+    };
+    core.http.registerAuth(authenticate, cookieOptions);
+    return {
+      dummy() {
+        return 'Hello from dummy plugin';
+      },
+    };
+  }
+}
