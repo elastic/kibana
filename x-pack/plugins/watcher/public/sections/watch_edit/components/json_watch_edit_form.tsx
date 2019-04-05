@@ -18,6 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ACTION_TYPES } from 'x-pack/plugins/watcher/common/constants';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';
@@ -39,6 +40,28 @@ function validateId(id: string) {
   } else if (!regex.test(id)) {
     return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
       defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
+    });
+  }
+  return false;
+}
+
+function validateActions(actions: { [key: string]: any }) {
+  const invalidActions = Object.keys(actions).find((actionKey: string) => {
+    const actionKeys = Object.keys(actions[actionKey]);
+    let type;
+    Object.keys(ACTION_TYPES).forEach((k: string) => {
+      if (actionKeys.includes(ACTION_TYPES[k]) && !actionKeys.includes(ACTION_TYPES.UNKNOWN)) {
+        type = ACTION_TYPES[k];
+      }
+    });
+    return !type;
+  });
+  if (invalidActions) {
+    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidActionType', {
+      defaultMessage: 'Unknown action type provided for action "{action}".',
+      values: {
+        action: invalidActions,
+      },
     });
   }
   return false;
@@ -160,6 +183,17 @@ export const JsonWatchEditForm = ({
               try {
                 const watchJson = JSON.parse(json);
                 if (watchJson && typeof watchJson === 'object') {
+                  if (watchJson.actions) {
+                    const actionsError = validateActions(watchJson.actions);
+                    if (actionsError) {
+                      setErrors({
+                        ...errors,
+                        [JSON_WATCH_IDS.JSON]: [actionsError],
+                      });
+                      setIsShowingErrors(true);
+                      return;
+                    }
+                  }
                   setWatchProperty('watch', watchJson);
                   const newErrors = { ...errors, [JSON_WATCH_IDS.JSON]: [] };
                   const isInvalidForm = !!Object.keys(newErrors).find(
