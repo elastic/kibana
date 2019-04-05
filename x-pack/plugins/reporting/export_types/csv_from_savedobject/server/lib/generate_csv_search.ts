@@ -33,21 +33,13 @@ interface CsvResultFromSearch {
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;
-type FormatsMap = Map<
-  string,
-  {
-    id: string;
-    params: {
-      pattern: string;
-    };
-  }
->;
+type FormatsMap = Map<string, any>; // this is required for generateCsv, but formatting is not done for this API
 
 interface GenerateCsvParams {
   searchRequest: SearchRequest;
   callEndpoint: EndpointCaller;
+  formatsMap: FormatsMap,
   fields: string[];
-  formatsMap: FormatsMap;
   metaFields: string[]; // FIXME not sure what this is for
   conflictedTypesFields: string[]; // FIXME not sure what this is for
   cancellationToken: any; // FIXME not sure how to do anything with this
@@ -186,7 +178,7 @@ export async function generateCsvSearch(
     searchRequest,
     callEndpoint: callCluster,
     fields: includes,
-    formatsMap: new Map(), // no field formatting in this API
+    formatsMap: new Map(), // there is no field formatting in this API; this is required for generateCsv
     metaFields: [],
     conflictedTypesFields: [],
     cancellationToken: [],
