@@ -30,6 +30,9 @@ const testCaseSource = {
           auditbeatIndicesExist
           auditbeatAliasExists
           auditbeatIndices
+          winlogbeatIndicesExist
+          winlogbeatAliasExists
+          winlogbeatIndices
           indexFields {
             name
             searchable

@@ -77,7 +77,10 @@ export function SingleFieldSelect({ fields,
 
 SingleFieldSelect.propTypes = {
   placeholder: PropTypes.string,
-  fields: PropTypes.object, // IndexedArray object
+  fields: PropTypes.oneOfType([
+    PropTypes.object, // IndexedArray object
+    PropTypes.array // array of Field objects
+  ]),
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string, // fieldName
   filterField: PropTypes.func,

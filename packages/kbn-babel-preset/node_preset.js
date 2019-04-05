@@ -36,7 +36,7 @@ module.exports = () => {
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
-          modules: 'cjs',
+          modules: 'cjs'
         },
       ],
       require('./common_preset'),
@@ -45,9 +45,9 @@ module.exports = () => {
       [
         require.resolve('babel-plugin-transform-define'),
         {
-          'global.__BUILT_WITH_BABEL__': 'true',
-        },
-      ],
-    ],
+          'global.__BUILT_WITH_BABEL__': 'true'
+        }
+      ]
+    ]
   };
 };

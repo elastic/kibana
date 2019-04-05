@@ -14,6 +14,7 @@
   "version": "8.0.0",
   "branch": "master",
   "types": "./kibana.d.ts",
+  "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -67,7 +68,8 @@
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
-    "kbn:bootstrap": "node scripts/register_git_hook"
+    "build:types": "tsc --p tsconfig.types.json",
+    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook"
   },
   "repository": {
     "type": "git",
@@ -98,7 +100,7 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/register": "^7.0.0",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.7.1",
+    "@elastic/eui": "9.8.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -260,6 +262,8 @@
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
+    "@microsoft/api-documenter": "7.0.41",
+    "@microsoft/api-extractor": "7.0.31",
     "@octokit/rest": "^15.10.0",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",
@@ -369,7 +373,7 @@
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "jest-raw-loader": "^1.0.1",
-    "jimp": "0.2.28",
+    "jimp": "0.6.0",
     "json5": "^1.0.1",
     "karma": "3.1.4",
     "karma-chrome-launcher": "2.1.1",

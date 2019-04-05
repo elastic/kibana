@@ -41,7 +41,7 @@ export function registerDeleteRoute(server) {
         const cluster = get(response, `persistent.cluster.remote.${name}`);
 
         if (acknowledged && !cluster) {
-          return {};
+          return { success: true };
         }
 
         // If for some reason the ES response still returns the cluster information,

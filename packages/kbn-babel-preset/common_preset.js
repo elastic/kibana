@@ -18,7 +18,10 @@
  */
 
 module.exports = {
-  presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
+  presets: [
+    require.resolve('@babel/preset-typescript'),
+    require.resolve('@babel/preset-react')
+  ],
   plugins: [
     require.resolve('babel-plugin-add-module-exports'),
 

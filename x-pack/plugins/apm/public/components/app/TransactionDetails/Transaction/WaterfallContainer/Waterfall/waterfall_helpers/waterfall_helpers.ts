@@ -21,11 +21,11 @@ import { StringMap } from '../../../../../../../../typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 
-export interface IWaterfallIndex {
+interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
 }
 
-export interface IWaterfallGroup {
+interface IWaterfallGroup {
   [key: string]: IWaterfallItem[];
 }
 
