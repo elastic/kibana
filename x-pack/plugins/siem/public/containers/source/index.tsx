@@ -32,6 +32,7 @@ interface WithSourceArgs {
   auditbeatIndicesExist: boolean;
   browserFields: BrowserFields;
   filebeatIndicesExist: boolean;
+  winlogbeatIndicesExist: boolean;
   indexPattern: StaticIndexPattern;
 }
 
@@ -64,9 +65,16 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
           const logAlias = get('source.configuration.logAlias', data);
           const auditbeatAlias = get('source.configuration.auditbeatAlias', data);
           const packetbeatAlias = get('source.configuration.packetbeatAlias', data);
+          const winlogbeatAlias = get('source.configuration.winlogbeatAlias', data);
           let indexPatternTitle: string[] = [];
           if (indexTypes.includes(IndexType.ANY)) {
-            indexPatternTitle = [...indexPatternTitle, logAlias, auditbeatAlias, packetbeatAlias];
+            indexPatternTitle = [
+              ...indexPatternTitle,
+              logAlias,
+              auditbeatAlias,
+              packetbeatAlias,
+              winlogbeatAlias,
+            ];
           } else {
             if (indexTypes.includes(IndexType.AUDITBEAT)) {
               indexPatternTitle = [...indexPatternTitle, auditbeatAlias];
@@ -77,10 +85,14 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
             if (indexTypes.includes(IndexType.PACKETBEAT)) {
               indexPatternTitle = [...indexPatternTitle, packetbeatAlias];
             }
+            if (indexTypes.includes(IndexType.WINLOGBEAT)) {
+              indexPatternTitle = [...indexPatternTitle, winlogbeatAlias];
+            }
           }
           return children({
             auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
             filebeatIndicesExist: get('source.status.filebeatIndicesExist', data),
+            winlogbeatIndicesExist: get('source.status.winlogbeatIndicesExist', data),
             browserFields: get('source.status.indexFields', data)
               ? this.memoizedBrowserFields(
                   indexPatternTitle.join(),

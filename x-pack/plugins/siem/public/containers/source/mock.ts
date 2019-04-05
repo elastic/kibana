@@ -26,10 +26,23 @@ export const mocksSource = [
             auditbeatAlias: 'auditbeat-*',
             logAlias: 'filebeat-*',
             packetbeatAlias: 'packetbeat-*',
+            winlogbeatAlias: 'winlogbeat-*',
           },
           status: {
             auditbeatIndicesExist: true,
             auditbeatAliasExists: true,
+            winlogbeatAliasExists: true,
+            winlogbeatIndicesExist: true,
+            winlogbeatIndices: [
+              'winlogbeat-7.0.0-2019.02.17',
+              'winlogbeat-7.0.0-2019.02.18',
+              'winlogbeat-7.0.0-2019.02.19',
+              'winlogbeat-7.0.0-2019.02.20',
+              'winlogbeat-7.0.0-2019.02.21',
+              'winlogbeat-7.0.0-2019.02.21-000001',
+              'winlogbeat-7.0.0-2019.02.22',
+              'winlogbeat-8.0.0-2019.02.19-000001',
+            ],
             auditbeatIndices: [
               'auditbeat-7.0.0-2019.02.17',
               'auditbeat-7.0.0-2019.02.18',

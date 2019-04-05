@@ -24,6 +24,7 @@ export const buildQuery = ({
     logAlias,
     auditbeatAlias,
     packetbeatAlias,
+    winlogbeatAlias,
   },
 }: RequestOptions) => {
   const esFields = reduceFields(fields, hostsFieldsMap);
@@ -50,7 +51,7 @@ export const buildQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias],
+    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggregations: {

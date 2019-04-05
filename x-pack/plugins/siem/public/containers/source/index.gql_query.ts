@@ -14,6 +14,7 @@ export const sourceQuery = gql`
         auditbeatAlias
         logAlias
         packetbeatAlias
+        winlogbeatAlias
       }
       status {
         auditbeatIndicesExist
@@ -22,6 +23,9 @@ export const sourceQuery = gql`
         filebeatIndicesExist
         filebeatAliasExists
         filebeatIndices
+        winlogbeatIndicesExist
+        winlogbeatAliasExists
+        winlogbeatIndices
         indexFields(indexTypes: $indexTypes) {
           category
           description

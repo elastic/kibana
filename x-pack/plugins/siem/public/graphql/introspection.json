@@ -701,6 +701,18 @@
             "deprecationReason": null
           },
           {
+            "name": "winlogbeatAlias",
+            "description": "The alias to read winlogbeat data from",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "The field mapping to use for this source",
             "args": [],
@@ -957,6 +969,50 @@
             "deprecationReason": null
           },
           {
+            "name": "winlogbeatAliasExists",
+            "description": "Whether the configured winlogbeat alias exists",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winlogbeatIndicesExist",
+            "description": "Whether the configured alias or wildcard pattern resolve to any winlogbeat indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winlogbeatIndices",
+            "description": "The list of indices in the winlogbeat alias",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "indexFields",
             "description": "The list of fields defined in the index mappings",
             "args": [
@@ -1030,6 +1086,12 @@
           },
           {
             "name": "PACKETBEAT",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "WINLOGBEAT",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
