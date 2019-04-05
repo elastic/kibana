@@ -20,7 +20,6 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { finalize } from 'rxjs/operators';
 import { ContextMenuAction } from 'ui/embeddable';
 import { Inspector } from 'ui/inspector';
 
@@ -77,10 +76,9 @@ export function getInspectorPanelAction({
           }
         };
         // In case the inspector gets closed (otherwise), restore the original destroy function
-        const restoreEmbeddableDestroy = () => {
+        session.onClose.finally(() => {
           embeddable.destroy = originalDestroy;
-        };
-        session.onClose.then(restoreEmbeddableDestroy, restoreEmbeddableDestroy);
+        });
       },
     }
   );
