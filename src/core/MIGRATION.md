@@ -130,9 +130,13 @@ The platform does not impose any technical restrictions on how the internals of 
 
 ### Services
 
-The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins via the first argument of their `setup` and `stop` functions. The interface varies from service to service, but it is always accessed through this argument.
+The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins. Services expose different features at different parts of their _lifecycle_. We describe the lifecycle of core services and plugins with specifically-named functions on the service definition.
 
-For example, the core `UiSettings` service exposes a function `get` to all plugin `setup` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
+In the new platform, there are two lifecycle functions today: `setup` and `stop`. The `setup` functions are invoked sequentially while Kibana is starting up on the server or when it is being loaded in the browser. The `stop` functions are invoked sequentially while Kibana is gracefully shutting down on the server or when the browser tab or window is being closed.
+
+There is no equivalent behavior to `stop` in legacy plugins, so this guide primarily focuses on migrating functionality into `setup`.
+
+The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin. For example, the core `UiSettings` service exposes a function `get` to all plugin `setup` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
 import { CoreSetup } from '../../../core/public';
@@ -148,9 +152,11 @@ Different service interfaces can and will be passed to `setup` and `stop` becaus
 
 For example, the `stop` function in the browser gets invoked as part of the `window.onbeforeunload` event, which means you can't necessarily execute asynchronous code here in a reliable way. For that reason, `core` likely wouldn't provide any asynchronous functions to plugin `stop` functions in the browser.
 
+Core services that expose functionality to plugins always have their `setup` function ran before any plugins.
+
 ### Integrating with other plugins
 
-Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to `setup` and/or `stop`.
+Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `stop`.
 
 Anything returned from `setup` or `stop` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
 
