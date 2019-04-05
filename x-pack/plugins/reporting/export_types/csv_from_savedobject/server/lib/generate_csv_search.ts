@@ -38,8 +38,8 @@ type FormatsMap = Map<string, any>; // this is required for generateCsv, but for
 interface GenerateCsvParams {
   searchRequest: SearchRequest;
   callEndpoint: EndpointCaller;
-  formatsMap: FormatsMap,
   fields: string[];
+  formatsMap: FormatsMap,
   metaFields: string[]; // FIXME not sure what this is for
   conflictedTypesFields: string[]; // FIXME not sure what this is for
   cancellationToken: any; // FIXME not sure how to do anything with this
