@@ -282,6 +282,7 @@ class ForecastsTableUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel',
           defaultMessage: 'View'
         }),
+        width: '60px',
         render: (forecast) => {
           const viewForecastAriaLabel = intl.formatMessage({
             id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
@@ -303,7 +304,7 @@ class ForecastsTableUI extends Component {
 
     return (
       <EuiInMemoryTable
-        className="forecasts-table"
+        compressed={true}
         items={forecasts}
         columns={columns}
         pagination={{

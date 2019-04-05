@@ -58,6 +58,7 @@ function getColumns(viewForecast) {
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
         defaultMessage: 'View'
       }),
+      width: '60px',
       render: (forecast) => {
         const viewForecastAriaLabel = i18n.translate(
           'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel', {
