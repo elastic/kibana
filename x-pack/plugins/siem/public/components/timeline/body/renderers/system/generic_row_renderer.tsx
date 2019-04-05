@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
 import { RowRenderer, RowRendererContainer } from '..';
 
-import { Row, SystemGenericDetails, SystemGenericFileDetails } from '.';
+import { Row } from '..';
+
+import { SystemGenericDetails, SystemGenericFileDetails } from '.';
 import * as i18n from './translations';
 
 export const createGenericSystemRowRenderer = ({
@@ -48,11 +49,9 @@ export const createGenericSystemRowRenderer = ({
 export const createGenericFileRowRenderer = ({
   actionName,
   text,
-  fileIcon = 'document',
 }: {
   actionName: string;
   text: string;
-  fileIcon?: IconType;
 }): RowRenderer => ({
   isInstance: ecs => {
     const module: string | null | undefined = get('event.module', ecs);
@@ -73,7 +72,6 @@ export const createGenericFileRowRenderer = ({
           data={data}
           contextId={actionName}
           text={text}
-          fileIcon={fileIcon}
         />
       </RowRendererContainer>
     </Row>

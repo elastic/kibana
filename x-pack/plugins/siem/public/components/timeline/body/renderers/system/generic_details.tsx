@@ -10,61 +10,51 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { Details, NetflowRenderer, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { AuditdNetflow } from '../auditd_netflow';
 
-import { AuthSsh, Details, Package, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '.';
+import { AuthSsh, Package } from '.';
 import * as i18n from './translations';
 
 interface Props {
-  id: string;
-  hostName: string | null | undefined;
-  outcome: string | null | undefined;
-  userName: string | null | undefined;
-  primary: string | null | undefined;
   contextId: string;
-  text: string;
-  secondary: string | null | undefined;
+  hostName: string | null | undefined;
+  id: string;
+  message: string | null | undefined;
+  outcome: string | null | undefined;
   packageName: string | null | undefined;
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
-  sshSignature: string | null | undefined;
-  sshMethod: string | null | undefined;
-  processPid: string | null | undefined;
-  processTitle: string | null | undefined;
-  processName: string | null | undefined;
-  message: string | null | undefined;
   processExecutable: string | null | undefined;
+  processPid: string | null | undefined;
+  processName: string | null | undefined;
+  sshMethod: string | null | undefined;
+  sshSignature: string | null | undefined;
+  text: string;
+  userName: string | null | undefined;
   workingDirectory: string | null | undefined;
-  args: string | null | undefined;
-  session: string | null | undefined;
 }
 
 export const SystemGenericLine = pure<Props>(
   ({
-    id,
     contextId,
     hostName,
-    userName,
+    id,
     message,
+    outcome,
     packageName,
     packageSummary,
     packageVersion,
-    primary,
-    secondary,
     processPid,
     processName,
     processExecutable,
-    processTitle,
     sshSignature,
     sshMethod,
-    workingDirectory,
-    args,
-    outcome,
-    session,
     text,
+    userName,
+    workingDirectory,
   }) => (
     <>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
@@ -116,17 +106,21 @@ export const SystemGenericLine = pure<Props>(
         />
       </EuiFlexGroup>
       {message != null && (
-        <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-          <TokensFlexItem grow={false} component="span">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={id}
-              field="message"
-              queryValue={message}
-              value={message}
-            />
-          </TokensFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+            <TokensFlexItem grow={false} component="span">
+              <DraggableBadge
+                contextId={contextId}
+                eventId={id}
+                field="message"
+                queryValue={message}
+                value={message}
+                iconType="editorComment"
+              />
+            </TokensFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </>
   )
@@ -139,62 +133,44 @@ interface GenericDetailsProps {
   text: string;
 }
 
-export const SystemGenericDetails = pure<GenericDetailsProps>(
-  ({ browserFields, data, contextId, text }) => {
-    // TODO: Do not check this in
-    // console.log('data is:', JSON.stringify(data, null, 2));
-    const id = data._id;
-    // TODO: Get message to populate and show it below the other text
-    const message: string | null = data.message != null ? data.message[0] : null;
-    const hostName: string | null | undefined = get('host.name', data);
-    const userName: string | null | undefined = get('user.name', data);
-    const outcome: string | null | undefined = get('event.outcome', data);
-    const packageName: string | null | undefined = get('system.audit.package.name', data);
-    const packageSummary: string | null | undefined = get('system.audit.package.summary', data);
-    const packageVersion: string | null | undefined = get('system.audit.package.version', data);
-    const processPid: string | null | undefined = get('process.pid', data);
-    const processName: string | null | undefined = get('process.name', data);
-    const sshSignature: string | null | undefined = get('system.auth.ssh.signature', data);
-    const sshMethod: string | null | undefined = get('system.auth.ssh.method', data);
-    const processExecutable: string | null | undefined = get('process.executable', data);
-    const processTitle: string | null | undefined = get('process.title', data);
-    const workingDirectory: string | null | undefined = get('process.working_directory', data);
-    const rawArgs: string[] | null | undefined = get('process.args', data);
+export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
+  const id = data._id;
+  const message: string | null = data.message != null ? data.message[0] : null;
+  const hostName: string | null | undefined = get('host.name', data);
+  const userName: string | null | undefined = get('user.name', data);
+  const outcome: string | null | undefined = get('event.outcome', data);
+  const packageName: string | null | undefined = get('system.audit.package.name', data);
+  const packageSummary: string | null | undefined = get('system.audit.package.summary', data);
+  const packageVersion: string | null | undefined = get('system.audit.package.version', data);
+  const processPid: string | null | undefined = get('process.pid', data);
+  const processName: string | null | undefined = get('process.name', data);
+  const processExecutable: string | null | undefined = get('process.executable', data);
+  const sshSignature: string | null | undefined = get('system.auth.ssh.signature', data);
+  const sshMethod: string | null | undefined = get('system.auth.ssh.method', data);
+  const workingDirectory: string | null | undefined = get('process.working_directory', data);
 
-    const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
-
-    // const primary: string | null | undefined = get('user.effective.name', data);
-    // const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
-    // TODO: Do not check this in
-    // console.log('outcome of the system is:', outcome);
-    return (
-      <Details>
-        <SystemGenericLine
-          id={id}
-          contextId={contextId}
-          text={text}
-          message={message}
-          hostName={hostName}
-          userName={userName}
-          packageName={packageName}
-          packageSummary={packageSummary}
-          packageVersion={packageVersion}
-          processPid={processPid}
-          processExecutable={processExecutable}
-          processName={processName}
-          processTitle={processTitle}
-          sshSignature={sshSignature}
-          sshMethod={sshMethod}
-          workingDirectory={workingDirectory}
-          args={args}
-          session={undefined}
-          primary={undefined}
-          outcome={outcome}
-          secondary={undefined}
-        />
-        <EuiSpacer size="s" />
-        <AuditdNetflow data={data} />
-      </Details>
-    );
-  }
-);
+  return (
+    <Details>
+      <SystemGenericLine
+        contextId={contextId}
+        hostName={hostName}
+        id={id}
+        message={message}
+        outcome={outcome}
+        packageName={packageName}
+        packageSummary={packageSummary}
+        packageVersion={packageVersion}
+        processExecutable={processExecutable}
+        processPid={processPid}
+        processName={processName}
+        sshMethod={sshMethod}
+        sshSignature={sshSignature}
+        text={text}
+        userName={userName}
+        workingDirectory={workingDirectory}
+      />
+      <EuiSpacer size="s" />
+      <NetflowRenderer data={data} />
+    </Details>
+  );
+});

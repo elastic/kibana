@@ -51,7 +51,7 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../source_destination/source_destination_arrows';
 
-export const AuditdNetflow = pure<{ data: Ecs }>(({ data }) => (
+export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
   <Netflow
     contextId="auditd-netflow"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}

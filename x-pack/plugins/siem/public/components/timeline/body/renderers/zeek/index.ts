@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './generic_details';
-export * from './generic_file_details';
-export * from './generic_row_renderer';
-export * from './primary_secondary_user_info';
-export * from './session_user_host_working_dir';
+export * from './zeek_details';
+export * from './zeek_row_renderer';
+export * from './zeek_signature';

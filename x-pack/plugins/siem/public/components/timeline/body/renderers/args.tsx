@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { DraggableBadge } from '../../../../draggables';
+import { DraggableBadge } from '../../../draggables';
 
 import { TokensFlexItem } from '.';
 
@@ -19,17 +19,15 @@ interface Props {
 }
 
 export const Args = pure<Props>(({ eventId, contextId, args, processTitle }) =>
-  args != null ? (
+  args != null && args !== '' ? (
     <TokensFlexItem grow={false} component="span">
-      {args !== '' && (
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.title"
-          queryValue={processTitle != null ? processTitle : ''}
-          value={args}
-        />
-      )}
+      <DraggableBadge
+        contextId={contextId}
+        eventId={eventId}
+        field="process.title"
+        queryValue={processTitle != null ? processTitle : ''}
+        value={args}
+      />
     </TokensFlexItem>
   ) : null
 );

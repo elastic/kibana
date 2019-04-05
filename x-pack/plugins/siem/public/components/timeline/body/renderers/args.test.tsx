@@ -8,7 +8,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { TestProviders } from '../../../../../mock';
+import { TestProviders } from '../../../../mock';
 
 import { Args } from './args';
 
@@ -49,6 +49,20 @@ describe('Args', () => {
             contextId="context-123"
             eventId="event-123"
             args={null}
+            processTitle="process-title-1"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toBeNull();
+    });
+
+    test('it returns null if args is an empty string', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <Args
+            contextId="context-123"
+            eventId="event-123"
+            args=""
             processTitle="process-title-1"
           />
         </TestProviders>

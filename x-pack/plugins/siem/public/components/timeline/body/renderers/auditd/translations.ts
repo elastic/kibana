@@ -22,10 +22,6 @@ export const SESSION = i18n.translate('xpack.siem.auditd.sessionDescription', {
   defaultMessage: 'Session',
 });
 
-export const IN = i18n.translate('xpack.siem.auditd.inDescription', {
-  defaultMessage: 'in',
-});
-
 export const WAS_AUTHORIZED_TO_USE = i18n.translate(
   'xpack.siem.auditd.wasAuthorizedToUseDescription',
   {

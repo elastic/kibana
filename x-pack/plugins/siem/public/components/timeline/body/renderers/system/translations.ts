@@ -21,10 +21,6 @@ export const SESSION = i18n.translate('xpack.siem.system.systemDescription', {
   defaultMessage: 'System',
 });
 
-export const IN = i18n.translate('xpack.siem.auditd.inDescription', {
-  defaultMessage: 'in',
-});
-
 export const WITH_RESULT = i18n.translate('xpack.siem.system.withResultDescription', {
   defaultMessage: 'with result',
 });
@@ -66,10 +62,6 @@ export const SOCKET_OPENED = i18n.translate('xpack.siem.system.socketOpenedDescr
 
 export const SOCKET_CLOSED = i18n.translate('xpack.siem.system.socketClosedDescription', {
   defaultMessage: 'closed a socket with',
-});
-
-export const NON_EXISTENT = i18n.translate('xpack.siem.system.nonExistentDescription', {
-  defaultMessage: 'to an unknown process',
 });
 
 export const EXISTING_USER = i18n.translate('xpack.siem.system.existingUserDescription', {

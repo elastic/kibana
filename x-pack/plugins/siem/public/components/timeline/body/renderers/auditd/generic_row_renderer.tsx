@@ -8,9 +8,9 @@ import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRenderer, RowRendererContainer } from '..';
+import { Row, RowRenderer, RowRendererContainer } from '..';
 
-import { AuditdGenericDetails, AuditdGenericFileDetails, Row } from '.';
+import { AuditdGenericDetails, AuditdGenericFileDetails } from '.';
 import * as i18n from './translations';
 
 export const createGenericAuditRowRenderer = ({

@@ -9,9 +9,9 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
-import { mockBrowserFields } from '../../../../containers/source/mock';
-import { Ecs } from '../../../../graphql/types';
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { mockBrowserFields } from '../../../../../containers/source/mock';
+import { Ecs } from '../../../../../graphql/types';
+import { mockTimelineData, TestProviders } from '../../../../../mock';
 
 import { zeekRowRenderer } from '.';
 

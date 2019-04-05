@@ -7,10 +7,9 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { TokensFlexItem } from '..';
-import { DraggableBadge } from '../../../../draggables';
+import { DraggableBadge } from '../../../draggables';
 
-import * as i18n from './translations';
+import { HostWorkingDir, TokensFlexItem } from '.';
 
 interface Props {
   contextId: string;
@@ -19,8 +18,6 @@ interface Props {
   hostName: string | null | undefined;
   workingDirectory: string | null | undefined;
 }
-
-// TODO: Refactor this so it can be shared with other components
 
 export const UserHostWorkingDir = pure<Props>(
   ({ contextId, eventId, userName, hostName, workingDirectory }) => {
@@ -40,28 +37,12 @@ export const UserHostWorkingDir = pure<Props>(
             @
           </TokensFlexItem>
         )}
-        <TokensFlexItem grow={false} component="span">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="host.name"
-            value={hostName}
-          />
-        </TokensFlexItem>
-        {workingDirectory != null && (
-          <TokensFlexItem grow={false} component="span">
-            {i18n.IN}
-          </TokensFlexItem>
-        )}
-        <TokensFlexItem grow={false} component="span">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.working_directory"
-            value={workingDirectory}
-            iconType="folderOpen"
-          />
-        </TokensFlexItem>
+        <HostWorkingDir
+          contextId={contextId}
+          eventId={eventId}
+          hostName={hostName}
+          workingDirectory={workingDirectory}
+        />
       </>
     );
   }

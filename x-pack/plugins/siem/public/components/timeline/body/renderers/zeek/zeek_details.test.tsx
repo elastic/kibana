@@ -8,8 +8,8 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { mockBrowserFields } from '../../../../containers/source/mock';
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { mockBrowserFields } from '../../../../../containers/source/mock';
+import { mockTimelineData, TestProviders } from '../../../../../mock';
 
 import { ZeekDetails } from './zeek_details';
 

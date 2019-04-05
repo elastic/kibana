@@ -7,9 +7,11 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { HostWorkingDir } from '..';
+import { TokensFlexItem } from '..';
 import { DraggableBadge } from '../../../../draggables';
 
-import { PrimarySecondaryUserInfo, TokensFlexItem } from '.';
+import { PrimarySecondaryUserInfo } from '.';
 import * as i18n from './translations';
 
 interface Props {
@@ -52,28 +54,12 @@ export const SessionUserHostWorkingDir = pure<Props>(
           @
         </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="host.name"
-          value={hostName}
-        />
-      </TokensFlexItem>
-      {workingDirectory != null && (
-        <TokensFlexItem grow={false} component="span">
-          {i18n.IN}
-        </TokensFlexItem>
-      )}
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.working_directory"
-          value={workingDirectory}
-          iconType="folderOpen"
-        />
-      </TokensFlexItem>
+      <HostWorkingDir
+        contextId={contextId}
+        eventId={eventId}
+        workingDirectory={workingDirectory}
+        hostName={hostName}
+      />
     </>
   )
 );

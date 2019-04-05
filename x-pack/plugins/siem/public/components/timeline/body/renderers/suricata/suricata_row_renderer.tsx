@@ -6,18 +6,10 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
-import { RowRenderer, RowRendererContainer } from '.';
+import { Row, RowRenderer, RowRendererContainer } from '..';
+
 import { SuricataDetails } from './suricata_details';
-
-const SuricataRow = styled.div`
-  width: 100%;
-  overflow: hidden;
-  &:hover {
-    background-color: ${props => props.theme.eui.euiTableHoverColor};
-  }
-`;
 
 export const suricataRowRenderer: RowRenderer = {
   isInstance: ecs => {
@@ -26,12 +18,12 @@ export const suricataRowRenderer: RowRenderer = {
   },
   renderRow: ({ browserFields, data, width, children }) => {
     return (
-      <SuricataRow>
+      <Row>
         {children}
         <RowRendererContainer width={width}>
           <SuricataDetails data={data} browserFields={browserFields} />
         </RowRendererContainer>
-      </SuricataRow>
+      </Row>
     );
   },
 };

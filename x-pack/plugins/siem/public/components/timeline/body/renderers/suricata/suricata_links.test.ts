@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getBeginningTokens, getLinksFromSignature } from './suricata_links';
+import { getBeginningTokens, getLinksFromSignature } from '.';
 
 describe('SuricataLinks', () => {
   describe('#getLinksFromSignature', () => {

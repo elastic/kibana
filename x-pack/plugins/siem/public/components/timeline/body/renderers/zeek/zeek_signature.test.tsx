@@ -9,8 +9,8 @@ import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Ecs } from '../../../../graphql/types';
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { Ecs } from '../../../../../graphql/types';
+import { mockTimelineData, TestProviders } from '../../../../../mock';
 
 import {
   constructDroppedValue,

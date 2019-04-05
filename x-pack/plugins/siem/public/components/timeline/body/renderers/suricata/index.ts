@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './generic_details';
-export * from './generic_file_details';
-export * from './generic_row_renderer';
-export * from './primary_secondary_user_info';
-export * from './session_user_host_working_dir';
+export * from './suricata_details';
+export * from './suricata_links';
+export * from './suricata_refs';
+export * from './suricata_row_renderer';
+export * from './suricata_signature';

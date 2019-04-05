@@ -9,11 +9,12 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { ExternalLinkIcon } from '../../../external_link_icon';
-import { GoogleLink } from '../../../links';
-import { Provider } from '../../../timeline/data_providers/provider';
+import { TokensFlexItem } from '..';
+import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
+import { ExternalLinkIcon } from '../../../../external_link_icon';
+import { GoogleLink } from '../../../../links';
+import { Provider } from '../../../../timeline/data_providers/provider';
 
 import { getBeginningTokens } from './suricata_links';
 
@@ -25,10 +26,6 @@ const SignatureFlexItem = styled(EuiFlexItem)`
 
 const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
-
-const TokensFlexItem = styled(EuiFlexItem)`
-  margin-left: 3px;
 `;
 
 const LinkFlexItem = styled(EuiFlexItem)`

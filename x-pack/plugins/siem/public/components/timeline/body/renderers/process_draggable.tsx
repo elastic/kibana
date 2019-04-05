@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { DraggableBadge } from '../../../../draggables';
+import { DraggableBadge } from '../../../draggables';
 
 import * as i18n from './translations';
 

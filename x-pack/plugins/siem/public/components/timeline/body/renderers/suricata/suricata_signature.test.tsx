@@ -8,7 +8,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { TestProviders } from '../../../../mock';
+import { TestProviders } from '../../../../../mock';
 
 import {
   DraggableSignatureId,

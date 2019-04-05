@@ -8,7 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRenderer, RowRendererContainer } from '../';
+import { Row, RowRenderer, RowRendererContainer } from '../';
 
 import { asArrayIfExists } from '../../../../../lib/helpers';
 import {
@@ -56,14 +56,6 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../source_destination/source_destination_arrows';
 
-const NetflowRow = styled.div`
-  &:hover {
-    background-color: ${props => props.theme.eui.euiTableHoverColor};
-  }
-  overflow: hidden;
-  width: 100%;
-`;
-
 const Details = styled.div`
   margin: 10px 0;
 `;
@@ -91,7 +83,7 @@ export const netflowRowRenderer: RowRenderer = {
     );
   },
   renderRow: ({ data, width, children }) => (
-    <NetflowRow>
+    <Row>
       {children}
       <RowRendererContainer width={width}>
         <Details>
@@ -151,6 +143,6 @@ export const netflowRowRenderer: RowRenderer = {
           />
         </Details>
       </RowRendererContainer>
-    </NetflowRow>
+    </Row>
   ),
 };
