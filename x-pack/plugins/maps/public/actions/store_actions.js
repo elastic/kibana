@@ -160,7 +160,7 @@ function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
-      isInErrorState: errorMessage !== null ? true : false,
+      isInErrorState: errorMessage !== null,
       layerId,
       errorMessage
     });
