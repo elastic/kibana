@@ -9,7 +9,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <Component
+    <SpaceAvatar
       announceSpaceName={true}
       space={
         Object {

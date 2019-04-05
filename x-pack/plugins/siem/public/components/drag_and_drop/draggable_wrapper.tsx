@@ -17,10 +17,13 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { dragAndDropActions } from '../../store/local/drag_and_drop';
-import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
-import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
-import { State } from '../../store/reducer';
+import { State } from '../../store';
+// This import needs to be directly link to drag_and_drop store or we will have a circular dependency
+import {
+  dragAndDropActions,
+  dragAndDropModel,
+  dragAndDropSelectors,
+} from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { TruncatableText } from '../truncatable_text';
 
@@ -47,7 +50,7 @@ interface OwnProps {
 }
 
 interface StateReduxProps {
-  dataProviders?: IdToDataProvider;
+  dataProviders?: dragAndDropModel.IdToDataProvider;
 }
 
 interface DispatchProps {
@@ -123,10 +126,10 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
   }
 }
 
-const emptyDataProviders: IdToDataProvider = {}; // stable reference
+const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
 const mapStateToProps = (state: State) =>
-  defaultTo(emptyDataProviders, dataProvidersSelector(state));
+  defaultTo(emptyDataProviders, dragAndDropSelectors.dataProvidersSelector(state));
 
 export const DraggableWrapper = connect(
   mapStateToProps,

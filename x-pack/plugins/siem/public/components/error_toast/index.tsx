@@ -10,15 +10,14 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { appActions, appSelectors, State } from '../../store';
-import { Error } from '../../store/local/app/model';
+import { appActions, appModel, appSelectors, State } from '../../store';
 
 interface OwnProps {
   toastLifeTimeMs?: number;
 }
 
 interface ReduxProps {
-  errors?: Error[];
+  errors?: appModel.Error[];
 }
 
 interface DispatchProps {
@@ -45,7 +44,7 @@ export const globalListFromToasts = (
     />
   ) : null;
 
-export const errorsToToasts = (errors: Error[]): Toast[] =>
+export const errorsToToasts = (errors: appModel.Error[]): Toast[] =>
   errors.map(({ id, title, message }) => {
     const toast: Toast = {
       id,

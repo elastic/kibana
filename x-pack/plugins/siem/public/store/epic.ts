@@ -6,6 +6,6 @@
 
 import { combineEpics } from 'redux-observable';
 
-import { createLocalEpic } from './local';
+import { createGlobalTimeEpic } from './inputs';
 
-export const createRootEpic = <State>() => combineEpics(createLocalEpic<State>());
+export const createRootEpic = <State>() => combineEpics(createGlobalTimeEpic<State>());

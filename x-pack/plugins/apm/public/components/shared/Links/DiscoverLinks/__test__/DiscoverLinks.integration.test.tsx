@@ -6,17 +6,15 @@
 
 import { Location } from 'history';
 import React from 'react';
-import * as savedObjects from 'x-pack/plugins/apm/public/services/rest/savedObjects';
-import { getRenderedHref } from 'x-pack/plugins/apm/public/utils/testHelpers';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
+import { Span } from '../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
+import * as savedObjects from '../../../../../services/rest/savedObjects';
+import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 
-// NOTE: jest.mock() is broken in TS test files (b/c of ts-jest, I think)
-// but using jest's "spies can be stubbed" feature, this works:
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
   .mockReturnValue(

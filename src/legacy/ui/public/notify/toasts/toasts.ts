@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToastsSetup } from '../../../../../core/public/notifications';
+import { ToastsSetup } from '../../../../../core/public';
 import { ToastNotifications } from './toast_notifications';
 
 export let toastNotifications: ToastNotifications;

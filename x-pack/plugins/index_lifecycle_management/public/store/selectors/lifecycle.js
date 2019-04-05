@@ -25,7 +25,7 @@ import {
   WARM_PHASE_ON_ROLLOVER,
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS
-} from '../constants';
+} from '../../constants';
 import {
   getPhase,
   getPhases,

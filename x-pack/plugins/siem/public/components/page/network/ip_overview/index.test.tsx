@@ -11,8 +11,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, State } from '../../../../store';
-import { networkModel } from '../../../../store/local/network';
+import { createStore, networkModel, State } from '../../../../store';
 
 import { IpOverview, IpOverviewId } from './index';
 import { mockData } from './mock';

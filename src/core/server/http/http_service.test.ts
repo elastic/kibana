@@ -17,11 +17,7 @@
  * under the License.
  */
 
-const mockHttpServer = jest.fn();
-
-jest.mock('./http_server', () => ({
-  HttpServer: mockHttpServer,
-}));
+import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';

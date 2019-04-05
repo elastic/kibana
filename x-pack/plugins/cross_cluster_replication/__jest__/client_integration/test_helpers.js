@@ -137,7 +137,7 @@ export const initTestBed = (component, props = {}, options) => {
   };
 };
 
-export const mockAllHttpRequests = server => {
+export const registerHttpRequestMockHelpers = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },
@@ -185,28 +185,10 @@ export const mockAllHttpRequests = server => {
     );
   };
 
-  /**
-   * Set all http request to their default response
-   */
-  setLoadFollowerIndicesResponse();
-  setLoadAutoFollowPatternsResponse();
-  setAutoFollowStatsResponse();
-
-  /**
-   * Return a method to override any of the http reques
-   */
-  return (request, response) => {
-    const mapRequestToHelper = {
-      'loadFollowerIndices': setLoadFollowerIndicesResponse,
-      'loadAutoFollowPatterns': setLoadAutoFollowPatternsResponse,
-      'deleteAutoFollowPattern': setDeleteAutoFollowPatternResponse,
-      'autoFollowStats': setAutoFollowStatsResponse,
-    };
-
-    if (!mapRequestToHelper[request]) {
-      throw new Error(`Did not find a helper to set http response for request ${request}`);
-    }
-
-    return mapRequestToHelper[request](response);
+  return {
+    setLoadFollowerIndicesResponse,
+    setLoadAutoFollowPatternsResponse,
+    setDeleteAutoFollowPatternResponse,
+    setAutoFollowStatsResponse,
   };
 };

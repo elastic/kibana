@@ -29,8 +29,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { UA_SHOW_DETAILS_CLICK } from '../../../../../common';
-import { trackUserAction } from '../../../services';
+import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
+import { trackUiMetric } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{
@@ -259,7 +259,7 @@ export class JobTableUi extends Component {
         content = (
           <EuiLink
             onClick={() => {
-              trackUserAction(UA_SHOW_DETAILS_CLICK);
+              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >
@@ -378,7 +378,7 @@ export class JobTableUi extends Component {
         <EuiSpacer size="m" />
 
         {jobs.length > 0 ? (
-          <EuiTable>
+          <EuiTable data-test-subj="rollupJobsListTable">
             <EuiTableHeader>
               <EuiTableHeaderCellCheckbox>
                 <EuiCheckbox

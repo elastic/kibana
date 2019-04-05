@@ -202,7 +202,7 @@ class RangeDatePickerComponents extends React.PureComponent<
 }
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
-  const myState = getOr({}, `local.inputs.${id}`, state);
+  const myState = getOr({}, `inputs.${id}`, state);
   return {
     from: get('timerange.from', myState),
     to: get('timerange.to', myState),

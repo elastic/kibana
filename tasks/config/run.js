@@ -24,20 +24,17 @@ const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
-
   function createKbnServerTask({ runBuild, flags = [] }) {
     return {
       options: {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false
+        failOnError: false,
       },
-      cmd: runBuild
-        ? `./build/${runBuild}/bin/kibana`
-        : process.execPath,
+      cmd: runBuild ? `./build/${runBuild}/bin/kibana` : process.execPath,
       args: [
-        ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
+        ...(runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss']),
 
         '--logging.json=false',
 
@@ -50,8 +47,8 @@ module.exports = function (grunt) {
           }
 
           return flags;
-        }, [])
-      ]
+        }, []),
+      ],
     };
   }
 
@@ -67,17 +64,12 @@ module.exports = function (grunt) {
     //    runs the eslint script to check for linting errors
     eslint: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/eslint'),
-        '--no-cache'
-      ]
+      args: [require.resolve('../../scripts/eslint'), '--no-cache'],
     },
 
     sasslint: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/sasslint')
-      ]
+      args: [require.resolve('../../scripts/sasslint')],
     },
 
     // used by the test tasks
@@ -86,87 +78,65 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/check_file_casing'),
-        '--quiet' // only log errors, not warnings
-      ]
+        '--quiet', // only log errors, not warnings
+      ],
     },
 
-    // used by dev/run_precommit_hook.js
-    //    runs the stylelint script to check for linting errors in Style Components
-    stylelint: {
+    // used by the test tasks
+    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    checkCoreApiChanges: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/stylelint')
-      ]
+      args: [require.resolve('../../scripts/check_core_api_changes')],
     },
 
     // used by the test and jenkins:unit tasks
     //    runs the tslint script to check for Typescript linting errors
     tslint: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/tslint')
-      ]
+      args: [require.resolve('../../scripts/tslint')],
     },
 
     // used by the test and jenkins:unit tasks
     //    runs the tslint script to check for Typescript linting errors
     typeCheck: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/type_check')
-      ]
+      args: [require.resolve('../../scripts/type_check')],
     },
 
     // used by the test and jenkins:unit tasks
     //    ensures that all typescript files belong to a typescript project
     checkTsProjects: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/check_ts_projects')
-      ]
+      args: [require.resolve('../../scripts/check_ts_projects')],
     },
 
     // used by the test and jenkins:unit tasks
     //    runs the i18n_check script to check i18n engine usage
     i18nCheck: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/i18n_check'),
-        '--ignore-missing',
-      ]
+      args: [require.resolve('../../scripts/i18n_check'), '--ignore-missing'],
     },
 
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
       cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/mocha')
-      ]
+      args: [require.resolve('../../scripts/mocha')],
     },
 
     // used by the test:browser task
     //    runs the kibana server to serve the browser test bundle
     browserTestServer: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-      ]
+      flags: [...browserTestServerFlags],
     }),
     browserSCSS: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-        '--optimize',
-        '--optimize.enabled=false'
-      ]
+      flags: [...browserTestServerFlags, '--optimize', '--optimize.enabled=false'],
     }),
 
     // used by the test:coverage task
     //    runs the kibana server to serve the instrumented version of the browser test bundle
     browserTestCoverageServer: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-        '--tests_bundle.instrument=true',
-      ]
+      flags: [...browserTestServerFlags, '--tests_bundle.instrument=true'],
     }),
 
     // used by the test:dev task
@@ -181,7 +151,7 @@ module.exports = function (grunt) {
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
-      ]
+      ],
     }),
 
     verifyNotice: {
@@ -189,17 +159,15 @@ module.exports = function (grunt) {
         wait: true,
       },
       cmd: process.execPath,
-      args: [
-        'scripts/notice',
-        '--validate'
-      ]
+      args: ['scripts/notice', '--validate'],
     },
 
     apiIntegrationTests: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/api_integration/config.js',
+        '--config',
+        'test/api_integration/config.js',
         '--bail',
         '--debug',
       ],
@@ -209,11 +177,14 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/server_integration/http/ssl/config.js',
-        '--config', 'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/ssl/config.js',
+        '--config',
+        'test/server_integration/http/ssl_redirect/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+        '--kibana-install-dir',
+        KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -221,10 +192,12 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/interpreter_functional/config.js',
+        '--config',
+        'test/interpreter_functional/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+        '--kibana-install-dir',
+        KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -232,10 +205,12 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/plugin_functional/config.js',
+        '--config',
+        'test/plugin_functional/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+        '--kibana-install-dir',
+        KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -243,14 +218,15 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
+        '--config',
+        'test/functional/config.js',
         '--bail',
         '--debug',
       ],
     },
 
     ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR
-    })
+      kibanaInstallDir: KIBANA_INSTALL_DIR,
+    }),
   };
 };
