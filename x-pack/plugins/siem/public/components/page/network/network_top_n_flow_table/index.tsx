@@ -12,11 +12,11 @@ import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import {
-  NetworkTopNFlowDirection,
+  FlowDirection,
+  FlowTarget,
   NetworkTopNFlowEdges,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
@@ -39,14 +39,14 @@ interface OwnProps {
 
 interface NetworkTopNFlowTableReduxProps {
   limit: number;
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
-  topNFlowType: NetworkTopNFlowType;
+  flowTarget: FlowTarget;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
   updateTopNFlowDirection: ActionCreator<{
-    topNFlowDirection: NetworkTopNFlowDirection;
+    flowDirection: FlowDirection;
     networkType: networkModel.NetworkType;
   }>;
   updateTopNFlowLimit: ActionCreator<{
@@ -57,8 +57,8 @@ interface NetworkTopNFlowTableDispatchProps {
     topNFlowSort: NetworkTopNFlowSortField;
     networkType: networkModel.NetworkType;
   }>;
-  updateTopNFlowType: ActionCreator<{
-    topNFlowType: NetworkTopNFlowType;
+  updateTopNFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget;
     networkType: networkModel.NetworkType;
   }>;
 }
@@ -104,23 +104,23 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       nextCursor,
       updateTopNFlowLimit,
       startDate,
-      topNFlowDirection,
+      flowDirection,
       topNFlowSort,
-      topNFlowType,
+      flowTarget,
       type,
     } = this.props;
 
     const field =
       topNFlowSort.field === NetworkTopNFlowFields.ipCount
-        ? `node.${topNFlowType}.count`
+        ? `node.${flowTarget}.count`
         : `node.network.${topNFlowSort.field}`;
 
     return (
       <LoadMoreTable
         columns={getNetworkTopNFlowColumns(
           startDate,
-          topNFlowDirection,
-          topNFlowType,
+          flowDirection,
+          flowTarget,
           type,
           NetworkTopNFlowTableId
         )}
@@ -152,9 +152,9 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                 >
                   <SelectType
                     id={`${NetworkTopNFlowTableId}-select-type`}
-                    selectedDirection={topNFlowDirection}
-                    selectedType={topNFlowType}
-                    onChangeType={this.onChangeTopNFlowType}
+                    selectedDirection={flowDirection}
+                    selectedType={flowTarget}
+                    onChangeType={this.onChangeTopNFlowTarget}
                     isLoading={loading}
                   />
                 </SelectTypeItem>
@@ -163,7 +163,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
             <EuiFlexItem grow={false}>
               <SelectDirection
                 id={`${NetworkTopNFlowTableId}-select-direction`}
-                selectedDirection={topNFlowDirection}
+                selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />
             </EuiFlexItem>
@@ -190,11 +190,11 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     }
   };
 
-  private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
-    this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
+  private onChangeTopNFlowTarget = (flowTarget: FlowTarget) =>
+    this.props.updateTopNFlowTarget({ flowTarget, networkType: this.props.type });
 
-  private onChangeTopNFlowDirection = (_: string, topNFlowDirection: NetworkTopNFlowDirection) =>
-    this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
+  private onChangeTopNFlowDirection = (_: string, flowDirection: FlowDirection) =>
+    this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });
 }
 
 const makeMapStateToProps = () => {
@@ -208,7 +208,7 @@ export const NetworkTopNFlowTable = connect(
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTopNFlowType: networkActions.updateTopNFlowType,
+    updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
   }
 )(NetworkTopNFlowTableComponent);

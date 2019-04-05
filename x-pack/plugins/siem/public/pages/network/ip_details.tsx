@@ -27,7 +27,7 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
-const DomainsTableManage = manageQuery(DomainsTable);
+// const DomainsTableManage = manageQuery(DomainsTable);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;

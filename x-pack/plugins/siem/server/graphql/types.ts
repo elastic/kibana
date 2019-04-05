@@ -1154,17 +1154,17 @@ export interface KpiNetworkSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
-  direction: NetworkTopNFlowDirection;
+  id?: string | null;
 
   filterQuery?: string | null;
 
-  id?: string | null;
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
 
   pagination: PaginationInput;
 
   sort: NetworkTopNFlowSortField;
-
-  type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
 }
@@ -1254,22 +1254,10 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
-export enum NetworkTopNFlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
-}
-
 export enum NetworkTopNFlowFields {
   bytes = 'bytes',
   packets = 'packets',
   ipCount = 'ipCount',
-}
-
-export enum NetworkTopNFlowType {
-  client = 'client',
-  destination = 'destination',
-  server = 'server',
-  source = 'source',
 }
 
 export enum NetworkDnsFields {
@@ -1497,17 +1485,17 @@ export namespace SourceResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context, NetworkTopNFlowArgs>;
   export interface NetworkTopNFlowArgs {
-    direction: NetworkTopNFlowDirection;
+    id?: string | null;
 
     filterQuery?: string | null;
 
-    id?: string | null;
+    flowDirection: FlowDirection;
+
+    flowTarget: FlowTarget;
 
     pagination: PaginationInput;
 
     sort: NetworkTopNFlowSortField;
-
-    type: NetworkTopNFlowType;
 
     timerange: TimerangeInput;
   }

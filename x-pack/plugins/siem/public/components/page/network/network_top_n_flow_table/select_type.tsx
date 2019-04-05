@@ -8,42 +8,42 @@ import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 
 import * as i18n from './translations';
 
 const toggleTypeOptions = (id: string) => [
   {
-    id: `${id}-${NetworkTopNFlowType.source}`,
-    value: NetworkTopNFlowType.source,
+    id: `${id}-${FlowTarget.source}`,
+    value: FlowTarget.source,
     inputDisplay: i18n.BY_SOURCE_IP,
-    directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
+    directions: [FlowDirection.uniDirectional, FlowDirection.biDirectional],
   },
   {
-    id: `${id}-${NetworkTopNFlowType.destination}`,
-    value: NetworkTopNFlowType.destination,
+    id: `${id}-${FlowTarget.destination}`,
+    value: FlowTarget.destination,
     inputDisplay: i18n.BY_DESTINATION_IP,
-    directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
+    directions: [FlowDirection.uniDirectional, FlowDirection.biDirectional],
   },
   {
-    id: `${id}-${NetworkTopNFlowType.client}`,
-    value: NetworkTopNFlowType.client,
+    id: `${id}-${FlowTarget.client}`,
+    value: FlowTarget.client,
     inputDisplay: i18n.BY_CLIENT_IP,
-    directions: [NetworkTopNFlowDirection.biDirectional],
+    directions: [FlowDirection.biDirectional],
   },
   {
-    id: `${id}-${NetworkTopNFlowType.server}`,
-    value: NetworkTopNFlowType.server,
+    id: `${id}-${FlowTarget.server}`,
+    value: FlowTarget.server,
     inputDisplay: i18n.BY_SERVER_IP,
-    directions: [NetworkTopNFlowDirection.biDirectional],
+    directions: [FlowDirection.biDirectional],
   },
 ];
 
 interface Props {
   id: string;
-  selectedDirection: NetworkTopNFlowDirection;
-  selectedType: NetworkTopNFlowType;
-  onChangeType: (value: NetworkTopNFlowType) => void;
+  selectedDirection: FlowDirection;
+  selectedType: FlowTarget;
+  onChangeType: (value: FlowTarget) => void;
   isLoading: boolean;
 }
 

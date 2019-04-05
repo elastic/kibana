@@ -7,11 +7,11 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
+  FlowDirection,
+  FlowTarget,
   NetworkDnsEdges,
   NetworkTopNFlowData,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -89,27 +89,27 @@ const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
-  if (options.networkTopNFlowDirection === NetworkTopNFlowDirection.uniDirectional) {
+  if (options.flowDirection === FlowDirection.uniDirectional) {
     return formatTopNFlowEgdes(
       getOr([], 'aggregations.top_uni_flow.buckets', response),
-      options.networkTopNFlowType
+      options.flowTarget
     );
   }
   return formatTopNFlowEgdes(
     getOr([], 'aggregations.top_bi_flow.buckets', response),
-    options.networkTopNFlowType
+    options.flowTarget
   );
 };
 
 const formatTopNFlowEgdes = (
   buckets: NetworkTopNFlowBuckets[],
-  networkTopNFlowType: NetworkTopNFlowType
+  flowTarget: FlowTarget
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {
       _id: bucket.key,
       timestamp: bucket.timestamp.value_as_string,
-      [networkTopNFlowType]: {
+      [flowTarget]: {
         count: getOrNumber('ip_count.value', bucket),
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,

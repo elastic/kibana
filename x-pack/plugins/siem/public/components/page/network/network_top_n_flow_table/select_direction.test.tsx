@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import { FlowDirection } from '../../../../graphql/types';
 
 import { NetworkTopNFlowTableId } from '.';
 import { SelectDirection } from './select_direction';
@@ -21,7 +21,7 @@ describe('NetworkTopNFlow Select direction', () => {
       const wrapper = shallow(
         <SelectDirection
           id={`${NetworkTopNFlowTableId}-select-direction`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
+          selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
       );
@@ -35,13 +35,13 @@ describe('NetworkTopNFlow Select direction', () => {
       const event = {
         target: {
           name: `${NetworkTopNFlowTableId}-select-direction`,
-          value: NetworkTopNFlowDirection.biDirectional,
+          value: FlowDirection.biDirectional,
         },
       };
       const wrapper = mount(
         <SelectDirection
           id={`${NetworkTopNFlowTableId}-select-direction`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
+          selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
       );

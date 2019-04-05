@@ -7,11 +7,10 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import {
+  FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -44,13 +43,13 @@ export const updateTopNFlowSort = actionCreator<{
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
-export const updateTopNFlowType = actionCreator<{
-  topNFlowType: NetworkTopNFlowType;
+export const updateTopNFlowTarget = actionCreator<{
+  flowTarget: FlowTarget;
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_TYPE');
 
 export const updateTopNFlowDirection = actionCreator<{
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_DIRECTION');
 

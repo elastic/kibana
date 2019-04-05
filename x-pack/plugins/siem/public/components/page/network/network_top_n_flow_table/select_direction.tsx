@@ -8,7 +8,7 @@ import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import { FlowDirection } from '../../../../graphql/types';
 
 import * as i18n from './translations';
 
@@ -23,21 +23,21 @@ const MyEuiButtonGroup: React.SFC<MyEuiButtonGroupProps> = EuiButtonGroup;
 
 const getToggleButtonDirection = (id: string) => [
   {
-    id: `${id}-${NetworkTopNFlowDirection.uniDirectional}`,
+    id: `${id}-${FlowDirection.uniDirectional}`,
     label: i18n.UNIDIRECTIONAL,
-    value: NetworkTopNFlowDirection.uniDirectional,
+    value: FlowDirection.uniDirectional,
   },
   {
-    id: `${id}-${NetworkTopNFlowDirection.biDirectional}`,
+    id: `${id}-${FlowDirection.biDirectional}`,
     label: i18n.BIDIRECTIONAL,
-    value: NetworkTopNFlowDirection.biDirectional,
+    value: FlowDirection.biDirectional,
   },
 ];
 
 interface Props {
   id: string;
-  selectedDirection: NetworkTopNFlowDirection;
-  onChangeDirection: (id: string, value: NetworkTopNFlowDirection) => void;
+  selectedDirection: FlowDirection;
+  onChangeDirection: (id: string, value: FlowDirection) => void;
 }
 
 export const SelectDirection = pure<Props>(({ id, onChangeDirection, selectedDirection }) => (

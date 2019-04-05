@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 
 import { NetworkTopNFlowTableId } from '.';
 import { SelectType } from './select_type';
@@ -21,8 +21,8 @@ describe('NetworkTopNFlow Select direction', () => {
       const wrapper = shallow(
         <SelectType
           id={`${NetworkTopNFlowTableId}-select-type`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
-          selectedType={NetworkTopNFlowType.source}
+          selectedDirection={FlowDirection.uniDirectional}
+          selectedType={FlowTarget.source}
           onChangeType={mockOnChange}
           isLoading={false}
         />
@@ -37,8 +37,8 @@ describe('NetworkTopNFlow Select direction', () => {
       const wrapper = mount(
         <SelectType
           id={`${NetworkTopNFlowTableId}-select-type`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
-          selectedType={NetworkTopNFlowType.source}
+          selectedDirection={FlowDirection.uniDirectional}
+          selectedType={FlowTarget.source}
           onChangeType={mockOnChange}
           isLoading={false}
         />

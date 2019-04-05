@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import { FlowDirection } from '../../../../graphql/types';
 import { mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
@@ -53,7 +53,7 @@ describe('NetworkTopNFlow Table Component', () => {
   describe('Direction', () => {
     test('when you click on the bi-direction button, it get selected', () => {
       const event = {
-        target: { name: 'direction', value: NetworkTopNFlowDirection.biDirectional },
+        target: { name: 'direction', value: FlowDirection.biDirectional },
       };
 
       const wrapper = mount(

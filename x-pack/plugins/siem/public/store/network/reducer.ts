@@ -8,11 +8,10 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   Direction,
+  FlowDirection,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 
@@ -26,7 +25,7 @@ import {
   updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
-  updateTopNFlowType,
+  updateTopNFlowTarget,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel, NetworkType } from './model';
@@ -42,8 +41,8 @@ export const initialNetworkState: NetworkState = {
           field: NetworkTopNFlowFields.bytes,
           direction: Direction.desc,
         },
-        topNFlowType: NetworkTopNFlowType.source,
-        topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+        flowTarget: FlowTarget.source,
+        flowDirection: FlowDirection.uniDirectional,
       },
       dns: {
         limit: DEFAULT_TABLE_LIMIT,
@@ -121,7 +120,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowDirection, (state, { topNFlowDirection, networkType }) => ({
+  .case(updateTopNFlowDirection, (state, { flowDirection, networkType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
@@ -130,8 +129,8 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         topNFlow: {
           ...state[NetworkType.page].queries.topNFlow,
           ...helperUpdateTopNFlowDirection(
-            state[NetworkType.page].queries.topNFlow.topNFlowType,
-            topNFlowDirection
+            state[NetworkType.page].queries.topNFlow.flowTarget,
+            flowDirection
           ),
         },
       },
@@ -150,7 +149,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowType, (state, { topNFlowType, networkType }) => ({
+  .case(updateTopNFlowTarget, (state, { flowTarget, networkType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
@@ -158,7 +157,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         ...state[networkType].queries,
         topNFlow: {
           ...state[NetworkType.page].queries.topNFlow,
-          topNFlowType,
+          flowTarget,
           topNFlowSort: {
             field: NetworkTopNFlowFields.bytes,
             direction: Direction.desc,

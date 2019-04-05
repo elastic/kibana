@@ -15,16 +15,13 @@ import {
   DomainsSortField,
   FlowDirection,
   FlowTarget,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { SelectDirection } from './select_direction';
-import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -47,20 +44,20 @@ interface DomainsTableReduxProps {
 }
 
 // interface DomainsTableDispatchProps {
-//   updateTopNFlowDirection: ActionCreator<{
-//     topNFlowDirection: FlowDirection;
+//   updateDomainsDirection: ActionCreator<{
+//     flowDirection: FlowDirection;
 //     networkType: networkModel.NetworkType;
 //   }>;
-//   updateTopNFlowLimit: ActionCreator<{
+//   updateDomainsLimit: ActionCreator<{
 //     limit: number;
 //     networkType: networkModel.NetworkType;
 //   }>;
-//   updateTopNFlowSort: ActionCreator<{
-//     topNFlowSort: DomainsSortField;
+//   updateDomainsSort: ActionCreator<{
+//     domainsSort: DomainsSortField;
 //     networkType: networkModel.NetworkType;
 //   }>;
-//   updateTopNFlowType: ActionCreator<{
-//     topNFlowType: FlowTarget;
+//   updateDomainsTarget: ActionCreator<{
+//     flowTarget: FlowTarget;
 //     networkType: networkModel.NetworkType;
 //   }>;
 // }
@@ -112,7 +109,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     // const field =
     //   domainsSortField.field === NetworkTopNFlowFields.ipCount
-    //     ? `node.${topNFlowType}.count`
+    //     ? `node.${flowTarget}.count`
     //     : `node.network.${topNFlowSort.field}`;
 
     return (
@@ -145,7 +142,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
                     id={`${DomainsTableId}-select-type`}
                     selectedDirection={flowDirection}
                     selectedType={flowTarget}
-                    onChangeType={this.onChangeDomainsType}
+                    onChangeType={this.onChangeDomainsFlowTarget}
                     isLoading={loading}
                   />
                 </SelectTypeItem>
@@ -181,11 +178,11 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     }
   };
 
-  private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
-    this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
+  private onChangeDomainsFlowTarget = (flowTarget: FlowTarget) =>
+    this.props.updateTopNFlowTarget({ flowTarget, networkType: this.props.type });
 
-  private onChangeTopNFlowDirection = (_: string, topNFlowDirection: NetworkTopNFlowDirection) =>
-    this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
+  private onChangeDomainsDirection = (_: string, flowDirection: FlowDirection) =>
+    this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });
 }
 
 const makeMapStateToProps = () => {
@@ -194,15 +191,15 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkTopNFlowTable = connect(
+export const DomainsTable = connect(
   makeMapStateToProps,
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTopNFlowType: networkActions.updateTopNFlowType,
+    updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
   }
-)(NetworkTopNFlowTableComponent);
+)(DomainsTableComponent);
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
