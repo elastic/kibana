@@ -15,7 +15,7 @@ import { getServices } from '../lib/services/get_services';
 
 const ROOT = '/api/apm/services';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };

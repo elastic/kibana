@@ -19,6 +19,7 @@ const agentNames: { [agentName in AgentName]: agentName } = {
   nodejs: 'nodejs',
   'js-base': 'js-base',
   'rum-js': 'rum-js',
+  dotnet: 'dotnet',
   ruby: 'ruby',
   go: 'go'
 };
