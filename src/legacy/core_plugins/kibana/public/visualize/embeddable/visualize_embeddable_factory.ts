@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
-import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
 import {
@@ -29,6 +28,7 @@ import {
   OnEmbeddableStateChanged,
 } from 'ui/embeddable/embeddable_factory';
 import { VisTypesRegistry } from 'ui/registry/vis_types';
+import { VisualizeEmbeddable } from './visualize_embeddable';
 import { VisualizationAttributes } from '../../../../../server/saved_objects/service/saved_objects_client';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';

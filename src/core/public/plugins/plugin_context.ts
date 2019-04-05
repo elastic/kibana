@@ -33,7 +33,7 @@ import { PluginsServiceSetupDeps } from './plugins_service';
  *
  * @public
  */
-// tslint:disable-next-line no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
 
 /**
