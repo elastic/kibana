@@ -6,17 +6,19 @@
 
 import {
   // @ts-ignore
-  EuiStat,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { OverviewHostData } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-
-import * as i18n from '../translations';
 
 interface OverviewHostProps {
   data: OverviewHostData;
@@ -24,57 +26,91 @@ interface OverviewHostProps {
 
 const overviewHostStats = (data: OverviewHostData) => [
   {
-    title:
+    description:
       has('auditbeatAuditd', data) && data.auditbeatAuditd !== null
         ? numeral(data.auditbeatAuditd).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_AUDITD,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatAuditTitle"
+        defaultMessage="Auditbeat Audit"
+      />
+    ),
   },
   {
-    title:
+    description:
       has('auditbeatFIM', data) && data.auditbeatFIM !== null
         ? numeral(data.auditbeatFIM).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_FIM,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatFimTitle"
+        defaultMessage="Auditbeat File Integrity Module"
+      />
+    ),
   },
   {
-    title:
+    description:
       has('auditbeatLogin', data) && data.auditbeatLogin !== null
         ? numeral(data.auditbeatLogin).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_LOGIN,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatLoginTitle"
+        defaultMessage="Auditbeat Login"
+      />
+    ),
   },
   {
-    title:
+    description:
       has('auditbeatPackage', data) && data.auditbeatPackage !== null
         ? numeral(data.auditbeatPackage).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_PACKAGE,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatPackageTitle"
+        defaultMessage="Auditbeat Package"
+      />
+    ),
   },
   {
-    title:
+    description:
       has('auditbeatProcess', data) && data.auditbeatProcess !== null
         ? numeral(data.auditbeatProcess).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_PROCESS,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatProcessTitle"
+        defaultMessage="Auditbeat Process"
+      />
+    ),
   },
   {
-    title:
+    description:
       has('auditbeatUser', data) && data.auditbeatUser !== null
         ? numeral(data.auditbeatUser).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_USER,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatUserTitle"
+        defaultMessage="Auditbeat User"
+      />
+    ),
   },
 ];
+
+export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
+  text-align: right;
+`;
+
 export const OverviewHostStats = pure<OverviewHostProps>(({ data }) => (
-  <>
-    {overviewHostStats(data).map(item => (
-      <EuiStat
-        key={item.description}
-        textAlign="center"
-        title={item.title}
-        description={item.description}
-      />
+  <EuiDescriptionList type="column">
+    {overviewHostStats(data).map((item, index) => (
+      <React.Fragment key={index}>
+        <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
+
+        <DescriptionListDescription>{item.description}</DescriptionListDescription>
+      </React.Fragment>
     ))}
-  </>
+  </EuiDescriptionList>
 ));
