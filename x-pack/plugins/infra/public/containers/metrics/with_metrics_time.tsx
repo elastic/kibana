@@ -6,7 +6,7 @@
 
 import createContainer from 'constate-latest';
 import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { InfraTimerangeInput } from '../../graphql/types';
 import { useInterval } from '../../hooks/use_interval';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
@@ -31,7 +31,7 @@ export const useMetricsTime = () => {
     interval: '>=1m',
   });
 
-  useInterval(
+  const setTimeRangeToNow = useCallback(
     () => {
       const range = timeRange.to - timeRange.from;
       setTimeRange({
@@ -42,20 +42,15 @@ export const useMetricsTime = () => {
         interval: '>=1m',
       });
     },
-    isAutoReloading ? refreshInterval : null
+    [timeRange.from, timeRange.to]
   );
+
+  useInterval(setTimeRangeToNow, isAutoReloading ? refreshInterval : null);
 
   useEffect(
     () => {
       if (isAutoReloading) {
-        const range = timeRange.to - timeRange.from;
-        setTimeRange({
-          from: moment()
-            .subtract(range, 'ms')
-            .valueOf(),
-          to: moment().valueOf(),
-          interval: '>=1m',
-        });
+        setTimeRangeToNow();
       }
     },
     [isAutoReloading]
