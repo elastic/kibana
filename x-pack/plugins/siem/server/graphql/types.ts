@@ -431,7 +431,7 @@ export interface EventEcsFields {
 
   original?: (string | null)[] | null;
 
-  outcome?: string | null;
+  outcome?: ToStringArray | null;
 
   risk_score?: number | null;
 
@@ -677,11 +677,11 @@ export interface UrlEcsFields {
 }
 
 export interface ProcessEcsFields {
-  pid?: number | null;
+  pid?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  ppid?: number | null;
+  ppid?: ToStringArray | null;
 
   args?: (string | null)[] | null;
 
@@ -741,17 +741,17 @@ export interface AuditEcsFields {
 }
 
 export interface PackageEcsFields {
-  arch?: string | null;
+  arch?: ToStringArray | null;
 
-  entity_id?: string | null;
+  entity_id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  size?: string | null;
+  size?: ToStringArray | null;
 
-  summary?: string | null;
+  summary?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface AuthEcsFields {
@@ -2566,7 +2566,7 @@ export namespace EventEcsFieldsResolvers {
 
     original?: OriginalResolver<(string | null)[] | null, TypeParent, Context>;
 
-    outcome?: OutcomeResolver<string | null, TypeParent, Context>;
+    outcome?: OutcomeResolver<ToStringArray | null, TypeParent, Context>;
 
     risk_score?: RiskScoreResolver<number | null, TypeParent, Context>;
 
@@ -2637,7 +2637,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OutcomeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3444,11 +3444,11 @@ export namespace UrlEcsFieldsResolvers {
 
 export namespace ProcessEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ProcessEcsFields> {
-    pid?: PidResolver<number | null, TypeParent, Context>;
+    pid?: PidResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    ppid?: PpidResolver<number | null, TypeParent, Context>;
+    ppid?: PpidResolver<ToStringArray | null, TypeParent, Context>;
 
     args?: ArgsResolver<(string | null)[] | null, TypeParent, Context>;
 
@@ -3462,17 +3462,17 @@ export namespace ProcessEcsFieldsResolvers {
   }
 
   export type PidResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PpidResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3658,46 +3658,46 @@ export namespace AuditEcsFieldsResolvers {
 
 export namespace PackageEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PackageEcsFields> {
-    arch?: ArchResolver<string | null, TypeParent, Context>;
+    arch?: ArchResolver<ToStringArray | null, TypeParent, Context>;
 
-    entity_id?: EntityIdResolver<string | null, TypeParent, Context>;
+    entity_id?: EntityIdResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    size?: SizeResolver<string | null, TypeParent, Context>;
+    size?: SizeResolver<ToStringArray | null, TypeParent, Context>;
 
-    summary?: SummaryResolver<string | null, TypeParent, Context>;
+    summary?: SummaryResolver<ToStringArray | null, TypeParent, Context>;
 
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ArchResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EntityIdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SizeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SummaryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

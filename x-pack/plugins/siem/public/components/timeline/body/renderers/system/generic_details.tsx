@@ -136,19 +136,18 @@ interface GenericDetailsProps {
 export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
   const id = data._id;
   const message: string | null = data.message != null ? data.message[0] : null;
-  const hostName: string | null | undefined = get('host.name', data);
-  const userName: string | null | undefined = get('user.name', data);
-  const outcome: string | null | undefined = get('event.outcome', data);
-  const packageName: string | null | undefined = get('system.audit.package.name', data);
-  const packageSummary: string | null | undefined = get('system.audit.package.summary', data);
-  const packageVersion: string | null | undefined = get('system.audit.package.version', data);
-  const processPid: string | null | undefined = get('process.pid', data);
-  const processName: string | null | undefined = get('process.name', data);
+  const hostName: string | null | undefined = get('host.name', data); // TODO: Array: host.name[0]
+  const userName: string | null | undefined = get('user.name', data); // TODO: Array: user.name[0]
+  const outcome: string | null | undefined = get('event.outcome[0]', data);
+  const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
+  const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
+  const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
+  const processPid: string | null | undefined = get('process.pid[0]', data);
+  const processName: string | null | undefined = get('process.name[0]', data);
   const processExecutable: string | null | undefined = get('process.executable', data);
   const sshSignature: string | null | undefined = get('system.auth.ssh.signature', data);
   const sshMethod: string | null | undefined = get('system.auth.ssh.method', data);
   const workingDirectory: string | null | undefined = get('process.working_directory', data);
-
   return (
     <Details>
       <SystemGenericLine

@@ -21,7 +21,7 @@ export const ecsSchema = gql`
     kind: String
     module: String
     original: [String]
-    outcome: String
+    outcome: ToStringArray
     risk_score: Float
     risk_score_norm: Float
     severity: Float
@@ -98,9 +98,9 @@ export const ecsSchema = gql`
   }
 
   type ProcessEcsFields {
-    pid: Float
-    name: String
-    ppid: Float
+    pid: ToStringArray
+    name: ToStringArray
+    ppid: ToStringArray
     args: [String]
     executable: String
     title: String
@@ -310,12 +310,12 @@ export const ecsSchema = gql`
   }
 
   type PackageEcsFields {
-    arch: String
-    entity_id: String
-    name: String
-    size: String
-    summary: String
-    version: String
+    arch: ToStringArray
+    entity_id: ToStringArray
+    name: ToStringArray
+    size: ToStringArray
+    summary: ToStringArray
+    version: ToStringArray
   }
 
   type AuditEcsFields {

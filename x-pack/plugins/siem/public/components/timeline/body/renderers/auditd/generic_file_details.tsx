@@ -129,11 +129,11 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
   ({ data, contextId, text, fileIcon = 'document' }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session', data);
-    const hostName: string | null | undefined = get('host.name', data);
-    const userName: string | null | undefined = get('user.name', data);
+    const hostName: string | null | undefined = get('host.name', data); // TODO: Array host.name[0]
+    const userName: string | null | undefined = get('user.name', data); // TODO: Array user.name[0]
     const result: string | null | undefined = get('auditd.result', data);
-    const processPid: string | null | undefined = get('process.pid', data);
-    const processName: string | null | undefined = get('process.name', data);
+    const processPid: string | null | undefined = get('process.pid[0]', data);
+    const processName: string | null | undefined = get('process.name[0]', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);

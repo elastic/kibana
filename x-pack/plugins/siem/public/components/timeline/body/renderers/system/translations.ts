@@ -85,7 +85,7 @@ export const USER_CHANGED = i18n.translate('xpack.siem.system.userChangedDescrip
 });
 
 export const HOST_CHANGED = i18n.translate('xpack.siem.system.hostDescription', {
-  defaultMessage: 'host',
+  defaultMessage: 'host information',
 });
 
 export const USER_ADDED = i18n.translate('xpack.siem.system.userAddedDescription', {

@@ -402,7 +402,7 @@ export interface EventEcsFields {
 
   original?: (string | null)[] | null;
 
-  outcome?: string | null;
+  outcome?: ToStringArray | null;
 
   risk_score?: number | null;
 
@@ -648,11 +648,11 @@ export interface UrlEcsFields {
 }
 
 export interface ProcessEcsFields {
-  pid?: number | null;
+  pid?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  ppid?: number | null;
+  ppid?: ToStringArray | null;
 
   args?: (string | null)[] | null;
 
@@ -712,17 +712,17 @@ export interface AuditEcsFields {
 }
 
 export interface PackageEcsFields {
-  arch?: string | null;
+  arch?: ToStringArray | null;
 
-  entity_id?: string | null;
+  entity_id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  size?: string | null;
+  size?: ToStringArray | null;
 
-  summary?: string | null;
+  summary?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface AuthEcsFields {
@@ -2507,17 +2507,17 @@ export namespace GetTimelineQuery {
   export type Package = {
     __typename?: 'PackageEcsFields';
 
-    arch?: string | null;
+    arch?: ToStringArray | null;
 
-    entity_id?: string | null;
+    entity_id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    size?: string | null;
+    size?: ToStringArray | null;
 
-    summary?: string | null;
+    summary?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Event = {
@@ -2545,7 +2545,7 @@ export namespace GetTimelineQuery {
 
     original?: (string | null)[] | null;
 
-    outcome?: string | null;
+    outcome?: ToStringArray | null;
 
     risk_score?: number | null;
 
@@ -2875,11 +2875,11 @@ export namespace GetTimelineQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    pid?: number | null;
+    pid?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ppid?: number | null;
+    ppid?: ToStringArray | null;
 
     args?: (string | null)[] | null;
 
@@ -3092,7 +3092,7 @@ export namespace GetUncommonProcessesQuery {
 
     title?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type User = {

@@ -114,7 +114,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
         instances: 1,
         process: {
           title: null,
-          name: 'Suricata-Main',
+          name: ['Suricata-Main'],
           __typename: 'ProcessEcsFields',
         },
         user: {
