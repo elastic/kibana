@@ -42,6 +42,24 @@ export const timelineQuery = gql`
               _id
               _index
               timestamp
+              system {
+                auth {
+                  ssh {
+                    signature
+                    method
+                  }
+                }
+                audit {
+                  package {
+                    arch
+                    entity_id
+                    name
+                    size
+                    summary
+                    version
+                  }
+                }
+              }
               event {
                 action
                 category

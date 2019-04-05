@@ -71,7 +71,7 @@ export const SOCKET_CLOSED = i18n.translate('xpack.siem.system.socketClosedDescr
 });
 
 export const NON_EXISTENT = i18n.translate('xpack.siem.system.nonExistentDescription', {
-  defaultMessage: 'an unknown process',
+  defaultMessage: 'to an unknown process',
 });
 
 export const EXISTING_USER = i18n.translate('xpack.siem.system.existingUserDescription', {
@@ -84,7 +84,7 @@ export const EXISTING_SOCKET = i18n.translate('xpack.siem.system.existingSocketD
 
 // TODO: Redo this one
 export const EXISTING_PACKAGE = i18n.translate('xpack.siem.system.existingPackageDescription', {
-  defaultMessage: 'is using an existing package from',
+  defaultMessage: 'is using an existing package',
 });
 
 export const INVALID = i18n.translate('xpack.siem.system.invalidDescription', {
@@ -113,4 +113,24 @@ export const ERROR = i18n.translate('xpack.siem.system.errorDescription', {
 
 export const PACKAGE_INSTALLED = i18n.translate('xpack.siem.system.packageInstalledDescription', {
   defaultMessage: 'installed package',
+});
+
+export const BOOT = i18n.translate('xpack.siem.system.packageInstalledDescription', {
+  defaultMessage: 'system started',
+});
+
+export const ACCEPTED = i18n.translate('xpack.siem.system.acceptedDescription', {
+  defaultMessage: 'accepted the user via',
+});
+
+export const PACKAGE_UPDATED = i18n.translate('xpack.siem.system.packageUpdatedDescription', {
+  defaultMessage: 'updated package',
+});
+
+export const PACKAGE_REMOVED = i18n.translate('xpack.siem.system.packageRemovedDescription', {
+  defaultMessage: 'removed package',
+});
+
+export const USER_REMOVED = i18n.translate('xpack.siem.system.userRemovedDescription', {
+  defaultMessage: 'was removed',
 });

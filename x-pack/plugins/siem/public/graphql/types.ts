@@ -321,6 +321,8 @@ export interface Ecs {
   process?: ProcessEcsFields | null;
 
   file?: FileFields | null;
+
+  system?: SystemEcsField | null;
 }
 
 export interface AuditdEcsFields {
@@ -697,6 +699,40 @@ export interface FileFields {
   mtime?: Date | null;
 
   ctime?: Date | null;
+}
+
+export interface SystemEcsField {
+  audit?: AuditEcsFields | null;
+
+  auth?: AuthEcsFields | null;
+}
+
+export interface AuditEcsFields {
+  package?: PackageEcsFields | null;
+}
+
+export interface PackageEcsFields {
+  arch?: string | null;
+
+  entity_id?: string | null;
+
+  name?: string | null;
+
+  size?: string | null;
+
+  summary?: string | null;
+
+  version?: string | null;
+}
+
+export interface AuthEcsFields {
+  ssh?: SshEcsFields | null;
+}
+
+export interface SshEcsFields {
+  method?: string | null;
+
+  signature?: string | null;
 }
 
 export interface TimelineData {
@@ -2405,6 +2441,8 @@ export namespace GetTimelineQuery {
 
     timestamp?: Date | null;
 
+    system?: System | null;
+
     event?: Event | null;
 
     auditd?: Auditd | null;
@@ -2434,6 +2472,50 @@ export namespace GetTimelineQuery {
     process?: Process | null;
 
     zeek?: Zeek | null;
+  };
+
+  export type System = {
+    __typename?: 'SystemEcsField';
+
+    auth?: Auth | null;
+
+    audit?: Audit | null;
+  };
+
+  export type Auth = {
+    __typename?: 'AuthEcsFields';
+
+    ssh?: Ssh | null;
+  };
+
+  export type Ssh = {
+    __typename?: 'SshEcsFields';
+
+    signature?: string | null;
+
+    method?: string | null;
+  };
+
+  export type Audit = {
+    __typename?: 'AuditEcsFields';
+
+    package?: Package | null;
+  };
+
+  export type Package = {
+    __typename?: 'PackageEcsFields';
+
+    arch?: string | null;
+
+    entity_id?: string | null;
+
+    name?: string | null;
+
+    size?: string | null;
+
+    summary?: string | null;
+
+    version?: string | null;
   };
 
   export type Event = {

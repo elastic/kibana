@@ -26,13 +26,15 @@ export const UserHostWorkingDir = pure<Props>(
   ({ contextId, eventId, userName, hostName, workingDirectory }) => {
     return (
       <>
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="user.name"
-          value={userName}
-          iconType="user"
-        />
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="user.name"
+            value={userName}
+            iconType="user"
+          />
+        </TokensFlexItem>
         {hostName != null && userName != null && (
           <TokensFlexItem grow={false} component="span">
             @

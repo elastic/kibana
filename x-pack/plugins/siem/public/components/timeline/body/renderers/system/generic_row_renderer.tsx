@@ -120,8 +120,7 @@ const systemExistingSocketRowRenderer = createGenericFileRowRenderer({
   text: i18n.EXISTING_SOCKET,
 });
 
-// TODO: This MUST BE CUSTOM using system.audit.package
-const systemExistingPackageRowRenderer = createGenericFileRowRenderer({
+const systemExistingPackageRowRenderer = createGenericSystemRowRenderer({
   actionName: 'existing_package',
   text: i18n.EXISTING_PACKAGE,
 });
@@ -136,7 +135,8 @@ const systemUserChangedRowRenderer = createGenericSystemRowRenderer({
   text: i18n.USER_CHANGED,
 });
 
-// TODO: Either show the message or show the uptime, but what else does this action show?
+// TODO: Does this show more than uptime? Currently looks like only host uptime
+// If we display the system message than we are covered with it displaying as is.
 const systemHostChangedRowRenderer = createGenericSystemRowRenderer({
   actionName: 'host',
   text: i18n.HOST_CHANGED,
@@ -157,7 +157,7 @@ const systemProcessErrorRowRenderer = createGenericFileRowRenderer({
   text: i18n.PROCESS_ERROR,
 });
 
-// TODO: Remove this once this has been replaced everywhere with error
+// TODO: Remove this once this has been replaced everywhere with "error"
 const systemErrorRowRendererDeprecated = createGenericSystemRowRenderer({
   actionName: 'error:',
   text: i18n.ERROR,
@@ -168,19 +168,40 @@ const systemErrorRowRenderer = createGenericSystemRowRenderer({
   text: i18n.ERROR,
 });
 
-// TODO: This MUST BE CUSTOM using system.audit.package
 const systemPackageInstalledRowRenderer = createGenericSystemRowRenderer({
   actionName: 'package_installed',
   text: i18n.PACKAGE_INSTALLED,
 });
 
-// TODO: Test this
 const systemBootRowRenderer = createGenericSystemRowRenderer({
   actionName: 'boot',
-  text: i18n.PACKAGE_INSTALLED,
+  text: i18n.BOOT,
+});
+
+// TODO: auth.ssh.method and auth.ssh.signature are important items to maybe add
+// generically if they exist
+const systemAcceptedRowRenderer = createGenericSystemRowRenderer({
+  actionName: 'accepted',
+  text: i18n.ACCEPTED,
+});
+
+const systemPackageUpdatedRowRenderer = createGenericSystemRowRenderer({
+  actionName: 'package_updated',
+  text: i18n.PACKAGE_UPDATED,
+});
+
+const systemPackageRemovedRowRenderer = createGenericSystemRowRenderer({
+  actionName: 'package_removed',
+  text: i18n.PACKAGE_REMOVED,
+});
+
+const systemUserRemovedRowRenderer = createGenericSystemRowRenderer({
+  actionName: 'user_removed',
+  text: i18n.USER_REMOVED,
 });
 
 export const systemRowRenderers: RowRenderer[] = [
+  systemAcceptedRowRenderer,
   systemBootRowRenderer,
   systemErrorRowRenderer,
   systemErrorRowRendererDeprecated,
@@ -193,6 +214,8 @@ export const systemRowRenderers: RowRenderer[] = [
   systemLoginRowRenderer,
   systemLogoutRowRenderer,
   systemPackageInstalledRowRenderer,
+  systemPackageUpdatedRowRenderer,
+  systemPackageRemovedRowRenderer,
   systemProcessErrorRowRenderer,
   systemProcessStartedRowRenderer,
   systemProcessStoppedRowRenderer,
@@ -200,4 +223,5 @@ export const systemRowRenderers: RowRenderer[] = [
   systemSocketOpenedRowRenderer,
   systemUserAddedRowRenderer,
   systemUserChangedRowRenderer,
+  systemUserRemovedRowRenderer,
 ];

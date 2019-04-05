@@ -309,6 +309,33 @@ export const ecsSchema = gql`
     transport: String
   }
 
+  type PackageEcsFields {
+    arch: String
+    entity_id: String
+    name: String
+    size: String
+    summary: String
+    version: String
+  }
+
+  type AuditEcsFields {
+    package: PackageEcsFields
+  }
+
+  type SshEcsFields {
+    method: String
+    signature: String
+  }
+
+  type AuthEcsFields {
+    ssh: SshEcsFields
+  }
+
+  type SystemEcsField {
+    audit: AuditEcsFields
+    auth: AuthEcsFields
+  }
+
   type ECS {
     _id: String!
     _index: String
@@ -329,6 +356,7 @@ export const ecsSchema = gql`
     user: UserEcsFields
     process: ProcessEcsFields
     file: FileFields
+    system: SystemEcsField
   }
 
   type EcsEdges {

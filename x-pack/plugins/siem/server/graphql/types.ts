@@ -350,6 +350,8 @@ export interface Ecs {
   process?: ProcessEcsFields | null;
 
   file?: FileFields | null;
+
+  system?: SystemEcsField | null;
 }
 
 export interface AuditdEcsFields {
@@ -726,6 +728,40 @@ export interface FileFields {
   mtime?: Date | null;
 
   ctime?: Date | null;
+}
+
+export interface SystemEcsField {
+  audit?: AuditEcsFields | null;
+
+  auth?: AuthEcsFields | null;
+}
+
+export interface AuditEcsFields {
+  package?: PackageEcsFields | null;
+}
+
+export interface PackageEcsFields {
+  arch?: string | null;
+
+  entity_id?: string | null;
+
+  name?: string | null;
+
+  size?: string | null;
+
+  summary?: string | null;
+
+  version?: string | null;
+}
+
+export interface AuthEcsFields {
+  ssh?: SshEcsFields | null;
+}
+
+export interface SshEcsFields {
+  method?: string | null;
+
+  signature?: string | null;
 }
 
 export interface TimelineData {
@@ -2221,6 +2257,8 @@ export namespace EcsResolvers {
     process?: ProcessResolver<ProcessEcsFields | null, TypeParent, Context>;
 
     file?: FileResolver<FileFields | null, TypeParent, Context>;
+
+    system?: SystemResolver<SystemEcsField | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = Ecs, Context = SiemContext> = Resolver<
@@ -2318,6 +2356,11 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
+  export type SystemResolver<
+    R = SystemEcsField | null,
+    Parent = Ecs,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace AuditdEcsFieldsResolvers {
@@ -3580,6 +3623,115 @@ export namespace FileFieldsResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace SystemEcsFieldResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SystemEcsField> {
+    audit?: AuditResolver<AuditEcsFields | null, TypeParent, Context>;
+
+    auth?: AuthResolver<AuthEcsFields | null, TypeParent, Context>;
+  }
+
+  export type AuditResolver<
+    R = AuditEcsFields | null,
+    Parent = SystemEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthResolver<
+    R = AuthEcsFields | null,
+    Parent = SystemEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuditEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AuditEcsFields> {
+    package?: PackageResolver<PackageEcsFields | null, TypeParent, Context>;
+  }
+
+  export type PackageResolver<
+    R = PackageEcsFields | null,
+    Parent = AuditEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PackageEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PackageEcsFields> {
+    arch?: ArchResolver<string | null, TypeParent, Context>;
+
+    entity_id?: EntityIdResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    size?: SizeResolver<string | null, TypeParent, Context>;
+
+    summary?: SummaryResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ArchResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EntityIdResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SizeResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SummaryResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuthEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AuthEcsFields> {
+    ssh?: SshResolver<SshEcsFields | null, TypeParent, Context>;
+  }
+
+  export type SshResolver<
+    R = SshEcsFields | null,
+    Parent = AuthEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SshEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SshEcsFields> {
+    method?: MethodResolver<string | null, TypeParent, Context>;
+
+    signature?: SignatureResolver<string | null, TypeParent, Context>;
+  }
+
+  export type MethodResolver<
+    R = string | null,
+    Parent = SshEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SignatureResolver<
+    R = string | null,
+    Parent = SshEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace TimelineDataResolvers {

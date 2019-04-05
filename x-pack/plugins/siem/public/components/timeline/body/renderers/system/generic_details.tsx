@@ -15,7 +15,7 @@ import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
 import { AuditdNetflow } from '../auditd_netflow';
 
-import { Details, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '.';
+import { AuthSsh, Details, Package, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
@@ -27,6 +27,11 @@ interface Props {
   contextId: string;
   text: string;
   secondary: string | null | undefined;
+  packageName: string | null | undefined;
+  packageSummary: string | null | undefined;
+  packageVersion: string | null | undefined;
+  sshSignature: string | null | undefined;
+  sshMethod: string | null | undefined;
   processPid: string | null | undefined;
   processTitle: string | null | undefined;
   processName: string | null | undefined;
@@ -44,12 +49,17 @@ export const SystemGenericLine = pure<Props>(
     hostName,
     userName,
     message,
+    packageName,
+    packageSummary,
+    packageVersion,
     primary,
     secondary,
     processPid,
     processName,
     processExecutable,
     processTitle,
+    sshSignature,
+    sshMethod,
     workingDirectory,
     args,
     outcome,
@@ -91,6 +101,19 @@ export const SystemGenericLine = pure<Props>(
             value={outcome}
           />
         </TokensFlexItem>
+        <AuthSsh
+          contextId={contextId}
+          eventId={id}
+          sshSignature={sshSignature}
+          sshMethod={sshMethod}
+        />
+        <Package
+          contextId={contextId}
+          eventId={id}
+          packageName={packageName}
+          packageSummary={packageSummary}
+          packageVersion={packageVersion}
+        />
       </EuiFlexGroup>
       {message != null && (
         <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
@@ -126,13 +149,20 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(
     const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
     const outcome: string | null | undefined = get('event.outcome', data);
+    const packageName: string | null | undefined = get('system.audit.package.name', data);
+    const packageSummary: string | null | undefined = get('system.audit.package.summary', data);
+    const packageVersion: string | null | undefined = get('system.audit.package.version', data);
     const processPid: string | null | undefined = get('process.pid', data);
     const processName: string | null | undefined = get('process.name', data);
+    const sshSignature: string | null | undefined = get('system.auth.ssh.signature', data);
+    const sshMethod: string | null | undefined = get('system.auth.ssh.method', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
+
     const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
+
     // const primary: string | null | undefined = get('user.effective.name', data);
     // const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     // TODO: Do not check this in
@@ -146,10 +176,15 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(
           message={message}
           hostName={hostName}
           userName={userName}
+          packageName={packageName}
+          packageSummary={packageSummary}
+          packageVersion={packageVersion}
           processPid={processPid}
           processExecutable={processExecutable}
           processName={processName}
           processTitle={processTitle}
+          sshSignature={sshSignature}
+          sshMethod={sshMethod}
           workingDirectory={workingDirectory}
           args={args}
           session={undefined}

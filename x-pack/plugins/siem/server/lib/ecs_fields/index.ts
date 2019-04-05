@@ -231,6 +231,17 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.type': 'event.type',
 };
 
+export const systemFieldsMap: Readonly<Record<string, string>> = {
+  'system.audit.package.arch': 'system.audit.package.arch',
+  'system.audit.package.entity_id': 'system.audit.package.entity_id',
+  'system.audit.package.name': 'system.audit.package.name',
+  'system.audit.package.size': 'system.audit.package.size',
+  'system.audit.package.summary': 'system.audit.package.summary',
+  'system.audit.package.version': 'system.audit.package.version',
+  'system.auth.ssh.signature': 'system.auth.ssh.signature',
+  'system.auth.ssh.method': 'system.auth.ssh.method',
+};
+
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
@@ -243,6 +254,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...networkFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
+  ...{ ...systemFieldsMap },
   ...{ ...tlsFieldsMap },
   ...{ ...zeekFieldsMap },
   ...{ ...httpFieldsMap },
