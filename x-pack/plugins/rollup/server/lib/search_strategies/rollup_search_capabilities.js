@@ -3,18 +3,10 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { unitsMap } from '@elastic/datemath';
 
 const leastCommonInterval = (num = 0, base = 0) => Math.max(Math.ceil(num / base) * base, base);
-
-const getDateHistogramAggregation = (fieldsCapabilities, rollupIndex) => {
-  const dateHistogramField = fieldsCapabilities[rollupIndex].aggs.date_histogram;
-
-  // there is also only one valid date_histogram field
-  return Object.values(dateHistogramField)[0];
-};
-
 const isCalendarInterval = ({ unit, value }) => value === 1 && ['calendar', 'mixed'].includes(unitsMap[unit].type);
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
@@ -23,7 +15,13 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
       super(req, batchRequestsSupport, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
-      this.dateHistogram = getDateHistogramAggregation(fieldsCapabilities, rollupIndex);
+      this.availableMetrics = get(fieldsCapabilities, `${rollupIndex}.aggs`, {});
+    }
+
+    get dateHistogram() {
+      const [dateHistogram] = Object.values(this.availableMetrics.date_histogram);
+
+      return dateHistogram;
     }
 
     get defaultTimeInterval() {
@@ -35,23 +33,27 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
     }
 
     get whiteListedMetrics() {
-      return {
-        '*': false,
-        avg: true,
-        max: true,
-        min: true,
-        sum: true,
-        count: true,
-        value_count: true,
-      };
+      const baseRestrictions = this.createUiRestriction({
+        count: this.createUiRestriction(),
+      });
+
+      const getFields = fields => Object.keys(fields)
+        .reduce((acc, item) => ({
+          ...acc,
+          [item]: true,
+        }), this.createUiRestriction({}));
+
+      return Object.keys(this.availableMetrics).reduce((acc, item) => ({
+        ...acc,
+        [item]: getFields(this.availableMetrics[item]),
+      }), baseRestrictions);
     }
 
     get whiteListedGroupByFields() {
-      return {
-        '*': false,
+      return this.createUiRestriction({
         everything: true,
-        terms: true,
-      };
+        terms: has(this.availableMetrics, 'terms'),
+      });
     }
 
     getValidTimeInterval(userIntervalString) {

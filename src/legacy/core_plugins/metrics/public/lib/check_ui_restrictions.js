@@ -31,11 +31,18 @@ const RESTRICTION_TYPES = {
 const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) => {
   const isAllEnabled = get(restrictions, `${type}.*`, true);
 
-  return isAllEnabled || get(restrictions, `${type}.${key}`) === true;
+  return isAllEnabled || get(restrictions, type, {})[key];
 };
 
 export const isMetricEnabled = (key, restrictions) => {
   return checkUIRestrictions(key, restrictions, RESTRICTION_TYPES.WHITE_LISTER_METRICS);
+};
+
+export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_RESTRICTION) => {
+  if (isMetricEnabled(metricType, restrictions)) {
+    return checkUIRestrictions(field, restrictions[RESTRICTION_TYPES.WHITE_LISTER_METRICS], metricType);
+  }
+  return false;
 };
 
 export const isGroupByFieldsEnabled = (key, restrictions) => {

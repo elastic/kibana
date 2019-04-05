@@ -28,8 +28,7 @@ import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 function StandardAgg(props) {
-  const { model, panel, series, fields } = props;
-
+  const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   let restrict = 'numeric';
@@ -61,7 +60,7 @@ function StandardAgg(props) {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={props.uiRestrictions}
+            uiRestrictions={uiRestrictions}
             onChange={handleSelectChange('type')}
             fullWidth
           />
@@ -86,6 +85,7 @@ function StandardAgg(props) {
                     indexPattern={indexPattern}
                     value={model.field}
                     onChange={handleSelectChange('field')}
+                    uiRestrictions={uiRestrictions}
                     fullWidth
                   />
                 </EuiFormRow>

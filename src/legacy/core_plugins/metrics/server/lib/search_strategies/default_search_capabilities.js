@@ -34,15 +34,11 @@ export class DefaultSearchCapabilities {
   }
 
   get whiteListedMetrics() {
-    return {
-      '*': true,
-    };
+    return this.createUiRestriction();
   }
 
   get whiteListedGroupByFields() {
-    return {
-      '*': true,
-    };
+    return this.createUiRestriction();
   }
 
   get uiRestrictions() {
@@ -54,6 +50,13 @@ export class DefaultSearchCapabilities {
 
   get searchTimezone() {
     return getTimezoneFromRequest(this.request);
+  }
+
+  createUiRestriction(restrictionsObject) {
+    return {
+      '*': !restrictionsObject,
+      ...(restrictionsObject || {}),
+    };
   }
 
   parseInterval(interval) {
