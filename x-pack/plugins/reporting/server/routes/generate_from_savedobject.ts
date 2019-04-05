@@ -123,8 +123,7 @@ export function registerGenerateCsvFromSavedObject(
         },
       });
 
-      let response: ResponseObject;
-      response = h
+      const response: ResponseObject = h
         .response(output.content)
         .type(output.contentType)
         .code(output.statusCode);
