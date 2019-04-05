@@ -7,7 +7,7 @@
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { DatasourceField, fieldToOperation, SelectOperator } from '../../../common';
-import { getOperationsForField, selectColumn, updateColumn, VisModel } from '../../../public';
+import { getOperatorsForField, selectColumn, updateColumn, VisModel } from '../../../public';
 import { columnSummary } from '../../common/components/config_panel';
 import { Draggable } from '../../common/components/draggable';
 
@@ -27,7 +27,7 @@ export function YAxisEditor({
   const field = visModel.datasource.fields.find((f: DatasourceField) => f.name === fieldName);
 
   const onDropField = (droppedField: DatasourceField) => {
-    const operation = fieldToOperation(droppedField, getOperationsForField(droppedField)[0]);
+    const operation = fieldToOperation(droppedField, getOperatorsForField(droppedField)[0]);
 
     onChangeVisModel(updateColumn(col, operation, visModel));
   };
@@ -44,7 +44,7 @@ export function YAxisEditor({
   };
 
   const options = field
-    ? getOperationsForField(field).map(opName => ({
+    ? getOperatorsForField(field).map(opName => ({
         value: opName,
         text: `${opName} of ${fieldName}`,
       }))

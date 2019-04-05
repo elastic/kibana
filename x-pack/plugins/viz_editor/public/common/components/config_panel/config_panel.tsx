@@ -104,10 +104,10 @@ export function columnSummary(column?: SelectOperation) {
     return <div>Column Not Found</div>;
   }
 
-  const colOp = columnOperations[column.operation];
+  const colOp = columnOperations[column.operator];
 
   if (!colOp) {
-    return <div>Unsupported operation {column.operation}</div>;
+    return <div>Unsupported operation {column.operator}</div>;
   }
 
   return colOp.summarize(column);

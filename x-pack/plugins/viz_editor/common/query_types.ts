@@ -18,7 +18,7 @@ export type SelectOperator =
   | 'terms';
 
 export interface Aliasable {
-  operation: SelectOperator;
+  operator: SelectOperator;
   alias?: string;
 }
 
@@ -31,36 +31,36 @@ export type FieldOperation = Aliasable & {
 };
 
 export interface ColumnOperation extends FieldOperation {
-  operation: 'column';
+  operator: 'column';
   argument: Field & {
     size?: number;
   };
 }
 
 export interface DateHistogramOperation extends FieldOperation {
-  operation: 'date_histogram';
+  operator: 'date_histogram';
   argument: Field & {
     interval: string;
   };
 }
 
 export interface SumOperation extends FieldOperation {
-  operation: 'sum';
+  operator: 'sum';
 }
 
 export interface AvgOperation extends FieldOperation {
-  operation: 'avg';
+  operator: 'avg';
 }
 export interface CardinalityOperation extends FieldOperation {
-  operation: 'cardinality';
+  operator: 'cardinality';
 }
 
 export interface CountOperation extends Aliasable {
-  operation: 'count';
+  operator: 'count';
 }
 
 export interface TermsOperation extends FieldOperation {
-  operation: 'terms';
+  operator: 'terms';
   argument: Field & {
     size: number;
   };
@@ -80,12 +80,12 @@ export type SelectOperation =
 // ----------------------------------------
 
 export interface LitAtomic {
-  operation: 'lit';
+  operator: 'lit';
   argument: number | string | boolean;
 }
 
 export interface LitDate {
-  operation: 'date';
+  operator: 'date';
   argument: Date | string;
 }
 
@@ -96,42 +96,42 @@ type ComparisonArg = Literal | ColumnOperation;
 export type BooleanOperator = 'and' | 'or' | '>' | '>=' | '<' | '<=' | '=' | '<>';
 
 export interface Eq {
-  operation: '=';
+  operator: '=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Ne {
-  operation: '<>';
+  operator: '<>';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Gt {
-  operation: '>';
+  operator: '>';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Gte {
-  operation: '>=';
+  operator: '>=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Lt {
-  operation: '<';
+  operator: '<';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Lte {
-  operation: '<=';
+  operator: '<=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface And {
-  operation: 'and';
+  operator: 'and';
   argument: BooleanOperation[];
 }
 
 export interface Or {
-  operation: 'or';
+  operator: 'or';
   argument: BooleanOperation[];
 }
 

@@ -21,7 +21,7 @@ import {
   Axis,
   EditorPlugin,
   getColumnIdByIndex,
-  getOperationsForField,
+  getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
@@ -311,12 +311,12 @@ function _getSuggestionsForFieldAsReplacement(
       suggestions = suggestions.concat(opWithDateHistogram('column'));
     } else {
       suggestions = suggestions.concat(
-        getOperationsForField(field).map(op => opWithDateHistogram(op))
+        getOperatorsForField(field).map(op => opWithDateHistogram(op))
       );
     }
   }
 
-  suggestions = suggestions.concat(getOperationsForField(field).map(opToSuggestion));
+  suggestions = suggestions.concat(getOperatorsForField(field).map(opToSuggestion));
 
   return suggestions.filter(suggestion => !!suggestion) as Suggestion[];
 }
@@ -326,7 +326,7 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
-  const operationNames = getOperationsForField(field);
+  const operationNames = getOperatorsForField(field);
 
   if (operationNames.length === 0 || !field.aggregatable) {
     return [] as Suggestion[];
