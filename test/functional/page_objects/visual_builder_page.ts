@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -39,20 +38,27 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
+    public async checkTabIsLoaded(testSubj: string, name: string) {
+      const isPresent = await testSubjects.exists(testSubj, { timeout: 5000 });
+      if (!isPresent) {
+        throw new Error(`TSVB ${name} tab is not loaded`);
+      }
+    }
+
     public async checkVisualBuilderIsPresent() {
-      expect(await testSubjects.exists('tvbEditor', { timeout: 5000 })).to.be(true);
+      await this.checkTabIsLoaded('tvbEditor', 'Time Series');
     }
 
     public async checkMetricTabIsPresent() {
-      expect(await testSubjects.exists('tsvbMetricValue', { timeout: 5000 })).to.be(true);
+      await this.checkTabIsLoaded('tsvbMetricValue', 'Metric');
     }
 
     public async checkGaugeTabIsPresent() {
-      expect(await testSubjects.exists('tvbVisGaugeContainer', { timeout: 5000 })).to.be(true);
+      await this.checkTabIsLoaded('tvbVisGaugeContainer', 'Gauge');
     }
 
     public async checkTopNTabIsPresent() {
-      expect(await testSubjects.exists('tvbVisTopNTable', { timeout: 5000 })).to.be(true);
+      await this.checkTabIsLoaded('tvbVisTopNTable', 'TopN');
     }
 
     public async clickMetric() {
@@ -74,10 +80,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       await input.type(markdown);
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async clearMarkdown() {

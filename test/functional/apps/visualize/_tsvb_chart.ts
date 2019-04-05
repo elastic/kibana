@@ -25,20 +25,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  // const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'header',
-    'settings',
-    'visualBuilder',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
-  // FAILING: https://github.com/elastic/kibana/issues/34299
-  // FAILING: https://github.com/elastic/kibana/issues/34292
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
@@ -97,7 +87,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // add a gauge test
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -114,7 +103,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // add a top N test
     describe('topN', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -131,7 +119,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // add a table sanity timestamp
     describe('table', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage(
