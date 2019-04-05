@@ -115,7 +115,7 @@ module.exports = {
      * Restricted paths
      */
     {
-      files: ['**/*.js'],
+      files: ['**/*.{js,ts,tsx}'],
       rules: {
         '@kbn/eslint/no-restricted-paths': [
           'error',
