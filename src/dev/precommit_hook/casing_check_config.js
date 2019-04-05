@@ -45,7 +45,7 @@ export const IGNORE_FILE_GLOBS = [
   'src/legacy/ui/public/assets/fonts/**/*',
 
   // filename must match language code which requires capital letters
-  '**/translations/*.json',
+  '**/translations/*.json'
 ];
 
 
