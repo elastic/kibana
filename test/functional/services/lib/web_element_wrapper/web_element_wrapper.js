@@ -108,6 +108,15 @@ export class WebElementWrapper {
     await this._webElement.clear();
   }
 
+  async clearWithKeyboard() {
+    const controlKey = process.platform === 'darwin' ? this._Keys.COMMAND : this._Keys.CONTROL;
+    await this.pressKeys([controlKey, 'a']);
+    const actions = this._driver.executor_.w3c === true
+      ? this._driver.actions()
+      : this._driver.actions({ bridge: true });
+    await actions.sendKeys(this._Keys.DELETE).perform();
+  }
+
   /**
    * Types a key sequence on the DOM element represented by this instance. Modifier keys
    * (SHIFT, CONTROL, ALT, META) are stateful; once a modifier is processed in the key sequence,
@@ -142,16 +151,13 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  async pressKeys(...args) {
-    let chord;
-    //leadfoot compatibility
-    if (Array.isArray(args[0])) {
-      chord = this._Keys.chord(...args[0]);
+  async pressKeys(keys) {
+    if (Array.isArray(keys)) {
+      const chord = this._Keys.chord(keys);
+      await this._webElement.sendKeys(chord);
     } else {
-      chord = this._Keys.chord(...args);
+      await this._webElement.sendKeys(keys);
     }
-
-    await this._webElement.sendKeys(chord);
   }
 
   /**
@@ -166,11 +172,6 @@ export class WebElementWrapper {
    * @param {string} name
    */
   async getAttribute(name) {
-    const rectAttributes = ['height', 'width', 'x', 'y'];
-    if (rectAttributes.includes(name)) {
-      const rect = await this.getSize();
-      return rect[name];
-    }
     return await this._webElement.getAttribute(name);
   }
 

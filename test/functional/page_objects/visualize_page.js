@@ -582,12 +582,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      // The interval element will only interpret space as "select this" if there
-      // was a long enough gap from the typing above to the space click.  Hence the
-      // need for the sleep.
-      await PageObjects.common.sleep(500);
-      await input.pressKeys(browser.keys.SPACE);
+      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
+      await option.click();
     }
 
     async setCustomInterval(newValue) {
@@ -898,18 +894,15 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const chartTypes = await retry.try(
         async () => await find
           .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
-
-      // 5). for each chart element, find the green circle, then the cy position
-      async function getChartType(chart) {
+      // 4). for each chart element, find the green circle, then the cy position
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const cy = await chart.getAttribute('cy');
         // the point_series_options test has data in the billions range and
         // getting 11 digits of precision with these calculations is very hard
         return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(6));
-      }
+      }));
 
-      // 4). pass the chartTypes to the getChartType function
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      return chartData;
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
