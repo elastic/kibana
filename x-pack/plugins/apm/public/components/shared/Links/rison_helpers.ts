@@ -6,18 +6,10 @@
 
 import { Location } from 'history';
 import { pick, set } from 'lodash';
-import qs from 'querystring';
 import rison from 'rison-node';
-import chrome from 'ui/chrome';
-import url from 'url';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 import { APMQueryParams, PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
-
-interface RisonEncoded {
-  _g?: string;
-  _a?: string;
-}
 
 export interface RisonDecoded {
   _g?: StringMap<any>;
@@ -77,42 +69,4 @@ export function getRisonString(
   }
 
   return risonValues.join('&');
-}
-
-export function getRisonHref({
-  location,
-  pathname,
-  hash,
-  query = {}
-}: RisonHrefArgs) {
-  const currentQuery = toQuery(location.search);
-  const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
-    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-    ...query
-  };
-
-  // Create _g value for non-apm links
-  const g = createG(nextQuery);
-  const encodedG = rison.encode(g);
-  const encodedA = query._a ? rison.encode(query._a) : ''; // TODO: Do we need to url-encode the _a values before rison encoding _a?
-  const risonQuery: RisonEncoded = {
-    _g: encodedG
-  };
-
-  if (encodedA) {
-    risonQuery._a = encodedA;
-  }
-
-  // don't URI-encode the already-encoded rison
-  const search = qs.stringify(risonQuery, undefined, undefined, {
-    encodeURIComponent: (v: string) => v
-  });
-
-  const href = url.format({
-    pathname: chrome.addBasePath(pathname),
-    hash: `${hash}?${search}`
-  });
-
-  return href;
 }

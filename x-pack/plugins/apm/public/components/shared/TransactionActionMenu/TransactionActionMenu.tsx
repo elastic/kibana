@@ -19,9 +19,7 @@ import { Location } from 'history';
 import React from 'react';
 import { idx } from '../../../../common/idx';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
-import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
-import { getRisonHref } from '../Links/rison_helpers';
+import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getKibanaHref } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
@@ -171,62 +169,46 @@ export class TransactionActionMenu extends React.Component<Props, State> {
   }
 
   public render() {
-    const { transaction, location } = this.props;
+    const { transaction } = this.props;
+
+    const items = [
+      ...this.getInfraActions(),
+      <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <DiscoverTransactionLink transaction={transaction}>
+              {i18n.translate(
+                'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
+                {
+                  defaultMessage: 'View sample document'
+                }
+              )}
+            </DiscoverTransactionLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    ];
+
     return (
-      <QueryWithIndexPattern query={getDiscoverQuery(transaction)}>
-        {query => {
-          const discoverTransactionHref = getRisonHref({
-            location,
-            pathname: '/app/kibana',
-            hash: '/discover',
-            query
-          });
-
-          const items = [
-            ...this.getInfraActions(),
-            <EuiContextMenuItem
-              icon="discoverApp"
-              href={discoverTransactionHref}
-              key="discover-transaction"
-            >
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiLink>
-                    {i18n.translate(
-                      'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
-                      {
-                        defaultMessage: 'View sample document'
-                      }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="popout" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>
-          ];
-
-          return (
-            <EuiPopover
-              id="transactionActionMenu"
-              button={<ActionMenuButton onClick={this.toggle} />}
-              isOpen={this.state.isOpen}
-              closePopover={this.close}
-              anchorPosition="downRight"
-              panelPaddingSize="none"
-            >
-              <EuiContextMenuPanel
-                items={items}
-                title={i18n.translate(
-                  'xpack.apm.transactionActionMenu.actionsLabel',
-                  { defaultMessage: 'Actions' }
-                )}
-              />
-            </EuiPopover>
-          );
-        }}
-      </QueryWithIndexPattern>
+      <EuiPopover
+        id="transactionActionMenu"
+        button={<ActionMenuButton onClick={this.toggle} />}
+        isOpen={this.state.isOpen}
+        closePopover={this.close}
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel
+          items={items}
+          title={i18n.translate(
+            'xpack.apm.transactionActionMenu.actionsLabel',
+            { defaultMessage: 'Actions' }
+          )}
+        />
+      </EuiPopover>
     );
   }
 }

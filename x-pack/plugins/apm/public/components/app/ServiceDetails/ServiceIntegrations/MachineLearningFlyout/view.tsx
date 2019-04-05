@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
 import React from 'react';
 import { getMlJobId } from '../../../../../../common/ml_job_constants';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
@@ -32,7 +31,6 @@ import { TransactionSelect } from './TransactionSelect';
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
-  location: Location;
   onChangeTransaction: (value: string) => void;
   onClickCreate: () => void;
   onClose: () => void;
@@ -46,7 +44,6 @@ const INITIAL_DATA = { count: 0, jobs: [] };
 export function MachineLearningFlyoutView({
   hasIndexPattern,
   isCreatingJob,
-  location,
   onChangeTransaction,
   onClickCreate,
   onClose,
@@ -111,7 +108,6 @@ export function MachineLearningFlyoutView({
                 <MLJobLink
                   serviceName={serviceName}
                   transactionType={transactionType}
-                  location={location}
                 >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',

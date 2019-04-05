@@ -112,7 +112,6 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
-            location={this.props.location}
           >
             View Job
           </MLJobLink>

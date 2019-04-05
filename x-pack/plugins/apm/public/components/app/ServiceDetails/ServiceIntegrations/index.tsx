@@ -164,7 +164,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
               />
             </EuiPopover>
             <MachineLearningFlyout
-              location={this.props.location}
               isOpen={this.state.activeFlyout === 'ML'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}

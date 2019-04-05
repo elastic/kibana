@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
@@ -18,7 +17,6 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   urlParams: IUrlParams;
-  location: Location;
   serviceTransactionTypes: string[];
 }
 
@@ -116,7 +114,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public addSuccessToast = () => {
-    const { location, urlParams } = this.props;
+    const { urlParams } = this.props;
     const { serviceName, transactionType } = urlParams;
 
     if (!serviceName) {
@@ -146,7 +144,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
           <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
-            location={location}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
@@ -167,13 +164,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }
 
   public render() {
-    const {
-      isOpen,
-      onClose,
-      urlParams,
-      location,
-      serviceTransactionTypes
-    } = this.props;
+    const { isOpen, onClose, urlParams, serviceTransactionTypes } = this.props;
     const { serviceName, transactionType } = urlParams;
     const {
       isCreatingJob,
@@ -189,7 +180,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
       <MachineLearningFlyoutView
         hasIndexPattern={hasIndexPattern}
         isCreatingJob={isCreatingJob}
-        location={location}
         onChangeTransaction={this.onChangeTransaction}
         onClickCreate={this.onClickCreate}
         onClose={onClose}
