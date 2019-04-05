@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export class FeatureTooltip extends React.Component {
 
   _renderFilterButton(tooltipProperty) {
-    if (!this.props.shouldShowFilterButtons || !tooltipProperty.isFilterable())  {
+    if (!this.props.showFilterButtons || !tooltipProperty.isFilterable())  {
       return null;
     }
 
