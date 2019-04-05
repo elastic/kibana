@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -31,11 +30,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  skippingDisconnectedClustersUrl,
-  transportPortUrl,
-} from '../../../services/documentation_links';
-import { validateName, validateSeeds, validateSeed } from './validators';
+import { skippingDisconnectedClustersUrl } from '../../../services/documentation_links';
+import { validateName, validateSeeds } from './validators';
+import { SeedsFormRow } from './seeds_form_row';
 
 const defaultFields = {
   name: '',
@@ -66,8 +63,6 @@ export const RemoteClusterForm = injectI18n(
       const fieldsState = merge({}, defaultFields, fields);
 
       this.state = {
-        localSeedErrors: [],
-        seedInput: '',
         fields: fieldsState,
         disabledFields,
         fieldsErrors: this.getFieldsErrors(fieldsState),
@@ -75,23 +70,23 @@ export const RemoteClusterForm = injectI18n(
       };
     }
 
-    getFieldsErrors(fields, seedInput = '') {
+    getFieldsErrors(fields) {
       const { name, seeds } = fields;
       return {
         name: validateName(name),
-        seeds: validateSeeds(seeds, seedInput),
+        seeds: validateSeeds(seeds),
       };
     }
 
     onFieldsChange = (changedFields) => {
-      this.setState(({ fields: prevFields, seedInput }) => {
+      this.setState(({ fields: prevFields }) => {
         const newFields = {
           ...prevFields,
           ...changedFields,
         };
         return ({
           fields: newFields,
-          fieldsErrors: this.getFieldsErrors(newFields, seedInput),
+          fieldsErrors: this.getFieldsErrors(newFields),
         });
       });
     };
@@ -126,72 +121,6 @@ export const RemoteClusterForm = injectI18n(
       save(cluster);
     };
 
-    onCreateSeed = (newSeed) => {
-      // If the user just hit enter without typing anything, treat it as a no-op.
-      if (!newSeed) {
-        return;
-      }
-
-      const localSeedErrors = validateSeed(newSeed);
-
-      if (localSeedErrors.length !== 0) {
-        this.setState({
-          localSeedErrors,
-        });
-
-        // Return false to explicitly reject the user's input.
-        return false;
-      }
-
-      const {
-        fields: {
-          seeds,
-        },
-      } = this.state;
-
-      const newSeeds = seeds.slice(0);
-      newSeeds.push(newSeed.toLowerCase());
-      this.onFieldsChange({ seeds: newSeeds });
-    };
-
-    onSeedsInputChange = (seedInput) => {
-      if (!seedInput) {
-        // If empty seedInput ("") don't do anything. This happens
-        // right after a seed is created.
-        return;
-      }
-
-      const { intl } = this.props;
-
-      this.setState(({ fields, localSeedErrors }) => {
-        const { seeds } = fields;
-
-        // Allow typing to clear the errors, but not to add new ones.
-        const errors = (!seedInput || validateSeed(seedInput).length === 0) ? [] : localSeedErrors;
-
-        // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
-        // input is a duplicate. So we need to surface this error here instead.
-        const isDuplicate = seeds.includes(seedInput);
-
-        if (isDuplicate) {
-          errors.push(intl.formatMessage({
-            id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage',
-            defaultMessage: `Duplicate seed nodes aren't allowed.`,
-          }));
-        }
-
-        return ({
-          localSeedErrors: errors,
-          fieldsErrors: this.getFieldsErrors(fields, seedInput),
-          seedInput,
-        });
-      });
-    };
-
-    onSeedsChange = (seeds) => {
-      this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
-    };
-
     onSkipUnavailableChange = (e) => {
       const skipUnavailable = e.target.checked;
       this.onFieldsChange({ skipUnavailable });
@@ -219,17 +148,7 @@ export const RemoteClusterForm = injectI18n(
         fieldsErrors: {
           seeds: errorsSeeds,
         },
-        localSeedErrors,
       } = this.state;
-
-      const { intl } = this.props;
-
-      // Show errors if there is a general form error or local errors.
-      const areFormErrorsVisible = Boolean(areErrorsVisible && errorsSeeds);
-      const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
-      const errors = areFormErrorsVisible ? localSeedErrors.concat(errorsSeeds) : localSeedErrors;
-
-      const formattedSeeds = seeds.map(seed => ({ label: seed }));
 
       return (
         <EuiDescribedFormGroup
@@ -256,48 +175,11 @@ export const RemoteClusterForm = injectI18n(
           )}
           fullWidth
         >
-          <EuiFormRow
-            data-test-subj="remoteClusterFormSeedNodesFormRow"
-            label={(
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
-                defaultMessage="Seed nodes"
-              />
-            )}
-            helpText={(
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
-                defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
-                values={{
-                  transportPort: (
-                    <EuiLink href={transportPortUrl} target="_blank">
-                      <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText"
-                        defaultMessage="transport port"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            )}
-            isInvalid={showErrors}
-            error={errors}
-            fullWidth
-          >
-            <EuiComboBox
-              noSuggestions
-              placeholder={intl.formatMessage({
-                id: 'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
-                defaultMessage: 'host:port',
-              })}
-              selectedOptions={formattedSeeds}
-              onCreateOption={this.onCreateSeed}
-              onChange={this.onSeedsChange}
-              onSearchChange={this.onSeedsInputChange}
-              isInvalid={showErrors}
-              fullWidth
-            />
-          </EuiFormRow>
+          <SeedsFormRow
+            value={seeds}
+            errors={areErrorsVisible ? errorsSeeds : undefined}
+            onChange={(seeds) => this.onFieldsChange({ seeds })}
+          />
         </EuiDescribedFormGroup>
       );
     }
