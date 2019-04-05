@@ -67,18 +67,18 @@ export const CSV_RESULT_TIMEBASED = `"@timestamp",clientip,extension
 `;
 
 export const CSV_RESULT_TIMELESS = `name,power
-"Jonelle-Jane Marth","1.177"
+"Jonelle-Jane Marth","1.1768"
 "Suzie-May Rishel","1.824"
 "Suzie-May Rishel","2.077"
-"Rosana Casto","2.808"
-"Stephen Cortez","4.986"
+"Rosana Casto","2.8084"
+"Stephen Cortez","4.9856"
 "Jonelle-Jane Marth","6.156"
-"Jonelle-Jane Marth","7.097"
-"Florinda Alejandro","10.373"
-"Jonelle-Jane Marth","14.807"
-"Suzie-May Rishel","19.738"
-"Suzie-May Rishel","20.92"
-"Florinda Alejandro","22.209"
+"Jonelle-Jane Marth","7.0966"
+"Florinda Alejandro","10.3734"
+"Jonelle-Jane Marth","14.8074"
+"Suzie-May Rishel","19.7377"
+"Suzie-May Rishel","20.9198"
+"Florinda Alejandro","22.2092"
 `;
 
 export const CSV_RESULT_SCRIPTED = `date,year,name,value,"years_ago"
