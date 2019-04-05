@@ -94,7 +94,7 @@ export class Plugin {
     // called when plugin is torn down, aka window.onbeforeunload
   }
 }
-```
+```x
 
 **[4] `server/index.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
@@ -208,23 +208,23 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 import { CoreSetup, PluginStop } from '../../../core/server';
 import { FoobarPluginSetup, FoobarPluginStop } from '../../foobar/server';
 
-interface DemoSetupDependencies {
+interface DemoSetupPlugins {
   foobar: FoobarPluginSetup
 }
 
-interface DemoStopDependencies {
+interface DemoStopPlugins {
   foobar: FoobarPluginStop
 }
 
 export class Plugin {
-  public setup(core: CoreSetup, dependencies: DemoSetupDependencies) {
-    const { foobar } = dependencies;
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins) {
+    const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public stop(core: PluginStop, dependencies: DemoStopDependencies) {
-    const { foobar } = dependencies;
+  public stop(core: PluginStop, plugins: DemoStopPlugins) {
+    const { foobar } = plugins;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
   }
@@ -422,14 +422,14 @@ interface FooSetup {
   getBar(): string
 }
 
-interface DependenciesSetup {
+interface PluginsSetup {
   foo: FooSetup
 }
 
 export type DemoPluginSetup = ReturnType<Plugin['setup']>;
 
 export class Plugin {
-  public setup(core: CoreSetup, dependencies: DependenciesSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup) {
     const serverFacade: ServerFacade = {
       plugins: {
         elasticsearch: core.elasticsearch
@@ -451,7 +451,7 @@ export class Plugin {
     // Exposing functionality for other plugins
     return {
       getDemoBar() {
-        return `Demo ${dependencies.foo.getBar()}`; // Accessing functionality from another plugin
+        return `Demo ${plugins.foo.getBar()}`; // Accessing functionality from another plugin
       }
     };
   }
@@ -478,11 +478,11 @@ export default (kibana) => {
         }
       };
       // plugins shim
-      const dependenciesSetup = {
+      const pluginsSetup = {
         foo: server.plugins.foo
       };
 
-      const demoSetup = new Plugin().setup(coreSetup, dependenciesSetup);
+      const demoSetup = new Plugin().setup(coreSetup, pluginsSetup);
 
       // continue to expose functionality to legacy plugins
       server.expose('getDemoBar', demoSetup.getDemoBar);
@@ -541,7 +541,7 @@ A similar approach can be taken for your plugins shim. First, update your plugin
 ```ts
 init(server) {
   // plugins shim
-  const dependenciesSetup = {
+  const pluginsSetup = {
     ...server.newPlatform.setup.plugins,
     foo: server.plugins.foo
   };
@@ -552,12 +552,12 @@ As the plugins you depend on are migrated to the new platform, their contract wi
 
 It is much easier to reliably make breaking changes to plugin APIs in the new platform than it is in the legacy world, so if you're planning a big change, consider doing it after your dependent plugins have migrated rather than as part of your own migration.
 
-Eventually, all overrides will be removed and your `dependenciesSetup` shim is entirely powered by `server.newPlatform.setup.plugins`.
+Eventually, all overrides will be removed and your `pluginsSetup` shim is entirely powered by `server.newPlatform.setup.plugins`.
 
 ```ts
 init(server) {
   // plugins shim
-  const dependenciesSetup = {
+  const pluginsSetup = {
     ...server.newPlatform.setup.plugins
   };
 }
