@@ -5,7 +5,7 @@
  */
 
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../common/graphql/types';
@@ -53,7 +53,10 @@ export const MetricsExplorerToolbar = injectI18n(
             />
           </EuiFlexItem>
           <EuiText size="s" color="subdued">
-            <strong>by</strong>
+            <FormattedMessage
+              id={`xpack.infra.metricsExplorer.groupByLabel`}
+              defaultMessage="graph per"
+            />
           </EuiText>
           <EuiFlexItem>
             <EuiComboBox
