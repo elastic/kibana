@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
@@ -14,6 +14,7 @@ export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(
         '2019-01-28 12:40:08.078',
+        '2019-01-29 12:40:08.078',
         'monitor-page-link-auto-http-0X131221E73F825974'
       );
     });

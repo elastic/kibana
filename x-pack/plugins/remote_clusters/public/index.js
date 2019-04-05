@@ -8,6 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
@@ -24,7 +25,7 @@ if (chrome.getInjected('remoteClustersUiEnabled')) {
 
   esSection.register('remote_clusters', {
     visible: true,
-    display: 'Remote Clusters',
+    display: i18n.translate('xpack.remoteClusters.appTitle', { defaultMessage: 'Remote Clusters' }),
     order: 5,
     url: `#${CRUD_APP_BASE_PATH}/list`,
   });
