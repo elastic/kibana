@@ -4145,7 +4145,6 @@
     "xpack.indexLifecycleMgmt.policyTable.policyActionsMenu.panelTitle": "策略选项",
     "xpack.indexLifecycleMgmt.policyTable.sectionDescription": "管理变旧的索引。 附加策略以自动化何时以及如何在索引整个生命周期中变迁索引。",
     "xpack.indexLifecycleMgmt.policyTable.sectionHeading": "索引生命周期策略",
-    "xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText": "公测版",
     "xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel": "搜索策略",
     "xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder": "搜索",
     "xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText": "查看链接到策略的索引",
