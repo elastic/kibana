@@ -48,7 +48,7 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
@@ -74,7 +74,7 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
@@ -89,7 +89,7 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
@@ -107,7 +107,7 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
