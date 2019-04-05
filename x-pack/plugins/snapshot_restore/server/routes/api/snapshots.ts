@@ -21,53 +21,54 @@ export async function getAllHandler(req, callWithRequest): RouterRouteHandler {
     return [];
   }
 
-  const snapshotsRequests = repositoryNames.map(repositoryName => {
-    return callWithRequest('cat.snapshots', {
+  const fetchSnapshotsForRepository = repositoryName => (
+    callWithRequest('cat.snapshots', {
       repository: repositoryName,
       format: 'json',
     })
-      .then(snapshots => {
+      .then(snapshots => (
         // Decorate each snapshot with the repository with which it's associated.
-        return snapshots.map(snapshot => ({
+        snapshots.map(snapshot => ({
           repository: repositoryName,
           ...snapshot,
-        }));
-      })
-      .catch(error => {
-        // These errors are commonly due to a misconfiguration in the repository or plugin errors,
-        // which can result in a variety of 400, 404, and 500 errors.
-        return error;
-      });
-  });
+        }))
+      ))
+      // These errors are commonly due to a misconfiguration in the repository or plugin errors,
+      // which can result in a variety of 400, 404, and 500 errors.
+      .catch(error => error);
+  );
 
-  const arraysOfSnapshotsAndErrors = await Promise.all(snapshotsRequests);
+  const arraysOfSnapshotsAndErrors = await Promise.all(repositoryNames.map(fetchSnapshotsForRepository));
 
   // Multiple repositories can have identical configurations. This means that the same snapshot
-  // may be listed as belonging to multiple repositories. We need to dedupe the snapshots and
-  // aggregate the repositories with which each is associated.
+  // may be listed as belonging to multiple repositories. A map lets us dedupe the snapshots and
+  // aggregate the repositories that are associated with each one.
   const idToSnapshotMap = {};
   const errors = [];
 
   arraysOfSnapshotsAndErrors.forEach(arrayOfSnapshotsOrError => {
     const isError = !Array.isArray(arrayOfSnapshotsOrError);
 
+    // If it's an error we just need to store it and return it.
     if (isError) {
       errors.push(arrayOfSnapshotsOrError);
       return;
     }
 
+    // If it's an array of snapshots, we'll create an object to store each snapshot and the
+    // repositories that are associated with it.
     arrayOfSnapshotsOrError.forEach(snapshot => {
       const { id, repository, ...rest } = snapshot;
 
       if (!idToSnapshotMap[id]) {
-        // Create the snapshot if it doesn't exist.
+        // Create the snapshot object if it doesn't exist.
         idToSnapshotMap[id] = {
           id,
           ...rest,
-          repositories: [repository], // Store its repository.
+          repositories: [repository], // Associate the repository with it.
         };
       } else {
-        // If it already exists, just store the repository.
+        // If it already exists, just associate the repository with it.
         idToSnapshotMap[id].repositories.push(repository);
       }
     });
