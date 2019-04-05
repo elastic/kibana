@@ -205,7 +205,7 @@ const mapStateToProps = (state: State, { id }: OwnProps) => {
   const myState = getOr({}, `inputs.${id}`, state);
   return {
     start: get('timerange.from', myState),
-    to: get('timerange.to', myState),
+    end: get('timerange.to', myState),
     isTimerOn: get('policy.kind', myState) === 'interval',
     duration: get('policy.duration', myState),
     loading: myState.query.filter((i: inputsModel.GlobalQuery) => i.loading === true).length > 0,
