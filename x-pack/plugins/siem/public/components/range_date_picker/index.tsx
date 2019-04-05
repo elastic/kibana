@@ -20,8 +20,8 @@ import { UpdateButton } from './update_button';
 export type DateType = 'relative' | 'absolute';
 
 interface RangeDatePickerStateRedux {
-  from: number;
-  to: number;
+  start: number;
+  end: number;
   isTimerOn: boolean;
   duration: number;
   loading: boolean;
@@ -73,7 +73,7 @@ class RangeDatePickerComponents extends React.PureComponent<
 
   public render() {
     const { recentlyUsed } = this.state;
-    const { id, loading, disabled = false, from, to, isTimerOn, refetch } = this.props;
+    const { id, loading, disabled = false, start, end, isTimerOn, refetch } = this.props;
 
     const quickSelectPopover = (
       <QuickSelectPopover
@@ -96,19 +96,19 @@ class RangeDatePickerComponents extends React.PureComponent<
               startDateControl={
                 <GlobalDateButton
                   id={`${id}-from`}
-                  date={moment(from)}
+                  date={moment(start)}
                   position="start"
                   onChange={this.handleChangeFrom}
-                  isInvalid={from && to ? from > to : false}
+                  isInvalid={start && end ? start > end : false}
                 />
               }
               endDateControl={
                 <GlobalDateButton
                   id={`${id}-to`}
-                  date={moment(to)}
+                  date={moment(end)}
                   position="end"
                   onChange={this.handleChangeTo}
-                  isInvalid={from && to ? from > to : false}
+                  isInvalid={start && end ? start > end : false}
                 />
               }
             />
@@ -122,23 +122,23 @@ class RangeDatePickerComponents extends React.PureComponent<
   }
 
   private handleChangeFrom = (date: moment.Moment | null) => {
-    const { id, to } = this.props;
-    if (date && moment(this.props.from) !== date) {
-      this.props.setAbsoluteRangeDatePicker({ id, from: date.valueOf(), to });
+    const { id, end, start } = this.props;
+    if (date && moment(start) !== date) {
+      this.props.setAbsoluteRangeDatePicker({ id, from: date.valueOf(), to: end });
       this.updateRecentlyUsed({
         kind: 'date-range',
-        timerange: [date.valueOf(), to],
+        timerange: [date.valueOf(), end],
       });
     }
   };
 
   private handleChangeTo = (date: moment.Moment | null) => {
-    const { id, from } = this.props;
-    if (date && moment(this.props.to) !== date) {
-      this.props.setAbsoluteRangeDatePicker({ id, from, to: date.valueOf() });
+    const { id, start, end } = this.props;
+    if (date && moment(end) !== date) {
+      this.props.setAbsoluteRangeDatePicker({ id, from: start, to: date.valueOf() });
       this.updateRecentlyUsed({
         kind: 'date-range',
-        timerange: [from, date.valueOf()],
+        timerange: [start, date.valueOf()],
       });
     }
   };
@@ -166,20 +166,20 @@ class RangeDatePickerComponents extends React.PureComponent<
     }
   };
 
-  private onChange = (from: Moment, to: Moment, type: DateType, msg?: RecentlyUsedI) => {
+  private onChange = (start: Moment, end: Moment, type: DateType, msg?: RecentlyUsedI) => {
     const { id } = this.props;
     if (type === 'absolute') {
       this.props.setAbsoluteRangeDatePicker({
         id,
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: start.valueOf(),
+        to: end.valueOf(),
       });
     } else if (type === 'relative') {
       this.props.setRelativeRangeDatePicker({
         id,
         option: msg ? msg.kind : '',
-        from: from.valueOf(),
-        to: to.valueOf(),
+        from: start.valueOf(),
+        to: end.valueOf(),
       });
     }
     this.updateRecentlyUsed(msg);
@@ -204,7 +204,7 @@ class RangeDatePickerComponents extends React.PureComponent<
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const myState = getOr({}, `inputs.${id}`, state);
   return {
-    from: get('timerange.from', myState),
+    start: get('timerange.from', myState),
     to: get('timerange.to', myState),
     isTimerOn: get('policy.kind', myState) === 'interval',
     duration: get('policy.duration', myState),
