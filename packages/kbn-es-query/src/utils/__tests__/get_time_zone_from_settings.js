@@ -21,34 +21,19 @@ import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { getTimeZoneFromSettings } from '../get_time_zone_from_settings';
 
-// following similar methodology to kibana/src/legacy/core_plugins/kibana/common/field_formats/types/__tests__/date.js
-
 describe('get timezone from settings', function () {
-  let mockConfig;
-
-  beforeEach(function () {
-    mockConfig = {};
-    mockConfig.dateFormatTZ = 'Browser';
-  });
-
-  it('should return the system timezone if the time zone is set to "Browser"', function () {
-    function setDefaultTimezone() {
-      moment.tz.setDefault(mockConfig.dateFormatTZ);
-    }
-    mockConfig.dateFormatTZ = 'America/Chicago';
-    setDefaultTimezone();
-
-    const result = getTimeZoneFromSettings(mockConfig.dateFormatTZ);
-    expect(result).to.eql(mockConfig.dateFormatTZ);
+  afterEach(function () {
+    moment.tz.setDefault();
   });
 
   it('should return the config timezone if the time zone is set', function () {
-    function setDefaultTimezone() {
-      moment.tz.setDefault(mockConfig.dateFormatTZ);
-    }
-    mockConfig.dateFormatTZ = 'America/New York';
-    setDefaultTimezone();
+    moment.tz.setDefault('America/Chicago');
+    const result = getTimeZoneFromSettings('America/Chicago');
+    expect(result).to.eql('America/Chicago');
+  });
 
+  it('should return the system timezone if the time zone is set to "Browser"', function () {
+    moment.tz.setDefault('Browser');
     const result = getTimeZoneFromSettings('Browser');
     expect(result).to.not.equal('Browser');
   });

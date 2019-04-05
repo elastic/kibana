@@ -157,7 +157,7 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
-      it('should support date fields without a dateFormat provided', function () {
+      it('should support date fields with a dateFormat provided', function () {
         const config = { dateFormatTZ: 'America/Phoenix' };
         const expected = {
           bool: {

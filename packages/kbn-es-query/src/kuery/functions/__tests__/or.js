@@ -66,6 +66,7 @@ describe('kuery functions', function () {
         expect(result.bool).to.have.property('minimum_should_match', 1);
       });
 
+      // TINA TODO: add a spy
       it('should pass the config to subqueries in an ES bool query\'s filter clause', function () {
         const config = { dateFormatTZ: 'America/Phoenix' };
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);

@@ -57,6 +57,7 @@ describe('kuery functions', function () {
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
 
+      // TINA TODO: add a spy
       it('should accept a config parameter in a subquery in an ES bool query\'s must_not clause', function () {
         const config = { dateFormatTZ: 'America/Phoenix' };
         const node = nodeTypes.function.buildNode('not', childNode);

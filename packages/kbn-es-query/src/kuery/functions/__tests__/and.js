@@ -57,6 +57,7 @@ describe('kuery functions', function () {
         );
       });
 
+      // TINA TODO: add a spy
       it('should pass the config to subqueries in an ES bool query\'s filter clause', function () {
         const config = {
           dateFormatTZ: 'America/Phoenix'

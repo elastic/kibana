@@ -72,7 +72,7 @@ describe('kuery node types', function () {
         const result = functionType.toElasticsearchQuery(node, indexPattern);
         expect(_.isEqual(expected, result)).to.be(true);
       });
-
+      // TINA TODO: use a spy
       it('should accept and pass on an optional config paramter to the returned function type\'s ES query representation', function () {
         const config = { dateFormatTZ: 'America/New York' };
         const node = functionType.buildNode('is', '@timestamp', '"2018-01-20T13:55:00"');
