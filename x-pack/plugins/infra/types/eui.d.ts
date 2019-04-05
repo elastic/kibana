@@ -118,11 +118,4 @@ declare module '@elastic/eui' {
     message?: any;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
-
-  type EuiColorPickerProps = CommonProps & {
-    color: string;
-    onChange: (color: string) => void;
-    showColorLabel: boolean;
-  };
-  export const EuiColorPicker: React.SFC<EuiColorPickerProps>;
 }

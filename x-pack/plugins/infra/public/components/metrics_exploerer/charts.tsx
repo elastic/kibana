@@ -14,16 +14,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import {
-  EuiAreaSeries,
-  EuiBarSeries,
-  EuiCrosshairX,
-  EuiDataPoint,
+  // EuiAreaSeries,
+  // EuiBarSeries,
+  // EuiCrosshairX,
+  // EuiDataPoint,
   EuiLineSeries,
   EuiSeriesChart,
-  EuiSeriesChartProps,
-  EuiSeriesProps,
-  EuiXAxis,
-  EuiYAxis,
+  // EuiSeriesChartProps,
+  // EuiSeriesProps,
+  // EuiXAxis,
+  // EuiYAxis,
 } from '@elastic/eui/lib/experimental';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isNumber } from 'lodash';

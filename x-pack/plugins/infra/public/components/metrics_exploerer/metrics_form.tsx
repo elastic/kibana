@@ -80,7 +80,7 @@ export const MetricForm = injectI18n(
       metric.aggregation === MetricsExplorerAggregation.cardinality ? 'string' : 'number';
 
     return (
-      <div style={{ width: 300 }}>
+      <React.Fragment>
         <EuiFormRow
           label={intl.formatMessage({
             id: `${intlPrefix}.aggregationLabel`,
@@ -132,7 +132,7 @@ export const MetricForm = injectI18n(
             </EuiButton>
           </React.Fragment>
         )}
-      </div>
+      </React.Fragment>
     );
   }
 );

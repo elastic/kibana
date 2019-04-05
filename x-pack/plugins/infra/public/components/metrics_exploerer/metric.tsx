@@ -75,14 +75,16 @@ export const Metric = injectI18n(
             isOpen={isPopoverOpen}
             zIndex={20}
           >
-            <MetricForm
-              fields={fields}
-              isDeleteable={isDeleteable}
-              onChange={onChange}
-              onDelete={onDelete}
-              metric={metric}
-              id={id}
-            />
+            <MetricFormContainer>
+              <MetricForm
+                fields={fields}
+                isDeleteable={isDeleteable}
+                onChange={onChange}
+                onDelete={onDelete}
+                metric={metric}
+                id={id}
+              />
+            </MetricFormContainer>
           </EuiPopover>
         </EuiToolTip>
       </MetricBadge>
@@ -96,4 +98,8 @@ const MetricBadge = euiStyled.div`
   display: flex;
   align-items: center;
   margin-right: 4px;
+`;
+
+const MetricFormContainer = euiStyled.div`
+  width: 400px;
 `;
