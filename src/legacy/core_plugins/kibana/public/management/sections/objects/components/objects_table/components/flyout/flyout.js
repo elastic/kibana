@@ -83,10 +83,9 @@ class FlyoutUI extends Component {
       importCount: 0,
       indexPatterns: undefined,
       isOverwriteAllChecked: true,
-      isLoading: false,
       loadingMessage: undefined,
-      wasImportSuccessful: false,
       isLegacyFile: false,
+      status: 'idle',
     };
   }
 
@@ -123,7 +122,7 @@ class FlyoutUI extends Component {
   import = async () => {
     const { intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
-    this.setState({ isLoading: true, error: undefined });
+    this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     let response;
@@ -131,7 +130,7 @@ class FlyoutUI extends Component {
       response = await importFile(file, isOverwriteAllChecked);
     } catch (e) {
       this.setState({
-        isLoading: false,
+        status: 'error',
         error: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.flyout.importFileErrorMessage',
           defaultMessage: 'The file could not be processed.',
@@ -164,11 +163,12 @@ class FlyoutUI extends Component {
     this.setState({
       failedImports,
       unmatchedReferences: Array.from(unmatchedReferences.values()),
-      isLoading: false,
-      importCount: response.successCount,
       // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
       // returned errors of type missing_references.
-      wasImportSuccessful: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error.type === 'conflict'),
+      status: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error.type === 'conflict')
+        ? 'success'
+        : 'idle',
+      importCount: response.successCount,
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       possibleRecordsToOverwrite: (response.errors || []).filter(obj => obj.error.type === 'conflict'),
@@ -269,7 +269,7 @@ class FlyoutUI extends Component {
 
     this.setState({
       error: undefined,
-      isLoading: true,
+      status: 'loading',
       loadingMessage: undefined,
     });
 
@@ -327,7 +327,7 @@ class FlyoutUI extends Component {
         response = await resolveImportErrors(file, retries);
       } catch (e) {
         this.setState({
-          isLoading: false,
+          status: 'error',
           error: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
             defaultMessage: 'The file could not be processed.',
@@ -345,8 +345,7 @@ class FlyoutUI extends Component {
     }
 
     this.setState({
-      isLoading: false,
-      wasImportSuccessful: true,
+      status: 'success',
       importCount: successImportCount,
       failedImports: importFailures,
     });
@@ -356,7 +355,7 @@ class FlyoutUI extends Component {
     const { services, indexPatterns, intl } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
-    this.setState({ isLoading: true, error: undefined });
+    this.setState({ status: 'loading', error: undefined });
 
     // Log warning on server, don't wait for response
     logLegacyImport();
@@ -366,7 +365,7 @@ class FlyoutUI extends Component {
       contents = await importLegacyFile(file);
     } catch (e) {
       this.setState({
-        isLoading: false,
+        status: 'error',
         error: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
           defaultMessage: 'The file could not be processed.',
@@ -377,7 +376,7 @@ class FlyoutUI extends Component {
 
     if (!Array.isArray(contents)) {
       this.setState({
-        isLoading: false,
+        status: 'error',
         error: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
           defaultMessage: 'Saved objects file format is invalid and cannot be imported.',
@@ -437,8 +436,7 @@ class FlyoutUI extends Component {
       failedImports,
       unmatchedReferences,
       importCount: importedObjectCount,
-      isLoading: false,
-      wasImportSuccessful: unmatchedReferences.length === 0,
+      status: unmatchedReferences.length === 0 ? 'success' : 'idle',
     });
   };
 
@@ -474,7 +472,7 @@ class FlyoutUI extends Component {
 
     this.setState({
       error: undefined,
-      isLoading: true,
+      status: 'loading',
       loadingMessage: undefined,
     });
 
@@ -533,14 +531,14 @@ class FlyoutUI extends Component {
       } catch (e) {
         this.setState({
           error: e.message,
-          isLoading: false,
+          status: 'error',
           loadingMessage: undefined,
         });
         return;
       }
     }
 
-    this.setState({ isLoading: false, wasImportSuccessful: true, importCount });
+    this.setState({ status: 'success', importCount });
   };
 
   onIndexChanged = (id, e) => {
@@ -662,9 +660,9 @@ class FlyoutUI extends Component {
   }
 
   renderError() {
-    const { error } = this.state;
+    const { error, status } = this.state;
 
-    if (!error) {
+    if (status !== 'error') {
       return null;
     }
 
@@ -687,16 +685,15 @@ class FlyoutUI extends Component {
   renderBody() {
     const { intl } = this.props;
     const {
-      isLoading,
+      status,
       loadingMessage,
       isOverwriteAllChecked,
-      wasImportSuccessful,
       importCount,
       failedImports = [],
       isLegacyFile,
     } = this.state;
 
-    if (isLoading) {
+    if (status === 'loading') {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -711,7 +708,7 @@ class FlyoutUI extends Component {
     }
 
     // Kept backwards compatible logic
-    if (failedImports.length && (!this.hasUnmatchedReferences || (isLegacyFile === false && wasImportSuccessful))) {
+    if (failedImports.length && (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))) {
       return (
         <EuiCallOut
           title={(
@@ -752,7 +749,7 @@ class FlyoutUI extends Component {
       );
     }
 
-    if (wasImportSuccessful) {
+    if (status === 'success') {
       if (importCount === 0) {
         return (
           <EuiCallOut
@@ -834,12 +831,12 @@ class FlyoutUI extends Component {
   }
 
   renderFooter() {
-    const { isLoading, wasImportSuccessful } = this.state;
+    const { status } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
 
-    if (wasImportSuccessful) {
+    if (status === 'success') {
       confirmButton = (
         <EuiButton
           onClick={done}
@@ -859,7 +856,7 @@ class FlyoutUI extends Component {
           onClick={this.state.isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
           size="s"
           fill
-          isLoading={isLoading}
+          isLoading={status === 'loading'}
           data-test-subj="importSavedObjectsConfirmBtn"
         >
           <FormattedMessage
@@ -874,7 +871,7 @@ class FlyoutUI extends Component {
           onClick={this.state.isLegacyFile ? this.legacyImport : this.import}
           size="s"
           fill
-          isLoading={isLoading}
+          isLoading={status === 'loading'}
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage
@@ -902,8 +899,8 @@ class FlyoutUI extends Component {
 
   renderSubheader() {
     if (
-      this.state.isLoading ||
-      this.state.wasImportSuccessful
+      this.state.status === 'loading' ||
+      this.state.status === 'success'
     ) {
       return null;
     }

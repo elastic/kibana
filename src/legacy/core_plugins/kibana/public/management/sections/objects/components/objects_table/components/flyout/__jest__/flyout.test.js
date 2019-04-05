@@ -193,8 +193,8 @@ describe('Flyout', () => {
         conflictedSavedObjectsLinkedToSavedSearches: undefined,
         conflictedSearchDocs: undefined,
         importCount: 0,
-        isLoading: false,
-        wasImportSuccessful: false,
+        status: 'idle',
+        error: undefined,
         unmatchedReferences: [
           {
             existingIndexPatternId: 'MyIndexPattern*',
@@ -385,8 +385,8 @@ describe('Flyout', () => {
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importCount: 2,
-        isLoading: false,
-        wasImportSuccessful: false,
+        status: 'idle',
+        error: undefined,
         unmatchedReferences: [
           {
             existingIndexPatternId: 'MyIndexPattern*',
