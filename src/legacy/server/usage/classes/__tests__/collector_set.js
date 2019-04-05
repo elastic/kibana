@@ -157,7 +157,7 @@ describe('CollectorSet', () => {
       expect(collectors.isUsageCollector(randomClass)).to.be(false);
       expect(collectors.isUsageCollector({})).to.be(false);
       expect(collectors.isUsageCollector(null)).to.be(false);
-      expect(collectors.isUsageCollector("")).to.be(false);
+      expect(collectors.isUsageCollector('')).to.be(false);
       expect(collectors.isUsageCollector()).to.be(false);
     });
   });
