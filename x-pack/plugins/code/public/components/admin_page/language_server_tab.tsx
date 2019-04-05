@@ -28,7 +28,7 @@ import { InstallationType } from '../../../common/installation';
 import { LanguageServer, LanguageServerStatus } from '../../../common/language_server';
 import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
-import { JavaIcon, TypeScriptIcon } from '../shared/icons';
+import { JavaIcon, TypeScriptIcon, GoIcon } from '../shared/icons';
 
 const LanguageServerState = styled(EuiTextColor)`
   color: ${props => props.color};
@@ -46,6 +46,8 @@ const LanguageServerLi = (props: {
       return <TypeScriptIcon />;
     } else if (name === 'Java') {
       return <JavaIcon />;
+    } else if (name === 'Go') {
+      return <GoIcon />
     }
   };
 
@@ -135,9 +137,9 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
           <h3>
             {this.props.languageServers.length}
             {this.props.languageServers.length > 1 ? (
-              <span> Language Servers</span>
+              <span> Language servers</span>
             ) : (
-              <span> Language Server</span>
+              <span> Language server</span>
             )}
           </h3>
         </EuiText>

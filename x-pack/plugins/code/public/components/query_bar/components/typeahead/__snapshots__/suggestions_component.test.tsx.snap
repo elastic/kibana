@@ -621,11 +621,21 @@ exports[`render full suggestions component 1`] = `
                 </Link>
               </div>
             </div>
-            <div
-              className="codeSearch__full-text-button"
+            <Link
+              replace={false}
+              to="/search?q=string"
             >
-              Press ⮐ Return for Full Text Search
-            </div>
+              <a
+                href="/search?q=string"
+                onClick={[Function]}
+              >
+                <div
+                  className="codeSearch__full-text-button"
+                >
+                  Press ⮐ Return for Full Text Search
+                </div>
+              </a>
+            </Link>
           </div>
         </div>
       </div>

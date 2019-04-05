@@ -34,6 +34,19 @@ export const JavaIcon = () => (
   </svg>
 );
 
+// TODO: design a go icon
+export const GoIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+    <g fill="none" fillRule="evenodd">
+      <rect width="32" height="32" />
+      <path
+        className="codeIcon__language"
+        fillRule="nonzero"
+      />
+    </g>
+  </svg>
+);
+
 export const BinaryFileIcon = () => (
   <svg
     width="320"
