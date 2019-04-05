@@ -42,6 +42,7 @@ export const timelineQuery = gql`
               _id
               _index
               timestamp
+              message
               system {
                 auth {
                   ssh {

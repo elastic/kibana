@@ -343,7 +343,7 @@ export interface Ecs {
 
   timestamp?: Date | null;
 
-  message?: string[] | null;
+  message?: ToStringArray | null;
 
   user?: UserEcsFields | null;
 
@@ -2250,7 +2250,7 @@ export namespace EcsResolvers {
 
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
-    message?: MessageResolver<string[] | null, TypeParent, Context>;
+    message?: MessageResolver<ToStringArray | null, TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
 
@@ -2336,11 +2336,11 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
-  export type MessageResolver<R = string[] | null, Parent = Ecs, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type MessageResolver<
+    R = ToStringArray | null,
+    Parent = Ecs,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type UserResolver<
     R = UserEcsFields | null,
     Parent = Ecs,

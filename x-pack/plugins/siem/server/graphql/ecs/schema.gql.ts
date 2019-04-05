@@ -352,7 +352,7 @@ export const ecsSchema = gql`
     http: HttpEcsFields
     url: UrlEcsFields
     timestamp: Date
-    message: [String!]
+    message: ToStringArray
     user: UserEcsFields
     process: ProcessEcsFields
     file: FileFields

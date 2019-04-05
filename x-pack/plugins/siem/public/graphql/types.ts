@@ -314,7 +314,7 @@ export interface Ecs {
 
   timestamp?: Date | null;
 
-  message?: string[] | null;
+  message?: ToStringArray | null;
 
   user?: UserEcsFields | null;
 
@@ -2440,6 +2440,8 @@ export namespace GetTimelineQuery {
     _index?: string | null;
 
     timestamp?: Date | null;
+
+    message?: ToStringArray | null;
 
     system?: System | null;
 
