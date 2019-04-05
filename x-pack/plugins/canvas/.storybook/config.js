@@ -39,17 +39,7 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 function loadStories() {
-  // Pull in the built CSS produced by the Kibana server
-  const css = require.context('../../../../built_assets/css', true, /light.css$/);
-  css.keys().forEach(filename => css(filename));
-
-  // Include the legacy styles
-  const uiStyles = require.context(
-    '../../../../src/legacy/ui/public/styles',
-    false,
-    /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
-  );
-  uiStyles.keys().forEach(key => uiStyles(key));
+  require('./dll_contexts');
 
   // Find all files ending in *.examples.ts
   const req = require.context('./..', true, /.examples.tsx$/);
