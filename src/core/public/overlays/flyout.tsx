@@ -85,23 +85,19 @@ export class FlyoutService {
       'data-test-subj'?: string;
     } = {}
   ): FlyoutRef => {
-    const cleanupDom = () => {
-      unmountComponentAtNode(targetDomElement);
-      targetDomElement.innerHTML = '';
-      this.activeFlyout = null;
-    };
-
     // If there is an active flyout session close it before opening a new one.
     if (this.activeFlyout) {
       this.activeFlyout.close();
-      cleanupDom();
     }
 
     const flyout = new FlyoutRef();
 
+    // If a flyout gets closed through it's FlyoutRef, remove it from the dom
     flyout.onClose.then(() => {
       if (this.activeFlyout === flyout) {
-        cleanupDom();
+        unmountComponentAtNode(targetDomElement);
+        targetDomElement.innerHTML = '';
+        this.activeFlyout = null;
       }
     });
 
