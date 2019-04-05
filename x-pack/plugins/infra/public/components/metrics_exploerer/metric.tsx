@@ -11,7 +11,10 @@ import React, { useCallback, useState } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../..//common/color_palette';
-import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
+import {
+  MetricsExplorerAggregation,
+  MetricsExplorerMetric,
+} from '../../../server/routes/metrics_explorer/types';
 import { MetricForm } from './metrics_form';
 
 interface MetricProps {
@@ -26,6 +29,9 @@ interface MetricProps {
 }
 
 const createBadgeName = (metric: MetricsExplorerMetric) => {
+  if (metric.aggregation === MetricsExplorerAggregation.count) {
+    return 'count()';
+  }
   return `${metric.aggregation}(${metric.field || ''})`;
 };
 
