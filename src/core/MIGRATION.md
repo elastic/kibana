@@ -110,7 +110,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, CoreSetup, PluginStop } from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStop } from '../../../core/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -120,7 +120,7 @@ export class Plugin {
     // called when plugin is setting up during Kibana's startup sequence
   }
 
-  public stop(core: PluginStop) {
+  public stop(core: CoreStop) {
     // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
