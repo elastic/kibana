@@ -33,9 +33,9 @@ describe('FlyoutService', () => {
   describe('openFlyout()', () => {
     it('renders a flyout to the DOM', () => {
       const target = document.createElement('div');
-      const flyoutService = new FlyoutService();
+      const flyoutService = new FlyoutService(target);
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      flyoutService.openFlyout(i18nMock, target, <span>Flyout content</span>);
+      flyoutService.openFlyout(i18nMock, <span>Flyout content</span>);
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
     });
     describe('with a currently active flyout', () => {
@@ -43,18 +43,18 @@ describe('FlyoutService', () => {
       let target: HTMLElement, flyoutService: FlyoutService, ref1: FlyoutRef;
       beforeEach(() => {
         target = document.createElement('div');
-        flyoutService = new FlyoutService();
-        ref1 = flyoutService.openFlyout(i18nMock, target, <span>Flyout content 1</span>);
+        flyoutService = new FlyoutService(target);
+        ref1 = flyoutService.openFlyout(i18nMock, <span>Flyout content 1</span>);
       });
       it('replaces the current flyout with a new one', () => {
-        flyoutService.openFlyout(i18nMock, target, <span>Flyout content 2</span>);
+        flyoutService.openFlyout(i18nMock, <span>Flyout content 2</span>);
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(() => ref1.close()).not.toThrowError();
       });
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
-        flyoutService.openFlyout(i18nMock, target, <span>Flyout content 2</span>);
+        flyoutService.openFlyout(i18nMock, <span>Flyout content 2</span>);
         await ref1.close();
         expect(onCloseComplete).toBeCalledTimes(1);
       });
@@ -63,8 +63,8 @@ describe('FlyoutService', () => {
   describe('FlyoutRef#close()', () => {
     it('resolves the onClose Promise', async () => {
       const target = document.createElement('div');
-      const flyoutService = new FlyoutService();
-      const ref = flyoutService.openFlyout(i18nMock, target, <span>Flyout content</span>);
+      const flyoutService = new FlyoutService(target);
+      const ref = flyoutService.openFlyout(i18nMock, <span>Flyout content</span>);
 
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
@@ -74,8 +74,8 @@ describe('FlyoutService', () => {
     });
     it('can be called multiple times on the same FlyoutRef', async () => {
       const target = document.createElement('div');
-      const flyoutService = new FlyoutService();
-      const ref = flyoutService.openFlyout(i18nMock, target, <span>Flyout content</span>);
+      const flyoutService = new FlyoutService(target);
+      const ref = flyoutService.openFlyout(i18nMock, <span>Flyout content</span>);
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       await ref.close();
       expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
@@ -84,9 +84,9 @@ describe('FlyoutService', () => {
     });
     it("on a stale FlyoutRef doesn't affect the active flyout", async () => {
       const target = document.createElement('div');
-      const flyoutService = new FlyoutService();
-      const ref1 = flyoutService.openFlyout(i18nMock, target, <span>Flyout content 1</span>);
-      const ref2 = flyoutService.openFlyout(i18nMock, target, <span>Flyout content 2</span>);
+      const flyoutService = new FlyoutService(target);
+      const ref1 = flyoutService.openFlyout(i18nMock, <span>Flyout content 1</span>);
+      const ref2 = flyoutService.openFlyout(i18nMock, <span>Flyout content 2</span>);
       const onCloseComplete = jest.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();

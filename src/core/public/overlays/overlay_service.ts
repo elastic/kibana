@@ -28,17 +28,15 @@ interface Deps {
 
 /** @internal */
 export class OverlayService {
-  private flyoutService: FlyoutService = new FlyoutService();
+  private flyoutService: FlyoutService;
 
-  constructor(private readonly targetDomElement: HTMLElement) {}
+  constructor(targetDomElement: HTMLElement) {
+    this.flyoutService = new FlyoutService(targetDomElement);
+  }
 
   public setup({ i18n }: Deps): OverlaySetup {
     return {
-      openFlyout: this.flyoutService.openFlyout.bind(
-        this.flyoutService,
-        i18n,
-        this.targetDomElement
-      ),
+      openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
     };
   }
 }

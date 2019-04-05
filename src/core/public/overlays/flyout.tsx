@@ -69,6 +69,8 @@ export class FlyoutRef {
 export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
 
+  constructor(private readonly targetDomElement: Element) {}
+
   /**
    * Opens a flyout panel with the given component inside. You can use
    * `close()` on the returned FlyoutRef to close the flyout.
@@ -78,7 +80,6 @@ export class FlyoutService {
    */
   public openFlyout = (
     i18n: I18nSetup,
-    targetDomElement: Element,
     flyoutChildren: React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;
@@ -95,8 +96,8 @@ export class FlyoutService {
     // If a flyout gets closed through it's FlyoutRef, remove it from the dom
     flyout.onClose.then(() => {
       if (this.activeFlyout === flyout) {
-        unmountComponentAtNode(targetDomElement);
-        targetDomElement.innerHTML = '';
+        unmountComponentAtNode(this.targetDomElement);
+        this.targetDomElement.innerHTML = '';
         this.activeFlyout = null;
       }
     });
@@ -107,7 +108,7 @@ export class FlyoutService {
       <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
         {flyoutChildren}
       </EuiFlyout>,
-      targetDomElement
+      this.targetDomElement
     );
 
     return flyout;
