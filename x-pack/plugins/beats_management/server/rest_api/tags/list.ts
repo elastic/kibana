@@ -27,8 +27,7 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     }),
   },
   handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
-    let tags: BeatTag[];
-    tags = await libs.tags.getAll(
+    const tags = await libs.tags.getAll(
       request.user,
       request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
     );

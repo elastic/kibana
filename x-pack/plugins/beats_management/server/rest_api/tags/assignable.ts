@@ -20,9 +20,8 @@ export const createAssignableTagsRoute = (libs: CMServerLibs) => ({
     const beatIdString: string = request.params.beatIds;
     const beatIds = beatIdString.split(',').filter((id: string) => id.length > 0);
 
-    let tags: BeatTag[];
     const beats = await libs.beats.getByIds(request.user, beatIds);
-    tags = await libs.tags.getNonConflictingTags(
+    const tags = await libs.tags.getNonConflictingTags(
       request.user,
       flatten(beats.map(beat => beat.tags))
     );
