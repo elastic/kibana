@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function systemLogsSpecProvider(server, context) {
   const moduleName = 'system';
-  const geoipRequired = true;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM'];
   return {
     id: 'systemLogs',
@@ -59,7 +57,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };
