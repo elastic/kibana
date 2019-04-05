@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
@@ -31,7 +30,8 @@ describe('DetailView', () => {
   it('should render Discover button', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: ({
+      transaction: undefined,
+      error: {
         '@timestamp': 'myTimestamp',
         http: { request: { method: 'GET' } },
         url: { full: 'myUrl' },
@@ -39,8 +39,9 @@ describe('DetailView', () => {
         user: { id: 'myUserId' },
         error: { exception: { handled: true } },
         transaction: { id: 'myTransactionId', sampled: true }
-      } as unknown) as APMError
+      } as any
     };
+
     const wrapper = shallow(
       <DetailView
         errorGroup={errorGroup}
@@ -56,7 +57,8 @@ describe('DetailView', () => {
   it('should render StickyProperties', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: {} as APMError
+      error: {} as any,
+      transaction: undefined
     };
     const wrapper = shallow(
       <DetailView
@@ -72,11 +74,12 @@ describe('DetailView', () => {
   it('should render tabs', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: ({
+      transaction: undefined,
+      error: {
         '@timestamp': 'myTimestamp',
         service: {},
         user: {}
-      } as unknown) as APMError
+      } as any
     };
     const wrapper = shallow(
       <DetailView
@@ -93,10 +96,11 @@ describe('DetailView', () => {
   it('should render TabContent', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: ({
+      transaction: undefined,
+      error: {
         '@timestamp': 'myTimestamp',
         context: {}
-      } as unknown) as APMError
+      } as any
     };
     const wrapper = shallow(
       <DetailView
