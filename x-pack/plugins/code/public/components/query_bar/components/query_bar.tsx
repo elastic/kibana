@@ -161,7 +161,7 @@ export class CodeQueryBar extends Component<Props, State> {
       if (prevGroupIndex < 0) {
         prevGroupIndex = this.state.suggestionGroups.length - 1;
       }
-      const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[currGroupIndex];
+      const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[prevGroupIndex];
       prevItemIndex = group.suggestions.length - 1;
     }
 
@@ -221,7 +221,9 @@ export class CodeQueryBar extends Component<Props, State> {
         isSuggestionsVisible: false,
       },
       () => {
-        this.props.onSelect(item);
+        if (item) {
+          this.props.onSelect(item);
+        }
       }
     );
   };
