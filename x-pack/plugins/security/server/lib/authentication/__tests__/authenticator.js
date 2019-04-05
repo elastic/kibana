@@ -454,6 +454,41 @@ describe('Authenticator', () => {
       sinon.assert.notCalled(session.clear);
     });
 
+    it('clears session if it belongs to not configured provider.', async () => {
+      // Add `kbn-xsrf` header to the raw part of the request to make `can_redirect_request`
+      // think that it's AJAX request and redirect logic shouldn't be triggered.
+      const systemAPIRequest = requestFixture({
+        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' }
+      });
+      const notSystemAPIRequest = requestFixture({
+        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' }
+      });
+
+      session.get.withArgs(systemAPIRequest).resolves({
+        state: { accessToken: 'some old token' },
+        provider: 'token'
+      });
+
+      session.get.withArgs(notSystemAPIRequest).resolves({
+        state: { accessToken: 'some old token' },
+        provider: 'token'
+      });
+
+      session.clear.resolves();
+
+      server.plugins.kibana.systemApi.isSystemApiRequest
+        .withArgs(systemAPIRequest).returns(true)
+        .withArgs(notSystemAPIRequest).returns(false);
+
+      const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
+      expect(systemAPIAuthenticationResult.notHandled()).to.be(true);
+      sinon.assert.calledOnce(session.clear);
+
+      const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
+      expect(notSystemAPIAuthenticationResult.notHandled()).to.be(true);
+      sinon.assert.calledTwice(session.clear);
+    });
+
     it('complements user with `scope` property.', async () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
@@ -517,6 +552,20 @@ describe('Authenticator', () => {
       sinon.assert.calledWithExactly(session.clear, request);
       expect(deauthenticationResult.redirected()).to.be(true);
       expect(deauthenticationResult.redirectURL).to.be('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED');
+    });
+
+    it('only clears session if it belongs to not configured provider.', async () => {
+      const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
+      session.get.withArgs(request).resolves({
+        state: {},
+        provider: 'token'
+      });
+
+      const deauthenticationResult = await deauthenticate(request);
+
+      sinon.assert.calledOnce(session.clear);
+      sinon.assert.calledWithExactly(session.clear, request);
+      expect(deauthenticationResult.notHandled()).to.be(true);
     });
   });
 
