@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DatasourceField, SelectOperation } from '../../../common';
+import { DatasourceField, fieldToOperation, SelectOperation } from '../../../common';
 import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
@@ -22,8 +22,8 @@ export function XAxisEditor({
   const onDropField = (field: DatasourceField) => {
     const operation: SelectOperation =
       field.type === 'date'
-        ? { operation: 'date_histogram', argument: { field: field.name, interval: '1m' } }
-        : { operation: 'terms', argument: { field: field.name, size: 5 } };
+        ? fieldToOperation(field, 'date_histogram')
+        : fieldToOperation(field, 'terms');
 
     onChangeVisModel(updateColumn(col, operation, visModel));
   };

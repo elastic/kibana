@@ -36,7 +36,7 @@ export function normalizeType(type: string) {
   if (normalizedType) {
     return normalizedType;
   }
-  throw new Error(`Canvas does not yet support type: ${type}`);
+  throw new Error(`Type not supported: ${type}`);
 }
 
 /**

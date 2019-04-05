@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DatasourceField } from '../../../common';
+import { DatasourceField, fieldToOperation } from '../../../common';
 import { selectColumn, updateColumn, VisModel } from '../../../public';
 import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
@@ -24,7 +24,7 @@ export function YAxisEditor({
   const onDropField = (field: DatasourceField) => {
     const operation = fieldName
       ? { ...currentOperation, argument: { ...currentOperation.argument, field: field.name } }
-      : { operation: 'sum', argument: { field: field.name } };
+      : fieldToOperation(field, 'sum');
 
     onChangeVisModel(updateColumn(col, operation, visModel));
   };

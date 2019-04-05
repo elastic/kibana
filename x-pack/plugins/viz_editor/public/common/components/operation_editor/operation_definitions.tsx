@@ -20,6 +20,7 @@ import {
   WindowFunction,
   WindowOperation,
 } from '../../../../common';
+import { operationToName } from '../../lib';
 
 const FixedEuiRange = EuiRange as React.ComponentType<any>;
 
@@ -231,7 +232,7 @@ function windowOperationEditor(props: OperationEditorProps) {
 
 export const operations: OperationDefinition[] = [
   {
-    name: 'Values',
+    name: operationToName('column'),
     type: 'column',
     applicableFields: (fields, { allowedColumnTypes }) =>
       fields.filter(({ type }) => (allowedColumnTypes ? allowedColumnTypes.includes(type) : true)),
@@ -257,7 +258,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Count',
+    name: operationToName('count'),
     type: 'count',
     applicableFields: () => [],
     toSelectClause(): CountOperation {
@@ -276,7 +277,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Average',
+    name: operationToName('avg'),
     type: 'avg',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
@@ -302,7 +303,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Date histogram',
+    name: operationToName('date_histogram'),
     type: 'date_histogram',
     applicableFields: dateAggFields,
     editor: dateHistogramOperationEditor,
@@ -329,7 +330,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Unique count',
+    name: operationToName('cardinality'),
     type: 'cardinality',
     applicableFields: aggregatableFields,
     editor: fieldOperationEditor,
@@ -358,7 +359,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Top values',
+    name: operationToName('terms'),
     type: 'terms',
     applicableFields: aggregatableFields,
     editor: fieldOperationEditor,
@@ -388,7 +389,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Sum',
+    name: operationToName('sum'),
     type: 'sum',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
@@ -414,7 +415,7 @@ export const operations: OperationDefinition[] = [
   },
 
   {
-    name: 'Window',
+    name: operationToName('window'),
     type: 'window',
     applicableFields: numericAggFields,
     editor: windowOperationEditor,
