@@ -97,7 +97,7 @@
     margin-top: $euiSizeS;
   }
 
-  label {
+  label:not([class^="eui"]) {
     @include __legacyLabelStyles__bad;
     display: block;
   }
@@ -224,8 +224,4 @@
 .visEditorSidebar__aggParamFormRow {
   margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
-}
-
-.visEditorSidebar__switchControl label{
-  display: initial;
 }

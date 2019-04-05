@@ -44,7 +44,6 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
         checked={value}
         data-test-subj="dropPartialBucketsCheckbox"
         onChange={ev => setValue(ev.target.checked)}
-        className="visEditorSidebar__switchControl"
       />
     </EuiToolTip>
   );
