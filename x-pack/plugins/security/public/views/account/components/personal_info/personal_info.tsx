@@ -7,7 +7,6 @@ import {
   // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,6 +20,7 @@ interface Props {
 export const PersonalInfo = (props: Props) => {
   return (
     <EuiDescribedFormGroup
+      fullWidth
       title={
         <h3>
           <FormattedMessage
@@ -36,22 +36,21 @@ export const PersonalInfo = (props: Props) => {
         />
       }
     >
-      <EuiFormRow>
-        <EuiText>
-          <div>
-            <strong title="username" data-test-subj="username">
+      <EuiFormRow fullWidth>
+        <EuiText size="s">
+          <dl>
+            <dt title="username" data-test-subj="username">
               {props.user.username}
-            </strong>
-            <EuiSpacer size="s" />
-            <strong title="email" data-test-subj="email">
+            </dt>
+            <dd title="email" data-test-subj="email">
               {props.user.email || (
                 <FormattedMessage
                   id="xpack.security.account.noEmailMessage"
                   defaultMessage="(no email address)"
                 />
               )}
-            </strong>
-          </div>
+            </dd>
+          </dl>
         </EuiText>
       </EuiFormRow>
     </EuiDescribedFormGroup>

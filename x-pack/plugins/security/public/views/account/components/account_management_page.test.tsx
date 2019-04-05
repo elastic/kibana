@@ -38,8 +38,8 @@ describe('<AccountManagementPage>', () => {
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(
       user.full_name
     );
-    expect(wrapper.find('strong[data-test-subj="username"]').text()).toEqual(user.username);
-    expect(wrapper.find('strong[data-test-subj="email"]').text()).toEqual(user.email);
+    expect(wrapper.find('[data-test-subj="username"]').text()).toEqual(user.username);
+    expect(wrapper.find('[data-test-subj="email"]').text()).toEqual(user.email);
   });
 
   it(`displays username when full_name is not provided`, () => {
@@ -48,10 +48,10 @@ describe('<AccountManagementPage>', () => {
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(user.username);
   });
 
-  it(`displays a placeholder when no email address is provided`, () => {
+  it(`displays a placeholder when n do email address is provided`, () => {
     const user: User = createUser({ withEmail: false });
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
-    expect(wrapper.find('strong[data-test-subj="email"]').text()).toEqual('(no email address)');
+    expect(wrapper.find('[data-test-subj="email"]').text()).toEqual('(no email address)');
   });
 
   it(`displays change password form for users in the native realm`, () => {

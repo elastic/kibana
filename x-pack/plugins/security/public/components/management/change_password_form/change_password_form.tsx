@@ -64,6 +64,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         {this.props.isUserChangingOwnPassword && (
           <EuiFormRow
             {...this.validateCurrentPassword()}
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.security.account.changePasswordForm.currentPasswordLabel"
@@ -77,12 +78,20 @@ export class ChangePasswordForm extends Component<Props, State> {
               value={this.state.currentPassword}
               onChange={this.onCurrentPasswordChange}
               disabled={this.state.changeInProgress}
+              fullWidth
             />
           </EuiFormRow>
         )}
 
         <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.security.account.changePasswordForm.passwordRequirements"
+              defaultMessage="6 characters minimum"
+            />
+          }
           {...this.validateNewPassword()}
+          fullWidth
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.newPasswordLabel"
@@ -96,10 +105,12 @@ export class ChangePasswordForm extends Component<Props, State> {
             value={this.state.newPassword}
             onChange={this.onNewPasswordChange}
             disabled={this.state.changeInProgress}
+            fullWidth
           />
         </EuiFormRow>
         <EuiFormRow
           {...this.validateConfirmPassword()}
+          fullWidth
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.confirmPasswordLabel"
@@ -113,10 +124,11 @@ export class ChangePasswordForm extends Component<Props, State> {
             value={this.state.confirmPassword}
             onChange={this.onConfirmPasswordChange}
             disabled={this.state.changeInProgress}
+            fullWidth
           />
         </EuiFormRow>
         <EuiFormRow>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={this.onChangePasswordClick}
@@ -197,7 +209,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         error: (
           <FormattedMessage
             id="xpack.security.account.currentPasswordRequired"
-            defaultMessage="Please enter your current password"
+            defaultMessage="Enter your current password"
           />
         ),
       };
@@ -286,7 +298,7 @@ export class ChangePasswordForm extends Component<Props, State> {
 
   private handleChangePasswordSuccess = () => {
     toastNotifications.addSuccess({
-      text: i18n.translate('xpack.security.account.changePasswordSuccess', {
+      title: i18n.translate('xpack.security.account.changePasswordSuccess', {
         defaultMessage: 'Your password has been changed',
       }),
       'data-test-subj': 'passwordUpdateSuccess',

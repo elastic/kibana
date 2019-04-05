@@ -27,10 +27,7 @@ export class ChangePassword extends Component<Props, {}> {
     const canChangePassword = canUserChangePassword(this.props.user);
 
     const changePasswordTitle = (
-      <FormattedMessage
-        id="xpack.security.account.changePasswordTitle"
-        defaultMessage="Change password"
-      />
+      <FormattedMessage id="xpack.security.account.changePasswordTitle" defaultMessage="Password" />
     );
 
     if (canChangePassword) {
@@ -42,6 +39,7 @@ export class ChangePassword extends Component<Props, {}> {
   private getChangePasswordForm = (changePasswordTitle: React.ReactElement<any>) => {
     return (
       <EuiDescribedFormGroup
+        fullWidth
         title={<h3>{changePasswordTitle}</h3>}
         description={
           <p>
@@ -60,6 +58,7 @@ export class ChangePassword extends Component<Props, {}> {
   private getChangePasswordUnavailable(changePasswordTitle: React.ReactElement<any>) {
     return (
       <EuiDescribedFormGroup
+        fullWidth
         title={<h3>{changePasswordTitle}</h3>}
         description={
           <p>
