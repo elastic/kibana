@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -151,7 +153,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   };
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: InfraKibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>> = [];

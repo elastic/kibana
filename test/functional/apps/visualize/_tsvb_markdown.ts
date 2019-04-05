@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
@@ -31,6 +31,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
     await visualBuilder.markdownSwitchSubTab('markdown');
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
     rerenderedTable.forEach(row => {
+      // eslint-disable-next-line no-unused-expressions
       variableName === 'label'
         ? expect(row.key).to.include.string(checkedValue)
         : expect(row.key).to.not.include.string(checkedValue);
@@ -105,6 +106,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
         table.forEach((row, index) => {
           // exception: last index for variable is always: {{count.label}}
+          // eslint-disable-next-line no-unused-expressions
           index === table.length - 1
             ? expect(row.key).to.not.include.string(VARIABLE)
             : expect(row.key).to.include.string(VARIABLE);
