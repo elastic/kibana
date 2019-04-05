@@ -65,7 +65,7 @@ export class BulkUploader {
    * @param {CollectorSet} collectorSet object to use for initial the fetch/upload and fetch/uploading on interval
    * @return undefined
    */
-start(collectorSet) {
+  start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
     const filterCollectorSet = _collectorSet => {
       const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
