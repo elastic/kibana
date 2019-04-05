@@ -11,16 +11,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPopover
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
 import { idx } from '../../../../common/idx';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
-import { getKibanaHref } from '../Links/url_helpers';
+import { InfraLink } from '../Links/InfraLink';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -47,7 +45,6 @@ function ActionMenuButton({ onClick }: { onClick: () => void }) {
 
 interface Props {
   readonly transaction: Transaction;
-  readonly location: Location;
 }
 
 interface State {
@@ -68,12 +65,11 @@ export class TransactionActionMenu extends React.Component<Props, State> {
   };
 
   public getInfraActions() {
-    const { transaction, location } = this.props;
+    const { transaction } = this.props;
     const hostName = idx(transaction, _ => _.host.hostname);
     const podId = idx(transaction, _ => _.kubernetes.pod.uid);
     const containerId = idx(transaction, _ => _.container.id);
     const traceId = idx(transaction, _ => _.trace.id);
-    const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
@@ -84,8 +80,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
           { defaultMessage: 'Show pod logs' }
         ),
-        target: podId,
-        hash: `/link-to/pod-logs/${podId}`,
+        condition: podId,
+        path: `/link-to/pod-logs/${podId}`,
         query: { time }
       },
       {
@@ -94,8 +90,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
           { defaultMessage: 'Show container logs' }
         ),
-        target: containerId,
-        hash: `/link-to/container-logs/${containerId}`,
+        condition: containerId,
+        path: `/link-to/container-logs/${containerId}`,
         query: { time }
       },
       {
@@ -104,8 +100,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
           { defaultMessage: 'Show host logs' }
         ),
-        target: hostName,
-        hash: `/link-to/host-logs/${hostName}`,
+        condition: hostName,
+        path: `/link-to/host-logs/${hostName}`,
         query: { time }
       },
       {
@@ -124,8 +120,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
           { defaultMessage: 'Show pod metrics' }
         ),
-        target: podId,
-        hash: `/link-to/pod-detail/${podId}`,
+        condition: podId,
+        path: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery
       },
       {
@@ -134,8 +130,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
           { defaultMessage: 'Show container metrics' }
         ),
-        target: containerId,
-        hash: `/link-to/container-detail/${containerId}`,
+        condition: containerId,
+        path: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery
       },
       {
@@ -144,20 +140,20 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
           { defaultMessage: 'Show host metrics' }
         ),
-        target: hostName,
-        hash: `/link-to/host-detail/${hostName}`,
+        condition: hostName,
+        path: `/link-to/host-detail/${hostName}`,
         query: infraMetricsQuery
       }
     ]
-      .filter(({ target }) => Boolean(target))
-      .map(({ icon, label, hash, query }, index) => {
-        const href = getKibanaHref({ location, pathname, hash, query });
-
+      .filter(({ condition }) => Boolean(condition))
+      .map(({ icon, label, path, query }, index) => {
         return (
-          <EuiContextMenuItem icon={icon} href={href} key={index}>
+          <EuiContextMenuItem icon={icon} key={index}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiLink>{label}</EuiLink>
+                <InfraLink path={path} query={query}>
+                  {label}
+                </InfraLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="popout" />

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
 import { pick } from 'lodash';
 import qs from 'querystring';
-import chrome from 'ui/chrome';
-import url from 'url';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 
@@ -17,7 +14,7 @@ export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
-export function fromQuery(query: APMQueryParams) {
+export function fromQuery(query: StringMap<any>) {
   return qs.stringify(query);
 }
 
@@ -40,52 +37,6 @@ export function getSearchWithCurrentTimeRange(
     ...query
   };
   return fromQuery(nextQuery);
-}
-
-function getSearchString(
-  location: Location,
-  pathname: string,
-  query: APMQueryParams = {}
-) {
-  const currentQuery = toQuery(location.search);
-
-  // Preserve existing params for apm links
-  const isApmLink = pathname.includes('app/apm') || pathname === '';
-  if (isApmLink) {
-    const nextQuery = {
-      ...TIMEPICKER_DEFAULTS,
-      ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-      ...query
-    };
-    return fromQuery(nextQuery);
-  }
-
-  return fromQuery(query);
-}
-
-export type QueryStringMap = StringMap<
-  string | number | boolean | undefined | null
->;
-
-export interface KibanaHrefArgs {
-  location: Location;
-  pathname?: string;
-  hash?: string;
-  query?: QueryStringMap;
-}
-
-export function getKibanaHref({
-  location,
-  pathname = '',
-  hash,
-  query = {}
-}: KibanaHrefArgs): string {
-  const search = getSearchString(location, pathname, query);
-  const href = url.format({
-    pathname: chrome.addBasePath(pathname),
-    hash: `${hash}?${search}`
-  });
-  return href;
 }
 
 export interface APMQueryParams {

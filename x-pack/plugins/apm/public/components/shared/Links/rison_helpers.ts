@@ -16,13 +16,7 @@ export interface RisonDecoded {
   _a?: StringMap<any>;
 }
 
-export type RisonAPMQueryParams = APMQueryParams & RisonDecoded;
-export interface RisonHrefArgs {
-  location: Location;
-  pathname?: string;
-  hash?: string;
-  query?: RisonAPMQueryParams;
-}
+type RisonAPMQueryParams = APMQueryParams & RisonDecoded;
 
 function createG(query: RisonAPMQueryParams) {
   const g: RisonDecoded['_g'] = { ...query._g };
