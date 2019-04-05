@@ -42,7 +42,7 @@ interface Params {
 }
 
 /** @internal */
-// tslint:disable-next-line no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CoreContext {}
 
 /**
