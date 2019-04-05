@@ -309,7 +309,8 @@ class FlyoutUI extends Component {
 
       // Scenario where we skip everything if nothing to retry
       if (retries.length === 0) {
-        importFailures = [];
+        // Canceld overwrites aren't failures anymore
+        importFailures = importFailures.filter(failure => failure.error.type !== 'conflict' || getOverwriteDecision(failure));
         break;
       }
 
@@ -726,7 +727,7 @@ class FlyoutUI extends Component {
                   return intl.formatMessage(
                     {
                       id: 'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
-                      defaultMessage: '{type} (id: {id}) could not locate {refType} (id: {refId})',
+                      defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
                     },
                     {
                       id: obj.id,

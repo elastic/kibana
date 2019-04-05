@@ -581,8 +581,7 @@ class ObjectsTableUI extends Component {
               <p>
                 <FormattedMessage
                   id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-                  defaultMessage="Select which types to export. The number in parentheses indicates
-                  how many of this type are available to export."
+                  defaultMessage="Select which types to export."
                 />
               </p>
               <EuiCheckboxGroup
@@ -611,7 +610,7 @@ class ObjectsTableUI extends Component {
                   label={(
                     <FormattedMessage
                       id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include all nested references"
+                      defaultMessage="Include dependencies"
                     />
                   )}
                   checked={isIncludeReferencesDeepChecked}
@@ -632,7 +631,7 @@ class ObjectsTableUI extends Component {
                     <EuiButton fill onClick={this.onExportAll}>
                       <FormattedMessage
                         id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                        defaultMessage="Export All"
+                        defaultMessage="Export all"
                       />
                     </EuiButton>
                   </EuiFlexItem>
