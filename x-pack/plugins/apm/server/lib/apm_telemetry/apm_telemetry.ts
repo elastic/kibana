@@ -8,7 +8,7 @@ import { Server } from 'hapi';
 import { countBy } from 'lodash';
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { isAgentName } from '../../../common/agent_name';
-import { getSavedObjectsClient } from '../saved_objects/client';
+import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 
 export const APM_TELEMETRY_DOC_ID = 'apm-telemetry';
 

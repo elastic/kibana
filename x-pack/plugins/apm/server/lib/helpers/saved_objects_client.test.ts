@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSavedObjectsClient } from '../client';
+import { getSavedObjectsClient } from './saved_objects_client';
 
 describe('saved_objects/client', () => {
   describe('getSavedObjectsClient', () => {

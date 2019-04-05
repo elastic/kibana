@@ -6,7 +6,7 @@
 import { Server } from 'hapi';
 // @ts-ignore
 import { getSavedObjects } from '../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/saved_objects/get_saved_objects';
-import { getSavedObjectsClient } from '../saved_objects/client';
+import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 
 export async function ensureIndexPatternExists(server: Server) {
   const config = server.config();
