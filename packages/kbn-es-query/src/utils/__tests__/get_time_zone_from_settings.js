@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// TINA WIP
+
 import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { getTimeZoneFromSettings } from '../get_time_zone_from_settings';
 
 // following similar methodology to kibana/src/legacy/core_plugins/kibana/common/field_formats/types/__tests__/date.js
 
-// eslint-disable-next-line mocha/no-exclusive-tests
 describe('get timezone from settings', function () {
   let mockConfig;
 
