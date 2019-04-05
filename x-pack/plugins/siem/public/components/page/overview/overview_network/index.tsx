@@ -41,7 +41,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, poll, startDate }) => 
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton href={`#/link-to/network/`}>
+          <EuiButton href="#/link-to/network/">
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
               defaultMessage="View Network"

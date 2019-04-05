@@ -5,7 +5,6 @@
  */
 
 import {
-  // @ts-ignore
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,

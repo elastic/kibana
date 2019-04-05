@@ -41,7 +41,7 @@ export const OverviewHost = pure<OwnProps>(({ endDate, poll, startDate }) => (
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton href={`#/link-to/hosts/`}>
+          <EuiButton href="#/link-to/hosts/">
             <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
           </EuiButton>
         </EuiFlexItem>
