@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldNumber, EuiForm, EuiFormRow, EuiIcon, EuiSelect } from '@elastic/eui';
+import { EuiFieldNumber, EuiForm, EuiFormRow, EuiIcon, EuiRange, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import {
   AvgOperation,
@@ -20,6 +20,8 @@ import {
   WindowFunction,
   WindowOperation,
 } from '../../../../common';
+
+const FixedEuiRange = EuiRange as React.ComponentType<any>;
 
 export interface OperationEditorProps {
   children: any;
@@ -84,6 +86,70 @@ function fieldOperationEditor(props: OperationEditorProps) {
       }
       aria-label="Field"
     />
+  );
+}
+
+function dateHistogramOperationEditor(props: OperationEditorProps) {
+  const { column, visModel, onColumnChange } = props;
+  const operation = column as DateHistogramOperation;
+  const { argument } = operation;
+  const opDefinition = getOperationDefinition(column.operation);
+  const options = opDefinition
+    .applicableFields(visModel.datasource.fields, props)
+    .map((f: DatasourceField) => ({
+      value: f.name,
+      text: f.name,
+    }));
+
+  const intervals = ['M', 'w', 'd', 'h'];
+
+  function intervalToNumeric(interval: string) {
+    return intervals.indexOf(interval);
+  }
+
+  function numericToInterval(i: number) {
+    return intervals[i];
+  }
+
+  return (
+    <EuiForm>
+      <EuiFormRow label="Field">
+        <EuiSelect
+          options={options}
+          value={argument && argument.field}
+          onChange={e =>
+            onColumnChange({
+              ...operation,
+              argument: {
+                ...argument,
+                field: e.target.value,
+              },
+            })
+          }
+          aria-label="Field"
+        />
+      </EuiFormRow>
+      <EuiFormRow label="Level of Detail">
+        <FixedEuiRange
+          min={0}
+          max={intervals.length}
+          step={1}
+          value={argument && intervalToNumeric(argument.interval)}
+          showTicks
+          ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
+          onChange={(e: any) =>
+            onColumnChange({
+              ...operation,
+              argument: {
+                ...argument,
+                interval: numericToInterval(Number(e.target.value)),
+              },
+            })
+          }
+          aria-label="Level of Detail"
+        />
+      </EuiFormRow>
+    </EuiForm>
   );
 }
 
@@ -239,7 +305,7 @@ export const operations: OperationDefinition[] = [
     name: 'Date histogram',
     type: 'date_histogram',
     applicableFields: dateAggFields,
-    editor: fieldOperationEditor,
+    editor: dateHistogramOperationEditor,
     toSelectClause(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]

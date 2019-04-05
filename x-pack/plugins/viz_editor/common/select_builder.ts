@@ -19,7 +19,7 @@ const operationTemplate: OperationTemplate = {
     operation: 'date_histogram',
     argument: {
       field: '',
-      interval: 'auto',
+      interval: 'd',
     },
   },
   window: {

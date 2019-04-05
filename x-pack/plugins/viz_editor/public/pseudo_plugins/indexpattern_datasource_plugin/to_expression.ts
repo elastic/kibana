@@ -59,7 +59,7 @@ function queryToEsAggsConfigs(query: Query): any {
           schema: 'segment',
           params: {
             field: selectOperation.argument.field,
-            interval: 'd',
+            interval: selectOperation.argument.interval,
           },
         };
     }
