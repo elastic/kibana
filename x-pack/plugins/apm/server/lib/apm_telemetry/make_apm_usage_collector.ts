@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { getSavedObjectsClient } from '../saved_objects/client';
+import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 import { APM_TELEMETRY_DOC_ID, createApmTelementry } from './apm_telemetry';
 
 // TODO this type should be defined by the platform
