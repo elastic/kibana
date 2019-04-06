@@ -23,7 +23,7 @@ echo $PATH
 echo ---
 yarn bin
 echo ---
-ls $(yarn bin)
+ls $(FORCE_COLOR=0 yarn bin)
 echo ---
 which github-checks-reporter
 github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
