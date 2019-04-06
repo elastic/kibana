@@ -22,25 +22,50 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { pingsQuery } from '../queries';
 
-interface PingListProps {
-  loading: boolean;
-  pingResults?: PingResults;
-  selectedOption: EuiComboBoxOptionProps;
-  selectedOptionChanged: (selectedOptions: EuiComboBoxOptionProps[]) => void;
-  statusOptions: EuiComboBoxOptionProps[];
+interface PingListQueryResult {
+  allPings?: PingResults;
 }
 
-export const PingList = ({
+interface PingListProps {
+  onUpdateApp: () => void;
+  onSelectedStatusUpdate: (status: string) => void;
+}
+
+type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
+
+export const PingListComponent = ({
+  data,
   loading,
-  pingResults,
-  selectedOption,
-  selectedOptionChanged,
-  statusOptions,
-}: PingListProps) => {
+  onSelectedStatusUpdate,
+  onUpdateApp,
+}: Props) => {
+  const [statusOptions] = useState<EuiComboBoxOptionProps[]>([
+    {
+      label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+        defaultMessage: 'All',
+      }),
+      value: '',
+    },
+    {
+      label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+        defaultMessage: 'Up',
+      }),
+      value: 'up',
+    },
+    {
+      label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+        defaultMessage: 'Down',
+      }),
+      value: 'down',
+    },
+  ]);
+  const [selectedOption, setSelectedOption] = useState<EuiComboBoxOptionProps>(statusOptions[2]);
   const columns = [
     {
       field: 'monitor.status',
@@ -112,11 +137,17 @@ export const PingList = ({
         ),
     },
   ];
+  useEffect(
+    () => {
+      onUpdateApp();
+    },
+    [selectedOption]
+  );
   let pings: Ping[] = [];
   let total: number = 0;
-  if (pingResults && pingResults.pings) {
-    pings = pingResults.pings;
-    total = pingResults.total;
+  if (data && data.allPings && data.allPings.pings) {
+    pings = data.allPings.pings;
+    total = data.allPings.total;
     const hasStatus: boolean = pings.reduce(
       (hasHttpStatus: boolean, currentPing: Ping) =>
         hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
@@ -164,12 +195,20 @@ export const PingList = ({
                 <EuiComboBox
                   isClearable={false}
                   singleSelection={{ asPlainText: true }}
-                  selectedOptions={[selectedOption]}
+                  selectedOptions={[selectedOption || statusOptions[2]]}
                   options={statusOptions}
                   aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                     defaultMessage: 'Status',
                   })}
-                  onChange={selectedOptionChanged}
+                  onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
+                    if (selectedOptions[0]) {
+                      setSelectedOption(selectedOptions[0]);
+                    }
+                    if (typeof selectedOptions[0].value === 'string') {
+                      // @ts-ignore it's definitely a string
+                      onSelectedStatusUpdate(selectedOptions[0].value);
+                    }
+                  }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -186,3 +225,8 @@ export const PingList = ({
     </Fragment>
   );
 };
+
+export const PingList = withUptimeGraphQL<PingListQueryResult, PingListProps>(
+  PingListComponent,
+  pingsQuery
+);

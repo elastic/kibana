@@ -20,13 +20,16 @@ import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorListItem, Ping } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { errorListQuery } from '../queries/error_list_query';
 
-interface ErrorListProps {
-  loading: boolean;
+interface ErrorListQueryResult {
   errorList?: ErrorListItem[];
 }
 
-export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
+type Props = UptimeGraphQLQueryProps<ErrorListQueryResult>;
+
+export const ErrorListComponent = ({ data, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -35,7 +38,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
     </EuiTitle>
     <EuiInMemoryTable
       loading={loading}
-      items={errorList}
+      items={(data && data.errorList) || undefined}
       columns={[
         {
           field: 'count',
@@ -101,4 +104,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
       pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
     />
   </EuiPanel>
+);
+
+export const ErrorList = withUptimeGraphQL<ErrorListQueryResult>(
+  ErrorListComponent,
+  errorListQuery
 );

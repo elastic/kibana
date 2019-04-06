@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiComboBoxOptionProps,
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
   // @ts-ignore No typings for EuiSuperSelect
@@ -13,15 +12,16 @@ import {
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import {
-  MonitorChartsQuery,
-  MonitorPageTitleQuery,
-  MonitorStatusBarQuery,
-  PingListQuery,
-} from '../components/queries';
-import { UptimeCommonProps } from '../uptime_app';
+  MonitorCharts,
+  MonitorPageTitle,
+  MonitorStatusBar,
+  PingList,
+} from '../components/functional';
+import { UMUpdateBreadcrumbs } from '../lib/lib';
+import { UptimeContext } from '../uptime_context';
 
 interface MonitorPageProps {
   history: { push: any };
@@ -31,30 +31,19 @@ interface MonitorPageProps {
   query: <T, TVariables = OperationVariables>(
     options: QueryOptions<TVariables>
   ) => Promise<ApolloQueryResult<T>>;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+  setHeadingText: (text: string) => void;
 }
 
-type Props = MonitorPageProps & UptimeCommonProps;
-
-interface MonitorPageState {
-  monitorId: string;
-  selectedPingListOption?: EuiComboBoxOptionProps;
-}
-
-export class MonitorPage extends React.Component<Props, MonitorPageState> {
-  constructor(props: Props) {
-    super(props);
-
-    // TODO: this is a hack because the id field's characters mess up react router's
-    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
-    this.state = {
-      monitorId: this.props.location.pathname.replace(/^(\/monitor\/)/, ''),
-    };
-  }
-
-  public componentDidMount() {
-    const { query, setBreadcrumbs, setHeadingText } = this.props;
-    const { monitorId } = this.state;
-
+export const MonitorPage = ({
+  location,
+  query,
+  setBreadcrumbs,
+  setHeadingText,
+}: MonitorPageProps) => {
+  const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
+  useEffect(() => {
     query({
       query: gql`
         query MonitorPageTitle($monitorId: String!) {
@@ -72,56 +61,29 @@ export class MonitorPage extends React.Component<Props, MonitorPageState> {
       setBreadcrumbs(getMonitorPageBreadcrumb(heading));
       setHeadingText(heading);
     });
-  }
-
-  public render() {
-    const { dateRangeStart, dateRangeEnd } = this.props;
-    const { monitorId } = this.state;
-
-    return (
-      <Fragment>
-        <MonitorPageTitleQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <MonitorStatusBarQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <MonitorChartsQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <PingListQuery
-          variables={{
-            dateRangeStart,
-            dateRangeEnd,
-            monitorId,
-            status: this.state.selectedPingListOption
-              ? this.state.selectedPingListOption.value
-              : 'down',
-          }}
-          {...this.props}
-          {...this.state}
-          onStatusSelectionChange={this.onPingListStatusSelectionChange}
-          selectedOption={this.state.selectedPingListOption}
-        />
-      </Fragment>
-    );
-  }
-
-  private onPingListStatusSelectionChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    if (selectedOptions[0]) {
-      this.setState({ selectedPingListOption: selectedOptions[0] }, () => this.props.refreshApp());
-    }
-  };
-}
+  }, []);
+  const { colors, dateRangeStart, dateRangeEnd, refreshApp } = useContext(UptimeContext);
+  return (
+    <Fragment>
+      <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
+      <EuiSpacer size="s" />
+      <MonitorStatusBar
+        monitorId={monitorId}
+        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+      />
+      <EuiSpacer size="s" />
+      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <EuiSpacer size="s" />
+      <PingList
+        onSelectedStatusUpdate={setSelectedStatus}
+        onUpdateApp={refreshApp}
+        variables={{
+          dateRangeStart,
+          dateRangeEnd,
+          monitorId,
+          status: selectedStatus ? selectedStatus : 'down',
+        }}
+      />
+    </Fragment>
+  );
+};

@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorPageTitleQuery } from './monitor_page_title_query';
+import gql from 'graphql-tag';
+
+export const monitorPageTitleQuery = gql`
+  query MonitorPageTitle($monitorId: String!) {
+    monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+      id
+      url
+      name
+    }
+  }
+`;

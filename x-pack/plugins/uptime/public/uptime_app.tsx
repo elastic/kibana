@@ -33,7 +33,7 @@ import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeContext } from './uptime_context';
 
-interface UptimeAppColors {
+export interface UptimeAppColors {
   danger: string;
   success: string;
   range: string;
@@ -157,7 +157,16 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       <I18nContext>
         <Router basename={routerBasename}>
           <ApolloProvider client={client}>
-            <UptimeContext.Provider value={{ ...this.state }}>
+            <UptimeContext.Provider
+              value={{
+                autorefreshInterval: this.state.autorefreshInterval,
+                autorefreshIsPaused: this.state.autorefreshIsPaused,
+                dateRangeStart: this.state.dateRangeStart,
+                dateRangeEnd: this.state.dateRangeEnd,
+                colors: this.state.colors,
+                refreshApp: this.refreshApp,
+              }}
+            >
               <EuiPage className="app-wrapper-panel ">
                 <div>
                   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -223,7 +232,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           {...props}
                           {...this.props}
                           {...this.state}
-                          refreshApp={this.refreshApp}
                           setHeadingText={this.setHeadingText}
                           query={this.props.client.query}
                         />

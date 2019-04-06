@@ -5,17 +5,34 @@
  */
 
 import { EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { monitorPageTitleQuery } from '../queries/monitor_page_title_query';
 
-interface MonitorPageTitleProps {
-  pageTitle: TitleType;
+interface MonitorPageTitleQueryResult {
+  monitorPageTitle?: TitleType;
 }
 
-export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTitleProps) => (
-  <EuiTitle size="xxs">
-    <EuiTextColor color="subdued">
-      <h4 data-test-subj="monitor-page-title">{id}</h4>
-    </EuiTextColor>
-  </EuiTitle>
-);
+interface MonitorPageTitleProps {
+  monitorId: string;
+}
+
+type Props = MonitorPageTitleProps & UptimeGraphQLQueryProps<MonitorPageTitleQueryResult>;
+
+export const MonitorPageTitleComponent = ({ data }: Props) =>
+  data && data.monitorPageTitle ? (
+    <EuiTitle size="xxs">
+      <EuiTextColor color="subdued">
+        <h4 data-test-subj="monitor-page-title">{data.monitorPageTitle.id}</h4>
+      </EuiTextColor>
+    </EuiTitle>
+  ) : (
+    <EuiLoadingSpinner size="xl" />
+  );
+
+export const MonitorPageTitle = withUptimeGraphQL<
+  MonitorPageTitleQueryResult,
+  MonitorPageTitleProps
+>(MonitorPageTitleComponent, monitorPageTitleQuery);
