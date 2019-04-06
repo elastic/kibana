@@ -19,6 +19,7 @@
 
 import * as functionType from '../function';
 import _ from 'lodash';
+import sinon from 'sinon';
 import expect from '@kbn/expect';
 import * as isFunction from '../../functions/is';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
@@ -30,10 +31,15 @@ describe('kuery node types', function () {
   describe('function', function () {
 
     let indexPattern;
-
+    let sandbox;
 
     beforeEach(() => {
       indexPattern = indexPatternResponse;
+      sandbox = sinon.createSandbox();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     describe('buildNode', function () {
@@ -72,13 +78,14 @@ describe('kuery node types', function () {
         const result = functionType.toElasticsearchQuery(node, indexPattern);
         expect(_.isEqual(expected, result)).to.be(true);
       });
-      // TINA TODO: use a spy
+
       it('should accept and pass on an optional config paramter to the returned function type\'s ES query representation', function () {
         const config = { dateFormatTZ: 'America/New York' };
+        const object = { method: isFunction.toElasticsearchQuery };
+        const spy = sinon.spy(object, 'method');
         const node = functionType.buildNode('is', '@timestamp', '"2018-01-20T13:55:00"');
-        const expected = isFunction.toElasticsearchQuery(node, indexPattern, config);
-        const result = functionType.toElasticsearchQuery(node, indexPattern, config);
-        expect(_.isEqual(expected, result)).to.be(true);
+        isFunction.toElasticsearchQuery(node, indexPattern, config);
+        expect(spy.withArgs(config).calledOnce).to.be.true;
       });
 
     });

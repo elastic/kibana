@@ -18,12 +18,14 @@
  */
 
 import expect from '@kbn/expect';
+import sinon from 'sinon';
 import * as or from '../or';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
 let indexPattern;
+let sandbox;
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
@@ -35,6 +37,11 @@ describe('kuery functions', function () {
 
     beforeEach(() => {
       indexPattern = indexPatternResponse;
+      sandbox = sinon.createSandbox();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     describe('buildNodeParams', function () {
@@ -66,14 +73,13 @@ describe('kuery functions', function () {
         expect(result.bool).to.have.property('minimum_should_match', 1);
       });
 
-      // TINA TODO: add a spy
       it('should pass the config to subqueries in an ES bool query\'s filter clause', function () {
         const config = { dateFormatTZ: 'America/Phoenix' };
+        const object = { method: ast.toElasticsearchQuery };
+        const spy = sinon.spy(object, 'method');
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
-        const result = or.toElasticsearchQuery(node, indexPattern, config);
-        expect(result.bool.should).to.eql(
-          [childNode1, childNode2].map(childNode => ast.toElasticsearchQuery(childNode, indexPattern, config))
-        );
+        or.toElasticsearchQuery(node, indexPattern, config);
+        expect(spy.withArgs(config).calledOnce).to.be.true;
       });
 
     });
