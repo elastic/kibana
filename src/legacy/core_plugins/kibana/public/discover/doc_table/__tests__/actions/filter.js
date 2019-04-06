@@ -33,7 +33,6 @@ describe('doc table filter actions', function () {
 
   beforeEach(ngMock.module(
     'kibana',
-    'kibana/courier',
     function ($provide) {
       $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
     }

@@ -8,7 +8,6 @@ import 'react-vis/dist/style.css';
 import 'ui/angular-bootstrap';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
-import 'ui/courier';
 import 'ui/persisted_log';
 import 'uiExports/autocompleteProviders';
 import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';

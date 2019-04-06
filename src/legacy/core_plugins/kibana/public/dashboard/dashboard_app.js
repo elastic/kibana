@@ -65,7 +65,6 @@ const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
   'react',
-  'kibana/courier',
   'kibana/config',
 ]);
 

@@ -18,7 +18,6 @@
  */
 
 import 'ui/notify';
-import 'ui/courier';
 import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
@@ -29,7 +28,6 @@ import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
   'kibana/notify',
-  'kibana/courier',
   'kibana/index_patterns'
 ]);
 

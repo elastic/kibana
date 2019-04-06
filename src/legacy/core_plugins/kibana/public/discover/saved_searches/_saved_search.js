@@ -24,7 +24,6 @@ import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify',
-  'kibana/courier'
 ]);
 
 module.factory('SavedSearch', function (Private, i18n) {

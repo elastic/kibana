@@ -19,41 +19,6 @@
 
 /**
  * @param requestsFetchParams {Array.<Object>}
-<<<<<<< HEAD
- * @param Promise
- * @param sessionId
- * @return {Promise.<string>}
- */
-export function serializeFetchParams(
-  requestsFetchParams,
-  Promise,
-  sessionId,
-  config,
-  esShardTimeout) {
-  const promises = requestsFetchParams.map(function (fetchParams) {
-    return Promise.resolve(fetchParams.index)
-      .then(function (indexPattern) {
-        const body = {
-          ...fetchParams.body || {},
-        };
-        if (esShardTimeout > 0) {
-          body.timeout = `${esShardTimeout}ms`;
-        }
-
-        const index = (indexPattern && indexPattern.title) ? indexPattern.title : indexPattern;
-
-        const header = {
-          index,
-          type: fetchParams.type,
-          search_type: fetchParams.search_type,
-          ignore_unavailable: true,
-        };
-        if (config.get('courier:setRequestPreference') === 'sessionId') {
-          header.preference = sessionId;
-        } else if (config.get('courier:setRequestPreference') === 'custom') {
-          header.preference = config.get('courier:customRequestPreference');
-        }
-=======
  * @param options
  */
 export function serializeFetchParams(requestsFetchParams, options) {
@@ -65,7 +30,6 @@ export function serializeFetchParams(requestsFetchParams, options) {
     if (esShardTimeout > 0) {
       body.timeout = `${esShardTimeout}ms`;
     }
->>>>>>> Simplify & remove angular from serialize fetch params
 
     const header = {
       index: fetchParams.index.title,

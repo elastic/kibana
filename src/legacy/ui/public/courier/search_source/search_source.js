@@ -71,7 +71,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig, translateToQuery } from '@kbn/es-query';
 
 import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
@@ -98,18 +98,10 @@ const FIELDS = [
   'index',
 ];
 
-function parseInitialFields(initialFields) {
-  if (!initialFields) {
-    return {};
-  }
-
+function parseInitialFields(initialFields = {}) {
   return typeof initialFields === 'string' ?
     JSON.parse(initialFields)
     : _.cloneDeep(initialFields);
-}
-
-function isIndexPattern(val) {
-  return Boolean(val && typeof val.title === 'string');
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
@@ -122,8 +114,6 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   class SearchSource {
     constructor(initialFields) {
-      this._id = _.uniqueId('data_source');
-
       this._searchStrategyId = undefined;
       this._fields = parseInitialFields(initialFields);
       this._parent = undefined;
@@ -131,21 +121,6 @@ export function SearchSourceProvider(Promise, Private, config) {
       this.history = [];
       this._requestStartHandlers = [];
       this._inheritOptions = {};
-
-      this._filterPredicates = [
-        (filter) => {
-          // remove null/undefined filters
-          return filter;
-        },
-        (filter) => {
-          const disabled = _.get(filter, 'meta.disabled');
-          return disabled === undefined || disabled === false;
-        },
-        (filter, data) => {
-          const index = data.index || this.getField('index');
-          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
-        }
-      ];
     }
 
     /*****
@@ -185,10 +160,6 @@ export function SearchSourceProvider(Promise, Private, config) {
           return this;
         }
 
-        if (!isIndexPattern(value)) {
-          throw new TypeError('expected indexPattern to be an IndexPattern duck.');
-        }
-
         fields[field] = value;
         if (!fields.source) {
           // imply source filtering based on the index pattern, but allow overriding
@@ -211,10 +182,6 @@ export function SearchSourceProvider(Promise, Private, config) {
       return this;
     };
 
-    getId() {
-      return this._id;
-    }
-
     getFields() {
       return _.clone(this._fields);
     }
@@ -222,35 +189,23 @@ export function SearchSourceProvider(Promise, Private, config) {
     /**
      * Get fields from the fields
      */
-    getField = field => {
+    getField = (field, recurse = true) => {
       if (!FIELDS.includes(field)) {
         throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
-
-      let searchSource = this;
-
-      while (searchSource) {
-        const value = searchSource._fields[field];
-        if (value !== void 0) {
-          return value;
-        }
-
-        searchSource = searchSource.getParent();
+      const value = this._fields[field];
+      const parent = this.getParent();
+      if (value !== void 0 || !recurse || !parent) {
+        return value;
       }
+      return parent.getField(field);
     };
 
     /**
      * Get the field from our own fields, don't traverse up the chain
      */
     getOwnField(field) {
-      if (!FIELDS.includes(field)) {
-        throw new Error(`Can't get field '${field}' from SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
-      }
-
-      const value = this._fields[field];
-      if (value !== void 0) {
-        return value;
-      }
+      return this.getField(field, false);
     }
 
     create() {
@@ -262,6 +217,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       const newSearchSource = new SearchSource(json);
       // when serializing the internal fields we lose the internal classes used in the index
       // pattern, so we have to set it again to workaround this behavior
+      newSearchSource.setPreferredSearchStrategyId(this._searchStrategyId);
       newSearchSource.setField('index', this.getField('index'));
       newSearchSource.setParent(this.getParent());
       return newSearchSource;
@@ -402,12 +358,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       switch (key) {
         case 'filter':
-          let filters = Array.isArray(val) ? val : [val];
-
-          filters = filters.filter(filter => {
-            return this._filterPredicates.every(predicate => predicate(filter, data));
-          });
-
+          const filters = Array.isArray(val) ? val : [val];
           data.filters = [...(data.filters || []), ...filters];
           return;
         case 'index':
@@ -536,39 +487,16 @@ export function SearchSourceProvider(Promise, Private, config) {
             delete flatData.highlightAll;
           }
 
-          /**
-           * Translate a filter into a query to support es 3+
-           * @param  {Object} filter - The filter to translate
-           * @return {Object} the query version of that filter
-           */
-          const translateToQuery = function (filter) {
-            if (!filter) return;
-
-            if (filter.query) {
-              return filter.query;
-            }
-
-            return filter;
-          };
-
           // re-write filters within filter aggregations
-          (function recurse(aggBranch) {
-            if (!aggBranch) return;
-            Object.keys(aggBranch).forEach(function (id) {
-              const agg = aggBranch[id];
-
-              if (agg.filters) {
-                // translate filters aggregations
-                const filters = agg.filters.filters;
-
-                Object.keys(filters).forEach(function (filterId) {
-                  filters[filterId] = translateToQuery(filters[filterId]);
-                });
-              }
-
-              recurse(agg.aggs || agg.aggregations);
-            });
-          }(flatData.body.aggs || flatData.body.aggregations));
+          Object.values(flatData.body.aggs || flatData.body.aggregations).forEach(function translate(agg) {
+            if (agg && agg.filters) {
+              const filters = agg.filters.filters;
+              Object.keys(filters).forEach(function (filterId) {
+                filters[filterId] = translateToQuery(filters[filterId]);
+              });
+              translate(agg.aggs || agg.aggregations);
+            }
+          });
 
           return flatData;
         });

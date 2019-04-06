@@ -40,7 +40,7 @@ const filterNegate = function (reverse) {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = function (filter) {
+export const translateToQuery = function (filter) {
   if (!filter) return;
 
   if (filter.query) {

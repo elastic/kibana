@@ -33,7 +33,6 @@ describe('toggle filters', function () {
 
   beforeEach(ngMock.module(
     'kibana',
-    'kibana/courier',
     'kibana/global_state',
     function ($provide) {
       $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
