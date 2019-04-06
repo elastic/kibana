@@ -28,7 +28,7 @@ echo ---
 ls $(FORCE_COLOR=0 yarn bin)
 echo ---
 echo which
-which github-checks-reporter
+#which github-checks-reporter
 echo ---
 echo which eslint
 which eslint
