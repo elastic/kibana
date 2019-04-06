@@ -31,8 +31,8 @@ echo ---
 # which github-checks-reporter
 echo ---
 echo which eslint
-which eslint
-github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
+echo $(which eslint)
+"$(FORCE_COLOR=0 yarn bin)/github-checks-reporter" "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
