@@ -251,6 +251,14 @@ export const registerHttpRequestMockHelpers = server => {
       [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]);
   };
 
+  const setGetFollowerIndexResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/follower_indices\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadFollowerIndicesResponse,
     setLoadAutoFollowPatternsResponse,
@@ -259,5 +267,6 @@ export const registerHttpRequestMockHelpers = server => {
     setLoadRemoteClusteresResponse,
     setGetAutoFollowPatternResponse,
     setGetClusterIndicesResponse,
+    setGetFollowerIndexResponse,
   };
 };
