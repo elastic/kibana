@@ -32,7 +32,7 @@ echo ---
 echo ---
 echo which eslint
 echo $(which eslint)
-"$(FORCE_COLOR=0 yarn bin)/github-checks-reporter" "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
+GITHUB_CHECKS_REPORTER_ID=26774 "$(FORCE_COLOR=0 yarn bin)/github-checks-reporter" "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
