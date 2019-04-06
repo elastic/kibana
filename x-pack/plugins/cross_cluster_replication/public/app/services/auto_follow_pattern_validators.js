@@ -92,6 +92,8 @@ export const validateLeaderIndexPattern = (indexPattern) => {
 };
 
 export const validateLeaderIndexPatterns = (indexPatterns) => {
+  // We only need to check if a value has been provided, because validation for this field
+  // has already been executed as the user has entered input into it.
   if (!indexPatterns.length) {
     return {
       message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
@@ -100,13 +102,7 @@ export const validateLeaderIndexPatterns = (indexPatterns) => {
     };
   }
 
-  let error = null;
-  indexPatterns.forEach((indexPattern) => {
-    if (!error) {
-      error = validateLeaderIndexPattern(indexPattern);
-    }
-  });
-  return error;
+  return null;
 };
 
 export const validatePrefix = (prefix) => {

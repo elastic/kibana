@@ -169,10 +169,10 @@ export class AutoFollowPatternForm extends PureComponent {
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     } else {
       this.setState(({ fieldsErrors, autoFollowPattern: { leaderIndexPatterns } }) => {
-        // If have at least 1 auto-follow pattern in our state, we validate its value
-        // otherwise, we validate the *current value* of the form input
         const errors = Boolean(leaderIndexPatterns.length)
+          // Validate existing patterns, so we can surface an error if this required input is missing.
           ? validateAutoFollowPattern({ leaderIndexPatterns })
+          // Validate the input as the user types so they have immediate feedback about errors.
           : validateAutoFollowPattern({ leaderIndexPatterns: [leaderIndexPattern] });
 
         return updateFormErrors(errors, fieldsErrors);
