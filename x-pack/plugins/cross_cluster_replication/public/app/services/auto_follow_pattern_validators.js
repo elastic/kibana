@@ -88,7 +88,21 @@ export const validateLeaderIndexPattern = (indexPattern) => {
     };
   }
 
-  return { message: null };
+  return null;
+};
+
+export const validateLeaderIndexPatterns = (indexPatterns) => {
+  // We only need to check if a value has been provided, because validation for this field
+  // has already been executed as the user has entered input into it.
+  if (!indexPatterns.length) {
+    return {
+      message: i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
+        defaultMessage: 'At least one leader index pattern is required.',
+      })
+    };
+  }
+
+  return null;
 };
 
 export const validatePrefix = (prefix) => {
@@ -184,7 +198,7 @@ export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
         break;
 
       case 'leaderIndexPatterns':
-        error = validateLeaderIndexPattern(fieldValue[0]);
+        error = validateLeaderIndexPatterns(fieldValue);
         break;
 
       case 'followIndexPatternPrefix':
