@@ -81,7 +81,6 @@ const Application = (props: UptimeAppProps) => {
     initialAutorefreshInterval,
     initialDateRangeStart,
     initialDateRangeEnd,
-    kibanaBreadcrumbs,
     persistState,
     renderGlobalHelpControls,
     routerBasename,
