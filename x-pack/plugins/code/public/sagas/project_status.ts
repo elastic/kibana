@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { Action } from 'redux-actions';
 import { delay } from 'redux-saga';
-import { all, call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { all, call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository, RepositoryUri, WorkerReservedProgress } from '../../model';

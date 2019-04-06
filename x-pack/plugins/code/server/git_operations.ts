@@ -279,7 +279,9 @@ export class GitOperations {
       const patches = await diff.patches();
       for (const patch of patches) {
         const { total_deletions, total_additions } = patch.lineStats();
+        // eslint-disable-next-line @typescript-eslint/camelcase
         commitDiff.additions += total_additions;
+        // eslint-disable-next-line @typescript-eslint/camelcase
         commitDiff.deletions += total_deletions;
         if (patch.isAdded()) {
           const path = patch.newFile().path();

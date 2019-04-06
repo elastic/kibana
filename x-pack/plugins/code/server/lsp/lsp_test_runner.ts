@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* tslint:disable */
+
+/* eslint-disable no-console */
 
 import fs from 'fs';
 // @ts-ignore
@@ -11,75 +12,51 @@ import * as sl from 'stats-lite';
 import _ from 'lodash';
 import papa from 'papaparse';
 
-import { Repo, RequestType } from '../../model/test_config';
-import { TypescriptServerLauncher } from './ts_launcher';
+import { InstallManager } from './install_manager';
 import { JavaLauncher } from './java_launcher';
+import { JAVA, TYPESCRIPT } from './language_servers';
 import { RequestExpander } from './request_expander';
-import { LspRequest } from '../../model';
+import { TypescriptServerLauncher } from './ts_launcher';
 import { GitOperations } from '../git_operations';
-import { ServerOptions } from "../server_options";
-import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
+import { createTestServerOption } from '../test_utils';
+import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { RepositoryUtils } from '../../common/repository_utils';
-import {JAVA, TYPESCRIPT} from "./language_servers";
-import {InstallManager} from "./install_manager";
-
-const options = {
-  enabled: true,
-  queueIndex: '.code_internal-worker-queue',
-  queueTimeout: 60 * 60 * 1000, // 1 hour by default
-  updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
-  indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lsp: {
-    requestTimeoutMs: 5 * 60, // timeout a request over 30s
-    detach: false,
-    verbose: false,
-  },
-  repos: [],
-  maxWorkspace: 5, // max workspace folder for each language server
-  disableScheduler: true, // Temp option to disable all schedulers.
-};
-
-const config = {
-  get(key: string) {
-    if (key === 'path.data') {
-      return '/tmp/test'
-    }
-  }
-};
+import { LspRequest } from '../../model';
+import { Repo, RequestType } from '../../model/test_config';
 
 const requestTypeMapping = new Map<number, string>([
   [RequestType.FULL, 'full'],
   [RequestType.HOVER, 'hover'],
-  [RequestType.INITIALIZE, 'initialize']
+  [RequestType.INITIALIZE, 'initialize'],
 ]);
 
-type Result = {
-  repoName: string,
-  startTime: number,
-  numberOfRequests: number,
-  rps: number,
-  OK: number,
-  KO: number,
-  KORate: string,
-  latency_max: number,
-  latency_min: number,
-  latency_medium: number,
-  latency_95: number,
-  latency_99: number,
-  latency_avg: number,
-  latency_std_dev: number
+interface Result {
+  repoName: string;
+  startTime: number;
+  numberOfRequests: number;
+  rps: number;
+  OK: number;
+  KO: number;
+  KORate: string;
+  latency_max: number;
+  latency_min: number;
+  latency_medium: number;
+  latency_95: number;
+  latency_99: number;
+  latency_avg: number;
+  latency_std_dev: number;
 }
 
-const serverOptions = new ServerOptions(options, config);
+const serverOptions = createTestServerOption();
 
 export class LspTestRunner {
   private repo: Repo;
   public result: Result;
-  public proxy: RequestExpander|null;
+  public proxy: RequestExpander | null;
   private requestType: RequestType;
   private times: number;
 
-  constructor (repo: Repo, requestType: RequestType, times: number) {
+  constructor(repo: Repo, requestType: RequestType, times: number) {
     this.repo = repo;
     this.requestType = requestType;
     this.times = times;
@@ -98,9 +75,9 @@ export class LspTestRunner {
       latency_95: 0,
       latency_99: 0,
       latency_avg: 0,
-      latency_std_dev: 0
+      latency_std_dev: 0,
     };
-    if (!fs.existsSync(serverOptions.workspacePath)){
+    if (!fs.existsSync(serverOptions.workspacePath)) {
       fs.mkdirSync(serverOptions.workspacePath);
     }
   }
@@ -110,7 +87,7 @@ export class LspTestRunner {
     const files = await this.getAllFile();
     const randomFile = files[Math.floor(Math.random() * files.length)];
     await this.proxy!.initialize(repoPath);
-    switch(this.requestType) {
+    switch (this.requestType) {
       case RequestType.HOVER: {
         const req: LspRequest = {
           method: 'textDocument/hover',
@@ -135,7 +112,7 @@ export class LspTestRunner {
             textDocument: {
               uri: `file://${this.repo.path}/${randomFile}`,
             },
-            reference: false
+            reference: false,
           },
         };
         await this.launchRequest(req);
@@ -150,10 +127,10 @@ export class LspTestRunner {
 
   private async launchRequest(req: LspRequest) {
     this.result.startTime = Date.now();
-    var OK: number = 0;
-    var KO: number = 0;
-    let responseTimes = [];
-    for (var i = 0; i < this.times; i ++) {
+    let OK: number = 0;
+    let KO: number = 0;
+    const responseTimes = [];
+    for (let i = 0; i < this.times; i++) {
       try {
         const start = Date.now();
         await this.proxy!.handleRequest(req);
@@ -165,8 +142,8 @@ export class LspTestRunner {
     }
     this.result.KO = KO;
     this.result.OK = OK;
-    this.result.KORate = ((KO/this.times)*100).toFixed(2) + '%';
-    this.result.rps = this.times/(Date.now()-this.result.startTime);
+    this.result.KORate = ((KO / this.times) * 100).toFixed(2) + '%';
+    this.result.rps = this.times / (Date.now() - this.result.startTime);
     this.collectMetrics(responseTimes);
   }
 
@@ -181,7 +158,7 @@ export class LspTestRunner {
   }
 
   public dumpToCSV(resultFile: string) {
-    const newResult = _.mapKeys(this.result, (v, k) => {
+    const newResult = _.mapKeys(this.result as _.Dictionary<any>, (v, k) => {
       if (k !== 'repoName') {
         return `${requestTypeMapping.get(this.requestType)}_${k}`;
       } else {
@@ -189,35 +166,40 @@ export class LspTestRunner {
       }
     });
     if (!fs.existsSync(resultFile)) {
-      console.log(papa.unparse([newResult]))
+      console.log(papa.unparse([newResult]));
       fs.writeFileSync(resultFile, papa.unparse([newResult]));
     } else {
       const file = fs.createReadStream(resultFile);
-      papa.parse(file, {header: true, complete: parsedResult => {
-        let originResults = parsedResult.data;
-        let index = originResults.findIndex(originResult => {
-          return originResult.repoName === newResult.repoName
-        })
-        if (index === -1) {
-          originResults.push(newResult);
-        } else {
-          originResults[index] = {...originResults[index], ...newResult}
-        }
-        fs.writeFileSync(resultFile, papa.unparse(originResults));
-      }});
+      papa.parse(file, {
+        header: true,
+        complete: parsedResult => {
+          const originResults = parsedResult.data;
+          const index = originResults.findIndex(originResult => {
+            return originResult.repoName === newResult.repoName;
+          });
+          if (index === -1) {
+            originResults.push(newResult);
+          } else {
+            originResults[index] = { ...originResults[index], ...newResult };
+          }
+          fs.writeFileSync(resultFile, papa.unparse(originResults));
+        },
+      });
     }
   }
 
   private async getAllFile() {
     const gitOperator: GitOperations = new GitOperations(this.repo.path);
     try {
-      const fileTree = await gitOperator.fileTree('',
+      const fileTree = await gitOperator.fileTree(
+        '',
         '',
         'HEAD',
         0,
         Number.MAX_SAFE_INTEGER,
         false,
-        Number.MAX_SAFE_INTEGER);
+        Number.MAX_SAFE_INTEGER
+      );
       return RepositoryUtils.getAllFiles(fileTree).filter((filePath: string) => {
         return filePath.endsWith(this.repo.language);
       });
@@ -228,15 +210,15 @@ export class LspTestRunner {
   }
 
   private randomizePosition() {
-    //TODO:pcxu randomize position according to source file
+    // TODO:pcxu randomize position according to source file
     return {
       line: 19,
       character: 2,
-    }
+    };
   }
 
   public async launchLspByLanguage() {
-    switch(this.repo.language) {
+    switch (this.repo.language) {
       case 'java': {
         this.proxy = await this.launchJavaLanguageServer();
         break;
@@ -253,7 +235,11 @@ export class LspTestRunner {
   }
 
   private async launchTypescriptLanguageServer() {
-    const launcher = new TypescriptServerLauncher('127.0.0.1', serverOptions, new ConsoleLoggerFactory());
+    const launcher = new TypescriptServerLauncher(
+      '127.0.0.1',
+      serverOptions,
+      new ConsoleLoggerFactory()
+    );
     return await launcher.launch(false, 1, TYPESCRIPT.embedPath!);
   }
 

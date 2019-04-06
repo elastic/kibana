@@ -47,7 +47,7 @@ const LanguageServerLi = (props: {
     } else if (name === 'Java') {
       return <JavaIcon />;
     } else if (name === 'Go') {
-      return <GoIcon />
+      return <GoIcon />;
     }
   };
 

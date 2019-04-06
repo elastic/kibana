@@ -5,8 +5,8 @@
  */
 
 import { Action } from 'redux-actions';
-import { all, call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { all, call, put, takeEvery } from 'redux-saga/effects';
 import { Repository, RepositoryConfig } from '../../model';
 import {
   fetchReposSuccess,

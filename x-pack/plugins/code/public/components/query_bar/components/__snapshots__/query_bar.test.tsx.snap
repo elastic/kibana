@@ -548,7 +548,6 @@ exports[`render correctly with empty query string 1`] = `
             >
               <form
                 name="queryBarForm"
-                role="form"
               >
                 <div
                   className="kuiLocalSearch"
@@ -1284,7 +1283,6 @@ exports[`render correctly with input query string changed 1`] = `
                 >
                   <form
                     name="queryBarForm"
-                    role="form"
                   >
                     <div
                       className="kuiLocalSearch"

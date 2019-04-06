@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 
 import { EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
@@ -114,6 +115,8 @@ export class CodeFileTree extends React.Component<Props> {
               data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
               role="button"
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
             >
               {forceOpen ? (
@@ -142,6 +145,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"
@@ -162,6 +167,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-Link-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"
@@ -182,6 +189,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-File-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function searchFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');

@@ -12,6 +12,7 @@ interface Props extends RouteProps {
   routeChange: (match: Match) => void;
 }
 class CSRoute extends ReactRoute<Props> {
+  // eslint-disable-next-line @typescript-eslint/camelcase
   public UNSAFE_componentWillMount() {
     this.props.routeChange({ ...this.state.match, location: this.props.location });
   }

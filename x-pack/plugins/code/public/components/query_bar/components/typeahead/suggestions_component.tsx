@@ -52,7 +52,9 @@ export class SuggestionsComponent extends Component<Props> {
           <div className="kbnTypeahead__popover">
             {this.renderSuggestionGroups()}
             <Link to={this.viewMoreUrl()}>
-              <div className="codeSearch__full-text-button">Press ⮐ Return for Full Text Search</div>
+              <div className="codeSearch__full-text-button">
+                Press ⮐ Return for Full Text Search
+              </div>
             </Link>
           </div>
         </div>
