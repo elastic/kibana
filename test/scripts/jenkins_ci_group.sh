@@ -22,13 +22,13 @@ export TEST_BROWSER_HEADLESS=1
 echo PATH
 echo $PATH
 echo ---
-echo yarn bin
-yarn bin
-echo ---
-ls $(FORCE_COLOR=0 yarn bin)
-echo ---
-echo which
-#which github-checks-reporter
+# echo yarn bin
+# yarn bin
+# echo ---
+# ls $(FORCE_COLOR=0 yarn bin)
+# echo ---
+# echo which
+# which github-checks-reporter
 echo ---
 echo which eslint
 which eslint
