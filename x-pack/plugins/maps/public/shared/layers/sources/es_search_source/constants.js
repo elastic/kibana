@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withState } from 'recompose';
-import { DropdownFilter as Component } from './dropdown_filter';
+export const DEFAULT_ES_DOC_LIMIT = 2048;
 
-export const DropdownFilter = compose(withState('value', 'onChange', ({ value }) => value || ''))(
-  Component
-);
+export const DEFAULT_FILTER_BY_MAP_BOUNDS = true;
