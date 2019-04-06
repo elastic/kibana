@@ -106,7 +106,8 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ### "install" yarn into this shell
 ###
 yarnGlobalDir="$(yarn global bin)"
-export PATH="$PATH:$yarnGlobalDir"
+yarnDir="$(yarn bin)"
+export PATH="$PATH:$yarnGlobalDir:$yarnDir"
 
 ###
 ### use the chromedriver cache if it exists
