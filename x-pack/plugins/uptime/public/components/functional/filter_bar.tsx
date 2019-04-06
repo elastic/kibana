@@ -28,7 +28,7 @@ type Props = FilterBarProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
 
 const SEARCH_THRESHOLD = 2;
 
-const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
+export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
   if (!data || !data.filterBar) {
     return <FilterBarLoading />;
   }

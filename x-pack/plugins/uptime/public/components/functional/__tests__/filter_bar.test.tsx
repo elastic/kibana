@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { FilterBar } from '../filter_bar';
+import { FilterBarComponent } from '../filter_bar';
 
 describe('FilterBar component', () => {
   const data = {
@@ -28,10 +28,16 @@ describe('FilterBar component', () => {
       schemes: ['tcp', 'http'],
     },
   };
+  const currentQuery = {};
 
   it('renders the component without errors', () => {
     const component = shallowWithIntl(
-      <FilterBar filterBar={data.filterBar} updateQuery={jest.fn()} />
+      <FilterBarComponent
+        currentQuery={currentQuery}
+        data={data}
+        loading={false}
+        updateQuery={jest.fn()}
+      />
     );
     expect(component).toMatchSnapshot();
   });
