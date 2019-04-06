@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* tslint:disable */
 
 import fs from 'fs';
 import path from 'path';
@@ -14,8 +13,8 @@ import { LspTestRunner } from './lsp_test_runner';
 
 jest.setTimeout(300000);
 
-var repoManger: TestRepoManager;
-const resultFile = `benchmark_result_${Date.now()}.csv`
+let repoManger: TestRepoManager;
+const resultFile = `benchmark_result_${Date.now()}.csv`;
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -25,7 +24,7 @@ beforeAll(async () => {
   const config: TestConfig = yaml.safeLoad(fs.readFileSync('test_config.yml', 'utf8'));
   repoManger = new TestRepoManager(config);
   await repoManger.importAllRepos();
-})
+});
 
 it('test Java lsp full', async () => {
   const repo = repoManger.getRepo('java');
@@ -37,7 +36,7 @@ it('test Java lsp full', async () => {
   await runner.proxy!.exit();
   runner.dumpToCSV(resultFile);
   expect(true);
-})
+});
 
 it('test Java lsp hover', async () => {
   const repo = repoManger.getRepo('java');
@@ -49,7 +48,7 @@ it('test Java lsp hover', async () => {
   await runner.proxy!.exit();
   runner.dumpToCSV(resultFile);
   expect(true);
-})
+});
 
 it('test ts lsp full', async () => {
   const repo = repoManger.getRepo('ts');
@@ -61,7 +60,7 @@ it('test ts lsp full', async () => {
   runner.dumpToCSV(resultFile);
   await sleep(2000);
   expect(true);
-})
+});
 
 it('test ts lsp hover', async () => {
   const repo = repoManger.getRepo('ts');
@@ -73,9 +72,10 @@ it('test ts lsp hover', async () => {
   runner.dumpToCSV(resultFile);
   await sleep(2000);
   expect(true);
-})
+});
 
 afterAll(async () => {
+  // eslint-disable-next-line no-console
   console.log(`result file ${path.resolve(__dirname)}/${resultFile} was saved!`);
   await repoManger.cleanAllRepos();
-})
+});

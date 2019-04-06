@@ -42,24 +42,24 @@ const NewProjectButton = styled(EuiButton)`
 `;
 
 enum SortOptionsValue {
-  alphabetical_asc = 'alphabetical_asc',
-  alphabetical_desc = 'alphabetical_desc',
-  updated_asc = 'updated_asc',
-  updated_desc = 'updated_desc',
-  recently_added = 'recently_added',
+  AlphabeticalAsc = 'alphabetical_asc',
+  AlphabeticalDesc = 'alphabetical_desc',
+  UpdatedAsc = 'updated_asc',
+  UpdatedDesc = 'updated_desc',
+  RecentlyAdded = 'recently_added',
 }
 
 const sortFunctionsFactory = (status: { [key: string]: RepoStatus }) => {
   const sortFunctions: { [k: string]: (a: Repository, b: Repository) => number } = {
-    [SortOptionsValue.alphabetical_asc]: (a: Repository, b: Repository) =>
+    [SortOptionsValue.AlphabeticalAsc]: (a: Repository, b: Repository) =>
       a.name!.localeCompare(b.name!),
-    [SortOptionsValue.alphabetical_desc]: (a: Repository, b: Repository) =>
+    [SortOptionsValue.AlphabeticalDesc]: (a: Repository, b: Repository) =>
       b.name!.localeCompare(a.name!),
-    [SortOptionsValue.updated_asc]: (a: Repository, b: Repository) =>
+    [SortOptionsValue.UpdatedAsc]: (a: Repository, b: Repository) =>
       moment(status[b.uri].timestamp).diff(moment(status[a.uri].timestamp)),
-    [SortOptionsValue.updated_desc]: (a: Repository, b: Repository) =>
+    [SortOptionsValue.UpdatedDesc]: (a: Repository, b: Repository) =>
       moment(status[a.uri].timestamp).diff(moment(status[b.uri].timestamp)),
-    [SortOptionsValue.recently_added]: () => {
+    [SortOptionsValue.RecentlyAdded]: () => {
       return -1;
     },
   };
@@ -67,10 +67,10 @@ const sortFunctionsFactory = (status: { [key: string]: RepoStatus }) => {
 };
 
 const sortOptions = [
-  { value: SortOptionsValue.alphabetical_asc, inputDisplay: 'A to Z' },
-  { value: SortOptionsValue.alphabetical_desc, inputDisplay: 'Z to A' },
-  { value: SortOptionsValue.updated_asc, inputDisplay: 'Last Updated ASC' },
-  { value: SortOptionsValue.updated_desc, inputDisplay: 'Last Updated DESC' },
+  { value: SortOptionsValue.AlphabeticalAsc, inputDisplay: 'A to Z' },
+  { value: SortOptionsValue.AlphabeticalDesc, inputDisplay: 'Z to A' },
+  { value: SortOptionsValue.UpdatedAsc, inputDisplay: 'Last Updated ASC' },
+  { value: SortOptionsValue.UpdatedDesc, inputDisplay: 'Last Updated DESC' },
   // { value: SortOptionsValue.recently_added, inputDisplay: 'Recently Added' },
 ];
 
@@ -109,7 +109,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       showImportProjectModal: false,
       settingModal: { show: false },
       repoURL: '',
-      sortOption: SortOptionsValue.alphabetical_asc,
+      sortOption: SortOptionsValue.AlphabeticalAsc,
       isInvalid: false,
     };
   }

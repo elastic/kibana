@@ -39,7 +39,7 @@ describe('repository service test', () => {
     // @ts-ignore
   }).timeout(60000);
 
-  /*it('can clone a repo by ssh with a key', async () => {
+  /* it('can clone a repo by ssh with a key', async () => {
 
     const repo = RepositoryUtils.buildRepository('git@github.com:elastic/code.git');
      const { publicKey, privateKey } = generateKeyPairSync('rsa', {

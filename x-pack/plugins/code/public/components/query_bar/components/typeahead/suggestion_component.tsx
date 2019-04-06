@@ -52,6 +52,7 @@ export const SuggestionComponent: SFC<Props> = props => {
   ) : null;
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={
         'codeSearch__suggestion-item ' +

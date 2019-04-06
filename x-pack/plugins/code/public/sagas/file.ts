@@ -5,10 +5,10 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import Url from 'url';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { FileTree } from '../../model';
 import {

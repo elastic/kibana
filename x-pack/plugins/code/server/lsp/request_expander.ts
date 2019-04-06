@@ -83,8 +83,7 @@ export class RequestExpander implements ILanguageServerHandler {
     if (this.hasWorkspacePath(workspacePath)) {
       if (this.builtinWorkspace) {
         this.removeWorkspace(workspacePath);
-        let params: DidChangeWorkspaceFoldersParams;
-        params = {
+        const params: DidChangeWorkspaceFoldersParams = {
           event: {
             removed: [
               {
@@ -218,9 +217,7 @@ export class RequestExpander implements ILanguageServerHandler {
    * @param maxWorkspace
    */
   private async changeWorkspaceFolders(workspacePath: string, maxWorkspace: number): Promise<void> {
-    let params: DidChangeWorkspaceFoldersParams;
-    this.updateWorkspace(workspacePath);
-    params = {
+    const params: DidChangeWorkspaceFoldersParams = {
       event: {
         added: [
           {
@@ -231,6 +228,7 @@ export class RequestExpander implements ILanguageServerHandler {
         removed: [],
       },
     };
+    this.updateWorkspace(workspacePath);
 
     if (this.workspaces.size > this.maxWorkspace) {
       let oldestWorkspace;

@@ -64,7 +64,7 @@ describe('git_operations', () => {
       treeId,
       []
     );
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.log(`created commit ${commit.tostrS()}`);
     return repo;
   }

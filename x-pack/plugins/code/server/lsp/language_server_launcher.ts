@@ -17,10 +17,8 @@ export interface ILanguageServerLauncher {
   ): Promise<ILanguageServerHandler>;
 }
 
-export interface LauncherConstructor {
-  new (
-    targetHost: string,
-    options: ServerOptions,
-    loggerFactory: LoggerFactory
-  ): ILanguageServerLauncher;
-}
+export type LauncherConstructor = new (
+  targetHost: string,
+  options: ServerOptions,
+  loggerFactory: LoggerFactory
+) => ILanguageServerLauncher;

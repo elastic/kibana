@@ -6,9 +6,9 @@
 
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
-import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
 import {

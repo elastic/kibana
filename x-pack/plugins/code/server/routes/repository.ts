@@ -78,10 +78,10 @@ export function repositoryRoute(
           };
           await cloneWorker.enqueueJob(payload, {});
           return repo;
-        } catch (error) {
+        } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
           log.error(msg);
-          log.error(error);
+          log.error(error2);
           return Boom.badRequest(msg);
         }
       }

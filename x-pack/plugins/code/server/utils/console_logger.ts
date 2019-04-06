@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* tslint:disable:no-console */
+/* eslint-disable no-console */
 
 import { Logger } from '../log';
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiBadge /*, EuiLink*/ } from '@elastic/eui';
+import { EuiBadge /* , EuiLink*/ } from '@elastic/eui';
 import React from 'react';
 // import { DIFF } from '../routes';
 

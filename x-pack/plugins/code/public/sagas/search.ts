@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import queryString from 'querystring';
-import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { SearchScope } from '../../model';
 import {

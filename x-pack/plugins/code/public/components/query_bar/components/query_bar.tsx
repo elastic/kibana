@@ -7,6 +7,8 @@
 import { debounce, isEqual } from 'lodash';
 import React, { Component } from 'react';
 
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { connect } from 'react-redux';
 import {
   saveSearchOptions,
   SearchOptions as ISearchOptions,
@@ -15,8 +17,6 @@ import {
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-import { connect } from 'react-redux';
 import { SearchScope } from '../../../../model';
 import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
@@ -435,7 +435,7 @@ export class CodeQueryBar extends Component<Props, State> {
               aria-owns="typeahead-items"
               aria-controls="typeahead-items"
             >
-              <form role="form" name="queryBarForm">
+              <form name="queryBarForm">
                 <div className="kuiLocalSearch" role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText

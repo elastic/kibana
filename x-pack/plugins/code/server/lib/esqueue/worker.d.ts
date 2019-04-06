@@ -88,14 +88,7 @@ export class Worker<P, O extends WorkerOutput> extends EventEmitter {
       output: O;
     }>
   ): this;
-  public on(
-    name:
-      | typeof events['EVENT_WORKER_JOB_CLAIM_ERROR']
-      | typeof events['EVENT_WORKER_JOB_UPDATE_ERROR']
-      | typeof events['EVENT_WORKER_JOB_TIMEOUT']
-      | typeof events['EVENT_WORKER_JOB_EXECUTION_ERROR'],
-    h: Handler<ErrorInfo>
-  ): this;
+  public on(name: typeof events['EVENT_WORKER_JOB_CLAIM_ERROR'], h: Handler<ErrorInfo>): this;
   public on(name: typeof events['EVENT_WORKER_JOB_SEARCH_ERROR'], h: Handler<ErrorInfoNoJob>): this;
   public on(
     name: typeof events['EVENT_WORKER_JOB_FAIL'],
