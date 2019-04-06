@@ -74,6 +74,8 @@ export interface Source {
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
+
+  KpiHosts: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -866,6 +868,10 @@ export interface AutonomousSystem {
   ip?: string | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1289,6 +1295,8 @@ export namespace SourceResolvers {
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+    KpiHosts?: KpiHostsResolver<KpiHostsData | null, TypeParent, Context>;
+
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
@@ -1408,6 +1416,19 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
 
     ip: string;
+  }
+
+  export type KpiHostsResolver<
+    R = KpiHostsData | null,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, KpiHostsArgs>;
+  export interface KpiHostsArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
   }
 
   export type KpiNetworkResolver<
