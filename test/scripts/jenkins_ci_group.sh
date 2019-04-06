@@ -19,6 +19,8 @@ node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
+echo $PATH
+which github-checks-reporter
 github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
