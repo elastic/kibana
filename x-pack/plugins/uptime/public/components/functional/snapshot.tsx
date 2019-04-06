@@ -140,4 +140,7 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
     <SnapshotLoading />
   );
 
-export const Snapshot = withUptimeGraphQL<SnapshotQueryResult>(SnapshotComponent, snapshotQuery);
+export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
+  SnapshotComponent,
+  snapshotQuery
+);

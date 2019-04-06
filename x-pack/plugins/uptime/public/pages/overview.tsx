@@ -11,7 +11,6 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeCommonProps } from '../uptime_app';
 import { UptimeContext } from '../uptime_context';
 
 interface OverviewPageProps {
@@ -19,7 +18,7 @@ interface OverviewPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-type Props = OverviewPageProps & UptimeCommonProps;
+type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 

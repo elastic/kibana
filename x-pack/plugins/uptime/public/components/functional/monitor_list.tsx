@@ -143,7 +143,7 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
   </EuiPanel>
 );
 
-export const MonitorList = withUptimeGraphQL<MonitorListQueryResult>(
+export const MonitorList = withUptimeGraphQL<MonitorListQueryResult, MonitorListProps>(
   MonitorListComponent,
   monitorListQuery
 );

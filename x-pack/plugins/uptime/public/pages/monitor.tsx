@@ -32,17 +32,14 @@ interface MonitorPageProps {
     options: QueryOptions<TVariables>
   ) => Promise<ApolloQueryResult<T>>;
   setBreadcrumbs: UMUpdateBreadcrumbs;
-  setHeadingText: (text: string) => void;
 }
 
-export const MonitorPage = ({
-  location,
-  query,
-  setBreadcrumbs,
-  setHeadingText,
-}: MonitorPageProps) => {
+export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
+  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
+    UptimeContext
+  );
   useEffect(() => {
     query({
       query: gql`
@@ -59,10 +56,11 @@ export const MonitorPage = ({
       const { name, url, id } = result.data.monitorPageTitle;
       const heading: string = name || url || id;
       setBreadcrumbs(getMonitorPageBreadcrumb(heading));
-      setHeadingText(heading);
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
     });
   }, []);
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp } = useContext(UptimeContext);
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
