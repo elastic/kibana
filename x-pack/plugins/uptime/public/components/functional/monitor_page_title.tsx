@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiTextColor, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
 
@@ -13,14 +13,9 @@ interface MonitorPageTitleProps {
 }
 
 export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTitleProps) => (
-  <EuiFlexGroup alignItems="baseline">
-    <EuiFlexItem grow={false}>
-      <EuiTitle>
-        <h2 data-test-subj="monitor-page-title">{name ? name : url}</h2>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <h4>{id}</h4>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <EuiTitle size="xxs">
+    <EuiTextColor color="subdued">
+      <h4 data-test-subj="monitor-page-title">{id}</h4>
+    </EuiTextColor>
+  </EuiTitle>
 );
