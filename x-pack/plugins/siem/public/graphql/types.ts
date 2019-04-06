@@ -72,6 +72,8 @@ export interface Source {
   Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts?: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1042,6 +1044,28 @@ export interface KpiNetworkData {
   tlsHandshakes?: number | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  installedPackages?: number | null;
+
+  processCount?: number | null;
+
+  authenticationAttempts?: number | null;
+
+  auditbeatEvents?: number | null;
+
+  winlogbeatEvents?: number | null;
+
+  filebeatEvents?: number | null;
+
+  sockets?: number | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueDestinationIps?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1381,6 +1405,13 @@ export interface UsersSourceArgs {
   timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiHostsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -2354,6 +2385,52 @@ export namespace GetIpOverviewQuery {
     platform?: ToStringArray | null;
 
     version?: ToStringArray | null;
+  };
+}
+
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts?: KpiHosts | null;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts?: number | null;
+
+    installedPackages?: number | null;
+
+    processCount?: number | null;
+
+    authenticationAttempts?: number | null;
+
+    auditbeatEvents?: number | null;
+
+    winlogbeatEvents?: number | null;
+
+    filebeatEvents?: number | null;
+
+    sockets?: number | null;
+
+    uniqueSourceIps?: number | null;
+
+    uniqueDestinationIps?: number | null;
   };
 }
 

@@ -101,6 +101,8 @@ export interface Source {
   Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts?: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1071,6 +1073,28 @@ export interface KpiNetworkData {
   tlsHandshakes?: number | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  installedPackages?: number | null;
+
+  processCount?: number | null;
+
+  authenticationAttempts?: number | null;
+
+  auditbeatEvents?: number | null;
+
+  winlogbeatEvents?: number | null;
+
+  filebeatEvents?: number | null;
+
+  sockets?: number | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueDestinationIps?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1416,6 +1440,13 @@ export interface KpiNetworkSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface KpiHostsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
 
@@ -1622,6 +1653,8 @@ export namespace SourceResolvers {
     Users?: UsersResolver<UsersData, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
+
+    KpiHosts?: KpiHostsResolver<KpiHostsData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -1867,6 +1900,19 @@ export namespace SourceResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context, KpiNetworkArgs>;
   export interface KpiNetworkArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+  }
+
+  export type KpiHostsResolver<
+    R = KpiHostsData | null,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, KpiHostsArgs>;
+  export interface KpiHostsArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -5135,6 +5181,81 @@ export namespace KpiNetworkDataResolvers {
   export type TlsHandshakesResolver<
     R = number | null,
     Parent = KpiNetworkData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KpiHostsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostsData> {
+    hosts?: HostsResolver<number | null, TypeParent, Context>;
+
+    installedPackages?: InstalledPackagesResolver<number | null, TypeParent, Context>;
+
+    processCount?: ProcessCountResolver<number | null, TypeParent, Context>;
+
+    authenticationAttempts?: AuthenticationAttemptsResolver<number | null, TypeParent, Context>;
+
+    auditbeatEvents?: AuditbeatEventsResolver<number | null, TypeParent, Context>;
+
+    winlogbeatEvents?: WinlogbeatEventsResolver<number | null, TypeParent, Context>;
+
+    filebeatEvents?: FilebeatEventsResolver<number | null, TypeParent, Context>;
+
+    sockets?: SocketsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
+  }
+
+  export type HostsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InstalledPackagesResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ProcessCountResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthenticationAttemptsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinlogbeatEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FilebeatEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SocketsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
