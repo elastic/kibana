@@ -17,26 +17,30 @@ import { triggerIndexing } from '../util/indexing_service';
 import _ from 'lodash';
 
 export function JsonUploadAndParse({
-  postProcessing,
-  previewCallback,
-  defaultMessage,
   boolIndexData = false,
-  indexingDetails,
-  onIndexSuccess,
-  onIndexError,
+  indexDescription,
+  fileUploadMessage,
+  onFileUpload,
+  onFileRemove,
+  postParseJsonTransform,
+  onIndexAddSuccess,
+  onIndexAddError,
 }) {
 
+  // Local state for parsed and indexed files
+  const [fileRef, setFileRef] = useState(null);
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
 
   if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, indexingDetails).then(resp => {
-      setIndexedFile(parsedFile);
-      if (resp.success && onIndexSuccess) {
-        onIndexSuccess(resp);
-      } else if (onIndexError) {
-        onIndexError();
-      } // No else
+    triggerIndexing(parsedFile, indexDescription).then(resp => {
+      if (resp.success) {
+        setIndexedFile(parsedFile);
+        onIndexAddSuccess && onIndexAddSuccess(resp);
+      } else {
+        setIndexedFile(null);
+        onIndexAddError && onIndexAddError();
+      }
     });
   }
 
@@ -44,25 +48,48 @@ export function JsonUploadAndParse({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.maps.sources.clientFileSource.filePickerLabel"
-          defaultMessage={defaultMessage || 'Please select a Json file to import'}
+          id="xpack.file_upload.filePickerLabel"
+          defaultMessage={
+            fileUploadMessage || 'Please select a Json file to upload'
+          }
         />
       )}
     >
       <EuiFilePicker
         initialPromptText={(
           <FormattedMessage
-            id="xpack.maps.sources.clientFileSource.filePicker"
-            defaultMessage="Import"
+            id="xpack.file_upload.filePicker"
+            defaultMessage="Upload file"
           />
         )}
-        onChange={async ([fileToImport]) => {
-          const parsedFileResult = await parseFile(fileToImport, previewCallback,
-            postProcessing);
-          if (fileToImport && boolIndexData) {
-            triggerIndexing(parsedFileResult);
+        onChange={async fileList => {
+          if (fileList.length === 0) { // Remove
+            setParsedFile(null);
+            onFileRemove && onFileRemove(fileRef);
+          } else if (fileList.length === 1) { // Parse & index file
+            const file = fileList[0];
+            setFileRef(file);
+            // Parse file
+            const parsedFileResult = await parseFile(
+              file, onFileUpload, postParseJsonTransform
+            );
+            // Immediately index file if flag set
+            if (file && boolIndexData) {
+              await triggerIndexing(parsedFileResult).then(resp => {
+                if (resp.success) {
+                  setIndexedFile(parsedFile);
+                  onIndexAddSuccess && onIndexAddSuccess(resp);
+                } else {
+                  setIndexedFile(null);
+                  onIndexAddError && onIndexAddError();
+                }
+              });
+            }
+            // Save parsed result
+            setParsedFile(parsedFileResult);
+          } else { // TODO: Support multiple file upload?
+            console.warn('Multiple file upload not currently supported');
           }
-          setParsedFile(parsedFileResult);
         }}
       />
     </EuiFormRow>
@@ -70,8 +97,12 @@ export function JsonUploadAndParse({
 }
 
 JsonUploadAndParse.propTypes = {
-  previewFile: PropTypes.func,
-  defaultMessage: PropTypes.string,
-  postProcessing: PropTypes.func,
   boolIndexData: PropTypes.bool,
+  indexDescription: PropTypes.object,
+  fileUploadMessage: PropTypes.string,
+  onFileUpload: PropTypes.func,
+  onFileRemove: PropTypes.func,
+  postParseJsonTransform: PropTypes.func,
+  onIndexAddSuccess: PropTypes.func,
+  onIndexAddError: PropTypes.func,
 };

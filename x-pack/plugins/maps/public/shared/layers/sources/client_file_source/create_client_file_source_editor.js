@@ -13,12 +13,10 @@ export function ClientFileCreateSourceEditor({ previewGeojsonFile, boolIndexData
   viewIndexedData }) {
   return (
     <JsonUploadAndParse
-      previewCallback={previewGeojsonFile}
+      onFileUpload={previewGeojsonFile}
       boolIndexData={boolIndexData}
-      indexingDetails={defaultSettings}
-      postProcessing={x => x}
-      onIndexSuccess={viewIndexedData}
-      // onIndexError={}
+      indexDescription={defaultSettings}
+      onIndexAddSuccess={viewIndexedData}
     />
   );
 }
