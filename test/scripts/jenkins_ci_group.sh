@@ -13,6 +13,7 @@ function report {
 
 trap report EXIT
 
+echo "hihihihihi"
 echo $PATH
 echo ---
 echo $(yarn run grunt --version)
