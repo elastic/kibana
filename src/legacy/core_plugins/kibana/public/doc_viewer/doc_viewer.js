@@ -18,12 +18,12 @@
  */
 
 import $ from 'jquery';
-import { uiModules } from '../modules';
-import { DocViewsRegistryProvider } from '../registry/doc_views';
+import { uiModules } from 'ui/modules';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
-import '../render_directive';
+import 'ui/render_directive';
 
-uiModules.get('kibana')
+uiModules.get('apps/discover')
   .directive('docViewer', function (config, Private) {
     const docViews = Private(DocViewsRegistryProvider);
     return {
