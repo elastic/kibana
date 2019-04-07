@@ -71,7 +71,7 @@ module.exports = function (grunt) {
     eslint: {
       cmd: YARN,
       args: [
-        githubChecksReporter('eslint'),
+        ...githubChecksReporter('eslint'),
         require.resolve('../../scripts/eslint'),
         '--no-cache'
       ]
@@ -80,7 +80,7 @@ module.exports = function (grunt) {
     sasslint: {
       cmd: YARN,
       args: [
-        githubChecksReporter('sasslint'),
+        ...githubChecksReporter('sasslint'),
         require.resolve('../../scripts/sasslint')
       ]
     },
@@ -90,7 +90,7 @@ module.exports = function (grunt) {
     checkFileCasing: {
       cmd: YARN,
       args: [
-        githubChecksReporter('checkFileCasing'),
+        ...githubChecksReporter('checkFileCasing'),
         require.resolve('../../scripts/check_file_casing'),
         '--quiet' // only log errors, not warnings
       ]
@@ -101,7 +101,7 @@ module.exports = function (grunt) {
     checkCoreApiChanges: {
       cmd: YARN,
       args: [
-        githubChecksReporter('checkCoreApiChange'),
+        ...githubChecksReporter('checkCoreApiChange'),
         require.resolve('../../scripts/check_core_api_changes')
       ]
     },
@@ -111,7 +111,7 @@ module.exports = function (grunt) {
     typeCheck: {
       cmd: YARN,
       args: [
-        githubChecksReporter('typeCheck'),
+        ...githubChecksReporter('typeCheck'),
         require.resolve('../../scripts/type_check')
       ]
     },
@@ -121,7 +121,7 @@ module.exports = function (grunt) {
     checkTsProjects: {
       cmd: YARN,
       args: [
-        githubChecksReporter('checkTsProjects'),
+        ...githubChecksReporter('checkTsProjects'),
         require.resolve('../../scripts/check_ts_projects')
       ]
     },
@@ -131,7 +131,7 @@ module.exports = function (grunt) {
     i18nCheck: {
       cmd: YARN,
       args: [
-        githubChecksReporter('i18nCheck'),
+        ...githubChecksReporter('i18nCheck'),
         require.resolve('../../scripts/i18n_check'),
         '--ignore-missing',
       ]
@@ -142,7 +142,7 @@ module.exports = function (grunt) {
     mocha: {
       cmd: YARN,
       args: [
-        githubChecksReporter('mocha'),
+        ...githubChecksReporter('mocha'),
         require.resolve('../../scripts/mocha')
       ]
     },
@@ -192,7 +192,7 @@ module.exports = function (grunt) {
       },
       cmd: YARN,
       args: [
-        githubChecksReporter('verifyNotice'),
+        ...githubChecksReporter('verifyNotice'),
         'scripts/notice',
         '--validate'
       ]
@@ -201,7 +201,7 @@ module.exports = function (grunt) {
     apiIntegrationTests: {
       cmd: YARN,
       args: [
-        githubChecksReporter('apiIntegrationTests'),
+        ...githubChecksReporter('apiIntegrationTests'),
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
         '--bail',
@@ -212,7 +212,7 @@ module.exports = function (grunt) {
     serverIntegrationTests: {
       cmd: YARN,
       args: [
-        githubChecksReporter('serverIntegrationTests'),
+        ...githubChecksReporter('serverIntegrationTests'),
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
@@ -225,7 +225,7 @@ module.exports = function (grunt) {
     interpreterFunctionalTestsRelease: {
       cmd: YARN,
       args: [
-        githubChecksReporter('interpreterFunctionalTestsRelease'),
+        ...githubChecksReporter('interpreterFunctionalTestsRelease'),
         'scripts/functional_tests',
         '--config', 'test/interpreter_functional/config.js',
         '--bail',
@@ -237,7 +237,7 @@ module.exports = function (grunt) {
     pluginFunctionalTestsRelease: {
       cmd: YARN,
       args: [
-        githubChecksReporter('pluginFunctionalTestsRelease'),
+        ...githubChecksReporter('pluginFunctionalTestsRelease'),
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
         '--bail',
@@ -249,7 +249,7 @@ module.exports = function (grunt) {
     functionalTests: {
       cmd: YARN,
       args: [
-        githubChecksReporter('functionalTests'),
+        ...githubChecksReporter('functionalTests'),
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
         '--bail',
