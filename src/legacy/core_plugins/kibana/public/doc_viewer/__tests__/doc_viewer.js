@@ -21,11 +21,10 @@ import angular from 'angular';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import '../../private';
+import 'ui/private';
 
-import { DocViewsRegistryProvider } from '../../registry/doc_views';
-import { uiRegistry } from '../../registry/_registry';
-import '..';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { uiRegistry } from 'ui/registry/_registry';
 
 describe('docViewer', function () {
   let stubRegistry;
