@@ -129,16 +129,19 @@ export class AddLayerPanel extends Component {
   }
 
   _getEditorProperties = (importView = false) => {
-    return {
+    let editorProperties = {
       onPreviewSource: this._previewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
-      ...(importView
-        ? {
-          addAndViewSource: source => this._previewLayer(source, false)
-        }
-        : {}
-      )
     };
+    if (importView) {
+      editorProperties = {
+        ...editorProperties,
+        boolIndexData: this.state.indexingTriggered,
+        addAndViewSource: source => this._previewLayer(source, false),
+        onRemove: this.props.removeTransientLayer,
+      };
+    }
+    return editorProperties;
   }
 
   _renderSourceEditor() {
@@ -189,7 +192,7 @@ export class AddLayerPanel extends Component {
           {
             GeojsonFileSource.renderEditor(
               this._getEditorProperties(true),
-              this.state.indexingTriggered
+
             )
           }
         </EuiPanel>

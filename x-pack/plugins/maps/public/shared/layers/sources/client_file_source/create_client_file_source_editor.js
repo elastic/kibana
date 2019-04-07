@@ -9,11 +9,16 @@ import React from 'react';
 import { JsonUploadAndParse } from '../../../../../../file_upload/public/';
 import { defaultSettings } from './default_index_settings';
 
-export function ClientFileCreateSourceEditor({ previewGeojsonFile, boolIndexData = false,
-  viewIndexedData }) {
+export function ClientFileCreateSourceEditor({
+  previewGeojsonFile,
+  boolIndexData = false,
+  viewIndexedData,
+  onRemove
+}) {
   return (
     <JsonUploadAndParse
       onFileUpload={previewGeojsonFile}
+      onFileRemove={onRemove}
       boolIndexData={boolIndexData}
       indexDescription={defaultSettings}
       onIndexAddSuccess={viewIndexedData}
