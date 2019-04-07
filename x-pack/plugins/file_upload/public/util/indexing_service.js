@@ -19,21 +19,28 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
     throw('No file imported');
     return;
   }
-  const initializedIndex = await writeToIndex({
-    id: undefined,
-    data: [],
-    ...indexingDetails
-  });
+  const index = await checkIndex(indexingDetails.index);
+  let id;
+  if (index.exists) {
+    id = index.id;
+  } else {
+    const createdIndex = await writeToIndex({
+      id: undefined,
+      data: [],
+      ...indexingDetails
+    });
+    id = createdIndex.id;
+  }
 
   await populateIndex({
-    id: initializedIndex.id,
+    id,
     data: parsedFile,
     ...indexingDetails,
     settings: {},
     mappings: {},
   });
   //create index pattern
-  return createIndexPattern('', indexingDetails.index);
+  return await createIndexPattern('', indexingDetails.index);
 }
 
 function writeToIndex(indexingDetails) {
@@ -132,22 +139,13 @@ async function populateIndex({ id, index, data, mappings, settings }) {
 async function createIndexPattern(indexPattern = '', index) {
   const indexPatterns = await indexPatternService.get();
   const indexPatternName = (indexPattern === '') ? index : indexPattern;
-  const indexPatternResp = await createKibanaIndexPattern(
-    indexPatternName,
-    indexPatterns
-  );
-  return indexPatternResp;
-}
-
-
-async function createKibanaIndexPattern(indexPatternName, indexPatterns) {
   try {
     Object.assign(indexPatterns, {
       id: '',
       title: indexPatternName,
     });
 
-    await indexPatterns.create();
+    await indexPatterns.create(true);
     const id = await getIndexPatternId(indexPatternName);
     const indexPattern = await indexPatternService.get(id);
     return {
@@ -176,4 +174,23 @@ async function getIndexPatternId(name) {
   } else {
     return undefined;
   }
+}
+
+
+async function checkIndex(name) {
+  const basePath = chrome.addBasePath('/api');
+  const indices = await http({
+    url: `${basePath}/index_management/indices`,
+    method: 'GET',
+  });
+  const existingIndex = indices.find(el => el.name === name);
+  return existingIndex
+    ? {
+      exists: true,
+      id: existingIndex.uuid
+    }
+    : {
+      exists: false,
+      id: null
+    };
 }
