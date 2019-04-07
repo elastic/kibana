@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import { template } from 'lodash';
-import '../filters/short_dots';
+import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
 import conflictFieldNameIcon from './field_name_icons/conflict_field_name_icon.html';
 import dateFieldNameIcon from './field_name_icons/date_field_name_icon.html';
@@ -126,7 +126,9 @@ module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
         const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
         const scripted = $scope.field ? $scope.field.scripted : false;
 
-        const displayName = $filter('shortDots')(name);
+
+        const isShortDots = this.getConfig('shortDots:enable');
+        const displayName = isShortDots ? shortenDottedString(name) : name;
 
         $el
           .attr('title', name)
