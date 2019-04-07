@@ -72,7 +72,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('eslint'),
-        require.resolve('../../scripts/eslint'),
+        'scripts/eslint',
         '--no-cache'
       ]
     },
@@ -81,7 +81,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('sasslint'),
-        require.resolve('../../scripts/sasslint')
+        'scripts/sasslint'
       ]
     },
 
@@ -91,7 +91,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('checkFileCasing'),
-        require.resolve('../../scripts/check_file_casing'),
+        'scripts/check_file_casing',
         '--quiet' // only log errors, not warnings
       ]
     },
@@ -102,7 +102,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('checkCoreApiChange'),
-        require.resolve('../../scripts/check_core_api_changes')
+        'scripts/check_core_api_changes'
       ]
     },
 
@@ -112,7 +112,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('typeCheck'),
-        require.resolve('../../scripts/type_check')
+        'scripts/type_check'
       ]
     },
 
@@ -122,7 +122,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('checkTsProjects'),
-        require.resolve('../../scripts/check_ts_projects')
+        'scripts/check_ts_projects'
       ]
     },
 
@@ -132,7 +132,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('i18nCheck'),
-        require.resolve('../../scripts/i18n_check'),
+        'scripts/i18n_check',
         '--ignore-missing',
       ]
     },
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         ...githubChecksReporter('mocha'),
-        require.resolve('../../scripts/mocha')
+        'scripts/mocha'
       ]
     },
 
