@@ -45,7 +45,7 @@ const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
 const compiledStringFieldNameIcon = template(stringFieldNameIcon);
 const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
 
-module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
+module.directive('fieldName', function ($compile, $rootScope, config, i18n) {
   return {
     restrict: 'AE',
     scope: {
@@ -127,7 +127,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
         const scripted = $scope.field ? $scope.field.scripted : false;
 
 
-        const isShortDots = this.getConfig('shortDots:enable');
+        const isShortDots = config.get('shortDots:enable');
         const displayName = isShortDots ? shortenDottedString(name) : name;
 
         $el
