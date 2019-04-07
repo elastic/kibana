@@ -21,7 +21,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import '../../doc_viewer';
-import '../../filters/uriescape';
 import '../../filters/short_dots';
 import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
@@ -95,6 +94,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $detailsTr.html(detailsHtml);
 
         $detailsScope.row = $scope.row;
+        $detailsScope.uriEncodedId = encodeURIComponent($detailsScope.row._id);
 
         $compile($detailsTr)($detailsScope);
       };
