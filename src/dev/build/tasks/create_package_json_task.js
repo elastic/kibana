@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { copyWorkspacePackages } from '@kbn/pm';
+
 import { read, write } from '../lib';
 
 export const CreatePackageJsonTask = {
@@ -79,6 +81,8 @@ export const RemoveWorkspacesTask = {
   description: 'Remove workspace artifacts',
 
   async run(config, log, build) {
+    await copyWorkspacePackages(build.resolvePath());
+
     const path = build.resolvePath('package.json');
     const pkg = JSON.parse(await read(path));
 
