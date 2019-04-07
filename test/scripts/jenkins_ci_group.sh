@@ -19,20 +19,7 @@ node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
-echo PATH
-echo $PATH
-echo ---
-# echo yarn bin
-# yarn bin
-echo ---
-ls -al $(FORCE_COLOR=0 yarn bin)/eslint
-echo ---
-# echo which
-# which github-checks-reporter
-echo ---
-echo which eslint
-echo $(which eslint)
-GITHUB_CHECKS_REPORTER_ID=26774 yarn run github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
+yarn run github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
