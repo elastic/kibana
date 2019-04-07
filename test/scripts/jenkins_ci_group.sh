@@ -17,6 +17,7 @@ echo "hihihihihi"
 echo $PATH
 echo ---
 echo $(yarn run grunt --version)
+echo $(grunt --version)
 echo ---
 ls -al $(FORCE_COLOR=0 yarn bin)/grunt
 
