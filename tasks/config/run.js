@@ -62,20 +62,25 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
+  const githubChecksReporter = title => ['run', 'github-checks-reporter', title, 'node'];
+  const YARN = 'yarn';
+
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
     eslint: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('eslint'),
         require.resolve('../../scripts/eslint'),
         '--no-cache'
       ]
     },
 
     sasslint: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('sasslint'),
         require.resolve('../../scripts/sasslint')
       ]
     },
@@ -83,8 +88,9 @@ module.exports = function (grunt) {
     // used by the test tasks
     //    runs the check_file_casing script to ensure filenames use correct casing
     checkFileCasing: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('checkFileCasing'),
         require.resolve('../../scripts/check_file_casing'),
         '--quiet' // only log errors, not warnings
       ]
@@ -93,8 +99,9 @@ module.exports = function (grunt) {
     // used by the test tasks
     //    runs the check_core_api_changes script to ensure API changes are explictily accepted
     checkCoreApiChanges: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('checkCoreApiChange'),
         require.resolve('../../scripts/check_core_api_changes')
       ]
     },
@@ -102,8 +109,9 @@ module.exports = function (grunt) {
     // used by the test and jenkins:unit tasks
     //    runs the typecheck script to check for Typescript type errors
     typeCheck: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('typeCheck'),
         require.resolve('../../scripts/type_check')
       ]
     },
@@ -111,8 +119,9 @@ module.exports = function (grunt) {
     // used by the test and jenkins:unit tasks
     //    ensures that all typescript files belong to a typescript project
     checkTsProjects: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('checkTsProjects'),
         require.resolve('../../scripts/check_ts_projects')
       ]
     },
@@ -120,8 +129,9 @@ module.exports = function (grunt) {
     // used by the test and jenkins:unit tasks
     //    runs the i18n_check script to check i18n engine usage
     i18nCheck: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('i18nCheck'),
         require.resolve('../../scripts/i18n_check'),
         '--ignore-missing',
       ]
@@ -130,8 +140,9 @@ module.exports = function (grunt) {
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('mocha'),
         require.resolve('../../scripts/mocha')
       ]
     },
@@ -179,16 +190,18 @@ module.exports = function (grunt) {
       options: {
         wait: true,
       },
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('verifyNotice'),
         'scripts/notice',
         '--validate'
       ]
     },
 
     apiIntegrationTests: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('apiIntegrationTests'),
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
         '--bail',
@@ -197,8 +210,9 @@ module.exports = function (grunt) {
     },
 
     serverIntegrationTests: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('serverIntegrationTests'),
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
@@ -209,8 +223,9 @@ module.exports = function (grunt) {
     },
 
     interpreterFunctionalTestsRelease: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('interpreterFunctionalTestsRelease'),
         'scripts/functional_tests',
         '--config', 'test/interpreter_functional/config.js',
         '--bail',
@@ -220,8 +235,9 @@ module.exports = function (grunt) {
     },
 
     pluginFunctionalTestsRelease: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('pluginFunctionalTestsRelease'),
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
         '--bail',
@@ -231,8 +247,9 @@ module.exports = function (grunt) {
     },
 
     functionalTests: {
-      cmd: process.execPath,
+      cmd: YARN,
       args: [
+        githubChecksReporter('functionalTests'),
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
         '--bail',

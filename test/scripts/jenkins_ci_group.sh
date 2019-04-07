@@ -24,8 +24,8 @@ yarn run github-checks-reporter "functionalTests_ciGroup${CI_GROUP}" yarn run gr
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
   cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
-  yarn build;
+  yarn run github-checks-reporter "build kbn_tp_sample_panel_action" yarn build;
   cd -;
-  "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
-  "$(FORCE_COLOR=0 yarn bin)/grunt" run:interpreterFunctionalTestsRelease;
+  yarn run github-checks-reporter "pluginFunctionalTestsRelease" yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+  yarn run github-checks-reporter "interpreterFunctionalTestsRelease" yarn run grunt run:interpreterFunctionalTestsRelease;
 fi
