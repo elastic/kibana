@@ -15,8 +15,9 @@ trap report EXIT
 
 echo $PATH
 echo ---
-echo $(yarn run grunt version)
+echo $(yarn run grunt --version)
 echo ---
+ls -al $(FORCE_COLOR=0 yarn bin)/grunt
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
