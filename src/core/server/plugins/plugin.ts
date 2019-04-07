@@ -26,6 +26,8 @@ import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
  * that use it as a key or value more obvious.
+ *
+ * @public
  */
 export type PluginName = string;
 
@@ -135,6 +137,7 @@ type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginNa
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ *
  * @internal
  */
 export class Plugin<
@@ -201,6 +204,7 @@ export class Plugin<
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);

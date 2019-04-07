@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ErrorDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/distribution/get_distribution';
-import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
-import { ErrorGroupListAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_groups';
+import { ErrorDistributionAPIResponse } from '../../../../server/lib/errors/distribution/get_distribution';
+import { ErrorGroupAPIResponse } from '../../../../server/lib/errors/get_error_group';
+import { ErrorGroupListAPIResponse } from '../../../../server/lib/errors/get_error_groups';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';

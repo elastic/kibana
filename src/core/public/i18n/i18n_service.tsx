@@ -25,6 +25,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 /**
  * Service that is responsible for i18n capabilities.
+ * @internal
  */
 export class I18nService {
   public setup() {
@@ -54,4 +55,5 @@ export class I18nService {
   }
 }
 
+/** @public */
 export type I18nSetup = ReturnType<I18nService['setup']>;

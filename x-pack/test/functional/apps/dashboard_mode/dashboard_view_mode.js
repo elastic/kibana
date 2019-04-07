@@ -145,6 +145,11 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
       });
 
+      it('shows the full screen menu item', async () => {
+        const fullScreenMenuItemExists = await testSubjects.exists('dashboardFullScreenMode');
+        expect(fullScreenMenuItemExists).to.be(true);
+      });
+
       it('does not show the edit menu item', async () => {
         const editMenuItemExists = await testSubjects.exists('dashboardEditMode');
         expect(editMenuItemExists).to.be(false);

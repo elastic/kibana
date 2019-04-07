@@ -16,11 +16,11 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { IUrlParams } from '../../../store/urlParams';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 

@@ -34,6 +34,7 @@ interface InjectedUiSettingsUser {
   isOverridden?: boolean;
 }
 
+/** @public */
 export interface UiSettingsState {
   [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }

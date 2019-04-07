@@ -11,7 +11,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
 
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };

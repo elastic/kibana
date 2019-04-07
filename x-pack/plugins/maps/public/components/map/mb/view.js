@@ -115,9 +115,20 @@ export class MBMapContainer extends React.Component {
     return popupAnchorLocation;
   }
   _getMbLayerIdsForTooltips() {
-    return this.props.layerList.reduce((mbLayerIds, layer) => {
+
+    const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
       return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
     }, []);
+
+
+    //ensure all layers that are actually on the map
+    //the raw list may contain layer-ids that have not been added to the map yet.
+    //For example:
+    //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
+    //during that data-fetch window, the app should not query for layers that do not exist.
+    return mbLayerIds.filter((mbLayerId) => {
+      return !!this._mbMap.getLayer(mbLayerId);
+    });
   }
 
   _getMapState() {
@@ -156,7 +167,6 @@ export class MBMapContainer extends React.Component {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING
       }
-
     ];
     return this._mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
