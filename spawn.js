@@ -112,7 +112,10 @@ const start = async function () {
       title,
       summary: `in progress`,
     },
-  }).then(logRateLimit);
+  }).then((response) => {
+    console.log('RESPONSE: ', response);
+    logRateLimit(response);
+  });
 
   const ls = spawn(cmd, cmdArgs, cmdSpawnConfig);
   ls.stdout.pipe(process.stdout);
