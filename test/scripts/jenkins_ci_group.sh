@@ -24,9 +24,9 @@ echo $PATH
 echo ---
 # echo yarn bin
 # yarn bin
-# echo ---
-# ls $(FORCE_COLOR=0 yarn bin)
-# echo ---
+echo ---
+ls -al $(FORCE_COLOR=0 yarn bin)/eslint
+echo ---
 # echo which
 # which github-checks-reporter
 echo ---
