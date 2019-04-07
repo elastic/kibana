@@ -52,7 +52,7 @@ describe('[API Routes] Remote Clusters Delete', () => {
       }
     });
 
-    expect(response).toEqual({});
+    expect(response).toEqual({ success: true });
   });
 
   it('should return an error if the response does still contain cluster information', async () => {

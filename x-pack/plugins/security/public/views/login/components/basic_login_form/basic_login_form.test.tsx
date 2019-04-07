@@ -14,6 +14,7 @@ const createMockHttp = ({ simulateError = false } = {}) => {
   return {
     post: jest.fn(async () => {
       if (simulateError) {
+        // eslint-disable-next-line no-throw-literal
         throw {
           data: {
             statusCode: 401,
