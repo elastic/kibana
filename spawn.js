@@ -88,6 +88,7 @@ const start = async function () {
     stdio: ['inherit', 'pipe', 'inherit']
   };
   let cmdLogs = '';
+  let checkRunId = undefined;
   const title = `${cmd} ${cmdArgs.join(' ')}`;
 
   console.log('spawn', title, cmd, cmdArgs.join(' '));
@@ -113,6 +114,7 @@ const start = async function () {
       summary: `in progress`,
     },
   }).then((response) => {
+    checkRunId = response.id;
     console.log('RESPONSE: ', response);
     logRateLimit(response);
   });
@@ -156,8 +158,10 @@ const start = async function () {
     }
 
     console.log('annotations: ', annotations);
-    clientWithAuth.checks.create({
+    console.log('chech_run_id: ', checkRunId);
+    clientWithAuth.checks.update({
       ...commonArgs,
+      chech_run_id: checkRunId,
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: new Date().toISOString(),
       output: {
