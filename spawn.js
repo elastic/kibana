@@ -114,7 +114,7 @@ const start = async function () {
       summary: `in progress`,
     },
   }).then((response) => {
-    checkRunId = response.id;
+    checkRunId = response.data.id;
     console.log('RESPONSE: ', response);
     logRateLimit(response);
   });
