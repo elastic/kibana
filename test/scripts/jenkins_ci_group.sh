@@ -13,6 +13,11 @@ function report {
 
 trap report EXIT
 
+echo $PATH
+echo ---
+echo $(yarn run grunt version)
+echo ---
+
 "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
 node scripts/build --debug --oss;
