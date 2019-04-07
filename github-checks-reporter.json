@@ -1,5 +1,0 @@
-{
-  "envVars": {
-    "appKey": "KIBANA_CI_REPORTER_KEY"
-  }
-}
