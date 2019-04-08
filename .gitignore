@@ -21,6 +21,8 @@ target
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+/test/*/snapshots/failure
+/test/*/snapshots/session
 /html_docs
 .eslintcache
 /plugins/
