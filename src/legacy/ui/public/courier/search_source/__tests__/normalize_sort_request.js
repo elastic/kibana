@@ -20,18 +20,18 @@
 import '../../../private';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { NormalizeSortRequestProvider } from '../_normalize_sort_request';
+import { normalizeSortRequest } from '../_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('SearchSource#normalizeSortRequest', function () {
-  let normalizeSortRequest;
+  let defaultSortOptions;
   let indexPattern;
   let normalizedSort;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    normalizeSortRequest = Private(NormalizeSortRequestProvider);
+  beforeEach(ngMock.inject(function (Private, config) {
+    defaultSortOptions = config.get('sort:options');
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     normalizedSort = [{
@@ -44,7 +44,7 @@ describe('SearchSource#normalizeSortRequest', function () {
 
   it('should return an array', function () {
     const sortable = { someField: 'desc' };
-    const result = normalizeSortRequest(sortable, indexPattern);
+    const result = normalizeSortRequest(sortable, indexPattern, defaultSortOptions);
     expect(result).to.be.an(Array);
     expect(result).to.eql(normalizedSort);
     // ensure object passed in is not mutated
@@ -53,7 +53,7 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should make plain string sort into the more verbose format', function () {
-    const result = normalizeSortRequest([{ someField: 'desc' }], indexPattern);
+    const result = normalizeSortRequest([{ someField: 'desc' }], indexPattern, defaultSortOptions);
     expect(result).to.eql(normalizedSort);
   });
 
@@ -64,7 +64,7 @@ describe('SearchSource#normalizeSortRequest', function () {
         unmapped_type: 'boolean'
       }
     }];
-    const result = normalizeSortRequest(sortState, indexPattern);
+    const result = normalizeSortRequest(sortState, indexPattern, defaultSortOptions);
     expect(result).to.eql(normalizedSort);
   });
 
@@ -86,11 +86,11 @@ describe('SearchSource#normalizeSortRequest', function () {
       }
     };
 
-    let result = normalizeSortRequest(sortState, indexPattern);
+    let result = normalizeSortRequest(sortState, indexPattern, defaultSortOptions);
     expect(result).to.eql([normalizedSort]);
 
     sortState[fieldName] = { order: direction };
-    result = normalizeSortRequest([sortState], indexPattern);
+    result = normalizeSortRequest([sortState], indexPattern, defaultSortOptions);
     expect(result).to.eql([normalizedSort]);
   });
 
@@ -105,7 +105,7 @@ describe('SearchSource#normalizeSortRequest', function () {
       order: direction,
       unmapped_type: 'boolean'
     };
-    const result = normalizeSortRequest([sortState], indexPattern);
+    const result = normalizeSortRequest([sortState], indexPattern, defaultSortOptions);
 
     expect(result).to.eql([normalizedSort]);
   });
@@ -118,7 +118,7 @@ describe('SearchSource#normalizeSortRequest', function () {
       }
     }];
 
-    const result = normalizeSortRequest(sortable, indexPattern);
+    const result = normalizeSortRequest(sortable, indexPattern, defaultSortOptions);
     expect(_.isEqual(result, expected)).to.be.ok();
 
   });

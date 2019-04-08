@@ -73,7 +73,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, translateToQuery } from '@kbn/es-query';
 
-import { NormalizeSortRequestProvider } from './_normalize_sort_request';
+import { normalizeSortRequest } from './_normalize_sort_request';
 import { SearchRequest } from '../fetch/request';
 
 import { FetchSoonProvider } from '../fetch';
@@ -103,7 +103,6 @@ function parseInitialFields(initialFields = {}) {
 }
 
 export function SearchSourceProvider(Private, config) {
-  const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
 
   class SearchSource {
@@ -330,7 +329,7 @@ export function SearchSourceProvider(Private, config) {
         case 'source':
           return addToBody('_source', val);
         case 'sort':
-          return addToBody(key, normalizeSortRequest(val, this.getField('index')));
+          return addToBody(key, normalizeSortRequest(val, this.getField('index'), config.get('sort:options')));
         case 'query':
           return (data[key] = (data[key] || []).concat(val));
         case 'fields':
