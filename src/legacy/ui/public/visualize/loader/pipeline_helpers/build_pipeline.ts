@@ -266,12 +266,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       escapedMarkdown = escapeString(markdown.toString());
     }
     let expr = `markdownvis '${escapedMarkdown}' `;
-    if (fontSize) {
-      expr += ` fontSize=${fontSize} `;
-    }
-    if (openLinksInNewTab) {
-      expr += `openLinksInNewTab=${openLinksInNewTab} `;
-    }
+    expr += prepareValue('fontSize', fontSize);
+    expr += prepareValue(openLinksInNewTab, openLinksInNewTab);
     return expr;
   },
   table: (visState, schemas) => {
@@ -319,31 +315,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
     const { metric, bucket } = buildVisConfig.tagcloud(schemas);
     let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+    expr += prepareValue('scale', scale);
+    expr += prepareValue('orientation', orientation);
+    expr += prepareValue('minFontSize', minFontSize);
+    expr += prepareValue('maxFontSize', maxFontSize);
+    expr += prepareValue('showLabel', showLabel);
+    expr += prepareDimension('bucket', bucket);
 
-    if (scale) {
-      expr += `scale='${scale}' `;
-    }
-    if (orientation) {
-      expr += `orientation='${orientation}' `;
-    }
-    if (minFontSize) {
-      expr += `minFontSize=${minFontSize} `;
-    }
-    if (maxFontSize) {
-      expr += `maxFontSize=${maxFontSize} `;
-    }
-    if (showLabel !== undefined) {
-      expr += `showLabel=${showLabel} `;
-    }
-
-    if (bucket) {
-      expr += ` bucket={visdimension ${bucket.accessor} `;
-      if (bucket.format) {
-        expr += `format=${bucket.format.id} `;
-        expr += prepareJson('formatParams', bucket.format.params);
-      }
-      expr += '} ';
-    }
     return expr;
   },
   region_map: (visState, schemas) => {
