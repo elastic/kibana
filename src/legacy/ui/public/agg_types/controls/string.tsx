@@ -29,16 +29,13 @@ function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorPro
     return null;
   }
 
-  const label = aggParam.displayName || aggParam.name;
-
   return (
-    <EuiFormRow label={label} fullWidth={true} className="visEditorSidebar__aggParamFormRow">
+    <EuiFormRow label={aggParam.displayName || aggParam.name} fullWidth={true} className="visEditorSidebar__aggParamFormRow">
       <EuiFieldText
         value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
-        aria-label={label}
       />
     </EuiFormRow>
   );
