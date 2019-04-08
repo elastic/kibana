@@ -53,15 +53,15 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
             subtitle={
               <FormattedMessage
                 id="xpack.siem.hosts.pageSubtitle"
-                defaultMessage="Last Beat: 23m Ago from {beat}"
+                defaultMessage="Last Beat: TODO from {beat}"
                 values={{
-                  beat: <EuiLink href="#">AuditBeat</EuiLink>,
+                  beat: <EuiLink href="#">TODO</EuiLink>,
                 }}
               />
             }
             title={<FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />}
           >
-            {/* Date picker to be moved here */}
+            {/* DEV NOTE: Date picker to be moved here */}
           </HeaderPage>
 
           <GlobalTime>

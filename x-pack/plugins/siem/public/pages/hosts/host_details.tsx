@@ -62,19 +62,20 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
           <>
             <HostsKql indexPattern={indexPattern} type={type} />
 
+            {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available */}
             <HeaderPage
               subtitle={
                 <FormattedMessage
                   id="xpack.siem.hostDetails.pageSubtitle"
-                  defaultMessage="Last Beat: 23m Ago from {beat}"
+                  defaultMessage="Last Beat: TODO from {beat}"
                   values={{
-                    beat: <EuiLink href="#">AuditBeat</EuiLink>,
+                    beat: <EuiLink href="#">TODO</EuiLink>,
                   }}
                 />
               }
               title={hostId}
             >
-              {/* Date picker to be moved here */}
+              {/* DEV NOTE: Date picker to be moved here */}
             </HeaderPage>
 
             <GlobalTime>

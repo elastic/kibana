@@ -49,15 +49,15 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
             subtitle={
               <FormattedMessage
                 id="xpack.siem.network.pageSubtitle"
-                defaultMessage="Last Beat: 23m Ago from {beat}"
+                defaultMessage="Last Beat: TODO from {beat}"
                 values={{
-                  beat: <EuiLink href="#">PacketBeat</EuiLink>,
+                  beat: <EuiLink href="#">TODO</EuiLink>,
                 }}
               />
             }
             title={<FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />}
           >
-            {/* Date picker to be moved here */}
+            {/* DEV NOTE: Date picker to be moved here */}
           </HeaderPage>
 
           <GlobalTime>

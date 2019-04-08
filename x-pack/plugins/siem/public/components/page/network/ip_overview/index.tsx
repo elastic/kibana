@@ -108,7 +108,8 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
 
     return (
       <>
-        <EuiFlexGroup alignItems="center">
+        {/* DEV NOTE: Commenting out the below as this information should be moved to the new HeaderPage component on pages/network/ip_details.tsx. Note that the SelectTypeItem component below should also be moved to the same children space within the HeaderPage component as the date picker. */}
+        {/* <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText>
               <h1>{ip}</h1>
@@ -124,8 +125,6 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
           </SelectTypeItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-
         <EuiText>
           {i18n.LAST_BEAT}:{' '}
           {typeData && typeData.lastSeen != null ? (
@@ -135,11 +134,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
           ) : (
             getEmptyTagValue()
           )}
-        </EuiText>
-
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule margin="xs" />
-        <EuiSpacer size="s" />
+        </EuiText> */}
 
         <EuiFlexGroup>
           {descriptionLists.map((descriptionList, index) =>

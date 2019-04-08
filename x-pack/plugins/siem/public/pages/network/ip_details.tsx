@@ -51,15 +51,16 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
               subtitle={
                 <FormattedMessage
                   id="xpack.siem.ipDetails.pageSubtitle"
-                  defaultMessage="Last Beat: 23m Ago from {beat}"
+                  defaultMessage="Last Beat: TODO from {beat}"
                   values={{
-                    beat: <EuiLink href="#">AuditBeat</EuiLink>,
+                    beat: <EuiLink href="#">TODO</EuiLink>,
                   }}
                 />
               }
               title={decodeIpv6(ip)}
             >
-              {/* Date picker to be moved here */}
+              {/* DEV NOTE: SelectTypeItem component from components/page/network/ip_overview/index.tsx to be moved here */}
+              {/* DEV NOTE: Date picker to be moved here */}
             </HeaderPage>
 
             <GlobalTime>
