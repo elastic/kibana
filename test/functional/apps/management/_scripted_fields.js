@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    describe.only('testing regression for issue #33251', function describeIndexTests() {
+    describe('testing regression for issue #33251', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
       it('should create and edit scripted field', async function () {
