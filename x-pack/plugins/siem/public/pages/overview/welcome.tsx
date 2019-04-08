@@ -4,23 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextAlign, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
-import * as i18n from './translations';
+export const FlexGroup = styled(EuiFlexGroup)`
+  margin-top: 78px;
+`;
 
 export const Welcome = pure(() => (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      <EuiTextAlign textAlign="center">
+  <>
+    <FlexGroup alignItems="center">
+      <EuiFlexItem>
         <EuiTitle size="l">
-          <h1>{i18n.OVERVIEW_TITLE}</h1>
+          <h1>
+            <FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="Elastic SIEM" />
+          </h1>
         </EuiTitle>
-        <EuiText>
-          <p>{i18n.OVERVIEW_SUBTITLE}</p>
+        <EuiText color="subdued" size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.siem.overview.pageSubtitle"
+              defaultMessage="Security Information & Event Management with the Elastic Stack"
+            />
+          </p>
         </EuiText>
-      </EuiTextAlign>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiButton href="kibana#home/tutorial_directory/security">
+          <FormattedMessage id="xpack.siem.overview.pageAction" defaultMessage="Add Data" />
+        </EuiButton>
+      </EuiFlexItem>
+    </FlexGroup>
+
+    <EuiHorizontalRule margin="xxl" />
+  </>
 ));

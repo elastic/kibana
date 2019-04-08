@@ -11,24 +11,22 @@ import { pure } from 'recompose';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
 import { GlobalTime } from '../../containers/global_time';
-import { PageContent, PageContentBody } from '../styles';
 
 import { Summary } from './summary';
 import { Welcome } from './welcome';
 
 export const OverviewComponent = pure(() => (
-  <PageContent>
+  <>
     <Welcome />
-    <PageContentBody>
-      <Summary />
-      <GlobalTime>
-        {({ poll, to, from }) => (
-          <EuiFlexGroup>
-            <OverviewHost poll={poll} endDate={to} startDate={from} />
-            <OverviewNetwork poll={poll} endDate={to} startDate={from} />
-          </EuiFlexGroup>
-        )}
-      </GlobalTime>
-    </PageContentBody>
-  </PageContent>
+
+    <GlobalTime>
+      {({ poll, to, from }) => (
+        <EuiFlexGroup gutterSize="xl">
+          <Summary />
+          <OverviewHost poll={poll} endDate={to} startDate={from} />
+          <OverviewNetwork poll={poll} endDate={to} startDate={from} />
+        </EuiFlexGroup>
+      )}
+    </GlobalTime>
+  </>
 ));
