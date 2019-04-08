@@ -4,36 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { Location } from 'history';
 import React from 'react';
-import { getMlJobId } from '../../../../common/ml_job_constants';
-import { getRisonHref } from './rison_helpers';
+import { getMlJobId } from '../../../../../common/ml_job_constants';
+import { MLLink } from './MLLink';
 
 interface Props {
   serviceName: string;
   transactionType?: string;
-  location: Location;
 }
 
 export const MLJobLink: React.SFC<Props> = ({
   serviceName,
   transactionType,
-  location,
   children
 }) => {
-  const pathname = '/app/ml';
-  const hash = '/timeseriesexplorer';
   const jobId = getMlJobId(serviceName, transactionType);
   const query = {
-    _g: { ml: { jobIds: [jobId] } }
+    ml: { jobIds: [jobId] }
   };
 
-  const href = getRisonHref({
-    location,
-    pathname,
-    hash,
-    query
-  });
-  return <EuiLink children={children} href={href} />;
+  return (
+    <MLLink children={children} query={query} path="/timeseriesexplorer" />
+  );
 };
