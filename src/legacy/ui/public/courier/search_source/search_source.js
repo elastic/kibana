@@ -77,7 +77,7 @@ import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequest } from '../fetch/request';
 
 import { FetchSoonProvider } from '../fetch';
-import { FieldWildcardProvider } from '../../field_wildcard';
+import { fieldWildcardFilter } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 
 const FIELDS = [
@@ -105,7 +105,6 @@ function parseInitialFields(initialFields = {}) {
 export function SearchSourceProvider(Private, config) {
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
-  const { fieldWildcardFilter } = Private(FieldWildcardProvider);
 
   class SearchSource {
     constructor(initialFields) {
@@ -390,7 +389,7 @@ export function SearchSourceProvider(Private, config) {
 
       if (flatData.body._source) {
         // exclude source fields for this index pattern specified by the user
-        const filter = fieldWildcardFilter(flatData.body._source.excludes);
+        const filter = fieldWildcardFilter(config.get('metaFields'), flatData.body._source.excludes);
         flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
           docvalueField => filter(docvalueField.field)
         );

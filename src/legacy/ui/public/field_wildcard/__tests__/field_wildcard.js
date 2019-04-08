@@ -18,21 +18,11 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 
-import { FieldWildcardProvider } from '../../field_wildcard';
+import { makeRegEx, fieldWildcardFilter } from '../../field_wildcard';
 
 describe('fieldWildcard', function () {
-  let fieldWildcardFilter;
-  let makeRegEx;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (config, Private) {
-    config.set('metaFields', ['_id', '_type', '_source']);
-    const fieldWildcard = Private(FieldWildcardProvider);
-    fieldWildcardFilter = fieldWildcard.fieldWildcardFilter;
-    makeRegEx = fieldWildcard.makeRegEx;
-  }));
+  const metaFields = ['_id', '_type', '_source'];
 
   describe('makeRegEx', function () {
     it('matches * in any position', function () {
@@ -58,7 +48,7 @@ describe('fieldWildcard', function () {
 
   describe('filter', function () {
     it('filters nothing when given undefined', function () {
-      const filter = fieldWildcardFilter();
+      const filter = fieldWildcardFilter(metaFields);
       const original = [
         'foo',
         'bar',
@@ -70,7 +60,7 @@ describe('fieldWildcard', function () {
     });
 
     it('filters nothing when given an empty array', function () {
-      const filter = fieldWildcardFilter([]);
+      const filter = fieldWildcardFilter(metaFields, []);
       const original = [
         'foo',
         'bar',
@@ -82,7 +72,7 @@ describe('fieldWildcard', function () {
     });
 
     it('does not filter metaFields', function () {
-      const filter = fieldWildcardFilter([ '_*' ]);
+      const filter = fieldWildcardFilter(metaFields, [ '_*' ]);
 
       const original = [
         '_id',
@@ -94,7 +84,7 @@ describe('fieldWildcard', function () {
     });
 
     it('filters values that match the globs', function () {
-      const filter = fieldWildcardFilter([
+      const filter = fieldWildcardFilter(metaFields, [
         'f*',
         '*4'
       ]);
@@ -110,7 +100,7 @@ describe('fieldWildcard', function () {
     });
 
     it('handles weird values okay', function () {
-      const filter = fieldWildcardFilter([
+      const filter = fieldWildcardFilter(metaFields, [
         'f*',
         '*4',
         'undefined'
