@@ -16,7 +16,7 @@ interface HeaderPageProps {
 }
 
 export const FlexGroup = styled(EuiFlexGroup)`
-  margin-top: 78px;
+  margin-top: 120px;
 `;
 
 export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title }) => (
@@ -35,6 +35,6 @@ export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title }) 
       {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
     </FlexGroup>
 
-    <EuiHorizontalRule margin="xxl" />
+    <EuiHorizontalRule />
   </>
 ));

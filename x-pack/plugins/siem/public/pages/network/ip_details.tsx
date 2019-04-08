@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,7 +22,6 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -63,29 +62,25 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
               {/* Date picker to be moved here */}
             </HeaderPage>
 
-            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-              <PageContentBody data-test-subj="pane1ScrollContainer">
-                <GlobalTime>
-                  {({ poll, to, from, setQuery }) => (
-                    <IpOverviewQuery
-                      sourceId="default"
-                      filterQuery={filterQuery}
-                      type={networkModel.NetworkType.details}
+            <GlobalTime>
+              {({ poll, to, from, setQuery }) => (
+                <IpOverviewQuery
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  type={networkModel.NetworkType.details}
+                  ip={decodeIpv6(ip)}
+                >
+                  {({ ipOverviewData, loading }) => (
+                    <IpOverview
                       ip={decodeIpv6(ip)}
-                    >
-                      {({ ipOverviewData, loading }) => (
-                        <IpOverview
-                          ip={decodeIpv6(ip)}
-                          data={ipOverviewData}
-                          loading={loading}
-                          type={networkModel.NetworkType.details}
-                        />
-                      )}
-                    </IpOverviewQuery>
+                      data={ipOverviewData}
+                      loading={loading}
+                      type={networkModel.NetworkType.details}
+                    />
                   )}
-                </GlobalTime>
-              </PageContentBody>
-            </PageContent>
+                </IpOverviewQuery>
+              )}
+            </GlobalTime>
           </>
         ) : (
           <EmptyPage

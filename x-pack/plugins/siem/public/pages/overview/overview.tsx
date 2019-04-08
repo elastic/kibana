@@ -30,7 +30,7 @@ export const OverviewComponent = pure(() => (
 
     <GlobalTime>
       {({ poll, to, from }) => (
-        <EuiFlexGroup gutterSize="xl">
+        <EuiFlexGroup>
           <Summary />
           <OverviewHost poll={poll} endDate={to} startDate={from} />
           <OverviewNetwork poll={poll} endDate={to} startDate={from} />

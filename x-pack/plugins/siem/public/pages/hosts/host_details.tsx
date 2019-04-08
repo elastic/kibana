@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -31,7 +31,6 @@ import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
@@ -78,128 +77,130 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
               {/* Date picker to be moved here */}
             </HeaderPage>
 
-            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-              <PageContentBody data-test-subj="pane1ScrollContainer">
-                <GlobalTime>
-                  {({ poll, to, from, setQuery }) => (
-                    <>
-                      <HostsQuery
-                        sourceId="default"
-                        startDate={from}
-                        endDate={to}
-                        poll={poll}
-                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        type={type}
-                      >
-                        {({ hosts, loading, id, refetch, startDate, endDate }) => (
-                          <HostSummaryManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            startDate={startDate}
-                            endDate={endDate}
-                            data={hosts}
-                            loading={loading}
-                          />
-                        )}
-                      </HostsQuery>
+            <GlobalTime>
+              {({ poll, to, from, setQuery }) => (
+                <>
+                  <HostsQuery
+                    sourceId="default"
+                    startDate={from}
+                    endDate={to}
+                    poll={poll}
+                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    type={type}
+                  >
+                    {({ hosts, loading, id, refetch, startDate, endDate }) => (
+                      <HostSummaryManage
+                        id={id}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        startDate={startDate}
+                        endDate={endDate}
+                        data={hosts}
+                        loading={loading}
+                      />
+                    )}
+                  </HostsQuery>
 
-                      <AuthenticationsQuery
-                        sourceId="default"
-                        startDate={from}
-                        endDate={to}
-                        poll={poll}
-                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        type={type}
-                      >
-                        {({
-                          authentications,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadMore,
-                          id,
-                          refetch,
-                        }) => (
-                          <AuthenticationTableManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            loading={loading}
-                            startDate={from}
-                            data={authentications}
-                            totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
-                            type={type}
-                          />
-                        )}
-                      </AuthenticationsQuery>
+                  <EuiSpacer />
 
-                      <UncommonProcessesQuery
-                        sourceId="default"
+                  <AuthenticationsQuery
+                    sourceId="default"
+                    startDate={from}
+                    endDate={to}
+                    poll={poll}
+                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    type={type}
+                  >
+                    {({
+                      authentications,
+                      totalCount,
+                      loading,
+                      pageInfo,
+                      loadMore,
+                      id,
+                      refetch,
+                    }) => (
+                      <AuthenticationTableManage
+                        id={id}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        loading={loading}
                         startDate={from}
-                        endDate={to}
-                        poll={poll}
-                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                        data={authentications}
+                        totalCount={totalCount}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        loadMore={loadMore}
                         type={type}
-                      >
-                        {({
-                          uncommonProcesses,
-                          totalCount,
-                          loading,
-                          pageInfo,
-                          loadMore,
-                          id,
-                          refetch,
-                        }) => (
-                          <UncommonProcessTableManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            loading={loading}
-                            startDate={from}
-                            data={uncommonProcesses}
-                            totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
-                            type={type}
-                          />
-                        )}
-                      </UncommonProcessesQuery>
+                      />
+                    )}
+                  </AuthenticationsQuery>
 
-                      <EventsQuery
-                        endDate={to}
-                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        poll={poll}
-                        sourceId="default"
+                  <EuiSpacer />
+
+                  <UncommonProcessesQuery
+                    sourceId="default"
+                    startDate={from}
+                    endDate={to}
+                    poll={poll}
+                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    type={type}
+                  >
+                    {({
+                      uncommonProcesses,
+                      totalCount,
+                      loading,
+                      pageInfo,
+                      loadMore,
+                      id,
+                      refetch,
+                    }) => (
+                      <UncommonProcessTableManage
+                        id={id}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        loading={loading}
                         startDate={from}
+                        data={uncommonProcesses}
+                        totalCount={totalCount}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        loadMore={loadMore}
                         type={type}
-                      >
-                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
-                          <EventsTableManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={events!}
-                            loading={loading}
-                            startDate={from}
-                            totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
-                            type={type}
-                          />
-                        )}
-                      </EventsQuery>
-                    </>
-                  )}
-                </GlobalTime>
-              </PageContentBody>
-            </PageContent>
+                      />
+                    )}
+                  </UncommonProcessesQuery>
+
+                  <EuiSpacer />
+
+                  <EventsQuery
+                    endDate={to}
+                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    poll={poll}
+                    sourceId="default"
+                    startDate={from}
+                    type={type}
+                  >
+                    {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                      <EventsTableManage
+                        id={id}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        data={events!}
+                        loading={loading}
+                        startDate={from}
+                        totalCount={totalCount}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        loadMore={loadMore}
+                        type={type}
+                      />
+                    )}
+                  </EventsQuery>
+                </>
+              )}
+            </GlobalTime>
           </>
         ) : (
           <EmptyPage
