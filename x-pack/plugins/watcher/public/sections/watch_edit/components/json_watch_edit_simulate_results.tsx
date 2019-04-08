@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, useContext } from 'react';
 
 import {
   EuiBasicTable,
@@ -18,13 +18,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
 import { WATCH_STATES } from '../../../../common/constants';
-import {
-  BaseWatch,
-  ExecutedWatchDetails,
-  ExecutedWatchResults,
-} from '../../../../common/types/watch_types';
+import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
+import { getTypeFromAction } from '../json_watch_edit_actions';
+import { WatchContext } from './watch_context';
 
 const WATCH_ICON_COLORS = {
   [WATCH_STATES.DISABLED]: 'subdued',
@@ -35,36 +32,36 @@ const WATCH_ICON_COLORS = {
 };
 
 export const JsonWatchEditSimulateResults = ({
-  executeDetails,
   executeResults,
+  executeDetails,
   onCloseFlyout,
-  watch,
 }: {
-  executeDetails: ExecutedWatchDetails;
   executeResults: ExecutedWatchResults;
+  executeDetails: ExecutedWatchDetails;
   onCloseFlyout: () => void;
-  watch: BaseWatch;
 }) => {
-  const getTableData = () => {
-    const actions = watch.actions;
-    const actionStatuses = executeResults.watchStatus.actionStatuses;
-    const actionModes = executeDetails.actionModes;
-    const actionDetails = actions.map(action => {
-      const actionMode = actionModes[action.id];
-      const actionStatus = find(actionStatuses, { id: action.id });
+  const { watch } = useContext(WatchContext);
 
-      return {
-        actionId: action.id,
-        actionType: action.type,
-        actionMode,
-        actionState: actionStatus && actionStatus.state,
-        actionReason: actionStatus && actionStatus.lastExecutionReason,
-      };
-    });
-    return actionDetails;
+  const getTableData = () => {
+    const actionStatuses = executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
+    const actionModes = executeDetails.actionModes;
+    const actions = watch.watch && watch.watch.actions;
+    if (actions) {
+      return Object.keys(actions).map(actionKey => {
+        const actionStatus = actionStatuses.find(status => status.id === actionKey);
+        return {
+          actionId: actionKey,
+          actionType: getTypeFromAction(actions[actionKey]),
+          actionMode: actionModes[actionKey],
+          actionState: actionStatus && actionStatus.state,
+          actionReason: actionStatus && actionStatus.lastExecutionReason,
+        };
+      });
+    }
+    return [];
   };
 
-  const tableData = getTableData();
+  const actionsTableData = getTableData();
 
   const columns = [
     {
@@ -141,19 +138,23 @@ export const JsonWatchEditSimulateResults = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <h5>
-            {i18n.translate(
-              'xpack.watcher.sections.watchEdit.simulateResults.actionsSectionTitle',
-              {
-                defaultMessage: 'Actions',
-              }
-            )}
-          </h5>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiBasicTable columns={columns} items={tableData} id="simulateResultsActionStates" />
-        <EuiSpacer size="l" />
+        {actionsTableData && actionsTableData.length > 0 && (
+          <Fragment>
+            <EuiText>
+              <h5>
+                {i18n.translate(
+                  'xpack.watcher.sections.watchEdit.simulateResults.actionsSectionTitle',
+                  {
+                    defaultMessage: 'Actions',
+                  }
+                )}
+              </h5>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiBasicTable columns={columns} items={actionsTableData} />
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiText>
           <h5>
             {i18n.translate(

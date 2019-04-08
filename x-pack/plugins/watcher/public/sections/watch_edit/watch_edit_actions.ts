@@ -14,7 +14,7 @@ import { createWatch, loadWatch } from '../../lib/api';
  * Get the type from an action where a key defines its type.
  * eg: { email: { ... } } | { slack: { ... } }
  */
-function getTypeFromAction(action: { [key: string]: any }) {
+export function getTypeFromAction(action: { [key: string]: any }) {
   const actionKeys = Object.keys(action);
   let type;
   Object.keys(ACTION_TYPES).forEach(k => {

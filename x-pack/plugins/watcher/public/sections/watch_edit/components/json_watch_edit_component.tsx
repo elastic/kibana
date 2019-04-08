@@ -111,6 +111,9 @@ const JsonWatchEditUi = ({
           <EuiTab
             onClick={() => {
               setSelectedTab(tab.id);
+              setExecuteDetails(
+                new ExecuteDetails({ ...executeDetails, actionModes: getActionModes(watchActions) })
+              );
             }}
             isSelected={tab.id === selectedTab}
             key={index}

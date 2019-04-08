@@ -138,7 +138,6 @@ export const JsonWatchEditSimulate = ({
         <JsonWatchEditSimulateResults
           executeResults={executeResults}
           executeDetails={executeDetails}
-          watch={watch}
           onCloseFlyout={() => setExecuteResults(null)}
         />
       )}
