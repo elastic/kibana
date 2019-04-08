@@ -17,10 +17,20 @@
  * under the License.
  */
 
-export function getEsQueryConfig(config) {
-  const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-  const queryStringOptions = config.get('query:queryString:options');
-  const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
-  const dateFormatTZ = config.get('dateFormat:tz');
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ };
-}
+import expect from '@kbn/expect';
+import { getTimeZoneFromSettings } from '../get_time_zone_from_settings';
+
+describe('get timezone from settings', function () {
+
+  it('should return the config timezone if the time zone is set', function () {
+    const result = getTimeZoneFromSettings('America/Chicago');
+    expect(result).to.eql('America/Chicago');
+  });
+
+  it('should return the system timezone if the time zone is set to "Browser"', function () {
+    const result = getTimeZoneFromSettings('Browser');
+    expect(result).to.not.equal('Browser');
+  });
+
+});
+
