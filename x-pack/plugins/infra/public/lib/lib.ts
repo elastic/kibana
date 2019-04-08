@@ -45,9 +45,10 @@ export interface InfraFrameworkAdapter {
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
-export interface InfraFramworkAdapterConstructable {
-  new (uiModule: IModule, timezoneProvider: InfraTimezoneProvider): InfraFrameworkAdapter;
-}
+export type InfraFramworkAdapterConstructable = new (
+  uiModule: IModule,
+  timezoneProvider: InfraTimezoneProvider
+) => InfraFrameworkAdapter;
 
 // TODO: replace AxiosRequestConfig with something more defined
 export type InfraRequestConfig = AxiosRequestConfig;
