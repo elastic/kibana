@@ -11,4 +11,8 @@ export class AbstractStyle {
       hasChanges: false,
     };
   }
+
+  getDescriptor() {
+    return this._descriptor;
+  }
 }
