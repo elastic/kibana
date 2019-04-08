@@ -9,3 +9,11 @@ import createHistory from 'history/createHashHistory';
 export const history = createHistory();
 
 export const isImportRepositoryURLInvalid = (url: string) => url.trim() === '';
+
+export const decodeRevisionString = (revision: string) => {
+  return revision.replace(':', '/');
+};
+
+export const encodeRevisionString = (revision: string) => {
+  return revision.replace('/', ':');
+};

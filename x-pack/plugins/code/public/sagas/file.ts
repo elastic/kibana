@@ -93,7 +93,7 @@ function requestRepoTree({
     query.parents = true;
   }
   return kfetch({
-    pathname: `/api/code/repo/${uri}/tree/${revision}/${path}`,
+    pathname: `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
     query,
   });
 }
@@ -158,7 +158,7 @@ function requestCommits(
 ) {
   const pathStr = path ? `/${path}` : '';
   const options: any = {
-    pathname: `/api/code/repo/${uri}/history/${revision}${pathStr}`,
+    pathname: `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
   };
   if (loadMore) {
     options.query = { after: 1 };
@@ -174,7 +174,7 @@ export async function requestFile(
   line?: string
 ): Promise<FetchFileResponse> {
   const { uri, revision, path } = payload;
-  const url = `/api/code/repo/${uri}/blob/${revision}/${path}`;
+  const url = `/api/code/repo/${uri}/blob/${encodeURIComponent(revision)}/${path}`;
   const query: any = {};
   if (line) {
     query.line = line;
