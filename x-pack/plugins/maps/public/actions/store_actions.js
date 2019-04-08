@@ -136,12 +136,13 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(layerId, errorMessage) {
+function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
+      isInErrorState: errorMessage !== null,
       layerId,
-      errorMessage,
+      errorMessage
     });
   };
 }
@@ -366,14 +367,20 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return ({
-    type: LAYER_DATA_LOAD_ENDED,
-    layerId,
-    dataId,
-    data,
-    meta,
-    requestToken
-  });
+  return async (dispatch) => {
+    dispatch({
+      type: LAYER_DATA_LOAD_ENDED,
+      layerId,
+      dataId,
+      data,
+      meta,
+      requestToken
+    });
+    //Clear any data-load errors when there is a succesful data return.
+    //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
+    //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
+    dispatch(setLayerDataLoadErrorStatus(layerId, null));
+  };
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
@@ -385,7 +392,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
       requestToken,
     });
 
-    dispatch(setLayerErrorStatus(layerId, errorMessage));
+    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
