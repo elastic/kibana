@@ -27,8 +27,6 @@ export class AddLayerPanel extends Component {
 
   state = {
     sourceType: null,
-    isLoading: false,
-    hasLayerSelected: false,
     layer: null
   }
 
