@@ -72,8 +72,8 @@ uiModules
             $scope.isSelectInvalid = false;
           });
 
-          // The model can become touched either onBlur event or when the form is submitted.
           $scope.$watch(() => {
+            // The model can become touched either onBlur event or when the form is submitted.
             return ngModelCtrl.$touched;
           }, (value) => {
             if (value === true) {
@@ -99,9 +99,7 @@ uiModules
           };
 
           $scope.setValidity = (isValid) => {
-            // The field will be invalid when the value is empty.
             _isSelectInvalid = !isValid;
-            // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };
 

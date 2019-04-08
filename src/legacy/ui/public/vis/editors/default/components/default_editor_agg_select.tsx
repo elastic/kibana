@@ -84,6 +84,7 @@ function DefaultEditorAggSelect({
 
   useEffect(
     () => {
+      // The selector will be invalid when the value is empty.
       setValidity(!!value);
     },
     [value]
@@ -105,7 +106,7 @@ function DefaultEditorAggSelect({
         options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        onBlur={() => setTouched()}
+        onBlur={setTouched}
         onChange={options => setValue(get(options, '0.value'))}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}

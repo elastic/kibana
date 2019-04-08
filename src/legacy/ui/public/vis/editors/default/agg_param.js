@@ -98,8 +98,8 @@ uiModules
               showValidation();
             }, true);
 
-            // The model can become touched either onBlur event or when the form is submitted.
             $scope.$watch(() => {
+              // The model can become touched either onBlur event or when the form is submitted.
               return ngModelCtrl.$touched;
             }, (value) => {
               if (value === true) {
