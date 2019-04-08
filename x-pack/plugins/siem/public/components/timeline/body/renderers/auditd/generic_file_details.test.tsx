@@ -46,7 +46,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/generic-text-123using/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/generic-text-123usinggpgconf--list-dirs agent-socket'
       );
     });
 
@@ -92,7 +92,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -121,7 +121,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -150,7 +150,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -179,7 +179,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -208,7 +208,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -237,7 +237,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -266,7 +266,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -295,7 +295,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -324,7 +324,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 

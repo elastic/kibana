@@ -25,23 +25,10 @@ interface Props {
 export const ProcessDraggable = pure<Props>(
   ({ contextId, eventId, processExecutable, processName, processPid }) => {
     if (
-      !isNillOrEmptyString(processExecutable) ||
-      (processExecutable === '' &&
-        isNillOrEmptyString(processName) &&
-        isNillOrEmptyString(processPid))
-    ) {
-      return (
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.executable"
-          value={processExecutable}
-          iconType="console"
-        />
-      );
-    } else if (
       !isNillOrEmptyString(processName) ||
-      (processName === '' && isNillOrEmptyString(processPid))
+      (processName === '' &&
+        isNillOrEmptyString(processExecutable) &&
+        isNillOrEmptyString(processPid))
     ) {
       return (
         <DraggableBadge
@@ -49,6 +36,19 @@ export const ProcessDraggable = pure<Props>(
           eventId={eventId}
           field="process.name"
           value={processName}
+          iconType="console"
+        />
+      );
+    } else if (
+      !isNillOrEmptyString(processExecutable) ||
+      (processExecutable === '' && isNillOrEmptyString(processPid))
+    ) {
+      return (
+        <DraggableBadge
+          contextId={contextId}
+          eventId={eventId}
+          field="process.executable"
+          value={processExecutable}
           iconType="console"
         />
       );
