@@ -5,20 +5,25 @@
  */
 
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
   EuiSelect
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function IndexSettings({
+export const IndexSettings = injectI18n(function IndexSettings({
+  index,
+  setIndex,
   setIndexType,
   mappingsOptions,
-  indexSelectionEnabled
+  indexSelectionEnabled,
+  intl
 }) {
+  const [indexError, setIndexError] = useState('');
+
   return (
     <Fragment>
       <EuiSpacer size="m" />
@@ -45,16 +50,65 @@ export function IndexSettings({
           )
         }
       </EuiFormRow>
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.file_upload.indexNameLabel"
+            defaultMessage="Index name"
+          />
+        }
+        // isInvalid={indexNameError !== ''}
+        // error={[indexNameError]}
+      >
+        <EuiFieldText
+          placeholder={intl.formatMessage({
+            id: 'xpack.file_upload.indexNamePlaceholder',
+            defaultMessage: 'index name'
+          })}
+          value={index}
+          // disabled={(initialized === true)}
+          onChange={onIndexChange(setIndex, setIndexError)}
+          isInvalid={indexError !== ''}
+          aria-label={intl.formatMessage({
+            id: 'xpack.file_upload.indexNameAriaLabel',
+            defaultMessage: 'Index name, required field'
+          })}
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="s" />
+
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.file_upload.indexPatternNameLabel"
+            defaultMessage="Index pattern name"
+          />
+        }
+        // disabled={(createIndexPattern === false || initialized === true)}
+        // isInvalid={indexPatternNameError !== ''}
+        // error={[indexPatternNameError]}
+      >
+        <EuiFieldText
+          // disabled={(createIndexPattern === false || initialized === true)}
+          // placeholder={(createIndexPattern === true) ? index : ''}
+          // value={indexPattern}
+          // onChange={onIndexPatternChange}
+          // isInvalid={indexPatternNameError !== ''}
+        />
+      </EuiFormRow>
+
     </Fragment>
   );
-}
+});
 
-function onIndexChange(e) {
-  const name = e.target.value;
-  this.setState({
-    index: name,
-    indexNameError: isIndexNameValid(name, this.state.indexNames),
-  });
+function onIndexChange(setIndex, setIndexError) {
+  return ({ target }) => {
+    const name = target.value;
+    setIndex(name);
+    // setIndexError(isIndexNameValid);
+  };
 }
 
 function isIndexNameValid(name, indexNames) {

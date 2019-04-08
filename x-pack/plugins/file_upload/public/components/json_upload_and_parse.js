@@ -27,15 +27,19 @@ export function JsonUploadAndParse(props) {
     onIndexAddSuccess,
     onIndexAddError
   } = props;
+  const boolMappingsOptions = Array.isArray(indexDescription.mappings);
 
   // Local state for parsed and indexed files
   const [fileRef, setFileRef] = useState(null);
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
-  const [mappings, setMappings] = useState(null);
+  const [mappings, setMappings] = useState(boolMappingsOptions
+    ? indexDescription.mappings[0].value
+    : indexDescription.mappings);
+  const [index, setIndex] = useState('');
 
   if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, { ...indexDescription, mappings }).then(
+    triggerIndexing(parsedFile, { ...indexDescription, mappings, index }).then(
       resp => {
         if (resp.success) {
           setIndexedFile(parsedFile);
@@ -46,16 +50,17 @@ export function JsonUploadAndParse(props) {
         }
       });
   }
-  const boolMappingsOptions = Array.isArray(indexDescription.mappings);
 
   return (
     <Fragment>
       {
         renderFilePicker(
-          { ...props, fileRef, setFileRef, parsedFile, setParsedFile, setIndexedFile, mappings }
+          { ...props, fileRef, setFileRef, parsedFile, setParsedFile, setIndexedFile, mappings, index }
         )
       }
       <IndexSettings
+        index={index}
+        setIndex={setIndex}
         setIndexType={boolMappingsOptions
           ? ({ target }) => {
             const selectedMappings = indexDescription.mappings
@@ -65,8 +70,8 @@ export function JsonUploadAndParse(props) {
           : setMappings(indexDescription.mappings)
         }
         mappingsOptions={boolMappingsOptions
-          ? indexDescription.mappings.map(mapping => (
-            { text: mapping.name, value: mapping.name }
+          ? indexDescription.mappings.map(mappings => (
+            { text: mappings.name, value: mappings.name }
           ))
           : []
         }
@@ -90,7 +95,8 @@ function renderFilePicker({
   setParsedFile,
   setIndexedFile,
   indexDescription,
-  mappings
+  mappings,
+  index
 }) {
   return (
     <EuiFormRow
@@ -123,7 +129,8 @@ function renderFilePicker({
             );
             // Immediately index file if flag set
             if (file && boolIndexData) {
-              await triggerIndexing(parsedFile, { ...indexDescription, mappings }).then(
+              await triggerIndexing(parsedFile, {
+                ...indexDescription, mappings, index }).then(
                 resp => {
                   if (resp.success) {
                     setIndexedFile(parsedFile);
