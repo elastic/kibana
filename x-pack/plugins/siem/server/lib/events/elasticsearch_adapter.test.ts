@@ -278,11 +278,7 @@ describe('events elasticsearch_adapter', () => {
     test('it formats an event with a suricata eve alert signature id correctly', () => {
       const fields: ReadonlyArray<string> = ['suricata.eve.alert.signature_id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      // TODO:
-      // This should turn back into expected: EcsEdges = {
-      // once we have all the types converted correctly to ToStringArray
-      // For now, this test _must_ return the data as is with an any for expected
-      const expected = {
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',

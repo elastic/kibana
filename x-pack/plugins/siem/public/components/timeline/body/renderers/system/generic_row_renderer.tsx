@@ -133,8 +133,6 @@ const systemUserChangedRowRenderer = createGenericSystemRowRenderer({
   text: i18n.USER_CHANGED,
 });
 
-// TODO: Does this show more than uptime? Currently looks like only host uptime
-// If we display the system message than we are covered with it displaying as is.
 const systemHostChangedRowRenderer = createGenericSystemRowRenderer({
   actionName: 'host',
   text: i18n.HOST_CHANGED,
@@ -155,7 +153,7 @@ const systemProcessErrorRowRenderer = createGenericFileRowRenderer({
   text: i18n.PROCESS_ERROR,
 });
 
-// TODO: Remove this once this has been replaced everywhere with "error"
+// TODO: Remove this once this has been replaced everywhere with "error" below
 const systemErrorRowRendererDeprecated = createGenericSystemRowRenderer({
   actionName: 'error:',
   text: i18n.ERROR,
@@ -176,8 +174,6 @@ const systemBootRowRenderer = createGenericSystemRowRenderer({
   text: i18n.BOOT,
 });
 
-// TODO: auth.ssh.method and auth.ssh.signature are important items to maybe add
-// generically if they exist
 const systemAcceptedRowRenderer = createGenericSystemRowRenderer({
   actionName: 'accepted',
   text: i18n.ACCEPTED,
