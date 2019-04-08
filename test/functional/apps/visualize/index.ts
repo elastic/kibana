@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
+// tslint:disable-next-line: no-default-export
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
@@ -29,7 +29,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   describe('visualize app', () => {
     before(async () => {
       log.debug('Starting visualize before method');
-      await browser.setWindowSize(1280, 800);
+      browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
