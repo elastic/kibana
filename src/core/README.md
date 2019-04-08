@@ -2,6 +2,12 @@
 
 Core is a set of systems (frontend, backend etc.) that Kibana and its plugins are built on top of.
 
+## Plugin development
+Core Plugin API Documentation:
+ - [Core Public API](/docs/development/core/public/kibana-plugin-public.md)
+ - [Core Server API](/docs/development/core/server/kibana-plugin-server.md)
+ - [Migration guide for porting existing plugins](./MIGRATION.md)
+
 ## Integration with the "legacy" Kibana
 
 Most of the existing core functionality is still spread over "legacy" Kibana and it will take some time to upgrade it.
