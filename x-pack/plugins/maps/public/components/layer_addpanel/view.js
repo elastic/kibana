@@ -50,7 +50,10 @@ export class AddLayerPanel extends Component {
   };
 
   _clearSource = () => {
-    this.setState({ sourceType: null });
+    this.setState({
+      layer: null,
+      sourceType: null
+    });
     this.props.removeTransientLayer();
   }
 
