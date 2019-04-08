@@ -9,6 +9,7 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { fetchAllRenderables } from '../../state/actions/elements';
 import { setPage } from '../../state/actions/pages';
 import { setAssets } from '../../state/actions/assets';
+import { selectToplevelNodes } from '../../state/actions/transient';
 import { ExportApp } from './export';
 
 export const routes = [
@@ -32,6 +33,7 @@ export const routes = [
           dispatch(setAssets(assets));
           dispatch(setWorkpad(workpad, { loadPages: false }));
           dispatch(setPage(pageNumber - 1));
+          dispatch(selectToplevelNodes([]));
           dispatch(fetchAllRenderables({ onlyActivePage: true }));
         },
         meta: {

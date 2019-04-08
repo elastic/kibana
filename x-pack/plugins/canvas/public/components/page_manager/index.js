@@ -10,6 +10,7 @@ import * as pageActions from '../../state/actions/pages';
 import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/selectors/workpad';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
+import { selectToplevelNodes } from '../../state/actions/transient';
 import { PageManager as Component } from './page_manager';
 
 const mapStateToProps = state => {
@@ -25,10 +26,19 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  addPage: () => dispatch(pageActions.addPage()),
+  addPage: () => {
+    dispatch(pageActions.addPage());
+    dispatch(selectToplevelNodes([]));
+  },
   movePage: (id, position) => dispatch(pageActions.movePage(id, position)),
-  duplicatePage: id => dispatch(pageActions.duplicatePage(id)),
-  removePage: id => dispatch(pageActions.removePage(id)),
+  duplicatePage: id => {
+    dispatch(pageActions.duplicatePage(id));
+    dispatch(selectToplevelNodes([]));
+  },
+  removePage: id => {
+    dispatch(pageActions.removePage(id));
+    dispatch(selectToplevelNodes([]));
+  },
 });
 
 export const PageManager = compose(

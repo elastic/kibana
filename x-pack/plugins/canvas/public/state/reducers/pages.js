@@ -11,9 +11,10 @@ import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
+import { getSelectedPageIndex } from '../selectors/workpad';
 
 function setPageIndex(workpadState, index) {
-  if (index < 0 || !workpadState.pages[index]) {
+  if (index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index) {
     return workpadState;
   }
   return set(workpadState, 'page', index);

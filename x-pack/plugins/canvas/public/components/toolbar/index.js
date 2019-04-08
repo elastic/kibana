@@ -15,6 +15,7 @@ import {
   getSelectedElement,
 } from '../../state/selectors/workpad';
 
+import { selectToplevelNodes } from '../../state/actions/transient';
 import { Toolbar as Component } from './toolbar';
 
 const mapStateToProps = state => ({
@@ -25,9 +26,16 @@ const mapStateToProps = state => ({
   selectedElement: getSelectedElement(state),
 });
 
+const mapDispatchToProps = dispatch => ({
+  resetToplevelSelection: () => dispatch(selectToplevelNodes([])),
+});
+
 export const Toolbar = compose(
   pure,
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   getContext({
     router: PropTypes.object,
   }),
@@ -35,10 +43,12 @@ export const Toolbar = compose(
     nextPage: props => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.totalPages);
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
+      props.resetToplevelSelection();
     },
     previousPage: props => () => {
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
+      props.resetToplevelSelection();
     },
   }),
   withState('tray', 'setTray', props => props.tray),
