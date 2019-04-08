@@ -12,7 +12,7 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
     {
       range: {
         'timestamp': {
-          gte: 'now-1d',
+          gte: 'now-30s',
           lte: 'now'
         }
       }
