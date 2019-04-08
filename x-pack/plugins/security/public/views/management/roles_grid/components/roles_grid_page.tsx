@@ -114,7 +114,7 @@ class RolesGridPageUI extends Component<Props, State> {
                 initialPageSize: 20,
                 pageSizeOptions: [10, 20, 30, 50, 100],
               }}
-              items={this.getVisibleRoles()}
+              items={this.getRolesForDisplay()}
               loading={roles.length === 0}
               search={{
                 toolsLeft: this.renderToolsLeft(),
@@ -181,33 +181,43 @@ class RolesGridPageUI extends Component<Props, State> {
       },
     },
     {
-      field: 'metadata',
+      field: 'metadata._reserved',
       name: intl.formatMessage({
         id: 'xpack.security.management.roles.reservedColumnName',
         defaultMessage: 'Reserved',
       }),
-      sortable: false,
+      sortable: true,
+      dataType: 'boolean',
       align: 'right',
       description: intl.formatMessage({
         id: 'xpack.security.management.roles.reservedColumnDescription',
         defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.',
       }),
-      render: (metadata: Record<string, boolean>) =>
-        metadata && metadata._reserved ? (
+      render: (reserved: boolean | undefined) =>
+        reserved ? (
           <EuiIcon aria-label="Reserved role" data-test-subj="reservedRole" type="check" />
         ) : null,
     },
   ];
 
-  private getVisibleRoles = () => {
+  private getRolesForDisplay = () => {
     const { roles, filter } = this.state;
-    return filter
+
+    const visibleRoles = filter
       ? roles.filter(({ name }) => {
           const normalized = `${name}`.toLowerCase();
           const normalizedQuery = filter.toLowerCase();
           return normalized.indexOf(normalizedQuery) !== -1;
         })
       : roles;
+
+    // ensure each role has a `metadata._reserved` property to enable proper sorting.
+    const transformedRoles = visibleRoles.map(role => ({
+      ...role,
+      metadata: { _reserved: false, ...role.metadata },
+    }));
+
+    return transformedRoles;
   };
 
   private handleDelete = () => {
