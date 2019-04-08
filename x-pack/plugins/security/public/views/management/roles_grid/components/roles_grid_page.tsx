@@ -218,10 +218,17 @@ class RolesGridPageUI extends Component<Props, State> {
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (reserved: boolean | undefined) =>
-          reserved ? (
-            <EuiIcon aria-label="Reserved role" data-test-subj="reservedRole" type="check" />
-          ) : null,
+        render: (reserved: boolean | undefined) => {
+          const label = intl.formatMessage({
+            id: 'xpack.security.management.roles.reservedRoleIconLabel',
+            defaultMessage: 'Reserved role',
+          });
+
+          return reserved ? (
+            // @ts-ignore missing "title" proptype
+            <EuiIcon aria-label={label} title={label} data-test-subj="reservedRole" type="check" />
+          ) : null;
+        },
       },
     ];
   };
