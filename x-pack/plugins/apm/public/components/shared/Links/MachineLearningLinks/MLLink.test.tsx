@@ -32,10 +32,7 @@ afterAll(() => {
 test('MLLink produces the correct URL', async () => {
   const href = await getRenderedHref(
     () => (
-      <MLLink
-        path="/some/path"
-        query={{ _g: { ml: { jobIds: ['something'] } } }}
-      />
+      <MLLink path="/some/path" query={{ ml: { jobIds: ['something'] } }} />
     ),
     {
       search: '?rangeFrom=now-5h&rangeTo=now-2h'

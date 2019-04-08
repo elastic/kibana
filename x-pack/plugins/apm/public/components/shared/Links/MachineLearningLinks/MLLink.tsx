@@ -9,23 +9,29 @@ import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getRisonString } from '../rison_helpers';
+import { getTimepickerG, risonStringify, TimepickerG } from '../rison_helpers';
+
+interface MlG {
+  ml?: {
+    jobIds: string[];
+  };
+}
 
 interface Props {
-  query?: {
-    _g: {
-      ml: {
-        jobIds: string[];
-      };
-    };
-  };
+  query?: MlG;
   path?: string;
 }
 
-const MLLink: React.FC<Props> = ({ children, path = '', query }) => {
+const MLLink: React.FC<Props> = ({ children, path = '', query = {} }) => {
   const location = useLocation();
 
-  const risonSearch = getRisonString(location.search, query);
+  const risonQuery: MlG & TimepickerG = getTimepickerG(location.search);
+
+  if (query.ml) {
+    risonQuery.ml = query.ml;
+  }
+
+  const risonSearch = risonStringify({ _g: risonQuery });
 
   const href = url.format({
     pathname: chrome.addBasePath('/app/ml'),

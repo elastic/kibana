@@ -5,52 +5,47 @@
  */
 
 import { Location } from 'history';
-import { set } from 'lodash';
 import rison from 'rison-node';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
-import { toQuery, APMQueryParams } from './url_helpers';
+import { toQuery } from './url_helpers';
+
+export interface TimepickerG {
+  time?: {
+    from?: string;
+    to?: string;
+  };
+  refreshInterval?: {
+    pause?: boolean | string;
+    value?: number | string;
+  };
+}
 
 export interface RisonDecoded {
-  _g?: StringMap<any>;
+  _g?: TimepickerG & StringMap<any>;
   _a?: StringMap<any>;
 }
 
-type RisonQuery = APMQueryParams & RisonDecoded;
-
-function createG(query: RisonQuery) {
-  const g: RisonDecoded['_g'] = { ...query._g };
-
-  if (typeof query.rangeFrom !== 'undefined') {
-    set(g, 'time.from', encodeURIComponent(query.rangeFrom));
-  }
-  if (typeof query.rangeTo !== 'undefined') {
-    set(g, 'time.to', encodeURIComponent(query.rangeTo));
-  }
-
-  if (typeof query.refreshPaused !== 'undefined') {
-    set(g, 'refreshInterval.pause', String(query.refreshPaused));
-  }
-  if (typeof query.refreshInterval !== 'undefined') {
-    set(g, 'refreshInterval.value', String(query.refreshInterval));
-  }
-
-  return g;
-}
-
-export function getRisonString(
-  currentSearch: Location['search'],
-  query: RisonQuery = {}
-) {
+export function getTimepickerG(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
-    ...currentQuery,
-    ...query
+    ...currentQuery
   };
+  return {
+    time: {
+      from: encodeURIComponent(nextQuery.rangeFrom),
+      to: encodeURIComponent(nextQuery.rangeTo)
+    },
+    refreshInterval: {
+      pause: String(nextQuery.refreshPaused),
+      value: String(nextQuery.refreshInterval)
+    }
+  };
+}
 
-  const g = createG(nextQuery);
-  const encodedG = rison.encode(g);
+export function risonStringify(query: RisonDecoded) {
+  const encodedG = query._g ? rison.encode(query._g) : '';
   const encodedA = query._a ? rison.encode(query._a) : '';
   const risonValues = [];
 

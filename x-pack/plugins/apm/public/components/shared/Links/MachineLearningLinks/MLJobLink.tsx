@@ -20,7 +20,7 @@ export const MLJobLink: React.SFC<Props> = ({
 }) => {
   const jobId = getMlJobId(serviceName, transactionType);
   const query = {
-    _g: { ml: { jobIds: [jobId] } }
+    ml: { jobIds: [jobId] }
   };
 
   return (
