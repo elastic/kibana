@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -11,13 +12,19 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
+import {
+  EventsTable,
+  HostsTable,
+  KpiHostsComponent,
+  UncommonProcessTable,
+} from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
+import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType } from '../../graphql/types';
@@ -33,7 +40,7 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
-
+const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 interface HostsComponentReduxProps {
   filterQuery: string;
 }
@@ -51,6 +58,24 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
               <GlobalTime>
                 {({ poll, to, from, setQuery }) => (
                   <>
+                    <KpiHostsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
+                      sourceId="default"
+                      startDate={from}
+                    >
+                      {({ kpiHosts, loading, id, refetch }) => (
+                        <KpiHostsComponentManage
+                          id={id}
+                          setQuery={setQuery}
+                          refetch={refetch}
+                          data={kpiHosts}
+                          loading={loading}
+                        />
+                      )}
+                    </KpiHostsQuery>
+                    <EuiSpacer size="m" />
                     <HostsQuery
                       endDate={to}
                       filterQuery={filterQuery}

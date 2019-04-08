@@ -46,6 +46,8 @@ export interface Source {
 
   TimelineDetails: TimelineDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  KpiHosts?: KpiHostsData | null;
+
   Hosts: HostsData;
 
   IpOverview?: IpOverviewData | null;
@@ -835,6 +837,10 @@ export interface AutonomousSystem {
   asn?: string | null;
 
   ip?: string | null;
+}
+
+export interface KpiHostsData {
+  hosts?: number | null;
 }
 
 export interface KpiNetworkData {
@@ -1965,6 +1971,34 @@ export namespace GetKpiNetworkQuery {
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
+  };
+}
+
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts?: KpiHosts | null;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts?: number | null;
   };
 }
 

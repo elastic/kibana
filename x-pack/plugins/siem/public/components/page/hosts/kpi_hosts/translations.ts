@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
-export * from './events_table';
-export * from './hosts_table';
-export * from './types_bar';
-export * from './uncommon_process_table';
-export * from './kpi_hosts';
+export const HOSTS = i18n.translate('xpack.siem.kpiHosts.source.hostsTitle', {
+  defaultMessage: 'Hosts',
+});
