@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { docCountQuery } from '../../queries/doc_count_query';
+import { docCountQuery } from '../../../queries';
 import { EmptyIndex } from './empty_index';
 import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';

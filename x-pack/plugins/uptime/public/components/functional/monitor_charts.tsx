@@ -27,7 +27,7 @@ import React, { Fragment } from 'react';
 import { MonitorChart } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorChartsQuery } from '../queries/monitor_charts_query';
+import { monitorChartsQuery } from '../../queries';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;

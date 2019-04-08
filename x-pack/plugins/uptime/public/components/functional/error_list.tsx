@@ -21,7 +21,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorListItem, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { errorListQuery } from '../queries/error_list_query';
+import { errorListQuery } from '../../queries';
 
 interface ErrorListQueryResult {
   errorList?: ErrorListItem[];

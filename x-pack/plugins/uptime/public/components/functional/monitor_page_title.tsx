@@ -9,7 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorPageTitleQuery } from '../queries/monitor_page_title_query';
+import { monitorPageTitleQuery } from '../../queries';
 
 interface MonitorPageTitleQueryResult {
   monitorPageTitle?: TitleType;

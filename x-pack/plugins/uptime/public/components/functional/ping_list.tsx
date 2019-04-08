@@ -26,7 +26,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { pingsQuery } from '../queries';
+import { pingsQuery } from '../../queries';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -34,7 +34,7 @@ interface PingListQueryResult {
 
 interface PingListProps {
   onUpdateApp: () => void;
-  onSelectedStatusUpdate: (status: string) => void;
+  onSelectedStatusUpdate: (status: string | null) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
@@ -204,9 +204,11 @@ export const PingListComponent = ({
                     if (selectedOptions[0]) {
                       setSelectedOption(selectedOptions[0]);
                     }
+                    console.log(selectedOptions[0]);
                     if (typeof selectedOptions[0].value === 'string') {
+                      console.log('setting status')
                       // @ts-ignore it's definitely a string
-                      onSelectedStatusUpdate(selectedOptions[0].value);
+                      onSelectedStatusUpdate(selectedOptions[0].value !== '' ? selectedOptions[0].value : null);
                     }
                   }}
                 />

@@ -11,7 +11,7 @@ import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { filterBarQuery } from '../queries/filter_bar_query';
+import { filterBarQuery } from '../../queries';
 import { FilterBarLoading } from './filter_bar_loading';
 import { filterBarSearchSchema } from './search_schema';
 

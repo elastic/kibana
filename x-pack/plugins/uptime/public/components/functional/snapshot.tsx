@@ -25,7 +25,7 @@ import React from 'react';
 import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeAppColors } from '../../uptime_app';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { snapshotQuery } from '../queries/snapshot_query';
+import { snapshotQuery } from '../../queries';
 import { SnapshotHistogram } from './snapshot_histogram';
 import { SnapshotLoading } from './snapshot_loading';
 

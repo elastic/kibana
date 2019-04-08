@@ -29,7 +29,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorListQuery } from '../queries/monitor_list_query';
+import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
 
 interface MonitorListQueryResult {

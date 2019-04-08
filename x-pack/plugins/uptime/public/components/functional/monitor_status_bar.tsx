@@ -12,7 +12,7 @@ import moment from 'moment';
 import React from 'react';
 import { Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { monitorStatusBarQuery } from '../queries/monitor_status_bar_query';
+import { monitorStatusBarQuery } from '../../queries';
 import { EmptyStatusBar } from './empty_status_bar';
 
 interface MonitorStatusBarQueryResult {

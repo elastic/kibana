@@ -36,7 +36,7 @@ interface MonitorPageProps {
 
 export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
     UptimeContext
   );
@@ -79,7 +79,7 @@ export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProp
           dateRangeStart,
           dateRangeEnd,
           monitorId,
-          status: selectedStatus ? selectedStatus : 'down',
+          status: selectedStatus,
         }}
       />
     </Fragment>
