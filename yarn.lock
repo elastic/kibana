@@ -12017,10 +12017,10 @@ github-username@^3.0.0:
   dependencies:
     gh-got "^5.0.0"
 
-github-xyz@^0.0.19:
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/github-xyz/-/github-xyz-0.0.19.tgz#f33976c6385d4f2648af9aefdfd8fa3a314583af"
-  integrity sha512-qxPPPm/U1T2k316BG6xvsevA34HQzk8uLy5MbltIwS3XFN56JwLE/h/v/cdupud61wNYVlgcZ1zsABQbk5YdVA==
+github-xyz@^0.0.20:
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/github-xyz/-/github-xyz-0.0.20.tgz#18a76e69719a85fa58e66eaea950af04441ccda0"
+  integrity sha512-79/Db5a+ODt9sGIE1ItNmChMDn51zxygzSQsqK/LEQ17ZjPgz4+V/gbuF/9kbEP9x9V8f3nYzoMLZEd2wnAoJA==
   dependencies:
     "@octokit/app" "^2.2.2"
     "@octokit/request" "^2.4.2"
