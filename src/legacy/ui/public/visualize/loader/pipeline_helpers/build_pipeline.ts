@@ -250,11 +250,35 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.tagcloud(schemas),
-    };
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+    const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
+    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
+    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel) {
+      expr += `showLabel=${showLabel} `;
+    }
+
+    if (bucket) {
+      expr += ` bucket={visdimension ${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `format=${bucket.format.id} `;
+        expr += prepareJson('formatParams', bucket.format.params);
+      }
+      expr += '} ';
+    }
+    return expr;
   },
   region_map: (visState, schemas) => {
     const visConfig = {
