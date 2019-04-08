@@ -20,7 +20,7 @@ import {
   WindowFunction,
   WindowOperation,
 } from '../../../../common';
-import { operationToName } from '../../lib';
+import { operationToName, VisModel } from '../../lib';
 
 const FixedEuiRange = EuiRange as React.ComponentType<any>;
 
@@ -28,7 +28,7 @@ export interface OperationEditorProps {
   children: any;
   column: SelectOperation;
   onColumnChange: (newColumn: SelectOperation) => void;
-  visModel: any;
+  visModel: VisModel;
   allowedOperations?: Array<SelectOperation['operator']>;
   allowedColumnTypes?: string[];
 }
@@ -65,7 +65,7 @@ function fieldOperationEditor(props: OperationEditorProps) {
   const { argument } = operation;
   const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
-    .applicableFields(visModel.datasource.fields, props)
+    .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
       value: f.name,
       text: f.name,
@@ -90,13 +90,107 @@ function fieldOperationEditor(props: OperationEditorProps) {
   );
 }
 
+function termsOperationEditor(props: OperationEditorProps) {
+  const { column, visModel, onColumnChange } = props;
+  const operation = column as TermsOperation;
+  const { argument } = operation;
+  const opDefinition = getOperationDefinition(column.operator);
+  const options = opDefinition
+    .applicableFields(visModel.datasource!.fields, props)
+    .map((f: DatasourceField) => ({
+      value: f.name,
+      text: f.name,
+    }));
+
+  function toValue(orderBy: number, orderByDirection: 'asc' | 'desc') {
+    return `${orderBy}-${orderByDirection}`;
+  }
+
+  function fromValue(value: string) {
+    const parts = value.split('-');
+    return { orderBy: Number(parts[0]), orderByDirection: parts[1] as 'asc' | 'desc' };
+  }
+
+  const orderOptions = Object.values(visModel.queries)[0]!.select.flatMap(
+    (currentColumn, index) => [
+      {
+        value: toValue(index, 'asc'),
+        text: `${
+          currentColumn === column ? 'Alphabetical' : operationToName(currentColumn.operator)
+        } asc.`,
+      },
+      {
+        value: toValue(index, 'desc'),
+        text: `${
+          currentColumn === column ? 'Alphabetical' : operationToName(currentColumn.operator)
+        } desc.`,
+      },
+    ]
+  );
+
+  return (
+    <EuiForm>
+      <EuiFormRow label="Field">
+        <EuiSelect
+          options={options}
+          value={argument && argument.field}
+          onChange={e =>
+            onColumnChange({
+              ...operation,
+              argument: {
+                ...argument,
+                field: e.target.value,
+              },
+            })
+          }
+          aria-label="Field"
+        />
+      </EuiFormRow>
+      <EuiFormRow label="Number of values">
+        <FixedEuiRange
+          min={1}
+          max={20}
+          step={1}
+          value={argument && argument.size}
+          showInput
+          onChange={(e: any) =>
+            onColumnChange({
+              ...operation,
+              argument: {
+                ...argument,
+                size: Number(e.target.value),
+              },
+            })
+          }
+          aria-label="Number of values"
+        />
+      </EuiFormRow>
+      <EuiFormRow label="Order by">
+        <EuiSelect
+          options={orderOptions}
+          value={argument && toValue(argument.orderBy || 0, argument.orderByDirection || 'desc')}
+          onChange={(e: any) =>
+            onColumnChange({
+              ...operation,
+              argument: {
+                ...argument,
+                ...fromValue(e.target.value),
+              },
+            })
+          }
+        />
+      </EuiFormRow>
+    </EuiForm>
+  );
+}
+
 function dateHistogramOperationEditor(props: OperationEditorProps) {
   const { column, visModel, onColumnChange } = props;
   const operation = column as DateHistogramOperation;
   const { argument } = operation;
   const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
-    .applicableFields(visModel.datasource.fields, props)
+    .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
       value: f.name,
       text: f.name,
@@ -160,7 +254,7 @@ function windowOperationEditor(props: OperationEditorProps) {
   const { argument } = operation;
   const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
-    .applicableFields(visModel.datasource.fields, props)
+    .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
       value: f.name,
       text: f.name,
@@ -362,7 +456,7 @@ export const operations: OperationDefinition[] = [
     name: operationToName('terms'),
     type: 'terms',
     applicableFields: aggregatableFields,
-    editor: fieldOperationEditor,
+    editor: termsOperationEditor,
     toSelectClause(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]

@@ -86,6 +86,8 @@ export interface TermsOperation extends FieldOperation {
   operator: 'terms';
   argument: Field & {
     size: number;
+    orderBy?: number;
+    orderByDirection?: 'asc' | 'desc';
   };
 }
 

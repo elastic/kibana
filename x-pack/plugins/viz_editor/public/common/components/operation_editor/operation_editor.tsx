@@ -30,7 +30,7 @@ export function OperationEditor(props: OperationEditorProps) {
   );
   const changeOperation = (operationType: string) => {
     const opDefinition = getOperationDefinition(operationType);
-    onColumnChange(opDefinition.toSelectClause(column, visModel.datasource.fields));
+    onColumnChange(opDefinition.toSelectClause(column, visModel.datasource!.fields));
   };
 
   const sideNavItems = [
@@ -43,8 +43,8 @@ export function OperationEditor(props: OperationEditorProps) {
           allowedColumnTypes
             ? allowedColumnTypes.includes(
                 getTypeForOperation(
-                  opDefinition.toSelectClause(column, visModel.datasource.fields),
-                  visModel.datasource.fields
+                  opDefinition.toSelectClause(column, visModel.datasource!.fields),
+                  visModel.datasource!.fields
                 )
               )
             : true
