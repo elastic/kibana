@@ -366,7 +366,6 @@ Observability::
 * Adds global help support to Uptime {pull}31493[#31493]
 * Updates targeted index pattern for 7.0.0 {pull}30998[#30998]
 Operations::
-* Shares sass build with script {pull}34323[#34323]
 * Removes the usage of types from Esqueue used for the `.reporting index` {pull}32146[#32146]
 * Fixes IPv6 addresses used with Angular connector {pull}29891[#29891]
 * Fixes `makelogs` dependency {pull}31428[#31428]
