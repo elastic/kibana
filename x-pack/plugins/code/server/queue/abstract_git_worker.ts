@@ -9,7 +9,6 @@ import {
   CloneProgress,
   CloneWorkerProgress,
   CloneWorkerResult,
-  RepositoryUri,
   WorkerReservedProgress,
 } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
@@ -35,6 +34,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    await super.onJobCompleted(job, res);
+
     // Update the default branch.
     const repoUri = res.uri;
     const localPath = RepositoryUtils.repositoryLocalPath(this.serverOptions.repoPath, repoUri);
@@ -42,10 +43,15 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     const defaultBranch = await getDefaultBranch(localPath);
 
     // Update the repository data.
-    await this.objectClient.updateRepository(repoUri, {
-      defaultBranch,
-      revision,
-    });
+    try {
+      await this.objectClient.updateRepository(repoUri, {
+        defaultBranch,
+        revision,
+      });
+    } catch (error) {
+      this.log.error(`Update repository default branch and revision error.`);
+      this.log.error(error);
+    }
 
     // Update the git operation status.
     try {
@@ -60,11 +66,10 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       this.log.error(`Update revision of repo clone done error.`);
       this.log.error(error);
     }
-
-    return await super.onJobCompleted(job, res);
   }
 
-  public async updateProgress(uri: RepositoryUri, progress: number, cloneProgress?: CloneProgress) {
+  public async updateProgress(job: Job, progress: number, cloneProgress?: CloneProgress) {
+    const { uri } = job.payload;
     const p: CloneWorkerProgress = {
       uri,
       progress,

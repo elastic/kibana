@@ -4,22 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Indexer, IndexerFactory, LspIndexer } from '.';
+import { Indexer, IndexerFactory, LspIncrementalIndexer, LspIndexer } from '.';
 import { RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 
 export class LspIndexerFactory implements IndexerFactory {
+  private objectClient: RepositoryObjectClient;
+
   constructor(
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
     protected readonly client: EsClient,
     protected readonly log: Logger
-  ) {}
+  ) {
+    this.objectClient = new RepositoryObjectClient(this.client);
+  }
 
-  public create(repoUri: RepositoryUri, revision: string): Indexer {
-    return new LspIndexer(repoUri, revision, this.lspService, this.options, this.client, this.log);
+  public async create(repoUri: RepositoryUri, revision: string): Promise<Indexer | undefined> {
+    try {
+      const repo = await this.objectClient.getRepository(repoUri);
+      const indexedRevision = repo.indexedRevision;
+      if (indexedRevision) {
+        this.log.info(`Create indexer to index ${repoUri} from ${indexedRevision} to ${revision}`);
+        // Create the indexer to index only the diff between these 2 revisions.
+        return new LspIncrementalIndexer(
+          repoUri,
+          revision,
+          indexedRevision,
+          this.lspService,
+          this.options,
+          this.client,
+          this.log
+        );
+      } else {
+        this.log.info(`Create indexer to index ${repoUri} at ${revision}`);
+        // Create the indexer to index the entire repository.
+        return new LspIndexer(
+          repoUri,
+          revision,
+          this.lspService,
+          this.options,
+          this.client,
+          this.log
+        );
+      }
+    } catch (error) {
+      this.log.error(`Create indexer error for ${repoUri}.`);
+      this.log.error(error);
+      return undefined;
+    }
   }
 }

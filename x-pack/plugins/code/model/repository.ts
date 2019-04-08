@@ -22,6 +22,8 @@ export interface Repository {
   nextUpdateTimestamp?: Date;
   // The timestamp of next index for this repository.
   nextIndexTimestamp?: Date;
+  // The current indexed revision in Elasticsearch.
+  indexedRevision?: string;
 }
 
 export interface RepositoryConfig {
@@ -88,9 +90,12 @@ export interface UpdateWorkerResult extends WorkerResult {
 }
 
 export enum IndexStatsKey {
-  File = 'file-count',
-  Symbol = 'symbol-count',
-  Reference = 'reference-count',
+  File = 'file-added-count',
+  FileDeleted = 'file-deleted-count',
+  Symbol = 'symbol-added-count',
+  SymbolDeleted = 'symbol-deleted-count',
+  Reference = 'reference-added-count',
+  ReferenceDeleted = 'reference-deleted-count',
 }
 export type IndexStats = Map<IndexStatsKey, number>;
 

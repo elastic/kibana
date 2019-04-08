@@ -100,4 +100,36 @@ describe('git_operations', () => {
     assert.strictEqual(count, 3, 'this repo should contains exactly 2 files');
     assert.strictEqual(totalFiles, 3, 'this repo should contains exactly 2 files');
   });
+
+  it('get diff between arbitrary 2 revisions', async () => {
+    function cloneProject(url: string, p: string) {
+      return new Promise(resolve => {
+        if (!fs.existsSync(p)) {
+          rimraf(p, error => {
+            Git.Clone.clone(url, p).then(repo => {
+              resolve(repo);
+            });
+          });
+        } else {
+          resolve();
+        }
+      });
+    }
+
+    await cloneProject(
+      'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+      path.join(serverOptions.repoPath, 'github.com/Microsoft/TypeScript-Node-Starter')
+    );
+
+    const g = new GitOperations(serverOptions.repoPath);
+    const d = await g.getDiff(
+      'github.com/Microsoft/TypeScript-Node-Starter',
+      '6206f643',
+      '4779cb7e'
+    );
+    assert.equal(d.additions, 2);
+    assert.equal(d.deletions, 4);
+    assert.equal(d.files.length, 3);
+    // @ts-ignore
+  }).timeout(100000);
 });

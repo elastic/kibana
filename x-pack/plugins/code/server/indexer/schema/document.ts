@@ -61,6 +61,9 @@ export const DocumentSchema = {
       revision: {
         type: 'keyword',
       },
+      indexedRevision: {
+        type: 'keyword',
+      },
     },
   },
   repository_config: {

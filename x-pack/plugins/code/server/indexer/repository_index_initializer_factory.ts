@@ -12,7 +12,7 @@ import { Logger } from '../log';
 export class RepositoryIndexInitializerFactory implements IndexerFactory {
   constructor(protected readonly client: EsClient, protected readonly log: Logger) {}
 
-  public create(repoUri: RepositoryUri, revision: string): Indexer {
+  public async create(repoUri: RepositoryUri, revision: string): Promise<Indexer | undefined> {
     return new RepositoryIndexInitializer(repoUri, revision, this.client, this.log);
   }
 }

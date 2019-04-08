@@ -33,9 +33,9 @@ export abstract class AbstractIndexer implements Indexer {
     this.log.info(
       `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
     );
-    this.cancelled = false;
+    const isCheckpointValid = this.validateCheckpoint(checkpointReq);
 
-    if (!checkpointReq) {
+    if (this.needRefreshIndices(checkpointReq)) {
       // Prepare the ES index
       const res = await this.prepareIndex();
       if (!res) {
@@ -70,19 +70,14 @@ export abstract class AbstractIndexer implements Indexer {
         break;
       }
 
-      // If checkpoint is not undefined and not empty
-      if (checkpointReq) {
-        // Assume for the same revision, everything we iterate the repository,
-        // the order of the files is definite.
-        // @ts-ignore
-        if (req.filePath === checkpointReq.filePath && req.revision === checkpointReq.revision) {
-          this.log.info(`The index checkpoint has been found ${JSON.stringify(checkpointReq)}.`);
-          meetCheckpoint = true;
-        }
-
+      // If checkpoint is valid and has not been met
+      if (isCheckpointValid && !meetCheckpoint) {
+        meetCheckpoint = meetCheckpoint || this.ifCheckpointMet(req, checkpointReq!);
         if (!meetCheckpoint) {
           // If the checkpoint has not been met yet, skip current request.
           continue;
+        } else {
+          this.log.info(`Checkpoint met. Continue with indexing.`);
         }
       }
 
@@ -125,6 +120,21 @@ export abstract class AbstractIndexer implements Indexer {
 
   protected isCancelled(): boolean {
     return this.cancelled;
+  }
+
+  // If the current checkpoint is valid
+  protected validateCheckpoint(checkpointReq?: IndexRequest): boolean {
+    return checkpointReq !== undefined;
+  }
+
+  // If it's necessary to refresh (create and reset) all the related indices
+  protected needRefreshIndices(checkpointReq?: IndexRequest): boolean {
+    return false;
+  }
+
+  protected ifCheckpointMet(req: IndexRequest, checkpointReq: IndexRequest): boolean {
+    // Please override this function
+    return false;
   }
 
   protected async cleanIndex(): Promise<void> {

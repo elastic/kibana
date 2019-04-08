@@ -103,16 +103,16 @@ export abstract class AbstractWorker implements Worker {
 
   public async onJobEnqueued(job: Job) {
     this.log.info(`${this.id} job enqueued with details ${JSON.stringify(job)}`);
-    return await this.updateProgress(job.payload.uri, WorkerReservedProgress.INIT);
+    return await this.updateProgress(job, WorkerReservedProgress.INIT);
   }
 
-  public async onJobCompleted(job: Job, res: WorkerResult) {
+  public async onJobCompleted(job: Job, res: any) {
     this.log.info(
       `${this.id} job completed with result ${JSON.stringify(
         res
       )} in ${this.workerTaskDurationSeconds(job)} seconds.`
     );
-    return await this.updateProgress(res.uri, WorkerReservedProgress.COMPLETED);
+    return await this.updateProgress(job, WorkerReservedProgress.COMPLETED);
   }
 
   public async onJobExecutionError(res: any) {
@@ -121,7 +121,7 @@ export abstract class AbstractWorker implements Worker {
         res.job
       )} seconds.`
     );
-    return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.ERROR);
+    return await this.updateProgress(res.job, WorkerReservedProgress.ERROR);
   }
 
   public async onJobTimeOut(res: any) {
@@ -130,10 +130,10 @@ export abstract class AbstractWorker implements Worker {
         res.job
       )} seconds.`
     );
-    return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.TIMEOUT);
+    return await this.updateProgress(res.job, WorkerReservedProgress.TIMEOUT);
   }
 
-  public async updateProgress(uri: string, progress: number) {
+  public async updateProgress(job: Job, progress: number) {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<WorkerResult>((resolve, _) => {
       resolve();
