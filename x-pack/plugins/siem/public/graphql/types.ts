@@ -438,15 +438,15 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: number | null;
+  flow_id?: ToStringArray | null;
 
-  proto?: string | null;
+  proto?: ToStringArray | null;
 }
 
 export interface SuricataAlertData {
   signature?: ToStringArray | null;
 
-  signature_id?: number | null;
+  signature_id?: ToStringArray | null;
 }
 
 export interface TlsEcsFields {
@@ -1475,9 +1475,9 @@ export namespace GetEventsQuery {
   export type Eve = {
     __typename?: 'SuricataEveData';
 
-    proto?: string | null;
+    proto?: ToStringArray | null;
 
-    flow_id?: number | null;
+    flow_id?: ToStringArray | null;
 
     alert?: Alert | null;
   };
@@ -1487,7 +1487,7 @@ export namespace GetEventsQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: number | null;
+    signature_id?: ToStringArray | null;
   };
 
   export type Zeek = {
@@ -2733,9 +2733,9 @@ export namespace GetTimelineQuery {
   export type Eve = {
     __typename?: 'SuricataEveData';
 
-    proto?: string | null;
+    proto?: ToStringArray | null;
 
-    flow_id?: number | null;
+    flow_id?: ToStringArray | null;
 
     alert?: Alert | null;
   };
@@ -2745,7 +2745,7 @@ export namespace GetTimelineQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: number | null;
+    signature_id?: ToStringArray | null;
   };
 
   export type Network = {

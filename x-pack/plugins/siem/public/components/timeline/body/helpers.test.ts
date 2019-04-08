@@ -45,11 +45,11 @@ describe('helpers', () => {
         },
         suricata: {
           eve: {
-            flow_id: 4,
-            proto: '',
+            flow_id: ['4'],
+            proto: [''],
             alert: {
               signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: 4,
+              signature_id: ['4'],
               __typename: 'level 2',
             },
           },
@@ -87,11 +87,11 @@ describe('helpers', () => {
         },
         suricata: {
           eve: {
-            flow_id: 4,
-            proto: '',
+            flow_id: ['4'],
+            proto: [''],
             alert: {
               signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: 4,
+              signature_id: ['4'],
             },
           },
         },
@@ -127,8 +127,8 @@ describe('helpers', () => {
         },
         suricata: {
           eve: {
-            flow_id: 4,
-            proto: '',
+            flow_id: ['4'],
+            proto: [''],
             alert: {
               signature: ['dance moves'],
             },
@@ -167,8 +167,8 @@ describe('helpers', () => {
         },
         suricata: {
           eve: {
-            flow_id: 4,
-            proto: '',
+            flow_id: ['4'],
+            proto: [''],
             alert: {
               signature: ['dance moves'],
               signature_id: undefined,

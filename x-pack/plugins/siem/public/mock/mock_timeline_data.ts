@@ -78,13 +78,13 @@ export const mockTimelineData: TimelineItem[] = [
       destination: { ip: '192.168.0.3', port: 6343 },
       suricata: {
         eve: {
-          flow_id: 4,
-          proto: '',
+          flow_id: ['4'],
+          proto: [''],
           alert: {
             signature: [
               'ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)',
             ],
-            signature_id: 4,
+            signature_id: ['4'],
           },
         },
       },
@@ -158,11 +158,11 @@ export const mockTimelineData: TimelineItem[] = [
       },
       suricata: {
         eve: {
-          flow_id: 8,
-          proto: '',
+          flow_id: ['8'],
+          proto: [''],
           alert: {
             signature: ['ET WEB_SERVER Possible CVE-2014-6271 Attempt in HTTP Cookie'],
-            signature_id: 8,
+            signature_id: ['8'],
           },
         },
       },
@@ -333,9 +333,12 @@ export const mockTimelineData: TimelineItem[] = [
       },
       suricata: {
         eve: {
-          flow_id: 13,
-          proto: '',
-          alert: { signature: ['ET WEB_SERVER Possible Attempt in HTTP Cookie'], signature_id: 13 },
+          flow_id: ['13'],
+          proto: [''],
+          alert: {
+            signature: ['ET WEB_SERVER Possible Attempt in HTTP Cookie'],
+            signature_id: ['13'],
+          },
         },
       },
       source: { ip: '192.168.0.8', port: 80 },

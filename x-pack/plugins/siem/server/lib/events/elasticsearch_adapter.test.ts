@@ -39,11 +39,11 @@ describe('events elasticsearch_adapter', () => {
           alert: {
             category: 'suricata-category-1',
             signature: ['suricata-signature-1'],
-            signature_id: 5000,
+            signature_id: ['5000'],
             severity: 1,
           },
-          flow_id: 100,
-          proto: 'suricata-proto-1',
+          flow_id: ['100'],
+          proto: ['suricata-proto-1'],
         },
       },
       source: {
@@ -220,7 +220,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              flow_id: 100,
+              flow_id: ['100'],
             },
           },
         },
@@ -242,7 +242,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              proto: 'suricata-proto-1',
+              proto: ['suricata-proto-1'],
             },
           },
         },
@@ -293,7 +293,7 @@ describe('events elasticsearch_adapter', () => {
           suricata: {
             eve: {
               alert: {
-                signature_id: 5000,
+                signature_id: ['5000'],
               },
             },
           },
@@ -449,9 +449,9 @@ describe('events elasticsearch_adapter', () => {
           },
           suricata: {
             eve: {
-              proto: 'suricata-proto-1',
+              proto: ['suricata-proto-1'],
               alert: {
-                signature_id: 5000,
+                signature_id: ['5000'],
               },
             },
           },
@@ -490,14 +490,14 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           data: [
             { field: 'host.name', value: 'hostname-1' },
-            { field: 'suricata.eve.alert.signature_id', value: 5000 },
+            { field: 'suricata.eve.alert.signature_id', value: ['5000'] },
             { field: '@timestamp', value: ['time-1'] },
           ],
           ecs: {
             _id: 'id-123',
             _index: 'index-123',
             host: { name: 'hostname-1' },
-            suricata: { eve: { alert: { signature_id: 5000 } } },
+            suricata: { eve: { alert: { signature_id: ['5000'] } } },
           },
         },
       };

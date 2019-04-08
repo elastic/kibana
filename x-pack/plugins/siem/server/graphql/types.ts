@@ -467,15 +467,15 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: number | null;
+  flow_id?: ToStringArray | null;
 
-  proto?: string | null;
+  proto?: ToStringArray | null;
 }
 
 export interface SuricataAlertData {
   signature?: ToStringArray | null;
 
-  signature_id?: number | null;
+  signature_id?: ToStringArray | null;
 }
 
 export interface TlsEcsFields {
@@ -2736,9 +2736,9 @@ export namespace SuricataEveDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataEveData> {
     alert?: AlertResolver<SuricataAlertData | null, TypeParent, Context>;
 
-    flow_id?: FlowIdResolver<number | null, TypeParent, Context>;
+    flow_id?: FlowIdResolver<ToStringArray | null, TypeParent, Context>;
 
-    proto?: ProtoResolver<string | null, TypeParent, Context>;
+    proto?: ProtoResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type AlertResolver<
@@ -2747,12 +2747,12 @@ export namespace SuricataEveDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FlowIdResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = SuricataEveData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ProtoResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SuricataEveData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2762,7 +2762,7 @@ export namespace SuricataAlertDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataAlertData> {
     signature?: SignatureResolver<ToStringArray | null, TypeParent, Context>;
 
-    signature_id?: SignatureIdResolver<number | null, TypeParent, Context>;
+    signature_id?: SignatureIdResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type SignatureResolver<
@@ -2771,7 +2771,7 @@ export namespace SuricataAlertDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SignatureIdResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = SuricataAlertData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

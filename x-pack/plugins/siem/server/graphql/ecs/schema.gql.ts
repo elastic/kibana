@@ -128,13 +128,13 @@ export const ecsSchema = gql`
 
   type SuricataAlertData {
     signature: ToStringArray
-    signature_id: Float
+    signature_id: ToStringArray
   }
 
   type SuricataEveData {
     alert: SuricataAlertData
-    flow_id: Float
-    proto: String
+    flow_id: ToStringArray
+    proto: ToStringArray
   }
 
   type SuricataEcsFields {
