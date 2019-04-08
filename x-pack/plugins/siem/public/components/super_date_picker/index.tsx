@@ -27,14 +27,16 @@ interface OwnProps {
   disabled?: boolean;
 }
 
-type SuperDatePickerProps = OwnProps & SuperDatePickerDispatchProps & SuperDatePickerStateRedux;
+export type SuperDatePickerProps = OwnProps &
+  SuperDatePickerDispatchProps &
+  SuperDatePickerStateRedux;
 
 interface TimeArgs {
   end: string;
   start: string;
 }
 
-interface SuperDatePickerState {
+export interface SuperDatePickerState {
   isAutoRefreshOnly: boolean;
   isLoading: boolean;
   isPaused: boolean;
@@ -43,7 +45,7 @@ interface SuperDatePickerState {
   showUpdateButton: boolean;
 }
 
-const SuperDatePickerComponents = class extends Component<
+export const SuperDatePickerComponent = class extends Component<
   SuperDatePickerProps,
   SuperDatePickerState
 > {
@@ -94,15 +96,14 @@ const SuperDatePickerComponents = class extends Component<
       to: this.formatDate(end),
     });
     this.setState((prevState: SuperDatePickerState) => {
-      let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(recentlyUsedRange => {
-        const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
-        return !isDuplicate;
-      });
-      if (recentlyUsedRanges.length > 9) {
-        recentlyUsedRanges = [{ start, end }, ...recentlyUsedRanges.slice(0, 9)];
-      } else {
-        recentlyUsedRanges = [{ start, end }, ...recentlyUsedRanges];
-      }
+      let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(
+        recentlyUsedRange => !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
+      );
+      recentlyUsedRanges =
+        recentlyUsedRanges.length > 9
+          ? [{ start, end }, ...recentlyUsedRanges.slice(0, 9)]
+          : [{ start, end }, ...recentlyUsedRanges];
+
       return {
         recentlyUsedRanges,
         isLoading: true,
@@ -133,4 +134,4 @@ export const SuperDatePicker = connect(
   {
     setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
   }
-)(SuperDatePickerComponents);
+)(SuperDatePickerComponent);
