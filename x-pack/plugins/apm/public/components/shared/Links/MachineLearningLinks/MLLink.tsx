@@ -9,10 +9,16 @@ import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getRisonString, RisonDecoded } from '../rison_helpers';
+import { getRisonString } from '../rison_helpers';
 
 interface Props {
-  query?: RisonDecoded;
+  query?: {
+    _g: {
+      ml: {
+        jobIds: string[];
+      };
+    };
+  };
   path?: string;
 }
 
