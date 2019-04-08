@@ -346,33 +346,6 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
   }
 }
 
-export class LogstashPipelineNodeWithoutPipelineCountMetric extends LogstashMetric {
-  constructor(opts) {
-    super({
-      ...opts,
-      derivative: false
-    });
-
-    this.dateHistogramSubAggs = {
-      logstash_uuid: {
-        terms: {
-          field: 'logstash_stats.logstash.uuid',
-          size: 1000,
-        },
-        aggs: {
-          with_no_pipeline: {
-            nested: {
-              path: 'logstash_stats.pipelines',
-            },
-          },
-        },
-      },
-    };
-    this.calculation = bucket =>
-      _.get(bucket, 'doc_count', 0) > 0 && _.get(bucket, 'with_no_pipeline.doc_count', 0) === 0;
-  }
-}
-
 export class LogstashPipelineNodeCountMetric extends LogstashMetric {
   constructor(opts) {
     super({
@@ -381,10 +354,26 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     });
 
     this.dateHistogramSubAggs = {
-      missing_pipeline_id: {
-        missing: {
-          field: 'logstash_stats.pipelines.id',
+      no_pipelines: {
+        filter: {
+          bool: {
+            must_not: {
+              nested: {
+                path: 'logstash_stats.pipelines',
+                query: {
+                  match_all: {}
+                }
+              }
+            }
+          }
         },
+        aggs: {
+          node_count: {
+            cardinality: {
+              field: this.field
+            }
+          }
+        }
       },
       pipelines_nested: {
         nested: {
@@ -409,27 +398,6 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               }
             }
           },
-          no_pipelines: {
-            filter: {
-              bool: {
-                must_not: {
-                  nested: {
-                    path: 'logstash_stats.pipelines',
-                    query: {
-                      match_all: {}
-                    }
-                  }
-                }
-              }
-            },
-            aggs: {
-              node_count: {
-                cardinality: {
-                  field: this.field
-                }
-              }
-            }
-          }
         }
       }
     };
@@ -449,12 +417,12 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
       });
 
       const DEFAULT_PIPELINE_ID = 'main'; // FIXME: Move to common constants
-      const oldNodesCount = _.get(bucket, 'no_pipelines.node_count.value', 0)
+      const oldNodesCount = _.get(bucket, 'no_pipelines.node_count.value', 0);
       if (oldNodesCount > 0) {
         if (!pipelineNodesCounts.hasOwnProperty(DEFAULT_PIPELINE_ID)) {
-          pipelineNodesCounts[DEFAULT_PIPELINE_ID] = 0
+          pipelineNodesCounts[DEFAULT_PIPELINE_ID] = 0;
         }
-        pipelineNodesCounts[DEFAULT_PIPELINE_ID] += oldNodesCount
+        pipelineNodesCounts[DEFAULT_PIPELINE_ID] += oldNodesCount;
       }
 
       return pipelineNodesCounts;

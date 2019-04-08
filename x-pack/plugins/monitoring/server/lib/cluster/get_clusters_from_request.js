@@ -11,7 +11,7 @@ import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
-import { getPipelines, getClusterHasPipelineWithoutId } from '../logstash/get_pipelines';
+import { getPipelines } from '../logstash/get_pipelines';
 import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
@@ -123,17 +123,14 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   // add logstash data
   const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
 
-  const [clusterPipelineNodesCount, clusterHasPipelineWithoutId] = await Promise.all([
-    getPipelines(req, lsIndexPattern, ['logstash_cluster_pipeline_nodes_count']),
-    getClusterHasPipelineWithoutId(req, lsIndexPattern)]
-  );
+  const clusterPipelineNodesCount = await getPipelines(req, lsIndexPattern, ['logstash_cluster_pipeline_nodes_count']);
 
   // add the logstash data to each cluster
   logstashes.forEach(logstash => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
 
     // withhold LS overview stats until pipeline metrics have at least one full bucket
-    if (logstash.clusterUuid === req.params.clusterUuid && clusterPipelineNodesCount.length === 0 && !clusterHasPipelineWithoutId) {
+    if (logstash.clusterUuid === req.params.clusterUuid && clusterPipelineNodesCount.length === 0) {
       logstash.stats = {};
     }
 

@@ -13,8 +13,7 @@ import {
   LogstashMetric,
   LogstashPipelineQueueSizeMetric,
   LogstashPipelineThroughputMetric,
-  LogstashPipelineNodeCountMetric,
-  LogstashPipelineNodeWithoutPipelineCountMetric
+  LogstashPipelineNodeCountMetric
 } from './classes';
 import {
   LARGE_FLOAT,
@@ -339,17 +338,6 @@ export const metrics = {
     field: 'logstash_stats.logstash.uuid',
     label: pipelineNodeCountLabel,
     description: pipelineNodeCountDescription,
-    format: LARGE_FLOAT,
-    units: ''
-  }),
-  logstash_cluster_no_pipelines_count: new LogstashPipelineNodeWithoutPipelineCountMetric({
-    field: 'logstash_stats.logstash.uuid',
-    label: i18n.translate('xpack.monitoring.metrics.logstashInstance.pipelinesWithoutIdCountLabel', {
-      defaultMessage: 'Pipeline Without ID'
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.logstashInstance.pipelinesWithoutIdCountDescription', {
-      defaultMessage: 'Denotes whether an instance is logging a pipeline without later pipeline fields.'
-    }),
     format: LARGE_FLOAT,
     units: ''
   }),
