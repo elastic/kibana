@@ -58,7 +58,7 @@ export const metric = () => ({
     },
     colorRange: {
       types: ['string'],
-      default: '"[{ from: 0, to: 10000 }]"',
+      default: `'[{ "from": 0, "to": 10000 }]'`,
       help: i18n.translate('metricVis.function.colorRange.help', {
         defaultMessage: 'Color ranges: array of objects with from and to property.'
       })

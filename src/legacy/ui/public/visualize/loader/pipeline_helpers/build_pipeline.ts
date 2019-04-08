@@ -298,14 +298,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     expr += prepareValue('colorRange', colorsRange);
     expr += prepareValue('invertColors', invertColors);
     expr += prepareValue('showLabels', labels.show);
-    expr += prepareValue('labelColor', style.labelColor);
-    expr += prepareValue('bgColor', style.bgColor);
     expr += prepareValue('bgFill', style.bgFill);
     expr += prepareValue('fontSize', style.fontSize);
     expr += prepareValue('subText', style.subText);
     expr += prepareDimension('bucket', bucket);
 
-    metrics.forEach(metric => {
+    metrics.forEach((metric:any) => {
       expr += prepareDimension('metric', metric);
     });
 
