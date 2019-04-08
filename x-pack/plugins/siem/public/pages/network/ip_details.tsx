@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { HeaderPage } from '../../components/header_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { IpOverview } from '../../components/page/network/ip_overview';
@@ -44,6 +47,22 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+
+            <HeaderPage
+              subtitle={
+                <FormattedMessage
+                  id="xpack.siem.ipDetails.pageSubtitle"
+                  defaultMessage="Last Beat: 23m Ago from {beat}"
+                  values={{
+                    beat: <EuiLink href="#">AuditBeat</EuiLink>,
+                  }}
+                />
+              }
+              title={decodeIpv6(ip)}
+            >
+              {/* Date picker to be moved here */}
+            </HeaderPage>
+
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>

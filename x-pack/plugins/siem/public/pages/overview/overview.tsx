@@ -5,19 +5,28 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
 
+import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
 import { GlobalTime } from '../../containers/global_time';
 
 import { Summary } from './summary';
-import { Welcome } from './welcome';
 
 export const OverviewComponent = pure(() => (
   <>
-    <Welcome />
+    <HeaderPage
+      subtitle={
+        <FormattedMessage
+          id="xpack.siem.overview.pageSubtitle"
+          defaultMessage="Security Information & Event Management with the Elastic Stack"
+        />
+      }
+      title={<FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="Elastic SIEM" />}
+    />
 
     <GlobalTime>
       {({ poll, to, from }) => (

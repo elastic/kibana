@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -11,6 +13,7 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { HeaderPage } from '../../components/header_page';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
@@ -46,6 +49,21 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+
+          <HeaderPage
+            subtitle={
+              <FormattedMessage
+                id="xpack.siem.hosts.pageSubtitle"
+                defaultMessage="Last Beat: 23m Ago from {beat}"
+                values={{
+                  beat: <EuiLink href="#">AuditBeat</EuiLink>,
+                }}
+              />
+            }
+            title={<FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />}
+          >
+            {/* Date picker to be moved here */}
+          </HeaderPage>
 
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
