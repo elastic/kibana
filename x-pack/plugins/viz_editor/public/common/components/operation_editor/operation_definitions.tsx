@@ -412,7 +412,7 @@ export const operations: OperationDefinition[] = [
       return {
         operator: 'date_histogram',
         argument: {
-          interval: 'auto',
+          interval: 'd',
           field: getFieldName(currentOperation, dateAggFields(fields)),
         },
       };

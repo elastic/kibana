@@ -135,8 +135,10 @@ function getFormatterFunction(type: ScaleType) {
 function XyChart(props: { config: XyChartConfig }) {
   const config = props.config;
 
+  const key = config.yAccessors.concat([config.xAccessor]).join(',');
+
   return (
-    <Chart renderer="canvas">
+    <Chart renderer="canvas" key={key}>
       <Settings
         showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
         legendPosition={Position.Right}

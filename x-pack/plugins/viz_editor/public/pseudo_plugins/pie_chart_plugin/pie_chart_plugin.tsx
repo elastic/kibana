@@ -121,8 +121,8 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 
   // TODO we maybe need a more stable way to get these
-  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
-  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
 
   if (xAxisRef && yAxisRef) {
     return updatePieState(visModel, {
@@ -172,14 +172,14 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef,
-          select: [{ ...firstOperation, alias: field.name }, { operator: 'count', alias: 'count' }],
+          select: [{ operator: 'count', alias: 'count' }, { ...firstOperation, alias: field.name }],
         },
       },
       private: {
         ...visModel.private,
         pieChart: {
-          sliceAxis: { title: 'Slice By', columns: ['q1_0'] },
-          angleAxis: { title: 'Size By', columns: ['q1_1'] },
+          sliceAxis: { title: 'Slice By', columns: ['q1_1'] },
+          angleAxis: { title: 'Size By', columns: ['q1_0'] },
         },
       },
     };
