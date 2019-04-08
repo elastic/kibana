@@ -196,8 +196,8 @@ export class AssetManager extends React.PureComponent {
           <EuiModalBody>
             <EuiText size="s" color="subdued">
               <p>
-                Below are image assets that have been added to this workpad. Any assets that are
-                currently in use cannot be determined at this time. To reclaim space, delete assets.
+                Below are the image assets in this workpad. Any assets that are currently in use
+                cannot be determined at this time. To reclaim space, delete assets.
               </p>
             </EuiText>
             <EuiSpacer />
