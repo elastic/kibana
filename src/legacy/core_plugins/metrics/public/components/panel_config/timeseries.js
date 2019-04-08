@@ -40,19 +40,26 @@ import {
   EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 class TimeseriesPanelConfigUi extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = { selectedTab: 'data' };
-  }
+  state = {
+    selectedTab: 'data',
+    isTimeMarkerChecked: false
+  };
 
   switchTab(selectedTab) {
-    this.setState({ selectedTab });
+    this.setState((prevState) => ({ ...prevState, selectedTab }));
   }
+
+  toggleTimeMarker = () => {
+    this.setState(prevState =>
+      ({ ...prevState, isTimeMarkerChecked: !prevState.isTimeMarkerChecked })
+    );
+  };
 
   render() {
     const defaults = {
@@ -63,7 +70,7 @@ class TimeseriesPanelConfigUi extends Component {
       show_grid: 1
     };
     const model = { ...defaults, ...this.props.model };
-    const { selectedTab } = this.state;
+    const { selectedTab, isTimeMarkerChecked } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
@@ -329,6 +336,16 @@ class TimeseriesPanelConfigUi extends Component {
                   value={model.show_grid}
                   name="show_grid"
                   onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCheckbox
+                  id={htmlId('timeMarker')}
+                  label="Current Time Marker"
+                  checked={isTimeMarkerChecked}
+                  onChange={this.toggleTimeMarker}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
