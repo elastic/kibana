@@ -43,20 +43,20 @@ export class RenderWithFn extends React.Component {
     const newRenderFunction = renderFn !== this.props.renderFn;
 
     if (newRenderFunction) {
-      this.resetRenderTarget(this._domNode);
+      this._resetRenderTarget(this._domNode);
     }
   }
 
   shouldComponentUpdate(prevProps) {
-    return !isEqual(this.props.size, prevProps.size) || this.shouldFullRerender(prevProps);
+    return !isEqual(this.props.size, prevProps.size) || this._shouldFullRerender(prevProps);
   }
 
   componentDidUpdate(prevProps) {
     const { handlers, size } = this.props;
     // Config changes
-    if (this.shouldFullRerender(prevProps)) {
+    if (this._shouldFullRerender(prevProps)) {
       // This should be the only place you call renderFn besides the first time
-      this.callRenderFn();
+      this._callRenderFn();
     }
 
     // Size changes
@@ -71,11 +71,11 @@ export class RenderWithFn extends React.Component {
 
   _domNode = null;
 
-  callRenderFn = () => {
+  _callRenderFn = () => {
     const { handlers, config, renderFn, reuseNode, name: functionName } = this.props;
     // TODO: We should wait until handlers.done() is called before replacing the element content?
     if (!reuseNode || !this.renderTarget) {
-      this.resetRenderTarget(this._domNode);
+      this._resetRenderTarget(this._domNode);
     }
     // else if (!firstRender) handlers.destroy();
 
@@ -91,7 +91,7 @@ export class RenderWithFn extends React.Component {
     }
   };
 
-  resetRenderTarget = domNode => {
+  _resetRenderTarget = domNode => {
     const { handlers } = this.props;
 
     if (!domNode) {
@@ -108,18 +108,18 @@ export class RenderWithFn extends React.Component {
     }
 
     this.firstRender = true;
-    this.renderTarget = this.createRenderTarget();
+    this.renderTarget = this._createRenderTarget();
     domNode.appendChild(this.renderTarget);
   };
 
-  createRenderTarget = () => {
+  _createRenderTarget = () => {
     const div = document.createElement('div');
     div.style.width = '100%';
     div.style.height = '100%';
     return div;
   };
 
-  shouldFullRerender = prevProps => {
+  _shouldFullRerender = prevProps => {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
     return (
@@ -143,7 +143,7 @@ export class RenderWithFn extends React.Component {
           style={{ height: '100%', width: '100%' }}
           render={domNode => {
             this._domNode = domNode;
-            this.callRenderFn();
+            this._callRenderFn();
           }}
         />
       </div>
