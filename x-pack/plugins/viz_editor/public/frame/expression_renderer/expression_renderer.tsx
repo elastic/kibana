@@ -58,7 +58,6 @@ export function ExpressionRenderer(props: ExpressionRendererProps) {
     () => {
       if (mountpoint.current) {
         mountpoint.current.style.position = 'relative';
-        mountpoint.current.style.height = '100%';
         runAndRender(
           props.expression,
           mountpoint.current,

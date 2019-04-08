@@ -29,7 +29,7 @@ export interface OperationEditorProps {
   column: SelectOperation;
   onColumnChange: (newColumn: SelectOperation) => void;
   visModel: any;
-  allowedOperations?: Array<SelectOperation['operation']>;
+  allowedOperations?: Array<SelectOperation['operator']>;
   allowedColumnTypes?: string[];
 }
 
@@ -38,7 +38,7 @@ export interface OperationDefinition {
   name: string;
 
   // The type of the operation (e.g. 'sum', 'avg', etc)
-  type: SelectOperation['operation'];
+  type: SelectOperation['operator'];
 
   // Filter the fields list down to only those supported by this
   // operation (e.g. numbers for sum operations, dates for histograms)
@@ -63,7 +63,7 @@ function fieldOperationEditor(props: OperationEditorProps) {
   const { column, visModel, onColumnChange } = props;
   const operation = column as FieldOperation;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operation);
+  const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource.fields, props)
     .map((f: DatasourceField) => ({
@@ -94,7 +94,7 @@ function dateHistogramOperationEditor(props: OperationEditorProps) {
   const { column, visModel, onColumnChange } = props;
   const operation = column as DateHistogramOperation;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operation);
+  const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource.fields, props)
     .map((f: DatasourceField) => ({
@@ -158,7 +158,7 @@ function windowOperationEditor(props: OperationEditorProps) {
   const { column, visModel, onColumnChange } = props;
   const operation = column as WindowOperation;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operation);
+  const opDefinition = getOperationDefinition(column.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource.fields, props)
     .map((f: DatasourceField) => ({
@@ -242,7 +242,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): ColumnOperation {
       return {
-        operation: 'column',
+        operator: 'column',
         alias: getFieldName(currentOperation, fields),
         argument: { field: getFieldName(currentOperation, fields) },
       };
@@ -263,7 +263,7 @@ export const operations: OperationDefinition[] = [
     applicableFields: () => [],
     toSelectClause(): CountOperation {
       return {
-        operation: 'count',
+        operator: 'count',
       };
     },
     summarize(op: CountOperation) {
@@ -286,7 +286,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): AvgOperation {
       return {
-        operation: 'avg',
+        operator: 'avg',
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
@@ -312,7 +312,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): DateHistogramOperation {
       return {
-        operation: 'date_histogram',
+        operator: 'date_histogram',
         argument: {
           interval: 'auto',
           field: getFieldName(currentOperation, dateAggFields(fields)),
@@ -339,7 +339,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): CardinalityOperation {
       return {
-        operation: 'cardinality',
+        operator: 'cardinality',
         argument: {
           field: getFieldName(currentOperation, aggregatableFields(fields)),
         },
@@ -368,7 +368,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): TermsOperation {
       return {
-        operation: 'terms',
+        operator: 'terms',
         argument: {
           field: getFieldName(currentOperation, aggregatableFields(fields)),
           size: 5,
@@ -398,7 +398,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): SumOperation {
       return {
-        operation: 'sum',
+        operator: 'sum',
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
@@ -428,7 +428,7 @@ export const operations: OperationDefinition[] = [
       fields: DatasourceField[]
     ): WindowOperation {
       return {
-        operation: 'window',
+        operator: 'window',
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
           windowFunction: 'max',
@@ -479,7 +479,7 @@ export const getOperationDefinition = (opType: string) => {
 };
 
 export const getOperationSummary = (operation?: SelectOperation) => {
-  const opDefinition = operation && tryGetOperationDefinition(operation.operation);
+  const opDefinition = operation && tryGetOperationDefinition(operation.operator);
 
   // TODO: What should we do in this case?
   if (!operation || !opDefinition) {
@@ -494,5 +494,5 @@ export const getOperationSummary = (operation?: SelectOperation) => {
   const fieldName = argument && argument.field;
   const fieldSummary = fieldName ? ` of ${fieldName}` : '';
 
-  return `${getOperationName(operation.operation)}${fieldSummary}`;
+  return `${getOperationName(operation.operator)}${fieldSummary}`;
 };

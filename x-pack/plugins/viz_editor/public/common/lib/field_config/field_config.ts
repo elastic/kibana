@@ -6,7 +6,7 @@
 
 import { DatasourceField, SelectOperator } from '../../../../common';
 
-export function getOperationsForField(field: DatasourceField): SelectOperator[] {
+export function getOperatorsForField(field: DatasourceField): SelectOperator[] {
   // TODO: Make this configuration plugin-oriented
   if (!field.aggregatable) {
     return ['column'];
@@ -17,7 +17,7 @@ export function getOperationsForField(field: DatasourceField): SelectOperator[] 
   }
 
   if (field.type === 'number') {
-    return ['terms', 'avg', 'sum'];
+    return ['column', 'terms', 'avg', 'sum'];
   }
 
   if (field.type === 'string') {

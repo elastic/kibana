@@ -9,6 +9,7 @@
 import {
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   getAxisId,
   getSpecId,
@@ -16,6 +17,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
   TooltipType,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
@@ -24,6 +26,18 @@ import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
+
+type XScaleTypes = ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
+
+function xAxisScale({ type }: { type: string }): XScaleTypes {
+  switch (type) {
+    case 'string':
+      return ScaleType.Ordinal;
+    case 'number':
+      return ScaleType.Linear;
+  }
+  return ScaleType.Time;
+}
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
@@ -37,6 +51,9 @@ function sampleVisFunction() {
       displayType: {
         types: ['string'],
       },
+      stacked: {
+        types: ['boolean'],
+      },
       hideAxes: {
         types: ['boolean'],
         default: false,
@@ -48,32 +65,44 @@ function sampleVisFunction() {
     },
     context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
-      const xColumn = context.columns[0].id;
-      const xColumnType = context.columns[0].type;
-      const yColumn = context.columns[1].id;
+      if (context.columns.length <= 1) {
+        // Can't render an XY chart without two columns
+        return;
+      }
+
+      // X is always the last column for an XY because of bucketing
+      const xColumn = context.columns[context.columns.length - 1];
+      const yColumn = context.columns[context.columns.length - 2];
+      // Other columns can be empty
+      const otherColumns = context.columns.slice(0, context.columns.length - 2);
+
+      const data: any[][] = context.rows.map((row: any) => {
+        return {
+          ...row,
+          [xColumn.id]:
+            xColumn.type === 'date' ? moment(row[xColumn.id] as any).valueOf() : row[xColumn.id],
+        };
+      });
 
       return {
         type: 'render',
         as: 'xy_chart_renderer',
         value: {
-          // TODO this should come via the expression
           title: 'A title',
           seriesType: args.displayType,
-          xAxisName: xColumn,
-          yAxisName: yColumn,
-          xAxisType:
-            context.columns[0].type === 'string'
-              ? 'ordinal'
-              : context.columns[0].type === 'number'
-              ? 'linear'
-              : 'time',
-          data: context.rows.map((row: any) => [
-            xColumnType === 'date' ? moment(row[xColumn]).valueOf() : row[xColumn],
-            row[yColumn],
-          ]),
+          stacked: args.stacked,
           showAxes: !args.hideAxes,
           hideTooltips: args.hideTooltips,
-        } as XyChartConfig,
+
+          xAxisName: xColumn.name,
+          yAxisName: yColumn.name,
+
+          xAccessor: xColumn.id,
+          yAccessors: [yColumn.id],
+          splitSeriesAccessors: otherColumns.map((col: any) => col.id),
+          xAxisType: xAxisScale(xColumn),
+          data,
+        },
       };
     },
   };
@@ -81,30 +110,38 @@ function sampleVisFunction() {
 
 interface XyChartConfig {
   title: string;
-  seriesType: 'line' | 'area';
+  seriesType: 'line' | 'area' | 'bar';
+  stacked: boolean;
   xAxisName: string;
   yAxisName: string;
-  xAxisType: 'ordinal' | 'linear' | 'time';
+  xAxisType: XScaleTypes;
+
+  xAccessor: string;
+  yAccessors: string[];
+  splitSeriesAccessors: string[];
+
   data: Array<Array<string | number>>;
   showAxes: boolean;
   hideTooltips: boolean;
 }
 
-function getXScaleType(xAxisType: string) {
-  if (xAxisType === 'time') {
-    return ScaleType.Time;
+function getFormatterFunction(type: ScaleType) {
+  if (type === ScaleType.Time) {
+    return timeFormatter('DD');
   }
-  if (xAxisType === 'linear') {
-    return ScaleType.Linear;
-  }
-  return ScaleType.Ordinal;
+  return (input: any) => input;
 }
 
 function XyChart(props: { config: XyChartConfig }) {
   const config = props.config;
+
   return (
     <Chart renderer="canvas">
-      {config.hideTooltips && <Settings tooltipType={TooltipType.None} />}
+      <Settings
+        showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
+        legendPosition={Position.Right}
+        tooltipType={config.hideTooltips ? TooltipType.None : TooltipType.VerticalCursor}
+      />
       {config.showAxes && (
         <>
           <Axis
@@ -112,33 +149,51 @@ function XyChart(props: { config: XyChartConfig }) {
             title={config.xAxisName}
             position={Position.Bottom}
             showOverlappingTicks={true}
+            tickFormat={getFormatterFunction(config.xAxisType)}
           />
           <Axis
             id={getAxisId('left')}
             title={config.yAxisName}
             position={Position.Left}
-            tickFormat={d => Number(d).toFixed(2)}
+            tickFormat={d => String(Math.floor(Number(d)))}
           />
         </>
       )}
-
-      {config.seriesType === 'line' ? (
+      {config.seriesType === 'line' && (
         <LineSeries
-          id={getSpecId('lines')}
-          xScaleType={getXScaleType(config.xAxisType)}
+          id={getSpecId(config.yAxisName)}
+          xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
+          xAccessor={config.xAccessor}
+          yAccessors={config.yAccessors}
+          splitSeriesAccessors={config.splitSeriesAccessors}
+          stackAccessors={config.stacked ? [config.xAccessor] : []}
           data={config.data}
           yScaleToDataExtent={false}
         />
-      ) : (
+      )}
+      {config.seriesType === 'area' && (
         <AreaSeries
-          id={getSpecId('area')}
-          xScaleType={ScaleType.Time}
+          id={getSpecId(config.yAxisName)}
+          xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
+          xAccessor={config.xAccessor}
+          yAccessors={config.yAccessors}
+          splitSeriesAccessors={config.splitSeriesAccessors}
+          stackAccessors={config.stacked ? [config.xAccessor] : []}
+          data={config.data}
+          yScaleToDataExtent={false}
+        />
+      )}
+      {config.seriesType === 'bar' && (
+        <BarSeries
+          id={getSpecId(config.yAxisName)}
+          xScaleType={config.xAxisType}
+          yScaleType={ScaleType.Linear}
+          xAccessor={config.xAccessor}
+          yAccessors={config.yAccessors}
+          splitSeriesAccessors={config.splitSeriesAccessors}
+          stackAccessors={config.stacked ? [config.xAccessor] : []}
           data={config.data}
           yScaleToDataExtent={false}
         />

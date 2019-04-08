@@ -52,7 +52,7 @@ export function OperationEditor(props: OperationEditorProps) {
         .map(op => ({
           name: op.name,
           id: op.type,
-          isSelected: op.type === column.operation,
+          isSelected: op.type === column.operator,
           onClick() {
             changeOperation(op.type);
           },
@@ -60,7 +60,7 @@ export function OperationEditor(props: OperationEditorProps) {
     },
   ];
 
-  const SubEditor = getOperationDefinition(column.operation).editor;
+  const SubEditor = getOperationDefinition(column.operator).editor;
 
   const subEditor = SubEditor ? (
     <EuiFlexItem>

@@ -7,15 +7,21 @@
 import {
   // @ts-ignore
   EuiSuperSelect,
+  EuiSwitch,
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { DatasourceField, fieldToOperation } from '../../../common';
+import {
+  DatasourceField,
+  fieldToOperation,
+  SelectOperation,
+  SelectOperator,
+} from '../../../common';
 import {
   Axis,
   EditorPlugin,
   getColumnIdByIndex,
-  getOperationsForField,
+  getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
@@ -28,10 +34,13 @@ import { YAxisEditor } from './yaxis_editor';
 
 const PLUGIN_NAME = 'xy_chart';
 
+type XyDisplayType = 'line' | 'area' | 'bar';
+
 interface XyChartPrivateState {
   xAxis: Axis;
   yAxis: Axis;
-  displayType?: 'line' | 'area';
+  displayType?: XyDisplayType;
+  stacked: boolean;
 }
 
 type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
@@ -45,7 +54,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
 
   const {
     private: {
-      xyChart: { xAxis, yAxis, displayType },
+      xyChart: { xAxis, yAxis, displayType, stacked },
     },
   } = visModel;
 
@@ -63,11 +72,24 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
               value: 'area',
               inputDisplay: 'Area',
             },
+            {
+              value: 'bar',
+              inputDisplay: 'Bar',
+            },
           ]}
           valueOfSelected={displayType || 'line'}
-          onChange={(value: 'line' | 'area') => {
+          onChange={(value: XyDisplayType) => {
             const updatedVisModel = updateXyState(visModel, { displayType: value });
             onChangeVisModel(updatedVisModel);
+          }}
+        />
+      </div>
+      <div className="configPanel-axis">
+        <EuiSwitch
+          label="Stacked"
+          checked={stacked}
+          onChange={() => {
+            onChangeVisModel(updateXyState(visModel, { stacked: !stacked }));
           }}
         />
       </div>
@@ -104,11 +126,16 @@ function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'ed
 
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `xy_chart hideTooltips=${mode === 'preview'} hideAxes=${mode ===
-    'preview'} displayType=${viewState.private.xyChart.displayType || 'line'}`;
+  return `
+    xy_chart
+      hideTooltips=${mode === 'preview'}
+      hideAxes=${mode === 'preview'}
+      displayType=${viewState.private.xyChart.displayType || 'line'}
+      stacked=${viewState.private.xyChart.stacked ? 'true' : 'false'}
+  `;
 }
 
-function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
+function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayType) {
   if (visModel.private.xyChart) {
     if (displayType) {
       return updateXyState(visModel, { displayType });
@@ -141,24 +168,157 @@ const displayTypeIcon: { [type: string]: IconType } = {
   area: 'visArea',
 };
 
+function buildSuggestion(
+  visModel: XyChartVisModel,
+  options?: {
+    title?: string;
+    iconType?: IconType;
+  }
+) {
+  const title = [visModel.private.xyChart.yAxis.title, visModel.private.xyChart.xAxis.title].join(
+    ' over '
+  );
+
+  return {
+    title,
+    visModel,
+    previewExpression: toExpression(visModel, 'preview'),
+    score: 0.5,
+    iconType: displayTypeIcon.line,
+    pluginName: PLUGIN_NAME,
+    category: 'line',
+    ...options,
+  } as Suggestion;
+}
+
 function getSuggestion(
   visModel: XyChartVisModel,
-  displayType: 'line' | 'area',
+  displayType: XyDisplayType,
   title: string
 ): Suggestion {
   const prefilledVisModel = prefillPrivateState(
     visModel as UnknownVisModel,
     displayType
   ) as XyChartVisModel;
+  return buildSuggestion(prefilledVisModel, { title, iconType: displayTypeIcon[displayType] });
+}
+
+function buildViewModel(
+  visModel: XyChartVisModel,
+  xAxis: SelectOperation[],
+  yAxis: SelectOperation[]
+): XyChartVisModel {
+  const formattedNameX = xAxis
+    .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
+    .join(' split by ');
+  const formattedNameY = yAxis
+    .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
+    .join(' split by ');
+
   return {
-    previewExpression: toExpression(prefilledVisModel, 'preview'),
-    score: 0.5,
-    visModel: prefilledVisModel,
-    title,
-    iconType: displayTypeIcon[displayType],
-    pluginName: PLUGIN_NAME,
-    category: 'XY Chart',
+    ...visModel,
+    queries: {
+      xyChartQuery: {
+        datasourceRef: visModel.datasource!.title,
+        // Split by Y values, then bucket by X
+        select: yAxis.concat(xAxis),
+      },
+    },
+    editorPlugin: PLUGIN_NAME,
+    private: {
+      ...visModel.private,
+      xyChart: {
+        ...visModel.private.xyChart,
+        xAxis: {
+          title: formattedNameX,
+          columns: xAxis.map((_, index) => `xyChartQuery_${index + yAxis.length}`),
+        },
+        yAxis: {
+          title: formattedNameY,
+          columns: yAxis.map((_, index) => `xyChartQuery_${index}`),
+        },
+      },
+    },
   };
+}
+
+function _getSuggestionsForFieldAsReplacement(
+  field: DatasourceField,
+  visModel: XyChartVisModel
+): Suggestion[] {
+  const { datasource } = visModel;
+
+  if (!datasource) {
+    return [];
+  }
+
+  let suggestions = [] as Array<Suggestion | null>;
+
+  const opToSuggestion = (op: SelectOperator): Suggestion | null => {
+    let xAxis = [];
+    let yAxis = [];
+
+    if (op === 'count') {
+      return null;
+    }
+
+    xAxis = [fieldToOperation(field, op)];
+    yAxis = [fieldToOperation(field, 'count')];
+
+    const newVisModel = buildViewModel(visModel, xAxis, yAxis);
+
+    return buildSuggestion(newVisModel, {
+      iconType: displayTypeIcon.line,
+    });
+  };
+
+  const opWithDateHistogram = (op: SelectOperator): Suggestion | null => {
+    let xAxis = [];
+    let yAxis = [];
+
+    if (op === 'column') {
+      xAxis = [
+        fieldToOperation(
+          datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+          'column'
+        ),
+      ];
+      yAxis = [fieldToOperation(field, op)];
+    } else {
+      xAxis = [
+        fieldToOperation(
+          datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+          'date_histogram'
+        ),
+      ];
+
+      if (op === 'count') {
+        return null;
+      } else {
+        yAxis = [fieldToOperation(field, op), fieldToOperation(field, 'count')];
+      }
+    }
+
+    const newVisModel = buildViewModel(visModel, xAxis, yAxis);
+
+    return buildSuggestion(newVisModel, {
+      iconType: displayTypeIcon.line,
+    });
+  };
+
+  if (datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
+    if (field.type === 'number') {
+      suggestions = suggestions.concat(opWithDateHistogram('column'));
+    } else {
+      suggestions = suggestions.concat(
+        getOperatorsForField(field).map(op => opWithDateHistogram(op))
+      );
+    }
+  }
+
+  suggestions = suggestions.concat(getOperatorsForField(field).map(opToSuggestion));
+
+  return suggestions.filter(suggestion => !!suggestion) as Suggestion[];
 }
 
 function getSuggestionsForField(
@@ -166,59 +326,20 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
-  const operationNames = getOperationsForField(field);
+  const operationNames = getOperatorsForField(field);
 
-  if (operationNames.length === 0) {
+  if (operationNames.length === 0 || !field.aggregatable) {
     return [] as Suggestion[];
   }
 
-  return operationNames.map(operationName => {
-    const firstOperation = fieldToOperation(field, operationName);
-    const formattedNameX = operationToName(operationName);
-    const formattedNameY = operationToName('count');
-
-    // Replaces the whole query and both axes. Good for first field, not for 2+
-    const prefilledVisModel: XyChartVisModel = {
-      ...visModel,
-      queries: {
-        q1: {
-          datasourceRef: datasourceName,
-          select: [
-            { ...firstOperation, alias: field.name },
-            { operation: 'count', alias: 'count' },
-          ],
-        },
-      },
-      editorPlugin: PLUGIN_NAME,
-      private: {
-        ...visModel.private,
-        xyChart: {
-          xAxis: { title: 'X Axis', columns: ['q1_0'] },
-          yAxis: { title: 'Y Axis', columns: ['q1_1'] },
-        },
-      },
-    };
-
-    return {
-      previewExpression: toExpression(prefilledVisModel, 'preview'),
-      score: 0.5,
-      visModel: prefilledVisModel,
-      title: `Line Chart: ${formattedNameX} of ${field.name} vs ${formattedNameY}`,
-      iconType: displayTypeIcon.line,
-      pluginName: PLUGIN_NAME,
-      category: 'Line chart',
-    };
-  });
+  return _getSuggestionsForFieldAsReplacement(field, visModel);
 }
 
 export const config: EditorPlugin<XyChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
-  getChartSuggestions: visModel => [
-    getSuggestion(visModel, 'line', 'Standard line chart'),
-    getSuggestion(visModel, 'area', 'Standard area chart'),
-  ],
+  getChartSuggestions: visModel => [getSuggestion(visModel, 'line', 'Switch to line chart')],
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),

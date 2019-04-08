@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourceField, Query, SelectOperation } from '../../../common';
+import { DatasourceField, Query, SelectOperation } from '../../../../common';
 
 export function getTypeForOperation(op: SelectOperation, fields: DatasourceField[]): string {
-  switch (op.operation) {
+  switch (op.operator) {
     case 'count':
     case 'cardinality':
       return 'number';
@@ -23,7 +23,7 @@ export function getTypeForOperation(op: SelectOperation, fields: DatasourceField
   }
 }
 
-export function getTypes(query: Query, fields: DatasourceField[]): string[] {
+export function getTypes(query: Query, fields: DatasourceField[]) {
   return query.select.map(operation => {
     return getTypeForOperation(operation, fields);
   });

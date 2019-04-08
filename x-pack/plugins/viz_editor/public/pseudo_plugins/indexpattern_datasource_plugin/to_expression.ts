@@ -8,12 +8,12 @@ import { Query, WhereOperation } from '../../../common';
 import { getTypes, VisModel } from '../../../public';
 
 function isRawDocumentQuery(query: Query) {
-  return query.select.every(selectOperation => selectOperation.operation === 'column');
+  return query.select.every(selectOperation => selectOperation.operator === 'column');
 }
 
 function queryToEsAggsConfigs(query: Query): any {
-  return [...query.select].reverse().map((selectOperation, index) => {
-    switch (selectOperation.operation) {
+  return query.select.map((selectOperation, index) => {
+    switch (selectOperation.operator) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
       case 'cardinality':
@@ -82,7 +82,7 @@ export function toExpression(viewState: VisModel) {
   if (isRawDocumentQuery(firstQuery)) {
     return `client_esdocs index='${viewState.datasource.id}' fields='${JSON.stringify(
       firstQuery.select.map(operation =>
-        operation.operation === 'column' ? operation.argument.field : ''
+        operation.operator === 'column' ? operation.argument.field : ''
       )
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }

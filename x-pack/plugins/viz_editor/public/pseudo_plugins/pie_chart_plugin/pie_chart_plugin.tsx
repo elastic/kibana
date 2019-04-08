@@ -15,7 +15,7 @@ import {
   Axis,
   EditorPlugin,
   getColumnIdByIndex,
-  getOperationsForField,
+  getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
@@ -154,7 +154,7 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: PieChartVisModel
 ): Suggestion[] {
-  const operationNames = getOperationsForField(field);
+  const operationNames = getOperatorsForField(field);
 
   if (operationNames.length === 0) {
     return [];
@@ -172,10 +172,7 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef,
-          select: [
-            { ...firstOperation, alias: field.name },
-            { operation: 'count', alias: 'count' },
-          ],
+          select: [{ ...firstOperation, alias: field.name }, { operator: 'count', alias: 'count' }],
         },
       },
       private: {

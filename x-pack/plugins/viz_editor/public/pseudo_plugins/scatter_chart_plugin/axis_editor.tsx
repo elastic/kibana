@@ -23,7 +23,7 @@ export function AxisEditor({
     onChangeVisModel(
       updateColumn(
         col,
-        { operation: 'column', alias: field.name, argument: { field: field.name } },
+        { operator: 'column', alias: field.name, argument: { field: field.name } },
         visModel
       )
     );
