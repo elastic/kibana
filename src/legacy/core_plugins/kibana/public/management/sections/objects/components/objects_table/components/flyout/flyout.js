@@ -50,6 +50,7 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
+  processImportResponse,
 } from '../../../../lib';
 import {
   resolveSavedObjects,
@@ -139,46 +140,13 @@ class FlyoutUI extends Component {
       return;
     }
 
-    // Go through the failures and split between unmatchedReferences and failedImports
-    const failedImports = [];
-    const unmatchedReferences = new Map();
-    for (const { error, ...obj } of response.errors || []) {
-      failedImports.push({ obj, error });
-      if (error.type !== 'missing_references') {
-        continue;
+    this.setState(processImportResponse(response), () => {
+      // Resolve import errors right away if there's no index patterns to match
+      // This will ask about overwriting each object, etc
+      if (this.state.unmatchedReferences.length === 0) {
+        this.resolveImportErrors();
       }
-      // Currently only supports resolving references on index patterns
-      const indexPatternRefs = error.references.filter(ref => ref.type === 'index-pattern');
-      for (const missingReference of indexPatternRefs) {
-        const conflict = unmatchedReferences.get(`${missingReference.type}:${missingReference.id}`) || {
-          existingIndexPatternId: missingReference.id,
-          list: [],
-          newIndexPatternId: undefined,
-        };
-        conflict.list.push(obj);
-        unmatchedReferences.set(`${missingReference.type}:${missingReference.id}`, conflict);
-      }
-    }
-
-    this.setState({
-      failedImports,
-      unmatchedReferences: Array.from(unmatchedReferences.values()),
-      // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
-      // returned errors of type missing_references.
-      status: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error.type === 'conflict')
-        ? 'success'
-        : 'idle',
-      importCount: response.successCount,
-      conflictedSavedObjectsLinkedToSavedSearches: undefined,
-      conflictedSearchDocs: undefined,
-      possibleRecordsToOverwrite: (response.errors || []).filter(obj => obj.error.type === 'conflict'),
     });
-
-    // Resolve import errors right away if there's no index patterns to match
-    // This will ask about overwriting each object, etc
-    if (unmatchedReferences.size === 0) {
-      this.resolveImportErrors();
-    }
   }
 
   /**
@@ -189,7 +157,7 @@ class FlyoutUI extends Component {
    * @param {array} objects List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  async getConflictResolutions(objects) {
+  getConflictResolutions = async (objects) => {
     const resolutions = {};
     for (const { type, id, title } of objects) {
       const overwrite = await new Promise((resolve) => {
@@ -209,63 +177,12 @@ class FlyoutUI extends Component {
   }
 
   /**
-   * Map Import Failure To Retry Object
-   *
-   * Takes a single import failure and builds a retry object for the resolve import errors API. Returns undefined when failure should be skipped.
-   */
-  mapImportFailureToRetryObject = ({ failure, overwriteDecisionCache, replaceReferencesCache }) => {
-    const { isOverwriteAllChecked, unmatchedReferences } = this.state;
-    const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true;
-
-    // Conflicts wihtout overwrite granted are skipped
-    if (!isOverwriteGranted && failure.error.type === 'conflict') {
-      return;
-    }
-
-    // Replace references if user chose a new reference
-    if (failure.error.type === 'missing_references') {
-      const objReplaceReferences = replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
-      const indexPatternRefs = failure.error.references.filter(obj => obj.type === 'index-pattern');
-      for (const reference of indexPatternRefs) {
-        for (const unmatchedReference of unmatchedReferences) {
-          const hasNewValue = !!unmatchedReference.newIndexPatternId;
-          const matchesIndexPatternId = unmatchedReference.existingIndexPatternId === reference.id;
-          if (!hasNewValue || !matchesIndexPatternId) {
-            continue;
-          }
-          objReplaceReferences.push({
-            type: 'index-pattern',
-            from: unmatchedReference.existingIndexPatternId,
-            to: unmatchedReference.newIndexPatternId,
-          });
-        }
-      }
-      replaceReferencesCache.set(`${failure.obj.type}:${failure.obj.id}`, objReplaceReferences);
-      // Skip if nothing to replace, the UI option selected would be --Skip Import--
-      if (objReplaceReferences.length === 0) {
-        return;
-      }
-    }
-
-    return {
-      id: failure.obj.id,
-      type: failure.obj.type,
-      overwrite: isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true,
-      replaceReferences: replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [],
-    };
-  }
-
-  /**
    * Resolve Import Errors
    *
    * Function goes through the failedImports and tries to resolve the issues.
    */
   resolveImportErrors = async () => {
     const { intl } = this.props;
-    const overwriteDecisionCache = new Map();
-    const replaceReferencesCache = new Map();
-    const { file, isOverwriteAllChecked } = this.state;
-    let { importCount: successImportCount, failedImports: importFailures } = this.state;
 
     this.setState({
       error: undefined,
@@ -273,82 +190,21 @@ class FlyoutUI extends Component {
       loadingMessage: undefined,
     });
 
-    const doesntHaveOverwriteDecision = ({ obj }) => {
-      return !overwriteDecisionCache.has(`${obj.type}:${obj.id}`);
-    };
-    const getOverwriteDecision = ({ obj }) => {
-      return overwriteDecisionCache.get(`${obj.type}:${obj.id}`);
-    };
-    const callMap = (failure) => {
-      return this.mapImportFailureToRetryObject({ overwriteDecisionCache, replaceReferencesCache, failure });
-    };
-
-    // Loop until all issues are resolved
-    while (importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))) {
-      // Ask for overwrites
-      if (!isOverwriteAllChecked) {
-        const result = await this.getConflictResolutions(
-          importFailures
-            .filter(({ error }) => error.type === 'conflict')
-            .filter(doesntHaveOverwriteDecision)
-            .map(({ obj }) => obj)
-        );
-        for (const key of Object.keys(result)) {
-          overwriteDecisionCache.set(key, result[key]);
-        }
-      }
-
-      // Build retries array
-      const retries = importFailures
-        .map(callMap)
-        .filter(obj => !!obj);
-      for (const { error, obj } of importFailures) {
-        if (error.type !== 'missing_references') {
-          continue;
-        }
-        if (!retries.some(retryObj => retryObj.type === obj.type && retryObj.id === obj.id)) {
-          continue;
-        }
-        for (const { type, id } of error.blocking || []) {
-          retries.push({ type, id });
-        }
-      }
-
-      // Scenario where we skip everything if nothing to retry
-      if (retries.length === 0) {
-        // Cancelled overwrites aren't failures anymore
-        importFailures = importFailures.filter(failure => failure.error.type !== 'conflict' || getOverwriteDecision(failure));
-        break;
-      }
-
-      // Call API
-      let response;
-      try {
-        response = await resolveImportErrors(file, retries);
-      } catch (e) {
-        this.setState({
-          status: 'error',
-          error: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-            defaultMessage: 'The file could not be processed.',
-          }),
-        });
-        return;
-      }
-
-      // Handle API Response
-      successImportCount += response.successCount;
-      importFailures = [];
-      for (const { error, ...obj } of response.errors || []) {
-        importFailures.push({ error, obj });
-      }
+    try {
+      const updatedState = await resolveImportErrors({
+        state: this.state,
+        getConflictResolutions: this.getConflictResolutions,
+      });
+      this.setState(updatedState);
+    } catch (e) {
+      this.setState({
+        status: 'error',
+        error: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
+          defaultMessage: 'The file could not be processed.',
+        }),
+      });
     }
-
-    this.setState({
-      status: 'success',
-      importCount: successImportCount,
-      failedImports: importFailures,
-    });
   }
 
   legacyImport = async () => {

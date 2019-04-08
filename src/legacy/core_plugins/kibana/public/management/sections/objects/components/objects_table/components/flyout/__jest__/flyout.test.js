@@ -67,6 +67,7 @@ const defaultProps = {
   done: jest.fn(),
   services: [],
   newIndexPatternUrl: '',
+  getConflictResolutions: jest.fn(),
   indexPatterns: {
     getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
   },
@@ -171,8 +172,9 @@ describe('Flyout', () => {
         ],
       }));
       resolveImportErrors.mockImplementation(() => ({
-        success: true,
-        successCount: 1,
+        status: 'success',
+        importCount: 1,
+        failedImports: [],
       }));
     });
 
@@ -238,20 +240,7 @@ describe('Flyout', () => {
         .simulate('click');
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
-      expect(resolveImportErrors).toHaveBeenCalledWith(mockFile, [
-        {
-          id: '1',
-          type: 'visualization',
-          overwrite: true,
-          replaceReferences: [
-            {
-              type: 'index-pattern',
-              from: 'MyIndexPattern*',
-              to: '2',
-            },
-          ],
-        },
-      ]);
+      expect(resolveImportErrors).toMatchSnapshot();
     });
 
     it('should handle errors', async () => {
@@ -263,12 +252,14 @@ describe('Flyout', () => {
       component.update();
 
       resolveImportErrors.mockImplementation(() => ({
-        success: false,
-        successCount: 0,
-        errors: [
+        status: 'success',
+        importCount: 0,
+        failedImports: [
           {
-            type: 'visualization',
-            id: '1',
+            obj: {
+              type: 'visualization',
+              id: '1',
+            },
             error: {
               type: 'unknown',
             },

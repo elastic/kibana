@@ -166,6 +166,83 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
+exports[`Flyout conflicts should allow conflict resolution 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "getConflictResolutions": [Function],
+        "state": Object {
+          "conflictedIndexPatterns": undefined,
+          "conflictedSavedObjectsLinkedToSavedSearches": undefined,
+          "conflictedSearchDocs": undefined,
+          "conflictingRecord": undefined,
+          "error": undefined,
+          "failedImports": Array [
+            Object {
+              "error": Object {
+                "references": Array [
+                  Object {
+                    "id": "MyIndexPattern*",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "missing_references",
+              },
+              "obj": Object {
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
+              },
+            },
+          ],
+          "file": Object {
+            "name": "foo.ndjson",
+            "path": "/home/foo.ndjson",
+          },
+          "importCount": 0,
+          "indexPatterns": Array [
+            Object {
+              "id": "1",
+            },
+            Object {
+              "id": "2",
+            },
+          ],
+          "isLegacyFile": false,
+          "isOverwriteAllChecked": true,
+          "loadingMessage": undefined,
+          "status": "loading",
+          "unmatchedReferences": Array [
+            Object {
+              "existingIndexPatternId": "MyIndexPattern*",
+              "list": Array [
+                Object {
+                  "id": "1",
+                  "title": "My Visualization",
+                  "type": "visualization",
+                },
+              ],
+              "newIndexPatternId": "2",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Object {
+        "failedImports": Array [],
+        "importCount": 1,
+        "status": "success",
+      },
+    },
+  ],
+}
+`;
+
 exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"

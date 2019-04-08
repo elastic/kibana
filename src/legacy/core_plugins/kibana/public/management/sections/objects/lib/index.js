@@ -30,3 +30,4 @@ export * from './parse_query';
 export * from './resolve_import_errors';
 export * from './resolve_saved_objects';
 export * from './log_legacy_import';
+export * from './process_import_response';
