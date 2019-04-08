@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* tslint:disable max-classes-per-file */
+/* eslint-disable max-classes-per-file */
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';

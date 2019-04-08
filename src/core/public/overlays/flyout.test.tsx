@@ -39,7 +39,6 @@ describe('FlyoutService', () => {
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
     });
     describe('with a currently active flyout', () => {
-      // tslint:disable-next-line: one-variable-per-declaration
       let target: HTMLElement, flyoutService: FlyoutService, ref1: FlyoutRef;
       beforeEach(() => {
         target = document.createElement('div');
@@ -51,6 +50,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
+        expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
