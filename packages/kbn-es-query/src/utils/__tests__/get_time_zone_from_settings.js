@@ -18,22 +18,16 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment-timezone';
 import { getTimeZoneFromSettings } from '../get_time_zone_from_settings';
 
 describe('get timezone from settings', function () {
-  afterEach(function () {
-    moment.tz.setDefault();
-  });
 
   it('should return the config timezone if the time zone is set', function () {
-    moment.tz.setDefault('America/Chicago');
     const result = getTimeZoneFromSettings('America/Chicago');
     expect(result).to.eql('America/Chicago');
   });
 
   it('should return the system timezone if the time zone is set to "Browser"', function () {
-    moment.tz.setDefault('Browser');
     const result = getTimeZoneFromSettings('Browser');
     expect(result).to.not.equal('Browser');
   });
