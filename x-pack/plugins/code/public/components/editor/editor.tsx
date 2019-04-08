@@ -104,7 +104,7 @@ export class EditorComponent extends React.Component<IProps> {
         this.monaco.editor.updateOptions({ lineHeight: 38 });
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineHeight: 24 });
+        this.monaco.editor.updateOptions({ lineHeight: 18 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
         this.loadBlame(this.props.blames);
