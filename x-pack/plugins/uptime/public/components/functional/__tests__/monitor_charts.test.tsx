@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorChartsComponent } from '../monitor_charts';
-import { MonitorChart } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorChart } from '../../../../common/graphql/types';
 
 describe('MonitorCharts component', () => {
   const chartResponse: { monitorChartsData: MonitorChart } = {
