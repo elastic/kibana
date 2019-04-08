@@ -59,6 +59,76 @@ describe('hitsToGeoJson', () => {
     });
   });
 
+  it('Should convert wkt shapes to geojson', () => {
+    const hits = [
+      {
+        _source: {
+          [geoFieldName]: 'POINT (32 40)'
+        }
+      },
+      {
+        _source: {
+          [geoFieldName]: 'LINESTRING (50 60, 70 80)'
+        }
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_shape');
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(2);
+    expect(geojson.features[0]).toEqual({
+      geometry: {
+        coordinates: [32, 40],
+        type: 'Point',
+      },
+      properties: {},
+      type: 'Feature',
+    });
+    expect(geojson.features[1]).toEqual({
+      geometry: {
+        coordinates: [[50, 60], [70, 80]],
+        type: 'LineString',
+      },
+      properties: {},
+      type: 'Feature',
+    });
+  });
+
+
+  it('Should handle point as string case', () => {
+    const hits = [
+      {
+        _source: {
+          [geoFieldName]: '33, 49'
+        }
+      },
+      {
+        _source: {
+          [geoFieldName]: 'drm3btev3e86'
+        }
+      }
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(2);
+    expect(geojson.features[0]).toEqual({
+      geometry: {
+        coordinates: [49, 33],
+        type: 'Point',
+      },
+      properties: {},
+      type: 'Feature',
+    });
+    expect(geojson.features[1]).toEqual({
+      geometry: {
+        coordinates: [-71.34000012651086, 41.12000000663102],
+        type: 'Point',
+      },
+      properties: {},
+      type: 'Feature',
+    });
+  });
+
+
   it('Should handle documents where geoField is not populated', () => {
     const hits = [
       {

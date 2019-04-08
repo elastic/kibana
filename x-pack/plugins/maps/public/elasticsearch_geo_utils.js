@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from 'wellknown';
+import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -67,18 +68,19 @@ export function geoPointToGeometry(value) {
   }
 
   if (typeof value === 'string') {
-    const commaSplit = value.split(',');
-    if (commaSplit.length === 1) {
-      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.geohashIsUnsupportedErrorMessage', {
-        defaultMessage: `Unable to convert to geojson, geohash not supported`
-      });
 
-      throw new Error(errorMessage);
+    const commaSplit = value.split(',');
+    let point;
+    if (commaSplit.length === 1) {
+      const geohash = decodeGeoHash(value);
+      point = pointGeometryFactory(geohash.latitude[2], geohash.longitude[2]);
+    } else {
+      const lat = parseFloat(commaSplit[0]);
+      const lon = parseFloat(commaSplit[1]);
+      point = pointGeometryFactory(lat, lon);
     }
     // Geo-point expressed as a string with the format: "lat,lon".
-    const lat = parseFloat(commaSplit[0]);
-    const lon = parseFloat(commaSplit[1]);
-    return [pointGeometryFactory(lat, lon)];
+    return [point];
   }
 
   if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
@@ -175,6 +177,7 @@ export function geoShapeToGeometry(value) {
   }
 
   let geoJson;
+  console.log('wkt', value);
   if (typeof value === 'string') {
     geoJson = convertWKTStringToGeojson(value);
   } else {
