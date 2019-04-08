@@ -12,22 +12,19 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import {
-  // EuiAreaSeries,
-  // EuiBarSeries,
-  // EuiCrosshairX,
-  // EuiDataPoint,
+  EuiCrosshairX,
+  EuiDataPoint,
   EuiLineSeries,
   EuiSeriesChart,
   EuiYAxis,
-  // EuiSeriesChartProps,
-  // EuiSeriesProps,
   EuiXAxis,
-  EuiSeriesChartAxisUtils,
 } from '@elastic/eui/lib/experimental';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { isNumber, last, max } from 'lodash';
+import { first, isNumber, last } from 'lodash';
+import moment from 'moment';
 import React, { useCallback } from 'react';
 import euiStyled from '../../../../..//common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
@@ -42,9 +39,21 @@ import { InfraLoadingPanel } from '../loading';
 import { createMetricLabel } from './create_metric_label';
 import { createFormatter } from '../../utils/formatters';
 import { InfraFormatterType } from '../../lib/lib';
+const LEFT_MARGIN = 60;
 
-const createFormatterForMetric = (metric: MetricsExplorerMetric) => {
-  if (metric.field) {
+const titleFormatter = (dataPoints: EuiDataPoint[]) => {
+  if (dataPoints.length > 0) {
+    const [firstDataPoint] = dataPoints;
+    const { originalValues } = firstDataPoint;
+    return {
+      title: <EuiIcon type="clock" />,
+      value: moment(originalValues.x).format('MMM D, YYYY h:mm:ss A'),
+    };
+  }
+};
+
+const createFormatterForMetric = (metric?: MetricsExplorerMetric) => {
+  if (metric && metric.field) {
     const suffix = last(metric.field.split(/\./));
     if (suffix === 'pct') {
       return createFormatter(InfraFormatterType.percent);
@@ -104,8 +113,40 @@ export const MetricsExplorerCharts = injectI18n(
       );
     }
 
-    const marginLeft = (options.metrics.length - 1) * 30 + 40;
+    const metrics =
+      options.aggregation === MetricsExplorerAggregation.count
+        ? [{ aggregation: MetricsExplorerAggregation.count }]
+        : options.metrics;
 
+    const formatter = useCallback(createFormatterForMetric(first(metrics)), [options]);
+
+    const itemsFormatter = useCallback(
+      (dataPoints: EuiDataPoint[]) => {
+        return dataPoints.map(d => {
+          const metric = metrics[d.seriesIndex];
+          const dataFormatter = createFormatterForMetric(metric);
+          return {
+            title: (
+              <span>
+                <EuiIcon
+                  type="dot"
+                  style={{
+                    color: colorTransformer(
+                      (metric && metric.color) || MetricsExplorerColor.color0
+                    ),
+                  }}
+                />
+                {createMetricLabel(metric)}
+              </span>
+            ),
+            value: dataFormatter(d.y),
+          };
+        });
+      },
+      [options]
+    );
+
+    const seriesNames = metrics.map(createMetricLabel);
     return (
       <div>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
@@ -119,15 +160,30 @@ export const MetricsExplorerCharts = injectI18n(
                 </EuiToolTip>
               ) : null}
               <div style={{ height: data.series.length > 1 ? 200 : 400 }}>
-                <EuiSeriesChart animateData={false} xType="time">
-                  {options.metrics.map((metric, id) => {
-                    const data = series.rows.map(row => ({
+                <EuiSeriesChart
+                  animateData={false}
+                  xType="time"
+                  showDefaultAxis={false}
+                  showCrosshair={false}
+                  marginLeft={LEFT_MARGIN}
+                >
+                  <EuiXAxis marginLeft={LEFT_MARGIN} />
+                  <EuiYAxis tickFormat={formatter} marginLeft={LEFT_MARGIN} />
+                  <EuiCrosshairX
+                    marginLeft={LEFT_MARGIN}
+                    titleFormat={titleFormatter}
+                    itemsFormat={itemsFormatter}
+                    seriesNames={seriesNames}
+                  />
+                  {metrics.map((metric, id) => {
+                    const chartData = series.rows.map(row => ({
                       x: row.timestamp,
                       y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
                       y0: 0,
                     }));
                     return (
                       <EuiLineSeries
+                        marginLeft={LEFT_MARGIN}
                         key={`metric_chart_${id}`}
                         color={
                           (metric.color && colorTransformer(metric.color)) ||
@@ -135,7 +191,7 @@ export const MetricsExplorerCharts = injectI18n(
                         }
                         lineSize={2}
                         name={createMetricLabel(metric)}
-                        data={data}
+                        data={chartData}
                       />
                     );
                   })}
@@ -182,7 +238,7 @@ export const MetricsExplorerCharts = injectI18n(
 );
 
 const ChartTitle = euiStyled.h4`
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        `;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `;
