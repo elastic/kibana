@@ -175,21 +175,17 @@ class RolesGridPageUI extends Component<Props, State> {
         truncateText: true,
         render: (name: string, record: Role) => {
           return (
-            <span>
+            <EuiText color="subdued" size="s">
               <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
                 {name}
               </EuiLink>
               {!isRoleEnabled(record) && (
-                <EuiTextColor color={'subdued'}>
-                  <span className="rolesGridPage__disabledRoleMessage">
-                    <FormattedMessage
-                      id="xpack.security.management.roles.disabledTooltip"
-                      defaultMessage="(disabled)"
-                    />
-                  </span>
-                </EuiTextColor>
+                <FormattedMessage
+                  id="xpack.security.management.roles.disabledTooltip"
+                  defaultMessage=" (disabled)"
+                />
               )}
-            </span>
+            </EuiText>
           );
         },
       },
