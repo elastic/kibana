@@ -17,10 +17,12 @@
  * under the License.
  */
 
-export function getEsQueryConfig(config) {
-  const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-  const queryStringOptions = config.get('query:queryString:options');
-  const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
-  const dateFormatTZ = config.get('dateFormat:tz');
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ };
+import moment from 'moment-timezone';
+const detectedTimezone = moment.tz.guess();
+
+export function getTimeZoneFromSettings(dateFormatTZ) {
+  if (dateFormatTZ === 'Browser') {
+    return detectedTimezone;
+  }
+  return dateFormatTZ;
 }
