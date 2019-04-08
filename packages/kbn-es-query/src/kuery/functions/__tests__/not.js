@@ -18,14 +18,12 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
 import * as not from '../not';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
 let indexPattern;
-let sandbox;
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
@@ -33,14 +31,8 @@ describe('kuery functions', function () {
 
   describe('not', function () {
 
-
     beforeEach(() => {
       indexPattern = indexPatternResponse;
-      sandbox = sinon.createSandbox();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     describe('buildNodeParams', function () {
@@ -63,14 +55,6 @@ describe('kuery functions', function () {
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
 
-      it('should accept a config parameter in a subquery in an ES bool query\'s must_not clause', function () {
-        const config = { dateFormatTZ: 'America/Phoenix' };
-        const object = { method: ast.toElasticsearchQuery };
-        const spy = sinon.spy(object, 'method');
-        const node = nodeTypes.function.buildNode('not', childNode);
-        not.toElasticsearchQuery(node, indexPattern, config);
-        expect(spy.withArgs(config).calledOnce).to.be.true;
-      });
     });
   });
 });
