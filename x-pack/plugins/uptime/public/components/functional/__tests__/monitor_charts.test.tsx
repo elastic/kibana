@@ -6,10 +6,11 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { MonitorCharts } from '../monitor_charts';
+import { MonitorChartsComponent } from '../monitor_charts';
+import { MonitorChart } from 'x-pack/plugins/uptime/common/graphql/types';
 
 describe('MonitorCharts component', () => {
-  const chartResponse = {
+  const chartResponse: { monitorChartsData: MonitorChart } = {
     monitorChartsData: {
       durationArea: [
         { x: 1548697620000, yMin: 106421, yMax: 3120392 },
@@ -57,11 +58,10 @@ describe('MonitorCharts component', () => {
 
   it('renders the component without errors', () => {
     const component = shallowWithIntl(
-      <MonitorCharts
-        checkDomainLimits={[0, 75]}
+      <MonitorChartsComponent
         danger="dangerColor"
-        durationDomainLimits={[0, 75]}
-        monitorChartsData={chartResponse.monitorChartsData}
+        data={{ monitorChartsData: chartResponse.monitorChartsData }}
+        loading={false}
         mean="mean"
         range="range"
         success="success"

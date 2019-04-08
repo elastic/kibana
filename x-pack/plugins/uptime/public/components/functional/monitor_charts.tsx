@@ -152,9 +152,13 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
       </Fragment>
     );
   }
-  return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
-    defaultMessage: 'Loading…',
-  });
+  return (
+    <Fragment>
+      {i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+        defaultMessage: 'Loading…',
+      })}
+    </Fragment>
+  );
 };
 
 export const MonitorCharts = withUptimeGraphQL<MonitorChartsQueryResult, MonitorChartsProps>(
