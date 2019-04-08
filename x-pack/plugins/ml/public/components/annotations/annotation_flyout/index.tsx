@@ -22,6 +22,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CommonProps } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntlProps } from 'react-intl';
+import { toastNotifications } from 'ui/notify';
 import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../common/constants/annotations';
 import {
   annotation$,
@@ -31,11 +35,6 @@ import {
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-
-import { CommonProps } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { InjectedIntlProps } from 'react-intl';
-import { toastNotifications } from 'ui/notify';
 
 import { ml } from '../../../services/ml_api_service';
 

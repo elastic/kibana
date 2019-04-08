@@ -17,35 +17,15 @@
  * under the License.
  */
 
-const Lint = require('tslint');
+import { i18n } from '@kbn/i18n';
 
-const FAILURE_STRING = 'This license header is not allowed in this file.';
-const RULE_NAME = 'disallow-license-header';
-
-exports.Rule = class extends Lint.Rules.AbstractRule {
-  apply(sourceFile) {
-    const [headerText] = this.getOptions().ruleArguments;
-
-    if (!headerText) {
-      throw new Error(`${RULE_NAME} requires a single argument containing the header text`);
-    }
-
-    if (!sourceFile.text.includes(headerText)) {
-      return [];
-    }
-
-    const start = sourceFile.text.indexOf(headerText);
-    const end = start + headerText.length;
-
-    return [
-      new Lint.RuleFailure(
-        sourceFile,
-        start,
-        end,
-        FAILURE_STRING,
-        RULE_NAME,
-        new Lint.Replacement(start, headerText.length, '')
-      )
-    ];
-  }
-};
+/**
+ * A message letting the user know the results that have been retrieved is limited
+ * to a certain size.
+ * @param resultCount {Number}
+ */
+export function getLimitedSearchResultsMessage(resultCount) {
+  return i18n.translate('kbn.docTable.limitedSearchResultLabel',
+    { defaultMessage: 'Limited to {resultCount} results. Refine your search.', values: { resultCount } }
+  );
+}
