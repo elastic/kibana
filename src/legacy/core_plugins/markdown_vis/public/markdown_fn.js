@@ -21,7 +21,7 @@ import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaMarkdown = () => ({
-  name: 'kibana_markdown',
+  name: 'markdownVis',
   type: 'render',
   context: {
     types: [],
@@ -30,20 +30,28 @@ export const kibanaMarkdown = () => ({
     defaultMessage: 'Markdown visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string'],
-      default: '"{}"',
+    markdown: {
+      type: ['string'],
+      aliases: ['_'],
+      required: true,
+    },
+    fontSize: {
+      types: ['number'],
+      default: 12,
+    },
+    openLinksInNewTab: {
+      types: ['boolean'],
+      default: false,
     }
   },
   fn(context, args) {
-    const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visType: 'markdown',
         visConfig: {
-          ...params,
+          ...args,
         },
       }
     };
