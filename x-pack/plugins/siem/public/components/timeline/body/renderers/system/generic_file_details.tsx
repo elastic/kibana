@@ -40,10 +40,9 @@ interface Props {
   processPid: string | null | undefined;
   processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
-  primary: string | null | undefined;
   sshSignature: string | null | undefined;
   sshMethod: string | null | undefined;
-  text: string;
+  text: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
 }
@@ -162,9 +161,9 @@ export const SystemGenericFileDetails = pure<GenericDetailsProps>(({ data, conte
   const processExecutable: string | null | undefined = get('process.executable[0]', data);
   const processTitle: string | null | undefined = get('process.title[0]', data);
   const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
-  const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
   const rawArgs: string[] | null | undefined = get('process.args', data);
   const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
+
   return (
     <Details>
       <SystemGenericFileLine
@@ -180,7 +179,6 @@ export const SystemGenericFileDetails = pure<GenericDetailsProps>(({ data, conte
         packageName={packageName}
         packageSummary={packageSummary}
         packageVersion={packageVersion}
-        primary={primary}
         processName={processName}
         processPid={processPid}
         processExecutable={processExecutable}

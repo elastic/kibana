@@ -12,7 +12,7 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 
-import { AuditdGenericFileDetails, AuditdGenericFileLine } from './generic_file_details';
+import { AuditdGenericFileDetails, AuditdGenericFileLine } from '.';
 
 describe('GenericFileDetails', () => {
   describe('rendering', () => {

@@ -1,0 +1,182 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SystemGenericFileDetails rendering it renders the default SystemGenericDetails 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <pure(Component)
+    browserFields={Object {}}
+    contextId="[contextid-123]"
+    data={
+      Object {
+        "_id": "30",
+        "auditd": null,
+        "destination": null,
+        "event": Object {
+          "action": "process_started",
+          "category": null,
+          "created": null,
+          "dataset": "login",
+          "duration": null,
+          "end": null,
+          "hash": null,
+          "id": null,
+          "kind": "event",
+          "module": "system",
+          "original": null,
+          "outcome": Array [
+            "failure",
+          ],
+          "risk_score": null,
+          "risk_score_norm": null,
+          "severity": null,
+          "start": null,
+          "timezone": null,
+          "type": null,
+        },
+        "file": null,
+        "geo": null,
+        "host": Object {
+          "id": "7c21f5ed03b04d0299569d221fe18bbc",
+          "ip": Array [
+            "46.101.3.136",
+            "10.16.0.5",
+            "fe80::4066:42ff:fe19:b3b9",
+          ],
+          "name": "zeek-london",
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": null,
+          "executable": null,
+          "name": null,
+          "pid": Array [
+            "6278",
+          ],
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
+        },
+        "source": Object {
+          "bytes": null,
+          "geo": null,
+          "ip": "128.199.212.120",
+          "packets": null,
+          "port": null,
+        },
+        "suricata": null,
+        "system": null,
+        "tls": null,
+        "url": null,
+        "user": Object {
+          "name": "Evan",
+        },
+        "zeek": null,
+      }
+    }
+    text="[generic-text-123]"
+  />
+</Component>
+`;

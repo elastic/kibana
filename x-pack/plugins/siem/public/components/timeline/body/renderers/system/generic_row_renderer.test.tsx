@@ -15,18 +15,18 @@ import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
 
-import { createGenericAuditRowRenderer, createGenericFileRowRenderer } from '.';
+import { createGenericFileRowRenderer, createGenericSystemRowRenderer } from '.';
 
 describe('GenericRowRenderer', () => {
-  describe('#createGenericAuditRowRenderer', () => {
-    let nonAuditd: Ecs;
-    let auditd: Ecs;
+  describe('#createGenericSystemRowRenderer', () => {
+    let nonSystem: Ecs;
+    let system: Ecs;
     let connectedToRenderer: RowRenderer;
     beforeEach(() => {
-      nonAuditd = cloneDeep(mockTimelineData[0].ecs);
-      auditd = cloneDeep(mockTimelineData[26].ecs);
-      connectedToRenderer = createGenericAuditRowRenderer({
-        actionName: 'connected-to',
+      nonSystem = cloneDeep(mockTimelineData[0].ecs);
+      system = cloneDeep(mockTimelineData[29].ecs);
+      connectedToRenderer = createGenericSystemRowRenderer({
+        actionName: 'process_started',
         text: 'some text',
       });
     });
@@ -35,7 +35,7 @@ describe('GenericRowRenderer', () => {
       const browserFields: BrowserFields = {};
       const children = connectedToRenderer.renderRow({
         browserFields,
-        data: auditd,
+        data: system,
         width: 100,
         children: <span>some children</span>,
       });
@@ -44,40 +44,25 @@ describe('GenericRowRenderer', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('should return false if not a auditd datum', () => {
-      expect(connectedToRenderer.isInstance(nonAuditd)).toBe(false);
+    test('should return false if not a system datum', () => {
+      expect(connectedToRenderer.isInstance(nonSystem)).toBe(false);
     });
 
-    test('should return true if it is a auditd datum', () => {
-      expect(connectedToRenderer.isInstance(auditd)).toBe(true);
+    test('should return true if it is a system datum', () => {
+      expect(connectedToRenderer.isInstance(system)).toBe(true);
     });
 
     test('should return false when action is set to some other value', () => {
-      auditd.event != null
-        ? (auditd.event.action = 'some other value')
-        : expect(auditd.event).toBeDefined();
-      expect(connectedToRenderer.isInstance(auditd)).toBe(false);
+      system.event != null
+        ? (system.event.action = 'some other value')
+        : expect(system.event).toBeDefined();
+      expect(connectedToRenderer.isInstance(system)).toBe(false);
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
+    test('should render a system row', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
-        data: nonAuditd,
-        width: 100,
-        children: <span>some children</span>,
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
-    test('should render a auditd row', () => {
-      const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: auditd,
+        data: system,
         width: 100,
         children: <span>some children </span>,
       });
@@ -87,21 +72,21 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome textwgetwith resultsuccessDestination93.184.216.34:80'
+        'some children Evan@zeek-londonsome text6278with resultfailureSource128.199.212.120'
       );
     });
   });
 
   describe('#createGenericFileRowRenderer', () => {
-    let nonAuditd: Ecs;
-    let auditdFile: Ecs;
+    let nonSystem: Ecs;
+    let systemFile: Ecs;
     let fileToRenderer: RowRenderer;
 
     beforeEach(() => {
-      nonAuditd = cloneDeep(mockTimelineData[0].ecs);
-      auditdFile = cloneDeep(mockTimelineData[27].ecs);
+      nonSystem = cloneDeep(mockTimelineData[0].ecs);
+      systemFile = cloneDeep(mockTimelineData[28].ecs);
       fileToRenderer = createGenericFileRowRenderer({
-        actionName: 'opened-file',
+        actionName: 'user_login',
         text: 'some text',
       });
     });
@@ -111,7 +96,7 @@ describe('GenericRowRenderer', () => {
       const browserFields: BrowserFields = {};
       const children = fileToRenderer.renderRow({
         browserFields,
-        data: auditdFile,
+        data: systemFile,
         width: 100,
         children: <span>some children</span>,
       });
@@ -121,39 +106,24 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false if not a auditd datum', () => {
-      expect(fileToRenderer.isInstance(nonAuditd)).toBe(false);
+      expect(fileToRenderer.isInstance(nonSystem)).toBe(false);
     });
 
     test('should return true if it is a auditd datum', () => {
-      expect(fileToRenderer.isInstance(auditdFile)).toBe(true);
+      expect(fileToRenderer.isInstance(systemFile)).toBe(true);
     });
 
     test('should return false when action is set to some other value', () => {
-      auditdFile.event != null
-        ? (auditdFile.event.action = 'some other value')
-        : expect(auditdFile.event).toBeDefined();
-      expect(fileToRenderer.isInstance(auditdFile)).toBe(false);
+      systemFile.event != null
+        ? (systemFile.event.action = 'some other value')
+        : expect(systemFile.event).toBeDefined();
+      expect(fileToRenderer.isInstance(systemFile)).toBe(false);
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
+    test('should render a system row', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
-        data: nonAuditd,
-        width: 100,
-        children: <span>some children</span>,
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
-    test('should render a auditd row', () => {
-      const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: auditdFile,
+        data: systemFile,
         width: 100,
         children: <span>some children </span>,
       });
@@ -163,7 +133,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journalwith resultsuccess'
+        'some children Braden@zeek-londonsome text6278with resultfailureSource128.199.212.120'
       );
     });
   });
