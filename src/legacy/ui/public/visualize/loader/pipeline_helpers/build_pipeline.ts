@@ -303,7 +303,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     expr += prepareValue('subText', style.subText);
     expr += prepareDimension('bucket', bucket);
 
-    metrics.forEach((metric:any) => {
+    metrics.forEach((metric: any) => {
       expr += prepareDimension('metric', metric);
     });
 

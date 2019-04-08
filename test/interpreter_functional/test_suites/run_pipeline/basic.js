@@ -51,7 +51,7 @@ export default function ({ getService, updateBaselines }) {
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
-        kibana_metric 
+        metricVis 
           visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"},"params":{}}],"bucket":{"accessor":0}}}'
       `;
 
@@ -99,7 +99,7 @@ export default function ({ getService, updateBaselines }) {
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
         const metricExpr =
-          `kibana_metric 
+          `metricVis 
           visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"}}],"bucket":{"accessor":0}}}'`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
