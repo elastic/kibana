@@ -15,6 +15,7 @@ import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query?: APMQueryParams;
+  children: React.ReactNode;
 }
 
 export const PERSISTENT_APM_PARAMS = [
@@ -38,7 +39,7 @@ function getSearchWithCurrentTimeRange(
   return fromQuery(nextQuery);
 }
 
-const APMLink: React.FC<Props> = ({ path, query, ...rest }) => {
+export function APMLink({ path, query, ...rest }: Props) {
   const { search } = useLocation();
   const nextSearch = getSearchWithCurrentTimeRange(search, query);
   const href = url.format({
@@ -46,6 +47,4 @@ const APMLink: React.FC<Props> = ({ path, query, ...rest }) => {
     hash: `${path}?${nextSearch}`
   });
   return <EuiLink {...rest} href={href} />;
-};
-
-export { APMLink };
+}

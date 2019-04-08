@@ -21,9 +21,10 @@ interface MlRisonData {
 interface Props {
   query?: MlRisonData;
   path?: string;
+  children: React.ReactNode;
 }
 
-const MLLink: React.FC<Props> = ({ children, path = '', query = {} }) => {
+export function MLLink({ children, path = '', query = {} }: Props) {
   const location = useLocation();
 
   const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
@@ -40,6 +41,4 @@ const MLLink: React.FC<Props> = ({ children, path = '', query = {} }) => {
   });
 
   return <EuiLink children={children} href={href} />;
-};
-
-export { MLLink };
+}

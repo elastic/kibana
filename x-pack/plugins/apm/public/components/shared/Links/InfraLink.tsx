@@ -20,15 +20,14 @@ interface InfraQueryParams {
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query: InfraQueryParams;
+  children: React.ReactNode;
 }
 
-const InfraLink: React.FC<Props> = ({ path, query = {}, ...rest }) => {
+export function InfraLink({ path, query = {}, ...rest }: Props) {
   const nextSearch = fromQuery(query);
   const href = url.format({
     pathname: chrome.addBasePath('/app/infra'),
     hash: compact([path, nextSearch]).join('?')
   });
   return <EuiLink {...rest} href={href} />;
-};
-
-export { InfraLink };
+}

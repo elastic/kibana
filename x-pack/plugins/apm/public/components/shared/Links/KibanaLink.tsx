@@ -11,14 +11,13 @@ import url from 'url';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
+  children: React.ReactNode;
 }
 
-const KibanaLink: React.FC<Props> = ({ path, ...rest }) => {
+export function KibanaLink({ path, ...rest }: Props) {
   const href = url.format({
     pathname: chrome.addBasePath('/app/kibana'),
     hash: path
   });
   return <EuiLink {...rest} href={href} />;
-};
-
-export { KibanaLink };
+}
