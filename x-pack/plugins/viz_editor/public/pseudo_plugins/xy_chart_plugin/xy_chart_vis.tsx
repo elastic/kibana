@@ -141,6 +141,7 @@ function XyChart(props: { config: XyChartConfig }) {
         showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
         legendPosition={Position.Right}
         tooltipType={config.hideTooltips ? TooltipType.None : TooltipType.VerticalCursor}
+        animateData={false}
       />
       {config.showAxes && (
         <>
