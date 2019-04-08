@@ -12,10 +12,11 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPage } from '../../components/header_page';
+import { HeaderPageProps } from '../../components/header_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { IpOverview } from '../../components/page/network/ip_overview';
+import { IpOverviewTool } from '../../components/page/network/ip_overview/tool';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -46,22 +47,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-
-            <HeaderPage
-              subtitle={
-                <FormattedMessage
-                  id="xpack.siem.ipDetails.pageSubtitle"
-                  defaultMessage="Last Beat: TODO from {beat}"
-                  values={{
-                    beat: <EuiLink href="#">TODO</EuiLink>,
-                  }}
-                />
-              }
-              title={decodeIpv6(ip)}
-            >
-              {/* DEV NOTE: SelectTypeItem component from components/page/network/ip_overview/index.tsx to be moved here */}
-              {/* DEV NOTE: Date picker to be moved here */}
-            </HeaderPage>
 
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
@@ -114,3 +99,17 @@ export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
     text: decodeIpv6(ip),
   },
 ];
+
+export const getPageHeadline = (ip: string): HeaderPageProps => ({
+  subtitle: (
+    <FormattedMessage
+      id="xpack.siem.ipDetails.pageSubtitle"
+      defaultMessage="Last Beat: TODO from {beat}"
+      values={{
+        beat: <EuiLink href="#">TODO</EuiLink>,
+      }}
+    />
+  ),
+  title: decodeIpv6(ip),
+  children: <IpOverviewTool />,
+});

@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPage } from '../../components/header_page';
+import { HeaderPageProps } from '../../components/header_page';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
@@ -44,21 +44,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <>
           <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-
-          <HeaderPage
-            subtitle={
-              <FormattedMessage
-                id="xpack.siem.network.pageSubtitle"
-                defaultMessage="Last Beat: TODO from {beat}"
-                values={{
-                  beat: <EuiLink href="#">TODO</EuiLink>,
-                }}
-              />
-            }
-            title={<FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />}
-          >
-            {/* DEV NOTE: Date picker to be moved here */}
-          </HeaderPage>
 
           <GlobalTime>
             {({ poll, to, from, setQuery }) => (
@@ -159,3 +144,16 @@ const makeMapStateToProps = () => {
 };
 
 export const Network = connect(makeMapStateToProps)(NetworkComponent);
+
+export const getPageHeadline = (): HeaderPageProps => ({
+  subtitle: (
+    <FormattedMessage
+      id="xpack.siem.network.pageSubtitle"
+      defaultMessage="Last Beat: TODO from {beat}"
+      values={{
+        beat: <EuiLink href="#">TODO</EuiLink>,
+      }}
+    />
+  ),
+  title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
+});

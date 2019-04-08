@@ -63,7 +63,7 @@ interface IpOverViewDispatchProps {
   }>;
 }
 
-type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps;
+export type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps;
 
 class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {

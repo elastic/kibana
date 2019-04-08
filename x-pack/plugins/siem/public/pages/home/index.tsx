@@ -7,6 +7,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
@@ -14,6 +15,7 @@ import {
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
@@ -24,6 +26,7 @@ import { AppSettings } from '../../components/app_settings';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
+import { HeaderPage } from '../../components/header_page';
 import { LinkToPage } from '../../components/link_to';
 import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
 import { RangeDatePicker } from '../../components/range_date_picker';
@@ -81,19 +84,33 @@ export const HomePage = pure(() => (
                 <PageHeaderSection>
                   <FixEuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                     <HeaderBreadcrumbs />
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
-                        <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <RangeDatePicker id="global" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
-                          <AppSettings />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
                   </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
+
+              <HeaderPage
+                subtitle={
+                  <FormattedMessage
+                    id="xpack.siem.ipDetails.pageSubtitle"
+                    defaultMessage="Last Beat: TODO from {beat}"
+                    values={{
+                      beat: <EuiLink href="#">TODO</EuiLink>,
+                    }}
+                  />
+                }
+                title={'Maybe shake a tamborine'}
+              >
+                {/* DEV NOTE: SelectTypeItem component from components/page/network/ip_overview/index.tsx to be moved here */}
+                {/* DEV NOTE: Date picker to be moved here */}
+                <EuiFlexGroup alignItems="flexEnd" wrap={false} gutterSize="s">
+                  <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
+                    <RangeDatePicker id="global" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
+                    <AppSettings />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </HeaderPage>
               <Switch>
                 <Redirect from="/" exact={true} to="/overview" />
                 <Route path="/overview" component={Overview} />

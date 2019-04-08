@@ -15,7 +15,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPage } from '../../components/header_page';
+import { HeaderPageProps } from '../../components/header_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
@@ -61,22 +61,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
         indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
           <>
             <HostsKql indexPattern={indexPattern} type={type} />
-
-            {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available */}
-            <HeaderPage
-              subtitle={
-                <FormattedMessage
-                  id="xpack.siem.hostDetails.pageSubtitle"
-                  defaultMessage="Last Beat: TODO from {beat}"
-                  values={{
-                    beat: <EuiLink href="#">TODO</EuiLink>,
-                  }}
-                />
-              }
-              title={hostId}
-            >
-              {/* DEV NOTE: Date picker to be moved here */}
-            </HeaderPage>
 
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
@@ -246,3 +230,16 @@ const getFilterQuery = (
         `${filterQueryExpression} and host.id: ${escapeQueryValue(hostId)}`,
         indexPattern
       );
+
+export const getPageHeadline = (hostId: string): HeaderPageProps => ({
+  subtitle: (
+    <FormattedMessage
+      id="xpack.siem.hostDetails.pageSubtitle"
+      defaultMessage="Last Beat: TODO from {beat}"
+      values={{
+        beat: <EuiLink href="#">TODO</EuiLink>,
+      }}
+    />
+  ),
+  title: hostId,
+});

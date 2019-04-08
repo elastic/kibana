@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPage } from '../../components/header_page';
+import { HeaderPageProps } from '../../components/header_page';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
@@ -48,22 +48,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-
-          <HeaderPage
-            subtitle={
-              <FormattedMessage
-                id="xpack.siem.hosts.pageSubtitle"
-                defaultMessage="Last Beat: TODO from {beat}"
-                values={{
-                  beat: <EuiLink href="#">TODO</EuiLink>,
-                }}
-              />
-            }
-            title={<FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />}
-          >
-            {/* DEV NOTE: Date picker to be moved here */}
-          </HeaderPage>
-
           <GlobalTime>
             {({ poll, to, from, setQuery }) => (
               <>
@@ -205,3 +189,16 @@ const makeMapStateToProps = () => {
 };
 
 export const Hosts = connect(makeMapStateToProps)(HostsComponent);
+
+export const getPageHeadline = (): HeaderPageProps => ({
+  subtitle: (
+    <FormattedMessage
+      id="xpack.siem.hosts.pageSubtitle"
+      defaultMessage="Last Beat: TODO from {beat}"
+      values={{
+        beat: <EuiLink href="#">TODO</EuiLink>,
+      }}
+    />
+  ),
+  title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
+});
