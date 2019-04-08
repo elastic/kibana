@@ -57,7 +57,7 @@ export class WorkpadExport extends React.PureComponent {
     return (
       <div className="canvasWorkpadExport__panelContent">
         <EuiText size="s">
-          <p>PDFs can take a minute or two to generate based upon the size of your workpad.</p>
+          <p>PDFs can take a minute or two to generate based on the size of your workpad.</p>
         </EuiText>
         <EuiSpacer size="s" />
 
