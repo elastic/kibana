@@ -175,28 +175,14 @@ export class AddLayerPanel extends Component {
 
   _renderFileImportEditor() {
     return (
-      <Fragment>
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={this._clearSource}
-          iconType="arrowLeft"
-        >
-          <FormattedMessage
-            id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
-            defaultMessage="Change data source"
-          />
-        </EuiButtonEmpty>
-        <EuiSpacer size="s" />
-        <EuiPanel>
-          {
-            GeojsonFileSource.renderEditor(
-              this._getEditorProperties(true),
+      <EuiPanel>
+        {
+          GeojsonFileSource.renderEditor(
+            this._getEditorProperties(true),
 
-            )
-          }
-        </EuiPanel>
-      </Fragment>
+          )
+        }
+      </EuiPanel>
     );
   }
 
