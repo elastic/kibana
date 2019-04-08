@@ -7,7 +7,7 @@
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole } from '../../../../../../lib/role';
+import { isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
 // @ts-ignore
 import { getClusterPrivileges } from '../../../../../../services/role_privileges';
 
@@ -39,7 +39,7 @@ export class ClusterPrivileges extends Component<Props, {}> {
           options={options}
           selectedOptions={selectedOptions}
           onChange={this.onClusterPrivilegesChange}
-          isDisabled={isReservedRole(role)}
+          isDisabled={isReservedRole(role) || !isRoleEnabled(role)}
         />
       </EuiFlexItem>
     );

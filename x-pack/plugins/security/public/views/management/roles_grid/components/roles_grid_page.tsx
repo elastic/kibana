@@ -7,7 +7,6 @@
 import {
   EuiButton,
   EuiIcon,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -15,6 +14,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -180,18 +180,14 @@ class RolesGridPageUI extends Component<Props, State> {
                 {name}
               </EuiLink>
               {!isRoleEnabled(record) && (
-                <EuiIconTip
-                  type="alert"
-                  size="s"
-                  color="warning"
-                  data-test-subj="disabledRoleTip"
-                  title={
+                <EuiTextColor color={'subdued'}>
+                  <span className="rolesGridPage__disabledRoleMessage">
                     <FormattedMessage
                       id="xpack.security.management.roles.disabledTooltip"
-                      defaultMessage="This role is currently disabled. You may only view or delete it."
+                      defaultMessage="(disabled)"
                     />
-                  }
-                />
+                  </span>
+                </EuiTextColor>
               )}
             </span>
           );

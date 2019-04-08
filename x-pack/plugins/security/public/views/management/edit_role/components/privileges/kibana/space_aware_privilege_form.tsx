@@ -22,7 +22,7 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole } from '../../../../../../lib/role';
+import { isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
@@ -170,7 +170,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
               data-test-subj={'kibanaMinimumPrivilege'}
               availablePrivileges={kibanaAppPrivileges}
               value={basePrivilege}
-              disabled={isReservedRole(role)}
+              disabled={isReservedRole(role) || !isRoleEnabled(role)}
               allowNone={true}
               onChange={this.onKibanaBasePrivilegeChange}
             />

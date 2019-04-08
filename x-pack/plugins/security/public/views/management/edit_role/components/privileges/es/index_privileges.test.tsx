@@ -29,6 +29,7 @@ test('it renders without crashing', () => {
     indexPatterns: [],
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
+    editable: true,
     validator: new RoleValidator(),
   };
   const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
@@ -61,6 +62,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
     httpClient: jest.fn(),
     onChange: jest.fn(),
     indexPatterns: [],
+    editable: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),

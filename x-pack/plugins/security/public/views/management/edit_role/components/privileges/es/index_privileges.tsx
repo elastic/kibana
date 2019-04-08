@@ -15,6 +15,7 @@ import { IndexPrivilegeForm } from './index_privilege_form';
 interface Props {
   role: Role;
   indexPatterns: string[];
+  editable: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   httpClient: any;
@@ -43,7 +44,12 @@ export class IndexPrivileges extends Component<Props, State> {
   public render() {
     const { indices = [] } = this.props.role.elasticsearch;
 
-    const { indexPatterns, allowDocumentLevelSecurity, allowFieldLevelSecurity } = this.props;
+    const {
+      indexPatterns,
+      allowDocumentLevelSecurity,
+      allowFieldLevelSecurity,
+      editable,
+    } = this.props;
 
     const props = {
       indexPatterns,
@@ -53,6 +59,7 @@ export class IndexPrivileges extends Component<Props, State> {
       allowDocumentLevelSecurity: allowDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowFieldLevelSecurity || !isRoleEnabled(this.props.role),
       isReservedRole: isReservedRole(this.props.role),
+      editable,
     };
 
     const forms = indices.map((indexPrivilege: IndexPrivilege, idx) => (
@@ -137,8 +144,8 @@ export class IndexPrivileges extends Component<Props, State> {
   };
 
   public loadAvailableFields(privileges: IndexPrivilege[]) {
-    // Reserved roles cannot be edited, and therefore do not need to fetch available fields.
-    if (isReservedRole(this.props.role)) {
+    // Reserved and disabled roles cannot be edited, and therefore do not need to fetch available fields.
+    if (isReservedRole(this.props.role) || !isRoleEnabled(this.props.role)) {
       return;
     }
 

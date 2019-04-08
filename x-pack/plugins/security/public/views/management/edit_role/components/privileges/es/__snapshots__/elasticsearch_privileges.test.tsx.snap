@@ -168,6 +168,7 @@ exports[`it renders without crashing 1`] = `
   <IndexPrivileges
     allowDocumentLevelSecurity={true}
     allowFieldLevelSecurity={true}
+    editable={true}
     httpClient={[MockFunction]}
     indexPatterns={Array []}
     onChange={[MockFunction]}

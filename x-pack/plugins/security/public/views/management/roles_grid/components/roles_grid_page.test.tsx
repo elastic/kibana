@@ -95,7 +95,7 @@ describe('<RolesGridPage />', () => {
     });
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(wrapper.find('EuiIconTip[data-test-subj="disabledRoleTip"]')).toHaveLength(1);
+    expect(wrapper.find('.rolesGridPage__disabledRoleMessage')).toHaveLength(1);
   });
 
   it('renders permission denied if required', async () => {

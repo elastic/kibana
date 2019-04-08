@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +28,7 @@ import { UserProfile } from '../../../../../../xpack_main/public/services/user_p
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
-import { isReservedRole } from '../../../../lib/role';
+import { isReservedRole, isRoleEnabled } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
@@ -103,6 +104,22 @@ class EditRolePageUI extends Component<Props, State> {
             </Fragment>
           )}
 
+          {!isRoleEnabled(this.props.role) && (
+            <Fragment>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                color="primary"
+                size="s"
+                title={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.disabledRoleMessage"
+                    defaultMessage="This role is currently disabled. You may only view or delete it."
+                  />
+                }
+              />
+            </Fragment>
+          )}
+
           <EuiSpacer />
 
           {this.getRoleName()}
@@ -124,7 +141,7 @@ class EditRolePageUI extends Component<Props, State> {
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isReservedRole(this.props.role)) {
+    if (isReservedRole(this.props.role) || !isRoleEnabled(this.props.role)) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
@@ -149,11 +166,13 @@ class EditRolePageUI extends Component<Props, State> {
     }
 
     return (
-      <EuiTitle size="l">
-        <h1 {...props}>
-          {titleText} <ReservedRoleBadge role={this.props.role} />
-        </h1>
-      </EuiTitle>
+      <>
+        <EuiTitle size="l">
+          <h1 {...props}>
+            {titleText} <ReservedRoleBadge role={this.props.role} />
+          </h1>
+        </EuiTitle>
+      </>
     );
   };
 
@@ -221,7 +240,7 @@ class EditRolePageUI extends Component<Props, State> {
         <EuiSpacer />
         <ElasticsearchPrivileges
           role={this.state.role}
-          editable={!isReservedRole(this.state.role)}
+          editable={!isReservedRole(this.state.role) && isRoleEnabled(this.props.role)}
           httpClient={this.props.httpClient}
           onChange={this.onRoleChange}
           runAsUsers={this.props.runAsUsers}
@@ -249,7 +268,7 @@ class EditRolePageUI extends Component<Props, State> {
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
           userProfile={this.props.userProfile}
-          editable={!isReservedRole(this.state.role)}
+          editable={!isReservedRole(this.state.role) && isRoleEnabled(this.props.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
           validator={this.validator}
@@ -260,16 +279,42 @@ class EditRolePageUI extends Component<Props, State> {
 
   public getFormButtons = () => {
     if (isReservedRole(this.props.role)) {
-      return (
-        <EuiButton onClick={this.backToRoleList}>
-          <FormattedMessage
-            id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-            defaultMessage="Return to role list"
-          />
-        </EuiButton>
-      );
+      return this.getReturnToRoleListButton();
     }
 
+    const buttons = [];
+
+    if (isRoleEnabled(this.props.role)) {
+      buttons.push(this.getSaveButton(), this.getCancelButton());
+    } else {
+      buttons.push(this.getReturnToRoleListButton());
+    }
+
+    return (
+      <EuiFlexGroup responsive={false}>
+        {buttons.map((button, idx) => (
+          <EuiFlexItem grow={false} key={idx}>
+            {button}
+          </EuiFlexItem>
+        ))}
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  };
+
+  public getReturnToRoleListButton = () => {
+    return (
+      <EuiButton onClick={this.backToRoleList}>
+        <FormattedMessage
+          id="xpack.security.management.editRole.returnToRoleListButtonLabel"
+          defaultMessage="Return to role list"
+        />
+      </EuiButton>
+    );
+  };
+
+  public getSaveButton = () => {
     const saveText = this.editingExistingRole() ? (
       <FormattedMessage
         id="xpack.security.management.editRole.updateRoleText"
@@ -283,28 +328,25 @@ class EditRolePageUI extends Component<Props, State> {
     );
 
     return (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj={`roleFormSaveButton`}
-            fill
-            onClick={this.saveRole}
-            disabled={isReservedRole(this.props.role)}
-          >
-            {saveText}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
-            <FormattedMessage
-              id="xpack.security.management.editRole.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        {this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiButton
+        data-test-subj={`roleFormSaveButton`}
+        fill
+        onClick={this.saveRole}
+        disabled={isReservedRole(this.props.role)}
+      >
+        {saveText}
+      </EuiButton>
+    );
+  };
+
+  public getCancelButton = () => {
+    return (
+      <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
+        <FormattedMessage
+          id="xpack.security.management.editRole.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      </EuiButtonEmpty>
     );
   };
 

@@ -34,6 +34,7 @@ interface Props {
   onChange: (indexPrivilege: IndexPrivilege) => void;
   onDelete: () => void;
   isReservedRole: boolean;
+  editable: boolean;
   allowDelete: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
@@ -60,7 +61,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiHorizontalRule />
         <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
-          {this.props.allowDelete && (
+          {this.props.allowDelete && this.props.editable && (
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
@@ -101,7 +102,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
                 onCreateOption={this.onCreateIndexPatternOption}
                 onChange={this.onIndexPatternsChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={!this.props.editable}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -120,7 +121,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 options={getIndexPrivileges().map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={!this.props.editable}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -135,7 +136,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   public getGrantedFieldsControl = () => {
-    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
+    const { allowFieldLevelSecurity, availableFields, indexPrivilege, editable } = this.props;
 
     if (!allowFieldLevelSecurity) {
       return null;
@@ -156,7 +157,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
             helpText={
-              !isReservedRole && grant.length === 0 ? (
+              editable && grant.length === 0 ? (
                 <FormattedMessage
                   id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
                   defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
@@ -173,7 +174,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 selectedOptions={grant.map(toOption)}
                 onCreateOption={this.onCreateGrantedField}
                 onChange={this.onGrantedFieldsChange}
-                isDisabled={this.props.isReservedRole}
+                isDisabled={!this.props.editable}
               />
             </Fragment>
           </EuiFormRow>
@@ -185,7 +186,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   public getGrantedDocumentsControl = () => {
-    const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
+    const { allowDocumentLevelSecurity, indexPrivilege, editable } = this.props;
 
     if (!allowDocumentLevelSecurity) {
       return null;
@@ -209,6 +210,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 compressed={true}
                 checked={this.state.queryExpanded}
                 onChange={this.toggleDocumentQuery}
+                disabled={!editable}
               />
             }
           </EuiFlexItem>
@@ -230,7 +232,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 fullWidth={true}
                 value={indexPrivilege.query}
                 onChange={this.onQueryChange}
-                readOnly={this.props.isReservedRole}
+                readOnly={!editable}
               />
             </EuiFormRow>
           </EuiFlexItem>
