@@ -125,7 +125,7 @@ class RolesGridPageUI extends Component<Props, State> {
                 initialPageSize: 20,
                 pageSizeOptions: [10, 20, 30, 50, 100],
               }}
-              items={this.getRolesForDisplay()}
+              items={this.getVisibleRoles()}
               loading={roles.length === 0}
               search={{
                 toolsLeft: this.renderToolsLeft(),
@@ -182,7 +182,7 @@ class RolesGridPageUI extends Component<Props, State> {
               {!isRoleEnabled(record) && (
                 <EuiIconTip
                   type="alert"
-                  size="xs"
+                  size="s"
                   color="warning"
                   data-test-subj="disabledRoleTip"
                   title={
@@ -230,24 +230,16 @@ class RolesGridPageUI extends Component<Props, State> {
     ];
   };
 
-  private getRolesForDisplay = () => {
+  private getVisibleRoles = () => {
     const { roles, filter } = this.state;
 
-    const visibleRoles = filter
+    return filter
       ? roles.filter(({ name }) => {
           const normalized = `${name}`.toLowerCase();
           const normalizedQuery = filter.toLowerCase();
           return normalized.indexOf(normalizedQuery) !== -1;
         })
       : roles;
-
-    // ensure each role has a `metadata._reserved` property to enable proper sorting.
-    const transformedRoles = visibleRoles.map(role => ({
-      ...role,
-      metadata: { _reserved: false, ...role.metadata },
-    }));
-
-    return transformedRoles;
   };
 
   private handleDelete = () => {
@@ -261,7 +253,13 @@ class RolesGridPageUI extends Component<Props, State> {
   private async loadRoles() {
     try {
       const roles = await RolesApi.getRoles();
-      this.setState({ roles });
+      // ensure each role has a `metadata._reserved` property to enable proper sorting.
+      const transformedRoles = roles.map(role => ({
+        ...role,
+        metadata: { _reserved: false, ...role.metadata },
+      }));
+
+      this.setState({ roles: transformedRoles });
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true });
