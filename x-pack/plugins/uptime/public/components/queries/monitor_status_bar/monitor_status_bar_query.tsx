@@ -5,70 +5,53 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApolloError } from 'apollo-client';
 import { get } from 'lodash';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { Ping } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { EmptyStatusBar, MonitorStatusBar } from '../../functional';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
+
+interface MonitorStatusBarQueryResult {
+  monitorStatus?: Ping[];
+}
 
 interface MonitorStatusBarProps {
   monitorId: string;
 }
 
-interface MonitorStatusBarQueryParams {
-  loading: boolean;
-  error?: ApolloError | any;
-  data?: { monitorStatus: Ping[] };
-}
+type Props = MonitorStatusBarProps &
+  UptimeCommonProps &
+  UptimeGraphQLQueryProps<MonitorStatusBarQueryResult>;
 
-type Props = MonitorStatusBarProps & UptimeCommonProps;
+const makeMonitorStatusBar = ({ monitorId, data }: Props) => {
+  if (data && data.monitorStatus) {
+    const { monitorStatus } = data;
+    if (!monitorStatus.length) {
+      return <EmptyStatusBar monitorId={monitorId} />;
+    }
+    const { monitor, timestamp, url } = monitorStatus[0];
+    const status = get(monitor, 'status', undefined);
+    const duration = microsToMillis(get(monitor, 'duration.us', null));
+    const full = get(url, 'full', undefined);
 
-export const MonitorStatusBarQuery = ({
-  dateRangeStart,
-  dateRangeEnd,
-  monitorId,
-  autorefreshIsPaused,
-  autorefreshInterval,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getMonitorStatusBarQuery}
-    variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-  >
-    {({ loading, error, data }: MonitorStatusBarQueryParams) => {
-      if (loading) {
-        return (
-          <EmptyStatusBar
-            message={i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
-              defaultMessage: 'Loading…',
-            })}
-            monitorId={monitorId}
-          />
-        );
-      }
-      if (error) {
-        return i18n.translate('xpack.uptime.monitorStatusBar.errorMessage', {
-          values: { message: error.message },
-          defaultMessage: 'Error {message}',
-        });
-      }
+    return (
+      <MonitorStatusBar duration={duration} status={status} timestamp={timestamp} url={full} />
+    );
+  }
+  return (
+    <EmptyStatusBar
+      message={i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
+        defaultMessage: 'Loading…',
+      })}
+      monitorId={monitorId}
+    />
+  );
+};
 
-      const monitorStatus: Ping[] = get(data, 'monitorStatus');
-      if (!monitorStatus || !monitorStatus.length) {
-        return <EmptyStatusBar monitorId={monitorId} />;
-      }
-      const { monitor, timestamp, url } = monitorStatus[0];
-      const status = get(monitor, 'status', undefined);
-      const duration = microsToMillis(get(monitor, 'duration.us', null));
-      const full = get(url, 'full', undefined);
-
-      return (
-        <MonitorStatusBar duration={duration} status={status} timestamp={timestamp} url={full} />
-      );
-    }}
-  </Query>
-);
+export const MonitorStatusBarQuery = withUptimeGraphQL<
+  MonitorStatusBarQueryResult,
+  MonitorStatusBarProps
+>(makeMonitorStatusBar, getMonitorStatusBarQuery);

@@ -21,11 +21,14 @@ import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
 import chrome from 'ui/chrome';
-import { getSort } from 'ui/doc_table/lib/get_sort';
-import * as columnActions from 'ui/doc_table/actions/columns';
-import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
-import 'ui/doc_table';
+
+// doc table
+import '../doc_table';
+import { getSort } from '../doc_table/lib/get_sort';
+import * as columnActions from '../doc_table/actions/columns';
+import * as filterActions from '../doc_table/actions/filter';
+
 import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
