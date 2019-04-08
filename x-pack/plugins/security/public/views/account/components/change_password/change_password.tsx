@@ -45,7 +45,7 @@ export class ChangePassword extends Component<Props, {}> {
           <p>
             <FormattedMessage
               id="xpack.security.account.changePasswordDescription"
-              defaultMessage="Change the password used to sign in to your account."
+              defaultMessage="Change the password for your account."
             />
           </p>
         }

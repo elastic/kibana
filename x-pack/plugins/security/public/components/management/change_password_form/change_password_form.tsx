@@ -87,7 +87,7 @@ export class ChangePasswordForm extends Component<Props, State> {
           helpText={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.passwordRequirements"
-              defaultMessage="6 characters minimum"
+              defaultMessage="Use at least 6 characters."
             />
           }
           {...this.validateNewPassword()}
@@ -138,7 +138,7 @@ export class ChangePasswordForm extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.saveChangesButtonLabel"
-                  defaultMessage="Update"
+                  defaultMessage="Change password"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -197,7 +197,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         error: (
           <FormattedMessage
             id="xpack.security.account.changePasswordForm.invalidPassword"
-            defaultMessage="Password is incorrect"
+            defaultMessage="Current password is incorrect."
           />
         ),
       };
@@ -209,7 +209,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         error: (
           <FormattedMessage
             id="xpack.security.account.currentPasswordRequired"
-            defaultMessage="Enter your current password"
+            defaultMessage="Current password is required."
           />
         ),
       };
@@ -229,10 +229,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         error: (
           <FormattedMessage
             id="xpack.security.account.passwordLengthDescription"
-            defaultMessage="Password must be at least {minPasswordLength} characters"
-            values={{
-              minPasswordLength,
-            }}
+            defaultMessage="Password is too short."
           />
         ),
       };
@@ -251,7 +248,7 @@ export class ChangePasswordForm extends Component<Props, State> {
         error: (
           <FormattedMessage
             id="xpack.security.account.passwordsDoNotMatch"
-            defaultMessage="Passwords to not match"
+            defaultMessage="Passwords do not match."
           />
         ),
       };
@@ -299,7 +296,7 @@ export class ChangePasswordForm extends Component<Props, State> {
   private handleChangePasswordSuccess = () => {
     toastNotifications.addSuccess({
       title: i18n.translate('xpack.security.account.changePasswordSuccess', {
-        defaultMessage: 'Your password has been changed',
+        defaultMessage: 'Your password has been changed.',
       }),
       'data-test-subj': 'passwordUpdateSuccess',
     });

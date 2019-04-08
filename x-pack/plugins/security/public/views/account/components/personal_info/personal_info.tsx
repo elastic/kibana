@@ -32,7 +32,7 @@ export const PersonalInfo = (props: Props) => {
       description={
         <FormattedMessage
           id="xpack.security.account.usernameGroupDescription"
-          defaultMessage="This info cannot be changed. Contact your administrator for details."
+          defaultMessage="You can't change this information."
         />
       }
     >
@@ -46,7 +46,7 @@ export const PersonalInfo = (props: Props) => {
               {props.user.email || (
                 <FormattedMessage
                   id="xpack.security.account.noEmailMessage"
-                  defaultMessage="(no email address)"
+                  defaultMessage="no email address"
                 />
               )}
             </dd>
