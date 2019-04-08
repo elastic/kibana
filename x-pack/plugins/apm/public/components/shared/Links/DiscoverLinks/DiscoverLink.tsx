@@ -10,14 +10,26 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getRisonString, RisonDecoded } from '../rison_helpers';
+import { getRisonString } from '../rison_helpers';
 
 interface Props {
-  query: RisonDecoded;
+  query: {
+    _a?: {
+      index?: string;
+      interval?: string;
+      query?: {
+        language: string;
+        query: string;
+      };
+      sort?: {
+        [key: string]: string;
+      };
+    };
+  };
   children: React.ReactNode;
 }
 
-export function DiscoverLink({ query, ...rest }: Props) {
+export function DiscoverLink({ query = {}, ...rest }: Props) {
   const apmIndexPattern = useAPMIndexPattern();
   const location = useLocation();
 

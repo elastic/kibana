@@ -5,20 +5,20 @@
  */
 
 import { Location } from 'history';
-import { pick, set } from 'lodash';
+import { set } from 'lodash';
 import rison from 'rison-node';
 import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
-import { APMQueryParams, PERSISTENT_APM_PARAMS, toQuery } from './url_helpers';
+import { toQuery, APMQueryParams } from './url_helpers';
 
 export interface RisonDecoded {
   _g?: StringMap<any>;
   _a?: StringMap<any>;
 }
 
-type RisonAPMQueryParams = APMQueryParams & RisonDecoded;
+type RisonQuery = APMQueryParams & RisonDecoded;
 
-function createG(query: RisonAPMQueryParams) {
+function createG(query: RisonQuery) {
   const g: RisonDecoded['_g'] = { ...query._g };
 
   if (typeof query.rangeFrom !== 'undefined') {
@@ -40,12 +40,12 @@ function createG(query: RisonAPMQueryParams) {
 
 export function getRisonString(
   currentSearch: Location['search'],
-  query: RisonDecoded = {}
+  query: RisonQuery = {}
 ) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
-    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
+    ...currentQuery,
     ...query
   };
 

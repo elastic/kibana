@@ -8,11 +8,8 @@ import { Location } from 'history';
 import { last, pick } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
-import {
-  fromQuery,
-  PERSISTENT_APM_PARAMS,
-  toQuery
-} from '../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { PERSISTENT_APM_PARAMS } from '../../shared/Links/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './routeConfig';
 

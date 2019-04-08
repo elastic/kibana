@@ -16,14 +16,6 @@ export function fromQuery(query: StringMap<any>) {
   return qs.stringify(query);
 }
 
-export const PERSISTENT_APM_PARAMS = [
-  'kuery',
-  'rangeFrom',
-  'rangeTo',
-  'refreshPaused',
-  'refreshInterval'
-];
-
 export interface APMQueryParams {
   transactionId?: string;
   traceId?: string;
