@@ -21,7 +21,7 @@ import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaMarkdown = () => ({
-  name: 'markdownvis',
+  name: 'markdownVis',
   type: 'render',
   context: {
     types: [],

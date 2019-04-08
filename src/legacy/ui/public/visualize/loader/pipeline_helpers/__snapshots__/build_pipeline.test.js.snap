@@ -2,7 +2,7 @@
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_'  fontSize=12 openLinksInNewTab=true "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with buckets 1`] = `"kibana_metric visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metrics\\":[0,1],\\"bucket\\":2}}' "`;
 
