@@ -207,7 +207,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
         return {
           rolename: await rolenameElement.getVisibleText(),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedRole')
+          reserved: (await isReservedElementVisible.existsByDisplayedByCssSelector('[data-test-subj="reservedRole"]'))
         };
       });
     }
