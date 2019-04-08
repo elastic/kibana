@@ -86,7 +86,7 @@ class RolesGridPageUI extends Component<Props, State> {
             <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref()}>
               <FormattedMessage
                 id="xpack.security.management.roles.createRoleButtonLabel"
-                defaultMessage="Create new role"
+                defaultMessage="Create role"
               />
             </EuiButton>
           </EuiPageContentHeaderSection>
