@@ -408,6 +408,27 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
                 }
               }
             }
+          },
+          no_pipelines: {
+            filter: {
+              bool: {
+                must_not: {
+                  nested: {
+                    path: 'logstash_stats.pipelines',
+                    query: {
+                      match_all: {}
+                    }
+                  }
+                }
+              }
+            },
+            aggs: {
+              node_count: {
+                cardinality: {
+                  field: this.field
+                }
+              }
+            }
           }
         }
       }
@@ -426,6 +447,15 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
           'to_root.node_count.value'
         );
       });
+
+      const DEFAULT_PIPELINE_ID = 'main'; // FIXME: Move to common constants
+      const oldNodesCount = _.get(bucket, 'no_pipelines.node_count.value', 0)
+      if (oldNodesCount > 0) {
+        if (!pipelineNodesCounts.hasOwnProperty(DEFAULT_PIPELINE_ID)) {
+          pipelineNodesCounts[DEFAULT_PIPELINE_ID] = 0
+        }
+        pipelineNodesCounts[DEFAULT_PIPELINE_ID] += oldNodesCount
+      }
 
       return pipelineNodesCounts;
     };
