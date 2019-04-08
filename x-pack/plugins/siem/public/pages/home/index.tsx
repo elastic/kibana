@@ -111,7 +111,7 @@ export const HomePage = pure(() => (
 ));
 
 const Page = styled(EuiPage)`
-  padding: 0px 16px 16px 16px;
+  padding: 0px 70px 24px 24px; //70px temporary until timeline is moved
 `;
 
 const PageHeader = styled(EuiPageHeader)`
