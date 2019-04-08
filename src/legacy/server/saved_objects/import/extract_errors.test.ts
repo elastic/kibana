@@ -23,7 +23,7 @@ import { extractErrors } from './extract_errors';
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
     const savedObjects: SavedObject[] = [];
-    const result = extractErrors(savedObjects);
+    const result = extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`Array []`);
   });
 
@@ -32,29 +32,55 @@ describe('extractErrors()', () => {
       {
         id: '1',
         type: 'dashboard',
-        attributes: {},
+        attributes: {
+          title: 'My Dashboard 1',
+        },
         references: [],
       },
       {
         id: '2',
         type: 'dashboard',
-        attributes: {},
+        attributes: {
+          title: 'My Dashboard 2',
+        },
         references: [],
         error: {
           statusCode: 409,
           message: 'Conflict',
         },
       },
+      {
+        id: '3',
+        type: 'dashboard',
+        attributes: {
+          title: 'My Dashboard 3',
+        },
+        references: [],
+        error: {
+          statusCode: 400,
+          message: 'Bad Request',
+        },
+      },
     ];
-    const result = extractErrors(savedObjects);
+    const result = extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
     "error": Object {
-      "message": "Conflict",
-      "statusCode": 409,
+      "type": "conflict",
     },
     "id": "2",
+    "title": "My Dashboard 2",
+    "type": "dashboard",
+  },
+  Object {
+    "error": Object {
+      "message": "Bad Request",
+      "statusCode": 400,
+      "type": "unknown",
+    },
+    "id": "3",
+    "title": "My Dashboard 3",
     "type": "dashboard",
   },
 ]

@@ -27,6 +27,8 @@ import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../../mappings/lib/get_root_properties_objects';
 import { encodeHitVersion } from '../../version';
 
+jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
+
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -274,7 +276,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
-    getSearchDslNS.getSearchDsl = jest.fn(() => {}); // eslint-disable-line import/namespace
+    getSearchDslNS.getSearchDsl.mockReset();
   });
 
   afterEach(() => {});
@@ -1222,7 +1224,15 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          _source: ['foo.title', 'namespace', 'type', 'title'],
+          _source: [
+            'foo.title',
+            'namespace',
+            'type',
+            'references',
+            'migrationVersion',
+            'updated_at',
+            'title',
+          ],
         })
       );
 

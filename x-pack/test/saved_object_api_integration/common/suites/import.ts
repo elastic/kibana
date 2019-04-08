@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -61,10 +61,12 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         {
           id: '1',
           type: 'wigwags',
+          title: 'Wigwags title',
           error: {
             message: `Unsupported saved object type: 'wigwags': Bad Request`,
             statusCode: 400,
             error: 'Bad Request',
+            type: 'unknown',
           },
         },
       ],

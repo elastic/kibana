@@ -107,9 +107,10 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(filters) {
+  async getBounds(dataFilters) {
     if (this._source.isBoundsAware()) {
-      return await this._source.getBoundsForFilters(filters);
+      const searchFilters = this._getSearchFilters(dataFilters);
+      return await this._source.getBoundsForFilters(searchFilters);
     }
     return this._getBoundsBasedOnData();
   }
@@ -203,9 +204,11 @@ export class VectorLayer extends AbstractLayer {
 
     let updateDueToQuery = false;
     let updateDueToFilters = false;
+    let updateDueToLayerQuery = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
       updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
     }
 
     let updateDueToPrecisionChange = false;
@@ -221,10 +224,11 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFields
       && !updateDueToQuery
       && !updateDueToFilters
+      && !updateDueToLayerQuery
       && !updateDueToPrecisionChange;
   }
 
-  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const joinSource = join.getJoinSource();
     const sourceDataId = join.getSourceId();
@@ -233,28 +237,31 @@ export class VectorLayer extends AbstractLayer {
     try {
       const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
       if (canSkip) {
+        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
         return {
-          shouldJoin: false,
-          join: join
+          dataHasChanged: false,
+          join: join,
+          propertiesMap: propertiesMap
         };
       }
       startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
-        rawData,
         propertiesMap
       } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
-      stopLoading(sourceDataId, requestToken, rawData);
+      stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
-        shouldJoin: true,
+        dataHasChanged: true,
         join: join,
         propertiesMap: propertiesMap,
       };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        shouldJoin: false,
-        join: join
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: null
       };
     }
   }
@@ -262,7 +269,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
     return await Promise.all(joinSyncs);
   }
@@ -280,6 +287,7 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      layerQuery: this.getQuery()
     };
   }
 
@@ -324,13 +332,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
-    if (!sourceResult.refreshed && !joinState.shouldJoin) {
+    if (!sourceResult.refreshed && !joinState.dataHasChanged) {
+      //no data changes in both the source data or the join data
       return false;
     }
     if (!sourceResult.featureCollection || !joinState.propertiesMap) {
+      //no data available in source or join (ie. request is pending or data errored)
       return false;
     }
 
+    //all other cases, perform the join
+    //- source data changed but join data has not
+    //- join data changed but source data has not
+    //- both source and join data changed
     const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
@@ -344,7 +358,6 @@ export class VectorLayer extends AbstractLayer {
     const hasJoined = joinStates.map(joinState => {
       return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
-
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
@@ -514,7 +527,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   canShowTooltip() {
-    return this._source.canFormatFeatureProperties();
+    return this.isVisible() && this._source.canFormatFeatureProperties();
   }
 
   getFeatureByFeatureById(id) {

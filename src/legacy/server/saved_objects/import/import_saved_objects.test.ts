@@ -26,25 +26,33 @@ describe('importSavedObjects()', () => {
     {
       id: '1',
       type: 'index-pattern',
-      attributes: {},
+      attributes: {
+        title: 'My Index Pattern',
+      },
       references: [],
     },
     {
       id: '2',
       type: 'search',
-      attributes: {},
+      attributes: {
+        title: 'My Search',
+      },
       references: [],
     },
     {
       id: '3',
       type: 'visualization',
-      attributes: {},
+      attributes: {
+        title: 'My Visualization',
+      },
       references: [],
     },
     {
       id: '4',
       type: 'dashboard',
-      attributes: {},
+      attributes: {
+        title: 'My Dashboard',
+      },
       references: [],
     },
   ];
@@ -60,13 +68,27 @@ describe('importSavedObjects()', () => {
   };
 
   beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
+  });
+
+  test('returns early when no objects exist', async () => {
+    const readStream = new Readable({
+      read() {
+        this.push(null);
+      },
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 1,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+  "successCount": 0,
+}
+`);
   });
 
   test('calls bulkCreate without overwrite', async () => {
@@ -76,6 +98,7 @@ describe('importSavedObjects()', () => {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -97,25 +120,33 @@ Object {
     Array [
       Array [
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Index Pattern",
+          },
           "id": "1",
           "references": Array [],
           "type": "index-pattern",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Search",
+          },
           "id": "2",
           "references": Array [],
           "type": "search",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Visualization",
+          },
           "id": "3",
           "references": Array [],
           "type": "visualization",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Dashboard",
+          },
           "id": "4",
           "references": Array [],
           "type": "dashboard",
@@ -143,6 +174,7 @@ Object {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -164,25 +196,33 @@ Object {
     Array [
       Array [
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Index Pattern",
+          },
           "id": "1",
           "references": Array [],
           "type": "index-pattern",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Search",
+          },
           "id": "2",
           "references": Array [],
           "type": "search",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Visualization",
+          },
           "id": "3",
           "references": Array [],
           "type": "visualization",
         },
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Dashboard",
+          },
           "id": "4",
           "references": Array [],
           "type": "dashboard",
@@ -203,13 +243,14 @@ Object {
 `);
   });
 
-  test('extracts errors', async () => {
+  test('extracts errors for conflicts', async () => {
     const readStream = new Readable({
       read() {
         savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.map(savedObject => ({
         type: savedObject.type,
@@ -231,39 +272,148 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "1",
+      "title": "My Index Pattern",
       "type": "index-pattern",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "2",
+      "title": "My Search",
       "type": "search",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "3",
+      "title": "My Visualization",
       "type": "visualization",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "4",
+      "title": "My Dashboard",
       "type": "dashboard",
     },
   ],
   "success": false,
   "successCount": 0,
+}
+`);
+  });
+
+  test('validates references', async () => {
+    const readStream = new Readable({
+      read() {
+        this.push(
+          JSON.stringify({
+            id: '1',
+            type: 'search',
+            attributes: {
+              title: 'My Search',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'index-pattern',
+                id: '2',
+              },
+            ],
+          }) + '\n'
+        );
+        this.push(
+          JSON.stringify({
+            id: '3',
+            type: 'visualization',
+            attributes: {
+              title: 'My Visualization',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'search',
+                id: '1',
+              },
+            ],
+          }) + '\n'
+        );
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: '2',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+      ],
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 4,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "blocking": Array [
+          Object {
+            "id": "3",
+            "type": "visualization",
+          },
+        ],
+        "references": Array [
+          Object {
+            "id": "2",
+            "type": "index-pattern",
+          },
+        ],
+        "type": "missing_references",
+      },
+      "id": "1",
+      "title": "My Search",
+      "type": "search",
+    },
+  ],
+  "success": false,
+  "successCount": 0,
+}
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "2",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
 }
 `);
   });

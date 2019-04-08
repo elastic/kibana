@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
-// tslint:disable-next-line: no-default-export
+// eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');

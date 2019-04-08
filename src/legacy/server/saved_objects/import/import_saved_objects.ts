@@ -20,7 +20,9 @@
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
-import { CustomError, extractErrors } from './extract_errors';
+import { extractErrors } from './extract_errors';
+import { ImportError } from './types';
+import { validateReferences } from './validate_references';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
@@ -32,7 +34,7 @@ interface ImportSavedObjectsOptions {
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: CustomError[];
+  errors?: ImportError[];
 }
 
 export async function importSavedObjects({
@@ -41,23 +43,33 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
-
-  if (objectsToImport.length === 0) {
+  // Get the objects to import
+  const objectsFromStream = await collectSavedObjects(readStream, objectLimit);
+  // Validate references
+  const { filteredObjects, errors: validationErrors } = await validateReferences(
+    objectsFromStream,
+    savedObjectsClient
+  );
+  // Exit early if no objects to import
+  if (filteredObjects.length === 0) {
     return {
-      success: true,
+      success: validationErrors.length === 0,
       successCount: 0,
+      ...(validationErrors.length ? { errors: validationErrors } : {}),
     };
   }
-
-  const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
+  // Create objects in bulk
+  const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
   });
-  const errors = extractErrors(bulkCreateResult.saved_objects);
+  const errors = [
+    ...validationErrors,
+    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
+  ];
 
   return {
     success: errors.length === 0,
-    successCount: objectsToImport.length - errors.length,
+    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
     ...(errors.length ? { errors } : {}),
   };
 }

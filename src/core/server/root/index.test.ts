@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
-const logger = loggingServiceMock.create();
-jest.mock('../logging', () => ({
-  LoggingService: jest.fn(() => logger),
-}));
-
-import { configServiceMock } from '../config/config_service.mock';
-const configService = configServiceMock.create();
-jest.mock('../config/config_service', () => ({
-  ConfigService: jest.fn(() => configService),
-}));
-
-const mockServer = { start: jest.fn(), stop: jest.fn() };
-jest.mock('../', () => ({ Server: jest.fn(() => mockServer) }));
+import { configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
@@ -57,29 +44,29 @@ afterEach(() => {
 
   logger.upgrade.mockReset();
   configService.atPath.mockReset();
-  mockServer.start.mockReset();
+  mockServer.setup.mockReset();
   mockServer.stop.mockReset();
 });
 
-test('starts services on "start"', async () => {
+test('sets up services on "setup"', async () => {
   const root = new Root(config$, env);
 
   expect(logger.upgrade).not.toHaveBeenCalled();
-  expect(mockServer.start).not.toHaveBeenCalled();
+  expect(mockServer.setup).not.toHaveBeenCalled();
 
-  await root.start();
+  await root.setup();
 
   expect(logger.upgrade).toHaveBeenCalledTimes(1);
   expect(logger.upgrade).toHaveBeenLastCalledWith({ someValue: 'foo' });
-  expect(mockServer.start).toHaveBeenCalledTimes(1);
+  expect(mockServer.setup).toHaveBeenCalledTimes(1);
 });
 
-test('upgrades logging configuration after start', async () => {
+test('upgrades logging configuration after setup', async () => {
   const mockLoggingConfig$ = new BehaviorSubject({ someValue: 'foo' });
   configService.atPath.mockReturnValue(mockLoggingConfig$);
 
   const root = new Root(config$, env);
-  await root.start();
+  await root.setup();
 
   expect(logger.upgrade).toHaveBeenCalledTimes(1);
   expect(logger.upgrade).toHaveBeenLastCalledWith({ someValue: 'foo' });
@@ -95,7 +82,7 @@ test('stops services on "shutdown"', async () => {
   const mockOnShutdown = jest.fn();
   const root = new Root(config$, env, mockOnShutdown);
 
-  await root.start();
+  await root.setup();
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
@@ -113,7 +100,7 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
   const mockOnShutdown = jest.fn();
   const root = new Root(config$, env, mockOnShutdown);
 
-  await root.start();
+  await root.setup();
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
@@ -128,18 +115,18 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 });
 
-test('fails and stops services if server fails to start', async () => {
+test('fails and stops services if server setup fails', async () => {
   const mockOnShutdown = jest.fn();
   const root = new Root(config$, env, mockOnShutdown);
 
   const serverError = new Error('server failed');
-  mockServer.start.mockRejectedValue(serverError);
+  mockServer.setup.mockRejectedValue(serverError);
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
   expect(mockServer.stop).not.toHaveBeenCalled();
 
-  await expect(root.start()).rejects.toThrowError('server failed');
+  await expect(root.setup()).rejects.toThrowError('server failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(serverError);
@@ -158,13 +145,13 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
-  expect(mockServer.start).not.toHaveBeenCalled();
+  expect(mockServer.setup).not.toHaveBeenCalled();
 
-  await expect(root.start()).rejects.toThrowError('logging config upgrade failed');
+  await expect(root.setup()).rejects.toThrowError('logging config upgrade failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(loggingUpgradeError);
-  expect(mockServer.start).not.toHaveBeenCalled();
+  expect(mockServer.setup).not.toHaveBeenCalled();
   expect(logger.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
@@ -181,7 +168,7 @@ test('stops services if consequent logger upgrade fails', async () => {
   configService.atPath.mockReturnValue(mockLoggingConfig$);
 
   const root = new Root(config$, env, mockOnShutdown);
-  await root.start();
+  await root.setup();
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();

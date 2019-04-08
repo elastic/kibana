@@ -388,7 +388,7 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ### Unit Testing Plugins
 
-This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
 To run the tests for just your particular plugin run the following command from your plugin:
 
@@ -463,10 +463,13 @@ To include your change in the Release Notes:
     * For a new feature or functionality, use `release_note:enhancement`.
     * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
     * For a deprecated feature, use `release_note:deprecation`.
-    * For a breaking change, use `release-breaking:note`.
+    * For a breaking change, use `release_note:breaking`.
 
 To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
 `build`, `docs`, `test`, `non-issue`, `jenkins`, `backport`,  and `chore`.
+
+To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
+`build`, `docs`, `test_*`,`test-*`, `non-issue`, `jenkins`, `backport`,  and `chore`.
 
 We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
 

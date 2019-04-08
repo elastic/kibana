@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { isValidTimeField, validateTimeRange } from '../validate_time_range';
 
 import mockTimeField from './mock_time_field';

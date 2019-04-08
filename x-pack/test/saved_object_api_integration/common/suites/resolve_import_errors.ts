@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -65,10 +65,12 @@ export function resolveImportErrorsTestSuiteFactory(
         {
           id: '1',
           type: 'wigwags',
+          title: 'Wigwags title',
           error: {
             message: `Unsupported saved object type: 'wigwags': Bad Request`,
             statusCode: 400,
             error: 'Bad Request',
+            type: 'unknown',
           },
         },
       ],
@@ -115,11 +117,12 @@ export function resolveImportErrorsTestSuiteFactory(
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
           .auth(user.username, user.password)
           .field(
-            'overwrites',
+            'retries',
             JSON.stringify([
               {
                 type: 'dashboard',
                 id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                overwrite: true,
               },
             ])
           )
@@ -146,15 +149,17 @@ export function resolveImportErrorsTestSuiteFactory(
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
             .auth(user.username, user.password)
             .field(
-              'overwrites',
+              'retries',
               JSON.stringify([
                 {
                   type: 'wigwags',
                   id: '1',
+                  overwrite: true,
                 },
                 {
                   type: 'dashboard',
                   id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                  overwrite: true,
                 },
               ])
             )

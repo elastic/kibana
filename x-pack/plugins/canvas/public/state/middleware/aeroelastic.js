@@ -261,10 +261,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
   const createStore = page =>
     aero.createStore(
       {
-        shapeAdditions: [],
         primaryUpdate: null,
-        currentScene: { shapes: [] },
-        configuration: aeroelasticConfiguration,
+        currentScene: { shapes: [], configuration: aeroelasticConfiguration },
       },
       onChangeCallback,
       page
@@ -286,6 +284,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
   const unselectShape = page => {
     aero.commit(page, 'shapeSelect', { shapes: [] });
+  };
+
+  const unhoverShape = page => {
+    aero.commit(page, 'cursorPosition', {});
   };
 
   return next => action => {
@@ -328,6 +330,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
       } else {
         unselectShape(prevPage); // deselect persistent groups as they're not currently selections in Redux
       }
+      unhoverShape(prevPage); // ensure hover box isn't stuck on page change, no matter how action originated
     }
 
     next(action);

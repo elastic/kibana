@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 // Data
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';

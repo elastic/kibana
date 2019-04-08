@@ -50,6 +50,7 @@ interface Props {
 
 export const SuggestionComponent: SFC<Props> = props => {
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
         kbnTypeahead__item: true,
@@ -67,14 +68,7 @@ export const SuggestionComponent: SFC<Props> = props => {
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
-        <div
-          className="kbnSuggestionItem__description"
-          // Description currently always comes from us and we escape any potential user input
-          // at the time we're generating the description text
-          // eslint-disable-next-line react/no-danger
-          // @ts-ignore
-          dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
-        />
+        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
       </div>
     </div>
   );

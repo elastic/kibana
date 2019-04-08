@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as selector from '../workpad';
 
 describe('workpad selectors', () => {
@@ -30,6 +30,39 @@ describe('workpad selectors', () => {
             type: 'function',
             function: 'demodata',
             arguments: {},
+          },
+        ],
+      },
+      'element-3': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'demodata',
+            arguments: {},
+          },
+          {
+            type: 'function',
+            function: 'dropdownControl',
+            arguments: {
+              valueColumn: ['project'],
+              filterColumn: ['project'],
+            },
+          },
+          {
+            type: 'function',
+            function: 'render',
+            arguments: {},
+          },
+        ],
+      },
+      'element-4': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'timefilterControl',
+            arguments: { compact: [true], column: ['@timestamp'] },
           },
         ],
       },
@@ -63,10 +96,23 @@ describe('workpad selectors', () => {
                 {
                   id: 'element-0',
                   expression: 'markdown',
+                  filter: '',
                 },
                 {
                   id: 'element-1',
                   expression: 'demodata',
+                  filter: '',
+                },
+                {
+                  id: 'element-3',
+                  expression:
+                    'demodata | dropdownControl valueColumn=project filterColumn=project | render',
+                  filter: 'exactly value="beats" column="project"',
+                },
+                {
+                  id: 'element-4',
+                  expression: 'timefilterControl compact=true column=@timestamp',
+                  filter: 'timefilter column=@timestamp from=now-24h to=now',
                 },
               ],
             },
@@ -135,6 +181,7 @@ describe('workpad selectors', () => {
 
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
+
       const expected = elements.map(element => ({
         ...element,
         ast: asts[element.id],
@@ -195,6 +242,15 @@ describe('workpad selectors', () => {
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);
       expect(arg).to.be(true);
+    });
+  });
+
+  describe('getGlobalFilterExpression', () => {
+    it('gets filters from all elements', () => {
+      const filters = selector.getGlobalFilterExpression(state);
+      expect(filters).to.equal(
+        'exactly value="beats" column="project" | timefilter column=@timestamp from=now-24h to=now'
+      );
     });
   });
 

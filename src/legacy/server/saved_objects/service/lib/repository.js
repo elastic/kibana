@@ -414,7 +414,7 @@ export class SavedObjectsRepository {
   /**
    * Returns an array of objects by id
    *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {array} objects - an array of objects containing id, type and optionally fields
    * @param {object} [options={}]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
@@ -436,10 +436,11 @@ export class SavedObjectsRepository {
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.reduce((acc, { type, id }) => {
+        docs: objects.reduce((acc, { type, id, fields }) => {
           if (this._isTypeAllowed(type)) {
             acc.push({
               _id: this._serializer.generateRawId(namespace, type, id),
+              _source: includedFields(type, fields),
             });
           } else {
             unsupportedTypes.push({
