@@ -437,6 +437,8 @@ export class EmbeddedVisualizeHandler {
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
 
+    console.log(this.vis.params);
+
     return this.dataLoader
       .fetch(this.dataLoaderParams)
       .then(data => {
@@ -485,6 +487,7 @@ export class EmbeddedVisualizeHandler {
     let args: any[] = [];
 
     if (this.pipelineDataLoader) {
+      console.log(get(response || {}, 'value'));
       renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
       args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
     } else {

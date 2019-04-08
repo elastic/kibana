@@ -20,32 +20,101 @@
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const inputControlVis = () => ({
-  name: 'input_control_vis',
-  type: 'render',
+export const inputControl = () => ({
+  name: 'inputControl',
+  type: 'input_control',
   context: {
     types: [],
   },
-  help: i18n.translate('inputControl.function.help', {
-    defaultMessage: 'Input control visualization'
+  help: i18n.translate('inputControl.function.inputControl.help', {
+    defaultMessage: 'Generates input control configuration'
   }),
   args: {
-    visConfig: {
+    type: {
       types: ['string'],
-      default: '"{}"',
+      aliases: ['_'],
+      required: true,
+      options: ['range', 'list'],
+    },
+    id: {
+      types: ['string'],
+      required: true,
+    },
+    parent: {
+      types: ['string'],
+      default: '""',
+    },
+    label: {
+      types: ['string'],
+    },
+    fieldName: {
+      types: ['string'],
+      required: true,
+    },
+    indexPattern: {
+      types: ['string'],
+      required: true,
+    },
+    dynamicOptions: {
+      types: ['boolean'],
+      default: false,
+    },
+    multiselect: {
+      types: ['boolean'],
+      default: false,
+    },
+    optionType: {
+      types: ['string'],
+      default: '"terms"',
+    },
+    optionSort: {
+      types: ['string'],
+      default: '"desc"',
+    },
+    optionSize: {
+      types: ['number'],
+      default: 5,
+    },
+    decimalPlaces: {
+      types: ['number'],
+      default: 0,
+    },
+    step: {
+      types: ['number'],
+      default: 1,
     }
   },
   fn(context, args) {
-    const params = JSON.parse(args.visConfig);
+    const params = {
+      id: args.id,
+      type: args.type,
+      fieldName: args.fieldName,
+      indexPattern: args.indexPattern,
+      parent: args.parent,
+    };
+    if (args.label) {
+      params.label = args.label;
+    }
+    if (args.type === 'range') {
+      params.options = {
+        decimalPlaces: args.decimalPlaces,
+        size: args.size,
+      };
+    } else {
+      params.options = {
+        dynamicOptions: args.dynamicOptions,
+        multiselect: args.multiselect,
+        type: args.optionType,
+        sort: args.optionSort,
+        size: args.optionSize,
+      };
+    }
+
     return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visType: 'input_control_vis',
-        visConfig: params
-      }
+      type: 'input_control',
+      params,
     };
   }
 });
 
-functionsRegistry.register(inputControlVis);
+functionsRegistry.register(inputControl);

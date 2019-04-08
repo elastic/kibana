@@ -210,7 +210,37 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `vega ${prepareString('spec', visState.params.spec)}`;
   },
   input_control_vis: visState => {
-    return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
+    const prepareControlValue = (control: any) => {
+      let expr = `control={inputControl ${control.type} `;
+      expr += prepareString('id', control.id);
+      expr += prepareString('parent', control.parent);
+      expr += prepareString('label', control.label);
+      expr += prepareString('fieldName', control.fieldName);
+      expr += prepareString('indexPattern', control.indexPattern);
+      if (control.type == 'range') {
+        expr += `decimalPlaces=${control.options.decimalPlaces} `;
+        expr += `step=${control.options.step} `;
+      } else {
+        expr += prepareString('optionType', control.options.type);
+        expr += prepareString('optionSort', control.options.sort);
+        expr += `optionSize=${control.options.size} `;
+        if (control.options.multiselect !== undefined) {
+          expr += `multiselect=${control.options.multiselect} `
+        }
+        if (control.options.dynamicOptions !== undefined) {
+          expr += `dynamicOptions=${control.options.dynamicOptions} `
+        }
+      }
+      expr += '} ';
+      return expr;
+    };
+    const { updateFiltersOnChange, useTimeFilter, pinFilters, controls } = visState.params;
+    let expr = `inputControlVis 
+      updateFiltersOnChange=${updateFiltersOnChange} useTimeFilter=${useTimeFilter} pinFilters=${pinFilters} `;
+    controls.forEach(control => {
+      expr += prepareControlValue(control);
+    });
+    return expr;
   },
   metrics: (visState, schemas, uiState = {}) => {
     const paramsJson = prepareJson('params', visState.params);
