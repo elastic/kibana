@@ -40,7 +40,7 @@ class VisEditor extends Component {
       dirty: false,
       autoApply: true,
       visFields: props.visFields,
-      extractedIndexPatterns: ['']
+      extractedIndexPatterns: [''],
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.Subject();
@@ -55,7 +55,7 @@ class VisEditor extends Component {
     return this.props.config.get(...args);
   };
 
-  handleUiState = (field, value) =>  {
+  handleUiState = (field, value) => {
     this.props.vis.uiStateVal(field, value);
   };
 
@@ -63,33 +63,38 @@ class VisEditor extends Component {
     if (isEmpty(partialModel)) {
       return;
     }
+    const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
+    const nextModel = {
+      ...this.state.model,
+      ...partialModel,
+    };
+    let dirty = true;
 
-    const nextModel = { ...this.state.model, ...partialModel };
     this.props.vis.params = nextModel;
 
-    if (this.state.autoApply) {
+    if (this.state.autoApply || hasTypeChanged) {
       this.props.vis.updateState();
-    }
 
-    let newState = {
-      model: nextModel,
-      dirty: !this.state.autoApply,
-    };
+      dirty = false;
+    }
 
     if (this.props.isEditorMode) {
       const { params, fields } = this.props.vis;
       const extractedIndexPatterns = extractIndexPatterns(params, fields);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        newState = {
-          ...newState,
-          visFields: await fetchFields(extractedIndexPatterns),
-          extractedIndexPatterns: extractedIndexPatterns
-        };
+        fetchFields(extractedIndexPatterns)
+          .then(visFields => this.setState({
+            visFields,
+            extractedIndexPatterns,
+          }));
       }
     }
 
-    this.setState(newState);
+    this.setState({
+      dirty,
+      model: nextModel,
+    });
   };
 
   handleCommit = () => {
@@ -129,7 +134,7 @@ class VisEditor extends Component {
       return (
         <div className="tvbEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange} />
+            <VisPicker model={model} onChange={this.handleChange}/>
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
@@ -172,7 +177,7 @@ class VisEditor extends Component {
 }
 
 VisEditor.defaultProps = {
-  visData: {}
+  visData: {},
 };
 
 VisEditor.propTypes = {
