@@ -9,16 +9,19 @@ import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
 export class DomPreview extends React.Component {
-  static container = null;
-  static content = null;
-  static observer = null;
-  static original = null;
-  static updateTimeout = null;
-
   static propTypes = {
     elementId: PropTypes.string.isRequired,
     height: PropTypes.number.isRequired,
   };
+
+  constructor(props) {
+    super(props);
+    this.container = null;
+    this.content = null;
+    this.observer = null;
+    this.original = null;
+    this.updateTimeout = null;
+  }
 
   componentDidMount() {
     this.update();
