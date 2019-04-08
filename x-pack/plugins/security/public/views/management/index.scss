@@ -2,6 +2,9 @@
 @import './edit_role/components/privileges/kibana/impacted_spaces_flyout';
 @import './edit_role/components/collapsible_panel';
 
+// Role grid styles
+@import './roles_grid/components/roles_grid_page';
+
 $securityFormWidth: 460px;
 
 // Management styles

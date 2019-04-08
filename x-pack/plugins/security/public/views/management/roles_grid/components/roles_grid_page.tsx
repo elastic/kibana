@@ -147,58 +147,75 @@ class RolesGridPageUI extends Component<Props, State> {
     );
   };
 
-  private getColumnConfig = (intl: InjectedIntl) => [
-    {
-      field: 'name',
-      name: intl.formatMessage({
-        id: 'xpack.security.management.roles.nameColumnName',
-        defaultMessage: 'Role',
-      }),
-      sortable: true,
-      truncateText: true,
-      render: (name: string, record: Role) => {
-        return (
-          <span>
-            <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
-              {name}
-            </EuiLink>
-            {!isRoleEnabled(record) && (
-              <EuiIconTip
-                type="alert"
-                size="xs"
-                color="warning"
-                data-test-subj="disabledRoleTip"
-                title={
-                  <FormattedMessage
-                    id="xpack.security.management.roles.disabledTooltip"
-                    defaultMessage="This role is currently disabled. You may only view or delete it."
-                  />
-                }
-              />
-            )}
-          </span>
-        );
+  private getColumnConfig = (intl: InjectedIntl) => {
+    const reservedRoleDesc = intl.formatMessage({
+      id: 'xpack.security.management.roles.reservedColumnDescription',
+      defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.',
+    });
+
+    return [
+      {
+        field: 'name',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.roles.nameColumnName',
+          defaultMessage: 'Role',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (name: string, record: Role) => {
+          return (
+            <span>
+              <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
+                {name}
+              </EuiLink>
+              {!isRoleEnabled(record) && (
+                <EuiIconTip
+                  type="alert"
+                  size="xs"
+                  color="warning"
+                  data-test-subj="disabledRoleTip"
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.management.roles.disabledTooltip"
+                      defaultMessage="This role is currently disabled. You may only view or delete it."
+                    />
+                  }
+                />
+              )}
+            </span>
+          );
+        },
       },
-    },
-    {
-      field: 'metadata._reserved',
-      name: intl.formatMessage({
-        id: 'xpack.security.management.roles.reservedColumnName',
-        defaultMessage: 'Reserved',
-      }),
-      sortable: true,
-      dataType: 'boolean',
-      align: 'right',
-      description: intl.formatMessage({
-        id: 'xpack.security.management.roles.reservedColumnDescription',
-        defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.',
-      }),
-      render: (reserved: boolean | undefined) =>
-        reserved ? (
-          <EuiIcon aria-label="Reserved role" data-test-subj="reservedRole" type="check" />
-        ) : null,
-    },
-  ];
+      {
+        field: 'metadata._reserved',
+        name: (
+          <div>
+            <FormattedMessage
+              id="xpack.security.management.roles.reservedColumnName"
+              defaultMessage="Reserved"
+            />
+            <span className="rolesGridPage__reservedRoleTooltip">
+              <EuiIconTip
+                type="questionInCircle"
+                size="m"
+                color="euiColorMediumShade"
+                className="rolesGridPage__reservedRoleTooltip"
+                title={reservedRoleDesc}
+              />
+            </span>
+          </div>
+        ),
+        sortable: true,
+        dataType: 'boolean',
+        align: 'right',
+        description: reservedRoleDesc,
+        render: (reserved: boolean | undefined) =>
+          reserved ? (
+            <EuiIcon aria-label="Reserved role" data-test-subj="reservedRole" type="check" />
+          ) : null,
+      },
+    ];
+  };
 
   private getRolesForDisplay = () => {
     const { roles, filter } = this.state;
