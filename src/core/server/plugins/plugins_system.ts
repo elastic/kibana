@@ -21,13 +21,13 @@ import { pick } from 'lodash';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
 import { createPluginSetupContext } from './plugin_context';
 import { PluginsServiceSetupDeps } from './plugins_service';
 
 /** @internal */
 export class PluginsSystem {
-  private readonly plugins = new Map<PluginName, Plugin>();
+  private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
@@ -36,14 +36,14 @@ export class PluginsSystem {
     this.log = coreContext.logger.get('plugins-system');
   }
 
-  public addPlugin(plugin: Plugin) {
+  public addPlugin(plugin: PluginWrapper) {
     this.plugins.set(plugin.name, plugin);
   }
 
   public async setupPlugins(deps: PluginsServiceSetupDeps) {
-    const exposedValues = new Map<PluginName, unknown>();
+    const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
-      return exposedValues;
+      return contracts;
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
@@ -57,29 +57,31 @@ export class PluginsSystem {
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
 
-      const exposedDependencyValues = [
-        ...plugin.requiredDependencies,
-        ...plugin.optionalDependencies,
-      ].reduce(
-        (dependencies, dependencyName) => {
-          dependencies[dependencyName] = exposedValues.get(dependencyName);
-          return dependencies;
+      const pluginDepContracts = [...plugin.requiredPlugins, ...plugin.optionalPlugins].reduce(
+        (depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have server-side code or is a
+          // missing optional dependency.
+          if (contracts.get(dependencyName) !== undefined) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
+
+          return depContracts;
         },
         {} as Record<PluginName, unknown>
       );
 
-      exposedValues.set(
+      contracts.set(
         pluginName,
         await plugin.setup(
           createPluginSetupContext(this.coreContext, deps, plugin),
-          exposedDependencyValues
+          pluginDepContracts
         )
       );
 
       this.satupPlugins.push(pluginName);
     }
 
-    return exposedValues;
+    return contracts;
   }
 
   public async stopPlugins() {
@@ -151,8 +153,8 @@ export class PluginsSystem {
         return [
           pluginName,
           new Set([
-            ...plugin.requiredDependencies,
-            ...plugin.optionalDependencies.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter(dependency => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })

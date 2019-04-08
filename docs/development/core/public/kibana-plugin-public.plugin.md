@@ -7,13 +7,13 @@ The interface that should be returned by a `PluginInitializer`<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = 
+export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [setup](./kibana-plugin-public.plugin.setup.md) | <code>(core: PluginSetupContext, dependencies: TDependencies) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
+|  [setup](./kibana-plugin-public.plugin.setup.md) | <code>(core: PluginSetupContext, dependencies: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
 |  [stop](./kibana-plugin-public.plugin.stop.md) | <code>() =&gt; void</code> |  |
 

@@ -124,15 +124,28 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
   readonly path: string;
 }
 
-type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginName, unknown>> = (
-  coreContext: PluginInitializerContext
-) => {
+/**
+ * The interface that should be returned by a `PluginInitializer`.
+ *
+ * @public
+ */
+export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
   setup: (
     pluginSetupContext: PluginSetupContext,
-    dependencies: TDependenciesSetup
-  ) => TExposedSetup;
+    plugins: TPluginsSetup
+  ) => TSetup | Promise<TSetup>;
   stop?: () => void;
-};
+}
+
+/**
+ * The `plugin` export at the root of a plugin's `server` directory should conform
+ * to this interface.
+ *
+ * @public
+ */
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (
+  coreContext: PluginInitializerContext
+) => Plugin<TSetup, TPluginsSetup>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -140,20 +153,20 @@ type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginNa
  *
  * @internal
  */
-export class Plugin<
+export class PluginWrapper<
   TSetup = unknown,
-  TDependenciesSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
-  public readonly requiredDependencies: PluginManifest['requiredPlugins'];
-  public readonly optionalDependencies: PluginManifest['optionalPlugins'];
+  public readonly requiredPlugins: PluginManifest['requiredPlugins'];
+  public readonly optionalPlugins: PluginManifest['optionalPlugins'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
 
-  private instance?: ReturnType<PluginInitializer<TSetup, TDependenciesSetup>>;
+  private instance?: Plugin<TSetup, TPluginsSetup>;
 
   constructor(
     public readonly path: string,
@@ -163,8 +176,8 @@ export class Plugin<
     this.log = initializerContext.logger.get();
     this.name = manifest.id;
     this.configPath = manifest.configPath;
-    this.requiredDependencies = manifest.requiredPlugins;
-    this.optionalDependencies = manifest.optionalPlugins;
+    this.requiredPlugins = manifest.requiredPlugins;
+    this.optionalPlugins = manifest.optionalPlugins;
     this.includesServerPlugin = manifest.server;
     this.includesUiPlugin = manifest.ui;
   }
@@ -176,7 +189,7 @@ export class Plugin<
    * @param dependencies The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, dependencies: TDependenciesSetup) {
+  public async setup(setupContext: PluginSetupContext, dependencies: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
     this.log.info('Setting up plugin');
@@ -211,7 +224,7 @@ export class Plugin<
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TSetup, TDependenciesSetup>;
+      plugin: PluginInitializer<TSetup, TPluginsSetup>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
