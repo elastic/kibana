@@ -7,8 +7,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { HostWorkingDir } from '..';
-import { TokensFlexItem } from '..';
+import { HostWorkingDir, TokensFlexItem } from '..';
 import { DraggableBadge } from '../../../../draggables';
 
 import { PrimarySecondaryUserInfo } from '.';

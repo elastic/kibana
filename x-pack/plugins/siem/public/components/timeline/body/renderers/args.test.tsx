@@ -9,6 +9,7 @@ import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
+import { getEmptyString } from '../../../empty_value';
 
 import { Args } from './args';
 
@@ -56,7 +57,7 @@ describe('Args', () => {
       expect(wrapper.text()).toBeNull();
     });
 
-    test('it returns null if args is an empty string', () => {
+    test('it returns empty string if args happens to be an empty string', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <Args
@@ -67,7 +68,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.text()).toEqual(getEmptyString());
     });
   });
 });

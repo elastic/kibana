@@ -63,10 +63,6 @@ describe('GenericDetails', () => {
     });
   });
 
-  // NOTE: It's best if all the arguments are sent into this function and they typically should be otherwise
-  // you have something wrong with your beats. These tests are to ensure the function does not
-  // crash. If you need to format things prettier because not all the data is there, then update
-  // these tests with those changes
   describe('#AuditdConnectedToLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
       const wrapper = mountWithIntl(

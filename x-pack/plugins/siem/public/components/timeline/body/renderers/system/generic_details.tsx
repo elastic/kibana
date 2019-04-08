@@ -32,7 +32,7 @@ interface Props {
   processName: string | null | undefined;
   sshMethod: string | null | undefined;
   sshSignature: string | null | undefined;
-  text: string;
+  text: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
 }
@@ -148,6 +148,7 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId
   const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
   const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
   const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+
   return (
     <Details>
       <SystemGenericLine

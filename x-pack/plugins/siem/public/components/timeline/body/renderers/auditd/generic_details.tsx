@@ -119,7 +119,7 @@ export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId
   const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
   const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
   const rawArgs: string[] | null | undefined = get('process.args', data);
-  const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
+  const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
   if (data.process != null) {
     return (
       <Details>

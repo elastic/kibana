@@ -164,7 +164,7 @@ export const SystemGenericFileDetails = pure<GenericDetailsProps>(({ data, conte
   const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
   const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
   const rawArgs: string[] | null | undefined = get('process.args', data);
-  const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
+  const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
   return (
     <Details>
       <SystemGenericFileLine

@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const Args = pure<Props>(({ eventId, contextId, args, processTitle }) =>
-  args != null && args !== '' ? (
+  args != null ? (
     <TokensFlexItem grow={false} component="span">
       <DraggableBadge
         contextId={contextId}
