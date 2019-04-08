@@ -79,6 +79,8 @@ function sampleVisFunction() {
       const data: any[][] = context.rows.map((row: any) => {
         return {
           ...row,
+          [yColumn.id]:
+            yColumn.type === 'date' ? moment(row[yColumn.id] as any).valueOf() : row[yColumn.id],
           [xColumn.id]:
             xColumn.type === 'date' ? moment(row[xColumn.id] as any).valueOf() : row[xColumn.id],
         };
