@@ -16,7 +16,7 @@ import { UserScenarios } from '../scenarios';
 
 const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(false);
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function savedObjectsManagementTests({
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
