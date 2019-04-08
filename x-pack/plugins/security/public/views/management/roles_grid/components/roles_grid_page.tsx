@@ -14,6 +14,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -79,6 +80,14 @@ class RolesGridPageUI extends Component<Props, State> {
                 />
               </h2>
             </EuiTitle>
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.roles.subtitle"
+                  defaultMessage="Apply roles to groups of users and manage permissions across the stack"
+                />
+              </p>
+            </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref()}>
