@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import timeseries from './panel_config/timeseries';
+import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
 import metric from './panel_config/metric';
 import topN from './panel_config/top_n';
 import table from './panel_config/table';
