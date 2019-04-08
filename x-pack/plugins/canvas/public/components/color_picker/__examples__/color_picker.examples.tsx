@@ -5,6 +5,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import { boolean, withKnobs } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPicker } from '../color_picker';
@@ -12,28 +13,49 @@ import { ColorPicker } from '../color_picker';
 const THREE_COLORS = ['#fff', '#666', '#000'];
 const SIX_COLORS = ['#fff', '#666', '#000', '#abc', '#def', '#abcdef'];
 
-class Interactive extends React.Component<{}, { value: string; colors: string[] }> {
+class Interactive extends React.Component<
+  {},
+  { hasButtons: boolean; value: string; colors: string[] }
+> {
   public state = {
     value: '',
     colors: SIX_COLORS,
+    hasButtons: true,
   };
 
   public render() {
     return (
-      <ColorPicker
-        colors={this.state.colors}
-        onAddColor={value => this.setState({ colors: this.state.colors.concat(value) })}
-        onRemoveColor={value =>
-          this.setState({ colors: this.state.colors.filter(color => color !== value) })
-        }
-        onChange={value => this.setState({ value })}
-        value={this.state.value}
-      />
+      <div>
+        <ColorPicker
+          colors={this.state.colors}
+          onAddColor={value => this.setState({ colors: this.state.colors.concat(value) })}
+          onRemoveColor={value =>
+            this.setState({ colors: this.state.colors.filter(color => color !== value) })
+          }
+          onChange={value => this.setState({ value })}
+          hasButtons={this.state.hasButtons}
+          value={this.state.value}
+        />
+        <p style={{ marginTop: 20 }}>
+          <label>
+            {/* tslint:disable-next-line:react-a11y-input-elements*/}
+            <input
+              aria-checked={this.state.hasButtons}
+              type="checkbox"
+              checked={this.state.hasButtons}
+              onChange={() => this.setState({ hasButtons: !this.state.hasButtons })}
+            />
+            {'  '}
+            <span>Show Buttons?</span>
+          </label>
+        </p>
+      </div>
     );
   }
 }
 
 storiesOf('components/ColorPicker', module)
+  .addDecorator(withKnobs)
   .addParameters({
     info: {
       inline: true,
@@ -55,6 +77,7 @@ storiesOf('components/ColorPicker', module)
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={THREE_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
     />
   ))
   .add('six colors', () => (
@@ -64,6 +87,7 @@ storiesOf('components/ColorPicker', module)
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
     />
   ))
   .add('six colors, value missing', () => (
@@ -73,6 +97,7 @@ storiesOf('components/ColorPicker', module)
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
     />
   ))
   .add('interactive', () => <Interactive />, {

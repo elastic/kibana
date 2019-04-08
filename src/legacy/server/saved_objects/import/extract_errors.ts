@@ -20,14 +20,29 @@
 import { SavedObject } from '../service';
 import { ImportError } from './types';
 
-export function extractErrors(savedObjects: SavedObject[]) {
+export function extractErrors(
+  savedObjectResults: SavedObject[],
+  savedObjectsToImport: SavedObject[]
+) {
   const errors: ImportError[] = [];
-  for (const savedObject of savedObjects) {
+  const originalSavedObjectsMap = new Map<string, SavedObject>();
+  for (const savedObject of savedObjectsToImport) {
+    originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
+  }
+  for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
+      const originalSavedObject = originalSavedObjectsMap.get(
+        `${savedObject.type}:${savedObject.id}`
+      );
+      const title =
+        originalSavedObject &&
+        originalSavedObject.attributes &&
+        originalSavedObject.attributes.title;
       if (savedObject.error.statusCode === 409) {
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
+          title,
           error: {
             type: 'conflict',
           },
@@ -37,6 +52,7 @@ export function extractErrors(savedObjects: SavedObject[]) {
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
+        title,
         error: {
           ...savedObject.error,
           type: 'unknown',

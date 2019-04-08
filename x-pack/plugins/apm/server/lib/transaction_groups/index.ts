@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
 import { transactionGroupsFetcher } from './fetcher';
 import { transactionGroupsTransformer } from './transform';

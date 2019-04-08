@@ -9,11 +9,12 @@ import {
   EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHealth,
   // @ts-ignore
   EuiInMemoryTable,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -27,9 +28,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 
 interface PingListProps {
   loading: boolean;
-  maxSearchSize: number;
-  pingResults: PingResults;
-  searchSizeOnBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  pingResults?: PingResults;
   selectedOption: EuiComboBoxOptionProps;
   selectedOptionChanged: (selectedOptions: EuiComboBoxOptionProps[]) => void;
   statusOptions: EuiComboBoxOptionProps[];
@@ -37,9 +36,7 @@ interface PingListProps {
 
 export const PingList = ({
   loading,
-  maxSearchSize,
   pingResults,
-  searchSizeOnBlur,
   selectedOption,
   selectedOptionChanged,
   statusOptions,
@@ -50,44 +47,39 @@ export const PingList = ({
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
         defaultMessage: 'Status',
       }),
-      render: (pingStatus: string) => (
-        <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-          {pingStatus === 'up'
-            ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
-                defaultMessage: 'Up',
-              })
-            : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
-                defaultMessage: 'Down',
-              })}
-        </EuiHealth>
+      render: (pingStatus: string, item: Ping) => (
+        <div>
+          <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
+            {pingStatus === 'up'
+              ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
+                  defaultMessage: 'Up',
+                })
+              : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
+                  defaultMessage: 'Down',
+                })}
+          </EuiHealth>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.uptime.pingList.recencyMessage', {
+              values: { fromNow: moment(item.timestamp).fromNow() },
+              defaultMessage: 'Checked {fromNow}',
+              description:
+                'A string used to inform our users how long ago Heartbeat pinged the selected host.',
+            })}
+          </EuiText>
+        </div>
       ),
     },
     {
-      field: 'timestamp',
-      name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
-        defaultMessage: 'Timestamp',
-      }),
-      render: (timestamp: string) => moment(timestamp).fromNow(),
-    },
-    {
       field: 'monitor.ip',
+      dataType: 'number',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
-      field: 'monitor.id',
-      name: i18n.translate('xpack.uptime.pingList.idColumnLabel', {
-        defaultMessage: 'Id',
-      }),
-      dataType: 'string',
-      width: '20%',
-    },
-    {
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
-        defaultMessage: 'Duration ms',
-        description: 'The "ms" in the default message is an abbreviation for milliseconds',
+        defaultMessage: 'Duration',
       }),
       render: (duration: number) => microsToMillis(duration),
     },
@@ -111,10 +103,12 @@ export const PingList = ({
             })}
             content={<p>{message}</p>}
           >
-            <div>{message.slice(0, 24)}…</div>
+            <code>{message.slice(0, 24)}…</code>
           </EuiToolTip>
         ) : (
-          message
+          <EuiText size="s">
+            <code>{message}</code>
+          </EuiText>
         ),
     },
   ];
@@ -131,55 +125,62 @@ export const PingList = ({
     if (hasStatus) {
       columns.push({
         field: 'http.response.status_code',
+        // @ts-ignore "align" property missing on type definition for column type
+        align: 'right',
         name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
           defaultMessage: 'Response code',
         }),
+        render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
       });
     }
   }
 
   return (
     <Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.uptime.pingList.checkHistoryTitle"
-                defaultMessage="Check History"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!!total && (
+      <EuiPanel paddingSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{total}</EuiBadge>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.uptime.pingList.checkHistoryTitle"
+                      defaultMessage="History"
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {!!total && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{total}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiPanel paddingSize="l">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.uptime.pingList.statusLabel', {
-                defaultMessage: 'Status',
-              })}
-            >
-              <EuiComboBox
-                isClearable={false}
-                singleSelection={{ asPlainText: true }}
-                selectedOptions={[selectedOption]}
-                options={statusOptions}
-                onChange={selectedOptionChanged}
-              />
-            </EuiFormRow>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ minWidth: 200 }}>
+                <EuiComboBox
+                  isClearable={false}
+                  singleSelection={{ asPlainText: true }}
+                  selectedOptions={[selectedOption]}
+                  options={statusOptions}
+                  aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                    defaultMessage: 'Status',
+                  })}
+                  onChange={selectedOptionChanged}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
+          pagination={{ initialPageSize: 20, pageSizeOptions: [5, 10, 20, 100] }}
         />
       </EuiPanel>
     </Fragment>

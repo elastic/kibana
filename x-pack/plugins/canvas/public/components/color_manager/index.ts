@@ -8,4 +8,5 @@ import { pure } from 'recompose';
 
 import { ColorManager as Component } from './color_manager';
 
+export { Props } from './color_manager';
 export const ColorManager = pure(Component);

@@ -10,8 +10,8 @@ import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
 
-import { JsonObject } from 'x-pack/plugins/infra/common/typed_json';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
+import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntryDocument,
