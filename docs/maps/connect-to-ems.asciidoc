@@ -1,0 +1,26 @@
+[role="xpack"]
+[[maps-connect-to-ems]]
+== Connecting to Elastic Maps Service
+
+The **Maps** application uses https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)]
+for tiles and vector shapes of administrative boundaries.
+
+The **Maps** application proxies requests for tile layer meta data, vector shapes meta data, and vector shapes
+through the Kibana server. EMS tile requests are made directly from the browser to EMS.
+
+NOTE: The Maps application uses the Kibana server as a proxy to EMS.
+This is different behavior than the legacy tilemap and regionmap visualizations.
+The legacy tilemap and regionmap visualizations do not proxy any EMS requests through the Kibana server.
+
+
+[float]
+=== Disabling Elastic Maps Service
+
+The **Maps** application does not require a connection to EMS.
+You can turn off EMS by setting `map.includeElasticMapsService: false` in <<settings, Kibana's settings>>.
+
+You will need to provide tile layers when the connection to EMS is not available.
+Configure the Maps application default tile layer by setting `map.tilemap.url` in <<settings, Kibana's settings>>.
+
+You can also provide vector shapes of administrative boundaries by configuring `map.regionmap`
+in <<settings, Kibana's settings>>.
