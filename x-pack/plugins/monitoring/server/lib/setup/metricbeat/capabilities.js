@@ -136,11 +136,8 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
         }
       }
-      capabilities.isFullyMigrated = isFullyMigrated;
-      capabilities.isInternalCollector = !isFullyMigrated;
       capabilities.totalUniqueInstanceCount = Object.keys(map).length;
-      capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
-      capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
+      capabilities.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       capabilities.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
@@ -181,18 +178,11 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
         }
       }
 
-      capabilities.isFullyMigrated = Object.keys(internalCollectorsUuidsMap).length === 0;
-      capabilities.isPartiallyMigrated = Object.keys(partiallyMigratedUuidsMap).length > 0
-        || (Object.keys(internalCollectorsUuidsMap).length > 0 && Object.keys(fullyMigratedUuidsMap).length > 0);
-      capabilities.isInternalCollector = Object.keys(fullyMigratedUuidsMap).length === 0
-        && Object.keys(partiallyMigratedUuidsMap).length === 0;
       capabilities.totalUniqueInstanceCount = uniq([
         ...Object.keys(internalCollectorsUuidsMap),
         ...Object.keys(fullyMigratedUuidsMap)
       ]).length;
-      capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
-      capabilities.partiallyMigratedUuids = Object.keys(partiallyMigratedUuidsMap);
-      capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
+      capabilities.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       capabilities.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,

@@ -31,7 +31,7 @@ export const MetricbeatMigrationStatus = ({ data }) => {
       <EuiBadge
         color={color}
       >
-        {data.fullyMigratedUuids.length}/{data.totalUniqueInstanceCount}
+        {data.totalUniqueFullyMigratedCount.length}/{data.totalUniqueInstanceCount}
       </EuiBadge>
     </EuiFlexItem>
   );
