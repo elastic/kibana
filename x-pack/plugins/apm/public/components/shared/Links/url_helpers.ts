@@ -5,10 +5,8 @@
  */
 
 import createHistory from 'history/createHashHistory';
-import { pick } from 'lodash';
 import qs from 'querystring';
 import { StringMap } from '../../../../typings/common';
-import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
@@ -25,19 +23,6 @@ export const PERSISTENT_APM_PARAMS = [
   'refreshPaused',
   'refreshInterval'
 ];
-
-export function getSearchWithCurrentTimeRange(
-  currentSearch: string,
-  query: StringMap<any> = {}
-) {
-  const currentQuery = toQuery(currentSearch);
-  const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
-    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-    ...query
-  };
-  return fromQuery(nextQuery);
-}
 
 export interface APMQueryParams {
   transactionId?: string;
