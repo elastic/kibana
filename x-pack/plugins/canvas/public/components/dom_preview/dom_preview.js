@@ -43,10 +43,11 @@ export class DomPreview extends React.Component {
         const config = { attributes: true, childList: true, subtree: true };
         // pass in the target node, as well as the observer options
         this.observer.observe(this.original, config);
+      } else {
+        clearTimeout(this.updateTimeout); // to avoid the assumption that we fully control when `update` is called
+        this.updateTimeout = setTimeout(this.update, 30);
+        return;
       }
-      clearTimeout(this.updateTimeout); // to avoid the assumption that we fully control when `update` is called
-      this.updateTimeout = setTimeout(this.update, 30);
-      return;
     }
 
     const thumb = this.original.cloneNode(true);
