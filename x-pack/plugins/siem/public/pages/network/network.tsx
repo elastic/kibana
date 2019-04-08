@@ -43,6 +43,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <>
           <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
               <GlobalTime>
@@ -65,7 +66,9 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </KpiNetworkQuery>
+
                     <EuiSpacer size="m" />
+
                     <NetworkTopNFlowQuery
                       endDate={to}
                       filterQuery={filterQuery}
@@ -98,7 +101,9 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </NetworkTopNFlowQuery>
+
                     <EuiSpacer size="m" />
+
                     <NetworkDnsQuery
                       endDate={to}
                       filterQuery={filterQuery}

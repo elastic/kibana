@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -98,38 +98,40 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       updateDnsLimit,
     } = this.props;
     return (
-      <LoadMoreTable
-        columns={getNetworkDnsColumns(startDate, type)}
-        loadingTitle={i18n.TOP_DNS_DOMAINS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
-        hasNextPage={hasNextPage}
-        itemsPerRow={rowItems}
-        onChange={this.onChange}
-        updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
-        sorting={{
-          field: `node.${dnsSortField.field}`,
-          direction: dnsSortField.direction,
-        }}
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h3>
-                {i18n.TOP_DNS_DOMAINS}
-                <Sup>
-                  <EuiIconTip content={i18n.TOOLTIP} position="right" />
-                </Sup>
-                <CountBadge color="hollow">{totalCount}</CountBadge>
-              </h3>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <EuiPanel>
+        <LoadMoreTable
+          columns={getNetworkDnsColumns(startDate, type)}
+          loadingTitle={i18n.TOP_DNS_DOMAINS}
+          loading={loading}
+          pageOfItems={data}
+          loadMore={() => loadMore(nextCursor)}
+          limit={limit}
+          hasNextPage={hasNextPage}
+          itemsPerRow={rowItems}
+          onChange={this.onChange}
+          updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
+          sorting={{
+            field: `node.${dnsSortField.field}`,
+            direction: dnsSortField.direction,
+          }}
+          title={
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <h3>
+                  {i18n.TOP_DNS_DOMAINS}
+                  <Sup>
+                    <EuiIconTip content={i18n.TOOLTIP} position="right" />
+                  </Sup>
+                  <CountBadge color="hollow">{totalCount}</CountBadge>
+                </h3>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiPanel>
     );
   }
 

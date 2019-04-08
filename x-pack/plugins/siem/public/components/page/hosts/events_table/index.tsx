@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiPanel } from '@elastic/eui';
 import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -77,24 +77,26 @@ const EventsTableComponent = pure<EventsTableProps>(
     startDate,
     type,
   }) => (
-    <LoadMoreTable
-      columns={getEventsColumns(startDate)}
-      loadingTitle={i18n.EVENTS}
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor, tiebreaker)}
-      limit={limit}
-      hasNextPage={hasNextPage}
-      itemsPerRow={rowItems}
-      updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
-      }
-      title={
-        <h3>
-          {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
-      }
-    />
+    <EuiPanel>
+      <LoadMoreTable
+        columns={getEventsColumns(startDate)}
+        loadingTitle={i18n.EVENTS}
+        loading={loading}
+        pageOfItems={data}
+        loadMore={() => loadMore(nextCursor, tiebreaker)}
+        limit={limit}
+        hasNextPage={hasNextPage}
+        itemsPerRow={rowItems}
+        updateLimitPagination={newLimit =>
+          updateLimitPagination({ limit: newLimit, hostsType: type })
+        }
+        title={
+          <h3>
+            {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          </h3>
+        }
+      />
+    </EuiPanel>
   )
 );
 

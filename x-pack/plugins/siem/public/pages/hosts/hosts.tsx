@@ -46,6 +46,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
               <GlobalTime>
@@ -74,6 +75,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </HostsQuery>
+
                     <UncommonProcessesQuery
                       endDate={to}
                       filterQuery={filterQuery}
@@ -106,6 +108,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </UncommonProcessesQuery>
+
                     <AuthenticationsQuery
                       endDate={to}
                       filterQuery={filterQuery}
@@ -138,6 +141,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </AuthenticationsQuery>
+
                     <EventsQuery
                       endDate={to}
                       filterQuery={filterQuery}
