@@ -29,6 +29,7 @@ import {
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
+import { SeriesAxisEditor } from './seriesaxis_editor';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
@@ -108,7 +109,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Split series by</span>
         {seriesAxis.columns.map(col => (
-          <XAxisEditor
+          <SeriesAxisEditor
             key={col}
             col={col}
             visModel={visModel}
@@ -159,6 +160,7 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayT
   // TODO we maybe need a more stable way to get these
   const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  // TODO check whether we have a split series candidate
 
   if (xAxisRef && yAxisRef) {
     return updateXyState(visModel, {
@@ -248,17 +250,15 @@ function buildViewModel(
         ...visModel.private.xyChart,
         xAxis: {
           title: formattedNameX,
-          columns: xAxis.map(
-            (_, index) => `xyChartQuery_${index + seriesAxis.length + yAxis.length}`
-          ),
+          columns: xAxis.map(column => `xyChartQuery_${column.alias}`),
         },
         seriesAxis: {
           title: formattedSplitName,
-          columns: seriesAxis.map((_, index) => `xyChartQuery_${index}`),
+          columns: seriesAxis.map(column => `xyChartQuery_${column.alias}`),
         },
         yAxis: {
           title: formattedNameY,
-          columns: yAxis.map((_, index) => `xyChartQuery_${seriesAxis.length + index}`),
+          columns: yAxis.map(column => `xyChartQuery_${column.alias}`),
         },
       },
     },

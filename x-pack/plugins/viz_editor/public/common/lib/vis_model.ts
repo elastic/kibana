@@ -47,16 +47,15 @@ export type UnknownVisModel = VisModel<string, unknown>;
 // TODO: the way the "id" works is too hacky. Need to modify this, probably should
 // use a dispatch mechanism, too, to avoid deep knowledge of VisModel everywhere...
 export function selectColumn(id: string, model: VisModel) {
-  const [queryId, columnIndex] = id.split('_');
+  const [queryId, columnId] = id.split('_');
   const query = model.queries[queryId];
 
-  return query ? query.select[parseInt(columnIndex, 10)] : undefined;
+  return query ? query.select.find(({ alias }) => alias === columnId) : undefined;
 }
 
-export function updateColumn(id: string, col: SelectOperation, model: VisModel) {
-  const [queryId, columnIndex] = id.split('_');
+export function removeColumn(id: string, model: VisModel) {
+  const [queryId, columnId] = id.split('_');
   const query = model.queries[queryId];
-  const index = parseInt(columnIndex, 10);
 
   return {
     ...model,
@@ -64,7 +63,25 @@ export function updateColumn(id: string, col: SelectOperation, model: VisModel) 
       ...model.queries,
       [queryId]: {
         ...query,
-        select: query.select.map((s, i) => (i === index ? col : s)),
+        select: query.select.filter(({ alias }) => alias !== columnId),
+      },
+    },
+  };
+}
+
+export function updateColumn(id: string, col: SelectOperation, model: VisModel) {
+  const [queryId, columnId] = id.split('_');
+  const query = model.queries[queryId];
+
+  return {
+    ...model,
+    queries: {
+      ...model.queries,
+      [queryId]: {
+        ...query,
+        select: query.select.map(currentColumn =>
+          currentColumn.alias === columnId ? col : currentColumn
+        ),
       },
     },
   };
@@ -91,7 +108,8 @@ export function getColumnIdByIndex(
 ): string | undefined {
   const queryId = Object.keys(queries).sort()[queryIndex];
   if (queryId) {
-    return `${queryId}_${columnIndex}`;
+    const columnId = queries[queryId].select[columnIndex].alias;
+    return `${queryId}_${columnId}`;
   }
 }
 

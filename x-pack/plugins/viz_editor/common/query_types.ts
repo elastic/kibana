@@ -20,7 +20,7 @@ export type SelectOperator =
 
 export interface Aliasable {
   operator: SelectOperator;
-  alias?: string;
+  alias: string;
 }
 
 export interface Field {

@@ -76,19 +76,15 @@ function sampleVisFunction() {
       // Other columns can be empty
       const otherColumns = context.columns.slice(0, context.columns.length - 2);
 
-      const data: any[][] = context.rows
-        .map((row: any) => {
-          return {
-            ...row,
-            [yColumn.id]:
-              yColumn.type === 'date' ? moment(row[yColumn.id] as any).valueOf() : row[yColumn.id],
-            [xColumn.id]:
-              xColumn.type === 'date' ? moment(row[xColumn.id] as any).valueOf() : row[xColumn.id],
-          };
-        })
-        .sort((row1, row2) => {
-          return row1[xColumn.id] < row2[xColumn.id] ? -1 : 1;
-        });
+      const data: any[][] = context.rows.map((row: any) => {
+        return {
+          ...row,
+          [yColumn.id]:
+            yColumn.type === 'date' ? moment(row[yColumn.id] as any).valueOf() : row[yColumn.id],
+          [xColumn.id]:
+            xColumn.type === 'date' ? moment(row[xColumn.id] as any).valueOf() : row[xColumn.id],
+        };
+      });
 
       return {
         type: 'render',

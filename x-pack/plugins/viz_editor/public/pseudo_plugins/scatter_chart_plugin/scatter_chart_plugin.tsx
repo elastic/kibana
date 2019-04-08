@@ -255,8 +255,8 @@ function getSuggestionsForField(
     private: {
       ...visModel.private,
       scatterChart: {
-        xAxis: { title: 'X Axis', columns: ['q1_1'] },
-        yAxis: { title: 'Y Axis', columns: ['q1_0'] },
+        xAxis: { title: 'X Axis', columns: [`q1_${select[1].alias}`] },
+        yAxis: { title: 'Y Axis', columns: [`q1_${select[0].alias}`] },
         hasDate,
       },
     },

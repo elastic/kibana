@@ -6,7 +6,7 @@
 import { DatasourceField } from './datasource';
 import { SelectOperation, SelectOperator } from './query_types';
 
-type OperationTemplate = { [operation in SelectOperator]: SelectOperation };
+type OperationTemplate = { [operation in SelectOperator]: Partial<SelectOperation> };
 
 const operationTemplate: OperationTemplate = {
   count: { operator: 'count' },
@@ -33,24 +33,27 @@ const operationTemplate: OperationTemplate = {
 };
 
 export function getOperationTemplate(operator: SelectOperator) {
-  const template: SelectOperation = { ...operationTemplate[operator] };
+  const template: Partial<SelectOperation> = { ...operationTemplate[operator] };
 
   if ('argument' in template) {
     // Deep clone
-    template.argument = { ...template.argument };
+    template.argument = { ...template.argument } as any;
   }
 
   return template;
 }
 
 export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
-  const template: SelectOperation = getOperationTemplate(operator);
+  const template = {
+    ...getOperationTemplate(operator),
+    alias: field.name,
+  } as SelectOperation;
 
   if ('argument' in template) {
     template.argument.field = field.name;
   }
 
-  template.alias = field.name;
+  template.alias = operator === 'count' ? 'count' : field.name;
 
   return template;
 }

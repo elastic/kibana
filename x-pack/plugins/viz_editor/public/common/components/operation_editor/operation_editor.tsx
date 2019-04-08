@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiPopover } from '@elastic/eui';
+import { EuiButtonToggle, EuiLink, EuiPopover } from '@elastic/eui';
 import { EuiSideNav } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
@@ -13,7 +13,16 @@ import { isApplicableForCardinality, isApplicableForScale } from '../../lib';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
 export function OperationEditor(props: OperationEditorProps) {
-  const { children, visModel, column, onColumnChange, allowedScale, allowedCardinality } = props;
+  const {
+    children,
+    visModel,
+    column,
+    onColumnChange,
+    removable,
+    onColumnRemove,
+    allowedScale,
+    allowedCardinality,
+  } = props;
   const [state, setState] = useState({
     isOpen: false,
   });
@@ -56,20 +65,31 @@ export function OperationEditor(props: OperationEditorProps) {
   ) : null;
 
   return (
-    <EuiPopover
-      id="contextMenu"
-      button={button}
-      isOpen={state.isOpen}
-      closePopover={close}
-      anchorPosition="leftCenter"
-      withTitle
-    >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={!subEditor}>
-          <EuiSideNav items={sideNavItems} />
-        </EuiFlexItem>
-        {subEditor}
-      </EuiFlexGroup>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id="contextMenu"
+        button={button}
+        isOpen={state.isOpen}
+        closePopover={close}
+        anchorPosition="leftCenter"
+        withTitle
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={!subEditor}>
+            <EuiSideNav items={sideNavItems} />
+          </EuiFlexItem>
+          {subEditor}
+        </EuiFlexGroup>
+      </EuiPopover>
+      {removable && (
+        <EuiButtonToggle
+          iconType="cross"
+          label="Remove"
+          isIconOnly
+          isEmpty
+          onChange={onColumnRemove}
+        />
+      )}
+    </>
   );
 }

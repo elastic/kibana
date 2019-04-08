@@ -123,6 +123,7 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   // TODO we maybe need a more stable way to get these
   const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
+  // TODO check whether we have a split series candidate
 
   if (xAxisRef && yAxisRef) {
     return updatePieState(visModel, {

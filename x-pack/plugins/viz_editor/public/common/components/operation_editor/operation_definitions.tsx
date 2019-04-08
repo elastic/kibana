@@ -32,6 +32,8 @@ export interface OperationEditorProps {
   children: any;
   column: SelectOperation;
   onColumnChange: (newColumn: SelectOperation) => void;
+  onColumnRemove?: () => void;
+  removable?: boolean;
   visModel: VisModel;
   allowedScale: Scale;
   allowedCardinality: Cardinality;
@@ -362,6 +364,7 @@ export const operations: OperationDefinition[] = [
     toSelectClause(): CountOperation {
       return {
         operator: 'count',
+        alias: 'count',
       };
     },
     summarize(op: CountOperation) {
@@ -388,6 +391,7 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
+        alias: getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
     summarize(op: AvgOperation) {
@@ -415,6 +419,7 @@ export const operations: OperationDefinition[] = [
           interval: 'd',
           field: getFieldName(currentOperation, dateAggFields(fields)),
         },
+        alias: getFieldName(currentOperation, dateAggFields(fields)),
       };
     },
     summarize(op: DateHistogramOperation) {
@@ -441,6 +446,7 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, aggregatableFields(fields)),
         },
+        alias: getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
     summarize(op: CardinalityOperation) {
@@ -471,6 +477,7 @@ export const operations: OperationDefinition[] = [
           field: getFieldName(currentOperation, aggregatableFields(fields)),
           size: 5,
         },
+        alias: getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
     summarize(op: CardinalityOperation) {
@@ -500,6 +507,7 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
+        alias: getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
     summarize(op: SumOperation) {
@@ -532,6 +540,7 @@ export const operations: OperationDefinition[] = [
           windowFunction: 'max',
           windowSize: 10,
         },
+        alias: getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
   },
