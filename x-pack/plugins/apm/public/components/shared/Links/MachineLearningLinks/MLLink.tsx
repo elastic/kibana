@@ -8,9 +8,9 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
+import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
-import rison, { RisonValue } from 'rison-node';
 
 interface MlRisonData {
   ml?: {
@@ -21,7 +21,7 @@ interface MlRisonData {
 interface Props {
   query?: MlRisonData;
   path?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function MLLink({ children, path = '', query = {} }: Props) {

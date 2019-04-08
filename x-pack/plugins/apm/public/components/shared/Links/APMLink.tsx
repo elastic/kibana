@@ -15,7 +15,7 @@ import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query?: APMQueryParams;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const PERSISTENT_APM_PARAMS = [

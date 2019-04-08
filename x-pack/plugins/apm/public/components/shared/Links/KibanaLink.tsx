@@ -11,7 +11,7 @@ import url from 'url';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function KibanaLink({ path, ...rest }: Props) {

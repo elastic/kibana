@@ -20,7 +20,7 @@ interface InfraQueryParams {
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query: InfraQueryParams;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function InfraLink({ path, query = {}, ...rest }: Props) {

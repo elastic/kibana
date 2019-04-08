@@ -8,10 +8,10 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
+import rison, { RisonValue } from 'rison-node';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import rison, { RisonValue } from 'rison-node';
 
 interface Props {
   query: {
