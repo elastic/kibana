@@ -34,11 +34,6 @@ export class RenderWithFn extends React.Component {
     reuseNode: false,
   };
 
-  constructor(props) {
-    super(props);
-    this.domNode = null;
-  }
-
   componentDidMount() {
     this.firstRender = true;
     this.renderTarget = null;
@@ -48,7 +43,7 @@ export class RenderWithFn extends React.Component {
     const newRenderFunction = renderFn !== this.props.renderFn;
 
     if (newRenderFunction) {
-      this.resetRenderTarget(this.domNode);
+      this.resetRenderTarget(this._domNode);
     }
   }
 
@@ -74,11 +69,13 @@ export class RenderWithFn extends React.Component {
     this.props.handlers.destroy();
   }
 
+  _domNode = null;
+
   callRenderFn = () => {
     const { handlers, config, renderFn, reuseNode, name: functionName } = this.props;
     // TODO: We should wait until handlers.done() is called before replacing the element content?
     if (!reuseNode || !this.renderTarget) {
-      this.resetRenderTarget(this.domNode);
+      this.resetRenderTarget(this._domNode);
     }
     // else if (!firstRender) handlers.destroy();
 
@@ -145,7 +142,7 @@ export class RenderWithFn extends React.Component {
         <RenderToDom
           style={{ height: '100%', width: '100%' }}
           render={domNode => {
-            this.domNode = domNode;
+            this._domNode = domNode;
             this.callRenderFn();
           }}
         />
