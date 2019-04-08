@@ -51,6 +51,7 @@ const DEFAULTS = {
   legend_position: 'right',
   show_grid: 1
 };
+const getUniqueId = htmlIdGenerator();
 
 function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, name }) {
   const [tab, switchTab] = useState('data');
@@ -59,7 +60,6 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
   const model = { ...DEFAULTS, ...seriesModel };
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
-  const htmlId = htmlIdGenerator();
 
   const positionOptions = [
     {
@@ -148,7 +148,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
           <EuiFlexGroup responsive={false} wrap={true}>
             <EuiFlexItem>
               <EuiFormRow
-                id={htmlId('panelFilter')}
+                id={getUniqueId('panelFilter')}
                 label={(<FormattedMessage
                   id="tsvb.timeseries.optionsTab.panelFilterLabel"
                   defaultMessage="Panel filter"
@@ -195,7 +195,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
           <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
             <EuiFlexItem>
               <EuiFormRow
-                id={htmlId('axisMin')}
+                id={getUniqueId('axisMin')}
                 label={(<FormattedMessage
                   id="tsvb.timeseries.optionsTab.axisMinLabel"
                   defaultMessage="Axis min"
@@ -209,7 +209,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                id={htmlId('axisMax')}
+                id={getUniqueId('axisMax')}
                 label={(<FormattedMessage
                   id="tsvb.timeseries.optionsTab.axisMaxLabel"
                   defaultMessage="Axis max"
@@ -223,7 +223,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                id={htmlId('axisPos')}
+                id={getUniqueId('axisPos')}
                 label={(<FormattedMessage
                   id="tsvb.timeseries.optionsTab.axisPositionLabel"
                   defaultMessage="Axis position"
@@ -240,7 +240,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                id={htmlId('axisScale')}
+                id={getUniqueId('axisScale')}
                 label={(<FormattedMessage
                   id="tsvb.timeseries.optionsTab.axisScaleLabel"
                   defaultMessage="Axis scale"
@@ -291,7 +291,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('legendPos')}>
+              <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={getUniqueId('legendPos')}>
                 <FormattedMessage
                   id="tsvb.timeseries.optionsTab.legendPositionLabel"
                   defaultMessage="Legend position"
@@ -301,7 +301,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
             <EuiFlexItem>
               <EuiComboBox
                 isClearable={false}
-                id={htmlId('legendPos')}
+                id={getUniqueId('legendPos')}
                 options={legendPositionOptions}
                 selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
                 onChange={handleSelectChange('legend_position')}
@@ -327,7 +327,7 @@ function TimeseriesPanelConfigUI({ model: seriesModel, onChange, intl, fields, n
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCheckbox
-                id={htmlId('timeMarker')}
+                id={getUniqueId('timeMarker')}
                 label="Current Time Marker"
                 checked={isTimeMarkerChecked}
                 onChange={() => toggleTimeMarker(!isTimeMarkerChecked)}
