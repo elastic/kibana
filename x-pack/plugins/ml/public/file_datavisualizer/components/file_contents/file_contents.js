@@ -5,7 +5,7 @@
  */
 
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -22,27 +22,36 @@ export function FileContents({ data, format, numberOfLines }) {
   }
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
+  const fileContentsHeader = i18n.translate('xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle', {
+    defaultMessage: `File contents`
+  });
+  const fileContentsDescription = i18n.translate('xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription', {
+    defaultMessage: `First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}`,
+    values: {
+      numberOfLines
+    }
+  });
+  const ariaLabelI18n = i18n.translate('xpack.ml.fileDatavisualizer.fileContents.ariaLabelBeforeSentUserToCodeEditor', {
+    defaultMessage: `{translatedHeader}. {translatedAmountOfFirstLines} is shown in a code editor below. Hit Tab key to go to code editor.`,
+    values: {
+      translatedHeader: fileContentsHeader,
+      translatedAmountOfFirstLines: fileContentsDescription,
+
+    }
+  });
 
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle"
-            defaultMessage="File contents"
-          />
+        <h3
+          tabIndex="0"
+          aria-label={ariaLabelI18n}
+        >
+          {fileContentsHeader}
         </h3>
       </EuiTitle>
 
-      <div>
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription"
-          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-          values={{
-            numberOfLines: numberOfLines,
-          }}
-        />
-      </div>
+      <div>{fileContentsDescription}</div>
 
       <EuiSpacer size="s" />
 
