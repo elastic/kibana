@@ -12,12 +12,18 @@ import {
   MetricsExplorerMetric,
 } from '../../../server/routes/metrics_explorer/types';
 
+export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
+  color?: MetricsExplorerColor;
+  label?: string;
+};
+
 export interface MetricsExplorerOptions {
-  metrics: MetricsExplorerMetric[];
+  metrics: MetricsExplorerOptionsMetric[];
   afterKey?: string | null;
   limit?: number;
   groupBy?: string;
   filterQuery?: string;
+  aggregation: MetricsExplorerAggregation;
 }
 
 export interface MetricsExplorerTimeOptions {
@@ -33,12 +39,8 @@ const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
 };
 
 const DEFAULT_OPTIONS: MetricsExplorerOptions = {
-  metrics: [
-    {
-      aggregation: MetricsExplorerAggregation.count,
-      color: MetricsExplorerColor.color0,
-    },
-  ],
+  aggregation: MetricsExplorerAggregation.count,
+  metrics: [],
 };
 
 export const useMetricsExplorerOptions = () => {

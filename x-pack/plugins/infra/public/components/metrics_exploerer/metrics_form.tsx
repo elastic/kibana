@@ -54,7 +54,7 @@ export const MetricForm = injectI18n(
           ...metric,
           aggregation:
             (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
-            MetricsExplorerAggregation.count,
+            MetricsExplorerAggregation.avg,
         }),
       [metric, onChange]
     );

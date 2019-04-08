@@ -8,7 +8,10 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../../common/graphql/types';
-import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
+import {
+  MetricsExplorerMetric,
+  MetricsExplorerAggregation,
+} from '../../../../server/routes/metrics_explorer/types';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_exploerer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_exploerer/toolbar';
@@ -90,6 +93,20 @@ export const MetricsExplorerPage = injectI18n(
       [options]
     );
 
+    const handleAggregationChange = useCallback(
+      (aggregation: MetricsExplorerAggregation) => {
+        setOptions({
+          ...options,
+          aggregation,
+          metrics:
+            aggregation === MetricsExplorerAggregation.count
+              ? [{ aggregation }]
+              : options.metrics.map(metric => ({ ...metric, aggregation })),
+        });
+      },
+      [options]
+    );
+
     return (
       <div>
         <DocumentTitle
@@ -115,6 +132,7 @@ export const MetricsExplorerPage = injectI18n(
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
           onMetricsChange={handleMetricsChange}
+          onAggregationChange={handleAggregationChange}
         />
         {(error && error.message) || (
           <MetricsExplorerCharts

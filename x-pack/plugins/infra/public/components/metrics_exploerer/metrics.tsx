@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
-import euiStyled from '../../../../../common/eui_styled_components';
-import { MetricsExplorerColor, sampleColor } from '../../../common/color_palette';
+import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
-  MetricsExplorerAggregation,
   MetricsExplorerMetric,
+  MetricsExplorerAggregation,
 } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
-import { Metric } from './metric';
 
 interface Props {
   intl: InjectedIntl;
@@ -24,94 +22,55 @@ interface Props {
   fields: StaticIndexPatternField[];
 }
 
-export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fields }: Props) => {
-  const [newMetric, setNewMetric] = useState<number | null>(null);
-  const handleChange = useCallback(
-    (id: number, metric: MetricsExplorerMetric) => {
-      onChange(
-        options.metrics.map((m, index) => {
-          if (index === id) {
-            return metric;
-          }
-          return m;
-        })
-      );
-      setNewMetric(null);
-    },
-    [options, onChange, setNewMetric]
-  );
+interface SelectedOption {
+  value: string;
+  label: string;
+}
 
-  const handleDelete = useCallback(
-    (id: number) => {
-      onChange(options.metrics.filter((m, index) => index !== id));
+export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fields }: Props) => {
+  const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
+
+  const handleChange = useCallback(
+    selectedOptions => {
+      if (selectedOptions.length < 4) {
+        onChange(
+          selectedOptions.map((opt: SelectedOption, index: number) => ({
+            aggregation: options.aggregation,
+            field: opt.value,
+            color: colors[index],
+          }))
+        );
+      }
     },
     [options, onChange]
   );
 
-  const handleAdd = useCallback(
-    () => {
-      const usedColors = options.metrics.map(m => m.color || MetricsExplorerColor.color0);
-      setNewMetric(options.metrics.length);
-      onChange([
-        ...options.metrics,
-        { aggregation: MetricsExplorerAggregation.count, color: sampleColor(usedColors) },
-      ]);
-    },
-    [options, onChange, setNewMetric]
-  );
+  const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
+  const selectedOptios =
+    options.aggregation === MetricsExplorerAggregation.count
+      ? []
+      : options.metrics
+          .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
+          .map(metric => ({
+            label: metric.field || '',
+            value: metric.field || '',
+            color: colorTransformer(metric.color || MetricsExplorerColor.color0),
+          }));
 
-  const addMetricLabel = intl.formatMessage({
-    id: 'xpack.infra.metricsExplorer.addMetricLabel',
-    defaultMessage: 'Add Metric',
+  const placeholderText = intl.formatMessage({
+    id: 'xpack.infra.metricsExplorer.metricComboBoxPlaceholder',
+    defaultMessage: 'choose a metric to plot',
   });
 
-  const openFirstMetric =
-    options.metrics.length === 1 &&
-    options.metrics[0] &&
-    options.metrics[0].aggregation === MetricsExplorerAggregation.count &&
-    options.metrics[0].color === MetricsExplorerColor.color0 &&
-    options.groupBy == null;
-
   return (
-    <MetricsContainer>
-      {options.metrics.map((metric, index) => (
-        <Metric
-          fields={fields}
-          id={index}
-          metric={metric}
-          key={`metric-${index}`}
-          onChange={handleChange}
-          onDelete={handleDelete}
-          isDeleteable={options.metrics.length > 1}
-          openFromStart={openFirstMetric || newMetric === index}
-        />
-      ))}
-      {options.metrics.length < 5 && (
-        <MetricsAddButton>
-          <EuiToolTip content={addMetricLabel}>
-            <EuiButtonIcon
-              aria-label={addMetricLabel}
-              iconType="plusInCircle"
-              color="text"
-              onClick={handleAdd}
-            />
-          </EuiToolTip>
-        </MetricsAddButton>
-      )}
-    </MetricsContainer>
+    <EuiComboBox
+      isDisabled={options.aggregation === MetricsExplorerAggregation.count}
+      placeholder={placeholderText}
+      fullWidth
+      options={comboOptions}
+      selectedOptions={selectedOptios}
+      onChange={handleChange}
+      isClearable={false}
+    />
   );
 });
-
-const MetricsAddButton = euiStyled.div`
-  text-align: right;
-  flex-grow: 1;
-`;
-
-const MetricsContainer = euiStyled.div`
-  display: flex;
-  background-color: ${params => params.theme.eui.euiFormBackgroundColor};
-  padding: 6px;
-  box-shadow:  0 1px 1px -1px rgba(152, 162, 179, 0.2),
-                0 3px 2px -2px rgba(152, 162, 179, 0.2), 
-                inset 0 0 0 1px rgba(0, 0, 0, 0.1)
-`;

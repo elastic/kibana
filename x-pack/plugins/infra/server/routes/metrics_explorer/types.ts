@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsExplorerColor } from '../../../common/color_palette';
 import { InfraWrappableRequest } from '../../lib/adapters/framework';
 
 export interface InfraTimerange {
@@ -18,16 +17,14 @@ export enum MetricsExplorerAggregation {
   avg = 'avg',
   max = 'max',
   min = 'min',
-  count = 'count',
   cardinality = 'cardinality',
   rate = 'rate',
+  count = 'count',
 }
 
 export interface MetricsExplorerMetric {
   aggregation: MetricsExplorerAggregation;
   field?: string | null;
-  color?: MetricsExplorerColor;
-  label?: string;
 }
 
 export interface MetricsExplorerRequest {

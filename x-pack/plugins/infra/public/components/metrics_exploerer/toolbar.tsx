@@ -9,7 +9,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../common/graphql/types';
-import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric, MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
@@ -17,6 +17,8 @@ import {
 import { Toolbar } from '../eui/toolbar';
 import { MetricsExploererKueryBar } from './kuery_bar';
 import { MetricsExplorerMetrics } from './metrics';
+import { MetricsExplorerGroupBy } from './group_by';
+import { MetricsExplorerAggregationPicker } from './aggregation';
 
 interface Props {
   intl: InjectedIntl;
@@ -29,6 +31,7 @@ interface Props {
   onGroupByChange: (groupBy: string | null) => void;
   onFilterQuerySubmit: (query: string) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
+  onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
 }
 
 export const MetricsExplorerToolbar = injectI18n(
@@ -41,10 +44,23 @@ export const MetricsExplorerToolbar = injectI18n(
     onGroupByChange,
     onFilterQuerySubmit,
     onMetricsChange,
+    onAggregationChange,
   }: Props) => {
     return (
       <Toolbar>
         <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <MetricsExplorerAggregationPicker
+              options={options}
+              onChange={onAggregationChange}
+            />
+          </EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id={`xpack.infra.metricsExplorer.aggregationLabel`}
+              defaultMessage="of"
+            />
+          </EuiText>
           <EuiFlexItem>
             <MetricsExplorerMetrics
               fields={derivedIndexPattern.fields}
@@ -59,19 +75,10 @@ export const MetricsExplorerToolbar = injectI18n(
             />
           </EuiText>
           <EuiFlexItem>
-            <EuiComboBox
-              placeholder="Everything"
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
-              options={derivedIndexPattern.fields
-                .filter(f => f.aggregatable && f.type === 'string')
-                .map(f => ({ label: f.name }))}
-              onChange={selectedOptions => {
-                const groupBy = (selectedOptions.length === 1 && selectedOptions[0].label) || null;
-                onGroupByChange(groupBy);
-              }}
-              isClearable={true}
+            <MetricsExplorerGroupBy
+              onChange={onGroupByChange}
+              fields={derivedIndexPattern.fields}
+              options={options}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

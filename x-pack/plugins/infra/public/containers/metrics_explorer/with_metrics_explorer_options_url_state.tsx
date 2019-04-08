@@ -71,6 +71,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     afterKey: Joi.string().allow(null),
     groupBy: Joi.string(),
     filterQuery: Joi.string(),
+    aggregation: Joi.string().required(),
     metrics: Joi.array()
       .items(
         Joi.object().keys({

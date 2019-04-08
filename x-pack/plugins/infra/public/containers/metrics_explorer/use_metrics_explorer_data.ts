@@ -9,7 +9,10 @@ import { isEqual, omit } from 'lodash';
 import { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../common/graphql/types';
-import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
+import {
+  MetricsExplorerAggregation,
+  MetricsExplorerResponse,
+} from '../../../server/routes/metrics_explorer/types';
 import { fetch } from '../../utils/fetch';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
@@ -48,7 +51,16 @@ export function useMetricsExplorerData(
           const response = await fetch.post<MetricsExplorerResponse>(
             '/api/infra/metrics_explorer',
             {
-              ...options,
+              metrics:
+                options.aggregation === MetricsExplorerAggregation.count
+                  ? [{ aggregation: MetricsExplorerAggregation.count }]
+                  : options.metrics.map(metric => ({
+                      aggregation: metric.aggregation,
+                      field: metric.field,
+                    })),
+              groupBy: options.groupBy,
+              afterKey: options.afterKey,
+              limit: options.limit,
               indexPattern: source.metricAlias,
               filterQuery:
                 (options.filterQuery &&

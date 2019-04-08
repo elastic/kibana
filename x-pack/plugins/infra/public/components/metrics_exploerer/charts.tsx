@@ -24,14 +24,18 @@ import {
   // EuiSeriesChartProps,
   // EuiSeriesProps,
   EuiXAxis,
-  EuiSeriesChartAxisUtils
+  EuiSeriesChartAxisUtils,
 } from '@elastic/eui/lib/experimental';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isNumber, last, max } from 'lodash';
 import React, { useCallback } from 'react';
 import euiStyled from '../../../../..//common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import { MetricsExplorerResponse, MetricsExplorerAggregation, MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
+import {
+  MetricsExplorerResponse,
+  MetricsExplorerAggregation,
+  MetricsExplorerMetric,
+} from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { NoData } from '../empty_states/no_data';
 import { InfraLoadingPanel } from '../loading';
@@ -49,11 +53,11 @@ const createFormatterForMetric = (metric: MetricsExplorerMetric) => {
       return createFormatter(InfraFormatterType.bits, '{{value}}/s');
     }
     if (suffix === 'bytes') {
-      return createFormatter(InfraFormatterType.bytes)
+      return createFormatter(InfraFormatterType.bytes);
     }
   }
   return createFormatter(InfraFormatterType.number);
-}
+};
 
 interface Props {
   loading: boolean;
@@ -100,7 +104,7 @@ export const MetricsExplorerCharts = injectI18n(
       );
     }
 
-    const marginLeft = ((options.metrics.length - 1) * 30) + 40;
+    const marginLeft = (options.metrics.length - 1) * 30 + 40;
 
     return (
       <div>
@@ -120,12 +124,11 @@ export const MetricsExplorerCharts = injectI18n(
                     const data = series.rows.map(row => ({
                       x: row.timestamp,
                       y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
+                      y0: 0,
                     }));
-                    const dataDomain = [0, max(data.map(d => d.y))];
                     return (
                       <EuiLineSeries
                         key={`metric_chart_${id}`}
-                        yDomain={dataDomain}
                         color={
                           (metric.color && colorTransformer(metric.color)) ||
                           colorTransformer(MetricsExplorerColor.color0)
@@ -134,7 +137,7 @@ export const MetricsExplorerCharts = injectI18n(
                         name={createMetricLabel(metric)}
                         data={data}
                       />
-                    )
+                    );
                   })}
                 </EuiSeriesChart>
               </div>
