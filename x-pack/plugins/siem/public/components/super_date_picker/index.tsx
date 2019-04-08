@@ -94,14 +94,17 @@ const SuperDatePickerComponents = class extends Component<
       to: this.formatDate(end),
     });
     this.setState((prevState: SuperDatePickerState) => {
-      const recentlyUsedRanges = prevState.recentlyUsedRanges.filter(recentlyUsedRange => {
+      let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(recentlyUsedRange => {
         const isDuplicate = recentlyUsedRange.start === start && recentlyUsedRange.end === end;
         return !isDuplicate;
       });
-      recentlyUsedRanges.unshift({ start, end });
+      if (recentlyUsedRanges.length > 9) {
+        recentlyUsedRanges = [{ start, end }, ...recentlyUsedRanges.slice(0, 9)];
+      } else {
+        recentlyUsedRanges = [{ start, end }, ...recentlyUsedRanges];
+      }
       return {
-        recentlyUsedRanges:
-          recentlyUsedRanges.length > 10 ? recentlyUsedRanges.slice(0, 9) : recentlyUsedRanges,
+        recentlyUsedRanges,
         isLoading: true,
       };
     }, this.startLoading);
