@@ -86,18 +86,6 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find('EuiCheckbox[title="Role is reserved"]')).toHaveLength(1);
   });
 
-  it(`renders disabled roles as such`, async () => {
-    const wrapper = mountWithIntl(<RolesGridPage />);
-    const initialIconCount = wrapper.find(EuiIcon).length;
-
-    await waitForRender(wrapper, updatedWrapper => {
-      return updatedWrapper.find(EuiIcon).length > initialIconCount;
-    });
-
-    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(wrapper.find('.rolesGridPage__disabledRoleMessage')).toHaveLength(1);
-  });
-
   it('renders permission denied if required', async () => {
     mockSimulate403 = true;
     const wrapper = mountWithIntl(<RolesGridPage />);
