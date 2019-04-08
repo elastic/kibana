@@ -35,14 +35,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to bulk_get ${type}, missing saved_object:${type}/bulk_get`,
+        message: `Unable to bulk_get ${type}`,
       });
       return;
     }
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to find ${type}, missing saved_object:${type}/find`,
+      message: `Unable to find ${type}`,
     });
   };
 

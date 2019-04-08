@@ -5,6 +5,7 @@
 ```ts
 
 import { default } from 'react';
+import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -44,6 +45,12 @@ export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
 
+// Warning: (ae-internal-missing-underscore) The name CoreContext should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal (undocumented)
+export interface CoreContext {
+}
+
 // @public
 export interface CoreSetup {
     // (undocumented)
@@ -75,7 +82,7 @@ export class CoreSystem {
     // (undocumented)
     constructor(params: Params);
     // (undocumented)
-    setup(): {
+    setup(): Promise<{
         fatalErrors: {
             add: (error: string | Error, source?: string | undefined) => never;
             get$: () => import("rxjs").Observable<{
@@ -83,7 +90,7 @@ export class CoreSystem {
                 stack: string | undefined;
             }>;
         };
-    } | undefined;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
@@ -151,6 +158,37 @@ export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>
 // 
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+
+// @public
+export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
+    // (undocumented)
+    setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    stop?: () => void;
+}
+
+// @public
+export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
+
+// @public
+export interface PluginInitializerContext {
+}
+
+// @public
+export interface PluginSetupContext {
+    // (undocumented)
+    basePath: BasePathSetup;
+    // (undocumented)
+    chrome: ChromeSetup;
+    // (undocumented)
+    fatalErrors: FatalErrorsSetup;
+    // (undocumented)
+    i18n: I18nSetup;
+    // (undocumented)
+    notifications: NotificationsSetup;
+    // (undocumented)
+    uiSettings: UiSettingsSetup;
+}
 
 export { Toast }
 

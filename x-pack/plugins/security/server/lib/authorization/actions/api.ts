@@ -5,16 +5,22 @@
  */
 import { isString } from 'lodash';
 
-const prefix = 'api:';
-
 export class ApiActions {
-  public all = `${prefix}*`;
+  private readonly prefix: string;
+
+  constructor(versionNumber: string) {
+    this.prefix = `api:${versionNumber}:`;
+  }
+
+  public get all(): string {
+    return `${this.prefix}*`;
+  }
 
   public get(operation: string) {
     if (!operation || !isString(operation)) {
       throw new Error('operation is required and must be a string');
     }
 
-    return `${prefix}${operation}`;
+    return `${this.prefix}${operation}`;
   }
 }

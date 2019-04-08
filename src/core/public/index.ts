@@ -25,10 +25,10 @@ import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
 import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
-/** @interal */
-export { CoreSystem } from './core_system';
+export { CoreContext, CoreSystem } from './core_system';
 
 /**
  * Core services exposed to the start lifecycle
@@ -59,6 +59,10 @@ export {
   ChromeHelpExtension,
   InjectedMetadataSetup,
   InjectedMetadataParams,
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
   NotificationsSetup,
   Toast,
   ToastInput,

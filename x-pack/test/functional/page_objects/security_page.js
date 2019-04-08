@@ -169,7 +169,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const btn = await find.byButtonText(privilege);
       await btn.click();
 
-      // const options = await find.byCssSelector(`.euiComboBoxOption`);
+      // const options = await find.byCssSelector(`.euiFilterSelectItem`);
       // Object.entries(options).forEach(([key, prop]) => {
       //   console.log({ key, proto: prop.__proto__ });
       // });

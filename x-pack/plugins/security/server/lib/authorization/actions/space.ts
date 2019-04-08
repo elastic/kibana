@@ -5,5 +5,13 @@
  */
 
 export class SpaceActions {
-  public manage = `space:manage`;
+  private readonly prefix: string;
+
+  constructor(versionNumber: string) {
+    this.prefix = `space:${versionNumber}:`;
+  }
+
+  public get manage(): string {
+    return `${this.prefix}manage`;
+  }
 }
