@@ -28,7 +28,10 @@ class ArgTemplateFormComponent extends React.Component {
     errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
   };
 
-  static domNode = null;
+  constructor(props) {
+    super(props);
+    this.domNode = null;
+  }
 
   componentWillUpdate(prevProps) {
     //see if error state changed

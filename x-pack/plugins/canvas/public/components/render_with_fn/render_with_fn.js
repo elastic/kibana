@@ -34,7 +34,10 @@ export class RenderWithFn extends React.Component {
     reuseNode: false,
   };
 
-  static domNode = null;
+  constructor(props) {
+    super(props);
+    this.domNode = null;
+  }
 
   componentDidMount() {
     this.firstRender = true;
