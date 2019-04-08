@@ -16,26 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/public';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
-};
-
-export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already initialized');
-  }
-
-  runtimeContext.setup.core = core;
-}
-
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
-  }
-  return runtimeContext;
-}
+export const mockReactDomRender = jest.fn();
+export const mockReactDomUnmount = jest.fn();
+jest.doMock('react-dom', () => ({
+  render: mockReactDomRender,
+  unmountComponentAtNode: mockReactDomUnmount,
+}));

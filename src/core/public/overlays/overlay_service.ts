@@ -16,26 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/public';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
-};
+import { FlyoutService } from './flyout';
 
-export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already initialized');
-  }
+import { FlyoutRef } from '..';
+import { I18nSetup } from '../i18n';
 
-  runtimeContext.setup.core = core;
+interface Deps {
+  i18n: I18nSetup;
 }
 
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
+/** @internal */
+export class OverlayService {
+  private flyoutService: FlyoutService;
+
+  constructor(targetDomElement: HTMLElement) {
+    this.flyoutService = new FlyoutService(targetDomElement);
   }
-  return runtimeContext;
+
+  public setup({ i18n }: Deps): OverlaySetup {
+    return {
+      openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
+    };
+  }
+}
+
+/** @public */
+export interface OverlaySetup {
+  openFlyout: (
+    flyoutChildren: React.ReactNode,
+    flyoutProps?: {
+      closeButtonAriaLabel?: string;
+      'data-test-subj'?: string;
+    }
+  ) => FlyoutRef;
 }
