@@ -237,7 +237,7 @@ function getSuggestionsForField(
 
   if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
     hasDate = true;
-    select[0] = fieldToOperation(
+    select[1] = fieldToOperation(
       datasource.fields.find(f => f.name === datasource.timeFieldName)!,
       'column'
     ) as ColumnOperation;
@@ -255,8 +255,8 @@ function getSuggestionsForField(
     private: {
       ...visModel.private,
       scatterChart: {
-        xAxis: { title: 'X Axis', columns: ['q1_0'] },
-        yAxis: { title: 'Y Axis', columns: ['q1_1'] },
+        xAxis: { title: 'X Axis', columns: ['q1_1'] },
+        yAxis: { title: 'Y Axis', columns: ['q1_0'] },
         hasDate,
       },
     },
