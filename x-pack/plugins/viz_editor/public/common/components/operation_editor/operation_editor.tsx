@@ -9,18 +9,11 @@ import { EuiSideNav } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
-import { getTypeForOperation } from '../../lib';
+import { isApplicableForCardinality, isApplicableForScale } from '../../lib';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
 export function OperationEditor(props: OperationEditorProps) {
-  const {
-    children,
-    visModel,
-    column,
-    onColumnChange,
-    allowedOperations,
-    allowedColumnTypes,
-  } = props;
+  const { children, visModel, column, onColumnChange, allowedScale, allowedCardinality } = props;
   const [state, setState] = useState({
     isOpen: false,
   });
@@ -38,23 +31,17 @@ export function OperationEditor(props: OperationEditorProps) {
       name: '',
       id: '0',
       items: operations
-        .filter(({ type }) => (allowedOperations ? allowedOperations.includes(type) : true))
-        .filter(opDefinition =>
-          allowedColumnTypes
-            ? allowedColumnTypes.includes(
-                getTypeForOperation(
-                  opDefinition.toSelectClause(column, visModel.datasource!.fields),
-                  visModel.datasource!.fields
-                )
-              )
-            : true
+        .filter(
+          ({ operator }) =>
+            isApplicableForScale(operator, allowedScale) &&
+            isApplicableForCardinality(operator, allowedCardinality)
         )
         .map(op => ({
           name: op.name,
-          id: op.type,
-          isSelected: op.type === column.operator,
+          id: op.operator,
+          isSelected: op.operator === column.operator,
           onClick() {
-            changeOperation(op.type);
+            changeOperation(op.operator);
           },
         })),
     },

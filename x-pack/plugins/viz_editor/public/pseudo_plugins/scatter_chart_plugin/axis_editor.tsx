@@ -47,8 +47,8 @@ export function AxisEditor({
         onColumnChange={newColumn => {
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
-        allowedOperations={['column']}
-        allowedColumnTypes={['number']}
+        allowedScale="interval"
+        allowedCardinality="multi"
       >
         {getOperationSummary(column)}
       </OperationEditor>

@@ -21,7 +21,7 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
   const updateDatasource = async () => {
     const headerRow = text.split('\n')[0].split(',');
     const firstRow = text.split('\n')[1].split(',');
-    const resultColumns: Array<{ name: string; type: string }> = headerRow.map(
+    const resultColumns: Array<{ name: string; type: 'number' | 'string' }> = headerRow.map(
       (columnHeader: string, index: number) => ({
         name: columnHeader,
         type: /\d+/.test(firstRow[index]) ? 'number' : 'string',

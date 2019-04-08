@@ -46,7 +46,8 @@ export function SliceAxisEditor({
         onColumnChange={newColumn => {
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
-        allowedOperations={['date_histogram', 'terms']}
+        allowedScale="ordinal"
+        allowedCardinality="multi"
       >
         {getOperationSummary(column)}
       </OperationEditor>

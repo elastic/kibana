@@ -15,13 +15,15 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
   const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.sql : '');
 
   const updateDatasource = async () => {
-    const resultColumns: Array<{ name: string; type: string }> = await kfetch({
-      pathname: '/api/viz_editor/sqlfields',
-      method: 'POST',
-      body: JSON.stringify({
-        sql: text,
-      }),
-    });
+    const resultColumns: Array<{ name: string; type: 'number' | 'string' | 'date' }> = await kfetch(
+      {
+        pathname: '/api/viz_editor/sqlfields',
+        method: 'POST',
+        body: JSON.stringify({
+          sql: text,
+        }),
+      }
+    );
 
     const newDatasource: Datasource = {
       id: 'source',

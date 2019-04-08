@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourceField, Query, SelectOperation } from '../../../../common';
+import { DatasourceField, Query, SelectOperation, SelectOperator } from '../../../../common';
+import { Cardinality, Scale } from '../../components/operation_editor';
 
 export function getTypeForOperation(op: SelectOperation, fields: DatasourceField[]): string {
   switch (op.operator) {
@@ -27,4 +28,22 @@ export function getTypes(query: Query, fields: DatasourceField[]) {
   return query.select.map(operation => {
     return getTypeForOperation(operation, fields);
   });
+}
+
+export function isApplicableForScale(operator: SelectOperator, scale: Scale) {
+  if (scale === 'ordinal') {
+    return true;
+  }
+
+  return ['column', 'count', 'cardinality', 'avg', 'sum', 'date_histogram', 'window'].includes(
+    operator
+  );
+}
+
+export function isApplicableForCardinality(operator: SelectOperator, cardinality: Cardinality) {
+  if (cardinality === 'single') {
+    return ['column', 'count', 'cardinality', 'avg', 'sum', 'window'].includes(operator);
+  }
+
+  return ['column', 'date_histogram', 'terms'].includes(operator);
 }

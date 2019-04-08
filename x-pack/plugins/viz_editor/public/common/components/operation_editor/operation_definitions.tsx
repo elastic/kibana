@@ -14,6 +14,7 @@ import {
   DatasourceField,
   DateHistogramOperation,
   FieldOperation,
+  isFieldApplicableForScale,
   SelectOperation,
   SumOperation,
   TermsOperation,
@@ -24,13 +25,16 @@ import { operationToName, VisModel } from '../../lib';
 
 const FixedEuiRange = EuiRange as React.ComponentType<any>;
 
+export type Scale = 'ordinal' | 'interval';
+export type Cardinality = 'single' | 'multi';
+
 export interface OperationEditorProps {
   children: any;
   column: SelectOperation;
   onColumnChange: (newColumn: SelectOperation) => void;
   visModel: VisModel;
-  allowedOperations?: Array<SelectOperation['operator']>;
-  allowedColumnTypes?: string[];
+  allowedScale: Scale;
+  allowedCardinality: Cardinality;
 }
 
 export interface OperationDefinition {
@@ -38,7 +42,7 @@ export interface OperationDefinition {
   name: string;
 
   // The type of the operation (e.g. 'sum', 'avg', etc)
-  type: SelectOperation['operator'];
+  operator: SelectOperation['operator'];
 
   // Filter the fields list down to only those supported by this
   // operation (e.g. numbers for sum operations, dates for histograms)
@@ -327,9 +331,9 @@ function windowOperationEditor(props: OperationEditorProps) {
 export const operations: OperationDefinition[] = [
   {
     name: operationToName('column'),
-    type: 'column',
-    applicableFields: (fields, { allowedColumnTypes }) =>
-      fields.filter(({ type }) => (allowedColumnTypes ? allowedColumnTypes.includes(type) : true)),
+    operator: 'column',
+    applicableFields: (fields, { allowedScale }) =>
+      fields.filter(isFieldApplicableForScale.bind(null, allowedScale)),
     editor: fieldOperationEditor,
     toSelectClause(
       currentOperation: SelectOperation | undefined,
@@ -353,7 +357,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('count'),
-    type: 'count',
+    operator: 'count',
     applicableFields: () => [],
     toSelectClause(): CountOperation {
       return {
@@ -372,7 +376,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('avg'),
-    type: 'avg',
+    operator: 'avg',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
     toSelectClause(
@@ -398,7 +402,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('date_histogram'),
-    type: 'date_histogram',
+    operator: 'date_histogram',
     applicableFields: dateAggFields,
     editor: dateHistogramOperationEditor,
     toSelectClause(
@@ -425,7 +429,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('cardinality'),
-    type: 'cardinality',
+    operator: 'cardinality',
     applicableFields: aggregatableFields,
     editor: fieldOperationEditor,
     toSelectClause(
@@ -454,7 +458,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('terms'),
-    type: 'terms',
+    operator: 'terms',
     applicableFields: aggregatableFields,
     editor: termsOperationEditor,
     toSelectClause(
@@ -484,7 +488,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('sum'),
-    type: 'sum',
+    operator: 'sum',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
     toSelectClause(
@@ -510,7 +514,7 @@ export const operations: OperationDefinition[] = [
 
   {
     name: operationToName('window'),
-    type: 'window',
+    operator: 'window',
     applicableFields: numericAggFields,
     editor: windowOperationEditor,
     summarize(operation: SelectOperation) {
@@ -557,12 +561,12 @@ export function getFieldName(
 }
 
 export const getOperationName = (opType: string) => {
-  const operation = operations.find(({ type }) => type === opType);
+  const operation = operations.find(({ operator: type }) => type === opType);
   return operation && operation.name;
 };
 
 export const tryGetOperationDefinition = (opType: string) =>
-  operations.find(({ type }) => type === opType);
+  operations.find(({ operator: type }) => type === opType);
 
 export const getOperationDefinition = (opType: string) => {
   const operation = tryGetOperationDefinition(opType);

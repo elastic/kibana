@@ -47,7 +47,8 @@ export function AngleAxisEditor({
         onColumnChange={newColumn => {
           onChangeVisModel(updateColumn(col, newColumn, visModel));
         }}
-        allowedOperations={['avg', 'cardinality', 'count', 'sum', 'window']}
+        allowedScale="interval"
+        allowedCardinality="single"
       >
         {getOperationSummary(column)}
       </OperationEditor>
