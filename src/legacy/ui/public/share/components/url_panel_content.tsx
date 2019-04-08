@@ -34,10 +34,9 @@ import {
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { unhashUrl } from '../../state_management/state_hashing';
 import { shortenUrl } from '../lib/url_shortener';
-
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 // TODO: Remove once EuiIconTip supports "content" prop
 const FixedEuiIconTip = EuiIconTip as React.SFC<any>;

@@ -146,11 +146,11 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Download">
+              <EuiToolTip content="Export">
                 <EuiButtonIcon
                   iconType="exportAction"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
-                  aria-label="Download Workpad"
+                  aria-label="Export workpad"
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -174,7 +174,7 @@ export class WorkpadLoader extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Workpad Name',
+        name: 'Workpad name',
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
@@ -294,7 +294,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     const downloadButton = (
       <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
-        {`Download (${selectedWorkpads.length})`}
+        {`Export (${selectedWorkpads.length})`}
       </EuiButton>
     );
 
