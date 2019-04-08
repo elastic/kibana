@@ -26,16 +26,8 @@ describe('processImportResponse()', () => {
       successCount: 0,
     };
     const result = processImportResponse(response);
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "conflictedSavedObjectsLinkedToSavedSearches": undefined,
-  "conflictedSearchDocs": undefined,
-  "failedImports": Array [],
-  "importCount": 0,
-  "status": "success",
-  "unmatchedReferences": Array [],
-}
-`);
+    expect(result.status).toBe('success');
+    expect(result.importCount).toBe(0);
   });
 
   test('conflict errors get added to failedImports', () => {
@@ -55,27 +47,20 @@ Object {
       ],
     };
     const result = processImportResponse(response);
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "conflictedSavedObjectsLinkedToSavedSearches": undefined,
-  "conflictedSearchDocs": undefined,
-  "failedImports": Array [
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
+    expect(result.failedImports).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "error": Object {
+      "type": "conflict",
+    },
+    "obj": Object {
       "obj": Object {
-        "obj": Object {
-          "id": "1",
-          "type": "a",
-        },
+        "id": "1",
+        "type": "a",
       },
     },
-  ],
-  "importCount": 0,
-  "status": "idle",
-  "unmatchedReferences": Array [],
-}
+  },
+]
 `);
   });
 
@@ -96,27 +81,20 @@ Object {
       ],
     };
     const result = processImportResponse(response);
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "conflictedSavedObjectsLinkedToSavedSearches": undefined,
-  "conflictedSearchDocs": undefined,
-  "failedImports": Array [
-    Object {
-      "error": Object {
-        "type": "unknown",
-      },
+    expect(result.failedImports).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "error": Object {
+      "type": "unknown",
+    },
+    "obj": Object {
       "obj": Object {
-        "obj": Object {
-          "id": "1",
-          "type": "a",
-        },
+        "id": "1",
+        "type": "a",
       },
     },
-  ],
-  "importCount": 0,
-  "status": "success",
-  "unmatchedReferences": Array [],
-}
+  },
+]
 `);
   });
 
@@ -143,46 +121,26 @@ Object {
       ],
     };
     const result = processImportResponse(response);
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "conflictedSavedObjectsLinkedToSavedSearches": undefined,
-  "conflictedSearchDocs": undefined,
-  "failedImports": Array [
-    Object {
-      "error": Object {
-        "references": Array [
-          Object {
-            "id": "2",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "missing_references",
-      },
-      "obj": Object {
-        "obj": Object {
-          "id": "1",
-          "type": "a",
-        },
-      },
-    },
-  ],
-  "importCount": 0,
-  "status": "idle",
-  "unmatchedReferences": Array [
-    Object {
-      "existingIndexPatternId": "2",
-      "list": Array [
+    expect(result.failedImports).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "error": Object {
+      "references": Array [
         Object {
-          "obj": Object {
-            "id": "1",
-            "type": "a",
-          },
+          "id": "2",
+          "type": "index-pattern",
         },
       ],
-      "newIndexPatternId": undefined,
+      "type": "missing_references",
     },
-  ],
-}
+    "obj": Object {
+      "obj": Object {
+        "id": "1",
+        "type": "a",
+      },
+    },
+  },
+]
 `);
   });
 });

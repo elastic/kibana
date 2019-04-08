@@ -19,7 +19,7 @@
 
 import { kfetch } from 'ui/kfetch';
 
-async function sendRequest(file, retries) {
+async function callResolveImportErrorsApi(file, retries) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
@@ -135,7 +135,7 @@ export async function resolveImportErrors({ getConflictResolutions, state }) {
     }
 
     // Call API
-    const response = await sendRequest(file, retries);
+    const response = await callResolveImportErrorsApi(file, retries);
     successImportCount += response.successCount;
     importFailures = [];
     for (const { error, ...obj } of response.errors || []) {
