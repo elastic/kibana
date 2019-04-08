@@ -11,6 +11,7 @@ import {
   AutocompleteSuggestionGroup,
   AutocompleteSuggestionType,
 } from '.';
+import { toRepoNameWithOrg } from '../../../../common/uri_util';
 import { SearchResultItem, SearchScope } from '../../../../model';
 
 export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
@@ -36,7 +37,7 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
         .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
         .map((doc: SearchResultItem) => {
           return {
-            description: '',
+            description: toRepoNameWithOrg(doc.uri),
             end: 10,
             start: 1,
             text: doc.filePath,
