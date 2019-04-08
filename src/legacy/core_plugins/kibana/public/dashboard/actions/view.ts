@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
 import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { KibanaAction } from '../../selectors/types';
@@ -26,7 +28,7 @@ import { PanelId } from '../selectors';
 export enum ViewActionTypeKeys {
   UPDATE_VIEW_MODE = 'UPDATE_VIEW_MODE',
   SET_VISIBLE_CONTEXT_MENU_PANEL_ID = 'SET_VISIBLE_CONTEXT_MENU_PANEL_ID',
-  MAXIMIZE_PANEl = 'MAXIMIZE_PANEl',
+  MAXIMIZE_PANEL = 'MAXIMIZE_PANEL',
   MINIMIZE_PANEL = 'MINIMIZE_PANEL',
   UPDATE_IS_FULL_SCREEN_MODE = 'UPDATE_IS_FULL_SCREEN_MODE',
   UPDATE_USE_MARGINS = 'UPDATE_USE_MARGINS',
@@ -48,7 +50,7 @@ export interface CloseContextMenuAction
   extends KibanaAction<ViewActionTypeKeys.CLOSE_CONTEXT_MENU, undefined> {}
 
 export interface MaximizePanelAction
-  extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
+  extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEL, PanelId> {}
 
 export interface MinimizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MINIMIZE_PANEL, undefined> {}
@@ -92,7 +94,7 @@ export const closeContextMenu = createAction(ViewActionTypeKeys.CLOSE_CONTEXT_ME
 export const setVisibleContextMenuPanelId = createAction<PanelId>(
   ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID
 );
-export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEl);
+export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEL);
 export const minimizePanel = createAction(ViewActionTypeKeys.MINIMIZE_PANEL);
 export const updateIsFullScreenMode = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE
