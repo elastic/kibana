@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
@@ -38,14 +38,17 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
   });
 
   return (
-    <EuiToolTip content={content} delay="long">
-      <EuiSwitch
-        label={label}
-        checked={value}
-        data-test-subj="dropPartialBucketsCheckbox"
-        onChange={ev => setValue(ev.target.checked)}
-      />
-    </EuiToolTip>
+    <>
+      <EuiToolTip content={content} delay="long">
+        <EuiSwitch
+          label={label}
+          checked={value}
+          data-test-subj="dropPartialBucketsCheckbox"
+          onChange={ev => setValue(ev.target.checked)}
+        />
+      </EuiToolTip>
+      <EuiSpacer size="s" />
+    </>
   );
 }
 
