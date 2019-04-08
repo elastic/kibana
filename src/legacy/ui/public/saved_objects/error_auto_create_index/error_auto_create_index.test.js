@@ -17,10 +17,10 @@
  * under the License.
  */
 
-jest.mock('ui/chrome', () => ({
+jest.mock('../../chrome', () => ({
   addBasePath: path => `myBase/${path}`,
 }));
-jest.mock('ui/metadata', () => ({
+jest.mock('../../metadata', () => ({
   metadata: {
     version: 'my-version',
   },
