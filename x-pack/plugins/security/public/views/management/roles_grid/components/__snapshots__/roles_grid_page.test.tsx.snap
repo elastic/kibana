@@ -2,142 +2,150 @@
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
 <PermissionDenied>
-  <EuiPageContent
-    horizontalPosition="center"
-    panelPaddingSize="l"
+  <EuiFlexGroup
+    gutterSize="none"
   >
-    <EuiPanel
-      className="euiPageContent euiPageContent--horizontalCenter"
-      grow={true}
-      hasShadow={false}
-      paddingSize="l"
+    <div
+      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <div
-        className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter"
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
       >
-        <EuiEmptyPrompt
-          body={
-            <p
-              data-test-subj="permissionDeniedMessage"
-            >
-              <FormattedMessage
-                defaultMessage="You do not have permission to manage roles."
-                id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-                values={Object {}}
-              />
-            </p>
-          }
-          iconColor="subdued"
-          iconType="securityApp"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="Permission denied"
-                id="xpack.security.management.roles.deniedPermissionTitle"
-                values={Object {}}
-              />
-            </h2>
-          }
+        <EuiPanel
+          className="euiPageContent euiPageContent--horizontalCenter"
+          grow={true}
+          hasShadow={false}
+          paddingSize="l"
         >
           <div
-            className="euiEmptyPrompt"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter"
           >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="securityApp"
-            >
-              <securityApp
-                className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
-                focusable="false"
-                height="32"
-                style={null}
-                viewBox="0 0 32 32"
-                width="32"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <svg
-                  className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
-                  focusable="false"
-                  height="32"
-                  style={null}
-                  viewBox="0 0 32 32"
-                  width="32"
-                  xmlns="http://www.w3.org/2000/svg"
+            <EuiEmptyPrompt
+              body={
+                <p
+                  data-test-subj="permissionDeniedMessage"
                 >
-                  <path
-                    d="M16 32l-.36-.14A21.07 21.07 0 0 1 2 12.07V5.44L16 .06l14 5.38v6.63a21.07 21.07 0 0 1-13.64 19.78L16 32zM4 6.82v5.25a19.08 19.08 0 0 0 12 17.77 19.08 19.08 0 0 0 12-17.77V6.82L16 2.2 4 6.82z"
+                  <FormattedMessage
+                    defaultMessage="You do not have permission to manage roles."
+                    id="xpack.security.management.roles.noPermissionToManageRolesDescription"
+                    values={Object {}}
                   />
-                  <path
-                    className="euiIcon__fillSecondary"
-                    d="M11 17.83h2V23h-2zM13 10.18V7h-2v3.18a3 3 0 1 0 2 0zM12 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM19 7h2v5.17h-2zM23 17a3 3 0 1 0-4 2.82V23h2v-3.18A3 3 0 0 0 23 17zm-3 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                </p>
+              }
+              iconColor="subdued"
+              iconType="securityApp"
+              title={
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Permission denied"
+                    id="xpack.security.management.roles.deniedPermissionTitle"
+                    values={Object {}}
                   />
-                </svg>
-              </securityApp>
-            </EuiIcon>
-            <EuiSpacer
-              size="s"
+                </h2>
+              }
             >
               <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiTextColor
-              color="subdued"
-              component="span"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
+                className="euiEmptyPrompt"
               >
-                <EuiTitle
-                  size="m"
-                  textTransform="none"
+                <EuiIcon
+                  color="subdued"
+                  size="xxl"
+                  type="securityApp"
                 >
-                  <h2
-                    className="euiTitle euiTitle--medium"
+                  <securityApp
+                    className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                    focusable="false"
+                    height="32"
+                    style={null}
+                    viewBox="0 0 32 32"
+                    width="32"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <FormattedMessage
-                      defaultMessage="Permission denied"
-                      id="xpack.security.management.roles.deniedPermissionTitle"
-                      values={Object {}}
+                    <svg
+                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                      focusable="false"
+                      height="32"
+                      style={null}
+                      viewBox="0 0 32 32"
+                      width="32"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      Permission denied
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
+                      <path
+                        d="M16 32l-.36-.14A21.07 21.07 0 0 1 2 12.07V5.44L16 .06l14 5.38v6.63a21.07 21.07 0 0 1-13.64 19.78L16 32zM4 6.82v5.25a19.08 19.08 0 0 0 12 17.77 19.08 19.08 0 0 0 12-17.77V6.82L16 2.2 4 6.82z"
+                      />
+                      <path
+                        className="euiIcon__fillSecondary"
+                        d="M11 17.83h2V23h-2zM13 10.18V7h-2v3.18a3 3 0 1 0 2 0zM12 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM19 7h2v5.17h-2zM23 17a3 3 0 1 0-4 2.82V23h2v-3.18A3 3 0 0 0 23 17zm-3 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                      />
+                    </svg>
+                  </securityApp>
+                </EuiIcon>
                 <EuiSpacer
-                  size="m"
+                  size="s"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--s"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
+                <EuiTextColor
+                  color="subdued"
+                  component="span"
                 >
-                  <div
-                    className="euiText euiText--medium"
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
                   >
-                    <p
-                      data-test-subj="permissionDeniedMessage"
+                    <EuiTitle
+                      size="m"
+                      textTransform="none"
                     >
-                      <FormattedMessage
-                        defaultMessage="You do not have permission to manage roles."
-                        id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-                        values={Object {}}
+                      <h2
+                        className="euiTitle euiTitle--medium"
                       >
-                        You do not have permission to manage roles.
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
+                        <FormattedMessage
+                          defaultMessage="Permission denied"
+                          id="xpack.security.management.roles.deniedPermissionTitle"
+                          values={Object {}}
+                        >
+                          Permission denied
+                        </FormattedMessage>
+                      </h2>
+                    </EuiTitle>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiText
+                      grow={true}
+                      size="m"
+                    >
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <p
+                          data-test-subj="permissionDeniedMessage"
+                        >
+                          <FormattedMessage
+                            defaultMessage="You do not have permission to manage roles."
+                            id="xpack.security.management.roles.noPermissionToManageRolesDescription"
+                            values={Object {}}
+                          >
+                            You do not have permission to manage roles.
+                          </FormattedMessage>
+                        </p>
+                      </div>
+                    </EuiText>
+                  </span>
+                </EuiTextColor>
+              </div>
+            </EuiEmptyPrompt>
           </div>
-        </EuiEmptyPrompt>
-      </div>
-    </EuiPanel>
-  </EuiPageContent>
+        </EuiPanel>
+      </EuiPageContent>
+    </div>
+  </EuiFlexGroup>
 </PermissionDenied>
 `;
