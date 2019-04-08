@@ -161,16 +161,24 @@ export const histogramBucketAgg = new BucketAggType({
 
     {
       name: 'extended_bounds',
-      default: {},
+      default: {
+        min: '',
+        max: '',
+      },
       editorComponent: ExtendedBoundsParamEditor,
       write: function (aggConfig, output) {
         const val = aggConfig.params.extended_bounds;
 
-        if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
-          output.params.extended_bounds = {
-            min: val.min,
-            max: val.max
-          };
+        if (aggConfig.params.min_doc_count && (val.min !== '' || val.max !== '')) {
+          output.params.extended_bounds = {};
+
+          if (val.min !== '') {
+            output.params.extended_bounds.min = Number(val.min);
+          }
+
+          if (val.max !== '') {
+            output.params.extended_bounds.max = Number(val.max);
+          }
         }
       }
     }

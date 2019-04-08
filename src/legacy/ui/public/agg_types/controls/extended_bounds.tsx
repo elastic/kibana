@@ -20,7 +20,7 @@
 import React from 'react';
 
 import {
-  EuiFieldText,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -31,12 +31,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
+interface Bounds {
+  min: number | string;
+  max: number | string;
+}
+
 function ExtendedBoundsParamEditor({
   agg,
   aggParam,
   value,
   setValue,
-}: AggParamEditorProps<string>) {
+}: AggParamEditorProps<Bounds>) {
   const { min_doc_count, field } = agg.params;
 
   if (min_doc_count && field && (field.type === 'number' || field.type === 'date')) {
@@ -79,18 +84,21 @@ function ExtendedBoundsParamEditor({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow label={minLabel} fullWidth={true} helpText={helpText}>
-              <EuiFieldText
-                value={value || ''}
-                onChange={ev => setValue(ev.target.value)}
+              <EuiFieldNumber
+                value={value.min === '' ? '' : Number(value.min)}
+                onChange={ev => {
+                  debugger;
+                  setValue({ ...value, min: ev.target.value })
+                }}
                 fullWidth={true}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow label={maxLabel} fullWidth={true} helpText={helpText}>
-              <EuiFieldText
-                value={value || ''}
-                onChange={ev => setValue(ev.target.value)}
+              <EuiFieldNumber
+                value={value.max === '' ? '' : Number(value.max)}
+                onChange={ev => setValue({ ...value, max: ev.target.value })}
                 fullWidth={true}
               />
             </EuiFormRow>
