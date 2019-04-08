@@ -162,7 +162,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'line' && (
         <LineSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}
@@ -175,7 +175,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'area' && (
         <AreaSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}
@@ -188,7 +188,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'bar' && (
         <BarSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}
