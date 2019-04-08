@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FeatureTooltip should not show close button 1`] = `
+exports[`FeatureTooltip should not show close button and not show filter button 1`] = `
 <Fragment>
   <EuiFlexGroup
     direction="column"
@@ -16,12 +16,39 @@ exports[`FeatureTooltip should not show close button 1`] = `
 </Fragment>
 `;
 
-exports[`FeatureTooltip should not show filter action for filterable properties 1`] = `
+exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
 <Fragment>
   <EuiFlexGroup
     direction="column"
     gutterSize="none"
   >
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        grow={true}
+      >
+        <EuiFlexGroup
+          alignItems="flexEnd"
+          direction="row"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonIcon
+              aria-label="Close tooltip"
+              color="primary"
+              iconSize="m"
+              iconType="cross"
+              onClick={[Function]}
+              type="button"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiFlexItem>
       <EuiFlexGroup
         direction="column"
@@ -46,6 +73,20 @@ exports[`FeatureTooltip should not show filter action for filterable properties 
                   "__html": "bar",
                 }
               }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonIcon
+              aria-label="Filter on property"
+              className="mapFeatureTooltipFilterButton"
+              color="primary"
+              iconSize="m"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              title="Filter on property"
+              type="button"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -77,7 +118,7 @@ exports[`FeatureTooltip should not show filter action for filterable properties 
 </Fragment>
 `;
 
-exports[`FeatureTooltip should show close button 1`] = `
+exports[`FeatureTooltip should show close button, but not filter button 1`] = `
 <Fragment>
   <EuiFlexGroup
     direction="column"
@@ -120,7 +161,7 @@ exports[`FeatureTooltip should show close button 1`] = `
 </Fragment>
 `;
 
-exports[`FeatureTooltip should show filter action for filterable properties 1`] = `
+exports[`FeatureTooltip should show only filter button for filterable properties 1`] = `
 <Fragment>
   <EuiFlexGroup
     direction="column"
@@ -150,6 +191,20 @@ exports[`FeatureTooltip should show filter action for filterable properties 1`] 
                   "__html": "bar",
                 }
               }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonIcon
+              aria-label="Filter on property"
+              className="mapFeatureTooltipFilterButton"
+              color="primary"
+              iconSize="m"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              title="Filter on property"
+              type="button"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

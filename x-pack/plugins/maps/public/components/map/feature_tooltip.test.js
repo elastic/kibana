@@ -35,7 +35,7 @@ class MockTooltipProperty {
 const defaultProps = {
   properties: [],
   closeTooltip: () => {},
-  isFilterable: false,
+  showFilterButtons: false,
   showCloseButton: false
 };
 
@@ -47,7 +47,7 @@ const mockTooltipProperties = [
 
 describe('FeatureTooltip', () => {
 
-  test('should not show close button', () => {
+  test('should not show close button and not show filter button', () => {
     const component = shallowWithIntl(
       <FeatureTooltip
         {...defaultProps}
@@ -58,7 +58,7 @@ describe('FeatureTooltip', () => {
       .toMatchSnapshot();
   });
 
-  test('should show close button', () => {
+  test('should show close button, but not filter button', () => {
     const component = shallowWithIntl(
       <FeatureTooltip
         {...defaultProps}
@@ -70,11 +70,11 @@ describe('FeatureTooltip', () => {
       .toMatchSnapshot();
   });
 
-  test('should show filter action for filterable properties', () => {
+  test('should show only filter button for filterable properties', () => {
     const component = shallowWithIntl(
       <FeatureTooltip
         {...defaultProps}
-        isFilterable={true}
+        showFilterButtons={true}
         properties={mockTooltipProperties}
       />
     );
@@ -83,11 +83,12 @@ describe('FeatureTooltip', () => {
       .toMatchSnapshot();
   });
 
-  test('should not show filter action for filterable properties', () => {
+  test('should show both filter buttons and close button', () => {
     const component = shallowWithIntl(
       <FeatureTooltip
         {...defaultProps}
-        isFilterable={false}
+        showFilterButtons={true}
+        showCloseButton={true}
         properties={mockTooltipProperties}
       />
     );
