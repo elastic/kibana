@@ -28,24 +28,28 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const find = getService('find');
 
   describe('visualize screenshots', function describeIndexTests() {
-    // let initialSize;
+    let initialSize;
     let historyLog = '';
     const baseUrl = 'http://localhost:5620/app/kibana#/visualize/edit/';
     const urlQueryArgs =
       '?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A\''
       + '2015-09-19T06%3A31%3A44.000Z\'%2Cto%3A\'2015-09-23T18%3A31%3A44.000Z\'))';
+    let screenshotCalibration = false;
 
     before(async function () {
       await esArchiver.load('visualization_screenshots');
       await PageObjects.common.navigateToApp('visualize');
+      // await browser.setWindowSize(1280, 800);
+      // await browser.setWindowSize(1264, 668);
 
-      // can see from properties of baseline images
-      // const baselineImageSize = { width: 1264, height: 668 };
+
+      // can see from properties of baseline images (using just the visualization element)
+      // const baselineImageSize = { width: 1216, height: 620 };
       // await calibrateForScreenshots(baselineImageSize);
     });
 
     after(async function () {
-      // browser.setWindowSize(initialSize.width, initialSize.height);
+      browser.setWindowSize(initialSize.width, initialSize.height);
       log.info(historyLog);
     });
 
@@ -66,37 +70,47 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       actual height 1372 and width 2560
     But that's OK, because that's exactly 200% of the baseline image size.
     */
-    // async function calibrateForScreenshots(baselineImageSize) {
-    //   // CALIBRATION STEP
-    //   initialSize = await browser.getWindowSize();
-    //   log.debug(`################## initial window Size: ${initialSize.width} x ${initialSize.height}`);
-    //   // take a sample screenshot and get the size
-    //   let currentSize = await screenshot.getScreenshotSize();
-    //   log.debug(`################## initial screenshot Size: ${currentSize.width} x ${currentSize.height}`);
-    //   // determine if there is display scaling and if so, what it is
-    //   log.debug(`current width / 1280 = ${currentSize.width / 1280}`);
-    //   log.debug(`current width / 1252 = ${currentSize.width / 1252}`);
-    //
-    //   await browser.setWindowSize(400, 400);
-    //   await browser.setWindowSize(initialSize.width + 100, initialSize.height);
-    //   const tempSize = await screenshot.getScreenshotSize();
-    //   log.debug(`################ temp  screenshot Size: ${tempSize.width} x ${tempSize.height}`);
-    //   if (tempSize.width - currentSize.width > 0) {
-    //     const ratio = Math.round((tempSize.width - currentSize.width) * 4 / 100) / 4;
-    //     log.debug(`################ display scaling ratio = ${ratio}`);
-    //
-    //     // calculate the new desired size using that ratio.
-    //     const newSize = { width: (initialSize.width) + (baselineImageSize.width) - currentSize.width / ratio,
-    //       height: (initialSize.height) + (baselineImageSize.height)  - currentSize.height / ratio };
-    //     log.debug(`################## setting window size to ${newSize.width} x ${newSize.height}`);
-    //     log.debug(`################## delta size to ${newSize.width - initialSize.width} x ${newSize.height - initialSize.height}`);
-    //     await browser.setWindowSize(newSize.width, newSize.height);
-    //
-    //     // check again.
-    //     currentSize = await screenshot.getScreenshotSize();
-    //     log.debug(`################## second screenshot Size: ${currentSize.width} x ${currentSize.height}`);
-    //   }
-    // }
+    async function calibrateForScreenshots(baselineImageSize) {
+      // CALIBRATION STEP
+      initialSize = await browser.getWindowSize();
+      log.debug(`################## initial window Size: ${initialSize.width} x ${initialSize.height}`);
+      // take a sample screenshot and get the size
+      // let currentSize = await screenshot.getScreenshotSize(await find.byCssSelector('div.app-wrapper div.app-wrapper-panel'));
+      let currentSize = await screenshot.getScreenshotSize(await find.byCssSelector('div.app-wrapper div.app-wrapper-panel'));
+      log.debug(`################## initial screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+      if (currentSize.width === baselineImageSize.width && currentSize.height === baselineImageSize.height) {
+        log.debug('currentSize = baselineImageSize');
+      } else {
+        // determine if there is display scaling and if so, what it is
+        log.debug(`current screenshot width / 1280 = ${currentSize.width / 1280}`);
+        log.debug(`current screenshot width / 1252 = ${currentSize.width / 1252}`);
+
+        await browser.setWindowSize(400, 400);
+        await browser.setWindowSize(initialSize.width + 100, initialSize.height);
+        const tempSize = await screenshot.getScreenshotSize(await find.byCssSelector('div.app-wrapper div.app-wrapper-panel'));
+        log.debug(`################ temp  screenshot Size: ${tempSize.width} x ${tempSize.height}`);
+        if (tempSize.width - currentSize.width > 0) {
+          const ratio = Math.round((tempSize.width - currentSize.width) * 4 / 100) / 4;
+          log.debug(`################ display scaling ratio = ${ratio}`);
+
+          if (ratio !== 1) {
+            log.error('capturing and comparing elements in Kibana will not work '
+            + 'when the display scaling ratio is anything other than 100%');
+          }
+
+          // calculate the new desired size using that ratio.
+          const newSize = { width: (initialSize.width) + (baselineImageSize.width) - currentSize.width / ratio,
+            height: (initialSize.height) + (baselineImageSize.height)  - currentSize.height / ratio };
+          log.debug(`################## setting window size to ${newSize.width} x ${newSize.height}`);
+          log.debug(`################## delta size to ${newSize.width - initialSize.width} x ${newSize.height - initialSize.height}`);
+          await browser.setWindowSize(newSize.width, newSize.height);
+
+          // check again.
+          currentSize = await screenshot.getScreenshotSize(await find.byCssSelector('div.app-wrapper div.app-wrapper-panel'));
+          log.debug(`################## second screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+        }
+      }
+    }
 
 
     it('should compare visualization screenshot for bar chart with count metric agg and date histogram with terms', async function () {
@@ -312,6 +326,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await browser.get(savedVizUrl);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(8000);
+      if (!screenshotCalibration) {
+        const baselineImageSize = { width: 1216, height: 620 };
+        await calibrateForScreenshots(baselineImageSize);
+        screenshotCalibration = true;
+      }
+
       const percentDifferent = await screenshot.compareAgainstBaseline(expectedSavedVizName,
         updateBaselines, await find.byCssSelector('div.app-wrapper div.app-wrapper-panel'));
       log.debug(`${(percentDifferent * 100).toPrecision(4)} : ${expectedSavedVizName}`);

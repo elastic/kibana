@@ -63,10 +63,10 @@ export async function ScreenshotsProvider({ getService }) {
       }
     }
 
-    async getScreenshotSize() {
+    async getScreenshotSize(el) {
       log.debug('getScreenshotSize');
       const sessionPath = resolve(SESSION_DIRECTORY, 'temp.png');
-      await this._take(sessionPath);
+      await this._take(sessionPath, el);
       return await getSize(sessionPath, SESSION_DIRECTORY);
     }
 
