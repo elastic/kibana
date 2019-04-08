@@ -32,7 +32,8 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid',
-    'field'
+    'field',
+    'minDocCount'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -60,6 +61,7 @@ uiModules
             is-invalid="isInvalid"
             set-validity="setValidity"
             field="agg.params.field"
+            min-doc-count="agg.params.min_doc_count"
           ></vis-agg-param-react-wrapper>`;
         }
 

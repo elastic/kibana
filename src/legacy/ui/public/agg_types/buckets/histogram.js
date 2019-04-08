@@ -27,7 +27,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import intervalTemplate from '../controls/number_interval.html';
 import minDocCountTemplate from '../controls/min_doc_count.html';
-import extendedBoundsTemplate from '../controls/extended_bounds.html';
+import { ExtendedBoundsParamEditor } from '../controls/extended_bounds';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -162,7 +162,7 @@ export const histogramBucketAgg = new BucketAggType({
     {
       name: 'extended_bounds',
       default: {},
-      editor: extendedBoundsTemplate,
+      editorComponent: ExtendedBoundsParamEditor,
       write: function (aggConfig, output) {
         const val = aggConfig.params.extended_bounds;
 
@@ -171,17 +171,6 @@ export const histogramBucketAgg = new BucketAggType({
             min: val.min,
             max: val.max
           };
-        }
-      },
-
-      // called from the editor
-      shouldShow: function (aggConfig) {
-        const field = aggConfig.params.field;
-        if (
-          field
-          && (field.type === 'number' || field.type === 'date')
-        ) {
-          return aggConfig.params.min_doc_count;
         }
       }
     }
