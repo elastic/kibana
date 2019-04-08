@@ -99,7 +99,7 @@ export function ComboBoxProvider({ getService }) {
       log.debug(`comboBox.doesComboBoxHaveSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
-      return selectedOptions > 0;
+      return selectedOptions.length > 0;
     }
 
     async getComboBoxSelectedOptions(comboBoxSelector) {
