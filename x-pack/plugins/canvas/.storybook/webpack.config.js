@@ -35,9 +35,11 @@ module.exports = async ({ config, _mode }) => {
     },
   });
 
-  // Support .ts/x files using the tsconfig from Kibana
+  // Parse props data for .tsx files
   config.module.rules.push({
-    test: /\.tsx?$/,
+    test: /\.tsx$/,
+    // Exclude example files, as we don't display props info for them
+    exclude: /\.examples.tsx$/,
     use: [
       {
         loader: 'babel-loader',
