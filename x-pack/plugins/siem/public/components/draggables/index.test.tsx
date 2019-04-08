@@ -9,6 +9,7 @@ import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock';
+import { getEmptyString } from '../empty_value';
 
 import {
   DefaultDraggable,
@@ -243,6 +244,21 @@ describe('draggables', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toBeNull();
+    });
+
+    test('it returns Empty string text if value is an empty string', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DraggableBadge
+            contextId="context-id"
+            eventId="event-id"
+            field="some-field"
+            value=""
+            iconType="document"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(getEmptyString());
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
