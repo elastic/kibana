@@ -18,13 +18,20 @@
  */
 
 import React from 'react';
-
+import { get } from 'lodash';
 import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { AggConfig } from 'ui/vis';
+
+function shouldShow(agg: AggConfig): boolean {
+  const fieldName = get(agg, 'params.field.name');
+
+  return fieldName && fieldName === agg.getIndexPattern().timeFieldName;
+}
 
 function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  if (agg.params.field.name !== agg.getIndexPattern().timeFieldName) {
+  if (!shouldShow(agg)) {
     return null;
   }
 
