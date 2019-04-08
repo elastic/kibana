@@ -19,7 +19,7 @@ export const findItem = (data: TimelineNonEcsData[], field: string): number =>
 
 export const getValues = (field: string, data: TimelineNonEcsData[]): string[] | undefined => {
   const obj = data.find(d => d.field === field);
-  if (obj != null) {
+  if (obj != null && obj.value != null) {
     return obj.value;
   }
   return undefined;

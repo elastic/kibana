@@ -169,11 +169,21 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         "network": null,
         "process": Object {
           "args": null,
-          "executable": "/lib/systemd/systemd-journald",
-          "name": "systemd-journal",
-          "pid": 27244,
-          "ppid": 1,
-          "title": "/lib/systemd/systemd-journald",
+          "executable": Array [
+            "/lib/systemd/systemd-journald",
+          ],
+          "name": Array [
+            "systemd-journal",
+          ],
+          "pid": Array [
+            "27244",
+          ],
+          "ppid": Array [
+            "1",
+          ],
+          "title": Array [
+            "/lib/systemd/systemd-journald",
+          ],
           "working_directory": "/",
         },
         "source": null,

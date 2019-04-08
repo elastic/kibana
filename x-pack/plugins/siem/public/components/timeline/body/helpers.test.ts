@@ -48,7 +48,7 @@ describe('helpers', () => {
             flow_id: 4,
             proto: '',
             alert: {
-              signature: 'ET PHONE HOME Stack Overflow (CVE-2019-90210)',
+              signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
               signature_id: 4,
               __typename: 'level 2',
             },
@@ -90,7 +90,7 @@ describe('helpers', () => {
             flow_id: 4,
             proto: '',
             alert: {
-              signature: 'ET PHONE HOME Stack Overflow (CVE-2019-90210)',
+              signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
               signature_id: 4,
             },
           },
@@ -130,7 +130,7 @@ describe('helpers', () => {
             flow_id: 4,
             proto: '',
             alert: {
-              signature: 'dance moves',
+              signature: ['dance moves'],
             },
           },
         },
@@ -170,7 +170,7 @@ describe('helpers', () => {
             flow_id: 4,
             proto: '',
             alert: {
-              signature: 'dance moves',
+              signature: ['dance moves'],
               signature_id: undefined,
             },
           },

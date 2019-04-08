@@ -15,7 +15,7 @@
 
 export type Date = any;
 
-export type ToStringArray = any;
+export type ToStringArray = string[];
 
 export type EsValue = any;
 
@@ -444,7 +444,7 @@ export interface SuricataEveData {
 }
 
 export interface SuricataAlertData {
-  signature?: string | null;
+  signature?: ToStringArray | null;
 
   signature_id?: number | null;
 }
@@ -654,11 +654,11 @@ export interface ProcessEcsFields {
 
   ppid?: ToStringArray | null;
 
-  args?: (string | null)[] | null;
+  args?: ToStringArray | null;
 
-  executable?: string | null;
+  executable?: ToStringArray | null;
 
-  title?: string | null;
+  title?: ToStringArray | null;
 
   thread?: Thread | null;
 
@@ -1485,7 +1485,7 @@ export namespace GetEventsQuery {
   export type Alert = {
     __typename?: 'SuricataAlertData';
 
-    signature?: string | null;
+    signature?: ToStringArray | null;
 
     signature_id?: number | null;
   };
@@ -2743,7 +2743,7 @@ export namespace GetTimelineQuery {
   export type Alert = {
     __typename?: 'SuricataAlertData';
 
-    signature?: string | null;
+    signature?: ToStringArray | null;
 
     signature_id?: number | null;
   };
@@ -2881,11 +2881,11 @@ export namespace GetTimelineQuery {
 
     ppid?: ToStringArray | null;
 
-    args?: (string | null)[] | null;
+    args?: ToStringArray | null;
 
-    executable?: string | null;
+    executable?: ToStringArray | null;
 
-    title?: string | null;
+    title?: ToStringArray | null;
 
     working_directory?: string | null;
   };
@@ -3090,7 +3090,7 @@ export namespace GetUncommonProcessesQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    title?: string | null;
+    title?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };

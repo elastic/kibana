@@ -14,8 +14,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "host": Array [],
             "instances": 93,
             "process": Object {
-              "name": "elrond.elstc.co",
-              "title": "Hello World",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
               "id": 0,
@@ -37,8 +41,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 93,
             "process": Object {
-              "name": "elrond.elstc.co",
-              "title": "Hello World",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
               "id": 0,
@@ -64,8 +72,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
               "id": 1,
@@ -88,8 +100,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
               "id": 1,
@@ -130,8 +146,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
               "id": 1,

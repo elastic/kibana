@@ -503,7 +503,9 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
         "suricata": Object {
           "eve": Object {
             "alert": Object {
-              "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+              "signature": Array [
+                "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+              ],
               "signature_id": 4,
             },
             "flow_id": 4,

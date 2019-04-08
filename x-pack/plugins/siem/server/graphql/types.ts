@@ -44,7 +44,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 
 export type Date = any;
 
-export type ToStringArray = any;
+export type ToStringArray = string[] | null | undefined;
 
 export type EsValue = any;
 
@@ -473,7 +473,7 @@ export interface SuricataEveData {
 }
 
 export interface SuricataAlertData {
-  signature?: string | null;
+  signature?: ToStringArray | null;
 
   signature_id?: number | null;
 }
@@ -683,11 +683,11 @@ export interface ProcessEcsFields {
 
   ppid?: ToStringArray | null;
 
-  args?: (string | null)[] | null;
+  args?: ToStringArray | null;
 
-  executable?: string | null;
+  executable?: ToStringArray | null;
 
-  title?: string | null;
+  title?: ToStringArray | null;
 
   thread?: Thread | null;
 
@@ -2760,13 +2760,13 @@ export namespace SuricataEveDataResolvers {
 
 export namespace SuricataAlertDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataAlertData> {
-    signature?: SignatureResolver<string | null, TypeParent, Context>;
+    signature?: SignatureResolver<ToStringArray | null, TypeParent, Context>;
 
     signature_id?: SignatureIdResolver<number | null, TypeParent, Context>;
   }
 
   export type SignatureResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SuricataAlertData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3450,11 +3450,11 @@ export namespace ProcessEcsFieldsResolvers {
 
     ppid?: PpidResolver<ToStringArray | null, TypeParent, Context>;
 
-    args?: ArgsResolver<(string | null)[] | null, TypeParent, Context>;
+    args?: ArgsResolver<ToStringArray | null, TypeParent, Context>;
 
-    executable?: ExecutableResolver<string | null, TypeParent, Context>;
+    executable?: ExecutableResolver<ToStringArray | null, TypeParent, Context>;
 
-    title?: TitleResolver<string | null, TypeParent, Context>;
+    title?: TitleResolver<ToStringArray | null, TypeParent, Context>;
 
     thread?: ThreadResolver<Thread | null, TypeParent, Context>;
 
@@ -3477,17 +3477,17 @@ export namespace ProcessEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ArgsResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ExecutableResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TitleResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

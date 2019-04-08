@@ -2732,7 +2732,7 @@
             "name": "signature",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3669,11 +3669,7 @@
             "name": "args",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3681,7 +3677,7 @@
             "name": "executable",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3689,7 +3685,7 @@
             "name": "title",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

@@ -157,9 +157,13 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
         "network": null,
         "process": Object {
           "args": null,
-          "executable": "/usr/sbin/sshd",
+          "executable": Array [
+            "/usr/sbin/sshd",
+          ],
           "name": null,
-          "pid": 21202,
+          "pid": Array [
+            "21202",
+          ],
           "ppid": null,
           "title": null,
           "working_directory": null,

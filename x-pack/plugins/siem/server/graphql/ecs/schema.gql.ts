@@ -101,9 +101,9 @@ export const ecsSchema = gql`
     pid: ToStringArray
     name: ToStringArray
     ppid: ToStringArray
-    args: [String]
-    executable: String
-    title: String
+    args: ToStringArray
+    executable: ToStringArray
+    title: ToStringArray
     thread: Thread
     working_directory: String
   }
@@ -127,7 +127,7 @@ export const ecsSchema = gql`
   }
 
   type SuricataAlertData {
-    signature: String
+    signature: ToStringArray
     signature_id: Float
   }
 

@@ -60,11 +60,21 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
             "network": null,
             "process": Object {
               "args": null,
-              "executable": "/usr/bin/wget",
-              "name": "wget",
-              "pid": 1490,
-              "ppid": 1476,
-              "title": "wget www.example.com",
+              "executable": Array [
+                "/usr/bin/wget",
+              ],
+              "name": Array [
+                "wget",
+              ],
+              "pid": Array [
+                "1490",
+              ],
+              "ppid": Array [
+                "1476",
+              ],
+              "title": Array [
+                "wget www.example.com",
+              ],
               "working_directory": null,
             },
             "source": null,
@@ -157,11 +167,21 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "network": null,
             "process": Object {
               "args": null,
-              "executable": "/lib/systemd/systemd-journald",
-              "name": "systemd-journal",
-              "pid": 27244,
-              "ppid": 1,
-              "title": "/lib/systemd/systemd-journald",
+              "executable": Array [
+                "/lib/systemd/systemd-journald",
+              ],
+              "name": Array [
+                "systemd-journal",
+              ],
+              "pid": Array [
+                "27244",
+              ],
+              "ppid": Array [
+                "1",
+              ],
+              "title": Array [
+                "/lib/systemd/systemd-journald",
+              ],
               "working_directory": "/",
             },
             "source": null,
