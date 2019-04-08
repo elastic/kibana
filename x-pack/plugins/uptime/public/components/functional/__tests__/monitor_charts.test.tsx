@@ -61,9 +61,10 @@ describe('MonitorCharts component', () => {
         checkDomainLimits={[0, 75]}
         danger="dangerColor"
         durationDomainLimits={[0, 75]}
-        monitorChartData={chartResponse.monitorChartsData}
-        primary="primaryColor"
-        secondary="secondaryColor"
+        monitorChartsData={chartResponse.monitorChartsData}
+        mean="mean"
+        range="range"
+        success="success"
       />
     );
     expect(component).toMatchSnapshot();

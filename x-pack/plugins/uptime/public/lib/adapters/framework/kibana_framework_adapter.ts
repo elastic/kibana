@@ -114,10 +114,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
             renderComponent({
               basePath,
               darkMode,
-              updateBreadcrumbs: chrome.breadcrumbs.set,
+              setBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
               routerBasename,
-              graphQLClient,
+              client: graphQLClient,
               initialAutorefreshIsPaused: autorefreshIsPaused,
               initialAutorefreshInterval: autorefreshInterval,
               initialDateRangeStart: dateRangeStart,

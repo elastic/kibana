@@ -6,3 +6,4 @@
 
 export { INDEX_NAMES } from './index_names';
 export { PLUGIN } from './plugin';
+export { QUERY } from './query';

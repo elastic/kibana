@@ -80,6 +80,7 @@ test('throws if [redirectHttpFromPort] is not specified', async () => {
 
 test('throws if [redirectHttpFromPort] is in use', async () => {
   const mockListen = jest.spyOn(Server.prototype, 'listen').mockImplementation(() => {
+    // eslint-disable-next-line no-throw-literal
     throw { code: 'EADDRINUSE' };
   });
 

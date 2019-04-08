@@ -4136,7 +4136,7 @@ const log = {
    * @param  ...args
    */
   write(...args) {
-    // tslint:disable no-console
+    // eslint-disable-next-line no-console
     console.log(...args);
   }
 
