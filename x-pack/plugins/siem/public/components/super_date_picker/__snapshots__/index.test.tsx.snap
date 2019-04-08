@@ -1,63 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SIEM Super Date Picker it renders when given dates 1`] = `
-<Fragment>
-  <EuiSuperDatePicker
-    commonlyUsedRanges={
-      Array [
-        Object {
-          "end": "now/d",
-          "label": "Today",
-          "start": "now/d",
-        },
-        Object {
-          "end": "now-1d/d",
-          "label": "Yesterday",
-          "start": "now-1d/d",
-        },
-        Object {
-          "end": "now/w",
-          "label": "This week",
-          "start": "now/w",
-        },
-        Object {
-          "end": "now",
-          "label": "Week to date",
-          "start": "now/w",
-        },
-        Object {
-          "end": "now/M",
-          "label": "This month",
-          "start": "now/M",
-        },
-        Object {
-          "end": "now",
-          "label": "Month to date",
-          "start": "now/M",
-        },
-        Object {
-          "end": "now/y",
-          "label": "This year",
-          "start": "now/y",
-        },
-        Object {
-          "end": "now",
-          "label": "Year to date",
-          "start": "now/y",
-        },
-      ]
-    }
-    dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-    end="2019-04-08T17:15:32.995Z"
-    isAutoRefreshOnly={false}
-    isLoading={false}
-    isPaused={false}
-    onTimeChange={[Function]}
-    recentlyUsedRanges={Array []}
-    refreshInterval={300000}
-    showUpdateButton={true}
-    start="2019-04-06T17:15:32.995Z"
-  />
-  <EuiSpacer />
-</Fragment>
+<EuiSuperDatePicker
+  commonlyUsedRanges={
+    Array [
+      Object {
+        "end": "now/d",
+        "label": "Today",
+        "start": "now/d",
+      },
+      Object {
+        "end": "now-1d/d",
+        "label": "Yesterday",
+        "start": "now-1d/d",
+      },
+      Object {
+        "end": "now/w",
+        "label": "This week",
+        "start": "now/w",
+      },
+      Object {
+        "end": "now",
+        "label": "Week to date",
+        "start": "now/w",
+      },
+      Object {
+        "end": "now/M",
+        "label": "This month",
+        "start": "now/M",
+      },
+      Object {
+        "end": "now",
+        "label": "Month to date",
+        "start": "now/M",
+      },
+      Object {
+        "end": "now/y",
+        "label": "This year",
+        "start": "now/y",
+      },
+      Object {
+        "end": "now",
+        "label": "Year to date",
+        "start": "now/y",
+      },
+    ]
+  }
+  dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+  end="2019-04-08T17:15:32.995Z"
+  isAutoRefreshOnly={false}
+  isLoading={false}
+  isPaused={false}
+  onTimeChange={[Function]}
+  recentlyUsedRanges={Array []}
+  refreshInterval={300000}
+  showUpdateButton={true}
+  start="2019-04-06T17:15:32.995Z"
+/>
 `;

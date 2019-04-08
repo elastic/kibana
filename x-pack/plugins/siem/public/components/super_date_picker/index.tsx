@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { EuiSpacer, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -66,20 +66,17 @@ export const SuperDatePickerComponent = class extends Component<
   public render() {
     const { end, start } = this.props;
     return (
-      <>
-        <EuiSuperDatePicker
-          end={new Date(end).toISOString()}
-          isLoading={this.state.isLoading}
-          isPaused={this.state.isPaused}
-          onTimeChange={this.onTimeChange}
-          recentlyUsedRanges={this.state.recentlyUsedRanges}
-          refreshInterval={this.state.refreshInterval}
-          showUpdateButton={this.state.showUpdateButton}
-          start={new Date(start).toISOString()}
-        />
-
-        <EuiSpacer />
-      </>
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
+      <EuiSuperDatePicker
+        end={new Date(end).toISOString()}
+        isLoading={this.state.isLoading}
+        isPaused={this.state.isPaused}
+        onTimeChange={this.onTimeChange}
+        recentlyUsedRanges={this.state.recentlyUsedRanges}
+        refreshInterval={this.state.refreshInterval}
+        showUpdateButton={this.state.showUpdateButton}
+        start={new Date(start).toISOString()}
+      />
     );
   }
 

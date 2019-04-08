@@ -21,13 +21,16 @@ describe('SIEM Super Date Picker', () => {
     mockCardItemsData.setAbsoluteSuperDatePicker.mockClear();
   });
   test('it renders when given dates', () => {
+    // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
     const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
   describe('onTimeChange', () => {
     test('it calls setAbsoluteSuperDatePicker when given absolute dates', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const instance = wrapper.instance();
+      // @ts-ignore
       instance.onTimeChange({
         start: '2019-04-06T18:24:31.723Z',
         end: '2019-04-08T18:24:31.723Z',
@@ -39,8 +42,10 @@ describe('SIEM Super Date Picker', () => {
       });
     });
     test('it calls setAbsoluteSuperDatePicker with epoch when given relative dates', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const instance = wrapper.instance();
+      // @ts-ignore
       instance.onTimeChange({
         start: 'now-1d',
         end: '2032-04-07T18:24:31.723Z',
@@ -50,12 +55,15 @@ describe('SIEM Super Date Picker', () => {
       ).toEqual(13);
     });
     test('returns recentlyUsedRanges array', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const instance = wrapper.instance();
+      // @ts-ignore
       instance.onTimeChange({
         start: '2019-04-06T18:24:31.723Z',
         end: '2019-04-08T18:24:31.723Z',
       });
+      // @ts-ignore
       const instanceState: SuperDatePickerState = instance.state;
       expect(instanceState.recentlyUsedRanges.length).toEqual(1);
       expect(instanceState.recentlyUsedRanges[0]).toMatchObject({
@@ -65,6 +73,7 @@ describe('SIEM Super Date Picker', () => {
     });
 
     test('addes new value to recentlyUsedRanges', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const recentlyUsedRanges = [
         {
@@ -80,15 +89,20 @@ describe('SIEM Super Date Picker', () => {
         recentlyUsedRanges,
       });
       const instance = wrapper.instance();
-
-      expect(instance.state.recentlyUsedRanges.length).toEqual(2);
+      // @ts-ignore
+      let instanceState: SuperDatePickerState = instance.state;
+      expect(instanceState.recentlyUsedRanges.length).toEqual(2);
+      // @ts-ignore
       instance.onTimeChange({
         start: '2019-03-06T18:24:31.723Z',
         end: '2019-03-08T18:24:31.723Z',
       });
-      expect(instance.state.recentlyUsedRanges.length).toEqual(3);
+      // @ts-ignore
+      instanceState = instance.state;
+      expect(instanceState.recentlyUsedRanges.length).toEqual(3);
     });
     test('keeps recentlyUsedRanges array at a length of 10 max', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       wrapper.setState({
         recentlyUsedRanges: [
@@ -135,25 +149,30 @@ describe('SIEM Super Date Picker', () => {
         ],
       });
       const instance = wrapper.instance();
+      // @ts-ignore
+      let instanceState: SuperDatePickerState = instance.state;
 
-      expect(instance.state.recentlyUsedRanges.length).toEqual(10);
-      expect(instance.state.recentlyUsedRanges[9]).toMatchObject({
+      expect(instanceState.recentlyUsedRanges.length).toEqual(10);
+      expect(instanceState.recentlyUsedRanges[9]).toMatchObject({
         start: '2017-04-03T18:24:31.723Z',
         end: '2017-04-05T18:24:31.723Z',
       });
+      // @ts-ignore
       instance.onTimeChange({
         start: '2019-03-06T18:24:31.723Z',
         end: '2019-03-08T18:24:31.723Z',
       });
-
-      expect(instance.state.recentlyUsedRanges.length).toEqual(10);
-      expect(instance.state.recentlyUsedRanges[9]).toMatchObject({
+      // @ts-ignore
+      instanceState = instance.state;
+      expect(instanceState.recentlyUsedRanges.length).toEqual(10);
+      expect(instanceState.recentlyUsedRanges[9]).toMatchObject({
         start: '2016-04-01T18:24:31.723Z',
         end: '2016-04-05T18:24:31.723Z',
       });
     });
 
     test('does not allow duplicates in recentlyUsedRanges', () => {
+      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const recentlyUsedRanges = [
         {
@@ -169,13 +188,18 @@ describe('SIEM Super Date Picker', () => {
         recentlyUsedRanges,
       });
       const instance = wrapper.instance();
+      // @ts-ignore
+      let instanceState: SuperDatePickerState = instance.state;
 
-      expect(instance.state.recentlyUsedRanges.length).toEqual(2);
+      expect(instanceState.recentlyUsedRanges.length).toEqual(2);
+      // @ts-ignore
       instance.onTimeChange({
         start: '2019-04-06T18:24:31.723Z',
         end: '2019-04-08T18:24:31.723Z',
       });
-      expect(instance.state.recentlyUsedRanges.length).toEqual(2);
+      // @ts-ignore
+      instanceState = instance.state;
+      expect(instanceState.recentlyUsedRanges.length).toEqual(2);
     });
   });
 });
