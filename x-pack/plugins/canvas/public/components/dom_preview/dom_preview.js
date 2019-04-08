@@ -25,6 +25,7 @@ export class DomPreview extends React.Component {
   }
 
   componentWillUnmount() {
+    clearTimeout(this.updateTimeout);
     this.observer && this.observer.disconnect(); // observer not guaranteed to exist
   }
 
