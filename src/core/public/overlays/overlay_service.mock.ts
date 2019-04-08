@@ -16,26 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/public';
+import { OverlayService, OverlaySetup } from './overlay_service';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<PublicMethodsOf<OverlaySetup>> = {
+    openFlyout: jest.fn(),
+  };
+  return setupContract;
 };
 
-export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already initialized');
-  }
+const createMock = () => {
+  const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
 
-  runtimeContext.setup.core = core;
-}
-
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
-  }
-  return runtimeContext;
-}
+export const overlayServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};
