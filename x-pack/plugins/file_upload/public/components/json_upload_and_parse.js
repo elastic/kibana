@@ -5,45 +5,93 @@
  */
 
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFilePicker,
   EuiFormRow,
+  EuiFieldText,
+  EuiSpacer,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
 import { triggerIndexing } from '../util/indexing_service';
+import { IndexSettings } from './index_settings';
 import _ from 'lodash';
 
-export function JsonUploadAndParse({
+export function JsonUploadAndParse(props) {
+  const {
+    boolIndexData = false,
+    indexDescription,
+    onIndexAddSuccess,
+    onIndexAddError
+  } = props;
+
+  // Local state for parsed and indexed files
+  const [fileRef, setFileRef] = useState(null);
+  const [parsedFile, setParsedFile] = useState(null);
+  const [indexedFile, setIndexedFile] = useState(null);
+  const [mappings, setMappings] = useState(null);
+
+  if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
+    triggerIndexing(parsedFile, { ...indexDescription, mappings }).then(
+      resp => {
+        if (resp.success) {
+          setIndexedFile(parsedFile);
+          onIndexAddSuccess && onIndexAddSuccess(resp);
+        } else {
+          setIndexedFile(null);
+          onIndexAddError && onIndexAddError();
+        }
+      });
+  }
+  const boolMappingsOptions = Array.isArray(indexDescription.mappings);
+
+  return (
+    <Fragment>
+      {
+        renderFilePicker(
+          { ...props, fileRef, setFileRef, parsedFile, setParsedFile, setIndexedFile, mappings }
+        )
+      }
+      <IndexSettings
+        setIndexType={boolMappingsOptions
+          ? ({ target }) => {
+            const selectedMappings = indexDescription.mappings
+              .find(({ name }) => name === target.value);
+            setMappings(selectedMappings.value);
+          }
+          : setMappings(indexDescription.mappings)
+        }
+        mappingsOptions={boolMappingsOptions
+          ? indexDescription.mappings.map(mapping => (
+            { text: mapping.name, value: mapping.name }
+          ))
+          : []
+        }
+        indexSelectionEnabled={boolMappingsOptions}
+      />
+    </Fragment>
+  );
+}
+
+function renderFilePicker({
   boolIndexData = false,
-  indexDescription,
   fileUploadMessage,
   onFileUpload,
   onFileRemove,
   postParseJsonTransform,
   onIndexAddSuccess,
   onIndexAddError,
+  fileRef,
+  setFileRef,
+  parsedFile,
+  setParsedFile,
+  setIndexedFile,
+  indexDescription,
+  mappings
 }) {
-
-  // Local state for parsed and indexed files
-  const [fileRef, setFileRef] = useState(null);
-  const [parsedFile, setParsedFile] = useState(null);
-  const [indexedFile, setIndexedFile] = useState(null);
-
-  if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, indexDescription).then(resp => {
-      if (resp.success) {
-        setIndexedFile(parsedFile);
-        onIndexAddSuccess && onIndexAddSuccess(resp);
-      } else {
-        setIndexedFile(null);
-        onIndexAddError && onIndexAddError();
-      }
-    });
-  }
-
   return (
     <EuiFormRow
       label={(
@@ -75,15 +123,16 @@ export function JsonUploadAndParse({
             );
             // Immediately index file if flag set
             if (file && boolIndexData) {
-              await triggerIndexing(parsedFileResult).then(resp => {
-                if (resp.success) {
-                  setIndexedFile(parsedFile);
-                  onIndexAddSuccess && onIndexAddSuccess(resp);
-                } else {
-                  setIndexedFile(null);
-                  onIndexAddError && onIndexAddError();
-                }
-              });
+              await triggerIndexing(parsedFile, { ...indexDescription, mappings }).then(
+                resp => {
+                  if (resp.success) {
+                    setIndexedFile(parsedFile);
+                    onIndexAddSuccess && onIndexAddSuccess(resp);
+                  } else {
+                    setIndexedFile(null);
+                    onIndexAddError && onIndexAddError();
+                  }
+                });
             }
             // Save parsed result
             setParsedFile(parsedFileResult);

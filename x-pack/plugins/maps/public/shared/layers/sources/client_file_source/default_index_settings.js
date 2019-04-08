@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   number_of_shards: 1
 };
 
-const DEFAULT_MAPPINGS = {
+const DEFAULT_GEO_SHAPE_MAPPINGS = {
   "name": {
     "type": "keyword"
   },
@@ -19,11 +19,26 @@ const DEFAULT_MAPPINGS = {
   }
 };
 
+const DEFAULT_GEO_POINT_MAPPINGS = {
+  "name": {
+    "type": "keyword"
+  },
+  "location": {
+    "type": "geo_point"
+  }
+};
+
 const DEFAULT_INGEST_PIPELINE = {};
 
 export const defaultSettings = {
   index: DEFAULT_INDEX_NAME,
   ingestPipeline: DEFAULT_INGEST_PIPELINE,
-  mappings: DEFAULT_MAPPINGS,
+  mappings: [ {
+    name: 'geo_point',
+    value: DEFAULT_GEO_POINT_MAPPINGS
+  }, {
+    name: 'geo_shape',
+    value: DEFAULT_GEO_SHAPE_MAPPINGS
+  } ],
   settings: DEFAULT_SETTINGS
 };

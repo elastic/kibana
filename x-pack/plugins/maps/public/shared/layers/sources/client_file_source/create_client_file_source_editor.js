@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { JsonUploadAndParse } from '../../../../../../file_upload/public/';
+import { JsonUploadAndParse } from '../../../../../../file_upload/public';
 import { defaultSettings } from './default_index_settings';
 
 export function ClientFileCreateSourceEditor({
