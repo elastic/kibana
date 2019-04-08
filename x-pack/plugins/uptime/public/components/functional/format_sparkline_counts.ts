@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface PingCount {
-  x: number;
-  y: number;
-}
+import { MonitorSeriesPoint } from '../../../common/graphql/types';
 
-export const formatSparklineCounts = (counts: PingCount[]) => {
+export const formatSparklineCounts = (seriesPoints: MonitorSeriesPoint[]) => {
   let defaultSize = 0;
-  const { length } = counts;
+  const { length } = seriesPoints;
   // assume points are uniform, use this
   // for the last element's span
   if (length > 1) {
-    defaultSize = Math.max(counts[1].x - counts[0].x, 0);
+    defaultSize = Math.max(seriesPoints[1].x - seriesPoints[0].x, 0);
   } else if (length === 1) {
     // wait for another point
     return [];
   }
-  return counts.map(({ x: x0, y }, index, array) => {
+  return seriesPoints.map(({ x: x0, y: yVal }, index, array) => {
     let x;
     const nextIndex = index + 1;
     if (nextIndex === array.length) {
@@ -29,6 +26,6 @@ export const formatSparklineCounts = (counts: PingCount[]) => {
       const { x: nextX } = array[nextIndex];
       x = nextX;
     }
-    return { x, x0, y };
+    return { x, x0, y: yVal || 0 };
   });
 };
