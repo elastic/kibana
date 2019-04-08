@@ -42,13 +42,13 @@ interface OnSaveProps {
 }
 
 interface Props {
-  onSave: (arg0: OnSaveProps) => void;
+  onSave: (props: OnSaveProps) => void;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
   objectType: string;
-  confirmButtonLabel?: any;
-  options?: any;
+  confirmButtonLabel?: React.ReactNode;
+  options?: React.ReactNode;
 }
 
 interface State {
@@ -175,17 +175,17 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     });
   };
 
-  private onTitleChange = (event: React.FormEvent<HTMLInputElement>) => {
+  private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
-      title: event.currentTarget.value,
+      title: event.target.value,
       isTitleDuplicateConfirmed: false,
       hasTitleDuplicate: false,
     });
   };
 
-  private onCopyOnSaveChange = (event: React.FormEvent<HTMLInputElement>) => {
+  private onCopyOnSaveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
-      copyOnSave: event.currentTarget.checked,
+      copyOnSave: event.target.checked,
     });
   };
 
