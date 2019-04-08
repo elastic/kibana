@@ -65,7 +65,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       try {
-        const blob = await fileResolver.fileContent(uri, path, ref);
+        const blob = await fileResolver.fileContent(uri, path, decodeURIComponent(ref));
         if (blob.isBinary()) {
           const type = fileType(blob.content());
           if (type && type.mime && type.mime.startsWith('image/')) {
@@ -149,7 +149,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     const after = queries.after !== undefined;
     try {
       const repository = await gitOperations.openRepo(uri);
-      const commit = await gitOperations.getCommit(repository, ref);
+      const commit = await gitOperations.getCommit(repository, decodeURIComponent(ref));
       const walk = repository.createRevWalk();
       walk.sorting(Revwalk.SORT.TIME);
       walk.push(commit.id());
@@ -223,7 +223,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const gitOperations = new GitOperations(options.repoPath);
       const { uri, path, revision } = req.params;
       try {
-        const blames = await gitOperations.blame(uri, revision, path);
+        const blames = await gitOperations.blame(uri, decodeURIComponent(revision), path);
         return blames;
       } catch (e) {
         if (e.isBoom) {
