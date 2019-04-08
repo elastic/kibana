@@ -6,6 +6,7 @@
 
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -16,11 +17,12 @@ import {
 
 export function AnalysisSummary({ results }) {
   const items = createDisplayItems(results);
+  const itemsWithI18n = pimpOutDisplayItemsWithAriaAndI18n(items);
 
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>
+        <h3 tabIndex="0">
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.analysisSummary.summaryTitle"
             defaultMessage="Summary"
@@ -32,22 +34,26 @@ export function AnalysisSummary({ results }) {
 
       <EuiDescriptionList
         type="column"
-        listItems={items}
+        listItems={itemsWithI18n}
         className="analysis-summary-list"
+        titleProps={{ tabIndex: '0' }}
       />
     </React.Fragment>
   );
 }
 
+function pimpOutDisplayItemsWithAriaAndI18n(items) {
+  return items.map(item => Object.assign(item, {
+    title: <span aria-label={`${item.title}: ${item.description}`}>{item.title}</span>
+  }));
+}
+
 function createDisplayItems(results) {
   const items = [
     {
-      title: (
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.analyzedLinesNumberTitle"
-          defaultMessage="Number of lines analyzed"
-        />
-      ),
+      title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.analyzedLinesNumberTitle', {
+        defaultMessage: 'Number of lines analyzed'
+      }),
       description: results.num_lines_analyzed,
     },
     // {
@@ -58,33 +64,24 @@ function createDisplayItems(results) {
 
   if (results.format !== undefined) {
     items.push({
-      title: (
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.formatTitle"
-          defaultMessage="Format"
-        />
-      ),
+      title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.formatTitle', {
+        defaultMessage: 'Format'
+      }),
       description: results.format,
     });
 
     if (results.format === 'delimited') {
       items.push({
-        title: (
-          <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.analysisSummary.delimiterTitle"
-            defaultMessage="Delimiter"
-          />
-        ),
+        title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.delimiterTitle', {
+          defaultMessage: 'Delimiter'
+        }),
         description: results.delimiter,
       });
 
       items.push({
-        title: (
-          <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.analysisSummary.hasHeaderRowTitle"
-            defaultMessage="Has header row"
-          />
-        ),
+        title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.hasHeaderRowTitle', {
+          defaultMessage: 'Has header row'
+        }),
         description: `${results.has_header_row}`,
       });
 
@@ -93,39 +90,30 @@ function createDisplayItems(results) {
 
   if (results.grok_pattern !== undefined) {
     items.push({
-      title: (
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.grokPatternTitle"
-          defaultMessage="Grok pattern"
-        />
-      ),
+      title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.grokPatternTitle', {
+        defaultMessage: 'Grok pattern'
+      }),
       description: results.grok_pattern,
     });
   }
 
   if (results.timestamp_field !== undefined) {
     items.push({
-      title: (
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFieldTitle"
-          defaultMessage="Time field"
-        />
-      ),
+      title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.timeFieldTitle', {
+        defaultMessage: 'Time field'
+      }),
       description: results.timestamp_field,
     });
   }
 
   if (results.java_timestamp_formats !== undefined) {
     items.push({
-      title: (
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle"
-          defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}}"
-          values={{
-            timestampFormats: results.java_timestamp_formats.length,
-          }}
-        />
-      ),
+      title: i18n.translate('xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle', {
+        defaultMessage: 'Time {timestampFormats, plural, zero {format} one {format} other {formats}}',
+        values: {
+          timestampFormats: results.java_timestamp_formats.length,
+        }
+      }),
       description: results.java_timestamp_formats.join(', '),
     });
   }
