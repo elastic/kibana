@@ -9,7 +9,10 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceFields } from '../../../common/graphql/types';
-import { MetricsExplorerMetric, MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
+import {
+  MetricsExplorerMetric,
+  MetricsExplorerAggregation,
+} from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
@@ -49,25 +52,30 @@ export const MetricsExplorerToolbar = injectI18n(
     return (
       <Toolbar>
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={options.aggregation === MetricsExplorerAggregation.count ? 1 : false}>
             <MetricsExplorerAggregationPicker
+              fullWidth
               options={options}
               onChange={onAggregationChange}
             />
           </EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id={`xpack.infra.metricsExplorer.aggregationLabel`}
-              defaultMessage="of"
-            />
-          </EuiText>
-          <EuiFlexItem>
-            <MetricsExplorerMetrics
-              fields={derivedIndexPattern.fields}
-              options={options}
-              onChange={onMetricsChange}
-            />
-          </EuiFlexItem>
+          {options.aggregation !== MetricsExplorerAggregation.count && (
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id={`xpack.infra.metricsExplorer.aggregationLabel`}
+                defaultMessage="of"
+              />
+            </EuiText>
+          )}
+          {options.aggregation !== MetricsExplorerAggregation.count && (
+            <EuiFlexItem>
+              <MetricsExplorerMetrics
+                fields={derivedIndexPattern.fields}
+                options={options}
+                onChange={onMetricsChange}
+              />
+            </EuiFlexItem>
+          )}
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id={`xpack.infra.metricsExplorer.groupByLabel`}

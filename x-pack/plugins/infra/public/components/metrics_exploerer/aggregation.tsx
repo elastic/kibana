@@ -13,6 +13,7 @@ import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_me
 interface Props {
   intl: InjectedIntl;
   options: MetricsExplorerOptions;
+  fullWidth: boolean;
   onChange: (aggregation: MetricsExplorerAggregation) => void;
 }
 
@@ -20,58 +21,61 @@ const isMetricsExplorerAggregation = (subject: any): subject is MetricsExplorerA
   return Object.keys(MetricsExplorerAggregation).includes(subject);
 };
 
-export const MetricsExplorerAggregationPicker = injectI18n(({ intl, options, onChange }: Props) => {
-  const intlPrefix = 'xpack.infra.metricsExplorer';
+export const MetricsExplorerAggregationPicker = injectI18n(
+  ({ fullWidth, intl, options, onChange }: Props) => {
+    const intlPrefix = 'xpack.infra.metricsExplorer';
 
-  const AGGREGATION_LABELS = {
-    [MetricsExplorerAggregation.avg]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.avg`,
-      defaultMessage: 'Average',
-    }),
-    [MetricsExplorerAggregation.max]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.max`,
-      defaultMessage: 'Max',
-    }),
-    [MetricsExplorerAggregation.min]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.min`,
-      defaultMessage: 'Min',
-    }),
-    [MetricsExplorerAggregation.cardinality]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.cardinality`,
-      defaultMessage: 'Cardinality',
-    }),
-    [MetricsExplorerAggregation.rate]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.rate`,
-      defaultMessage: 'Rate',
-    }),
-    [MetricsExplorerAggregation.count]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.count`,
-      defaultMessage: 'Document Count',
-    }),
-  };
+    const AGGREGATION_LABELS = {
+      [MetricsExplorerAggregation.avg]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.avg`,
+        defaultMessage: 'Average',
+      }),
+      [MetricsExplorerAggregation.max]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.max`,
+        defaultMessage: 'Max',
+      }),
+      [MetricsExplorerAggregation.min]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.min`,
+        defaultMessage: 'Min',
+      }),
+      [MetricsExplorerAggregation.cardinality]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.cardinality`,
+        defaultMessage: 'Cardinality',
+      }),
+      [MetricsExplorerAggregation.rate]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.rate`,
+        defaultMessage: 'Rate',
+      }),
+      [MetricsExplorerAggregation.count]: intl.formatMessage({
+        id: `${intlPrefix}.aggregationLables.count`,
+        defaultMessage: 'Document Count',
+      }),
+    };
 
-  const handleChange = useCallback(
-    e => {
-      const aggregation =
-        (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
-        MetricsExplorerAggregation.avg;
-      onChange(aggregation);
-    },
-    [options, onChange]
-  );
+    const handleChange = useCallback(
+      e => {
+        const aggregation =
+          (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
+          MetricsExplorerAggregation.avg;
+        onChange(aggregation);
+      },
+      [options, onChange]
+    );
 
-  return (
-    <EuiSelect
-      placeholder={intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.aggregationSelectLabel',
-        defaultMessage: 'Select an aggregation',
-      })}
-      value={options.aggregation}
-      options={Object.keys(MetricsExplorerAggregation).map(k => ({
-        text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
-        value: k,
-      }))}
-      onChange={handleChange}
-    />
-  );
-});
+    return (
+      <EuiSelect
+        placeholder={intl.formatMessage({
+          id: 'xpack.infra.metricsExplorer.aggregationSelectLabel',
+          defaultMessage: 'Select an aggregation',
+        })}
+        fullWidth
+        value={options.aggregation}
+        options={Object.keys(MetricsExplorerAggregation).map(k => ({
+          text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
+          value: k,
+        }))}
+        onChange={handleChange}
+      />
+    );
+  }
+);

@@ -46,16 +46,13 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
   );
 
   const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
-  const selectedOptios =
-    options.aggregation === MetricsExplorerAggregation.count
-      ? []
-      : options.metrics
-          .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
-          .map(metric => ({
-            label: metric.field || '',
-            value: metric.field || '',
-            color: colorTransformer(metric.color || MetricsExplorerColor.color0),
-          }));
+  const selectedOptios = options.metrics
+    .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
+    .map(metric => ({
+      label: metric.field || '',
+      value: metric.field || '',
+      color: colorTransformer(metric.color || MetricsExplorerColor.color0),
+    }));
 
   const placeholderText = intl.formatMessage({
     id: 'xpack.infra.metricsExplorer.metricComboBoxPlaceholder',

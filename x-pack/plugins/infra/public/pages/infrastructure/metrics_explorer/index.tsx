@@ -98,10 +98,11 @@ export const MetricsExplorerPage = injectI18n(
         setOptions({
           ...options,
           aggregation,
-          metrics:
-            aggregation === MetricsExplorerAggregation.count
-              ? [{ aggregation }]
-              : options.metrics.map(metric => ({ ...metric, aggregation })),
+          metrics: options.metrics.map(metric => ({
+            ...metric,
+            aggregation:
+              aggregation === MetricsExplorerAggregation.count ? metric.aggregation : aggregation,
+          })),
         });
       },
       [options]
