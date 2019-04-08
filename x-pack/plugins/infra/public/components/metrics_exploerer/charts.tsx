@@ -8,8 +8,8 @@ import {
   EuiButton,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiText,
+  EuiHorizontalRule,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -20,21 +20,40 @@ import {
   // EuiDataPoint,
   EuiLineSeries,
   EuiSeriesChart,
+  EuiYAxis,
   // EuiSeriesChartProps,
   // EuiSeriesProps,
-  // EuiXAxis,
-  // EuiYAxis,
+  EuiXAxis,
+  EuiSeriesChartAxisUtils
 } from '@elastic/eui/lib/experimental';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { isNumber } from 'lodash';
-import React from 'react';
+import { isNumber, last, max } from 'lodash';
+import React, { useCallback } from 'react';
 import euiStyled from '../../../../..//common/eui_styled_components';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerResponse, MetricsExplorerAggregation, MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { NoData } from '../empty_states/no_data';
 import { InfraLoadingPanel } from '../loading';
 import { createMetricLabel } from './create_metric_label';
+import { createFormatter } from '../../utils/formatters';
+import { InfraFormatterType } from '../../lib/lib';
+
+const createFormatterForMetric = (metric: MetricsExplorerMetric) => {
+  if (metric.field) {
+    const suffix = last(metric.field.split(/\./));
+    if (suffix === 'pct') {
+      return createFormatter(InfraFormatterType.percent);
+    }
+    if (suffix === 'bytes' && metric.aggregation === MetricsExplorerAggregation.rate) {
+      return createFormatter(InfraFormatterType.bits, '{{value}}/s');
+    }
+    if (suffix === 'bytes') {
+      return createFormatter(InfraFormatterType.bytes)
+    }
+  }
+  return createFormatter(InfraFormatterType.number);
+}
 
 interface Props {
   loading: boolean;
@@ -81,6 +100,8 @@ export const MetricsExplorerCharts = injectI18n(
       );
     }
 
+    const marginLeft = ((options.metrics.length - 1) * 30) + 40;
+
     return (
       <div>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
@@ -95,22 +116,26 @@ export const MetricsExplorerCharts = injectI18n(
               ) : null}
               <div style={{ height: data.series.length > 1 ? 200 : 400 }}>
                 <EuiSeriesChart animateData={false} xType="time">
-                  {options.metrics.map((metric, id) => (
-                    <EuiLineSeries
-                      key={`metric_series_${id}`}
-                      color={
-                        (metric.color && colorTransformer(metric.color)) ||
-                        colorTransformer(MetricsExplorerColor.color0)
-                      }
-                      lineSize={2}
-                      name={createMetricLabel(metric)}
-                      data={series.rows.map(row => ({
-                        x: row.timestamp,
-                        y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
-                        y0: 0,
-                      }))}
-                    />
-                  ))}
+                  {options.metrics.map((metric, id) => {
+                    const data = series.rows.map(row => ({
+                      x: row.timestamp,
+                      y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
+                    }));
+                    const dataDomain = [0, max(data.map(d => d.y))];
+                    return (
+                      <EuiLineSeries
+                        key={`metric_chart_${id}`}
+                        yDomain={dataDomain}
+                        color={
+                          (metric.color && colorTransformer(metric.color)) ||
+                          colorTransformer(MetricsExplorerColor.color0)
+                        }
+                        lineSize={2}
+                        name={createMetricLabel(metric)}
+                        data={data}
+                      />
+                    )
+                  })}
                 </EuiSeriesChart>
               </div>
             </EuiFlexItem>
@@ -154,7 +179,7 @@ export const MetricsExplorerCharts = injectI18n(
 );
 
 const ChartTitle = euiStyled.h4`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        `;
