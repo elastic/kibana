@@ -33,7 +33,7 @@ export function FieldTitleBar({ card }) {
 
   return (
     <EuiText className={classNames.join(' ')}>
-      <FieldTypeIcon type={card.type} tooltipEnabled={true} />
+      <FieldTypeIcon type={card.type} tooltipEnabled={true} ariaSuffix={fieldName} />
       <EuiToolTip position="left" content={fieldName}>
         <div className="field-name">
           {fieldName}

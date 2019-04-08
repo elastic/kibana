@@ -28,7 +28,7 @@ export function FieldStatsCard({ field }) {
           <div
             className={`ml-field-title-bar ${type}`}
           >
-            <FieldTypeIcon type={type} />
+            <FieldTypeIcon type={type} ariaSuffix={field.name} />
             <div className="field-name">{field.name}</div>
           </div>
 

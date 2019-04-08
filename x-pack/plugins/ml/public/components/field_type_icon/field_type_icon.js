@@ -14,7 +14,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl }) {
+export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl, ariaSuffix }) {
   let ariaLabel = '';
   let iconClass = '';
   let iconChar = '';
@@ -80,6 +80,10 @@ export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled 
       // if type doesn't match one of ML_JOB_FIELD_TYPES
       // don't render the component at all
       return null;
+  }
+
+  if (ariaSuffix) {
+    ariaLabel += `, ${ariaSuffix}`;
   }
 
   let className = 'field-type-icon';
