@@ -438,21 +438,23 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
-          '2015-09-19 17:00',
-          '2015-09-20 05:00',
-          '2015-09-20 17:00',
-          '2015-09-21 05:00',
-          '2015-09-21 17:00',
-          '2015-09-22 05:00',
-          '2015-09-22 17:00',
-          '2015-09-23 05:00'
+          '2015-09-19 12:00',
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
         ];
 
-        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
-          if (!maxTicks.includes(tick)) {
-            throw new Error(`unexpected x-axis tick "${tick}"`);
+        await retry.try(async function () {
+          for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+            if (!maxTicks.includes(tick)) {
+              throw new Error(`unexpected x-axis tick "${tick}"`);
+            }
           }
-        }
+        });
       });
     });
   });
