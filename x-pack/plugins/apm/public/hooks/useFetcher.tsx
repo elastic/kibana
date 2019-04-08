@@ -6,6 +6,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { GlobalFetchContext } from '../components/app/Main/GlobalFetchIndicator';
+import { useComponentId } from './useComponentId';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -20,6 +21,7 @@ export function useFetcher<Response>(
   fn: () => Promise<Response>,
   useEffectKey: Array<string | boolean | number | undefined>
 ) {
+  const id = useComponentId();
   const { dispatchStatus } = useContext(GlobalFetchContext);
   const [result, setResult] = useState<{
     data?: Response;
@@ -29,26 +31,19 @@ export function useFetcher<Response>(
 
   useEffect(() => {
     let didCancel = false;
-    let didFinish = false;
 
-    // only apply the loading indicator if the promise did not resolve immediately
-    // the promise will resolve immediately if the value was found in cache
-    requestAnimationFrame(() => {
-      if (!didFinish && !didCancel) {
-        dispatchStatus({ name: fn.name, isLoading: true });
-        setResult({
-          data: result.data, // preserve data from previous state while loading next state
-          status: FETCH_STATUS.LOADING,
-          error: undefined
-        });
-      }
+    dispatchStatus({ id, isLoading: true });
+    setResult({
+      data: result.data, // preserve data from previous state while loading next state
+      status: FETCH_STATUS.LOADING,
+      error: undefined
     });
 
     async function doFetch() {
       try {
         const data = await fn();
         if (!didCancel) {
-          dispatchStatus({ name: fn.name, isLoading: false });
+          dispatchStatus({ id, isLoading: false });
           setResult({
             data,
             status: FETCH_STATUS.SUCCESS,
@@ -60,7 +55,7 @@ export function useFetcher<Response>(
           return;
         }
         if (!didCancel) {
-          dispatchStatus({ name: fn.name, isLoading: false });
+          dispatchStatus({ id, isLoading: false });
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -68,13 +63,12 @@ export function useFetcher<Response>(
           });
         }
       }
-      didFinish = true;
     }
 
     doFetch();
 
     return () => {
-      dispatchStatus({ name: fn.name, isLoading: false });
+      dispatchStatus({ id, isLoading: false });
       didCancel = true;
     };
   }, useEffectKey);

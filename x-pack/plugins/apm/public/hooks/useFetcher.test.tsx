@@ -32,17 +32,16 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []));
     });
 
-    it('should initially be empty', async () => {
+    it('should have loading spinner initally', async () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        status: undefined
+        status: 'loading'
       });
     });
 
-    it('should show loading spinner after 100ms', async () => {
+    it('should still show loading spinner after 100ms', async () => {
       jest.advanceTimersByTime(100);
-      await hook.waitForNextUpdate();
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -74,17 +73,16 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []));
     });
 
-    it('should initially be empty', async () => {
+    it('should have loading spinner initally', async () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        status: undefined
+        status: 'loading'
       });
     });
 
-    it('should show loading spinner after 100ms', async () => {
+    it('should still show loading spinner after 100ms', async () => {
       jest.advanceTimersByTime(100);
-      await hook.waitForNextUpdate();
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -117,6 +115,12 @@ describe('useFetcher', () => {
           }
         }
       );
+      expect(hook.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        status: 'loading'
+      });
+
       await hook.waitForNextUpdate();
 
       // assert: first response has loaded and should be rendered
@@ -136,7 +140,6 @@ describe('useFetcher', () => {
       });
 
       jest.advanceTimersByTime(100);
-      await hook.waitForNextUpdate();
 
       // assert: while loading new data the previous data should still be rendered
       expect(hook.result.current).toEqual({

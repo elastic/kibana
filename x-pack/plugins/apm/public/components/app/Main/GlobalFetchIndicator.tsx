@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiDelayHide, EuiPortal, EuiProgress } from '@elastic/eui';
+import { EuiPortal, EuiProgress } from '@elastic/eui';
 import React, { Fragment, useMemo, useReducer } from 'react';
+import { useDelayedVisibility } from './useDelayedVisibility';
 
 export const GlobalFetchContext = React.createContext({
   statuses: {},
@@ -17,11 +18,18 @@ interface State {
 
 interface Action {
   isLoading: boolean;
-  name: string;
+  id: number;
 }
 
 function reducer(statuses: State, action: Action) {
-  return { ...statuses, [action.name]: action.isLoading };
+  // add loading status
+  if (action.isLoading) {
+    return { ...statuses, [action.id]: true };
+  }
+
+  // remove loading status
+  const { [action.id]: statusToRemove, ...restStatuses } = statuses;
+  return restStatuses;
 }
 
 function getIsAnyLoading(statuses: State) {
@@ -35,18 +43,15 @@ export function GlobalFetchIndicator({
 }) {
   const [statuses, dispatchStatus] = useReducer(reducer, {});
   const isLoading = useMemo(() => getIsAnyLoading(statuses), [statuses]);
+  const shouldShowLoadingIndicator = useDelayedVisibility(isLoading);
 
   return (
     <Fragment>
-      <EuiDelayHide
-        hide={!isLoading}
-        minimumDuration={1000}
-        render={() => (
-          <EuiPortal>
-            <EuiProgress size="xs" position="fixed" />
-          </EuiPortal>
-        )}
-      />
+      {shouldShowLoadingIndicator && (
+        <EuiPortal>
+          <EuiProgress size="xs" position="fixed" />
+        </EuiPortal>
+      )}
 
       <GlobalFetchContext.Provider
         value={{ statuses, dispatchStatus }}
