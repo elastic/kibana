@@ -19,11 +19,11 @@ import {
   NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { SelectFlowDirection } from '../../../flow_controls/select_flow_direction';
+import { SelectFlowTarget } from '../../../flow_controls/select_flow_target';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkTopNFlowColumns } from './columns';
-import { SelectDirection } from './select_direction';
-import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -148,21 +148,27 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                 </EuiFlexItem>
                 <SelectTypeItem
                   grow={false}
-                  data-test-subj={`${NetworkTopNFlowTableId}-select-type`}
+                  data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
                 >
-                  <SelectType
-                    id={`${NetworkTopNFlowTableId}-select-type`}
-                    selectedDirection={flowDirection}
-                    selectedType={flowTarget}
-                    onChangeType={this.onChangeTopNFlowTarget}
+                  <SelectFlowTarget
+                    id={NetworkTopNFlowTableId}
                     isLoading={loading}
+                    onChangeTarget={this.onChangeTopNFlowTarget}
+                    selectedDirection={flowDirection}
+                    selectedTarget={flowTarget}
+                    displayTextOverride={[
+                      i18n.BY_SOURCE_IP,
+                      i18n.BY_DESTINATION_IP,
+                      i18n.BY_CLIENT_IP,
+                      i18n.BY_SERVER_IP,
+                    ]}
                   />
                 </SelectTypeItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SelectDirection
-                id={`${NetworkTopNFlowTableId}-select-direction`}
+              <SelectFlowDirection
+                id={NetworkTopNFlowTableId}
                 selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />

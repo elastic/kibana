@@ -38,7 +38,13 @@ export const createIpDetailsResolvers = (
       return libs.ipDetails.getIpOverview(req, options);
     },
     async Domains(source, args, { req }, info) {
-      const options = { ...createOptions(source, args, info), ip: args.ip };
+      const options = {
+        ...createOptions(source, args, info),
+        ip: args.ip,
+        domainsSortField: args.domainsSortField,
+        flowTarget: args.flowTarget,
+        flowDirection: args.flowDirections,
+      };
       return libs.ipDetails.getDomains(req, options);
     },
   },

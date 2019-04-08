@@ -58,20 +58,20 @@ describe('IP Overview Component', () => {
       );
 
       wrapper
-        .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
+        .find(`[data-test-subj="${IpOverviewId}-select-flow-target"] button`)
         .first()
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find(`button#${IpOverviewId}-select-type-destination`)
+        .find(`button#${IpOverviewId}-select-flow-target-destination`)
         .first()
         .simulate('click');
 
       expect(
         wrapper
-          .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
+          .find(`[data-test-subj="${IpOverviewId}-select-flow-target"] button`)
           .first()
           .text()
           .toLocaleLowerCase()

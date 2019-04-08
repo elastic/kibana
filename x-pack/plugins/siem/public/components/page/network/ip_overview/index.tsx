@@ -19,9 +19,10 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
+import { SelectFlowTarget } from '../../../flow_controls/select_flow_target';
 
 import {
   autonomousSystemRenderer,
@@ -32,7 +33,6 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from './field_renderers';
-import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 export const IpOverviewId = 'ip-overview';
@@ -114,12 +114,14 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
               <h1>{ip}</h1>
             </EuiText>
           </EuiFlexItem>
-          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
-            <SelectType
-              id={`${IpOverviewId}-select-type`}
-              selectedType={flowTarget}
-              onChangeType={this.onChangeType}
+          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
+            <SelectFlowTarget
+              id={IpOverviewId}
               isLoading={loading}
+              onChangeTarget={this.onChangeTarget}
+              selectedDirection={FlowDirection.uniDirectional}
+              selectedTarget={flowTarget}
+              displayTextOverride={[i18n.AS_SOURCE, i18n.AS_DESTINATION]}
             />
           </SelectTypeItem>
         </EuiFlexGroup>
@@ -158,7 +160,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
     );
   };
 
-  private onChangeType = (flowTarget: FlowTarget) => {
+  private onChangeTarget = (flowTarget: FlowTarget) => {
     this.props.updateIpOverviewFlowType({ flowTarget });
   };
 }

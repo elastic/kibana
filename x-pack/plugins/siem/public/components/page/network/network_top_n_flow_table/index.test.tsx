@@ -82,7 +82,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       expect(
         wrapper
-          .find(`button#${NetworkTopNFlowTableId}-select-direction-biDirectional`)
+          .find(`button#${NetworkTopNFlowTableId}-select-flow-direction-biDirectional`)
           .hasClass('euiButton--fill')
       ).toEqual(true);
     });
@@ -108,20 +108,20 @@ describe('NetworkTopNFlow Table Component', () => {
       );
 
       wrapper
-        .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-type"] button`)
+        .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-flow-target"] button`)
         .first()
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find(`button#${NetworkTopNFlowTableId}-select-type-destination`)
+        .find(`button#${NetworkTopNFlowTableId}-select-flow-target-destination`)
         .first()
         .simulate('click');
 
       expect(
         wrapper
-          .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-type"] button`)
+          .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-flow-target"] button`)
           .first()
           .text()
           .toLocaleLowerCase()
