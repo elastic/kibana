@@ -10,24 +10,21 @@ import { KibanaPanel } from './kibana_panel';
 import { LogstashPanel } from './logstash_panel';
 import { AlertsPanel } from './alerts_panel';
 import { BeatsPanel } from './beats_panel';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
-import { MetricbeatMigration } from '../../metricbeat_migration';
 
-export function Overview(props) {
+const Overview = ({
+  setupMode,
+  ...props
+}) => {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   return (
     <EuiPage>
       <EuiPageBody>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
-
-        <MetricbeatMigration
-          monitoringHosts={props.monitoringHosts}
-          fetchCapabilities={props.fetchCapabilities}
-        />
-
+        <EuiSpacer size="m"/>
         { !isFromStandaloneCluster ?
           (
             <Fragment>
@@ -38,19 +35,19 @@ export function Overview(props) {
                 changeUrl={props.changeUrl}
                 license={props.cluster.license}
                 showLicenseExpiration={props.showLicenseExpiration}
+                setupMode={setupMode}
               />
-              <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} />
+              <KibanaPanel {...props.cluster.kibana} changeUrl={props.changeUrl} setupMode={setupMode} />
             </Fragment>
           )
           : null
         }
-
         <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
-
         <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
-
         <ApmPanel {...props.cluster.apm} changeUrl={props.changeUrl} />
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
+
+export { Overview };

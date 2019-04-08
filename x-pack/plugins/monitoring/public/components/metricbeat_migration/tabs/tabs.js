@@ -44,7 +44,7 @@ export class Tabs extends Component {
   }
 
   buildTabs() {
-    const { products, esMonitoringUrl, updateCapabilities } = this.props;
+    const { products, esMonitoringUrl, updateProduct } = this.props;
     const { checkingMigrationStatus, hasCheckedMigrationStatus, isShowingMigrationSteps } = this.state;
 
     const tabs = products.map(product => {
@@ -54,14 +54,14 @@ export class Tabs extends Component {
       if (status.showInstructions && isShowingMigrationSteps) {
         const instructionSteps = getInstructionSteps(product, {
           doneWithMigration: async () => {
-            await updateCapabilities();
+            await updateProduct();
             this.setState({ activeTabId: 'overview' });
           },
           kibanaUrl: '',
           esMonitoringUrl,
           checkForMigrationStatus: async () => {
             this.setState({ checkingMigrationStatus: true });
-            await updateCapabilities();
+            await updateProduct();
             this.setState({ checkingMigrationStatus: false, hasCheckedMigrationStatus: true });
           },
           checkingMigrationStatus,

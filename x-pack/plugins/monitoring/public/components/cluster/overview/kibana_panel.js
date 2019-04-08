@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage } from './helpers';
 
@@ -18,8 +19,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiFlexGroup
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { MetricbeatMigrationStatus } from '../../setup_mode';
 
 function KibanaPanelUi(props) {
   if (!props.count) {
@@ -88,24 +91,29 @@ function KibanaPanelUi(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToInstances}
-                  data-test-subj="kbnInstances"
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
-                    defaultMessage: 'Kibana Instances: {instancesCount}' },
-                  { instancesCount: props.count })}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkLabel"
-                    defaultMessage="Instances: {instancesCount}"
-                    values={{ instancesCount: (<span data-test-subj="number_of_kibana_instances">{ props.count }</span>) }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      onClick={goToInstances}
+                      data-test-subj="kbnInstances"
+                      aria-label={props.intl.formatMessage({
+                        id: 'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
+                        defaultMessage: 'Kibana Instances: {instancesCount}' },
+                      { instancesCount: props.count })}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkLabel"
+                        defaultMessage="Instances: {instancesCount}"
+                        values={{ instancesCount: (<span data-test-subj="number_of_kibana_instances">{ props.count }</span>) }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {props.setupMode.enabled ? <MetricbeatMigrationStatus data={get(props.setupMode, 'data.kibana')}/> : null}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>

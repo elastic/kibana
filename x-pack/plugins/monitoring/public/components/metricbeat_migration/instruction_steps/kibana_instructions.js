@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiCallOut
 } from '@elastic/eui';
+import { formatDateTimeLocal } from '../../../../common/formatting';
 
 export function getKibanaInstructions(product, {
   doneWithMigration,
@@ -48,6 +49,7 @@ export function getKibanaInstructions(product, {
     let status = null;
     if (hasCheckedMigrationStatus) {
       if (product.isPartiallyMigrated) {
+        const lastInternallyCollectedTimestamp = formatDateTimeLocal(product.lastInternallyCollectedTimestamp);
         status = (
           <Fragment>
             <EuiSpacer size="m"/>
@@ -55,7 +57,9 @@ export function getKibanaInstructions(product, {
               size="s"
               color="warning"
               title="We still see data coming from the default collection of Kibana. Make sure you disable that before moving forward."
-            />
+            >
+              <p>Last default collection occurred at {lastInternallyCollectedTimestamp}</p>
+            </EuiCallOut>
           </Fragment>
         );
       }
@@ -66,12 +70,11 @@ export function getKibanaInstructions(product, {
             <EuiCallOut
               size="s"
               color="warning"
-              title="We have not detected any monitoring data coming from Metricbeat for Kibana"
+              title={`We have not detected any monitoring data coming from Metricbeat for this Kibana`}
             />
           </Fragment>
         );
       }
-
     }
 
     updateStep = {
@@ -114,7 +117,7 @@ export function getKibanaInstructions(product, {
     };
   }
 
-  if (product.fullyMigratedButNeedsToDisableLegacy) {
+  if (product.isPartiallyMigrated) {
     return [
       disableKibanaInternalCollection,
       updateStep

@@ -3,20 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiStepsHorizontal,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiButton,
+  EuiPanel,
+  EuiSteps
 } from '@elastic/eui';
-import { Tabs } from '../tabs';
+import { getInstructionSteps } from '../instruction_steps';
 
 export class Flyout extends Component {
   constructor(props) {
@@ -25,12 +26,29 @@ export class Flyout extends Component {
     this.state = {
       activeStep: 2,
       esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
+      hasCheckedMigrationStatus: false,
+      checkingMigrationStatus: false,
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const productChanged = nextProps.product !== this.props.product;
+    const stateChanged = nextState !== this.state;
+
+    if (productChanged || stateChanged) {
+      return true;
+    }
+    return false;
+  }
+
   renderActiveStep() {
-    const { products, updateCapabilities } = this.props;
-    const { activeStep, esMonitoringUrl } = this.state;
+    const { product, updateProduct, productName, onClose } = this.props;
+    const {
+      activeStep,
+      esMonitoringUrl,
+      hasCheckedMigrationStatus,
+      checkingMigrationStatus,
+    } = this.state;
 
     switch (activeStep) {
       case 1:
@@ -48,12 +66,38 @@ export class Flyout extends Component {
           </EuiForm>
         );
       case 2:
+        const instructionSteps = getInstructionSteps(productName, product, {
+          doneWithMigration: async () => {
+            onClose();
+          },
+          kibanaUrl: '',
+          esMonitoringUrl,
+          checkForMigrationStatus: async () => {
+            this.setState({ checkingMigrationStatus: true });
+            await updateProduct();
+            this.setState({ checkingMigrationStatus: false, hasCheckedMigrationStatus: true });
+          },
+          checkingMigrationStatus,
+          hasCheckedMigrationStatus,
+        });
+
+        const migrationLabel = product.isFullyMigrated
+          ? null
+          : (
+            <Fragment>
+              <p>To migrate, following the following instructions:</p>
+              <EuiSpacer size="m"/>
+            </Fragment>
+          );
+
         return (
-          <Tabs
-            products={products}
-            esMonitoringUrl={esMonitoringUrl}
-            updateCapabilities={updateCapabilities}
-          />
+          <Fragment>
+            <EuiSpacer size="m"/>
+            {migrationLabel}
+            <EuiPanel>
+              <EuiSteps steps={instructionSteps}/>
+            </EuiPanel>
+          </Fragment>
         );
     }
 
@@ -62,21 +106,21 @@ export class Flyout extends Component {
 
   render() {
     const { onClose } = this.props;
-    const { activeStep } = this.state;
-    const horizontalSteps = [
-      {
-        title: 'Configure monitoring cluster',
-        isComplete: activeStep > 1,
-        onClick: () => this.setState({ activeStep: 1 }),
-      },
-      {
-        title: 'Setup stack products',
-        isComplete: activeStep > 2,
-        onClick: () => {
-          this.setState({ activeStep: 2 });
-        }
-      }
-    ];
+    // const { activeStep } = this.state;
+    // const horizontalSteps = [
+    //   {
+    //     title: 'Configure monitoring cluster',
+    //     isComplete: activeStep > 1,
+    //     onClick: () => this.setState({ activeStep: 1 }),
+    //   },
+    //   {
+    //     title: 'Setup stack products',
+    //     isComplete: activeStep > 2,
+    //     onClick: () => {
+    //       this.setState({ activeStep: 2 });
+    //     }
+    //   }
+    // ];
 
     return (
       <EuiFlyout
@@ -91,10 +135,10 @@ export class Flyout extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiStepsHorizontal
+          {/* <EuiStepsHorizontal
             steps={horizontalSteps}
           />
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m"/> */}
           {this.renderActiveStep()}
         </EuiFlyoutBody>
       </EuiFlyout>

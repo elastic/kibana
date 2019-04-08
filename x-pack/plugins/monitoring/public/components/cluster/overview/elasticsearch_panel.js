@@ -18,9 +18,11 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiFlexGroup
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { MetricbeatMigrationStatus } from '../../setup_mode';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -40,8 +42,8 @@ const calculateShards = shards => {
   };
 };
 
-function ElasticsearchPanelUi(props) {
 
+function ElasticsearchPanelUi(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
@@ -129,20 +131,25 @@ function ElasticsearchPanelUi(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  data-test-subj="esNumberOfNodes"
-                  onClick={goToNodes}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
-                    defaultMessage="Nodes: {nodesTotal}"
-                    values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      data-test-subj="esNumberOfNodes"
+                      onClick={goToNodes}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
+                        defaultMessage="Nodes: {nodesTotal}"
+                        values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {props.setupMode.enabled ? <MetricbeatMigrationStatus data={get(props.setupMode, 'data.elasticsearch')}/> : null}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>

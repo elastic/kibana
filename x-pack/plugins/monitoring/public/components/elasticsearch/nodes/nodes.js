@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
+import { get } from 'lodash';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
@@ -18,11 +19,14 @@ import {
   EuiPageContent,
   EuiPageBody,
   EuiPanel,
+  EuiButton,
+  EuiBadge
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
+import { Flyout } from '../../metricbeat_migration/flyout';
 
-const getColumns = showCgroupMetricsElasticsearch => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode, openFlyout = null) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
@@ -198,45 +202,108 @@ const getColumns = showCgroupMetricsElasticsearch => {
     }
   });
 
+  if (setupMode.enabled) {
+    cols.push({
+      name: 'Migration Status',
+      field: 'resolver',
+      render: uuid => {
+        const list = get(setupMode, 'data.elasticsearch.byUuid', {});
+        const status = list[uuid] || {};
+
+        if (status.isInternalCollector) {
+          return (
+            <EuiButton color="danger" onClick={openFlyout}>
+              Migrate
+            </EuiButton>
+          );
+        }
+
+        if (status.isFullyMigrated) {
+          return (
+            <EuiBadge color="secondary" iconType="check">
+              Migrated
+            </EuiBadge>
+          );
+        }
+
+        console.log({ uuid, status, setupMode });
+        return 'foo';
+      }
+    });
+  }
+
   return cols;
 };
 
-function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, intl, ...props }) {
-  const columns = getColumns(showCgroupMetricsElasticsearch);
-  const { sorting, pagination, onTableChange } = props;
+class ElasticsearchNodesUI extends Component {
+  state = { isFlyoutOpen: false }
 
-  return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
-        </EuiPanel>
-        <EuiSpacer size="m" />
-        <EuiPageContent>
-          <EuiMonitoringTable
-            className="elasticsearchNodesTable"
-            rows={nodes}
-            columns={columns}
-            sorting={sorting}
-            pagination={pagination}
-            search={{
-              box: {
-                incremental: true,
-                placeholder: intl.formatMessage({
-                  id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
-                  defaultMessage: 'Filter Nodes…',
-                }),
-              },
-            }}
-            onTableChange={onTableChange}
-            executeQueryOptions={{
-              defaultFields: ['name']
-            }}
-          />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
-  );
+  openFlyout = () => {
+    this.setState({ isFlyoutOpen: true });
+  }
+
+  closeFlyout = () => {
+    this.setState({ isFlyoutOpen: false });
+  }
+
+  render() {
+    const {
+      clusterStatus,
+      nodes,
+      showCgroupMetricsElasticsearch,
+      intl,
+      setupMode,
+      sorting,
+      pagination,
+      onTableChange
+    } = this.props;
+
+    const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, this.openFlyout);
+
+    return (
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPanel>
+            <ClusterStatus stats={clusterStatus} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
+            <EuiMonitoringTable
+              className="elasticsearchNodesTable"
+              rows={nodes}
+              columns={columns}
+              sorting={sorting}
+              pagination={pagination}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: intl.formatMessage({
+                    id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
+                    defaultMessage: 'Filter Nodes…',
+                  }),
+                },
+              }}
+              onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['name']
+              }}
+            />
+            { this.state.isFlyoutOpen ?
+              <Flyout
+                onClose={() => this.closeFlyout()}
+                productName="elasticsearch"
+                product={get(setupMode, 'data.elasticsearch')}
+                updateProduct={setupMode.updateData}
+                // products={capabilities}
+                // updateCapabilities={() => this.updateCapabilities()}
+              />
+              : null
+            }
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
 }
 
 export const ElasticsearchNodes = injectI18n(ElasticsearchNodesUI);

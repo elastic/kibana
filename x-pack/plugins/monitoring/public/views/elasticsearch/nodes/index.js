@@ -39,6 +39,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         storageKey: 'elasticsearch.nodes',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes`,
         reactNodeId: 'elasticsearchNodesReact',
+        supportSetupMode: true,
         defaultData: {},
         $scope,
         $injector
@@ -47,19 +48,25 @@ uiRoutes.when('/elasticsearch/nodes', {
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       $scope.$watch(() => this.data, data => {
+        if (!data) {
+          return;
+        }
         this.renderReact(data);
       });
 
-      this.renderReact = ({ clusterStatus, nodes }) => {
+      this.onSetupModeChanged = () => this.renderReact();
+
+      this.renderReact = () => {
         super.renderReact(
           <I18nContext>
             <ElasticsearchNodes
-              clusterStatus={clusterStatus}
-              nodes={nodes}
+              clusterStatus={this.data.clusterStatus}
+              nodes={this.data.nodes}
               showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
               sorting={this.sorting}
               pagination={this.pagination}
               onTableChange={this.onTableChange}
+              setupMode={this.setupMode}
             />
           </I18nContext>
         );

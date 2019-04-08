@@ -1,5 +1,5 @@
-<div class="app-container">
-  <kbn-top-nav name="{{ monitoringMain.name }}-nav">
+<div class="app-container" ng-class="{ 'monSetupModeActive': setupMode.enabled }">
+  <kbn-top-nav name="{{ monitoringMain.name }}-nav" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Tabs -->

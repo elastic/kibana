@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortByOrder, uniq, isEqual } from 'lodash';
+import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
 
 export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
@@ -12,7 +12,7 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
     {
       range: {
         'timestamp': {
-          gte: 'now-2m',
+          gte: 'now-1d',
           lte: 'now'
         }
       }
@@ -43,14 +43,29 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
             size: 50,
           },
           aggs: {
-            es_cluster_uuids: {
+            es_uuids: {
               terms: {
-                field: 'cluster_uuid'
+                // do not rely on source_node
+                field: 'source_node.uuid'
+              },
+              aggs: {
+                by_timestamp: {
+                  max: {
+                    field: 'timestamp'
+                  }
+                }
               }
             },
             kibana_uuids: {
               terms: {
                 field: 'kibana_stats.kibana.uuid'
+              },
+              aggs: {
+                by_timestamp: {
+                  max: {
+                    field: 'timestamp'
+                  }
+                }
               }
             }
           }
@@ -66,7 +81,7 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
 function getUuidBucketName(productName) {
   switch (productName) {
     case 'elasticsearch':
-      return 'es_cluster_uuids';
+      return 'es_uuids';
     case 'kibana':
       return 'kibana_uuids';
   }
@@ -84,7 +99,7 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
   const recentDocuments = await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets');
 
-  const products = PRODUCTS.map(product => {
+  const products = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
     const indexBuckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
@@ -98,7 +113,6 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       internalCollectorsUuids: [],
       fullyMigratedUuids: [],
       partiallyMigratedUuids: [],
-      fullyMigratedButNeedsToDisableLegacy: false
     };
 
     const fullyMigratedUuidsMap = {};
@@ -117,9 +131,9 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
-      for (const { key } of uuidBuckets) {
+      for (const { key, by_timestamp: byTimestamp } of uuidBuckets) {
         if (!map[key]) {
-          map[key] = true;
+          map[key] = { lastTimestamp: get(byTimestamp, 'value') };
         }
       }
       capabilities.isFullyMigrated = isFullyMigrated;
@@ -127,29 +141,49 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       capabilities.totalUniqueInstanceCount = Object.keys(map).length;
       capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
       capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
+      capabilities.byUuid = {
+        ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isInternalCollector: true, ...internalCollectorsUuidsMap[uuid] }
+        }), {}),
+        ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isPartiallyMigrated: true, ...partiallyMigratedUuidsMap[uuid] }
+        }), {}),
+        ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isFullyMigrated: true, ...fullyMigratedUuidsMap[uuid] }
+        }), {}),
+      };
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
+      const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated = indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
+
         const uuidBuckets = get(indexBucket, `${uuidBucketName}.buckets`, []);
-        for (const { key } of uuidBuckets) {
+        for (const { key, by_timestamp: byTimestamp } of uuidBuckets) {
           if (!map[key]) {
             if (otherMap[key]) {
-              delete otherMap[key];
               partiallyMigratedUuidsMap[key] = true;
+              delete otherMap[key];
             }
             else {
               map[key] = true;
             }
           }
+          if (!isFullyMigrated) {
+            internalTimestamps.push(byTimestamp.value);
+          }
         }
       }
 
       capabilities.isFullyMigrated = Object.keys(internalCollectorsUuidsMap).length === 0;
-      capabilities.isPartiallyMigrated = Object.keys(partiallyMigratedUuidsMap).length > 0;
+      capabilities.isPartiallyMigrated = Object.keys(partiallyMigratedUuidsMap).length > 0
+        || (Object.keys(internalCollectorsUuidsMap).length > 0 && Object.keys(fullyMigratedUuidsMap).length > 0);
       capabilities.isInternalCollector = Object.keys(fullyMigratedUuidsMap).length === 0
         && Object.keys(partiallyMigratedUuidsMap).length === 0;
       capabilities.totalUniqueInstanceCount = uniq([
@@ -159,14 +193,27 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
       capabilities.partiallyMigratedUuids = Object.keys(partiallyMigratedUuidsMap);
       capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
-      capabilities.fullyMigratedButNeedsToDisableLegacy = isEqual(capabilities.fullyMigratedUuids, capabilities.internalCollectorsUuids);
+      capabilities.byUuid = {
+        ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isInternalCollector: true }
+        }), {}),
+        ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isPartiallyMigrated: true, lastInternallyCollectedTimestamp: internalTimestamps[0] }
+        }), {}),
+        ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
+          ...accum,
+          [uuid]: { isFullyMigrated: true }
+        }), {}),
+      };
     }
 
     return {
-      name: product.name,
-      ...capabilities
+      ...products,
+      [product.name]: capabilities,
     };
   }, {});
 
-  return sortByOrder(products, ['isInternalCollector', 'isPartiallyMigrated', 'isFullyMigrated', 'isNetNewUser'], 'desc');
+  return products;
 };

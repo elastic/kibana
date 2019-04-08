@@ -66,11 +66,14 @@ export class MonitoringViewBaseController {
     getPageData: _getPageData = getPageData,
     defaultData,
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
+    supportSetupMode,
     $scope,
     $injector,
     options = {}
   }) {
     const titleService = $injector.get('title');
+    const capabilities = $injector.get('capabilities');
+    const globalState = $injector.get('globalState');
     const $executor = $injector.get('$executor');
 
     titleService($scope.cluster, title);
@@ -138,6 +141,69 @@ export class MonitoringViewBaseController {
     };
 
     this.setTitle = title => titleService($scope.cluster, title);
+
+    this.setupMode = {};
+    if (supportSetupMode) {
+      this.setupMode = $scope.setupMode = {
+        enabled: false,
+        data: null,
+        updateData: null
+      };
+
+      this.setupMode.updateData = async () => {
+        this.setupMode.data = await capabilities(globalState.cluster_uuid, globalState.ccs);
+        this.onSetupModeChanged && this.onSetupModeChanged();
+      };
+
+      const toggleSetupMode = inSetupMode => {
+        $scope.$evalAsync(async () => {
+          this.setupMode.enabled = inSetupMode;
+          globalState.inSetupMode = inSetupMode;
+          globalState.save();
+          setSetupModeMenuItem(); // eslint-disable-line no-use-before-define
+          this.onSetupModeChanged && this.onSetupModeChanged();
+
+          if (inSetupMode) {
+            await this.setupMode.updateData();
+          }
+        });
+      };
+
+      const setSetupModeMenuItem = () => {
+        const navItems = globalState.inSetupMode
+          ? [
+            {
+              key: 'exit',
+              label: 'Exit Setup Mode',
+              description: 'Exit setup mode',
+              run: () => toggleSetupMode(false),
+              testId: 'exitSetupMode'
+            },
+            {
+              key: 'refresh',
+              label: 'Refresh Setup Data',
+              description: 'Refresh data used for setup mode',
+              run: () => this.setupMode.updateData(),
+              testId: 'refreshSetupModeData'
+            }
+          ]
+          : [{
+            key: 'enter',
+            label: 'Enter Setup Mode',
+            description: 'Enter setup mode',
+            run: () => toggleSetupMode(true),
+            testId: 'enterSetupMode'
+          }];
+
+        $scope.topNavMenu = [...navItems];
+      };
+
+      setSetupModeMenuItem();
+
+      if (globalState.inSetupMode) {
+        toggleSetupMode(true);
+      }
+    }
   }
 
   renderReact(component) {

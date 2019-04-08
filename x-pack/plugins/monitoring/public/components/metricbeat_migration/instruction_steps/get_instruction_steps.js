@@ -6,8 +6,8 @@
 
 import { getKibanaInstructions } from './kibana_instructions';
 
-export function getInstructionSteps(product, opts) {
-  switch (product.name) {
+export function getInstructionSteps(productName, product, opts) {
+  switch (productName) {
     case 'kibana':
       return getKibanaInstructions(product, opts);
   }

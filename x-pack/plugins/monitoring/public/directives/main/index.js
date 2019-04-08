@@ -10,6 +10,7 @@ import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
 
+
 /*
  * Manage data and provide helper methods for the "main" directive's template
  */
@@ -81,9 +82,10 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      const $route = $injector.get('$route');
+      const globalState = $injector.get('globalState');
+
       if (!scope.cluster) {
-        const $route = $injector.get('$route');
-        const globalState = $injector.get('globalState');
         scope.cluster = ($route.current.locals.clusters || []).find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
       }
 

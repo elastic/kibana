@@ -45,6 +45,7 @@ uiRoutes.when('/overview', {
           return await monitoringClusters(globalState.cluster_uuid, globalState.ccs);
         },
         reactNodeId: 'monitoringClusterOverviewApp',
+        supportSetupMode: true,
         $scope,
         $injector
       });
@@ -58,23 +59,30 @@ uiRoutes.when('/overview', {
         });
       };
 
-      $scope.$watch(() => this.data, data => {
-        if (!data) {
-          return null;
-        }
-
+      const renderReact = () => {
         this.renderReact(
           <I18nContext>
             <Overview
-              cluster={data}
+              cluster={this.data}
               monitoringHosts={clusterMonitoringHosts}
               changeUrl={changeUrl}
+              setupMode={this.setupMode}
               fetchCapabilities={fetchCapabilities}
               showLicenseExpiration={true}
             />
           </I18nContext>
         );
+      };
+
+      $scope.$watch(() => this.data, data => {
+        if (!data) {
+          return null;
+        }
+
+        renderReact(data);
       });
+
+      this.onSetupModeChanged = () => renderReact();
     }
   }
 });

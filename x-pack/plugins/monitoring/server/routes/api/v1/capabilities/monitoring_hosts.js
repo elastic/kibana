@@ -5,7 +5,6 @@
  */
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
-import { first } from 'rxjs/operators';
 
 export function monitoringHostsRoute(server) {
   /*
@@ -28,8 +27,10 @@ export function monitoringHostsRoute(server) {
           return monitoringHosts;
         }
 
-        const legacyEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
-        return legacyEsConfig.hosts;
+        return [];
+
+        // const legacyEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+        // return legacyEsConfig.hosts;
       } catch (err) {
         throw handleError(err, req);
       }
