@@ -57,7 +57,6 @@ you can no longer set a dark or light theme on an individual dashboard.
 [role="screenshot"]
 image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
 
-// end::notable-highlights[]
 
 [float]
 === Responsive dashboards
@@ -94,10 +93,10 @@ image::images/highlights-7.0.0-filters.png[Filters menu]
 [float]
 === Saved objects structure improvements
 
-The <<breaking-changes-7.0-saved-objects,structure of saved objects changed>> so 
-that they are now aware of each other.  
-This means you can now export a dashboard,
-including all visualization dependencies, from the Saved objects page. 
+The {kibana-ref}/breaking-changes-7.0.html#breaking-changes-7.0-saved-objects[structure of saved objects changed],
+so that they are now aware of each other.  
+This means you can now export a dashboard, including all visualization dependencies, 
+from the Saved objects page. 
 You can also easily move objects from one {kib} instance to another or 
 between Spaces.
 
@@ -120,5 +119,4 @@ click the help icon.
 image::images/highlights-7.0.0-canvas-kbd.png[]
 
 
-
-
+// end::notable-highlights[]
