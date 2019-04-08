@@ -8,7 +8,6 @@ import JoiNamespace from 'joi';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { mappings } from './server/code_node_client';
 import { init } from './server/init';
 
 export const code = (kibana: any) =>
@@ -25,7 +24,6 @@ export const code = (kibana: any) =>
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      mappings,
     },
     config(Joi: typeof JoiNamespace) {
       return Joi.object({

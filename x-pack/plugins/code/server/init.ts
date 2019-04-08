@@ -16,7 +16,6 @@ import { LspService } from './lsp/lsp_service';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryConfigController } from './repository_config_controller';
 import { RepositoryServiceFactory } from './repository_service_factory';
-import { clusterRoute } from './routes/cluster';
 import { fileRoute } from './routes/file';
 import { installRoute } from './routes/install';
 import { lspRoute, symbolByQnameRoute } from './routes/lsp';
@@ -72,11 +71,9 @@ export function init(server: Server, options: any) {
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    const codeNodeClient = clientWithInternalUser(server);
+    const codeNodeClient = await clientWithInternalUser(server);
     // enable security check in routes
     enableSecurity(server);
-    // enable cluster status routes
-    clusterRoute(server);
     if (serverOptions.codeNode) {
       let info = await codeNodeClient.getCodeNodeInfo();
       if (!info) {
@@ -99,10 +96,15 @@ export function init(server: Server, options: any) {
       if (info.uuid === serverUuid) {
         await initCodeNode(server, serverOptions, log);
       } else {
+        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+        // @ts-ignore
+        const esUrl = adminCluster.clusterClient.config.hosts[0];
         log.error(
-          `a code node with a different uuid ${
-            info.uuid
-          } already exists, please check your configuration.`
+          `A code node with different uuid:${info.uuid} is already registered as code nodes.
+            1. If this kibana node should be a non-code node, then please set "xpack.code.codeNode" to false in kibana.yml.
+            2. If you want to replace the code-node to this kibana node, then please delete the old info by execute:
+               curl --request DELETE --url ${esUrl}/.code_node/_doc/code-node-info  
+          `
         );
         await initNonCodeNode(info, server, serverOptions, log);
       }

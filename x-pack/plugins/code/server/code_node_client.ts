@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Server } from 'hapi';
+import { EsClient } from './lib/esqueue';
 
-export const CODE_NODE_TYPE = 'code-node';
+export const CODE_NODE_INDEX_NAME = '.code_node';
 export const CODE_NODE_ID = 'code-node-info';
 
 export class CodeNodeClient {
-  constructor(readonly objectsClient: any) {}
+  constructor(readonly client: EsClient) {}
 
   public async getCodeNodeInfo(): Promise<CodeNodeInfo | undefined> {
     try {
-      const ret = await this.objectsClient.get(CODE_NODE_TYPE, CODE_NODE_ID);
-      return ret.attributes;
+      const ret = await this.client.get({
+        index: CODE_NODE_INDEX_NAME,
+        id: CODE_NODE_ID,
+      });
+      return ret._source;
     } catch (e) {
       // NOT FOUND
       return undefined;
@@ -22,25 +26,40 @@ export class CodeNodeClient {
   }
 
   public async createNodeInfo(info: CodeNodeInfo): Promise<CodeNodeInfo> {
-    await this.objectsClient.create(CODE_NODE_TYPE, info, { id: CODE_NODE_ID, refresh: true });
+    try {
+      await this.client.index({
+        index: CODE_NODE_INDEX_NAME,
+        id: CODE_NODE_ID,
+        body: info,
+        op_type: 'create',
+        refresh: true,
+      });
+    } catch (e) {
+      // other node may have created the doc
+    }
     return (await this.getCodeNodeInfo()) as CodeNodeInfo;
   }
 
-  public async deleteNodeInfo() {
-    await this.objectsClient.delete(CODE_NODE_TYPE, CODE_NODE_ID);
+  public async createIndex() {
+    const exists = await this.client.indices.exists({ index: CODE_NODE_INDEX_NAME });
+    if (!exists) {
+      await this.client.indices.create({
+        index: CODE_NODE_INDEX_NAME,
+        body: {
+          mappings,
+        },
+      });
+    }
   }
 }
 
-export function clientWithInternalUser(server: Server): CodeNodeClient {
-  const repo = server.savedObjects.getSavedObjectsRepository(
-    server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-  );
-  const objectsClient = new server.savedObjects.SavedObjectsClient(repo);
-  return new CodeNodeClient(objectsClient);
-}
-
-export function clientWithRequest(request: any): CodeNodeClient {
-  return new CodeNodeClient(request.getSavedObjectsClient());
+export async function clientWithInternalUser(server: Server): Promise<CodeNodeClient> {
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  // @ts-ignore
+  const esClient: EsClient = adminCluster.clusterClient.client;
+  const client = new CodeNodeClient(esClient);
+  await client.createIndex();
+  return client;
 }
 
 export interface CodeNodeInfo {
@@ -49,14 +68,12 @@ export interface CodeNodeInfo {
 }
 
 export const mappings = {
-  [CODE_NODE_TYPE]: {
-    properties: {
-      url: {
-        type: 'text',
-      },
-      uuid: {
-        type: 'text',
-      },
+  properties: {
+    url: {
+      type: 'text',
+    },
+    uuid: {
+      type: 'text',
     },
   },
 };
