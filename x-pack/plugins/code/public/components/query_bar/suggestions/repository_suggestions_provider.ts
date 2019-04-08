@@ -37,7 +37,7 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
         .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
         .map((repo: Repository) => {
           return {
-            description: '',
+            description: repo.url,
             end: 10,
             start: 1,
             text: toRepoNameWithOrg(repo.uri),
