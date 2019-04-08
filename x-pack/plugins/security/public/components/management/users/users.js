@@ -241,7 +241,7 @@ class UsersUI extends Component {
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
-                  defaultMessage="Create new user"
+                  defaultMessage="Create user"
                 />
               </EuiButton>
             </EuiPageContentHeaderSection>
