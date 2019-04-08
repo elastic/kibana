@@ -9,11 +9,8 @@ import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { useLocation } from '../../../../hooks/useLocation';
-import {
-  getTimepickerRisonData,
-  risonStringify,
-  TimepickerRisonData
-} from '../rison_helpers';
+import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import rison, { RisonValue } from 'rison-node';
 
 interface MlRisonData {
   ml?: {
@@ -37,11 +34,9 @@ const MLLink: React.FC<Props> = ({ children, path = '', query = {} }) => {
     risonQuery.ml = query.ml;
   }
 
-  const risonSearch = risonStringify({ _g: risonQuery });
-
   const href = url.format({
     pathname: chrome.addBasePath('/app/ml'),
-    hash: `${path}?${risonSearch}`
+    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
   });
 
   return <EuiLink children={children} href={href} />;

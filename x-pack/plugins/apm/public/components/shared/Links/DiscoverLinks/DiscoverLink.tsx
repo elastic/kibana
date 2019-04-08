@@ -10,7 +10,8 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerRisonData, risonStringify } from '../rison_helpers';
+import { getTimepickerRisonData } from '../rison_helpers';
+import rison, { RisonValue } from 'rison-node';
 
 interface Props {
   query: {
@@ -45,11 +46,11 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
     }
   };
 
-  const risonSearch = risonStringify(risonQuery);
-
   const href = url.format({
     pathname: chrome.addBasePath('/app/kibana'),
-    hash: `/discover?${risonSearch}`
+    hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
+      risonQuery._a as RisonValue
+    )}`
   });
 
   return <EuiLink {...rest} href={href} />;

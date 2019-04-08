@@ -5,8 +5,6 @@
  */
 
 import { Location } from 'history';
-import rison from 'rison-node';
-import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 import { toQuery } from './url_helpers';
 
@@ -19,11 +17,6 @@ export interface TimepickerRisonData {
     pause?: boolean | string;
     value?: number | string;
   };
-}
-
-interface RisonQuery {
-  _g?: TimepickerRisonData & StringMap<any>;
-  _a?: StringMap<any>;
 }
 
 export function getTimepickerRisonData(currentSearch: Location['search']) {
@@ -42,20 +35,4 @@ export function getTimepickerRisonData(currentSearch: Location['search']) {
       value: String(nextQuery.refreshInterval)
     }
   };
-}
-
-export function risonStringify(query: RisonQuery) {
-  const encodedG = query._g ? rison.encode(query._g) : '';
-  const encodedA = query._a ? rison.encode(query._a) : '';
-  const risonValues = [];
-
-  if (encodedG) {
-    risonValues.push(`_g=${encodedG}`);
-  }
-
-  if (encodedA) {
-    risonValues.push(`_a=${encodedA}`);
-  }
-
-  return risonValues.join('&');
 }
