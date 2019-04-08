@@ -414,6 +414,9 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
       meta,
       requestToken
     });
+    //Clear any data-load errors when there is a succesful data return.
+    //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
+    //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
     dispatch(setLayerDataLoadErrorStatus(layerId, null));
   };
 }
