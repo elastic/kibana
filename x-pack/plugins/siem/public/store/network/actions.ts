@@ -7,6 +7,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import {
+  DomainsSortField,
   FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
@@ -46,7 +47,7 @@ export const updateTopNFlowSort = actionCreator<{
 export const updateTopNFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
   networkType: NetworkType;
-}>('UPDATE_TOP_N_FLOW_TYPE');
+}>('UPDATE_TOP_N_FLOW_TARGET');
 
 export const updateTopNFlowDirection = actionCreator<{
   flowDirection: FlowDirection;
@@ -64,6 +65,22 @@ export const applyNetworkFilterQuery = actionCreator<{
 }>('APPLY_NETWORK_FILTER_QUERY');
 
 // IP Overview Actions
-export const updateIpOverviewFlowType = actionCreator<{
+export const updateIpOverviewFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
-}>('UPDATE_IP_OVERVIEW_FLOW_TYPE');
+}>('UPDATE_IP_OVERVIEW_TARGET');
+
+export const updateDomainsLimit = actionCreator<{
+  limit: number;
+}>('UPDATE_DOMAINS_LIMIT');
+
+export const updateDomainsFlowDirection = actionCreator<{
+  flowDirection: FlowDirection;
+}>('UPDATE_DOMAINS_DIRECTION');
+
+export const updateDomainsSort = actionCreator<{
+  domainsSortField: DomainsSortField;
+}>('UPDATE_DOMAINS_SORT');
+
+export const updateDomainsFlowTarget = actionCreator<{
+  flowTarget: FlowTarget;
+}>('UPDATE_DOMAINS_TARGET');

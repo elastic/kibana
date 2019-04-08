@@ -1029,7 +1029,7 @@ export interface SortField {
 export interface DomainsSortField {
   field: DomainsFields;
 
-  flowDirection: FlowDirection;
+  direction: Direction;
 }
 
 export interface NetworkTopNFlowSortField {
@@ -1195,11 +1195,11 @@ export enum Direction {
 }
 
 export enum DomainsFields {
-  dnsName = 'dnsName',
-  queryCount = 'queryCount',
-  uniqueDomains = 'uniqueDomains',
-  dnsBytesIn = 'dnsBytesIn',
-  dnsBytesOut = 'dnsBytesOut',
+  domainName = 'domainName',
+  direction = 'direction',
+  bytes = 'bytes',
+  packets = 'packets',
+  uniqueIpCount = 'uniqueIpCount',
 }
 
 export enum FlowDirection {

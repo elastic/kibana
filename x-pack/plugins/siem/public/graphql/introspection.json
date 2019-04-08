@@ -4535,12 +4535,12 @@
             "defaultValue": null
           },
           {
-            "name": "flowDirection",
+            "name": "direction",
             "description": "",
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "FlowDirection", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "Direction", "ofType": null }
             },
             "defaultValue": null
           }
@@ -4558,31 +4558,26 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "dnsName",
+            "name": "domainName",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "queryCount",
+            "name": "direction",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "bytes", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "packets",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "uniqueDomains",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "dnsBytesIn",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "dnsBytesOut",
+            "name": "uniqueIpCount",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

@@ -41,9 +41,9 @@ export const createIpDetailsResolvers = (
       const options = {
         ...createOptions(source, args, info),
         ip: args.ip,
-        domainsSortField: args.domainsSortField,
+        domainsSortField: args.sort,
         flowTarget: args.flowTarget,
-        flowDirection: args.flowDirections,
+        flowDirection: args.flowDirection,
       };
       return libs.ipDetails.getDomains(req, options);
     },

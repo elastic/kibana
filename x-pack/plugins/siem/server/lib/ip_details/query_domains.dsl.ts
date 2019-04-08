@@ -37,9 +37,6 @@ const getAggs = (
       terms: {
         field: `${getOppositeField(type)}.domain`,
         size: 20,
-        order: {
-          [domainsSortField.field]: domainsSortField.flowDirection,
-        },
       },
       aggs: {
         firstSeen: {

@@ -79,11 +79,7 @@ export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
   },
 };
 
-export const mockDomainsData: { Domains: DomainsData } = {
-  Domains: {
-    domain_name: 'Hiii',
-  },
-};
+export const mockDomainsData: { Domains: DomainsData } = {};
 
 export const getIpOverviewQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SiemContext) => {

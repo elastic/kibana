@@ -5,6 +5,7 @@
  */
 
 import {
+  DomainsSortField,
   FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
@@ -45,11 +46,18 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
+export interface DomainsQuery extends BasicQuery {
+  flowTarget: FlowTarget;
+  flowDirection: FlowDirection;
+  domainsSortField: DomainsSortField;
+}
+
 export interface IpOverviewQuery {
   flowTarget: FlowTarget;
 }
 
 interface IpOverviewQueries {
+  domains: DomainsQuery;
   ipOverview: IpOverviewQuery;
 }
 

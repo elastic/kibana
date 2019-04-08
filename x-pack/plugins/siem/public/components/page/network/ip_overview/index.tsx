@@ -174,6 +174,6 @@ const makeMapStateToProps = () => {
 export const IpOverview = connect(
   makeMapStateToProps,
   {
-    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
+    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowTarget,
   }
 )(IpOverviewComponent);

@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { get, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
 import {
+  DomainsEdges,
+  DomainsNode,
   FlowDirection,
   FlowTarget,
   NetworkDirectionEcs,
-  NetworkTopNFlowEdges,
-  NetworkTopNFlowItem,
 } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { DefaultDraggable } from '../../../draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { IPDetailsLink } from '../../../links';
+import { FormattedDate } from '../../../formatted_date';
 import { Columns } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../network_top_n_flow_table/add_to_kql';
 
 import * as i18n from './translations';
@@ -37,108 +34,17 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<NetworkTopNFlowEdges | valueof<NetworkTopNFlowItem>>> => [
+): Array<Columns<DomainsEdges | valueof<DomainsNode>>> => [
   {
-    name: flowTarget,
+    field: `node.${flowTarget}.domainName`,
+    name: i18n.DOMAIN_NAME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: { node: NetworkTopNFlowItem }) => {
-      const ipAttr = `${flowTarget}.ip`;
-      const ip: string | null = get(ipAttr, node);
-      const id = escapeDataProviderId(`${tableId}-table--${flowTarget}-${flowDirection}-ip-${ip}`);
-      if (ip != null) {
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: ip,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: ipAttr, value: ip },
-              queryDate: { from: startDate, to: Date.now() },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <IPDetailsLink ip={ip} />
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
-    name: i18n.DOMAINS,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }: { node: NetworkTopNFlowItem }) => {
-      const domainAttr = `${flowTarget}.domain`;
-      const ipAttr = `${flowTarget}.ip`;
-      const domains: string[] = get(domainAttr, node);
-      const ip: string | null = get(ipAttr, node);
-
-      if (Array.isArray(domains) && domains.length > 0) {
-        const domain = domains[0];
-        const id = escapeDataProviderId(
-          `${tableId}-table-${ip}-${flowTarget}-${flowDirection}-domain-${domain}`
-        );
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: domain,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: domainAttr, value: domain },
-              queryDate: { from: startDate, to: Date.now() },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  {domain}
-                  {domains.length > 1 && (
-                    <EuiToolTip
-                      content={
-                        <>
-                          {domains.slice(1, 6).map(domainName => (
-                            <span key={`${id}-${domainName}`}>
-                              {defaultToEmptyTag(domainName)}
-                              <br />
-                            </span>
-                          ))}
-                          {domains.slice(1).length > 5 && (
-                            <b>
-                              <br />
-                              {i18n.MORE}
-                            </b>
-                          )}
-                        </>
-                      }
-                    >
-                      <MoreDomains type="eye" />
-                    </EuiToolTip>
-                  )}
-                </>
-              )
-            }
-          />
-        );
+    render: (domainName: string | null) => {
+      const domainNameAttr = `${flowTarget}.domainName`;
+      if (domainName != null) {
+        const id = `${tableId}-table-${flowTarget}-${flowDirection}-domain-${domainName}`;
+        return <DefaultDraggable id={id} field={domainNameAttr} value={domainName} />;
       } else {
         return getEmptyTagValue();
       }
@@ -174,7 +80,6 @@ export const getDomainsColumns = (
     name: i18n.BYTES,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
     render: (bytes: number | null | undefined) => {
       if (bytes != null) {
         return numeral(bytes).format('0.000b');
@@ -198,22 +103,42 @@ export const getDomainsColumns = (
     },
   },
   {
-    field: `node.${flowTarget}.count`,
-    name: getUniqueTitle(flowTarget),
+    field: `node.${flowTarget}.uniqueIpCount`,
+    name: getFlowTargetTitle(flowTarget),
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (ipCount: number | null | undefined) => {
-      if (ipCount != null) {
-        return numeral(ipCount).format('0,000');
+    render: (uniqueIpCount: number | null | undefined) => {
+      if (uniqueIpCount != null) {
+        return numeral(uniqueIpCount).format('0,000');
       } else {
         return getEmptyTagValue();
       }
     },
   },
+  {
+    field: `node.${flowTarget}.firstSeen`,
+    name: i18n.FIRST_SEEN,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: (firstSeen: string | null | undefined) => (
+      <FormattedDate value={firstSeen} fieldName={`${flowTarget}.firstSeen`} />
+    ),
+  },
+  {
+    field: `node.${flowTarget}.lastSeen`,
+    name: i18n.LAST_SEEN,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: (lastSeen: string | null | undefined) => (
+      <FormattedDate value={lastSeen} fieldName={`${flowTarget}.lastSeen`} />
+    ),
+  },
 ];
 
-const getUniqueTitle = (flowTarget: FlowTarget) => {
+const getFlowTargetTitle = (flowTarget: FlowTarget) => {
   if (flowTarget === FlowTarget.source) {
     return i18n.UNIQUE_DESTINATIONS;
   } else if (flowTarget === FlowTarget.destination) {
@@ -221,7 +146,3 @@ const getUniqueTitle = (flowTarget: FlowTarget) => {
   }
   return '';
 };
-
-const MoreDomains = styled(EuiIcon)`
-  margin-left: 5px;
-`;

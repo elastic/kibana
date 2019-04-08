@@ -57,3 +57,9 @@ export const ipOverviewSelector = () =>
     selectNetworkDetails,
     network => network.queries.ipOverview
   );
+
+export const domainsSelector = () =>
+  createSelector(
+    selectNetworkDetails,
+    network => network.queries.domains
+  );

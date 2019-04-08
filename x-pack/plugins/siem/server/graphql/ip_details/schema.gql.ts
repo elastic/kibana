@@ -35,16 +35,16 @@ export const ipOverviewSchema = gql`
 
 export const domainsSchema = gql`
   enum DomainsFields {
-    dnsName
-    queryCount
-    uniqueDomains
-    dnsBytesIn
-    dnsBytesOut
+    domainName
+    direction
+    bytes
+    packets
+    uniqueIpCount
   }
 
   input DomainsSortField {
     field: DomainsFields!
-    flowDirection: FlowDirection!
+    direction: Direction!
   }
 
   type DomainsNetworkField {

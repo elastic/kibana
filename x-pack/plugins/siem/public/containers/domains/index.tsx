@@ -7,10 +7,11 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 
 import { FlowDirection, FlowTarget } from '../../../server/graphql/types';
 import { DomainsEdges, DomainsSortField, GetDomainsQuery, PageInfo } from '../../graphql/types';
-import { inputsModel, networkModel } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
@@ -127,12 +128,11 @@ class DomainsComponentQuery extends QueryTemplate<
   }
 }
 
-// const makeMapStateToProps = () => {
-//   const getDomainsdomainsSelector = networkSelectors.dnsSelector();
-//   const mapStateToProps = (state: State) => getDomainsSelector(state);
-//
-//   return mapStateToProps;
-// };
+const makeMapStateToProps = () => {
+  const getDomainsSelector = networkSelectors.domainsSelector();
+  const mapStateToProps = (state: State) => getDomainsSelector(state);
 
-// export const DomainsQuery = connect(makeMapStateToProps)(DomainsComponentQuery);
-export const DomainsQuery = DomainsComponentQuery;
+  return mapStateToProps;
+};
+
+export const DomainsQuery = connect(makeMapStateToProps)(DomainsComponentQuery);

@@ -49,6 +49,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       'search',
       buildDomainsQuery(options)
     );
+
     // const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
     // const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);

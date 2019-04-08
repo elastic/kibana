@@ -8,20 +8,21 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { ActionCreator } from 'redux';
 import styled from 'styled-components';
 
 import {
   DomainsEdges,
+  DomainsFields,
   DomainsSortField,
   FlowDirection,
   FlowTarget,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { SelectFlowDirection } from '../../../flow_controls/select_flow_direction';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
-import { SelectDirection } from './select_direction';
+import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -39,29 +40,28 @@ interface DomainsTableReduxProps {
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
   flowTarget: FlowTarget;
-  ip: string;
   limit: number;
 }
 
-// interface DomainsTableDispatchProps {
-//   updateDomainsDirection: ActionCreator<{
-//     flowDirection: FlowDirection;
-//     networkType: networkModel.NetworkType;
-//   }>;
-//   updateDomainsLimit: ActionCreator<{
-//     limit: number;
-//     networkType: networkModel.NetworkType;
-//   }>;
-//   updateDomainsSort: ActionCreator<{
-//     domainsSort: DomainsSortField;
-//     networkType: networkModel.NetworkType;
-//   }>;
-//   updateDomainsTarget: ActionCreator<{
-//     flowTarget: FlowTarget;
-//     networkType: networkModel.NetworkType;
-//   }>;
-// }
-//
+interface DomainsTableDispatchProps {
+  updateDomainsDirection: ActionCreator<{
+    flowDirection: FlowDirection;
+    networkType: networkModel.NetworkType;
+  }>;
+  updateDomainsLimit: ActionCreator<{
+    limit: number;
+    networkType: networkModel.NetworkType;
+  }>;
+  updateDomainsSort: ActionCreator<{
+    domainsSort: DomainsSortField;
+    networkType: networkModel.NetworkType;
+  }>;
+  updateDomainsTarget: ActionCreator<{
+    flowTarget: FlowTarget;
+    networkType: networkModel.NetworkType;
+  }>;
+}
+
 type DomainsTableProps = OwnProps & DomainsTableReduxProps & DomainsTableDispatchProps;
 
 const rowItems: ItemsPerRow[] = [
@@ -102,19 +102,13 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       updateDomainsLimit,
       startDate,
       flowDirection,
-      domainsSortField,
       flowTarget,
       type,
     } = this.props;
 
-    // const field =
-    //   domainsSortField.field === NetworkTopNFlowFields.ipCount
-    //     ? `node.${flowTarget}.count`
-    //     : `node.network.${topNFlowSort.field}`;
-
     return (
       <LoadMoreTable
-        columns={getDomainsTableColumns(startDate, flowDirection, flowTarget, type, DomainsTableId)}
+        columns={getDomainsColumns(startDate, flowDirection, flowTarget, type, DomainsTableId)}
         loadingTitle={i18n.DOMAINS}
         loading={loading}
         pageOfItems={data}
@@ -126,7 +120,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
-        sorting={{ field: domainsSortField, direction: flowDirection.direction }}
         title={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -137,20 +130,11 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
                     <CountBadge color="hollow">{totalCount}</CountBadge>
                   </h3>
                 </EuiFlexItem>
-                <SelectTypeItem grow={false} data-test-subj={`${DomainsTableId}-select-type`}>
-                  <SelectType
-                    id={`${DomainsTableId}-select-type`}
-                    selectedDirection={flowDirection}
-                    selectedType={flowTarget}
-                    onChangeType={this.onChangeDomainsFlowTarget}
-                    isLoading={loading}
-                  />
-                </SelectTypeItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SelectDirection
-                id={`${DomainsTableId}-select-direction`}
+              <SelectFlowDirection
+                id={DomainsTableId}
                 selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeDomainsDirection}
               />
@@ -164,43 +148,39 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
-      const field = last(splitField) === 'count' ? NetworkTopNFlowFields.ipCount : last(splitField);
-      const newTopNFlowSort: NetworkTopNFlowSortField = {
-        field: field as NetworkTopNFlowFields,
+      const field = last(splitField) === 'count' ? DomainsFields.uniqueIpCount : last(splitField);
+      const newDomainsSort: DomainsSortField = {
+        field: field as DomainsFields,
         direction: criteria.sort.direction,
       };
-      if (!isEqual(newTopNFlowSort, this.props.topNFlowSort)) {
-        this.props.updateTopNFlowSort({
-          topNFlowSort: newTopNFlowSort,
+      if (!isEqual(newDomainsSort, this.props.domainsSortField)) {
+        this.props.updateDomainsSort({
+          domainsSort: newDomainsSort,
           networkType: this.props.type,
         });
       }
     }
   };
 
-  private onChangeDomainsFlowTarget = (flowTarget: FlowTarget) =>
-    this.props.updateTopNFlowTarget({ flowTarget, networkType: this.props.type });
+  // private onChangeDomainsFlowTarget = (flowTarget: FlowTarget) =>
+  //   this.props.updateDomainsFlowTarget({ flowTarget, networkType: this.props.type });
 
   private onChangeDomainsDirection = (_: string, flowDirection: FlowDirection) =>
-    this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });
+    this.props.updateDomainsDirection({ flowDirection, networkType: this.props.type });
 }
 
 const makeMapStateToProps = () => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
+  const getDomainsSelector = networkSelectors.domainsSelector();
+  const mapStateToProps = (state: State) => getDomainsSelector(state);
   return mapStateToProps;
 };
 
 export const DomainsTable = connect(
   makeMapStateToProps,
   {
-    updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
-    updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
-    updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
+    updateDomainsLimit: networkActions.updateDomainsLimit,
+    updateDomainsDirection: networkActions.updateDomainsFlowDirection,
+    updateDomainsSort: networkActions.updateDomainsSort,
+    updateDomainsTarget: networkActions.updateDomainsFlowTarget,
   }
 )(DomainsTableComponent);
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;

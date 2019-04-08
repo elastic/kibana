@@ -7,6 +7,7 @@
 import { defaultWidth } from '../components/timeline/body';
 import {
   Direction,
+  DomainsFields,
   FlowDirection,
   FlowTarget,
   NetworkDnsFields,
@@ -70,6 +71,12 @@ export const mockGlobalState: State = {
       queries: {
         ipOverview: {
           flowTarget: FlowTarget.source,
+        },
+        domains: {
+          limit: 10,
+          flowDirection: FlowDirection.uniDirectional,
+          flowTarget: FlowTarget.source,
+          domainsSortField: { field: DomainsFields.domainName, direction: Direction.desc },
         },
       },
     },
