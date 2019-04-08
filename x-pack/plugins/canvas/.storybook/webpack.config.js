@@ -10,7 +10,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
 // Extend the Storybook Webpack config with some customizations
-module.exports = async ({ config, _mode }) => {
+module.exports = async ({ config }) => {
+  // Include timing and other data in the Webpack build stats file.
   config.profile = true;
 
   // Find and alter the CSS rule to replace the Kibana public path string with a path
@@ -25,7 +26,7 @@ module.exports = async ({ config, _mode }) => {
     },
   });
 
-  // Include the React preset for Storybook JS files.
+  // Include the React preset from Kibana for Storybook JS files.
   config.module.rules.push({
     test: /\.js$/,
     exclude: /node_modules/,
@@ -35,11 +36,9 @@ module.exports = async ({ config, _mode }) => {
     },
   });
 
-  // Parse props data for .tsx files
+  // Handle Typescript files
   config.module.rules.push({
-    test: /\.tsx$/,
-    // Exclude example files, as we don't display props info for them
-    exclude: /\.examples.tsx$/,
+    test: /\.tsx?$/,
     use: [
       {
         loader: 'babel-loader',
@@ -61,7 +60,8 @@ module.exports = async ({ config, _mode }) => {
     ],
   });
 
-  // Reference the built DLL file of static(ish) dependencies
+  // Reference the built DLL file of static(ish) dependencies, which are removed
+  // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
     new webpack.DllReferencePlugin({
       manifest: path.resolve(DLL_OUTPUT, 'manifest.json'),
@@ -69,7 +69,7 @@ module.exports = async ({ config, _mode }) => {
     })
   );
 
-  // Copy the DLL files to the webpack build for use in the Storybook site
+  // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
     new CopyWebpackPlugin([
       {

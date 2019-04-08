@@ -10,9 +10,17 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const { DLL_NAME, DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
+// This is the Webpack config for the DLL of CSS and JS assets that are
+// not expected to change during development.  This saves compile and run
+// times considerably.
 module.exports = {
   context: KIBANA_ROOT,
   mode: 'development',
+
+  // This is a (potentially growing) list of modules that can be safely
+  // included in the DLL.  Only add to this list modules or other code
+  // which Storybook stories and their components would require, but don't
+  // change during development.
   entry: [
     '@elastic/eui',
     '@elastic/eui/dist/eui_theme_light.css',
@@ -36,22 +44,27 @@ module.exports = {
     'react',
     'recompose',
     'tinycolor2',
+    // Include the DLL UI contexts from Kibana
     require.resolve('./dll_contexts'),
   ],
   plugins: [
+    // Produce the DLL and its manifest
     new webpack.DllPlugin({
       name: DLL_NAME,
       path: path.resolve(DLL_OUTPUT, 'manifest.json'),
     }),
+    // Produce the DLL CSS file
     new MiniCssExtractPlugin({
       filename: 'dll.css',
     }),
   ],
+  // Output the DLL JS file
   output: {
     path: DLL_OUTPUT,
     filename: 'dll.js',
     library: DLL_NAME,
   },
+  // Include a require alias for legacy UI code and styles
   resolve: {
     alias: {
       ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
@@ -61,7 +74,6 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        exclude: [/canvas.+light.css/],
         use: [
           {
             loader: MiniCssExtractPlugin.loader,

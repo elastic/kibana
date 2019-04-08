@@ -36,16 +36,14 @@ if (process.env.NODE_ENV === 'test') {
 function loadStories() {
   require('./dll_contexts');
 
+  // Only gather and require CSS files related to Canvas.  The other CSS files
+  // are built into the DLL.
   const css = require.context(
     '../../../../built_assets/css',
     true,
     /plugins\/(?=canvas).*light\.css/
   );
-  console.log('CSS!', css.keys());
-  css.keys().forEach(filename => {
-    console.log('config', filename);
-    console.log(css(filename));
-  });
+  css.keys().forEach(filename => css(filename));
 
   // Find all files ending in *.examples.ts
   const req = require.context('./..', true, /.examples.tsx$/);
