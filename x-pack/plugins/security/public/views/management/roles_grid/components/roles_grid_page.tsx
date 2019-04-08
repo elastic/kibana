@@ -61,16 +61,14 @@ class RolesGridPageUI extends Component<Props, State> {
   public render() {
     const { permissionDenied } = this.state;
 
-    const pageContent = permissionDenied ? <PermissionDenied /> : this.getPageContent();
-
-    return <div className="mgtRolesListingPage">{pageContent}</div>;
+    return permissionDenied ? <PermissionDenied /> : this.getPageContent();
   }
 
   private getPageContent = () => {
     const { roles } = this.state;
     const { intl } = this.props;
     return (
-      <EuiPageContent className="mgtRolesListingPage__content">
+      <EuiPageContent>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
