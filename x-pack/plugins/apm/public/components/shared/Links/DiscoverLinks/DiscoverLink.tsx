@@ -10,7 +10,7 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerG, risonStringify } from '../rison_helpers';
+import { getTimepickerRisonData, risonStringify } from '../rison_helpers';
 
 interface Props {
   query: {
@@ -38,7 +38,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   }
 
   const risonQuery = {
-    _g: getTimepickerG(location.search),
+    _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
       index: apmIndexPattern.id

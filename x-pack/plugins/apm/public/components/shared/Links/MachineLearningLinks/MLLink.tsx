@@ -9,23 +9,29 @@ import React from 'react';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerG, risonStringify, TimepickerG } from '../rison_helpers';
+import {
+  getTimepickerRisonData,
+  risonStringify,
+  TimepickerRisonData
+} from '../rison_helpers';
 
-interface MlG {
+interface MlRisonData {
   ml?: {
     jobIds: string[];
   };
 }
 
 interface Props {
-  query?: MlG;
+  query?: MlRisonData;
   path?: string;
 }
 
 const MLLink: React.FC<Props> = ({ children, path = '', query = {} }) => {
   const location = useLocation();
 
-  const risonQuery: MlG & TimepickerG = getTimepickerG(location.search);
+  const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
+    location.search
+  );
 
   if (query.ml) {
     risonQuery.ml = query.ml;

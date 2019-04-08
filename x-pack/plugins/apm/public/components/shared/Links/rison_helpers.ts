@@ -10,7 +10,7 @@ import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 import { toQuery } from './url_helpers';
 
-export interface TimepickerG {
+export interface TimepickerRisonData {
   time?: {
     from?: string;
     to?: string;
@@ -21,12 +21,12 @@ export interface TimepickerG {
   };
 }
 
-export interface RisonDecoded {
-  _g?: TimepickerG & StringMap<any>;
+interface RisonQuery {
+  _g?: TimepickerRisonData & StringMap<any>;
   _a?: StringMap<any>;
 }
 
-export function getTimepickerG(currentSearch: Location['search']) {
+export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
@@ -44,7 +44,7 @@ export function getTimepickerG(currentSearch: Location['search']) {
   };
 }
 
-export function risonStringify(query: RisonDecoded) {
+export function risonStringify(query: RisonQuery) {
   const encodedG = query._g ? rison.encode(query._g) : '';
   const encodedA = query._a ? rison.encode(query._a) : '';
   const risonValues = [];

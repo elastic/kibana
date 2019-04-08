@@ -7,10 +7,10 @@
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
+import { pick } from 'lodash';
 import { useLocation } from '../../../hooks/useLocation';
 import { APMQueryParams, toQuery, fromQuery } from './url_helpers';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
-import { pick } from 'lodash';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
