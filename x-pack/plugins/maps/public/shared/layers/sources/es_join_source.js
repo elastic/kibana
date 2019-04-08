@@ -187,10 +187,14 @@ export class ESJoinSource extends AbstractESSource {
   }
 
   async createESTooltipProperty(propertyName, rawValue) {
-    const indexPattern = await this._getIndexPattern();
-    if (!indexPattern) {
+    try {
+      const indexPattern = await this._getIndexPattern();
+      if (!indexPattern) {
+        return null;
+      }
+      return new ESTooltipProperty(propertyName, rawValue, indexPattern);
+    } catch (e) {
       return null;
     }
-    return new ESTooltipProperty(propertyName, rawValue, indexPattern);
   }
 }

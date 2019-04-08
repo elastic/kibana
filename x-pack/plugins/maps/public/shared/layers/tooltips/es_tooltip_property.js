@@ -27,8 +27,7 @@ export class ESTooltipProperty extends TooltipProperty {
       return _.escape(this._rawValue);
     }
     const htmlConverter = field.format.getConverterFor('html');
-    return  (htmlConverter) ? htmlConverter(this._rawValue) :
-      field.format.convert(this._rawValue);
+    return htmlConverter ? htmlConverter(this._rawValue) : field.format.convert(this._rawValue);
   }
 
   isFilterable() {
