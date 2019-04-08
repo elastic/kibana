@@ -92,9 +92,9 @@ class SearchBarUI extends Component<Props, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* tslint:disable */
+  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* tslint:enable */
+  /* eslint-enable */
 
   public toggleFiltersVisible = () => {
     this.setState({
