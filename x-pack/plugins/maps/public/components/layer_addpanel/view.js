@@ -34,7 +34,7 @@ export class AddLayerPanel extends Component {
     indexingTriggered: false,
   }
 
-  _previewLayer = (source, temp = true) => {
+  _viewLayer = (source, temp = true) => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
@@ -44,7 +44,7 @@ export class AddLayerPanel extends Component {
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
     },
-    () => this.props.previewLayer(this.state.layer, temp));
+    () => this.props.viewLayer(this.state.layer, temp));
   };
 
   _clearSource = () => {
@@ -130,14 +130,14 @@ export class AddLayerPanel extends Component {
 
   _getEditorProperties = (importView = false) => {
     let editorProperties = {
-      onPreviewSource: this._previewLayer,
+      onPreviewSource: this._viewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
     };
     if (importView) {
       editorProperties = {
         ...editorProperties,
         boolIndexData: this.state.indexingTriggered,
-        addAndViewSource: source => this._previewLayer(source, false),
+        addAndViewSource: source => this._viewLayer(source, false),
         onRemove: this.props.removeTransientLayer,
       };
     }
