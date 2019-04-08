@@ -1,0 +1,43 @@
+<div ng-controller="aggParam.controller" class="visEditorAgg__formRow--flex">
+  <div class="form-group visEditorAgg__formRow--split">
+    <label for="visEditorTopHitsAggregate{{agg.id}}">
+      <span
+        i18n-id="common.ui.aggTypes.aggregateWithLabel"
+        i18n-default-message="Aggregate with"
+      ></span>
+      <icon-tip
+        content="::'common.ui.aggTypes.aggregateWithTooltip' | i18n: { defaultMessage: 'Choose a strategy for combining multiple hits or a multi-valued field into a single metric' }"
+      ></icon-tip>
+    </label>
+
+    <select
+      required
+      id="visEditorTopHitsAggregate{{agg.id}}"
+      name="aggregate"
+      ng-model="agg.params.aggregate"
+      ng-options="opt as opt.display for opt in options| orderBy: 'display' track by opt.val"
+      class="form-control"
+    ></select>
+  </div>
+  <div class="form-group visEditorAgg__formRow--split">
+    <label for="visEditorTopHitsSize{{agg.id}}">
+      <span
+        i18n-id="common.ui.aggTypes.sizeLabel"
+        i18n-default-message="Size"
+      ></span>
+      <icon-tip
+        content="::'common.ui.aggTypes.sizeTooltip' | i18n: { defaultMessage: 'Request top-K hits. Multiple hits will be combined via \'aggregate with\'.' }"
+      ></icon-tip>
+    </label>
+
+    <input
+       required
+       id="visEditorTopHitsSize{{agg.id}}"
+       name="size"
+       ng-model="agg.params.size"
+       class="form-control"
+       type="number"
+       min="1"
+    ></input>
+  </div>
+</div>

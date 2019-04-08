@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <AddItemPopover
+        addItems={[MockFunction]}
+        canCreateFilter={true}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xl"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="danger"
+        disabled={true}
+        fill={false}
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Delete item"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSearchBar
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <AddItemPopover
+        addItems={[MockFunction]}
+        canCreateFilter={true}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xl"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        color="danger"
+        disabled={false}
+        fill={false}
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Delete item"
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSearchBar
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

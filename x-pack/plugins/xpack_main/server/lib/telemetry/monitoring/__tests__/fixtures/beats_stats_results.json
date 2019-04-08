@@ -3,7 +3,112 @@
     "hits": {
       "hits": [
         {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
+            "state" : {
+              "heartbeat" : {
+                  "endpoints" : 2,
+                  "http" : {
+                    "endpoints" : 1,
+                    "monitors" : 1
+                  },
+                  "icmp" : {
+                    "monitors" : 0,
+                    "endpoints" : 0
+                  },
+                  "tcp" : {
+                    "monitors" : 1,
+                    "endpoints" : 1
+                  },
+                  "monitors" : 2
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
+            "state" : {
+              "heartbeat" : {
+                  "endpoints" : 2,
+                  "http" : {
+                    "endpoints" : 0,
+                    "monitors" : 0
+                  },
+                  "icmp" : {
+                    "monitors" : 0,
+                    "endpoints" : 0
+                  },
+                  "tcp" : {
+                    "monitors" : 1,
+                    "endpoints" : 2
+                  },
+                  "monitors" : 1
+                }
+              }
+            }
+          }
+        },
+        {
           "_source": {
+            "type": "beats_state",
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "beats_state": {
+              "state": {
+                "module": {
+                  "count": 1,
+                  "names": [
+                    "ferrari"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source": {
+            "type": "beats_state",
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "beats_state": {
+              "state": {
+                "input": {
+                  "count": 1,
+                  "names": [
+                    "firehose"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source": {
+            "type": "beats_state",
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "beats_state": {
+              "state": {
+                "host": {
+                  "name": "Elastic-MBP.local",
+                  "architecture": "x86_64",
+                  "os": {
+                    "platform": "darwin",
+                    "version": "10.13.6",
+                    "family": "darwin",
+                    "build": "17G65"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {
               "beat": {
@@ -21,6 +126,26 @@
                       "published": 1038
                     }
                   }
+                },
+                "heartbeat" : {
+                  "http" : {
+                    "endpoint_starts" : 1,
+                    "endpoint_stops" : 0,
+                    "monitor_starts" : 1,
+                    "monitor_stops" : 0
+                  },
+                  "icmp" : {
+                    "endpoint_starts" : 0,
+                    "endpoint_stops" : 0,
+                    "monitor_starts" : 0,
+                    "monitor_stops" : 0
+                  },
+                  "tcp" : {
+                    "endpoint_starts" : 1,
+                    "endpoint_stops" : 0,
+                    "monitor_starts" : 1,
+                    "monitor_stops" : 0
+                  }
                 }
               }
             }
@@ -28,6 +153,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {
               "beat": {
@@ -58,6 +184,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {
               "beat": {
@@ -82,6 +209,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {
               "beat": {
@@ -112,6 +240,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {
               "beat": {
@@ -136,6 +265,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -166,6 +296,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -190,6 +321,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -220,6 +352,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -244,6 +377,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -274,6 +408,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -298,6 +433,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -328,6 +464,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -352,6 +489,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -382,6 +520,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -406,6 +545,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -436,6 +576,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -460,6 +601,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -490,6 +632,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -514,6 +657,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -544,6 +688,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -568,6 +713,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -598,6 +744,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -622,6 +769,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -652,6 +800,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -676,6 +825,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -706,6 +856,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -730,6 +881,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -760,6 +912,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -784,6 +937,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -814,6 +968,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -838,6 +993,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -868,6 +1024,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -892,6 +1049,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -922,6 +1080,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -946,6 +1105,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -976,6 +1136,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1000,6 +1161,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1030,6 +1192,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1054,6 +1217,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1084,6 +1248,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1108,6 +1273,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1138,6 +1304,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1162,6 +1329,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1192,6 +1360,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1216,6 +1385,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1246,6 +1416,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1270,6 +1441,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1300,6 +1472,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1324,6 +1497,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1354,6 +1528,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1378,6 +1553,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1408,6 +1584,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1432,6 +1609,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1462,6 +1640,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1486,6 +1665,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1516,6 +1696,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1540,6 +1721,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1570,6 +1752,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1594,6 +1777,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1624,6 +1808,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1648,6 +1833,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1678,6 +1864,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1702,6 +1889,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1732,6 +1920,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1756,6 +1945,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1786,6 +1976,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1810,6 +2001,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1840,6 +2032,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1864,6 +2057,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1894,6 +2088,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1918,6 +2113,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1948,6 +2144,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -1972,6 +2169,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2002,6 +2200,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2026,6 +2225,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2056,6 +2256,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2080,6 +2281,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2110,6 +2312,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2134,6 +2337,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2164,6 +2368,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2188,6 +2393,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2218,6 +2424,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2242,6 +2449,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2272,6 +2480,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2296,6 +2505,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2326,6 +2536,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2350,6 +2561,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2380,6 +2592,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2404,6 +2617,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2434,6 +2648,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2458,6 +2673,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2488,6 +2704,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2512,6 +2729,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2542,6 +2760,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2566,6 +2785,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2596,6 +2816,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2620,6 +2841,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2650,6 +2872,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2674,6 +2897,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2704,6 +2928,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2728,6 +2953,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2758,6 +2984,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2782,6 +3009,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2812,6 +3040,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2836,6 +3065,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2866,6 +3096,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2890,6 +3121,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2920,6 +3152,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2944,6 +3177,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2974,6 +3208,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -2998,6 +3233,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3028,6 +3264,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3052,6 +3289,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3082,6 +3320,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3106,6 +3345,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3136,6 +3376,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3160,6 +3401,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3190,6 +3432,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3214,6 +3457,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3244,6 +3488,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3268,6 +3513,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3298,6 +3544,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3322,6 +3569,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3352,6 +3600,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3376,6 +3625,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3406,6 +3656,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3430,6 +3681,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3460,6 +3712,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3484,6 +3737,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3514,6 +3768,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3538,6 +3793,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3568,6 +3824,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3592,6 +3849,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3622,6 +3880,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3646,6 +3905,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3676,6 +3936,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3700,6 +3961,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3730,6 +3992,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3754,6 +4017,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3784,6 +4048,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3808,6 +4073,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3838,6 +4104,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3862,6 +4129,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3892,6 +4160,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3916,6 +4185,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3946,6 +4216,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -3970,6 +4241,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4000,6 +4272,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4024,6 +4297,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4054,6 +4328,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4078,6 +4353,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4108,6 +4384,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4132,6 +4409,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4162,6 +4440,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4186,6 +4465,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4216,6 +4496,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4240,6 +4521,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4270,6 +4552,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4294,6 +4577,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4324,6 +4608,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4348,6 +4633,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4378,6 +4664,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4402,6 +4689,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4432,6 +4720,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4456,6 +4745,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4486,6 +4776,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4510,6 +4801,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4540,6 +4832,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4564,6 +4857,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4594,6 +4888,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4618,6 +4913,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4648,6 +4944,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4672,6 +4969,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4702,6 +5000,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4726,6 +5025,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4756,6 +5056,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4780,6 +5081,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4810,6 +5112,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4834,6 +5137,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4864,6 +5168,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4888,6 +5193,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4918,6 +5224,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4942,6 +5249,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4972,6 +5280,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -4996,6 +5305,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5026,6 +5336,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5050,6 +5361,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5080,6 +5392,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5104,6 +5417,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5134,6 +5448,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5158,6 +5473,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5188,6 +5504,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5212,6 +5529,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5242,6 +5560,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5266,6 +5585,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5296,6 +5616,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5320,6 +5641,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5350,6 +5672,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5374,6 +5697,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5404,6 +5728,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5428,6 +5753,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5458,6 +5784,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5482,6 +5809,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5512,6 +5840,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5536,6 +5865,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5566,6 +5896,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5590,6 +5921,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5620,6 +5952,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5644,6 +5977,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5674,6 +6008,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5698,6 +6033,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5728,6 +6064,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5752,6 +6089,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5782,6 +6120,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5806,6 +6145,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5836,6 +6176,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5860,6 +6201,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5890,6 +6232,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5914,6 +6257,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5944,6 +6288,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5968,6 +6313,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -5998,6 +6344,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6022,6 +6369,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6052,6 +6400,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6076,6 +6425,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6106,6 +6456,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6130,6 +6481,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6160,6 +6512,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6184,6 +6537,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6214,6 +6568,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6238,6 +6593,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6268,6 +6624,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6292,6 +6649,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6322,6 +6680,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6346,6 +6705,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6376,6 +6736,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6400,6 +6761,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6430,6 +6792,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6454,6 +6817,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6484,6 +6848,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6508,6 +6873,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6538,6 +6904,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6562,6 +6929,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6592,6 +6960,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6616,6 +6985,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6646,6 +7016,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6670,6 +7041,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6700,6 +7072,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6724,6 +7097,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6754,6 +7128,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6778,6 +7153,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6808,6 +7184,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6832,6 +7209,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6862,6 +7240,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6886,6 +7265,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6916,6 +7296,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6940,6 +7321,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6970,6 +7352,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -6994,6 +7377,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7024,6 +7408,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7048,6 +7433,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7078,6 +7464,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7102,6 +7489,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7132,6 +7520,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7156,6 +7545,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7186,6 +7576,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7210,6 +7601,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7240,6 +7632,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7264,6 +7657,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7294,6 +7688,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7318,6 +7713,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7348,6 +7744,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7372,6 +7769,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7402,6 +7800,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7426,6 +7825,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7456,6 +7856,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7480,6 +7881,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7510,6 +7912,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7534,6 +7937,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7564,6 +7968,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7588,6 +7993,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7618,6 +8024,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7642,6 +8049,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7672,6 +8080,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7696,6 +8105,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7726,6 +8136,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7750,6 +8161,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7780,6 +8192,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7804,6 +8217,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7834,6 +8248,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7858,6 +8273,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7888,6 +8304,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7912,6 +8329,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7942,6 +8360,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7966,6 +8385,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -7996,6 +8416,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8020,6 +8441,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8050,6 +8472,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8074,6 +8497,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8104,6 +8528,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8128,6 +8553,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8158,6 +8584,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8182,6 +8609,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8212,6 +8640,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "beat": {
@@ -8236,6 +8665,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8266,6 +8696,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8290,6 +8721,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8320,6 +8752,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8344,6 +8777,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8374,6 +8808,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8398,6 +8833,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8428,6 +8864,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8452,6 +8889,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8482,6 +8920,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8506,6 +8945,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8536,6 +8976,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8560,6 +9001,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8590,6 +9032,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8614,6 +9057,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8644,6 +9088,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8668,6 +9113,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8698,6 +9144,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8722,6 +9169,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8752,6 +9200,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8776,6 +9225,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8806,6 +9256,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8830,6 +9281,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8860,6 +9312,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8884,6 +9337,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8914,6 +9368,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8938,6 +9393,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8968,6 +9424,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -8992,6 +9449,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9022,6 +9480,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9046,6 +9505,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9076,6 +9536,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9100,6 +9561,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9130,6 +9592,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9154,6 +9617,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9184,6 +9648,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9208,6 +9673,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9238,6 +9704,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9262,6 +9729,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9292,6 +9760,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9316,6 +9785,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9346,6 +9816,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9370,6 +9841,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9400,6 +9872,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9424,6 +9897,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9454,6 +9928,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9478,6 +9953,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9508,6 +9984,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9532,6 +10009,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9562,6 +10040,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9586,6 +10065,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9616,6 +10096,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9640,6 +10121,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9670,6 +10152,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9694,6 +10177,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9724,6 +10208,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9748,6 +10233,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9778,6 +10264,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9802,6 +10289,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9832,6 +10320,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9856,6 +10345,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9886,6 +10376,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9910,6 +10401,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9940,6 +10432,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9964,6 +10457,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -9994,6 +10488,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10018,6 +10513,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10048,6 +10544,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10072,6 +10569,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10102,6 +10600,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10126,6 +10625,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10156,6 +10656,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10180,6 +10681,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10210,6 +10712,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10234,6 +10737,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10264,6 +10768,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10288,6 +10793,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10318,6 +10824,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10342,6 +10849,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10372,6 +10880,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10396,6 +10905,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10426,6 +10936,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10450,6 +10961,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10480,6 +10992,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10504,6 +11017,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10534,6 +11048,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10558,6 +11073,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10588,6 +11104,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10612,6 +11129,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10642,6 +11160,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10666,6 +11185,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10696,6 +11216,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10720,6 +11241,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10750,6 +11272,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10774,6 +11297,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10804,6 +11328,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10828,6 +11353,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10858,6 +11384,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10882,6 +11409,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10912,6 +11440,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10936,6 +11465,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10966,6 +11496,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -10990,6 +11521,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -11020,6 +11552,7 @@
       "hits": [
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -11044,6 +11577,7 @@
         },
         {
           "_source": {
+            "type": "beats_stats",
             "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
             "beats_stats": {
               "metrics": {
@@ -11069,5 +11603,6 @@
       ]
     }
   },
+  
   {}
 ]

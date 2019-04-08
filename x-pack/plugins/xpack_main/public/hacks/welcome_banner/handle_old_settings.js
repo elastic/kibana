@@ -14,19 +14,31 @@ import { CONFIG_TELEMETRY } from '../../../common/constants';
  * @param {Object} config The advanced settings config object.
  * @return {Boolean} {@code true} if the banner should still be displayed. {@code false} if the banner should not be displayed.
  */
-export async function handleOldSettings(config) {
+export async function handleOldSettings(config, telemetryOptInProvider) {
   const CONFIG_ALLOW_REPORT = 'xPackMonitoring:allowReport';
   const CONFIG_SHOW_BANNER = 'xPackMonitoring:showBanner';
-  const oldSetting = config.get(CONFIG_ALLOW_REPORT, null);
+  const oldAllowReportSetting = config.get(CONFIG_ALLOW_REPORT, null);
+  const oldTelemetrySetting = config.get(CONFIG_TELEMETRY, null);
 
-  if (oldSetting !== null) {
-    if (await config.set(CONFIG_TELEMETRY, Boolean(oldSetting))) {
+  let legacyOptInValue = null;
+
+  if (typeof oldTelemetrySetting === 'boolean') {
+    legacyOptInValue = oldTelemetrySetting;
+  } else if (typeof oldAllowReportSetting === 'boolean') {
+    legacyOptInValue = oldAllowReportSetting;
+  }
+
+  if (legacyOptInValue !== null) {
+    try {
+      await telemetryOptInProvider.setOptIn(legacyOptInValue);
+
       // delete old keys once we've successfully changed the setting (if it fails, we just wait until next time)
       config.remove(CONFIG_ALLOW_REPORT);
       config.remove(CONFIG_SHOW_BANNER);
+      config.remove(CONFIG_TELEMETRY);
+    } finally {
+      return false;
     }
-
-    return false;
   }
 
   const oldShowSetting = config.get(CONFIG_SHOW_BANNER, null);

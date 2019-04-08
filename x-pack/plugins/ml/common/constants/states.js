@@ -11,14 +11,15 @@ export const DATAFEED_STATE = {
   STARTED: 'started',
   STARTING: 'starting',
   STOPPED: 'stopped',
-  STOPPING: 'stopping'
+  STOPPING: 'stopping',
+  DELETED: 'deleted',
 };
 
 export const FORECAST_REQUEST_STATE = {
   FAILED: 'failed',
   FINISHED: 'finished',
   SCHEDULED: 'scheduled',
-  STARTED: 'started'
+  STARTED: 'started',
 };
 
 export const JOB_STATE = {
@@ -26,5 +27,6 @@ export const JOB_STATE = {
   CLOSING: 'closing',
   FAILED: 'failed',
   OPENED: 'opened',
-  OPENING: 'opening'
+  OPENING: 'opening',
+  DELETED: 'deleted',
 };

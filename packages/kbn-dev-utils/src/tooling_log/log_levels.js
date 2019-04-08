@@ -19,20 +19,19 @@
 
 const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
 
-export function pickLevelFromFlags(flags) {
+export function pickLevelFromFlags(flags, options = {}) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
   if (flags.quiet) return 'error';
   if (flags.silent) return 'silent';
-  return 'info';
+  return options.default || 'info';
 }
 
 export function parseLogLevel(name) {
   const i = LEVELS.indexOf(name);
 
   if (i === -1) {
-    const msg =
-      `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
+    const msg = `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
     throw new Error(msg);
   }
 

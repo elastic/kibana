@@ -22,6 +22,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardAddPanel {
@@ -34,16 +35,26 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('addNewSavedObjectLink');
     }
 
-    async clickSavedSearchTab() {
-      await testSubjects.click('addSavedSearchTab');
+    async toggleFilterPopover() {
+      log.debug('DashboardAddPanel.toggleFilter');
+      await testSubjects.click('savedObjectFinderFilterButton');
+    }
+
+    async toggleFilter(type) {
+      log.debug(`DashboardAddPanel.addToFilter(${type})`);
+      await this.waitForListLoading();
+      await this.toggleFilterPopover();
+      await testSubjects.click(`savedObjectFinderFilter-${type}`);
+      await this.toggleFilterPopover();
     }
 
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      const embeddableRows = await addPanel.findAllByClassName('euiLink');
+      const itemList = await testSubjects.find('savedObjectFinderItemList');
+      const embeddableRows = await itemList.findAllByCssSelector('li');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
+        await PageObjects.common.closeToast();
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
@@ -92,23 +103,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitForListLoading() {
+      await retry.waitFor('dashboard add panel loading to complete', async () => {
+        return !(await testSubjects.exists('savedObjectFinderLoadingIndicator'));
+      });
+    }
+
     async closeAddPanel() {
-      log.debug('closeAddPanel');
-      const isOpen = await this.isAddPanelOpen();
-      if (isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('closeAddPanelBtn');
-          const isOpen = await this.isAddPanelOpen();
-          if (isOpen) {
-            throw new Error('Add panel still open, trying again.');
-          }
-        });
-      }
+      await flyout.ensureClosed('dashboardAddPanel');
     }
 
     async addEveryVisualization(filter) {
       log.debug('DashboardAddPanel.addEveryVisualization');
       await this.ensureAddPanelIsShowing();
+      await this.toggleFilter('visualization');
       if (filter) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
@@ -123,7 +131,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addEverySavedSearch(filter) {
       log.debug('DashboardAddPanel.addEverySavedSearch');
       await this.ensureAddPanelIsShowing();
-      await this.clickSavedSearchTab();
+      await this.toggleFilter('search');
       if (filter) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
@@ -139,11 +147,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`addSavedSearch(${searchName})`);
 
       await this.ensureAddPanelIsShowing();
-      await this.clickSavedSearchTab();
+      await this.toggleFilter('search');
       await this.filterEmbeddableNames(searchName);
 
-      await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
+      await testSubjects.exists('addObjectToDashboardSuccess');
       await this.closeAddPanel();
     }
 
@@ -163,21 +171,25 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
+      await this.toggleFilter('visualization');
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
+      await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
+      await testSubjects.exists('addObjectToDashboardSuccess');
       await this.closeAddPanel();
     }
 
     async filterEmbeddableNames(name) {
+      // The search input field may be disabled while the table is loading so wait for it
+      await this.waitForListLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForListLoading();
     }
 
     async panelAddLinkExists(name) {
       log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${name}"`);
-      return await testSubjects.exists(`addPanel${name.split(' ').join('-')}`);
+      return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
   };
 }

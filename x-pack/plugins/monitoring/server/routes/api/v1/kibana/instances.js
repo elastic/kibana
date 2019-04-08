@@ -9,6 +9,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getKibanas } from '../../../../lib/kibana/get_kibanas';
 import { handleError } from '../../../../lib/errors';
+import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 
 export function kibanaInstancesRoute(server) {
   /**
@@ -31,11 +32,11 @@ export function kibanaInstancesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.kibana.index_pattern', ccs);
+      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
         const [ clusterStatus, kibanas ] = await Promise.all([
@@ -43,12 +44,12 @@ export function kibanaInstancesRoute(server) {
           getKibanas(req, kbnIndexPattern, { clusterUuid }),
         ]);
 
-        reply({
+        return {
           clusterStatus,
           kibanas,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

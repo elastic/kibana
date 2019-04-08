@@ -26,12 +26,12 @@ export const graphExploreRoute = {
         query: Joi.object().required().unknown(true)
       }).default()
     },
-    handler(request, reply) {
-      reply(callEsGraphExploreApi({
+    handler(request) {
+      return callEsGraphExploreApi({
         callCluster: request.pre.callCluster,
         index: request.payload.index,
         query: request.payload.query,
-      }));
+      });
     }
   }
 };

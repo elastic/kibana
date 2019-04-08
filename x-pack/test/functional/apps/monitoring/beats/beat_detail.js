@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/beats', {
-        from: '2017-12-19 17:14:09',
-        to: '2017-12-19 18:15:09',
+        from: '2017-12-19 17:14:09.000',
+        to: '2017-12-19 18:15:09.000',
       });
 
       // go to beats detail
@@ -36,17 +36,17 @@ export default function ({ getService, getPageObjects }) {
 
     it('cluster status bar shows correct information', async () => {
       expect(await detail.getSummary()).to.eql({
-        name: 'tsullivan.local-1-17',
-        version: '7.0.0-alpha1',
-        type: 'Duckbeat',
-        host: 'tsullivan.local',
-        output: 'Elasticsearch',
-        configReloads: 0,
-        uptime: '6 minutes',
-        eventsTotal: 17,
-        eventsEmitted: 17,
-        eventsDropped: 0,
-        bytesWritten: '18.3 KB',
+        name: 'Name\ntsullivan.local-1-17',
+        version: 'Version\n7.0.0-alpha1',
+        type: 'Type\nDuckbeat',
+        host: 'Host\ntsullivan.local',
+        output: 'Output\nElasticsearch',
+        configReloads: 'Config reloads\n0',
+        uptime: 'Uptime\n6 minutes',
+        eventsTotal: 'Events total\n17',
+        eventsEmitted: 'Events emitted\n17',
+        eventsDropped: 'Events dropped\n0',
+        bytesWritten: 'Bytes sent\n18.3 KB',
       });
     });
 

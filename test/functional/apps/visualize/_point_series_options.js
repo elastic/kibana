@@ -22,85 +22,52 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries', 'timePicker']);
   const pointSeriesVis = PageObjects.pointSeries;
 
   describe('point series', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickLineChart');
-          return PageObjects.visualize.clickLineChart();
-        })
-        .then(function clickNewSearch() {
-          return PageObjects.visualize.clickNewSearch();
-        })
-        .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function clickBucket() {
-          log.debug('Bucket = X-Axis');
-          return PageObjects.visualize.clickBucket('X-Axis');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Date Histogram');
-          return PageObjects.visualize.selectAggregation('Date Histogram');
-        })
-        .then(function selectField() {
-          log.debug('Field = @timestamp');
-          return PageObjects.visualize.selectField('@timestamp');
-        })
+      await PageObjects.visualize.navigateToNewVisualization();
+      log.debug('clickLineChart');
+      await PageObjects.visualize.clickLineChart();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = X-Axis');
+      await PageObjects.visualize.clickBucket('X-Axis');
+      log.debug('Aggregation = Date Histogram');
+      await PageObjects.visualize.selectAggregation('Date Histogram');
+      log.debug('Field = @timestamp');
+      await PageObjects.visualize.selectField('@timestamp');
       // add another metrics
-        .then(function clickAddMetrics() {
-          log.debug('Add Metric');
-          return PageObjects.visualize.clickAddMetric();
-        })
-        .then(function () {
-          log.debug('Metric = Value Axis');
-          return PageObjects.visualize.clickBucket('Y-Axis');
-        })
-        .then(function selectAggregation() {
-          log.debug('Aggregation = Average');
-          return PageObjects.visualize.selectAggregation('Average', 'metrics');
-        })
-        .then(function selectField() {
-          log.debug('Field = memory');
-          return PageObjects.visualize.selectField('machine.ram', 'metrics');
-        })
+      log.debug('Add Metric');
+      await PageObjects.visualize.clickAddMetric();
+      log.debug('Metric = Value Axis');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+      log.debug('Aggregation = Average');
+      await PageObjects.visualize.selectAggregation('Average', 'metrics');
+      log.debug('Field = memory');
+      await PageObjects.visualize.selectField('machine.ram', 'metrics');
       // go to options page
-        .then(function gotoAxisOptions() {
-          log.debug('Going to axis options');
-          return pointSeriesVis.clickAxisOptions();
-        })
+      log.debug('Going to axis options');
+      await pointSeriesVis.clickAxisOptions();
       // add another value axis
-        .then(function addAxis() {
-          log.debug('adding axis');
-          return pointSeriesVis.clickAddAxis();
-        })
+      log.debug('adding axis');
+      await pointSeriesVis.clickAddAxis();
       // set average count to use second value axis
-        .then(function setAxis() {
-          return pointSeriesVis.toggleCollapsibleTitle('Average machine.ram')
-            .then(function () {
-              log.debug('Average memory value axis - ValueAxis-2');
-              return pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
-            });
-        })
-        .then(function clickGo() {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        });
+      await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
+      log.debug('Average memory value axis - ValueAxis-2');
+      await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     });
 
     describe('secondary value axis', function () {
 
-      it('should show correct chart, take screenshot', async function () {
+      it('should show correct chart', async function () {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],
@@ -116,7 +83,9 @@ export default function ({ getService, getPageObjects }) {
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
           expect(data).to.eql(expectedChartValues[0]);
+        });
 
+        await retry.try(async () => {
           const avgMemoryData = await PageObjects.visualize.getLineChartData('Average machine.ram', 'ValueAxis-2');
           log.debug('average memory data=' + avgMemoryData);
           log.debug('data.length=' + avgMemoryData.length);
@@ -124,69 +93,88 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should put secondary axis on the right', function () {
-        pointSeriesVis.getRightValueAxes().then(length => {
-          expect(length).to.be(1);
-        });
+      it('should put secondary axis on the right', async function () {
+        const length = await pointSeriesVis.getRightValueAxes();
+        expect(length).to.be(1);
       });
     });
 
     describe('multiple chart types', function () {
-      it('should change average series type to histogram', function () {
-        return pointSeriesVis.toggleCollapsibleTitle('RightAxis-1')
-          .then(function () {
-            return pointSeriesVis.setSeriesType(1, 'bar');
-          })
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function checkSeriesTypes() {
-            pointSeriesVis.getHistogramSeries().then(length => {
-              expect(length).to.be(1);
-            });
-          });
+      it('should change average series type to histogram', async function () {
+        await pointSeriesVis.toggleCollapsibleTitle('RightAxis-1');
+        await pointSeriesVis.setSeriesType(1, 'bar');
+        await PageObjects.visualize.clickGo();
+        const length = await pointSeriesVis.getHistogramSeries();
+        expect(length).to.be(1);
       });
     });
 
     describe('grid lines', function () {
-      before(function () {
-        return pointSeriesVis.clickOptions();
+      before(async function () {
+        await pointSeriesVis.clickOptions();
       });
 
-      it('should show category grid lines', function () {
-        return pointSeriesVis.toggleGridCategoryLines()
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return pointSeriesVis.getGridLines();
-          })
-          .then(function checkGridLines(gridLines) {
-            expect(gridLines.length).to.be(9);
-            gridLines.forEach(gridLine => {
-              expect(gridLine.y).to.be(0);
-            });
-
-          });
+      it('should show category grid lines', async function () {
+        await pointSeriesVis.toggleGridCategoryLines();
+        await PageObjects.visualize.clickGo();
+        const gridLines = await pointSeriesVis.getGridLines();
+        expect(gridLines.length).to.be(9);
+        gridLines.forEach(gridLine => {
+          expect(gridLine.y).to.be(0);
+        });
       });
 
-      it('should show value axis grid lines', function () {
-        return pointSeriesVis.setGridValueAxis('ValueAxis-2')
-          .then(function () {
-            return pointSeriesVis.toggleGridCategoryLines();
-          })
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return pointSeriesVis.getGridLines();
-          })
-          .then(function checkGridLines(gridLines) {
-            expect(gridLines.length).to.be(9);
-            gridLines.forEach(gridLine => {
-              expect(gridLine.x).to.be(0);
-            });
-          });
+      it('should show value axis grid lines', async function () {
+        await pointSeriesVis.setGridValueAxis('ValueAxis-2');
+        await pointSeriesVis.toggleGridCategoryLines();
+        await PageObjects.visualize.clickGo();
+        const gridLines = await pointSeriesVis.getGridLines();
+        expect(gridLines.length).to.be(9);
+        gridLines.forEach(gridLine => {
+          expect(gridLine.x).to.be(0);
+        });
+      });
+    });
+
+    describe('custom labels and axis titles', function () {
+      const visName = 'Visualization Point Series Test';
+      const customLabel = 'myLabel';
+      const axisTitle = 'myTitle';
+      before(async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickLineChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
+      });
+
+      it('should render a custom label when one is set', async function () {
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(customLabel);
+      });
+
+      it('should render a custom axis title when one is set, overriding the custom label', async function () {
+        await pointSeriesVis.setAxisTitle(axisTitle);
+        await PageObjects.visualize.clickGo();
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(axisTitle);
+      });
+
+      it('should preserve saved axis titles after a vis is saved and reopened', async function () {
+        await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.loadSavedVisualization(visName);
+        await PageObjects.visualize.waitForRenderingCount();
+        await PageObjects.visualize.clickData();
+        await PageObjects.visualize.toggleOpenEditor(1);
+        await PageObjects.visualize.setCustomLabel('test', 1);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(axisTitle);
       });
     });
 

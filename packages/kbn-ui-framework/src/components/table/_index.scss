@@ -1,8 +1,8 @@
 $tableCellPadding: 7px 8px 8px;
 $tableCellFontWeight: 400;
-$tableBackgroundColor: #FFF;
+$tableBackgroundColor: $euiColorEmptyShade;
 $tableHeaderTextColor: $kuiColorDarkGray;
-$tableCellExpandedBorderColor: #f0f0f0;
+$tableCellExpandedBorderColor: $euiColorEmptyShade;
 
 @import "controlled_table";
 @import "table";

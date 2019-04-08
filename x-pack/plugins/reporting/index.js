@@ -7,19 +7,18 @@
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { main as mainRoutes } from './server/routes/main';
-import { jobs as jobRoutes } from './server/routes/jobs';
+import { registerRoutes } from './server/routes';
 
 import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
-import { validateConfig } from './server/lib/validate_config';
+import { runValidations } from './server/lib/validate';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
-import { callClusterFactory } from '../xpack_main';
 import { getReportingUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -33,12 +32,11 @@ export const reporting = (kibana) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
-      navbarExtensions: [
-        'plugins/reporting/controls/discover',
-        'plugins/reporting/controls/visualize',
-        'plugins/reporting/controls/dashboard',
+      shareContextMenuExtensions: [
+        'plugins/reporting/share_context_menu/register_csv_reporting',
+        'plugins/reporting/share_context_menu/register_reporting',
       ],
-      hacks: [ 'plugins/reporting/hacks/job_completion_notifier'],
+      hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
@@ -48,9 +46,13 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          name: 'PDF footer image',
+          name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
+            defaultMessage: 'PDF footer image'
+          }),
           value: null,
-          description: `Custom image to use in the PDF's footer`,
+          description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
+            defaultMessage: `Custom image to use in the PDF's footer`
+          }),
           type: 'image',
           options: {
             maxSize: {
@@ -73,12 +75,12 @@ export const reporting = (kibana) => {
         }).default(),
         queue: Joi.object({
           indexInterval: Joi.string().default('week'),
+          pollEnabled: Joi.boolean().default(true),
           pollInterval: Joi.number().integer().default(3000),
           pollIntervalErrorMultiplier: Joi.number().integer().default(10),
-          timeout: Joi.number().integer().default(30000),
+          timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
-          record: Joi.boolean().default(false),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),
@@ -89,13 +91,18 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),
-            autoDownload: Joi.boolean().when('$dev', {
+            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
+            autoDownload: Joi.boolean().when('$dist', {
               is: true,
-              then: Joi.default(true),
-              otherwise: Joi.default(false),
+              then: Joi.default(false),
+              otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
+              inspect: Joi.boolean().when('$dev', {
+                is: false,
+                then: Joi.valid(false),
+                else: Joi.default(false),
+              }),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),
@@ -141,14 +148,18 @@ export const reporting = (kibana) => {
 
     init: async function (server) {
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
+      const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      validateConfig(config, message => server.log(['reporting', 'warning'], message));
-      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+      const logger = {
+        debug: message => server.log(['reporting', 'debug'], message),
+        warning: message => server.log(['reporting', 'warning'], message),
+      };
+      logConfiguration(config, logger);
+      runValidations(server, config, logger, browserFactory);
 
-      const { xpack_main: xpackMainPlugin, monitoring: monitoringPlugin } = server.plugins;
-
+      const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       xpackMainPlugin.status.once('green', () => {
@@ -157,28 +168,22 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function to with Monitoring to manage the collection of usage stats
-      monitoringPlugin.status.once('green', () => {
-        if (monitoringPlugin.collectorSet) {
-          const callCluster = callClusterFactory(server).getCallClusterInternal(); // uses callWithInternal as this is for internal collection
-          monitoringPlugin.collectorSet.register(getReportingUsageCollector(server, callCluster));
-        }
-      });
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server));
 
-      server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
+      server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes
-      mainRoutes(server);
-      jobRoutes(server);
+      registerRoutes(server);
     },
 
     deprecations: function ({ unused }) {
       return [
-        unused("capture.concurrency"),
-        unused("capture.timeout"),
-        unused("capture.settleTime"),
-        unused("kibanaApp"),
+        unused('capture.concurrency'),
+        unused('capture.timeout'),
+        unused('capture.settleTime'),
+        unused('kibanaApp'),
       ];
     },
   });

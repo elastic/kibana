@@ -4,168 +4,239 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { get } from 'lodash';
-import { SORT_ASCENDING } from '../../../../common/constants';
+import React from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
-import { MonitoringTable } from '../../';
+import { EuiMonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
-import { EuiLink, EuiToolTip } from '@elastic/eui';
-import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
+import {
+  EuiLink,
+  EuiToolTip,
+  EuiSpacer,
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPanel,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
-const filterFields = ['node.name', 'status', 'type', 'transport_address'];
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
-  cols.push({ title: 'Name', sortKey: 'node.name', sortOrder: SORT_ASCENDING });
-  cols.push({ title: 'Status', sortKey: 'online' });
+
+  const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
+    defaultMessage: 'CPU Usage',
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    field: 'name',
+    sortable: true,
+    render: (value, node) => (
+      <div>
+        <div className="monTableCell__name">
+          <EuiToolTip
+            position="bottom"
+            content={node.nodeTypeLabel}
+          >
+            <span className={`fa ${node.nodeTypeClass}`} />
+          </EuiToolTip>
+          &nbsp;
+          <span data-test-subj="name">
+            <EuiLink
+              href={`#/elasticsearch/nodes/${node.resolver}`}
+              data-test-subj={`nodeLink-${node.resolver}`}
+            >
+              {value}
+            </EuiLink>
+          </span>
+        </div>
+        <div className="monTableCell__transportAddress">
+          {extractIp(node.transport_address)}
+        </div>
+      </div>
+    )
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
+    field: 'isOnline',
+    sortable: true,
+    render: value => {
+      const status = value ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
+        defaultMessage: 'Online',
+      }) : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
+        defaultMessage: 'Offline',
+      });
+      return (
+        <div className="monTableCell__status">
+          <NodeStatusIcon
+            isOnline={value}
+            status={status}
+          />{' '}
+          {status}
+        </div>
+      );
+    }
+  });
+
   if (showCgroupMetricsElasticsearch) {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cgroup_quota.lastVal' });
     cols.push({
-      title: 'CPU Throttling',
-      sortKey: 'node_cgroup_throttled.lastVal'
+      name: cpuUsageColumnTitle,
+      field: 'node_cgroup_quota',
+      sortable: true,
+      render: (value, node) => (
+        <MetricCell
+          isOnline={node.isOnline}
+          metric={value}
+          isPercent={true}
+          data-test-subj="cpuQuota"
+        />
+      )
+    });
+
+    cols.push({
+      name: i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle', {
+        defaultMessage: 'CPU Throttling',
+      }),
+      field: 'node_cgroup_throttled',
+      sortable: true,
+      render: (value, node) => (
+        <MetricCell
+          isOnline={node.isOnline}
+          metric={value}
+          isPercent={false}
+          data-test-subj="cpuThrottled"
+        />
+      )
     });
   } else {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cpu_utilization.lastVal' });
-    cols.push({ title: 'Load Average', sortKey: 'node_load_average.lastVal' });
+    cols.push({
+      name: cpuUsageColumnTitle,
+      field: 'node_cpu_utilization',
+      sortable: true,
+      render: (value, node) => (
+        <MetricCell
+          isOnline={node.isOnline}
+          metric={value}
+          isPercent={true}
+          data-test-subj="cpuUsage"
+        />
+      )
+    });
+
+    cols.push({
+      name: i18n.translate('xpack.monitoring.elasticsearch.nodes.loadAverageColumnTitle', {
+        defaultMessage: 'Load Average',
+      }),
+      field: 'node_load_average',
+      sortable: true,
+      render: (value, node) => (
+        <MetricCell
+          isOnline={node.isOnline}
+          metric={value}
+          isPercent={false}
+          data-test-subj="loadAverage"
+        />
+      )
+    });
   }
-  cols.push({ title: 'JVM Memory', sortKey: 'node_jvm_mem_percent.lastVal' });
-  cols.push({ title: 'Disk Free Space', sortKey: 'node_free_space.lastVal' });
-  cols.push({ title: 'Shards', sortKey: 'shardCount' });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
+      defaultMessage: '{javaVirtualMachine} Memory',
+      values: {
+        javaVirtualMachine: 'JVM'
+      }
+    }),
+    field: 'node_jvm_mem_percent',
+    sortable: true,
+    render: (value, node) => (
+      <MetricCell
+        isOnline={node.isOnline}
+        metric={value}
+        isPercent={true}
+        data-test-subj="jvmMemory"
+      />
+    )
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle', {
+      defaultMessage: 'Disk Free Space',
+    }),
+    field: 'node_free_space',
+    sortable: true,
+    width: '300px',
+    render: (value, node) => (
+      <MetricCell
+        isOnline={node.isOnline}
+        metric={value}
+        isPercent={false}
+        data-test-subj="diskFreeSpace"
+      />
+    )
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
+      defaultMessage: 'Shards',
+    }),
+    field: 'shardCount',
+    sortable: true,
+    render: (value, node) => {
+      return node.isOnline ? (
+        <div className="monTableCell__number" data-test-subj="shards">
+          {value}
+        </div>
+      ) : <OfflineCell/>;
+    }
+  });
+
   return cols;
 };
 
-const nodeRowFactory = showCgroupMetricsElasticsearch => {
-  return class NodeRow extends React.Component {
-    constructor(props) {
-      super(props);
-    }
-
-    isOnline() {
-      return this.props.isOnline === true;
-    }
-
-    getCpuComponents() {
-      const isOnline = this.isOnline();
-      if (showCgroupMetricsElasticsearch) {
-        return [
-          <MetricCell
-            key="cpuCol1"
-            isOnline={isOnline}
-            metric={get(this.props, 'node_cgroup_quota')}
-            isPercent={true}
-          />,
-          <MetricCell
-            key="cpuCol2"
-            isOnline={isOnline}
-            metric={get(this.props, 'node_cgroup_throttled')}
-            isPercent={false}
-          />
-        ];
-      }
-      return [
-        <MetricCell
-          key="cpuCol1"
-          isOnline={isOnline}
-          metric={get(this.props, 'node_cpu_utilization')}
-          isPercent={true}
-        />,
-        <MetricCell
-          key="cpuCol2"
-          isOnline={isOnline}
-          metric={get(this.props, 'node_load_average')}
-          isPercent={false}
-        />
-      ];
-    }
-
-    getShardCount() {
-      if (this.isOnline()) {
-        return (
-          <KuiTableRowCell>
-            <div className="monitoringTableCell__number">
-              {get(this.props, 'shardCount')}
-            </div>
-          </KuiTableRowCell>
-        );
-      }
-      return <OfflineCell />;
-    }
-
-    render() {
-      const isOnline = this.isOnline();
-      const status = this.props.isOnline ? 'Online' : 'Offline';
-
-      return (
-        <KuiTableRow>
-          <KuiTableRowCell>
-            <div className="monitoringTableCell__name">
-              <EuiToolTip
-                position="bottom"
-                content={this.props.nodeTypeLabel}
-              >
-                <span className={`fa ${this.props.nodeTypeClass}`} />
-              </EuiToolTip>
-              &nbsp;
-              <EuiLink
-                href={`#/elasticsearch/nodes/${this.props.resolver}`}
-                data-test-subj={`nodeLink-${this.props.resolver}`}
-              >
-                {this.props.name}
-              </EuiLink>
-            </div>
-            <div className="monitoringTableCell__transportAddress">
-              {extractIp(this.props.transport_address)}
-            </div>
-          </KuiTableRowCell>
-          <KuiTableRowCell>
-            <div className="monitoringTableCell__status">
-              <NodeStatusIcon
-                isOnline={this.props.isOnline}
-                status={status}
-              />{' '}
-              {status}
-            </div>
-          </KuiTableRowCell>
-          {this.getCpuComponents()}
-          <MetricCell
-            isOnline={isOnline}
-            metric={get(this.props, 'node_jvm_mem_percent')}
-            isPercent={true}
-          />
-          <MetricCell
-            isOnline={isOnline}
-            metric={get(this.props, 'node_free_space')}
-            isPercent={false}
-          />
-          {this.getShardCount()}
-        </KuiTableRow>
-      );
-    }
-  };
-};
-
-export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
+function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, intl, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
+  const { sorting, pagination, onTableChange } = props;
 
   return (
-    <Fragment>
-      <ClusterStatus stats={clusterStatus} />
-
-      <MonitoringTable
-        className="elasticsearchNodesTable"
-        rows={nodes}
-        pageIndex={props.pageIndex}
-        filterText={props.filterText}
-        sortKey={props.sortKey}
-        sortOrder={props.sortOrder}
-        onNewState={props.onNewState}
-        placeholder="Filter Nodes..."
-        filterFields={filterFields}
-        columns={columns}
-        rowComponent={nodeRowFactory(showCgroupMetricsElasticsearch)}
-      />
-    </Fragment>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPanel>
+          <ClusterStatus stats={clusterStatus} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
+          <EuiMonitoringTable
+            className="elasticsearchNodesTable"
+            rows={nodes}
+            columns={columns}
+            sorting={sorting}
+            pagination={pagination}
+            search={{
+              box: {
+                incremental: true,
+                placeholder: intl.formatMessage({
+                  id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
+                  defaultMessage: 'Filter Nodes…',
+                }),
+              },
+            }}
+            onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
+
+export const ElasticsearchNodes = injectI18n(ElasticsearchNodesUI);

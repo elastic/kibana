@@ -26,10 +26,7 @@ function indent(txt, n) {
 }
 
 module.exports = function docs(name) {
-  const md = readFileSync(
-    resolve(__dirname, '../tasks', name, 'README.md'),
-    'utf8'
-  );
+  const md = readFileSync(resolve(__dirname, '../tasks', name, 'README.md'), 'utf8');
 
   return function() {
     console.log('\n  Docs:');

@@ -9,7 +9,6 @@ import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import 'ui/dirty_prompt';
 import template from './threshold_watch_edit.html';
-import './threshold_watch_edit.less';
 import '../watch_edit_title_panel';
 import 'plugins/watcher/components/threshold_watch_expression';
 import 'plugins/watcher/components/threshold_preview_chart';
@@ -23,14 +22,14 @@ import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/interval';
 import 'plugins/watcher/services/action_defaults';
 
-import dateMath from '@kbn/datemath';
-import { Notifier, toastNotifications } from 'ui/notify';
+import dateMath from '@elastic/datemath';
+import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchEdit', function ($injector) {
+app.directive('thresholdWatchEdit', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const fieldsService = $injector.get('xpackWatcherFieldsService');
   const timezoneService = $injector.get('xpackWatcherTimezoneService');
@@ -39,7 +38,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
   const actionDefaultsService = $injector.get('xpackWatcherActionDefaultsService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
   const $interval = $injector.get('$interval');
 
   return {
@@ -53,7 +52,6 @@ app.directive('thresholdWatchEdit', function ($injector) {
     controller: class ThresholdWatchEditController extends InitAfterBindingsWorkaround {
       initAfterBindings($scope) {
         this.index = undefined;
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.originalWatch = {
           ...this.watch
         };
@@ -64,9 +62,9 @@ app.directive('thresholdWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
         $scope.$on('$destroy', () => {
-          dirtyPrompt.deregister();
+          // dirtyPrompt.deregister();
           this.stopRefreshWatchVisualizationTimer();
         });
 
@@ -141,18 +139,18 @@ app.directive('thresholdWatchEdit', function ($injector) {
 
             if (actionStatus.lastExecutionSuccessful === false) {
               const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
-              this.notifier.error(message);
+              toastNotifications.addDanger(message);
             } else {
               toastNotifications.addSuccess(action.simulateMessage);
             }
           })
           .catch(err => {
-            this.notifier.error(err);
+            toastNotifications.addDanger(err);
           });
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
       }
 
@@ -197,7 +195,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
             this.restartRefreshWatchVisualizationTimer();
           })
           .catch(e => {
-            this.notifier.error(e);
+            toastNotifications.addDanger(e);
             this.stopRefreshWatchVisualizationTimer();
           });
       }, 500);
@@ -263,14 +261,28 @@ app.directive('thresholdWatchEdit', function ($injector) {
 
             const confirmModalOptions = {
               onConfirm: this.saveWatch,
-              confirmButtonText: 'Overwrite Watch'
+              confirmButtonText: i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.overwriteWatchButtonLabel', {
+                defaultMessage: 'Overwrite Watch',
+              }),
             };
 
-            const watchNameMessageFragment = existingWatch.name ? ` (name: "${existingWatch.name}")` : '';
-            const message = `Watch with ID "${this.watch.id}"${watchNameMessageFragment} already exists. Do you want to overwrite it?`;
+            const message = i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.description', {
+              defaultMessage: 'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
+              values: {
+                watchId: this.watch.id,
+                watchNameMessageFragment: existingWatch.name
+                  ? i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.descriptionFragmentText', {
+                    defaultMessage: '(name: "{existingWatchName}")',
+                    values: {
+                      existingWatchName: existingWatch.name
+                    }
+                  })
+                  : ''
+              }
+            });
             return confirmModal(message, confirmModalOptions);
           })
-          .catch(err => this.notifier.error(err));
+          .catch(err => toastNotifications.addDanger(err));
       }
 
       isExistingWatch = () => {
@@ -293,12 +305,19 @@ app.directive('thresholdWatchEdit', function ($injector) {
         return watchService.saveWatch(this.watch)
           .then(() => {
             this.watch.isNew = false; // without this, the message displays 'New Watch'
-            toastNotifications.addSuccess(`Saved '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n('xpack.watcher.sections.watchEdit.threshold.saveSuccessNotificationText', {
+                defaultMessage: 'Saved \'{watchDisplayName}\'',
+                values: {
+                  watchDisplayName: this.watch.displayName
+                }
+              }),
+            );
             this.onClose();
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
     }

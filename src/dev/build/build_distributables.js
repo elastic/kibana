@@ -20,17 +20,21 @@
 import { getConfig, createRunner } from './lib';
 
 import {
-  BootstrapTask,
   BuildPackagesTask,
+  CleanClientModulesOnDLLTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
+  CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
   CleanPackagesTask,
   CleanTypescriptTask,
+  CleanNodeBuildsTask,
   CleanTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
   CreateDebPackageTask,
+  CreateDockerPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -41,11 +45,14 @@ import {
   InstallDependenciesTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
+  RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileTypescriptTask,
+  TranspileScssTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
+  PathLengthTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -59,6 +66,9 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    createDockerPackage,
+    versionQualifier,
+    targetAllPlatforms,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -69,10 +79,13 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    versionQualifier,
   });
 
   const config = await getConfig({
     isRelease,
+    versionQualifier,
+    targetAllPlatforms
   });
 
   const run = createRunner({
@@ -87,7 +100,6 @@ export async function buildDistributables(options) {
    */
   await run(VerifyEnvTask);
   await run(CleanTask);
-  await run(BootstrapTask);
   await run(downloadFreshNode ? DownloadNodeBuildsTask : VerifyExistingNodeBuildsTask);
   await run(ExtractNodeBuildsTask);
 
@@ -102,13 +114,17 @@ export async function buildDistributables(options) {
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
+  await run(RemoveWorkspacesTask);
   await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
-  await run(CleanExtraFilesFromModulesTask);
+  await run(TranspileScssTask);
   await run(OptimizeBuildTask);
+  await run(CleanClientModulesOnDLLTask);
+  await run(CleanExtraFilesFromModulesTask);
+  await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build
@@ -116,6 +132,10 @@ export async function buildDistributables(options) {
    */
   await run(CreateArchivesSourcesTask);
   await run(CleanExtraBinScriptsTask);
+  await run(CleanExtraBrowsersTask);
+  await run(CleanNodeBuildsTask);
+
+  await run(PathLengthTask);
 
   /**
    * package platform-specific builds into archives
@@ -129,6 +149,9 @@ export async function buildDistributables(options) {
   }
   if (createRpmPackage) { // control w/ --rpm or --skip-os-packages
     await run(CreateRpmPackageTask);
+  }
+  if (createDockerPackage) { // control w/ --docker or --skip-os-packages
+    await run(CreateDockerPackageTask);
   }
 
   /**

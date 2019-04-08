@@ -9,35 +9,76 @@ import { LatestActive } from './latest_active';
 import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
 import { Stats } from '../';
-import { MonitoringTimeseriesContainer } from 'plugins/monitoring/components';
-import { EuiCallOut } from '@elastic/eui';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import {
+  EuiCallOut,
+  EuiTitle,
+  EuiSpacer,
+  EuiPage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageBody,
+  EuiPanel,
+  EuiPageContent
+} from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-function renderLatestActive(latestActive, latestTypes, latestVersions) {
+function renderLatestActive(latestActive, latestTypes, latestVersions, intl) {
   if (latestTypes && latestTypes.length > 0) {
     return (
-      <div className="page-row">
-        <div className="row">
-          <div className="col-md-4">
-            <h2 className="euiTitle">Active Beats in Last Day</h2>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiPanel>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
+                  defaultMessage="Active Beats in Last Day"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s"/>
             <LatestActive latestActive={latestActive} />
-          </div>
-
-          <div className="col-md-4">
-            <h2 className="euiTitle">Top 5 Beat Types in Last Day</h2>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
+                  defaultMessage="Top 5 Beat Types in Last Day"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s"/>
             <LatestTypes latestTypes={latestTypes} />
-          </div>
-
-          <div className="col-md-4">
-            <h2 className="euiTitle">Top 5 Versions in Last Day</h2>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
+                  defaultMessage="Top 5 Versions in Last Day"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s"/>
             <LatestVersions latestVersions={latestVersions} />
-          </div>
-        </div>
-      </div>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
-  const calloutMsg = `Hi there! This area is where your latest Beats activity would show
-up, but you don't seem to have any activity within the last day.`;
+  const calloutMsg = intl.formatMessage({
+    id: 'xpack.monitoring.beats.overview.noActivityDescription',
+    // eslint-disable-next-line max-len
+    defaultMessage: `Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day.`
+  });
+
 
   return (
     <EuiCallOut
@@ -48,49 +89,47 @@ up, but you don't seem to have any activity within the last day.`;
   );
 }
 
-export function BeatsOverview({
+export function BeatsOverviewUI({
   latestActive,
   latestTypes,
   latestVersions,
   stats,
   metrics,
+  intl,
   ...props
 }) {
+  const seriesToShow = [
+    metrics.beat_event_rates,
+    metrics.beat_fail_rates,
+    metrics.beat_throughput_rates,
+    metrics.beat_output_errors,
+  ];
+
+  const charts = seriesToShow.map((data, index) => (
+    <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
+      <EuiPanel>
+        <MonitoringTimeseriesContainer
+          series={data}
+          {...props}
+        />
+      </EuiPanel>
+    </EuiFlexItem>
+  ));
+
   return (
-    <div>
-      {renderLatestActive(latestActive, latestTypes, latestVersions)}
-
-      <Stats stats={stats} />
-
-      <div className="page-row">
-        <div className="row">
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_event_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_fail_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_throughput_rates}
-              {...props}
-            />
-          </div>
-          <div className="col-md-6">
-            <MonitoringTimeseriesContainer
-              series={metrics.beat_output_errors}
-              {...props}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <Stats stats={stats} />
+          {renderLatestActive(latestActive, latestTypes, latestVersions, intl)}
+          <EuiSpacer size="s"/>
+          <EuiFlexGroup wrap>
+            {charts}
+          </EuiFlexGroup>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
 
+export const BeatsOverview = injectI18n(BeatsOverviewUI);

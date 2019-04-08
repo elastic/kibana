@@ -21,17 +21,34 @@ import { resolve } from 'path';
 
 import { Command } from 'commander';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');
 const resolveConfigPath = v => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
+const createMultiArgCollector = (map) => () => {
+  const paths = [];
+  return (arg) => {
+    paths.push(map ? map(arg) : arg);
+    return paths;
+  };
+};
+
+const collectExcludePaths = createMultiArgCollector(a => resolve(a));
+const collectIncludeTags = createMultiArgCollector();
+const collectExcludeTags = createMultiArgCollector();
+
 cmd
   .option('--config [path]', 'Path to a config file', resolveConfigPath, defaultConfigPath)
   .option('--bail', 'stop tests after the first failure', false)
   .option('--grep <pattern>', 'pattern used to select which tests to run')
+  .option('--invert', 'invert grep to exclude tests', false)
+  .option('--exclude [file]', 'Path to a test file that should not be loaded', collectExcludePaths(), [])
+  .option('--include-tag [tag]', 'A tag to be included, pass multiple times for multiple tags', collectIncludeTags(), [])
+  .option('--exclude-tag [tag]', 'A tag to be excluded, pass multiple times for multiple tags', collectExcludeTags(), [])
+  .option('--test-stats', 'Print the number of tests (included and excluded) to STDERR', false)
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -45,8 +62,10 @@ if (cmd.quiet) logLevel = 'error';
 if (cmd.debug) logLevel = 'debug';
 if (cmd.verbose) logLevel = 'verbose';
 
-const log = createToolingLog(logLevel);
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: logLevel,
+  writeTo: process.stdout
+});
 
 const functionalTestRunner = createFunctionalTestRunner({
   log,
@@ -55,15 +74,29 @@ const functionalTestRunner = createFunctionalTestRunner({
     mochaOpts: {
       bail: cmd.bail,
       grep: cmd.grep,
+      invert: cmd.invert,
     },
-    updateBaselines: cmd.updateBaselines
+    suiteTags: {
+      include: cmd.includeTag,
+      exclude: cmd.excludeTag,
+    },
+    updateBaselines: cmd.updateBaselines,
+    excludeTestFiles: cmd.exclude
   }
 });
 
 async function run() {
   try {
-    const failureCount = await functionalTestRunner.run();
-    process.exitCode = failureCount ? 1 : 0;
+    if (cmd.testStats) {
+      process.stderr.write(JSON.stringify(
+        await functionalTestRunner.getTestStats(),
+        null,
+        2
+      ) + '\n');
+    } else {
+      const failureCount = await functionalTestRunner.run();
+      process.exitCode = failureCount ? 1 : 0;
+    }
   } catch (err) {
     await teardown(err);
   } finally {

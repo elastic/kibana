@@ -18,15 +18,17 @@
  */
 
 import { delay } from 'bluebird';
+import expect from 'expect.js';
 
 import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -47,7 +49,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl) {
       const appConfig = {
         ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
@@ -55,12 +57,50 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
-      return remote.get(appUrl);
+      await retry.try(async () => {
+        log.debug(`navigateToUrl ${appUrl}`);
+        await browser.get(appUrl);
+        const currentUrl = await this.loginIfPrompted(appUrl);
+        if (!currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
     }
 
-    navigateToApp(appName) {
+
+    async loginIfPrompted(appUrl) {
+      let currentUrl = await browser.getCurrentUrl();
+      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
+      const loginPage = currentUrl.includes('/login');
+      const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
+      if (loginPage && !wantedLoginPage) {
+        log.debug(`Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`);
+        await PageObjects.shield.login(
+          config.get('servers.kibana.username'),
+          config.get('servers.kibana.password')
+        );
+        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)', 20000);
+        await browser.get(appUrl);
+        currentUrl = await browser.getCurrentUrl();
+        log.debug(`Finished login process currentUrl = ${currentUrl}`);
+      }
+      return currentUrl;
+    }
+
+
+    /**
+     * @param {string} appName - name of the app
+     * @param {object} [opts] - optional options object
+     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
+     */
+    navigateToApp(appName, opts = { appConfig: {} }) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get(['apps', appName]),
+        ...opts.appConfig,
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
@@ -76,42 +116,31 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*'
+                    'defaultIndex': 'logstash-*',
                   });
                 }
               }
             })
             .then(function () {
               log.debug('navigate to: ' + url);
-              return remote.get(url);
+              return browser.get(url);
             })
             .then(function () {
               return self.sleep(700);
             })
             .then(function () {
               log.debug('returned from get, calling refresh');
-              return remote.refresh();
+              return browser.refresh();
             })
             .then(async function () {
-              const currentUrl = await remote.getCurrentUrl();
-              const loginPage = currentUrl.includes('/login');
-              const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
-
-              if (loginPage && !wantedLoginPage) {
-                log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
-                await PageObjects.shield.login(
-                  config.get('servers.kibana.username'),
-                  config.get('servers.kibana.password')
-                );
-              }
+              const currentUrl = await self.loginIfPrompted(appUrl);
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
               }
             })
             .then(async function () {
-              const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+              const currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
               const maxAdditionalLengthOnNavUrl = 230;
               // On several test failures at the end of the TileMap test we try to navigate back to
               // Visualize so we can create the next Vertical Bar Chart, but we can see from the
@@ -126,7 +155,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
-              const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
+              const navSuccessful = new RegExp(appUrl.replace(':80/', '/').replace(':443/', '/')
                 + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
@@ -152,7 +181,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               // give the app time to update the URL
               return self.sleep(501)
                 .then(function () {
-                  return remote.getCurrentUrl();
+                  return browser.getCurrentUrl();
                 })
                 .then(function (currentUrl) {
                   log.debug('in navigateTo url = ' + currentUrl);
@@ -170,26 +199,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             }
           });
       });
-    }
-
-    runScript(fn, timeout = 10000) {
-      // wait for deps on window before running script
-      return remote
-        .setExecuteAsyncTimeout(timeout)
-        .executeAsync(function (done) {
-          const interval = setInterval(function () {
-            const ready = (document.readyState === 'complete');
-            const hasJQuery = !!window.$;
-
-            if (ready && hasJQuery) {
-              console.log('doc ready, jquery loaded');
-              clearInterval(interval);
-              done();
-            }
-          }, 10);
-        }).then(function () {
-          return remote.execute(fn);
-        });
     }
 
     async sleep(sleepMilliseconds) {
@@ -213,7 +222,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async waitUntilUrlIncludes(path) {
       await retry.try(async () => {
-        const url = await remote.getCurrentUrl();
+        const url = await browser.getCurrentUrl();
         if (!url.includes(path)) {
           throw new Error('Url not found');
         }
@@ -247,7 +256,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async pressEnterKey() {
-      await remote.pressKeys('\uE007');
+      await browser.pressKeys(browser.keys.ENTER);
     }
 
     // pass in true if your test will show multiple modals
@@ -260,36 +269,24 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async isConfirmModalOpen() {
-      log.debug('isConfirmModalOpen');
-      return await testSubjects.exists('confirmModalCancelButton', 2000);
-    }
+    async expectConfirmModalOpenState(state) {
+      if (typeof state !== 'boolean') {
+        throw new Error('pass true or false to expectConfirmModalOpenState()');
+      }
 
-    async getBreadcrumbPageTitle() {
-      return await testSubjects.getVisibleText('breadcrumbPageTitle');
-    }
+      log.debug(`expectConfirmModalOpenState(${state})`);
 
-    async getTopNavText() {
-      return await testSubjects.getVisibleText('top-nav');
-    }
-
-    async doesCssSelectorExist(selector) {
-      log.debug(`doesCssSelectorExist ${selector}`);
-
-      const exists = await remote
-        .setFindTimeout(1000)
-        .findByCssSelector(selector)
-        .then(() => true)
-        .catch(() => false);
-
-      remote.setFindTimeout(defaultFindTimeout);
-
-      log.debug(`exists? ${exists}`);
-      return exists;
+      // we use retry here instead of a simple .exists() check because the modal
+      // fades in/out, which takes time, and we really only care that at some point
+      // the modal is either open or closed
+      await retry.try(async () => {
+        const actualState = await testSubjects.exists('confirmModalCancelButton');
+        expect(actualState).to.be(state);
+      });
     }
 
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
+      const globalNavShown = await globalNav.exists();
       const topNavShown = await testSubjects.exists('top-nav');
       return globalNavShown && topNavShown;
     }
@@ -304,16 +301,25 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
-      await remote.moveMouseTo(toast);
+      let toast;
+      await retry.try(async () => {
+        toast = await find.byCssSelector('.euiToast');
+        if (!toast) {
+          throw new Error('Toast is not visible yet');
+        }
+      });
+      await browser.moveMouseTo(toast);
+      const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+      log.debug(title);
       await find.clickByCssSelector('.euiToast__closeButton');
+      return title;
     }
 
     async clearAllToasts() {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
         try {
-          await remote.moveMouseTo(toastElement);
+          await browser.moveMouseTo(toastElement);
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
         } catch (err) {

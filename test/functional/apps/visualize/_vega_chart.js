@@ -21,23 +21,23 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');
       await PageObjects.visualize.clickVega();
     });
 
     describe('vega chart', () => {
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
-        expect(spyToggleExists).to.be(false);
+      it('should not have inspector enabled', async function () {
+        await inspector.expectIsNotEnabled();
       });
 
-      it('should have some initial vega spec text', async function () {
+      it.skip('should have some initial vega spec text', async function () {
         const vegaSpec = await PageObjects.visualize.getVegaSpec();
         expect(vegaSpec).to.contain('{').and.to.contain('data');
         expect(vegaSpec.length).to.be.above(500);

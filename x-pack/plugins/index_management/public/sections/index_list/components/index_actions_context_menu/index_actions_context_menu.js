@@ -5,30 +5,39 @@
  */
 
 import React, { Component } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { all } from 'lodash';
-import pluralize from 'pluralize';
 import {
   EuiButton,
+  EuiCallOut,
   EuiContextMenu,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiConfirmModal,
   EuiOverlayMask
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
+import { getActionExtensions } from '../../../../index_management_extensions';
+import { getHttpClient } from '../../../../services/api';
 
-export class IndexActionsContextMenu extends Component {
+class IndexActionsContextMenuUi extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      renderConfirmModal: null,
     };
+  }
+  closeConfirmModal = () => {
+    this.setState({
+      renderConfirmModal: null
+    });
+    this.props.resetSelection && this.props.resetSelection();
   }
   panels() {
     const {
@@ -43,42 +52,55 @@ export class IndexActionsContextMenu extends Component {
       showSettings,
       detailPanel,
       indexNames,
-      indexStatusByName
+      indexStatusByName,
+      performExtensionAction,
+      indices,
+      intl,
+      reloadIndices,
+      unfreezeIndices,
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
-    const entityUpper = `${entity[0].toUpperCase()}${entity.slice(1)}`;
+    const allFrozen = all(indices, (index) => index.isFrozen);
+    const allUnfrozen = all(indices, (index) => !index.isFrozen);
+    const selectedIndexCount = indexNames.length;
     const items = [];
-    if (!detailPanel && oneIndexSelected) {
+    if (!detailPanel && selectedIndexCount === 1) {
       items.push({
-        name: `Show ${entity} settings`,
-        icon: <EuiIcon type="indexSettings" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel',
+          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(showSettings);
         }
       });
       items.push({
-        name: `Show ${entity} mapping`,
-        icon: <EuiIcon type="indexMapping" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel',
+          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(showMapping);
         }
       });
       if (allOpen) {
         items.push({
-          name: `Show ${entity} stats`,
-          icon: <EuiIcon type="stats" />,
+          name: intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel',
+            defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
+          }, { selectedIndexCount }),
           onClick: () => {
             this.closePopoverAndExecute(showStats);
           }
         });
       }
       items.push({
-        name: `Edit ${entity} settings`,
-        icon: <EuiIcon type="indexEdit" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel',
+          defaultMessage: 'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(editIndex);
         }
@@ -86,56 +108,116 @@ export class IndexActionsContextMenu extends Component {
     }
     if (allOpen) {
       items.push({
-        name: `Close ${entity}`,
-        icon: <EuiIcon type="indexClose" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.closeIndexLabel',
+          defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(closeIndices);
         }
       });
       items.push({
-        name: `Force merge ${entity}`,
-        icon: <EuiIcon type="merge" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel',
+          defaultMessage: 'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopover();
-          this.openForcemergeSegmentsModal();
+          this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
         }
       });
       items.push({
-        name: `Refresh ${entity}`,
-        icon: <EuiIcon type="refresh" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.refreshIndexLabel',
+          defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(refreshIndices);
         }
       });
       items.push({
-        name: `Clear ${entity} cache`,
-        icon: <EuiIcon type="broom" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel',
+          defaultMessage: 'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(clearCacheIndices);
         }
       });
       items.push({
-        name: `Flush ${entity}`,
-        icon: <EuiIcon type="indexFlush" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.flushIndexLabel',
+          defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(flushIndices);
         }
       });
+      if (allFrozen) {
+        items.push({
+          name: intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel',
+            defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
+          }, { selectedIndexCount }),
+          onClick: () => {
+            this.closePopoverAndExecute(unfreezeIndices);
+          }
+        });
+      } else if (allUnfrozen) {
+        items.push({
+          name: intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.freezeIndexLabel',
+            defaultMessage: 'Freeze {selectedIndexCount, plural, one {index} other {indices} }',
+          }, { selectedIndexCount }),
+          onClick: () => {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConfirmFreezeModal });
+          }
+        });
+      }
     } else {
       items.push({
-        name: `Open ${entity}`,
-        icon: <EuiIcon type="indexOpen" />,
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.openIndexLabel',
+          defaultMessage: 'Open {selectedIndexCount, plural, one {index} other {indices} }',
+        }, { selectedIndexCount }),
         onClick: () => {
           this.closePopoverAndExecute(openIndices);
         }
       });
     }
     items.push({
-      name: `Delete ${entity}`,
-      icon: <EuiIcon type="trash" />,
+      name: intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.deleteIndexLabel',
+        defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
+      }, { selectedIndexCount }),
       onClick: () => {
         this.closePopover();
-        this.openDeleteConfirmationModal();
+        this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
+      }
+    });
+    getActionExtensions().forEach((actionExtension) => {
+      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
+      if (actionExtensionDefinition) {
+        const { buttonLabel, requestMethod, successMessage, renderConfirmModal } = actionExtensionDefinition;
+        if (requestMethod) {
+          items.push({
+            name: buttonLabel,
+            onClick: () => {
+              this.closePopoverAndExecute(async () => {
+                await performExtensionAction(requestMethod, successMessage);
+              });
+            },
+          });
+        } else {
+          items.push({
+            name: buttonLabel,
+            onClick: () => {
+              this.closePopover();
+              this.setState({ renderConfirmModal });
+            }
+          });
+        }
       }
     });
     items.forEach(item => {
@@ -143,7 +225,10 @@ export class IndexActionsContextMenu extends Component {
     });
     const panelTree = {
       id: 0,
-      title: `${entityUpper} options`,
+      title: intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.panelTitle',
+        defaultMessage: '{selectedIndexCount, plural, one {Index} other {Indices} } options',
+      }, { selectedIndexCount }),
       items
     };
     return flattenPanelTree(panelTree);
@@ -158,7 +243,7 @@ export class IndexActionsContextMenu extends Component {
   closePopoverAndExecute = func => {
     this.setState({
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      renderConfirmModal: false
     });
     func();
     this.props.resetSelection && this.props.resetSelection();
@@ -170,46 +255,34 @@ export class IndexActionsContextMenu extends Component {
     });
   };
 
-  closeDeleteConfirmationModal = () => {
-    this.setState({ showDeleteConfirmation: false });
-  };
-
-  openDeleteConfirmationModal = () => {
-    this.setState({ showDeleteConfirmation: true });
-  };
-
-  openForcemergeSegmentsModal = () => {
-    this.setState({ showForcemergeSegmentsModal: true });
-  };
-
-  closeForcemergeSegmentsModal = () => {
-    this.setState({ showForcemergeSegmentsModal: false });
-  };
-
   forcemergeSegmentsError = () => {
     const { forcemergeSegments } = this.state;
+    const { intl } = this.props;
     if (!forcemergeSegments || forcemergeSegments.match(/^([1-9][0-9]*)?$/)) {
       return;
     } else {
-      return 'Value for number of segments must be a number greater than zero.';
+      return intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.segmentsNumberErrorMessage',
+        defaultMessage: 'The number of segments must be greater than zero.',
+      });
     }
   };
-  forcemergeSegmentsModal = () => {
-    const helpText = `The number of segments to merge to.
-      To fully merge the index, set it to 1. Defaults to
-      simply checking if a merge needs to execute, and if so, executes it.`;
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
-    const { forcemergeIndices, indexNames } = this.props;
-    const { showForcemergeSegmentsModal } = this.state;
-    if (!showForcemergeSegmentsModal) {
-      return null;
-    }
+  renderForcemergeSegmentsModal = () => {
+    const { forcemergeIndices, indexNames, intl } = this.props;
+    const helpText = intl.formatMessage({
+      id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
+      defaultMessage: 'Merge the segments in an index until the number is reduced to this or fewer segments. The default is 1.',
+    });
+    const selectedIndexCount = indexNames.length;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Choose max number of segments for forcemerge ${entity}`}
-          onCancel={this.closeForcemergeSegmentsModal}
+          title={intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle',
+            defaultMessage: 'Force merge',
+          })}
+          onCancel={this.closeConfirmModal}
           onConfirm={() => {
             if (!this.forcemergeSegmentsError()) {
               this.closePopoverAndExecute(() => {
@@ -221,25 +294,61 @@ export class IndexActionsContextMenu extends Component {
               });
             }
           }}
-          cancelButtonText="Cancel"
-          confirmButtonText="Forcemerge"
+          cancelButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
+              defaultMessage: 'Cancel',
+            })
+          }
+          confirmButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
+              defaultMessage: 'Force merge',
+            })
+          }
         >
           <div>
             <p>
-              You are about to forcemerge {oneIndexSelected ? 'this' : 'these'}{' '}
-              {entity}:
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
+                defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
+                values={{ selectedIndexCount }}
+              />
             </p>
             <ul>
               {indexNames.map(indexName => (
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
+            <EuiCallOut
+              title={intl.formatMessage({
+                id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
+                defaultMessage: 'Proceed with caution!',
+              })}
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
+                  defaultMessage="
+                    Force merging a large index or an index that is not read-only can
+                    potentially cause performance and stability issues in the cluster
+                    if it is not run properly (run against non-read-only indices) or run during peak hours.
+                  "
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
             <EuiForm
               isInvalid={this.forcemergeSegmentsError()}
               error={this.forcemergeSegmentsError()}
             >
               <EuiFormRow
-                label="Maximum number of segments"
+                label={intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
+                  defaultMessage: 'Maximum number of segments per shard',
+                })}
                 helpText={helpText}
               >
                 <EuiFieldText
@@ -256,26 +365,104 @@ export class IndexActionsContextMenu extends Component {
     );
   };
 
-  confirmDeleteModal = () => {
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
-    const { deleteIndices, indexNames } = this.props;
-    const { showDeleteConfirmation } = this.state;
-    if (!showDeleteConfirmation) {
-      return null;
-    }
+  renderConfirmDeleteModal = () => {
+    const { deleteIndices, indexNames, intl } = this.props;
+    const selectedIndexCount = indexNames.length;
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Confirm Delete ${entity}`}
-          onCancel={this.closeDeleteConfirmationModal}
+          title={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
+              defaultMessage: 'Confirm delete {selectedIndexCount, plural, one {index} other {indices} }',
+            }, { selectedIndexCount })
+          }
+          onCancel={this.closeConfirmModal}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
+          cancelButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+              defaultMessage: 'Cancel',
+            })
+          }
+          confirmButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
+              defaultMessage: 'Confirm',
+            })
+          }
         >
           <div>
             <p>
-              You are about to delete {oneIndexSelected ? 'this' : 'these'}{' '}
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
+                defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
+                values={{ selectedIndexCount }}
+              />
+            </p>
+            <ul>
+              {indexNames.map(indexName => (
+                <li key={indexName}>{indexName}</li>
+              ))}
+            </ul>
+            <EuiCallOut
+              title={
+                intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
+                  defaultMessage: 'Proceed with caution!',
+                })
+              }
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
+                  defaultMessage="This operation cannot be undone. Make sure you have appropriate backups."
+                />
+              </p>
+            </EuiCallOut>
+          </div>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+  renderConfirmFreezeModal = () => {
+    const oneIndexSelected = this.oneIndexSelected();
+    const entity = this.getEntity(oneIndexSelected);
+    const { freezeIndices, indexNames, intl } = this.props;
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
+              defaultMessage: 'Confirm Freeze {entity}',
+            }, { entity })
+          }
+          onCancel={this.closeConfirmModal}
+          onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
+          cancelButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
+              defaultMessage: 'Cancel',
+            })
+          }
+          confirmButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
+              defaultMessage: 'Freeze {entity}',
+            }, { entity })
+          }
+        >
+          <div>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
+                defaultMessage="You are about to freeze  {oneIndexSelected, plural, one {this} other {these}}"
+                values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
+              />
+              {' '}
               {entity}:
             </p>
             <ul>
@@ -283,10 +470,26 @@ export class IndexActionsContextMenu extends Component {
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>
-            <p>
-              This operation cannot be undone. Make sure you have appropriate
-              backups.
-            </p>
+            <EuiCallOut
+              title={
+                intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
+                  defaultMessage: 'Proceed with caution',
+                })
+              }
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
+                  defaultMessage="
+                    A frozen index has little overhead on the cluster and is blocked for write operations.
+                    You can search a frozen index, but expect queries to be slower.
+                  "
+                />
+              </p>
+            </EuiCallOut>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
@@ -296,25 +499,40 @@ export class IndexActionsContextMenu extends Component {
     return this.props.indexNames.length === 1;
   };
   getEntity = oneIndexSelected => {
-    return oneIndexSelected ? 'index' : 'indices';
+    const { intl } = this.props;
+    return oneIndexSelected ? (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indexMessage',
+        defaultMessage: 'index'
+      })
+    ) : (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indicesMessage',
+        defaultMessage: 'indices'
+      })
+    );
   };
   render() {
+    const { indexNames, intl } = this.props;
+    const selectedIndexCount = indexNames.length;
     const {
       iconSide = 'right',
       anchorPosition = 'rightUp',
-      label = 'Manage ' +
-        this.props.indexNames.length +
-        pluralize(' index', this.props.indexNames.length),
+      label = intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.manageButtonLabel',
+        defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
+      }, { selectedIndexCount }),
       iconType = 'arrowDown'
     } = this.props;
     const panels = this.panels();
-    const oneIndexSelected = this.oneIndexSelected();
-    const entity = this.getEntity(oneIndexSelected);
     const button = (
       <EuiButton
         data-test-subj="indexActionsContextMenuButton"
         iconSide={iconSide}
-        aria-label={`${entity} options`}
+        aria-label={intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel',
+          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
+        }, { selectedIndexCount })}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill
@@ -325,16 +543,16 @@ export class IndexActionsContextMenu extends Component {
 
     return (
       <div>
-        {this.confirmDeleteModal()}
-        {this.forcemergeSegmentsModal()}
+        {this.state.renderConfirmModal ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient()) : null}
         <EuiPopover
-          id={`contextMenu${entity}`}
+          id="contextMenuIndices"
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
           panelPaddingSize="none"
           withTitle
           anchorPosition={anchorPosition}
+          repositionOnScroll
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>
@@ -342,3 +560,5 @@ export class IndexActionsContextMenu extends Component {
     );
   }
 }
+
+export const IndexActionsContextMenu = injectI18n(IndexActionsContextMenuUi);

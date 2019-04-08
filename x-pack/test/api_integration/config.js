@@ -5,9 +5,11 @@
  */
 
 import {
+  EsProvider,
+  EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
-  ReportingAPIProvider,
   UsageAPIProvider,
+  InfraOpsGraphQLProvider
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -23,18 +25,25 @@ export default async function ({ readConfigFile }) {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
-      es: kibanaCommonConfig.get('services.es'),
+      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
+      infraOpsGraphQLClient: InfraOpsGraphQLProvider,
+      es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
-      reportingAPI: ReportingAPIProvider,
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
+      chance: kibanaAPITestsConfig.get('services.chance'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },
-    env: xPackFunctionalTestsConfig.get('env'),
-    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    kbnTestServer: {
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--optimize.enabled=false',
+      ],
+    },
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }

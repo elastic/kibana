@@ -20,13 +20,12 @@
 import expect from 'expect.js';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
-const TEST_ANCHOR_TYPE = 'doc';
+const TEST_ANCHOR_TYPE = '_doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_DEFAULT_CONTEXT_SIZE = 7;
 const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
@@ -61,7 +60,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
-      await (await PageObjects.context.getPredecessorLoadMoreButton()).click();
+      await PageObjects.context.clickPredecessorLoadMoreButton();
+
       await retry.try(async function () {
         expect(await docTable.getBodyRows(table)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
@@ -73,9 +73,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
-      const successorLoadMoreButton = await PageObjects.context.getSuccessorLoadMoreButton();
-      await remote.moveMouseTo(successorLoadMoreButton);  // possibly scroll until the button is visible
-      await successorLoadMoreButton.click();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+
       await retry.try(async function () {
         expect(await docTable.getBodyRows(table)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1

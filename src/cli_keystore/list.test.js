@@ -17,10 +17,25 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import mockFs from 'mock-fs';
+const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
+  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
+  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
-import { Keystore } from '../server/keystore';
+jest.mock('fs', () => ({
+  readFileSync: jest.fn().mockImplementation((path) => {
+    if (!path.includes('nonexistent')) {
+      return JSON.stringify(mockKeystoreData);
+    }
+
+    throw { code: 'ENOENT' };
+  }),
+  existsSync: jest.fn().mockImplementation((path) => {
+    return !path.includes('nonexistent');
+  })
+}));
+
+import sinon from 'sinon';
+import { Keystore } from '../legacy/server/keystore';
 import { list } from './list';
 import Logger from '../cli_plugin/lib/logger';
 
@@ -28,23 +43,12 @@ describe('Kibana keystore', () => {
   describe('list', () => {
     const sandbox = sinon.createSandbox();
 
-    const keystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-      + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-      + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
-
     beforeEach(() => {
-      mockFs({
-        '/data': {
-          'test.keystore': JSON.stringify(keystoreData),
-        }
-      });
-
       sandbox.stub(Logger.prototype, 'log');
       sandbox.stub(Logger.prototype, 'error');
     });
 
     afterEach(() => {
-      mockFs.restore();
       sandbox.restore();
     });
 
@@ -63,5 +67,9 @@ describe('Kibana keystore', () => {
       sinon.assert.calledOnce(Logger.prototype.error);
       sinon.assert.calledWith(Logger.prototype.error, 'ERROR: Kibana keystore not found. Use \'create\' command to create one.');
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 });

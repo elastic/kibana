@@ -13,120 +13,72 @@ describe('monitoring plugin deprecations', function () {
   let transformDeprecations;
 
   before(function () {
-    const noopDeprecation = () => noop;
-    const deprecations = deprecationsModule({ rename: noopDeprecation });
+    const deprecations = deprecationsModule();
     transformDeprecations = (settings, log = noop) => {
       deprecations.forEach(deprecation => deprecation(settings, log));
     };
   });
 
-  it('verificationMode is set to full when elasticsearch.ssl.verify is true', function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {
-          verify: true
+  describe('cluster_alerts.email_notifications.email_address', function () {
+    it(`shouldn't log when email notifications are disabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          email_notifications: {
+            enabled: false
+          }
         }
-      }
-    };
+      };
 
-    transformDeprecations(settings);
-    expect(settings.elasticsearch.ssl.verificationMode).to.eql('full');
-  });
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
 
-  it(`sets verificationMode to none when verify is false`, function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {
-          verify: false
+    it(`shouldn't log when cluster alerts are disabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: false,
+          email_notifications: {
+            enabled: true
+          }
         }
-      }
-    };
+      };
 
-    transformDeprecations(settings);
-    expect(settings.elasticsearch.ssl.verificationMode).to.be('none');
-    expect(settings.elasticsearch.ssl.verify).to.be(undefined);
-  });
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
 
-  it('should log when deprecating verify from false', function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {
-          verify: false
+    it(`shouldn't log when email_address is specified`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: true,
+          email_notifications: {
+            enabled: true,
+            email_address: 'foo@bar.com'
+          }
         }
-      }
-    };
+      };
 
-    const log = sinon.spy();
-    transformDeprecations(settings, log);
-    expect(log.calledOnce).to.be(true);
-  });
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
 
-  it('sets verificationMode to full when verify is true', function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {
-          verify: true
+    it(`should log when email_address is missing, but alerts/notifications are both enabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: true,
+          email_notifications: {
+            enabled: true
+          }
         }
-      }
-    };
+      };
 
-    transformDeprecations(settings);
-    expect(settings.elasticsearch.ssl.verificationMode).to.be('full');
-    expect(settings.elasticsearch.ssl.verify).to.be(undefined);
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(true);
+    });
   });
 
-  it('should log when deprecating verify from true', function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {
-          verify: true
-        }
-      }
-    };
-
-    const log = sinon.spy();
-    transformDeprecations(settings, log);
-    expect(log.calledOnce).to.be(true);
-  });
-
-  it(`shouldn't set verificationMode when verify isn't present`, function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {}
-      }
-    };
-
-    transformDeprecations(settings);
-    expect(settings.elasticsearch.ssl.verificationMode).to.be(undefined);
-  });
-
-  it(`shouldn't log when verify isn't present`, function () {
-    const settings = {
-      elasticsearch: {
-        ssl: {}
-      }
-    };
-
-    const log = sinon.spy();
-    transformDeprecations(settings, log);
-    expect(log.called).to.be(false);
-  });
-
-  it('should log when deprecating node_resolver', function () {
-    const settings = {
-      node_resolver: 'uuid'
-    };
-
-    const log = sinon.spy();
-    transformDeprecations(settings, log);
-    expect(log.calledOnce).to.be(true);
-  });
-
-  it(`shouldn't log when node_resolver isn't present`, function () {
-    const settings = { };
-
-    const log = sinon.spy();
-    transformDeprecations(settings, log);
-    expect(log.called).to.be(false);
-  });
 });

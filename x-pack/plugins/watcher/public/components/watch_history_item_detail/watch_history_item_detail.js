@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './watch_history_item_detail.html';
-import './watch_history_item_detail.less';
 import 'ace';
 
 const app = uiModules.get('xpack/watcher');

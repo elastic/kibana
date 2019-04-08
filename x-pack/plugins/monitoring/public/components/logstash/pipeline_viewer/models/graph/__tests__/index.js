@@ -144,16 +144,6 @@ describe('Graph', () => {
       });
     });
 
-    it('identifies cola representations of vertices correctly', () => {
-      const colaVertices = graph.colaVertices;
-      expect(colaVertices).to.be.an(Array);
-      expect(colaVertices.length).to.be(5);
-
-      expect(colaVertices[0]).to.have.property('vertex');
-      expect(colaVertices[0]).to.have.property('width');
-      expect(colaVertices[0]).to.have.property('height');
-    });
-
     it('identifies the correct edges', () => {
       const edges = graph.edges;
       expect(edges).to.be.an(Array);
@@ -161,81 +151,6 @@ describe('Graph', () => {
 
       edges.forEach(edge => {
         expect(edge).to.be.an(Edge);
-      });
-    });
-
-    it('identifies cola representations of edges correctly', () => {
-      const colaEdges = graph.colaEdges;
-      expect(colaEdges).to.be.an(Array);
-      expect(colaEdges.length).to.be(4);
-
-      colaEdges.forEach(colaEdge => {
-        expect(colaEdge).to.have.property('edge');
-        expect(colaEdge).to.have.property('source');
-        expect(colaEdge).to.have.property('target');
-      });
-    });
-
-    it('identifies its root vertices correctly', () => {
-      const roots = graph.roots;
-      expect(roots).to.be.an(Array);
-      expect(roots.length).to.be(1);
-
-      roots.forEach(root => {
-        expect(root).to.be.a(Vertex);
-        expect(root.json.id).to.be('my-prefix:my-really-long-named-generator');
-      });
-    });
-
-    it('identifies its leaf vertices correctly', () => {
-      const leaves = graph.leaves;
-      expect(leaves).to.be.an(Array);
-      expect(leaves.length).to.be(2);
-
-      leaves.forEach(leaf => {
-        expect(leaf).to.be.a(Vertex);
-      });
-    });
-
-    it('identifies the highest vertex rank correctly', () => {
-      expect(graph.maxRank).to.be(3);
-    });
-
-    describe('vertex layout ranking', () => {
-      const expectedRanks = [
-        ['my-prefix:my-really-long-named-generator'],
-        ['my-queue'],
-        ['my-if'],
-        ['my-grok', 'my-sleep']
-      ];
-
-      it('should store a 2d array of the vertices in the expected ranks', () => {
-        const result = graph.verticesByLayoutRank;
-        expectedRanks.forEach((expectedVertexIds, rank) => {
-          const resultVertices = result[rank];
-          expectedVertexIds.forEach(expectedVertexId => {
-            const expectedVertex = graph.getVertexById(expectedVertexId);
-            expect(resultVertices).to.contain(expectedVertex);
-          });
-        });
-      });
-
-      it('should add a .layoutRank property to each Vertex', () => {
-        expectedRanks.forEach((expectedVertexIds, rank) => {
-          expectedVertexIds.forEach(expectedVertexId => {
-            const vertex = graph.getVertexById(expectedVertexId);
-            expect(vertex.layoutRank).to.be(rank);
-          });
-        });
-      });
-    });
-
-    it('should classify the if triangle correctly', () => {
-      expect(graph.triangularIfGroups.length).to.be(1);
-      expect(graph.triangularIfGroups[0]).to.eql({
-        ifVertex: graph.getVertexById('my-if'),
-        trueVertex: graph.getVertexById('my-grok'),
-        falseVertex: graph.getVertexById('my-sleep'),
       });
     });
   });
@@ -246,26 +161,26 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             }
           ]
         };
@@ -291,11 +206,11 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             }
           ],
@@ -323,11 +238,11 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
@@ -355,40 +270,40 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "__QUEUE__",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '__QUEUE__',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             }
           ]
         };
@@ -414,40 +329,40 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "__QUEUE__",
-              to: "es",
-              type: "plain"
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '__QUEUE__',
+              to: 'es',
+              type: 'plain'
             }
           ]
         };
@@ -473,28 +388,28 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "plain"
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'plain'
             }
           ]
         };
@@ -520,54 +435,54 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "__QUEUE__",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: '__QUEUE__',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "plain"
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'plain'
             }
           ]
         };
@@ -593,27 +508,27 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              config_name: "grok",
-              type: "plugin",
-              plugin_type: "filter",
+              config_name: 'grok',
+              type: 'plugin',
+              plugin_type: 'filter',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "log_line_parser",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'log_line_parser',
+              type: 'boolean',
               when: true
             }
           ]
@@ -640,27 +555,27 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'boolean',
               when: true
             }
           ]
@@ -687,53 +602,53 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              config_name: "grok",
-              type: "plugin",
-              plugin_type: "filter",
+              config_name: 'grok',
+              type: 'plugin',
+              plugin_type: 'filter',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "__QUEUE__",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: '__QUEUE__',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "log_line_parser",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'log_line_parser',
+              type: 'boolean',
               when: true
             }
           ]
@@ -760,53 +675,53 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "__QUEUE__",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: '__QUEUE__',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'boolean',
               when: true
             }
           ]
@@ -833,62 +748,62 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              config_name: "grok",
-              type: "plugin",
-              plugin_type: "filter",
+              config_name: 'grok',
+              type: 'plugin',
+              plugin_type: 'filter',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "log_line_parser",
-              type: "boolean",
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: 'log_line_parser',
+              type: 'boolean',
               when: true
             },
             {
-              id: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "boolean",
+              id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'boolean',
               when: false
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'boolean',
               when: true
             }
           ]
@@ -915,88 +830,88 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              config_name: "grok",
-              type: "plugin",
-              plugin_type: "filter",
+              config_name: 'grok',
+              type: 'plugin',
+              plugin_type: 'filter',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296",
-              from: "__QUEUE__",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "plain"
+              id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
+              from: '__QUEUE__',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'plain'
             },
             {
-              id: "e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "log_line_parser",
-              type: "boolean",
+              id: 'e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: 'log_line_parser',
+              type: 'boolean',
               when: true
             },
             {
-              id: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "boolean",
+              id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'boolean',
               when: false
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'boolean',
               when: true
             }
           ]
@@ -1023,40 +938,40 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
+              id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "stdin",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'stdin',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
+              to: '__QUEUE__',
+              type: 'plain'
             }
           ]
         };
@@ -1082,28 +997,28 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             }
           ]
         };
@@ -1130,19 +1045,19 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "stdout",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'stdout',
               stats: {}
             }
           ],
@@ -1170,41 +1085,41 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             }
           ]
@@ -1231,63 +1146,63 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             },
             {
-              id: "micdrop",
+              id: 'micdrop',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "drop",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'drop',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             },
             {
-              id: "5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "micdrop",
-              type: "boolean",
+              id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'micdrop',
+              type: 'boolean',
               when: false
             },
             {
-              id: "6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "micdrop",
-              type: "plain"
+              id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: 'micdrop',
+              type: 'plain'
             }
           ]
         };
@@ -1313,35 +1228,35 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "stdout",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'stdout',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             }
           ]
@@ -1369,43 +1284,43 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "stdout",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'stdout',
               stats: {}
             },
             {
-              id: "local_persistent_out",
+              id: 'local_persistent_out',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "file",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'file',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             }
           ]
@@ -1432,158 +1347,158 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "tweet_harvester",
+              id: 'tweet_harvester',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "twitter",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'twitter',
               stats: {}
             },
             {
-              id: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
+              id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "input",
-              config_name: "stdin",
+              type: 'plugin',
+              plugin_type: 'input',
+              config_name: 'stdin',
               stats: {}
             },
             {
-              id: "__QUEUE__",
+              id: '__QUEUE__',
               explicit_id: false,
-              type: "queue",
+              type: 'queue',
               stats: {}
             },
             {
-              id: "log_line_parser",
+              id: 'log_line_parser',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "grok",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'grok',
               stats: {}
             },
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "mutant",
+              id: 'mutant',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             },
             {
-              id: "es",
+              id: 'es',
               explicit_id: true,
-              config_name: "elasticsearch",
-              type: "plugin",
-              plugin_type: "output",
+              config_name: 'elasticsearch',
+              type: 'plugin',
+              plugin_type: 'output',
               stats: {}
             },
             {
-              id: "90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8",
+              id: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "stdout",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'stdout',
               stats: {}
             },
             {
-              id: "local_persistent_out",
+              id: 'local_persistent_out',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "output",
-              config_name: "file",
+              type: 'plugin',
+              plugin_type: 'output',
+              config_name: 'file',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f",
-              from: "tweet_harvester",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
+              from: 'tweet_harvester',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02",
-              from: "296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0",
-              to: "__QUEUE__",
-              type: "plain"
+              id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
+              from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
+              to: '__QUEUE__',
+              type: 'plain'
             },
             {
-              id: "6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029",
-              from: "__QUEUE__",
-              to: "log_line_parser",
-              type: "plain"
+              id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
+              from: '__QUEUE__',
+              to: 'log_line_parser',
+              type: 'plain'
             },
             {
-              id: "ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296",
-              from: "log_line_parser",
-              to: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              type: "plain"
+              id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
+              from: 'log_line_parser',
+              to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              type: 'plain'
             },
             {
-              id: "e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "mutant",
-              type: "boolean",
+              id: 'e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'mutant',
+              type: 'boolean',
               when: true
             },
             {
-              id: "28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "es",
-              type: "boolean",
+              id: '28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'es',
+              type: 'boolean',
               when: false
             },
             {
-              id: "8a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae2",
-              from: "mutant",
-              to: "es",
-              type: "plain"
+              id: '8a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae2',
+              from: 'mutant',
+              to: 'es',
+              type: 'plain'
             },
             {
-              id: "a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8",
-              type: "boolean",
+              id: 'a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
+              type: 'boolean',
               when: false
             },
             {
-              id: "1c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a1",
-              from: "mutant",
-              to: "90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8",
-              type: "plain"
+              id: '1c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a1',
+              from: 'mutant',
+              to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
+              type: 'plain'
             },
             {
-              id: "c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "local_persistent_out",
-              type: "boolean",
+              id: 'c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'local_persistent_out',
+              type: 'boolean',
               when: false
             },
             {
-              id: "3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11c",
-              from: "mutant",
-              to: "local_persistent_out",
-              type: "plain"
+              id: '3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11c',
+              from: 'mutant',
+              to: 'local_persistent_out',
+              type: 'plain'
             },
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             }
           ]
@@ -1610,42 +1525,42 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             },
             {
-              id: "micdrop",
+              id: 'micdrop',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "drop",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'drop',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             },
             {
-              id: "5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "micdrop",
-              type: "boolean",
+              id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'micdrop',
+              type: 'boolean',
               when: false
             }
           ]
@@ -1672,42 +1587,42 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "mutate",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'mutate',
               stats: {}
             },
             {
-              id: "micdrop",
+              id: 'micdrop',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "drop",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'drop',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             },
             {
-              id: "5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "micdrop",
-              type: "plain"
+              id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: 'micdrop',
+              type: 'plain'
             }
           ]
         };
@@ -1733,41 +1648,41 @@ describe('Graph', () => {
         graphJson = {
           vertices: [
             {
-              id: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
+              id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
-              type: "if",
-              condition: "[is_rt] == \"RT\"",
+              type: 'if',
+              condition: '[is_rt] == "RT"',
               stats: {}
             },
             {
-              id: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
+              id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
-              type: "if",
-              condition: "[has_image] == true",
+              type: 'if',
+              condition: '[has_image] == true',
               stats: {}
             },
             {
-              id: "micdrop",
+              id: 'micdrop',
               explicit_id: true,
-              type: "plugin",
-              plugin_type: "filter",
-              config_name: "drop",
+              type: 'plugin',
+              plugin_type: 'filter',
+              config_name: 'drop',
               stats: {}
             }
           ],
           edges: [
             {
-              id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
-              from: "4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8",
-              to: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              type: "boolean",
+              id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
+              from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
+              to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              type: 'boolean',
               when: true
             },
             {
-              id: "5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53",
-              from: "a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84",
-              to: "micdrop",
-              type: "boolean",
+              id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
+              from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
+              to: 'micdrop',
+              type: 'boolean',
               when: true
             }
           ]

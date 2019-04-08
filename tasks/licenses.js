@@ -21,6 +21,7 @@ import { getInstalledPackages } from '../src/dev/npm';
 import {
   assertLicensesValid,
   LICENSE_WHITELIST,
+  DEV_ONLY_LICENSE_WHITELIST,
   LICENSE_OVERRIDES,
 } from '../src/dev/license_checker';
 
@@ -29,13 +30,35 @@ export default function licenses(grunt) {
     const done = this.async();
 
     try {
+      const dev = Boolean(grunt.option('dev'));
+
+      // Get full packages list according dev flag
+      const packages = await getInstalledPackages({
+        directory: grunt.config.get('root'),
+        licenseOverrides: LICENSE_OVERRIDES,
+        dev
+      });
+      // Filter the packages only used in production
+      const prodPackages = packages.filter(pkg => !pkg.isDevOnly);
+
+      // Assert if the found licenses in the production
+      // packages are valid
       assertLicensesValid({
-        packages: await getInstalledPackages({
-          directory: grunt.config.get('root'),
-          licenseOverrides: LICENSE_OVERRIDES
-        }),
+        packages: prodPackages,
         validLicenses: LICENSE_WHITELIST
       });
+
+      // Do the same as above for the packages only used in development
+      // if the dev flag is found
+      if (dev) {
+        const devPackages = packages.filter(pkg => pkg.isDevOnly);
+
+        assertLicensesValid({
+          packages: devPackages,
+          validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST)
+        });
+      }
+
       done();
     } catch (err) {
       grunt.fail.fatal(err);

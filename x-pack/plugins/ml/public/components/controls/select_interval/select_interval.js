@@ -7,65 +7,81 @@
 
 
 /*
- * AngularJS directive for rendering a select element with various interval levels.
+ * React component for rendering a select element with various aggregation interval levels.
  */
 
-import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import {
+  EuiSelect
+} from '@elastic/eui';
 
-import template from './select_interval.html';
-import 'plugins/ml/components/controls/controls_select';
+import { i18n } from '@kbn/i18n';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
-module
-  .service('mlSelectIntervalService', function (Private) {
-    const stateFactory = Private(stateFactoryProvider);
-    this.state = stateFactory('mlSelectInterval', {
-      interval: { display: 'Auto', val: 'auto' }
-    });
-  })
-  .directive('mlSelectInterval', function (mlSelectIntervalService) {
-    return {
-      restrict: 'E',
-      template,
-      link: function (scope, element) {
-        scope.intervalOptions = [
-          { display: 'Auto', val: 'auto' },
-          { display: '1 hour', val: 'hour' },
-          { display: '1 day', val: 'day' },
-          { display: 'Show all', val: 'second' }
-        ];
+const OPTIONS = [
+  {
+    value: 'auto',
+    text: i18n.translate('xpack.ml.controls.selectInterval.autoLabel', { defaultMessage: 'Auto' })
+  },
+  {
+    value: 'hour',
+    text: i18n.translate('xpack.ml.controls.selectInterval.hourLabel', { defaultMessage: '1 hour' })
+  },
+  {
+    value: 'day',
+    text: i18n.translate('xpack.ml.controls.selectInterval.dayLabel', { defaultMessage: '1 day' })
+  },
+  {
+    value: 'second',
+    text: i18n.translate('xpack.ml.controls.selectInterval.showAllLabel', { defaultMessage: 'Show all' })
+  }
+];
 
-        const intervalState = mlSelectIntervalService.state.get('interval');
-        const intervalValue = _.get(intervalState, 'val', 'auto');
-        let intervalOption = scope.intervalOptions.find(d => d.val === intervalValue);
-        if (intervalOption === undefined) {
-          // Attempt to set value in URL which doesn't map to one of the options.
-          intervalOption = scope.intervalOptions.find(d => d.val === 'auto');
-        }
-        scope.interval = intervalOption;
-        mlSelectIntervalService.state.set('interval', scope.interval);
+function optionValueToInterval(value) {
+  // Builds the corresponding interval object with the required display and val properties
+  // from the specified value.
+  const option = OPTIONS.find(opt => (opt.value === value));
 
-        scope.setInterval = function (interval) {
-          if (!_.isEqual(scope.interval, interval)) {
-            scope.interval = interval;
-            mlSelectIntervalService.state.set('interval', scope.interval).changed();
-          }
-        };
+  // Default to auto if supplied value doesn't map to one of the options.
+  let interval = OPTIONS[0];
+  if (option !== undefined) {
+    interval = { display: option.text, val: option.value };
+  }
 
-        function setScopeInterval() {
-          scope.setInterval(mlSelectIntervalService.state.get('interval'));
-        }
+  return interval;
+}
 
-        mlSelectIntervalService.state.watch(setScopeInterval);
+export const interval$ = new BehaviorSubject(optionValueToInterval(OPTIONS[0].value));
 
-        element.on('$destroy', () => {
-          mlSelectIntervalService.state.unwatch(setScopeInterval);
-          scope.$destroy();
-        });
-      }
-    };
-  });
+class SelectIntervalUnwrapped extends Component {
+  static propTypes = {
+    interval: PropTypes.object.isRequired,
+  };
+
+  onChange = (e) => {
+    const interval = optionValueToInterval(e.target.value);
+    interval$.next(interval);
+  };
+
+  render() {
+    return (
+      <EuiSelect
+        options={OPTIONS}
+        className="ml-select-interval"
+        value={this.props.interval.val}
+        onChange={this.onChange}
+      />
+    );
+  }
+}
+
+const SelectInterval = injectObservablesAsProps(
+  { interval: interval$ },
+  SelectIntervalUnwrapped
+);
+
+export { SelectInterval };

@@ -10,3 +10,5 @@ export { PipelineEditorProvider } from './pipeline_editor';
 export { RandomProvider } from './random';
 export { AceEditorProvider } from './ace_editor';
 export { GrokDebuggerProvider } from './grok_debugger';
+export { UserMenuProvider } from './user_menu';
+export { UptimeProvider } from './uptime';

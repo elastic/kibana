@@ -9,7 +9,14 @@
 import $ from 'jquery';
 import d3 from 'd3';
 import expect from 'expect.js';
-import { chartLimits, filterAxisLabels, numTicks } from '../chart_utils';
+import {
+  chartLimits,
+  filterAxisLabels,
+  numTicks,
+  showMultiBucketAnomalyMarker,
+  showMultiBucketAnomalyTooltip,
+} from '../chart_utils';
+import { MULTI_BUCKET_IMPACT } from 'plugins/ml/../common/constants/multi_bucket_impact';
 
 describe('ML - chart utils', () => {
 
@@ -64,6 +71,26 @@ describe('ML - chart utils', () => {
       expect(limits.max).to.be(105);
     });
 
+    it('returns minimum of 0 when data includes an anomaly for missing data', () => {
+      const data = [
+        { date: new Date('2017-02-23T09:00:00.000Z'), value: 22.2 },
+        { date: new Date('2017-02-23T10:00:00.000Z'), value: 23.3 },
+        { date: new Date('2017-02-23T11:00:00.000Z'), value: 24.4 },
+        {
+          date: new Date('2017-02-23T12:00:00.000Z'),
+          value: null, anomalyScore: 97.32085,
+          actual: [0], typical: [22.2]
+        },
+        { date: new Date('2017-02-23T13:00:00.000Z'), value: 21.3 },
+        { date: new Date('2017-02-23T14:00:00.000Z'), value: 21.2 },
+        { date: new Date('2017-02-23T15:00:00.000Z'), value: 21.1 }
+      ];
+
+      const limits = chartLimits(data);
+      expect(limits.min).to.be(0);
+      expect(limits.max).to.be(24.4);
+    });
+
   });
 
   describe('filterAxisLabels', () => {
@@ -116,6 +143,36 @@ describe('ML - chart utils', () => {
 
     it('returns 10 for 1000', () => {
       expect(numTicks(1000)).to.be(10);
+    });
+
+  });
+
+  describe('showMultiBucketAnomalyMarker', () => {
+
+    it('returns true for points with multiBucketImpact at or above medium impact', () => {
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).to.be(true);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).to.be(true);
+    });
+
+    it('returns false for points with multiBucketImpact missing or below medium impact', () => {
+      expect(showMultiBucketAnomalyMarker({})).to.be(false);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).to.be(false);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).to.be(false);
+    });
+
+  });
+
+  describe('showMultiBucketAnomalyTooltip', () => {
+
+    it('returns true for points with multiBucketImpact at or above low impact', () => {
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).to.be(true);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).to.be(true);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).to.be(true);
+    });
+
+    it('returns false for points with multiBucketImpact missing or below medium impact', () => {
+      expect(showMultiBucketAnomalyTooltip({})).to.be(false);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).to.be(false);
     });
 
   });

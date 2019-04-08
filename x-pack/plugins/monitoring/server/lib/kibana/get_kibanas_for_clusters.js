@@ -16,7 +16,7 @@ import { KibanaClusterMetric } from '../metrics';
  * The set contains single cluster for cluster overview page and cluster status bar
 
  * Timespan for the data is an interval of time based on calculations of an
- * interval size using the same calculation as determinting bucketSize using
+ * interval size using the same calculation as determining bucketSize using
  * the timepicker for a chart
 
  * Returns, for each cluster,

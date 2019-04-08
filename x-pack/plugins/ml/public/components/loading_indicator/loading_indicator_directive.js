@@ -5,8 +5,6 @@
  */
 
 
-
-import './styles/main.less';
 import template from './loading_indicator.html';
 
 import { uiModules } from 'ui/modules';

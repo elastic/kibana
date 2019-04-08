@@ -17,26 +17,19 @@
  * under the License.
  */
 
-import { join } from 'path';
+import path from 'path';
 import { set } from 'lodash';
 
-import { Keystore } from '../../server/keystore';
-import { getData } from '../../server/path';
+import { Keystore } from '../../legacy/server/keystore';
+import { getData } from '../../legacy/server/path';
 
-export function loadKeystore() {
-  const path = join(getData(), 'kibana.keystore');
-
-  const keystore = new Keystore(path);
+export function readKeystore(dataPath = getData()) {
+  const keystore = new Keystore(path.join(dataPath, 'kibana.keystore'));
   keystore.load();
 
-  return keystore;
-}
-
-export function readKeystore() {
-  const keystore = loadKeystore();
   const keys = Object.keys(keystore.data);
-
   const data = {};
+
   keys.forEach(key => {
     set(data, key, keystore.data[key]);
   });

@@ -15,6 +15,8 @@ import {
   EuiConfirmModal,
   EuiText
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 
 export class RevertToBasic extends React.PureComponent {
   cancel = () => {
@@ -35,11 +37,20 @@ export class RevertToBasic extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Confirm Revert to Basic License"
+          title={(<FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
+            defaultMessage="Confirm Revert to Basic License"
+          />)}
           onCancel={cancelStartBasicLicense}
           onConfirm={() => startBasicLicense(licenseType, true)}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
+          cancelButtonText={(<FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />)}
+          confirmButtonText={(<FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />)}
         >
           <div>
             <EuiText>{firstLine}</EuiText>
@@ -64,14 +75,24 @@ export class RevertToBasic extends React.PureComponent {
     }
     const description = (
       <span>
-        You’ll revert to our free features and lose access to security, machine
-        learning and other{' '}
-        <EuiLink
-          href="https://www.elastic.co/subscriptions/xpack"
-          target="_blank"
-        >
-          Platinum features
-        </EuiLink>.
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.revertToBasic.revertToFreeFeaturesDescription"
+          defaultMessage="You’ll revert to our free features and lose access to security,
+          machine learning and other {platinumLicenseFeaturesLinkText}."
+          values={{
+            platinumLicenseFeaturesLinkText: (
+              <EuiLink
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.licenseMgmt.licenseDashboard.revertToBasic.platinumLicenseFeaturesLinkText"
+                  defaultMessage="Platinum features"
+                />
+              </EuiLink>
+            )
+          }}
+        />
       </span>
     );
 
@@ -79,11 +100,17 @@ export class RevertToBasic extends React.PureComponent {
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
-          title="Revert to Basic license"
+          title={(<FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModalTitle"
+            defaultMessage="Revert to Basic license"
+          />)}
           description={description}
           footer={
-            <EuiButton onClick={() => startBasicLicense(licenseType)}>
-              Revert to Basic
+            <EuiButton data-test-subj="revertToBasicButton" onClick={() => startBasicLicense(licenseType)}>
+              <FormattedMessage
+                id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModal.revertToBasicButtonLabel"
+                defaultMessage="Revert to Basic"
+              />
             </EuiButton>
           }
         />

@@ -6,6 +6,7 @@
 
 import { get } from 'lodash';
 import Boom from 'boom';
+import { INDEX_PATTERN } from '../../../common/constants';
 
 /*
  * Check the currently logged-in user's privileges for "read" privileges on the
@@ -36,15 +37,14 @@ export async function verifyMonitoringAuth(req) {
  */
 async function verifyHasPrivileges(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const config = req.server.config();
 
   const response = await callWithRequest(req, 'transport.request', {
     method: 'POST',
-    path: '/_xpack/security/user/_has_privileges',
+    path: '/_security/user/_has_privileges',
     body: {
       index: [
         {
-          names: [ config.get('xpack.monitoring.index_pattern') ], // uses wildcard
+          names: [ INDEX_PATTERN ], // uses wildcard
           privileges: [ 'read' ]
         }
       ]

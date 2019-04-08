@@ -1,0 +1,14 @@
+{
+  "name": "kbn_tp_visualize_embedding",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@elastic/eui": "5.0.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
+  }
+}

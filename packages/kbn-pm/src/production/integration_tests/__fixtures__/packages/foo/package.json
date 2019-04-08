@@ -4,8 +4,7 @@
   "private": true,
   "main": "./target/index.js",
   "dependencies": {
-    "@elastic/bar": "link:../bar",
-    "lodash": "4.17.4"
+    "@elastic/bar": "link:../bar"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

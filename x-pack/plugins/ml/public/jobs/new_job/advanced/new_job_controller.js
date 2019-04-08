@@ -9,17 +9,26 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
+import 'ui/angular_ui_select';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
-import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { getAdvancedJobConfigurationBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
+import {
+  SearchItemsProvider,
+  createJobForSaving,
+  checkCardinalitySuccess,
+  getMinimalValidJob,
+} from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults, newJobLimits, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
@@ -30,33 +39,32 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/jobs/new_job/advanced', {
     template,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   })
   .when('/jobs/new_job/advanced/:jobId', {
     template,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -69,9 +77,9 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
-    timefilter,
-    mlDatafeedService,
-    mlConfirmModalService) {
+    Private,
+    mlConfirmModalService,
+    i18n) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
@@ -98,6 +106,8 @@ module.controller('MlNewJob',
       '_type',
       '_uid',
       '_version',
+      '_feature',
+      '_ignored',
     ];
 
     const allowedInfluencerTypes = [
@@ -111,12 +121,13 @@ module.controller('MlNewJob',
     const mlConfirm = mlConfirmModalService;
     msgs.clear();
     const jobDefaults = newJobDefaults();
+    // For keeping a copy of the detectors for comparison
+    const currentConfigs = { detectors: [], model_plot_config: { enabled: false } };
 
     $scope.job = {};
     $scope.mode = MODE.NEW;
     $scope.saveLock = false;
     $scope.indices = {};
-    $scope.types = {};
     $scope.fields = {};
     $scope.dateFields = {};
     $scope.catFields = {};
@@ -125,18 +136,53 @@ module.controller('MlNewJob',
     $scope.elasticServerInfo = {};
     $scope.jobGroupsUpdateFunction = {};
 
+    $scope.enterJobNameLabel = i18n('xpack.ml.newJob.advanced.jobDetails.enterJobNameLabel', {
+      defaultMessage: 'Enter a name for the job'
+    });
+    $scope.bucketSpanNotValidFormatLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.bucketSpanNotValidFormatLabel', {
+      defaultMessage: '{bucketSpan} is not a valid time interval format',
+      values: { bucketSpan: 'bucket_span' }
+    });
+    $scope.categorizationFiltersNotValidLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.categorizationFiltersNotValidLabel', {
+      defaultMessage: 'Categorization filters must all be valid regular expressions'
+    });
+    $scope.detectorNotConfiguredLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.detectorNotConfiguredLabel', {
+      defaultMessage: 'At least one detector should be configured'
+    });
+    $scope.influencerNotSelectedLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.influencerNotSelectedLabel', {
+      defaultMessage: 'At least one influencer should be selected'
+    });
+    $scope.validatingCardinalityLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.validatingCardinalityLabel', {
+      defaultMessage: 'Validating cardinality…'
+    });
+    $scope.enableModelPlotLabel = i18n('xpack.ml.newJob.advanced.analysisConfiguration.enableModelPlotLabel', {
+      defaultMessage: 'Enable model plot'
+    });
+    $scope.specifyTimeFieldLabel = i18n('xpack.ml.newJob.advanced.dataDescription.specifyTimeFieldLabel', {
+      defaultMessage: 'Time field should be specified'
+    });
+    $scope.specifyTimeFormatLabel = i18n('xpack.ml.newJob.advanced.dataDescription.specifyTimeFormatLabel', {
+      defaultMessage: 'Time format should be specified'
+    });
+
     $scope.ui = {
-      pageTitle: 'Create a new job',
+      pageTitle: i18n('xpack.ml.newJob.advanced.createNewJobTitle', {
+        defaultMessage: 'Create a new job'
+      }),
       dataLocation: 'ES',
       dataPreview: '',
       currentTab: 0,
       tabs: [
-        { index: 0, title: 'Job Details' },
-        { index: 1, title: 'Analysis Configuration' },
-        { index: 2, title: 'Data Description', hidden: true  },
-        { index: 3, title: 'Datafeed' },
-        { index: 4, title: 'Edit JSON' },
-        { index: 5, title: 'Data Preview', hidden: true },
+        { index: 0, title: i18n('xpack.ml.newJob.advanced.tabs.jobDetailsLabel', { defaultMessage: 'Job Details' }) },
+        { index: 1, title: i18n('xpack.ml.newJob.advanced.tabs.analysisConfigurationLabel', { defaultMessage: 'Analysis Configuration' }) },
+        {
+          index: 2,
+          title: i18n('xpack.ml.newJob.advanced.tabs.dataDescriptionLabel', { defaultMessage: 'Data Description' }),
+          hidden: true
+        },
+        { index: 3, title: i18n('xpack.ml.newJob.advanced.tabs.datafeedLabel', { defaultMessage: 'Datafeed' }) },
+        { index: 4, title: i18n('xpack.ml.newJob.advanced.tabs.editJsonLabel', { defaultMessage: 'Edit JSON' }) },
+        { index: 5, title: i18n('xpack.ml.newJob.advanced.tabs.dataPreviewLabel', { defaultMessage: 'Data Preview' }), hidden: true },
       ],
       validation: {
         tabs: [
@@ -153,6 +199,15 @@ module.controller('MlNewJob',
           $scope.ui.validation.tabs[tab].valid = valid;
         }
       },
+      cardinalityValidator: {
+        status: 0, message: '', STATUS: {
+          FAILED: -1,
+          NOT_RUNNING: 0,
+          RUNNING: 1,
+          FINISHED: 2,
+          WARNING: 3,
+        }
+      },
       jsonText: '',
       changeTab: changeTab,
       influencers: [],
@@ -160,24 +215,24 @@ module.controller('MlNewJob',
       customInfluencers: [],
       tempCustomInfluencer: '',
       inputDataFormat: [
-        { value: 'delimited',     title: 'Delimited' },
+        { value: 'delimited',     title: i18n('xpack.ml.newJob.advanced.delimitedLabel', { defaultMessage: 'Delimited' }) },
         { value: 'json',          title: 'JSON' },
       ],
       fieldDelimiterOptions: [
-        { value: '\t',      title: 'tab' },
-        { value: ' ',       title: 'space' },
+        { value: '\t',      title: i18n('xpack.ml.newJob.advanced.tabLabel', { defaultMessage: 'tab' }) },
+        { value: ' ',       title: i18n('xpack.ml.newJob.advanced.spaceLabel', { defaultMessage: 'space' }) },
         { value: ',',       title: ',' },
         { value: ';',       title: ';' },
-        { value: 'custom',  title: 'custom' }
+        { value: 'custom',  title: i18n('xpack.ml.newJob.advanced.customLabel', { defaultMessage: 'custom' }) }
       ],
       selectedFieldDelimiter: ',',
       customFieldDelimiter: '',
       indexTextOk: false,
       fieldsUpToDate: false,
       indices: {},
-      types: {},
       isDatafeed: true,
       useDedicatedIndex: false,
+      enableModelPlot: false,
       modelMemoryLimit: '',
       modelMemoryLimitDefault: jobDefaults.anomaly_detectors.model_memory_limit,
 
@@ -190,7 +245,7 @@ module.controller('MlNewJob',
         scrollSizeText: '',
         scrollSizeDefault: 1000,
         indicesText: '',
-        typesText: '',
+        scriptFields: [],
       },
       saveStatus: {
         job: 0,
@@ -214,7 +269,10 @@ module.controller('MlNewJob',
         if (jobId) {
           $scope.mode = MODE.EDIT;
           console.log('Editing job', mlJobService.currentJob);
-          $scope.ui.pageTitle = 'Editing Job ' + $scope.job.job_id;
+          $scope.ui.pageTitle = i18n('xpack.ml.newJob.advanced.editingJobPageTitle', {
+            defaultMessage: 'Editing Job {jobId}',
+            values: { jobId: $scope.job.job_id }
+          });
         } else {
           // if the job_version is undefined, assume we have transferred to this page from
           // a new job wizard.
@@ -229,7 +287,10 @@ module.controller('MlNewJob',
           } else {
             $scope.mode = MODE.CLONE;
             console.log('Cloning job', mlJobService.currentJob);
-            $scope.ui.pageTitle = 'Clone Job from ' + $scope.job.job_id;
+            $scope.ui.pageTitle = i18n('xpack.ml.newJob.advanced.cloneJobFromPageTitle', {
+              defaultMessage: 'Clone Job from {jobId}',
+              values: { jobId: $scope.job.job_id }
+            });
             $scope.job.job_id = '';
 
             if ($scope.job.results_index_name === 'shared') {
@@ -278,9 +339,37 @@ module.controller('MlNewJob',
         });
     }
 
+    function checkForConfigUpdates() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      // Check if enable model plot was set/has changed and update if it has.
+      const jobModelPlotValue = $scope.job.model_plot_config ? $scope.job.model_plot_config : { enabled: false };
+      const modelPlotSettingsEqual = _.isEqual(currentConfigs.model_plot_config, jobModelPlotValue);
+
+      if (!modelPlotSettingsEqual) {
+        // Update currentConfigs.
+        currentConfigs.model_plot_config.enabled = jobModelPlotValue.enabled;
+        // Update ui portion so checkbox is checked
+        $scope.ui.enableModelPlot = jobModelPlotValue.enabled;
+      }
+
+      if ($scope.ui.enableModelPlot === true) {
+        const unchanged = _.isEqual(currentConfigs.detectors, $scope.job.analysis_config.detectors);
+        // if detectors changed OR model plot was just toggled on run cardinality
+        if (!unchanged || !modelPlotSettingsEqual) {
+          runValidateCardinality();
+        }
+      } else {
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+      }
+    }
+
     function changeTab(tab) {
       $scope.ui.currentTab = tab.index;
-      if (tab.index === 4) {
+      // Selecting Analysis Configuration tab
+      if (tab.index === 1) {
+        checkForConfigUpdates();
+      } else if (tab.index === 4) {
         createJSONText();
       } else if (tab.index === 5) {
         if ($scope.ui.dataLocation === 'ES') {
@@ -297,6 +386,9 @@ module.controller('MlNewJob',
       loadFields()
         .catch(() => {
           // No need to do anything here as loadFields handles the displaying of any errors.
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     };
 
@@ -347,6 +439,16 @@ module.controller('MlNewJob',
                     }
                   });
                 });
+              });
+
+              // Add script fields from the job configuration to $scope.fields
+              // so they're available from within the dropdown in the detector modal.
+              const scriptFields = Object.keys(_.get($scope.job, 'datafeed_config.script_fields', {}));
+              // This type information is retrieved via fieldCaps for regular fields,
+              // here we're creating a similar object so the script field is usable further on.
+              const scriptType = { type: 'script_fields', searchable: false, aggregatable: true };
+              scriptFields.forEach((fieldName) => {
+                $scope.fields[fieldName] = scriptType;
               });
 
               if (Object.keys($scope.fields).length) {
@@ -412,8 +514,12 @@ module.controller('MlNewJob',
               const tab = $scope.ui.validation.tabs[0];
               tab.valid = false;
               tab.checks.jobId.valid = false;
-              tab.checks.jobId.message = '\'' + $scope.job.job_id + '\' already exists, please choose a different name';
+              tab.checks.jobId.message = i18n('xpack.ml.newJob.advanced.jobAlreadyExistsLabel', {
+                defaultMessage: `'{jobId}' already exists, please choose a different name`,
+                values: { jobId: $scope.job.job_id }
+              });
               changeTab({ index: 0 });
+              $scope.$applyAsync();
             } else {
               checkInfluencers();
             }
@@ -426,8 +532,12 @@ module.controller('MlNewJob',
               } else {
                 // if there are no influencers set, open a confirmation
                 mlConfirm.open({
-                  message: 'You have not chosen any influencers, do you want to continue?',
-                  title: 'No Influencers'
+                  message: i18n('xpack.ml.newJob.advanced.noInfluencersChosenConfirmModalDescription', {
+                    defaultMessage: 'You have not chosen any influencers, do you want to continue?'
+                  }),
+                  title: i18n('xpack.ml.newJob.advanced.noInfluencersChosenConfirmModalTitle', {
+                    defaultMessage: 'No Influencers'
+                  })
                 })
                   .then(saveFunc)
                   .catch(() => {
@@ -472,15 +582,21 @@ module.controller('MlNewJob',
                     // mappings should be fully set up, but the Kibana mappings then
                     // need to be refreshed to reflect the Elasticsearch mappings for
                     // any new analytical fields that have been configured in the job.
-                    //courier.indexPatterns.get('.ml-anomalies-*')
+                    //indexPatterns.get('.ml-anomalies-*')
                     //.then((indexPattern) => {
                     //  indexPattern.refreshFields()
                     //  .then(() => {
                     //    console.log('refreshed fields for index pattern .ml-anomalies-*');
                     //    wait for mappings refresh before continuing on with the post save stuff
-                    msgs.info('New Job \'' + result.resp.job_id + '\' added');
+                    msgs.info(
+                      i18n('xpack.ml.newJob.advanced.newJobAddedNotificationMessage', {
+                        defaultMessage: `New Job '{jobId}' added`,
+                        values: { jobId: result.resp.job_id }
+                      })
+                    );
                     // update status
                     $scope.ui.saveStatus.job = 2;
+                    $scope.$applyAsync();
 
                     // save successful, attempt to open the job
                     mlJobService.openJob($scope.job.job_id)
@@ -488,8 +604,17 @@ module.controller('MlNewJob',
                         saveNewDatafeed($scope.job.datafeed_config, $scope.job.job_id);
                       })
                       .catch((resp) => {
-                        msgs.error('Could not open job: ', resp);
-                        msgs.error('Job created, creating datafeed anyway');
+                        msgs.error(
+                          i18n('xpack.ml.newJob.advanced.couldNotOpenJobErrorMessage', {
+                            defaultMessage: 'Could not open job:'
+                          }),
+                          resp
+                        );
+                        msgs.error(
+                          i18n('xpack.ml.newJob.advanced.jobCreatedAndCreatingDatafeedAnywayErrorMessage', {
+                            defaultMessage: 'Job created, creating datafeed anyway'
+                          })
+                        );
                         saveNewDatafeed($scope.job.datafeed_config, $scope.job.job_id);
                       });
 
@@ -497,16 +622,26 @@ module.controller('MlNewJob',
                       if (datafeedConfig) {
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
-                          .then(() => {
+                          .then((resp) => {
+                            datafeedConfig.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
-                            msgs.error('Could not create datafeed: ', resp);
+                            msgs.error(
+                              i18n('xpack.ml.newJob.advanced.couldNotCreateDatafeedErrorMessage', {
+                                defaultMessage: 'Could not create datafeed:'
+                              }),
+                              resp
+                            );
                             $scope.saveLock = false;
+                          })
+                          .then(() => {
+                            $scope.$applyAsync();
                           });
                       } else {
                         // no datafeed, so save is complete
                         $scope.saveLock = false;
+                        $scope.$applyAsync();
                       }
                     }
 
@@ -516,33 +651,56 @@ module.controller('MlNewJob',
                     // save failed, unlock the buttons and tell the user
                     $scope.ui.saveStatus.job = -1;
                     $scope.saveLock = false;
-                    msgs.error('Save failed: ' + result.resp.message);
+                    msgs.error(
+                      i18n('xpack.ml.newJob.advanced.unsuccessfulSavingResultErrorMessage', {
+                        defaultMessage: 'Save failed: {message}',
+                        values: { message: result.resp.message }
+                      })
+                    );
+                    $scope.$applyAsync();
                   }
                 }).catch((result) => {
                   $scope.ui.saveStatus.job = -1;
                   $scope.saveLock = false;
-                  msgs.error('Save failed: ' + result.resp.message);
+                  msgs.error(
+                    i18n('xpack.ml.newJob.advanced.saveFailedWithMessageErrorMessage', {
+                      defaultMessage: 'Save failed: {message}',
+                      values: { message: result.resp.message }
+                    })
+                  );
+                  $scope.$applyAsync();
                 });
             }
           })
           .catch(() => {
-            msgs.error('Save failed');
+            msgs.error(
+              i18n('xpack.ml.newJob.advanced.saveFailedErrorMessage', {
+                defaultMessage: 'Save failed'
+              })
+            );
             console.log('save(): job validation failed. Jobs list could not be loaded.');
+            $scope.$applyAsync();
           });
       }
       else {
         msgs.error(jobValid.message);
         console.log('save(): job validation failed');
+        $scope.$applyAsync();
       }
     };
 
     $scope.cancel = function () {
       mlConfirm.open({
-        message: 'Are you sure you want to cancel job creation?',
-        title: 'Are you sure?'
+        message: i18n('xpack.ml.newJob.advanced.cancelJobCreationConfirmModalDescription', {
+          defaultMessage: 'Are you sure you want to cancel job creation?'
+        }),
+        title: i18n('xpack.ml.newJob.advanced.cancelJobCreationConfirmModalTitle', {
+          defaultMessage: 'Are you sure?'
+        })
       })
         .then(() => {
           msgs.clear();
+          $scope.$applyAsync();
           $location.path('jobs');
         });
     };
@@ -555,10 +713,11 @@ module.controller('MlNewJob',
     // if an index pattern or saved search has been added to the url
     // populate those items in the form and datafeed config
     function populateFormFromUrl() {
+      const createSearchItems = Private(SearchItemsProvider);
       const {
         indexPattern,
         savedSearch,
-        combinedQuery } = createSearchItems($route);
+        combinedQuery } = createSearchItems();
 
       if (indexPattern.id !== undefined) {
         timeBasedIndexCheck(indexPattern, true);
@@ -637,6 +796,96 @@ module.controller('MlNewJob',
       }
     };
 
+    function runValidateCardinality() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      $scope.ui.cardinalityValidator.status = $scope.ui.cardinalityValidator.STATUS.RUNNING;
+
+      const tempJob = mlJobService.cloneJob($scope.job);
+      _.merge(tempJob, getMinimalValidJob());
+
+      ml.validateCardinality(tempJob)
+        .then((response) => {
+          const validationResult = checkCardinalitySuccess(response);
+
+          if (validationResult.success === true) {
+            $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+            $scope.ui.cardinalityValidator.message = '';
+          } else {
+            $scope.ui.cardinalityValidator.message = i18n(
+              'xpack.ml.newJob.advanced.recommendationForUsingModelPlotWithCardinalityDescription',
+              {
+                defaultMessage: 'Creating model plots is resource intensive and not recommended' +
+                  'where the cardinality of the selected fields is greater than 100. Estimated cardinality' +
+                  'for this job is {highCardinality}.' +
+                  'If you enable model plot with this configuration' +
+                  'we recommend you select a dedicated results index on the Job Details tab.',
+                values: { highCardinality: validationResult.highCardinality }
+              }
+            );
+
+            $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+          }
+        })
+        .catch((error) => {
+          console.log('Cardinality check error:', error);
+          $scope.ui.cardinalityValidator.message = i18n(
+            'xpack.ml.newJob.advanced.cardinalityNotValidErrorMessage',
+            {
+              defaultMessage: 'An error occurred validating the configuration' +
+                'for running the job with model plot enabled.' +
+                'Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.' +
+                'You may want to select a dedicated results index on the Job Details tab.'
+            }
+          );
+          $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+        })
+        .then(() => {
+          $scope.$applyAsync();
+        });
+    }
+
+    $scope.onDetectorsUpdate = function () {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+
+      if ($scope.ui.enableModelPlot === true) {
+        // Update currentConfigs since config changed
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+          $scope.ui.cardinalityValidator.message = '';
+        } else {
+          runValidateCardinality();
+        }
+      }
+    };
+
+    $scope.setModelPlotEnabled = function () {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+
+      if ($scope.ui.enableModelPlot === true) {
+        // Start keeping track of the config in case of changes from Edit JSON tab requiring another cardinality check
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
+        $scope.job.model_plot_config = {
+          enabled: true
+        };
+
+        currentConfigs.model_plot_config.enabled = true;
+        // return early if there's nothing to run a check on yet.
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          return;
+        }
+
+        runValidateCardinality();
+      } else {
+        currentConfigs.model_plot_config.enabled = false;
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+        delete $scope.job.model_plot_config;
+      }
+    };
+
     // function called by field-select components to set
     // properties in the analysis_config
     $scope.setAnalysisConfigProperty = function (value, field) {
@@ -685,19 +934,21 @@ module.controller('MlNewJob',
           scrollSize = '';
         }
 
-        clear($scope.types);
-        _.each(datafeedConfig.types, (type) => {
-          $scope.types[type] = $scope.ui.types[type];
-        });
-
         clear($scope.indices);
         _.each(datafeedConfig.indices, (index) => {
           $scope.indices[index] = $scope.ui.indices[index];
         });
 
         const indicesText = datafeedConfig.indices.join(',');
-        $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
-        const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
+
+        const scriptFields = (datafeedConfig.script_fields !== undefined) ? Object.keys(datafeedConfig.script_fields) : [];
+
+        let fieldsUpToDate = true;
+        if (indicesText !== $scope.ui.datafeed.indicesText || _.isEqual(scriptFields, $scope.ui.datafeed.scriptFields) === false) {
+          fieldsUpToDate = false;
+        }
+
+        $scope.ui.fieldsUpToDate = fieldsUpToDate;
 
         $scope.ui.datafeed = {
           queryText: angular.toJson(datafeedConfig.query, true),
@@ -708,7 +959,7 @@ module.controller('MlNewJob',
           scrollSizeText: scrollSize,
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
-          typesText: types.join(','),
+          scriptFields,
         };
 
         if ($scope.ui.fieldsUpToDate === false) {
@@ -745,8 +996,8 @@ module.controller('MlNewJob',
     function setFieldDelimiterControlsFromText() {
       if ($scope.job.data_description && $scope.job.data_description.field_delimiter) {
 
-      // if the data format has not been set and fieldDelimiter exists,
-      // assume the format is delimited
+        // if the data format has not been set and fieldDelimiter exists,
+        // assume the format is delimited
         if ($scope.job.data_description.format === undefined) {
           $scope.job.data_description.format = 'delimited';
         }
@@ -827,22 +1078,6 @@ module.controller('MlNewJob',
           indices = df.indicesText.split(',').map(i => i.trim());
         }
 
-        let types = [];
-        if (df.typesText) {
-          types = df.typesText.split(',');
-          for (let i = 0; i < types.length; i++) {
-            types[i] = types[i].trim();
-          }
-        }
-        // if the selected types is different to all types
-        // the user must have edited the json, so use the types object
-        // otherwise, the types object is the same as all types, so set
-        // types to an empty array
-        const typeKeys = Object.keys($scope.ui.types);
-        if (_.difference(typeKeys, types).length === 0) {
-          types = [];
-        }
-
         // create datafeedConfig if it doesn't already exist
         if (!$scope.job.datafeed_config) {
           $scope.job.datafeed_config = {};
@@ -874,7 +1109,6 @@ module.controller('MlNewJob',
         }
 
         config.indices = indices;
-        config.types = types;
       }
     }
 
@@ -903,6 +1137,9 @@ module.controller('MlNewJob',
       getCustomUrlSelection();
       getCategorizationFilterSelection();
       $scope.ui.jsonText = angular.toJson($scope.job, true);
+      setTimeout(() => {
+        $scope.$applyAsync();
+      }, 0);
     }
 
     // add new custom URL
@@ -979,7 +1216,9 @@ module.controller('MlNewJob',
       const validationResults = basicJobValidation($scope.job, $scope.fields, limits);
 
       const valid = validationResults.valid;
-      const message = 'Fill in all required fields';
+      const message = i18n('xpack.ml.newJob.advanced.fillInAllrequiredFieldsValidationMessage', {
+        defaultMessage: 'Fill in all required fields'
+      });
 
       const tabs = $scope.ui.validation.tabs;
       // reset validations
@@ -1002,27 +1241,49 @@ module.controller('MlNewJob',
           tabs[0].checks.jobId.valid = false;
         } else if (validationResults.contains('job_id_invalid')) {
           tabs[0].checks.jobId.valid = false;
-          let msg = 'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
-          msg += 'must start and end with an alphanumeric character';
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.jobNameAllowedCharactersDescription', {
+            defaultMessage: 'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+            'must start and end with an alphanumeric character'
+          });
           tabs[0].checks.jobId.message = msg;
         }
 
         if (validationResults.contains('job_group_id_invalid')) {
           tabs[0].checks.groupIds.valid = false;
-          let msg = 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
-          msg += 'must start and end with an alphanumeric character';
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.jobGroupNamesAllowedCharactersDescription', {
+            defaultMessage: 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+            'must start and end with an alphanumeric character'
+          });
           tabs[0].checks.groupIds.message = msg;
+        }
+
+        if (validationResults.contains('model_memory_limit_units_invalid')) {
+          tabs[0].checks.modelMemoryLimit.valid = false;
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.modelMemoryLimitUnrecognizedUnitsErrorMessage', {
+            defaultMessage: 'Model memory limit data unit unrecognized. It must be {allowedDataUnits} or {allowedDataUnit}',
+            values: {
+              allowedDataUnits: (ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', ')),
+              allowedDataUnit: ([...ALLOWED_DATA_UNITS].pop())
+            }
+          });
+          tabs[0].checks.modelMemoryLimit.message = msg;
         }
 
         if (validationResults.contains('model_memory_limit_invalid')) {
           tabs[0].checks.modelMemoryLimit.valid = false;
-          const msg = `Model memory limit cannot be higher than the maximum value of ${limits.max_model_memory_limit.toUpperCase()}`;
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.modelMemoryLimitInvalidRangeErrorMessage', {
+            defaultMessage: 'Model memory limit cannot be higher than the maximum value of {maxModelMemoryLimit}',
+            values: { maxModelMemoryLimit: limits.max_model_memory_limit.toUpperCase() }
+          });
           tabs[0].checks.modelMemoryLimit.message = msg;
         }
 
         // tab 1 - Analysis Configuration
         if (validationResults.contains('categorization_filter_invalid')) {
-          tabs[1].checks.categorizationFilters.message = 'categorizationFieldName must be set to allow filters';
+          tabs[1].checks.categorizationFilters.message = i18n('xpack.ml.newJob.advanced.validateJob.howToAllowFiltersDescription', {
+            defaultMessage: '{categorizationFieldName} must be set to allow filters',
+            values: { categorizationFieldName: 'categorizationFieldName' }
+          });
           tabs[1].checks.categorizationFilters.valid = false;
         }
 
@@ -1030,9 +1291,18 @@ module.controller('MlNewJob',
           tabs[1].checks.detectors.valid = false;
         }
         if (validationResults.contains('detectors_duplicates')) {
-          let msg = 'Duplicate detectors were found. Detectors having the same combined configuration for';
-          msg += ` 'function', 'field_name', 'by_field_name', 'over_field_name' and`;
-          msg += ` 'partition_field_name' are not allowed within the same job.`;
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.duplicateDetectorsFoundErrorMessage', {
+            defaultMessage: 'Duplicate detectors were found. Detectors having the same combined configuration for ' +
+            `'{function}', '{fieldName}', '{byFieldName}', '{overFieldName}' and '{partitionFieldName}' ` +
+            'are not allowed within the same job.',
+            values: {
+              function: 'function',
+              fieldName: 'field_name',
+              byFieldName: 'by_field_name',
+              overFieldName: 'over_field_name',
+              partitionFieldName: 'partition_field_name'
+            }
+          });
           tabs[1].checks.detectors.message = msg;
           tabs[1].checks.detectors.valid = false;
         }
@@ -1042,11 +1312,17 @@ module.controller('MlNewJob',
         }
 
         if (validationResults.contains('bucket_span_empty')) {
-          tabs[1].checks.bucketSpan.message = 'bucket_span must be set';
+          tabs[1].checks.bucketSpan.message = i18n('xpack.ml.newJob.advanced.validateJob.bucketSpanMustBeSetErrorMessage', {
+            defaultMessage: '{bucketSpan} must be set',
+            values: { bucketSpan: 'bucket_span' }
+          });
           tabs[1].checks.bucketSpan.valid = false;
         } else if (validationResults.contains('bucket_span_invalid')) {
-          let msg = `${job.analysis_config.bucket_span} is not a valid time interval format e.g. 10m, 1h.`;
-          msg += ' It also needs to be higher than zero.';
+          const msg = i18n('xpack.ml.newJob.advanced.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage', {
+            defaultMessage:
+              '{bucketSpan} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+            values: { bucketSpan: job.analysis_config.bucket_span, tenMinutes: '10m', oneHour: '1h' }
+          });
           tabs[1].checks.bucketSpan.message = msg;
           tabs[1].checks.bucketSpan.valid = false;
         }
@@ -1076,7 +1352,9 @@ module.controller('MlNewJob',
     // it can be overridden with a custom function to do an alternative test
     function validateIndex(tabs, dataFeedTest = () => (Object.keys($scope.fields).length === 0)) {
       if (dataFeedTest()) {
-        const msg = 'Could not load fields from index';
+        const msg = i18n('xpack.ml.newJob.advanced.validateJob.couldNotLoadFieldsFromIndexErrorMessage', {
+          defaultMessage: 'Could not load fields from index'
+        });
         tabs[3].checks.hasAccessToIndex.valid = false;
         tabs[3].checks.hasAccessToIndex.message = msg;
         tabs[3].valid = false;
@@ -1098,7 +1376,7 @@ module.controller('MlNewJob',
             return {
               pscope: $scope,
               openDatafeed: function () {
-                mlDatafeedService.openJobTimepickerWindow($scope.job);
+                mlJobService.currentJob = $scope.job;
               }
             };
           }
@@ -1106,7 +1384,7 @@ module.controller('MlNewJob',
       });
     }
 
-    // using the selected indices and types, perform a search
+    // using the selected indices, perform a search
     // on the ES server and display the results in the Data preview tab
     function loadDataPreview() {
       createJSONText();
@@ -1129,9 +1407,15 @@ module.controller('MlNewJob',
           })
           .catch(function (resp) {
             $scope.ui.dataPreview = angular.toJson(resp, true);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
-        $scope.ui.dataPreview = 'Datafeed does not exist';
+        $scope.ui.dataPreview = i18n('xpack.ml.newJob.advanced.dataPreview.datafeedDoesNotExistLabel', {
+          defaultMessage: 'Datafeed does not exist'
+        });
+        $scope.$applyAsync();
       }
     }
 

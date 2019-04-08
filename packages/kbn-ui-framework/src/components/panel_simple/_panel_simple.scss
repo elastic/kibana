@@ -1,9 +1,8 @@
 .kuiPanelSimple {
-  @include kuiBottomShadowSmall;
-
-  background-color: $kuiColorEmptyShade;
-  border: $kuiBorderThin;
-  border-radius: $kuiBorderRadius;
+  @include euiBottomShadowSmall;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
   flex-grow: 1;
 
   &.kuiPanelSimple--paddingSmall {
@@ -24,10 +23,5 @@
 
   &.kuiPanelSimple--flexGrowZero {
     flex-grow: 0;
-  }
-
-  @include darkTheme {
-    background-color: $kuiBackgroundColor--darkTheme;
-    border-color: $kuiInputBorderColor--darkTheme;
   }
 }

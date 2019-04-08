@@ -4,25 +4,29 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const screenshot = getService('screenshots');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
-  const remote = getService('remote');
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
+  const browser = getService('browser');
 
 
-  describe('visualize app', function describeIndexTests() {
+  describe('visualize screenshots', function describeIndexTests() {
     let initialize = true;
     let initialSize;
+    let historyLog = '';
+    let historyUrls = '';
 
     before(async function () {
       await esArchiver.load('visualization_screenshots');
       await PageObjects.common.navigateToApp('visualize');
 
       // can see from properties of baseline images
-      const baselineImageSize = { width: 1280, height: 686 };
+      const baselineImageSize = { width: 1264, height: 668 };
       await calibrateForScreenshots(baselineImageSize);
     });
 
     after(async function () {
-      await remote.setWindowSize(initialSize.width, initialSize.height);
+      // browser.setWindowSize(initialSize.width, initialSize.height);
+      log.debug(historyUrls);
+      log.info(historyLog);
     });
 
     /*
@@ -44,7 +48,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     */
     async function calibrateForScreenshots(baselineImageSize) {
       // CALIBRATION STEP
-      initialSize = await remote.getWindowSize();
+      initialSize = await browser.getWindowSize();
+      log.debug(`################## initial window Size: ${initialSize.width} x ${initialSize.height}`);
       // take a sample screenshot and get the size
       let currentSize = await screenshot.getScreenshotSize();
       log.debug(`################## initial screenshot Size: ${currentSize.width} x ${currentSize.height}`);
@@ -52,28 +57,31 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       log.debug(`current width / 1280 = ${currentSize.width / 1280}`);
       log.debug(`current width / 1252 = ${currentSize.width / 1252}`);
 
-      await remote.setWindowSize(initialSize.width + 100, initialSize.height);
+      await browser.setWindowSize(400, 400);
+      await browser.setWindowSize(initialSize.width + 100, initialSize.height);
       const tempSize = await screenshot.getScreenshotSize();
-      log.debug(`################ temp  screenshot Size: ${currentSize.width} x ${currentSize.height}`);
-      const ratio = (tempSize.width - currentSize.width) / 100;
-      log.debug(`################ display scaling ratio = ${ratio}`);
+      log.debug(`################ temp  screenshot Size: ${tempSize.width} x ${tempSize.height}`);
+      if (tempSize.width - currentSize.width > 0) {
+        const ratio = Math.round((tempSize.width - currentSize.width) * 4 / 100)/4;
+        log.debug(`################ display scaling ratio = ${ratio}`);
 
-      // calculate the new desired size using that ratio.
-      const newSize = { width: (initialSize.width) + (baselineImageSize.width) - currentSize.width / ratio,
-        height: (initialSize.height) + (baselineImageSize.height)  - currentSize.height / ratio };
-      log.debug(`################## setting window size to ${newSize.width} x ${newSize.height}`);
-      log.debug(`################## delta size to ${newSize.width - initialSize.width} x ${newSize.height - initialSize.height}`);
-      await remote.setWindowSize(newSize.width, newSize.height);
+        // calculate the new desired size using that ratio.
+        const newSize = { width: (initialSize.width) + (baselineImageSize.width) - currentSize.width / ratio,
+          height: (initialSize.height) + (baselineImageSize.height)  - currentSize.height / ratio };
+        log.debug(`################## setting window size to ${newSize.width} x ${newSize.height}`);
+        log.debug(`################## delta size to ${newSize.width - initialSize.width} x ${newSize.height - initialSize.height}`);
+        await browser.setWindowSize(newSize.width, newSize.height);
 
-      // check again.
-      currentSize = await screenshot.getScreenshotSize();
-      log.debug(`################## second screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+        // check again.
+        currentSize = await screenshot.getScreenshotSize();
+        log.debug(`################## second screenshot Size: ${currentSize.width} x ${currentSize.height}`);
+      }
     }
 
 
     it('should compare visualization screenshot for bar chart with count metric agg and date histogram with terms', async function () {
       const expectedSavedVizName = 'screenshot_area_chart_bar';
-      await compareScreenshot(expectedSavedVizName);
+      await compareScreenshot2(expectedSavedVizName, `http://localhost:5620/app/kibana#/visualize/edit/b5530c20-3d8a-11e8-9faa-599abad8b901?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2Cto%3A'2015-09-23T18%3A31%3A44.000Z'))`);
     });
 
     it('should compare visualization screenshot for area chart with legend position and grid lines', async function () {
@@ -230,7 +238,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
         await PageObjects.common.navigateToApp('visualize');
         await PageObjects.visualize.openSavedVisualization(expectedSavedVizName);
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       } else {
         await PageObjects.visualize.loadSavedVisualization(expectedSavedVizName);
       }
@@ -238,10 +246,32 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
+      let currentUrl = await browser.getCurrentUrl();
+      historyUrls += currentUrl + '\n';
       const percentDifferent = await screenshot.compareAgainstBaseline(expectedSavedVizName, updateBaselines);
+      log.debug(`${(percentDifferent * 100).toPrecision(4)} : ${expectedSavedVizName}`);
+      historyLog += `${(percentDifferent * 100).toPrecision(4)} : ${expectedSavedVizName}\n`;
       expect(percentDifferent).to.be.lessThan(threshold);
 
     }
+
+
+
+    async function compareScreenshot2(expectedSavedVizName, savedVizUrl, threshold = 0.065) {
+
+      await browser.get(savedVizUrl);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(4000);
+      let currentUrl = await browser.getCurrentUrl();
+      historyUrls += currentUrl + '\n';
+      const percentDifferent = await screenshot.compareAgainstBaseline(expectedSavedVizName, updateBaselines);
+      log.debug(`${(percentDifferent * 100).toPrecision(4)} : ${expectedSavedVizName}`);
+      historyLog += `${(percentDifferent * 100).toPrecision(4)} : ${expectedSavedVizName}\n`;
+      expect(percentDifferent).to.be.lessThan(threshold);
+
+    }
+
+
 
   });
 }

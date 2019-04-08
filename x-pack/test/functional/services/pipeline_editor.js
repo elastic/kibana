@@ -34,20 +34,13 @@ export function PipelineEditorProvider({ getService }) {
   const DEFAULT_INPUT_VALUES = {
     id: '',
     description: '',
-    pipeline: [
-      'input {',
-      '}',
-      'filter {',
-      '}',
-      'output {',
-      '}',
-    ].join('\n'),
-    workers: '',
-    batchSize: 125,
+    pipeline: ['input {', '}', 'filter {', '}', 'output {', '}'].join('\n'),
+    workers: '1',
+    batchSize: '125',
     queueType: 'memory',
-    queueMaxBytesNumber: 1,
+    queueMaxBytesNumber: '1',
     queueMaxBytesUnits: 'gb',
-    queueCheckpointWrites: 1024
+    queueCheckpointWrites: '1024',
   };
 
   return new class PipelineEditor {
@@ -98,7 +91,7 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      if (!await testSubjects.exists(SUBJ_CONTAINER)) {
+      if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
         throw new Error('Expected to find the pipeline editor');
       }
     }
@@ -110,7 +103,7 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertEditorId(id) {
-      if (!await testSubjects.exists(getContainerSubjForId(id))) {
+      if (!(await testSubjects.exists(getContainerSubjForId(id)))) {
         throw new Error(`Expected editor id to be "${id}"`);
       }
     }
@@ -138,7 +131,10 @@ export function PipelineEditorProvider({ getService }) {
         queueType: testSubjects.getProperty(SUBJ_SELECT_QUEUE_TYPE, 'value'),
         queueMaxBytesNumber: testSubjects.getProperty(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
         queueMaxBytesUnits: testSubjects.getProperty(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
-        queueCheckpointWrites: testSubjects.getProperty(SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES, 'value')
+        queueCheckpointWrites: testSubjects.getProperty(
+          SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES,
+          'value'
+        ),
       });
 
       expect(values).to.eql(expectedValues);
@@ -153,5 +149,5 @@ export function PipelineEditorProvider({ getService }) {
     assertUnsavedChangesModal() {
       return testSubjects.exists(SUBJ_CONFIRM_MODAL_TEXT);
     }
-  };
+  }();
 }

@@ -6,9 +6,9 @@
 
 
 
-import './styles/main.less';
 import './new_job_controller';
 import './detectors_list_directive';
 import './save_status_modal';
 import './field_select_directive';
 import 'plugins/ml/components/job_group_select';
+import './enable_model_plot_callout';

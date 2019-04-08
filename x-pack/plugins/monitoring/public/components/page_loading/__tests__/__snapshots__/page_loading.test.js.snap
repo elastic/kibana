@@ -29,7 +29,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
             <div
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              Loading...
+              Loading…
             </div>
           </div>
         </div>

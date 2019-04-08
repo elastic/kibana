@@ -13,6 +13,7 @@ import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
 
@@ -37,7 +38,7 @@ export function esIndexRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       try {
         const config = server.config();
         const ccs = req.payload.ccs;
@@ -45,7 +46,7 @@ export function esIndexRoute(server) {
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
@@ -62,7 +63,6 @@ export function esIndexRoute(server) {
           const shardFilter = { term: { 'shard.index': indexUuid } };
           const stateUuid = get(cluster, 'cluster_state.state_uuid');
           const allocationOptions = {
-            nodeResolver: config.get('xpack.monitoring.node_resolver'),
             shardFilter,
             stateUuid,
             showSystemIndices,
@@ -77,14 +77,14 @@ export function esIndexRoute(server) {
           };
         }
 
-        reply({
+        return {
           indexSummary,
           metrics,
           ...shardAllocation,
-        });
+        };
 
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

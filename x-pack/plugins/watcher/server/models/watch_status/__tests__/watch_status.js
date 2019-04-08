@@ -252,6 +252,17 @@ describe('watch_status', () => {
         expect(watchStatus.state).to.be(WATCH_STATES.ERROR);
       });
 
+      it('correctly calculates WATCH_STATE.CONFIG_ERROR', () => {
+        const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
+
+        watchStatus.actionStatuses = [
+          { state: ACTION_STATES.OK },
+          { state: ACTION_STATES.CONFIG_ERROR }
+        ];
+
+        expect(watchStatus.state).to.be(WATCH_STATES.CONFIG_ERROR);
+      });
+
       it(`correctly calculates WATCH_STATES.DISABLED when watch is inactive`, () => {
         const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
         watchStatus.isActive = false;

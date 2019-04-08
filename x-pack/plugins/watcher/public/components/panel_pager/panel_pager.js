@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './panel_pager.html';
-import './panel_pager.less';
 
 const app = uiModules.get('xpack/watcher');
 

@@ -17,20 +17,34 @@
  * under the License.
  */
 
-import { run } from './run';
-
+import { run, combineErrors } from './run';
 import * as Eslint from './eslint';
 import * as Tslint from './tslint';
+import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(async ({ log }) => {
   const files = await getFilesForCommit();
-  await checkFileCasing(log, files);
+  const errors = [];
 
-  for (const Linter of [Eslint, Tslint]) {
+  try {
+    await checkFileCasing(log, files);
+  } catch (error) {
+    errors.push(error);
+  }
+
+  for (const Linter of [Eslint, Tslint, Sasslint]) {
     const filesToLint = Linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
-      await Linter.lintFiles(log, filesToLint);
+      try {
+        await Linter.lintFiles(log, filesToLint);
+      } catch (error) {
+        errors.push(error);
+      }
     }
+  }
+
+  if (errors.length) {
+    throw combineErrors(errors);
   }
 });

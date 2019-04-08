@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const getLicensePath = (acknowledge) => `/_xpack/license${ acknowledge ? '?acknowledge=true' : ''}`;
+const getLicensePath = (acknowledge) => `/_license${ acknowledge ? '?acknowledge=true' : ''}`;
 
 export async function putLicense(req, xpackInfo) {
   const { acknowledge } = req.query;

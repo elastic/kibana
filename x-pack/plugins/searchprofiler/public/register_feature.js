@@ -8,11 +8,15 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'searchprofiler',
-    title: 'Search Profiler',
-    description: 'Quickly check the performance of any Elasticsearch query.',
+    title: i18n('xpack.searchProfiler.registryProviderTitle', {
+      defaultMessage: 'Search Profiler',
+    }),
+    description: i18n('xpack.searchProfiler.registryProviderDescription', {
+      defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
+    }),
     icon: 'searchProfilerApp',
     path: '/app/kibana#/dev_tools/searchprofiler',
     showOnHomePage: false,

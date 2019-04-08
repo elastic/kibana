@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const groupByTypes = {
   'all': {
-    label: 'all documents',
+    label: i18n.translate('xpack.watcher.thresholdWatchExpression.groupByLabel.allDocumentsLabel', {
+      defaultMessage: 'all documents',
+    }),
     sizeRequired: false,
     value: 'all',
     validNormalizedTypes: []
   },
   'top': {
-    label: 'top',
+    label: i18n.translate('xpack.watcher.thresholdWatchExpression.groupByLabel.topLabel', {
+      defaultMessage: 'top',
+    }),
     sizeRequired: true,
     value: 'top',
     validNormalizedTypes: ['number', 'date', 'keyword']

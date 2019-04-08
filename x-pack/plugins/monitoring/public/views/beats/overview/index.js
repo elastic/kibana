@@ -22,14 +22,14 @@ uiRoutes.when('/beats', {
   },
   controllerAs: 'beats',
   controller: class BeatsOverview extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       // breadcrumbs + page title
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
       super({
-        title: 'Beats - Overview',
+        title: i18n('xpack.monitoring.beats.overview.routeTitle', { defaultMessage: 'Beats - Overview' }),
         getPageData,
         $scope,
         $injector

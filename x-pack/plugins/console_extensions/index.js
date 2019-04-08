@@ -29,7 +29,7 @@ export function consoleExtensions(kibana) {
         server.plugins.console.addExtensionSpecFilePath
       ) {
         server.plugins.console.addExtensionSpecFilePath(
-          join(__dirname, 'spec')
+          join(__dirname, 'spec/')
         );
       } else {
         console.warn(

@@ -20,6 +20,7 @@
 const execa = require('execa');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const readline = require('readline');
 const chalk = require('chalk');
 const crypto = require('crypto');
@@ -27,15 +28,9 @@ const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
 const { createCliError } = require('../errors');
 const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
-const {
-  GRADLE_BIN,
-  ES_ARCHIVE_PATTERN,
-  ES_OSS_ARCHIVE_PATTERN,
-  BASE_PATH,
-} = require('../paths');
+const { GRADLE_BIN, BASE_PATH } = require('../paths');
 
-const onceEvent = (emitter, event) =>
-  new Promise(resolve => emitter.once(event, resolve));
+const onceEvent = (emitter, event) => new Promise(resolve => emitter.once(event, resolve));
 
 /**
  * Installs ES from source
@@ -65,15 +60,10 @@ exports.installSource = async function installSource({
 
   const cacheMeta = cache.readMeta(dest);
   const isCached = cacheMeta.exists && cacheMeta.etag === metadata.etag;
-  const archive = isCached
-    ? dest
-    : await createSnapshot({ sourcePath, log, license });
+  const archive = isCached ? dest : await createSnapshot({ sourcePath, log, license });
 
   if (isCached) {
-    log.info(
-      'source path unchanged since %s, using cache',
-      chalk.bold(cacheMeta.ts)
-    );
+    log.info('source path unchanged since %s, using cache', chalk.bold(cacheMeta.ts));
   } else {
     cache.writeMeta(dest, metadata);
     fs.copyFileSync(archive, dest);
@@ -100,6 +90,7 @@ async function sourceInfo(cwd, license, log = defaultLog) {
 
   const git = simpleGit(cwd);
 
+  const { task, ext } = archiveForPlatform(os.platform(), license);
   const status = await git.status();
   const branch = status.current;
   const sha = (await git.revparse(['HEAD'])).trim();
@@ -121,8 +112,8 @@ async function sourceInfo(cwd, license, log = defaultLog) {
     .digest('hex')
     .substr(0, 8);
 
-  const basename = `${branch}${license === 'oss' ? '-oss-' : '-'}${cwdHash}`;
-  const filename = `${basename}.tar.gz`;
+  const basename = `${branch}-${task}-${cwdHash}`;
+  const filename = `${basename}.${ext}`;
 
   return {
     etag: etag.digest('hex'),
@@ -140,10 +131,18 @@ async function sourceInfo(cwd, license, log = defaultLog) {
  * @property {String} options.sourcePath
  * @property {ToolingLog} options.log
  * @returns {Object} containing archive and optional plugins
+ *
+ * Gradle tasks:
+ *   :distribution:archives:darwin-tar:assemble
+ *   :distribution:archives:linux-tar:assemble
+ *   :distribution:archives:windows-zip:assemble
+ *   :distribution:archives:oss-darwin-tar:assemble
+ *   :distribution:archives:oss-linux-tar:assemble
+ *   :distribution:archives:oss-windows-zip:assemble
  */
 async function createSnapshot({ license, sourcePath, log = defaultLog }) {
-  const tarTask = license === 'oss' ? 'oss-tar' : 'tar';
-  const buildArgs = [`:distribution:archives:${tarTask}:assemble`];
+  const { task, ext } = archiveForPlatform(os.platform(), license);
+  const buildArgs = [`:distribution:archives:${task}:assemble`];
 
   log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
 
@@ -168,15 +167,27 @@ async function createSnapshot({ license, sourcePath, log = defaultLog }) {
     throw createCliError('unable to build ES');
   }
 
-  const archivePattern =
-    license === 'oss' ? ES_OSS_ARCHIVE_PATTERN : ES_ARCHIVE_PATTERN;
-  const esTarballPath = findMostRecentlyChanged(
-    path.resolve(sourcePath, archivePattern)
-  );
+  const archivePattern = `distribution/archives/${task}/build/distributions/elasticsearch-*.${ext}`;
+  const esArchivePath = findMostRecentlyChanged(path.resolve(sourcePath, archivePattern));
 
-  if (!esTarballPath) {
+  if (!esArchivePath) {
     throw createCliError('could not locate ES distribution');
   }
 
-  return esTarballPath;
+  return esArchivePath;
+}
+
+function archiveForPlatform(platform, license) {
+  const taskPrefix = license === 'oss' ? 'oss-' : '';
+
+  switch (platform) {
+    case 'darwin':
+      return { format: 'tar', ext: 'tar.gz', task: `${taskPrefix}darwin-tar`, platform: 'darwin' };
+    case 'win32':
+      return { format: 'zip', ext: 'zip', task: `${taskPrefix}windows-zip`, platform: 'windows' };
+    case 'linux':
+      return { format: 'tar', ext: 'tar.gz', task: `${taskPrefix}linux-tar`, platform: 'linux' };
+    default:
+      throw new Error(`unknown platform: ${platform}`);
+  }
 }

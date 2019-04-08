@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extractors/i18n_call extracts "i18n" and "i18n.translate" functions call message 1`] = `
+Array [
+  "message-id-1",
+  Object {
+    "description": "Message description 1",
+    "message": "Default message 1",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/i18n_call extracts "i18n" and "i18n.translate" functions call message 2`] = `
+Array [
+  "message-id-2",
+  Object {
+    "description": "Message description 2",
+    "message": "Default message 2",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/i18n_call extracts "i18n" and "i18n.translate" functions call message 3`] = `
+Array [
+  "message-id-3",
+  Object {
+    "description": "Message
+description 3",
+    "message": "Default
+message 3",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/i18n_call throws if defaultMessage is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
+
+exports[`dev/i18n/extractors/i18n_call throws if message id value is not a string literal 1`] = `"Message id should be a string literal."`;
+
+exports[`dev/i18n/extractors/i18n_call throws if properties object is not provided 1`] = `"Object with defaultMessage property is not passed to i18n() or i18n.translate() function call (\\"message-id\\")."`;
+
+exports[`dev/i18n/extractors/i18n_call throws on empty defaultMessage 1`] = `"Empty defaultMessage in i18n() or i18n.translate() is not allowed (\\"message-id\\")."`;

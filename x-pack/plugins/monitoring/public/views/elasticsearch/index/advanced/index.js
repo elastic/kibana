@@ -7,18 +7,21 @@
 /**
  * Controller for Advanced Index Detail
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
+import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
+import { I18nContext } from 'ui/i18n';
+import { MonitoringViewBaseController } from '../../../base_controller';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/indices/${$route.current.params.index}`;
   const $http = $injector.get('$http');
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {
@@ -46,28 +49,39 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringElasticsearchAdvancedIndexApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      const $route = $injector.get('$route');
+      const indexName = $route.current.params.index;
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.indexName = $route.current.params.index;
-    $scope.pageData = $route.current.locals.pageData;
+      super({
+        title: i18n('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices - {indexName} - Advanced',
+          values: {
+            indexName,
+          }
+        }),
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringElasticsearchAdvancedIndexApp',
+        $scope,
+        $injector
+      });
 
-    const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Indices - ${$scope.indexName} - Advanced`);
+      this.indexName = indexName;
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
-
-    $executor.start();
-
-    $scope.$on('$destroy', $executor.destroy);
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(
+          <I18nContext>
+            <AdvancedIndex
+              indexSummary={data.indexSummary}
+              metrics={data.metrics}
+              onBrush={this.onBrush}
+            />
+          </I18nContext>
+        );
+      });
+    }
   }
 });

@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The get saved object API enables you to retrieve a single Kibana saved object
 by id.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `GET /api/saved_objects/<type>/<id>`

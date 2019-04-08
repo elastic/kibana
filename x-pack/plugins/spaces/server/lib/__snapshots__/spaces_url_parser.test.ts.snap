@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`addSpaceIdToPath it throws an error when the requested path does not start with a slash 1`] = `"path must start with a /"`;

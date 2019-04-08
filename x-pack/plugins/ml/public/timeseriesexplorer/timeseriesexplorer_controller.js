@@ -13,16 +13,18 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
+import 'plugins/ml/components/annotations/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import {
   isTimeSeriesViewJob,
@@ -30,6 +32,7 @@ import {
   isModelPlotEnabled,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import {
   createTimeSeriesJobData,
   processForecastResults,
@@ -48,17 +51,27 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
-import { initPromise } from 'plugins/ml/util/promise';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+import { annotationsRefresh$ } from '../services/annotations_service';
+import { interval$ } from '../components/controls/select_interval/select_interval';
+import { severity$ } from '../components/controls/select_severity/select_severity';
+
+
+import chrome from 'ui/chrome';
+let mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
+    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
     }
   });
 
@@ -66,21 +79,22 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
+  $injector,
   $scope,
-  $route,
   $timeout,
   Private,
-  timefilter,
   AppState,
-  mlSelectIntervalService,
-  mlSelectSeverityService) {
+  config,
+  i18n) {
+
+  $injector.get('mlSelectIntervalService');
+  $injector.get('mlSelectSeverityService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
   const CHARTS_POINT_TARGET = 500;
-  const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -96,13 +110,20 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
+  $scope.showAnnotations = mlAnnotationsEnabled;// Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = mlAnnotationsEnabled;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  $scope.focusAnnotationData = [];
+
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
   };
-
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store the zoom range.
@@ -129,25 +150,40 @@ module.controller('MlTimeSeriesExplorerController', function (
           const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
-            const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `Requested job${s} ${invalidIds} cannot be viewed in this dashboard`;
+            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+              values: {
+                invalidIdsCount: invalidIds.length,
+                invalidIds
+              }
+            });
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += ', auto selecting first job';
+              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+                defaultMessage: ', auto selecting first job'
+              });
             }
-            notify.warning(warningText, { lifetime: 30000 });
+            toastNotifications.addWarning(warningText);
           }
 
           if (selectedJobIds.length > 1 || mlJobSelectService.groupIds.length) {
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+              toastNotifications.addWarning(
+                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                  defaultMessage: 'You can only view one job at a time in this dashboard'
+                })
+              );
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                notify.warning('Only one job may be viewed at a time in this dashboard', { lifetime: 30000 });
+                toastNotifications.addWarning(
+                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                    defaultMessage: 'You can only view one job at a time in this dashboard'
+                  })
+                );
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -179,6 +215,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           $scope.loading = false;
         }
 
+        $scope.$applyAsync();
       }).catch((resp) => {
         console.log('Time series explorer - error getting job info from elasticsearch:', resp);
       });
@@ -231,6 +268,10 @@ module.controller('MlTimeSeriesExplorerController', function (
           $timeout(() => {
             $scope.$broadcast('render');
           }, 0);
+        } else {
+          // Call $applyAsync() if for any reason the upper condition doesn't trigger the $timeout.
+          // We still want to trigger a scope update about the changes above the condition.
+          $scope.$applyAsync();
         }
 
       }
@@ -345,7 +386,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.refreshFocusData = function (fromDate, toDate) {
 
     // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 3;
+    let awaitingCount = 4;
 
     // This object is used to store the results of individual remote requests
     // before we transform it into the final data and apply it to $scope. Otherwise
@@ -362,7 +403,8 @@ module.controller('MlTimeSeriesExplorerController', function (
         refreshFocusData.focusChartData = processDataForFocusAnomalies(
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
-          $scope.timeFieldName);
+          $scope.timeFieldName,
+          $scope.focusAggregationInterval);
 
         refreshFocusData.focusChartData = processScheduledEventsForChart(
           refreshFocusData.focusChartData,
@@ -375,6 +417,12 @@ module.controller('MlTimeSeriesExplorerController', function (
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
+
+          // If the annotations failed to load and the feature flag is set to `false`,
+          // make sure the checkbox toggle gets hidden.
+          if (mlAnnotationsEnabled === false) {
+            $scope.showAnnotationsCheckbox = false;
+          }
         });
       }
     }
@@ -415,7 +463,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
@@ -440,6 +488,38 @@ module.controller('MlTimeSeriesExplorerController', function (
     }).catch((resp) => {
       console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
     });
+
+    // Query 4 - load any annotations for the selected job.
+    if (mlAnnotationsEnabled) {
+      ml.annotations.getAnnotations({
+        jobIds: [$scope.selectedJob.job_id],
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+      }).then((resp) => {
+        refreshFocusData.focusAnnotationData = [];
+
+        if (Array.isArray(resp.annotations[$scope.selectedJob.job_id])) {
+          refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = String.fromCharCode(65 + i);
+              return d;
+            });
+        }
+
+        finish();
+      }).catch(() => {
+        // silently fail and disable annotations feature if loading annotations fails.
+        refreshFocusData.focusAnnotationData = [];
+        mlAnnotationsEnabled = false;
+        finish();
+      });
+    } else {
+      finish();
+    }
 
     // Plus query for forecast data if there is a forecastId stored in the appState.
     const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
@@ -505,16 +585,18 @@ module.controller('MlTimeSeriesExplorerController', function (
       forecastId
     ).then((resp) => {
       const bounds = timefilter.getActiveBounds();
-      const earliest = moment(resp.earliest || timefilter.time.from);
-      const latest = moment(resp.latest || timefilter.time.to);
+      const earliest = moment(resp.earliest || timefilter.getTime().from);
+      const latest = moment(resp.latest || timefilter.getTime().to);
 
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
 
-      // Set the zoom to show backwards from the end of the forecast range.
+      // Set the zoom to centre on the start of the forecast range, depending
+      // on the time range of the forecast and data.
       const earliestDataDate = _.first($scope.contextChartData).date;
-      const zoomLatestMs = resp.latest;
-      const zoomEarliestMs = Math.max(earliestDataDate.getTime(), zoomLatestMs - $scope.autoZoomDuration);
+      const zoomLatestMs = Math.min(earliest + ($scope.autoZoomDuration / 2), latest.valueOf());
+      const zoomEarliestMs = Math.max(zoomLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+
       const zoomState = {
         from: moment(zoomEarliestMs).toISOString(),
         to: moment(zoomLatestMs).toISOString()
@@ -526,11 +608,15 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Ensure the forecast data will be shown if hidden previously.
       $scope.showForecast = true;
 
+
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
-        timefilter.time.from = moment(earliestMs).toISOString();
-        timefilter.time.to = moment(latestMs).toISOString();
+
+        timefilter.setTime({
+          from: moment(earliestMs).toISOString(),
+          to: moment(latestMs).toISOString()
+        });
       } else {
         // Refresh to show the requested forecast data.
         $scope.refresh();
@@ -552,6 +638,14 @@ module.controller('MlTimeSeriesExplorerController', function (
     }, 0);
   };
 
+  if (mlAnnotationsEnabled) {
+    $scope.toggleShowAnnotations = function () {
+      $timeout(() => {
+        $scope.showAnnotations = !$scope.showAnnotations;
+      }, 0);
+    };
+  }
+
   $scope.toggleShowForecast = function () {
     $timeout(() => {
       $scope.showForecast = !$scope.showForecast;
@@ -559,7 +653,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   // Refresh the data when the time range is altered.
-  $scope.$listen(timefilter, 'fetch', $scope.refresh);
+  $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
@@ -573,14 +667,16 @@ module.controller('MlTimeSeriesExplorerController', function (
       loadAnomaliesTableData($scope.zoomFrom.getTime(), $scope.zoomTo.getTime());
     }
   };
-  mlSelectIntervalService.state.watch(tableControlsListener);
-  mlSelectSeverityService.state.watch(tableControlsListener);
 
+  const intervalSub = interval$.subscribe(tableControlsListener);
+  const severitySub = severity$.subscribe(tableControlsListener);
+  const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
-    mlSelectIntervalService.state.unwatch(tableControlsListener);
-    mlSelectSeverityService.state.unwatch(tableControlsListener);
+    intervalSub.unsubscribe();
+    severitySub.unsubscribe();
+    annotationsRefreshSub.unsubscribe();
   });
 
   // Listen for changes to job selection.
@@ -605,6 +701,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
 
     const defaultRange = calculateDefaultFocusRange();
+
     if ((selection.from.getTime() !== defaultRange[0].getTime() || selection.to.getTime() !== defaultRange[1].getTime()) &&
       (isNaN(Date.parse(selection.from)) === false && isNaN(Date.parse(selection.to)) === false)) {
       const zoomState = { from: selection.from.toISOString(), to: selection.to.toISOString() };
@@ -658,8 +755,14 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
-      notify.warning(warningText, { lifetime: 30000 });
+      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+        defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
+        values: {
+          detectorIndex,
+          jobId: $scope.selectedJob.job_id
+        }
+      });
+      toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
       $scope.appState.save();
@@ -672,23 +775,26 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-      .finally(() => {
-        // Load the data - if the FieldFormats failed to populate
-        // the default formatting will be used for metric values.
+      .catch((err) => { console.log('Error populating field formats:', err); })
+      // Load the data - if the FieldFormats failed to populate
+      // the default formatting will be used for metric values.
+      .then(() => {
         $scope.refresh();
       });
   }
 
   function loadAnomaliesTableData(earliestMs, latestMs) {
+
     ml.results.getAnomaliesTableData(
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
       [],
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      interval$.getValue().val,
+      severity$.getValue().val,
       earliestMs,
       latestMs,
-      ANOMALIES_MAX_RESULTS
+      dateFormatTz,
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -697,9 +803,16 @@ module.controller('MlTimeSeriesExplorerController', function (
         // Default to functionDescription if no description available.
         // TODO - when job_service is moved server_side, move this to server endpoint.
         const jobId = anomaly.jobId;
-        anomaly.detector = _.get(detectorsByJob,
-          [jobId, anomaly.detectorIndex, 'detector_description'],
+        const detector = _.get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+        anomaly.detector = _.get(detector,
+          ['detector_description'],
           anomaly.source.function_description);
+
+        // For detectors with rules, add a property with the rule count.
+        const customRules = detector.custom_rules;
+        if (customRules !== undefined) {
+          anomaly.rulesLength = customRules.length;
+        }
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
@@ -766,7 +879,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       bounds.min.valueOf(),
       bounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS)
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE)
       .then((resp) => {
         if (resp.records && resp.records.length > 0) {
           const firstRec = resp.records[0];
@@ -782,6 +895,7 @@ module.controller('MlTimeSeriesExplorerController', function (
               entity.fieldValues = _.chain(resp.records).pluck('by_field_value').uniq().value();
             }
           });
+          $scope.$applyAsync();
         }
 
       });
@@ -794,20 +908,20 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
       $scope.autoZoomDuration = getAutoZoomDuration();
 
+      // Check that the zoom times are valid.
+      // zoomFrom must be at or after dashboard earliest,
+      // zoomTo must be at or before dashboard latest plus context chart agg interval.
       const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-
-      // Get the time span of data in the context chart.
-      // Valid zoomTo is the time of the last bucket plus the aggregation interval.
-      const combinedData = $scope.contextForecastData === undefined ?
-        $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-      const earliestDataDate = _.first(combinedData).date;
-      const latestDataDate = new Date(_.last(combinedData).date.valueOf() +
-        $scope.contextAggregationInterval.asMilliseconds());
+      const aggIntervalMs = $scope.contextAggregationInterval.asMilliseconds();
+      const bounds = timefilter.getActiveBounds();
+      const earliest = bounds.min;
+      const latest = moment(bounds.max).add(aggIntervalMs, 'ms');
 
       if (zoomFrom.isValid() && zoomTo.isValid &&
-        zoomFrom.isBetween(earliestDataDate, latestDataDate, null, '[]') &&
-        zoomTo.isBetween(earliestDataDate, latestDataDate, null, '[]')) {
+        zoomTo.isAfter(zoomFrom) &&
+        zoomFrom.isBetween(earliest, latest, null, '[]') &&
+        zoomTo.isBetween(earliest, latest, null, '[]')) {
         return [zoomFrom.toDate(), zoomTo.toDate()];
       }
     }
@@ -816,18 +930,34 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   function calculateDefaultFocusRange() {
-    // Returns the range that shows the most recent data at bucket span granularity.
+
     $scope.autoZoomDuration = getAutoZoomDuration();
+    const isForecastData = $scope.contextForecastData !== undefined && $scope.contextForecastData.length > 0;
 
-    const combinedData = $scope.contextForecastData === undefined ?
+    const combinedData = (isForecastData === false) ?
       $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-
     const earliestDataDate = _.first(combinedData).date;
     const latestDataDate = _.last(combinedData).date;
-    const latestMsToLoad = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
-    const earliestMsToLoad = Math.max(earliestDataDate.getTime(), latestMsToLoad - $scope.autoZoomDuration);
 
-    return [new Date(earliestMsToLoad), new Date(latestMsToLoad)];
+    let rangeEarliestMs;
+    let rangeLatestMs;
+
+    if (isForecastData === true) {
+      // Return a range centred on the start of the forecast range, depending
+      // on the time range of the forecast and data.
+      const earliestForecastDataDate = _.first($scope.contextForecastData).date;
+      const latestForecastDataDate = _.last($scope.contextForecastData).date;
+
+      rangeLatestMs = Math.min(earliestForecastDataDate.getTime() + ($scope.autoZoomDuration / 2), latestForecastDataDate.getTime());
+      rangeEarliestMs = Math.max(rangeLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+    } else {
+      // Returns the range that shows the most recent data at bucket span granularity.
+      rangeLatestMs = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
+      rangeEarliestMs = Math.max(earliestDataDate.getTime(), rangeLatestMs - $scope.autoZoomDuration);
+    }
+
+    return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
+
   }
 
   function calculateAggregationInterval(bounds, bucketsTarget) {
@@ -898,5 +1028,4 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   $scope.initializeVis();
-
 });

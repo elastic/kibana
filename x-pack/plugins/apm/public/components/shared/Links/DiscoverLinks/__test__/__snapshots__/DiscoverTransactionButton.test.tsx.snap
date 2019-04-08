@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DiscoverTransactionLink component should render with data 1`] = `
+<DiscoverLink
+  query={
+    Object {
+      "_a": Object {
+        "interval": "auto",
+        "query": Object {
+          "language": "lucene",
+          "query": "processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"",
+        },
+      },
+    }
+  }
+/>
+`;
+
+exports[`getDiscoverQuery should return the correct query params object 1`] = `
+Object {
+  "_a": Object {
+    "interval": "auto",
+    "query": Object {
+      "language": "lucene",
+      "query": "processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"",
+    },
+  },
+}
+`;

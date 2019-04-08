@@ -1,0 +1,9 @@
+{
+  "telemetry": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      }
+    }
+  }
+}

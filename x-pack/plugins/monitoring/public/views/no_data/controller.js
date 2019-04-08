@@ -14,13 +14,15 @@ import {
 import { ModelUpdater } from './model_updater';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
 export class NoDataController {
   constructor($injector, $scope) {
     const $executor = $injector.get('$executor');
-    this.enableTimefilter($injector, $executor);
+    this.enableTimefilter($executor, $scope);
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
@@ -68,7 +70,9 @@ export class NoDataController {
       () => model,
       props => {
         render(
-          <NoData {...props} enabler={enabler} />,
+          <I18nContext>
+            <NoData {...props} enabler={enabler} />
+          </I18nContext>,
           document.getElementById(REACT_NODE_ID_NO_DATA)
         );
       },
@@ -94,18 +98,17 @@ export class NoDataController {
       }
     });
 
-    $executor.start(); // start the executor to keep refreshing the search for data
+    $executor.start($scope); // start the executor to keep refreshing the search for data
   }
 
-  enableTimefilter($injector, $executor) {
-    const timefilter = $injector.get('timefilter');
+  enableTimefilter($executor, $scope) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', () => $executor.run()); // re-fetch if they change the time filter
+    $scope.$listen(timefilter, 'timeUpdate', () => $executor.run()); // re-fetch if they change the time filter
   }
 
   registerCleanup($scope, $executor) {
-    // destory the executor, unmount the react component
+    // destroy the executor, unmount the react component
     $scope.$on('$destroy', () => {
       $executor.destroy();
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));

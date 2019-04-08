@@ -18,6 +18,7 @@
  */
 
 import moment from 'moment';
+import { filter, first, catchError } from 'rxjs/operators';
 
 import { createCliError } from './errors';
 import { createProc } from './proc';
@@ -91,17 +92,17 @@ export class ProcRunner {
       // wait for process to log matching line
       if (wait instanceof RegExp) {
         await proc.lines$
-          .filter(line => wait.test(line))
-          .first()
-          .catch(err => {
-            if (err.name !== 'EmptyError') {
-              throw createCliError(
-                `[${name}] exited without matching pattern: ${wait}`
-              );
-            } else {
-              throw err;
-            }
-          })
+          .pipe(
+            filter(line => wait.test(line)),
+            first(),
+            catchError(err => {
+              if (err.name !== 'EmptyError') {
+                throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
+              } else {
+                throw err;
+              }
+            })
+          )
           .toPromise();
       }
 
@@ -188,12 +189,7 @@ export class ProcRunner {
     proc.outcome$.subscribe({
       next: code => {
         const duration = moment.duration(Date.now() - startMs);
-        this._log.info(
-          '[%s] exited with %s after %s',
-          name,
-          code,
-          duration.humanize()
-        );
+        this._log.info('[%s] exited with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();

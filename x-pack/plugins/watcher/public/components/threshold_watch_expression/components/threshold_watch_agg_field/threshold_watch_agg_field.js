@@ -12,7 +12,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchAggField', function ($injector) {
+app.directive('thresholdWatchAggField', function ($injector, i18n) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -51,11 +51,16 @@ app.directive('thresholdWatchAggField', function ($injector) {
           }
         });
 
-        this.itemDescription = 'Of';
+        this.itemDescription = i18n('xpack.watcher.thresholdWatchExpression.aggField.itemDescription', {
+          defaultMessage: 'Of',
+        });
       }
 
       get itemValue() {
-        return this.aggField ? this.aggField.name : 'select a field';
+        return this.aggField ? this.aggField.name : i18n(
+          'xpack.watcher.thresholdWatchExpression.aggField.selectFieldTextMessage', {
+            defaultMessage: 'select a field',
+          });
       }
     }
   };

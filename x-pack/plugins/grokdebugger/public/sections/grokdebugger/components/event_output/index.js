@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './event_output';
+export { EventOutput } from './event_output';

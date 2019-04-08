@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import 'ui/dirty_prompt';
 import template from './json_watch_edit.html';
 import 'plugins/watcher/components/kbn_tabs';
@@ -18,15 +18,16 @@ import '../watch_edit_execute_detail';
 import '../watch_edit_actions_execute_summary';
 import '../watch_edit_watch_execute_summary';
 import 'plugins/watcher/services/license';
+import { ACTION_TYPES } from '../../../../../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('jsonWatchEdit', function ($injector) {
+app.directive('jsonWatchEdit', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
 
   return {
     restrict: 'E',
@@ -37,8 +38,7 @@ app.directive('jsonWatchEdit', function ($injector) {
     bindToController: true,
     controllerAs: 'jsonWatchEdit',
     controller: class JsonWatchEditController extends InitAfterBindingsWorkaround {
-      initAfterBindings($scope) {
-        this.notifier = new Notifier({ location: 'Watcher' });
+      initAfterBindings() {
         this.selectedTabId = 'edit-watch';
         this.simulateResults = null;
         this.originalWatch = {
@@ -51,8 +51,8 @@ app.directive('jsonWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
-        $scope.$on('$destroy', dirtyPrompt.deregister);
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // $scope.$on('$destroy', dirtyPrompt.deregister);
 
         this.onExecuteDetailsValid();
       }
@@ -96,31 +96,47 @@ app.directive('jsonWatchEdit', function ($injector) {
             this.onTabSelect('simulate-results');
           })
           .catch(e => {
-            this.notifier.error(e);
+            toastNotifications.addDanger(e);
           });
       }
 
       onWatchSave = () => {
+        this.createActionsForWatch(this.watch);
+
         if (!this.watch.isNew) {
-          return this.saveWatch();
+          return this.validateAndSaveWatch();
         }
 
         return this.isExistingWatch()
           .then(existingWatch => {
             if (!existingWatch) {
-              return this.saveWatch();
+              return this.validateAndSaveWatch();
             }
 
             const confirmModalOptions = {
               onConfirm: this.saveWatch,
-              confirmButtonText: 'Overwrite Watch'
+              confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.overwriteWatchButtonLabel', {
+                defaultMessage: 'Overwrite Watch',
+              }),
             };
 
-            const watchNameMessageFragment = existingWatch.name ? ` (name: "${existingWatch.name}")` : '';
-            const message = `Watch with ID "${this.watch.id}"${watchNameMessageFragment} already exists. Do you want to overwrite it?`;
+            const message = i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.description', {
+              defaultMessage: 'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
+              values: {
+                watchId: this.watch.id,
+                watchNameMessageFragment: existingWatch.name
+                  ? i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText', {
+                    defaultMessage: '(name: "{existingWatchName}")',
+                    values: {
+                      existingWatchName: existingWatch.name
+                    }
+                  })
+                  : ''
+              }
+            });
             return confirmModal(message, confirmModalOptions);
           })
-          .catch(err => this.notifier.error(err));
+          .catch(err => toastNotifications.addDanger(err));
       }
 
       isExistingWatch = () => {
@@ -139,43 +155,134 @@ app.directive('jsonWatchEdit', function ($injector) {
           });
       }
 
+      validateAndSaveWatch = () => {
+        const { warning } = this.watch.validate();
+
+        if (warning) {
+          const confirmModalOptions = {
+            onConfirm: this.saveWatch,
+            confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.watchErrorsWarning.confirmSaveWatch', {
+              defaultMessage: 'Save watch',
+            }),
+          };
+
+          return confirmModal(warning.message, confirmModalOptions);
+        }
+
+        return this.saveWatch();
+      }
+
       saveWatch = () => {
         return watchService.saveWatch(this.watch)
           .then(() => {
             this.watch.isNew = false; // without this, the message displays 'New Watch'
-            toastNotifications.addSuccess(`Saved '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
+                defaultMessage: 'Saved \'{watchDisplayName}\'',
+                values: {
+                  watchDisplayName: this.watch.displayName
+                }
+              }),
+            );
             this.onClose();
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
       onWatchDelete = () => {
         const confirmModalOptions = {
           onConfirm: this.deleteWatch,
-          confirmButtonText: 'Delete Watch'
+          confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.overwriteWatchButtonLabel', {
+            defaultMessage: 'Delete Watch',
+          }),
         };
 
-        return confirmModal('This will permanently delete the watch. Are you sure?', confirmModalOptions);
+        return confirmModal(
+          i18n('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.description', {
+            defaultMessage: 'This will permanently delete the watch. Are you sure?',
+          }),
+          confirmModalOptions
+        );
       }
 
       deleteWatch = () => {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
-            toastNotifications.addSuccess(`Deleted '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n('xpack.watcher.sections.watchEdit.json.deleteSuccessNotificationText', {
+                defaultMessage: 'Deleted \'{watchDisplayName}\'',
+                values: {
+                  watchDisplayName: this.watch.displayName
+                }
+              }),
+            );
             this.onClose();
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
+      }
+
+      /**
+       * Actions instances are not automatically added to the Watch _actions_ Array
+       * when we add them in the Json editor. This method takes takes care of it.
+       *
+       * @param watchModel Watch instance
+       * @return Watch instance
+       */
+      createActionsForWatch(watchInstance) {
+        watchInstance.resetActions();
+
+        let action;
+        let type;
+        let actionProps;
+
+        Object.keys(watchInstance.watch.actions).forEach((k) => {
+          action = watchInstance.watch.actions[k];
+          type = this.getTypeFromAction(action);
+          actionProps = this.getPropsFromAction(type, action);
+
+          watchInstance.createAction(type, actionProps);
+        });
+
+        return watchInstance;
+      }
+
+      /**
+       * Get the type from an action where a key defines its type.
+       * eg: { email: { ... } } | { slack: { ... } }
+       *
+       * @param action A raw action object
+       * @return {string} The action type
+       */
+      getTypeFromAction(action) {
+        const actionKeys = Object.keys(action);
+        let type;
+
+        Object.keys(ACTION_TYPES).forEach((k) => {
+          if (actionKeys.includes(ACTION_TYPES[k])) {
+            type = ACTION_TYPES[k];
+          }
+        });
+
+        return type ? type : ACTION_TYPES.UNKNOWN;
+      }
+
+      getPropsFromAction(type, action) {
+        if (type === ACTION_TYPES.SLACK) {
+          // Slack action has its props inside the "message" object
+          return action[type].message;
+        }
+        return action[type];
       }
     }
   };

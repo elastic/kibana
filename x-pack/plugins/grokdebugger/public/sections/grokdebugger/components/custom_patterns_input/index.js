@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './custom_patterns_input';
+export { CustomPatternsInput } from './custom_patterns_input';

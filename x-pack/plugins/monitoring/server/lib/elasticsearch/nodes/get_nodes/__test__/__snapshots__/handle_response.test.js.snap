@@ -55,7 +55,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -151,7 +151,7 @@ Array [
       },
     },
     "resolver": "_x_V2YzPQU-a9KRRBxUxZQ",
-    "shardCount": null,
+    "shardCount": 0,
     "transport_address": "127.0.0.1:9300",
     "type": "master",
   },
@@ -164,7 +164,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -260,7 +260,7 @@ Array [
       },
     },
     "resolver": "DAiX7fFjS3Wii7g2HYKrOg",
-    "shardCount": null,
+    "shardCount": 0,
     "transport_address": "127.0.0.1:9301",
     "type": "node",
   },
@@ -334,7 +334,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,
@@ -443,7 +443,7 @@ Array [
     "node_cgroup_throttled": Object {
       "metric": Object {
         "app": "elasticsearch",
-        "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+        "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
         "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
         "format": "0,0.[0]a",
         "hasCalculation": false,

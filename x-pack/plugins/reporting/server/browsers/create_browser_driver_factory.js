@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExtractError } from './extract';
 import { ensureBrowserDownloaded } from './download';
 import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
 
 export async function createBrowserDriverFactory(server) {
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, ['reporting']);
+  const logger = LevelLogger.createForServer(server, ['reporting', 'browser-driver']);
 
   const DATA_DIR = config.get('path.data');
   const CAPTURE_CONFIG = config.get('xpack.reporting.capture');
@@ -28,24 +27,13 @@ export async function createBrowserDriverFactory(server) {
     logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
     return browserDriverFactory;
   } catch (error) {
-    if (error instanceof ExtractError) {
-      logger.error('Failed to install browser. See kibana logs for more details.');
-      throw error;
+    if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
+      logger.error(
+        `Error code ${error.cause.code}: Insufficient permissions for extracting the browser archive. ` +
+        `Make sure the Kibana data directory (path.data) is owned by the same user that is running Kibana.`
+      );
     }
 
-    logger.error(error);
-
-    if (error.cause) {
-      logger.error(error.cause);
-
-      if (['EACCES', 'EEXIST'].includes(error.cause.code)) {
-        throw new Error(
-          'Insufficient permissions for extracting the browser archive. ' +
-          'Make sure the Kibana data directory (path.data) is owned by the same user that is running Kibana.'
-        );
-      }
-    }
-
-    throw new Error('Failed to extract the browser archive. See kibana logs for more details.');
+    throw error; // reject the promise with the original error
   }
 }

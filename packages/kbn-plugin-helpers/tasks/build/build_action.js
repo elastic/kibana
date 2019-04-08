@@ -27,8 +27,7 @@ const createPackage = require('./create_package');
 module.exports = function(plugin, run, options) {
   options = options || {};
   let buildVersion = plugin.version;
-  let kibanaVersion =
-    (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
+  let kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
   let buildFiles = plugin.buildSourcePatterns;
   let buildTarget = join(plugin.root, 'build');
 
@@ -38,30 +37,17 @@ module.exports = function(plugin, run, options) {
   }
 
   // allow options to override plugin info
-  if (options.buildDestination)
-    buildTarget = resolve(plugin.root, options.buildDestination);
+  if (options.buildDestination) buildTarget = resolve(plugin.root, options.buildDestination);
   if (options.buildVersion) buildVersion = options.buildVersion;
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
   let buildStep;
   if (kibanaVersion === 'kibana') {
     buildStep = askForKibanaVersion().then(function(customKibanaVersion) {
-      return createBuild(
-        plugin,
-        buildTarget,
-        buildVersion,
-        customKibanaVersion,
-        buildFiles
-      );
+      return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
     });
   } else {
-    buildStep = createBuild(
-      plugin,
-      buildTarget,
-      buildVersion,
-      kibanaVersion,
-      buildFiles
-    );
+    buildStep = createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
   }
 
   return buildStep.then(function() {

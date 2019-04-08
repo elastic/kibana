@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { createTypeFilter } from '../../create_query';
 import { createBeatsQuery } from '../create_beats_query';
 
 describe('createBeatsQuery', () => {
@@ -24,9 +23,9 @@ describe('createBeatsQuery', () => {
     const query1 = createBeatsQuery();
     const query2 = createBeatsQuery({});
 
-    expect(query1.bool.filter[0]).to.eql(createTypeFilter('beats_stats'));
+    expect(query1.bool.filter[0]).to.eql({ term: { type: 'beats_stats' } });
     expect(query1.bool.filter[query1.bool.filter.length - 1]).to.eql(noApmFilter);
-    expect(query2.bool.filter[0]).to.eql(createTypeFilter('beats_stats'));
+    expect(query2.bool.filter[0]).to.eql({ term: { type: 'beats_stats' } });
     expect(query2.bool.filter[query2.bool.filter.length - 1]).to.eql(noApmFilter);
   });
 
@@ -44,7 +43,7 @@ describe('createBeatsQuery', () => {
       const queryFilters = query.bool.filter;
       const filterCount = queryFilters.length;
 
-      expect(queryFilters[0]).to.eql(createTypeFilter('beats_stats'));
+      expect(queryFilters[0]).to.eql({ term: { type: 'beats_stats' } });
 
       filters.forEach((filter, index) => {
         // "custom" filters are added at the end of all known filters, and the last "custom" filter is the noApmFilter

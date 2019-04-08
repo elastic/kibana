@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -173,6 +173,14 @@ export function MultiMetricJobServiceProvider() {
       const job = mlJobService.getBlankJob();
       job.data_description.time_field = formConfig.timeField;
 
+      if (formConfig.enableModelPlot === true) {
+        job.model_plot_config = {
+          enabled: true
+        };
+      } else if (formConfig.enableModelPlot === false) {
+        delete job.model_plot_config;
+      }
+
       _.each(formConfig.fields, (field, key) => {
         let func = field.agg.type.mlName;
         if (formConfig.isSparseData) {
@@ -204,12 +212,7 @@ export function MultiMetricJobServiceProvider() {
         job.analysis_config.influencers = influencerFields;
       }
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       job.analysis_config.bucket_span = formConfig.bucketSpan;
 
@@ -233,6 +236,14 @@ export function MultiMetricJobServiceProvider() {
 
       if (formConfig.useDedicatedIndex) {
         job.results_index_name = job.job_id;
+      }
+
+      if (formConfig.usesSavedSearch === false) {
+        // Jobs created from saved searches cannot be cloned in the wizard as the
+        // ML job config holds no reference to the saved search ID.
+        job.custom_settings = {
+          created_by: WIZARD_TYPE.MULTI_METRIC
+        };
       }
 
       return job;

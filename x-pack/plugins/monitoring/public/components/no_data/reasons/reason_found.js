@@ -16,6 +16,7 @@ import {
   ExplainExporters,
   ExplainPluginEnabled
 } from '../explanations';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const ExplainWhyNoData = ({ reason, ...props }) => {
   const { property, data, context } = reason;
@@ -32,8 +33,15 @@ const ExplainWhyNoData = ({ reason, ...props }) => {
       return (
         <EuiText>
           <p>
-            There is a <EuiCode>{context}</EuiCode> setting that has{' '}
-            <EuiCode>{property}</EuiCode> set to <EuiCode>{data}</EuiCode>.
+            <FormattedMessage
+              id="xpack.monitoring.noData.reasons.explainWhyNoDataDescription"
+              defaultMessage="There is a {context} setting that has {property} set to {data}."
+              values={{
+                context: (<EuiCode>{context}</EuiCode>),
+                property: (<EuiCode>{property}</EuiCode>),
+                data: (<EuiCode>{data}</EuiCode>)
+              }}
+            />
           </p>
         </EuiText>
       );

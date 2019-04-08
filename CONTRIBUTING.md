@@ -21,7 +21,9 @@ A high level overview of our contributing guidelines.
     - [Customizing `config/kibana.dev.yml`](#customizing-configkibanadevyml)
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
+  - [Internationalization](#internationalization)
   - [Testing and Building](#testing-and-building)
+    - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -30,6 +32,7 @@ A high level overview of our contributing guidelines.
       - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
+  - [Release Notes Process](#release-notes-process)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Reviewing](#code-reviewing)
@@ -111,7 +114,7 @@ You want to make sure there are no merge conflicts. If there are merge conflicts
 
 You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
-Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be commiteed, and then use `git rebase --continue` to tell git to continue the rebase.
+Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be committed, and then use `git rebase --continue` to tell git to continue the rebase.
 
 When the rebase has completed, you will need to force push your branch because the history is now completely different than what's on the remote. **This is potentially dangerous** because it will completely overwrite what you have on the remote, so you need to be sure that you haven't lost any work when resolving merge conflicts. (If there weren't any merge conflicts, then you can force push without having to worry about this.)
 
@@ -170,15 +173,39 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch from a nightly snapshot.
+### Running Elasticsearch
+
+There are a few options when it comes to running Elasticsearch:
+
+First, you'll need to have a `java` binary in `PATH` and `JAVA_HOME` set. The version of Java required is specified in [.ci/java-version.properties](https://github.com/elastic/elasticsearch/blob/master/.ci/java-versions.properties) on the ES branch.
+
+**Nightly snapshot**
+
+These snapshots are built on a nightly basis which expire after a couple weeks. If running from an old, untracted branch this snapshot might not exist. In which case you might need to run from source or an archive.
 
 ```bash
 yarn es snapshot
 ```
 
-This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+**Source**
 
-> You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
+By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
+
+```bash
+yarn es source
+```
+
+**Archive**
+
+Use this if you already have a distributable. For released versions, one can be obtained on the [Elasticsearch downloads](https://www.elastic.co/downloads/elasticsearch) page.
+
+```bash
+yarn es archive <full_path_to_archive>
+```
+
+
+Each of these will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+
 
 If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 
@@ -189,9 +216,10 @@ node scripts/makelogs
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
 
 Start the development server.
-  ```bash
-  yarn start
-  ```
+
+```bash
+yarn start
+```
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
@@ -227,8 +255,6 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Potential Optimization Pitfalls
 
-In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
-
  - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
  - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
  - (if you discover other scenarios, please send a PR!)
@@ -253,6 +279,25 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
+### Internationalization
+
+All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
+
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+```jsx
+import { I18nContext } from 'ui/i18n';
+
+ReactDOM.render(
+  <I18nContext>
+      {myComponentTree}
+  </I18nContext>,
+  container
+);
+```
+
+There is a number of tools was created to support internationalization in Kibana that would allow one to validate internationalized labels, 
+extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
+
 ### Testing and Building
 
 To ensure that your changes will not break other functionality, please run the test suite and build process before submitting your Pull Request.
@@ -271,8 +316,15 @@ You can get all build options using the following command:
 yarn build --help
 ```
 
+macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator's GPU settings. In iTerm2:
+- Open Preferences (Command + ,)
+- In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
+- Open "Advanced GPU Settings..."
+- Uncheck the "Prefer integrated to discrete GPU" option
+- Restart iTerm
+
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+`yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
 ### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
@@ -398,13 +450,42 @@ README for getting the docs tooling set up.
 node scripts/docs.js --open
 ```
 
+### Release Notes Process
+
+Part of this process only applies to maintainers, since it requires access to Github labels.
+
+Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html).
+To include your change in the Release Notes:
+
+1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
+1. Label the PR with the targeted version (ex: 6.5).
+1. Label the PR with the appropriate github labels:
+    * For a new feature or functionality, use `release_note:enhancement`.
+    * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
+    * For a deprecated feature, use `release_note:deprecation`.
+    * For a breaking change, use `release-breaking:note`.
+
+To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
+`build`, `docs`, `test`, `non-issue`, `jenkins`, `backport`,  and `chore`.
+
+We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
+
+
+```
+# Dev Docs
+
+## Name the feature with the break (ex: Visualize Loader)
+
+Summary of the change. Anything Under `#Dev Docs` will be used in the blog.
+```
+
 ## Signing the contributor license agreement
 
 Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
 ## Submitting a Pull Request
 
-Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, eg “Closes #123″.
+Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, e.g., “Closes #123″.
 
 Always submit your pull against `master` unless the bug is only present in an older version. If the bug affects both `master` and another branch say so in your pull.
 

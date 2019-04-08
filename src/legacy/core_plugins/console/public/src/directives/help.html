@@ -1,0 +1,95 @@
+<h2
+  class="euiTitle euiTitle--small"
+  i18n-id="console.helpPage.pageTitle"
+  i18n-default-message="Help"
+></h2>
+
+<div class="euiSpacer euiSpacer--m"></div>
+
+<div class="euiPanel euiPanel--paddingLarge">
+  <div class="euiFlexGroup euiFlexGroup--gutterExtraLarge">
+    <div class="euiFlexItem">
+      <h3
+        class="euiTitle euiTitle--xsmall"
+        i18n-id="console.helpPage.requestFormatTitle"
+        i18n-default-message="Request format"
+      ></h3>
+      <div class="euiSpacer euiSpacer--l"></div>
+      <span
+        i18n-id="console.helpPage.requestFormatDescription"
+        i18n-default-message="You can type one or more requests in the white editor. Console understands requests in a compact format:"
+      ></span>
+      <sense-help-example class="conHelp__example"></sense-help-example>
+    </div>
+    <div class="euiFlexItem">
+      <h3
+        i18n-id="console.helpPage.keyboardCommandsTitle"
+        i18n-default-message="Keyboard commands"
+        class="euiTitle euiTitle--xsmall"
+      ></h3>
+      <div class="euiSpacer euiSpacer--l"></div>
+      <dl class="euiDescriptionList euiDescriptionList--row euiDescriptionList--compressed">
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + I</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.autoIndentDescription"
+          i18n-default-message="Auto indent current request"
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + /</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.openDocumentationDescription"
+          i18n-default-message="Open documentation for current request"
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl + Space</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.openAutoCompleteDescription"
+          i18n-default-message="Open Auto complete (even if not typing)"
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + Enter</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.submitRequestDescription"
+          i18n-default-message="Submit request"
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + Up/Down</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.jumpToPreviousNextRequestDescription"
+          i18n-default-message="Jump to the previous/next request start or end."
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + Alt + L</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.collapseExpandCurrentScopeDescription"
+          i18n-default-message="Collapse/expand current scope."
+        ></dd>
+        <dt class="euiDescriptionList__title">Ctrl/Cmd + Option + 0</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.collapseAllScopesDescription"
+          i18n-default-message="Collapse all scopes but the current one. Expand by adding a shift."
+        ></dd>
+        <dt class="euiDescriptionList__title">Down arrow</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.switchFocusToAutoCompleteMenuDescription"
+          i18n-default-message="Switch focus to auto-complete menu. Use arrows to further select a term"
+        ></dd>
+        <dt class="euiDescriptionList__title">Enter/Tab</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.selectCurrentlySelectedInAutoCompleteMenuDescription"
+          i18n-default-message="Select the currently selected or the top most term in auto-complete menu"
+        ></dd>
+        <dt class="euiDescriptionList__title">Esc</dt>
+        <dd
+          class="euiDescriptionList__description"
+          i18n-id="console.helpPage.keyboardCommands.closeAutoCompleteMenuDescription"
+          i18n-default-message="Close auto-complete menu"
+        ></dd>
+      </dl>
+    </div>
+  </div>
+</div>

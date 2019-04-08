@@ -20,12 +20,7 @@
 import { topologicalSort } from './topological_sort';
 
 test('returns a topologically ordered sequence', () => {
-  const nodes = new Map([
-    ['a', []],
-    ['b', ['a']],
-    ['c', ['a', 'b']],
-    ['d', ['a']],
-  ]);
+  const nodes = new Map([['a', []], ['b', ['a']], ['c', ['a', 'b']], ['d', ['a']]]);
 
   const sorted = topologicalSort(nodes);
 
@@ -35,12 +30,7 @@ test('returns a topologically ordered sequence', () => {
 });
 
 test('handles multiple "roots" with no deps', () => {
-  const nodes = new Map([
-    ['a', []],
-    ['b', []],
-    ['c', ['a', 'b']],
-    ['d', ['a']],
-  ]);
+  const nodes = new Map([['a', []], ['b', []], ['c', ['a', 'b']], ['d', ['a']]]);
 
   const sorted = topologicalSort(nodes);
 

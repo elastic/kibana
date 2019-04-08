@@ -50,5 +50,4 @@ export class MonitoringViewBaseTableController extends MonitoringViewBaseControl
       setLocalStorageData(storage, newState);
     };
   }
-
 }

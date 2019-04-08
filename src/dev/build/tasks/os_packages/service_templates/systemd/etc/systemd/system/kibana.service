@@ -1,6 +1,8 @@
 [Unit]
 Description=Kibana
- 
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
 [Service]
 Type=simple
 User=kibana

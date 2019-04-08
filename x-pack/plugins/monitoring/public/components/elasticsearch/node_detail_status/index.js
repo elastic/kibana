@@ -8,8 +8,9 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function NodeDetailStatus({ stats }) {
+function NodeDetailStatusUI({ stats, intl }) {
   const {
     transport_address: transportAddress,
     usedHeap,
@@ -25,49 +26,75 @@ export function NodeDetailStatus({ stats }) {
 
   const metrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress',
+        defaultMessage: 'Transport Address',
+      }),
       value: transportAddress,
-      dataTestSubj: 'transportAddress'
+      'data-test-subj': 'transportAddress'
     },
     {
-      label: 'JVM Heap',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.jvmHeapLabel',
+        defaultMessage: '{javaVirtualMachine} Heap' }, {
+        javaVirtualMachine: 'JVM'
+      }),
       value: formatMetric(usedHeap, '0,0.[00]', '%', { prependSpace: false }),
-      dataTestSubj: 'jvmHeap'
+      'data-test-subj': 'jvmHeap'
     },
     {
-      label: 'Free Disk Space',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel',
+        defaultMessage: 'Free Disk Space',
+      }),
       value: formatMetric(freeSpace, '0.0 b'),
-      dataTestSubj: 'freeDiskSpace'
+      'data-test-subj': 'freeDiskSpace'
     },
     {
-      label: 'Documents',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.documentsLabel',
+        defaultMessage: 'Documents',
+      }),
       value: formatMetric(documents, '0.[0]a'),
-      dataTestSubj: 'documentCount'
+      'data-test-subj': 'documentCount'
     },
     {
-      label: 'Data',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.dataLabel',
+        defaultMessage: 'Data',
+      }),
       value: formatMetric(dataSize, '0.0 b'),
-      dataTestSubj: 'dataSize'
+      'data-test-subj': 'dataSize'
     },
     {
-      label: 'Indices',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.indicesLabel',
+        defaultMessage: 'Indices',
+      }),
       value: formatMetric(indexCount, 'int_commas'),
-      dataTestSubj: 'indicesCount'
+      'data-test-subj': 'indicesCount'
     },
     {
-      label: 'Shards',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.shardsLabel',
+        defaultMessage: 'Shards',
+      }),
       value: formatMetric(totalShards, 'int_commas'),
-      dataTestSubj: 'shardsCount'
+      'data-test-subj': 'shardsCount'
     },
     {
-      label: 'Type',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel',
+        defaultMessage: 'Type',
+      }),
       value: nodeTypeLabel,
-      dataTestSubj: 'nodeType'
+      'data-test-subj': 'nodeType'
     }
   ];
 
   const IconComponent = ({ status, isOnline }) => (
     <Fragment>
-      Status: <NodeStatusIcon status={status} isOnline={isOnline} />
+      <NodeStatusIcon status={status} isOnline={isOnline} />
     </Fragment>
   );
 
@@ -81,3 +108,5 @@ export function NodeDetailStatus({ stats }) {
     />
   );
 }
+
+export const NodeDetailStatus = injectI18n(NodeDetailStatusUI);

@@ -1,0 +1,32 @@
+.canvasAdvancedFilter {
+  width: 100%;
+  font-size: inherit;
+
+  .canvasAdvancedFilter__input {
+    background-color: $euiColorEmptyShade;
+    width: 100%;
+    padding: $euiSizeXS $euiSize;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    font-size: inherit;
+    line-height: 19px;
+    font-family: monospace;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .canvasAdvancedFilter__button {
+    width: 100%;
+    padding: $euiSizeXS $euiSizeS;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    background-color: $euiColorEmptyShade;
+    font-size: inherit;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+  }
+}

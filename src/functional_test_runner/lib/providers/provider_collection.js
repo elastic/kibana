@@ -19,6 +19,7 @@
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
+import { createVerboseInstance } from './verbose_instance';
 
 export class ProviderCollection {
   constructor(log, providers) {
@@ -29,6 +30,10 @@ export class ProviderCollection {
 
   getService = name => (
     this._getInstance('Service', name)
+  )
+
+  hasService = name => (
+    Boolean(this._findProvider('Service', name))
   )
 
   getPageObject = name => (
@@ -68,8 +73,12 @@ export class ProviderCollection {
     }
   }
 
+  _findProvider(type, name) {
+    return this._providers.find(p => p.type === type && p.name === name);
+  }
+
   _getProvider(type, name) {
-    const providerDef = this._providers.find(p => p.type === type && p.name === name);
+    const providerDef = this._findProvider(type, name);
     if (!providerDef) {
       throw new Error(`Unknown ${type} "${name}"`);
     }
@@ -87,12 +96,21 @@ export class ProviderCollection {
       if (!instances.has(provider)) {
         let instance = provider({
           getService: this.getService,
+          hasService: this.hasService,
           getPageObject: this.getPageObject,
           getPageObjects: this.getPageObjects,
         });
 
         if (instance && typeof instance.then === 'function') {
           instance = createAsyncInstance(type, name, instance);
+        }
+
+        if (name !== '__webdriver__' && name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
+          instance = createVerboseInstance(
+            this._log,
+            type === 'PageObject' ? `PageObjects.${name}` : name,
+            instance
+          );
         }
 
         instances.set(provider, instance);

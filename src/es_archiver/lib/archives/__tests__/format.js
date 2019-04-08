@@ -26,7 +26,7 @@ import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createFormatArchiveStreams } from '../format';
 
@@ -53,7 +53,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       output.forEach(b => expect(b).to.be.a(Buffer));
     });
 
-    it('product is pretty-printed JSON seperated by two newlines', async () => {
+    it('product is pretty-printed JSON separated by two newlines', async () => {
       const json = await createPromiseFromStreams([
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: false }),

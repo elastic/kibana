@@ -7,17 +7,20 @@
 /**
  * Controller for Advanced Node Detail
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
+import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
+import { MonitoringViewBaseController } from '../../../base_controller';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes/${$route.current.params.node}`;
 
@@ -46,29 +49,38 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      super({
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringElasticsearchAdvancedNodeApp',
+        $scope,
+        $injector
+      });
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.nodeSummary) {
+          return;
+        }
 
-    const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Nodes - ${$scope.pageData.nodeSummary.name} - Advanced`);
+        this.setTitle(i18n('xpack.monitoring.elasticsearch.node.advanced.routeTitle', {
+          defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Advanced',
+          values: {
+            nodeSummaryName: data.nodeSummary.name
+          }
+        }));
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => {
-        $scope.pageData = response;
-      }
-    });
-
-    $executor.start();
-
-    $scope.$on('$destroy', $executor.destroy);
+        this.renderReact(
+          <I18nContext>
+            <AdvancedNode
+              nodeSummary={data.nodeSummary}
+              metrics={data.metrics}
+              onBrush={this.onBrush}
+            />
+          </I18nContext>
+        );
+      });
+    }
   }
 });

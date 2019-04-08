@@ -8,7 +8,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -21,8 +21,10 @@ export const results = {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords,
-    maxExamples) {
+    maxExamples,
+    influencersFilterQuery) {
 
     return http({
       url: `${basePath}/results/anomalies_table_data`,
@@ -35,8 +37,10 @@ export const results = {
         threshold,
         earliestMs,
         latestMs,
+        dateFormatTz,
         maxRecords,
-        maxExamples
+        maxExamples,
+        influencersFilterQuery
       }
     });
   },

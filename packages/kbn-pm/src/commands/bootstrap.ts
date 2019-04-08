@@ -30,24 +30,32 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   async run(projects, projectGraph, { options }) {
+    const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
+      batchByWorkspace: true,
+    });
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-    const frozenLockfile = options['frozen-lockfile'] === true;
-    const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+    const extraArgs = [
+      ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
+      ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
+    ];
 
     log.write(chalk.bold('\nRunning installs in topological order:'));
 
-    for (const batch of batchedProjects) {
+    for (const batch of batchedProjectsByWorkspace) {
       for (const project of batch) {
+        if (project.isWorkspaceProject) {
+          log.write(`Skipping workspace project: ${project.name}`);
+          continue;
+        }
+
         if (project.hasDependencies()) {
           await project.installDependencies({ extraArgs });
         }
       }
     }
 
-    log.write(
-      chalk.bold('\nInstalls completed, linking package executables:\n')
-    );
+    log.write(chalk.bold('\nInstalls completed, linking package executables:\n'));
     await linkProjectExecutables(projects, projectGraph);
 
     /**
@@ -56,11 +64,7 @@ export const BootstrapCommand: ICommand = {
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
-    log.write(
-      chalk.bold(
-        '\nLinking executables completed, running `kbn:bootstrap` scripts\n'
-      )
-    );
+    log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
     await parallelizeBatches(batchedProjects, async pkg => {
       if (pkg.hasScript('kbn:bootstrap')) {
         await pkg.runScriptStreaming('kbn:bootstrap');

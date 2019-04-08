@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './bootstrap_task';
 export * from './build_packages_task';
 export * from './clean_tasks';
 export * from './copy_source_task';
@@ -29,10 +28,13 @@ export * from './create_readme_task';
 export * from './install_dependencies_task';
 export * from './license_file_task';
 export * from './nodejs';
+export * from './nodejs_modules';
 export * from './notice_file_task';
 export * from './optimize_task';
 export * from './os_packages';
 export * from './transpile_babel_task';
 export * from './transpile_typescript_task';
+export * from './transpile_scss_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
+export * from './path_length_task';

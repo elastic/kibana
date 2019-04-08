@@ -35,7 +35,7 @@ function help() {
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in '../kibana-extra'.
+    folder and for all plugins in './plugins' and '../kibana-extra'.
 
     Available commands:
 
@@ -43,10 +43,10 @@ function help() {
 
     Global options:
 
-       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
-       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
-       --oss                Do not include the x-pack when running command.
-       --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
+       -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
+       --oss                  Do not include the x-pack when running command.
+       --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
   `);
 }
 
@@ -55,11 +55,7 @@ export async function run(argv: string[]) {
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    log.write(
-      chalk.red(
-        `Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`
-      )
-    );
+    log.write(chalk.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
     process.exit(1);
   }
 
@@ -69,6 +65,7 @@ export async function run(argv: string[]) {
       h: 'help',
       i: 'include',
     },
+    boolean: ['prefer-offline', 'frozen-lockfile'],
   });
 
   const args = options._;
@@ -89,9 +86,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    log.write(
-      chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
-    );
+    log.write(chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
     process.exit(1);
   }
 

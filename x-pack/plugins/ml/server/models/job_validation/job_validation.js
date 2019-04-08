@@ -6,11 +6,12 @@
 
 
 
+import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
-import messages from './messages.json';
+import { getMessages } from './messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
@@ -20,31 +21,45 @@ import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 
-export async function validateJob(callWithRequest, payload, kbnVersion = 'current') {
+export async function validateJob(callWithRequest, payload, kbnVersion = 'current', server) {
+  const messages = getMessages();
+
   try {
     if (typeof payload !== 'object' || payload === null) {
-      throw new Error('Invalid payload: Needs to be an object.');
+      throw new Error(i18n.translate('xpack.ml.models.jobValidation.payloadIsNotObjectErrorMessage', {
+        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+        values: { invalidParamName: 'payload' },
+      }));
     }
 
     const { fields, job } = payload;
     let { duration } = payload;
 
     if (typeof job !== 'object') {
-      throw new Error('Invalid job: Needs to be an object.');
+      throw new Error(i18n.translate('xpack.ml.models.jobValidation.jobIsNotObjectErrorMessage', {
+        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+        values: { invalidParamName: 'job' },
+      }));
     }
 
     if (typeof job.analysis_config !== 'object') {
-      throw new Error('Invalid job.analysis_config: Needs to be an object.');
+      throw new Error(i18n.translate('xpack.ml.models.jobValidation.analysisConfigIsNotObjectErrorMessage', {
+        defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
+        values: { invalidParamName: 'job.analysis_config' },
+      }));
     }
 
     if (!Array.isArray(job.analysis_config.detectors)) {
-      throw new Error('Invalid job.analysis_config.detectors: Needs to be an array.');
+      throw new Error(i18n.translate('xpack.ml.models.jobValidation.detectorsAreNotArrayErrorMessage', {
+        defaultMessage: 'Invalid {invalidParamName}: Needs to be an array.',
+        values: { invalidParamName: 'job.analysis_config.detectors' },
+      }));
     }
 
     // check if basic tests pass the requirements to run the extended tests.
     // if so, run the extended tests and merge the messages.
     // otherwise just return the basic test messages.
-    const basicValidation = basicJobValidation(job, fields, {});
+    const basicValidation = basicJobValidation(job, fields, {}, true);
     let validationMessages;
 
     if (basicValidation.valid === true) {
@@ -86,7 +101,7 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
         return VALIDATION_STATUS[messages[m.id].status] === VALIDATION_STATUS.ERROR;
       });
 
-      validationMessages.push(...await validateBucketSpan(callWithRequest, job, duration));
+      validationMessages.push(...await validateBucketSpan(callWithRequest, job, duration, server));
       validationMessages.push(...await validateTimeRange(callWithRequest, job, duration));
 
       // only run the influencer and model memory limit checks
@@ -104,6 +119,9 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
     return uniqWithIsEqual(validationMessages).map(message => {
       if (typeof messages[message.id] !== 'undefined') {
         // render the message template with the provided metadata
+        if (typeof messages[message.id].heading !== 'undefined') {
+          message.heading = renderTemplate(messages[message.id].heading, message);
+        }
         message.text = renderTemplate(messages[message.id].text, message);
         // check if the error message provides a link with further information
         // if so, add it to the message to be returned with it
@@ -115,7 +133,10 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
 
         message.status = VALIDATION_STATUS[messages[message.id].status];
       } else {
-        message.text = `${message.id} (unknown message id)`;
+        message.text = i18n.translate('xpack.ml.models.jobValidation.unknownMessageIdErrorMessage', {
+          defaultMessage: '{messageId} (unknown message id)',
+          values: { messageId: message.id },
+        });
       }
 
       return message;

@@ -5,11 +5,20 @@
  */
 
 import 'angular-resource';
+import { omit } from 'lodash';
+import angular from 'angular';
 import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('security', ['ngResource']);
 module.service('ShieldRole', ($resource, chrome) => {
-  return $resource(chrome.addBasePath('/api/security/v1/roles/:name'), {
+  return $resource(chrome.addBasePath('/api/security/role/:name'), {
     name: '@name'
+  }, {
+    save: {
+      method: 'PUT',
+      transformRequest(data) {
+        return angular.toJson(omit(data, 'name', 'transient_metadata', '_unrecognized_applications'));
+      }
+    }
   });
 });

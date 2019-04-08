@@ -1,5 +1,5 @@
 [[tutorial-define-index]]
-== Defining Your Index Patterns
+=== Defining your index patterns
 
 Index patterns tell Kibana which Elasticsearch indices you want to explore.
 An index pattern can match the name of a single index, or include a wildcard
@@ -10,7 +10,7 @@ series of indices in the format `logstash-YYYY.MMM.DD`. To explore all
 of the log data from May 2018, you could specify the index pattern
 `logstash-2018.05*`.
 
-Create patterns for the Shakespeare data set, which has an
+You'll create patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank.` These data sets don't contain time-series data.
 

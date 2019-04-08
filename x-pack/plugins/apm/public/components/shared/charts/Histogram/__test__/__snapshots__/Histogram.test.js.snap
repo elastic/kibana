@@ -115,7 +115,7 @@ exports[`Histogram Initially should have default markup 1`] = `
               textAnchor="middle"
               transform="translate(0, 18)"
             >
-              0
+              0 ms
             </text>
           </g>
           <g
@@ -422,11 +422,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -441,11 +441,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -460,11 +460,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857142}
@@ -479,11 +479,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -498,11 +498,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571405}
@@ -517,11 +517,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857142}
@@ -536,11 +536,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571405}
@@ -555,11 +555,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571405}
@@ -574,11 +574,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571377}
@@ -593,11 +593,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571462}
@@ -612,11 +612,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -631,11 +631,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -650,11 +650,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -669,11 +669,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -688,11 +688,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -707,11 +707,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -726,11 +726,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571547}
@@ -745,11 +745,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -764,11 +764,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571547}
@@ -783,11 +783,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -802,11 +802,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571433}
@@ -821,11 +821,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571377}
@@ -840,11 +840,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -859,11 +859,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -878,11 +878,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571604}
@@ -897,11 +897,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -916,11 +916,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.62857142857149}
@@ -935,11 +935,11 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseOver={[Function]}
           style={
             Object {
-              "fill": "#80bcd2",
+              "fill": "#7fb5d9",
               "opacity": 1,
               "rx": "0px",
               "ry": "0px",
-              "stroke": "#80bcd2",
+              "stroke": "#7fb5d9",
             }
           }
           width={22.628571428571377}
@@ -961,6 +961,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -976,6 +977,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -991,6 +993,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1006,6 +1009,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1021,6 +1025,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1084,6 +1089,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1099,6 +1105,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1130,6 +1137,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1145,6 +1153,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1160,6 +1169,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1175,6 +1185,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1190,6 +1201,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1205,6 +1217,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1220,6 +1233,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1235,6 +1249,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1250,6 +1265,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1265,6 +1281,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1280,6 +1297,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1295,6 +1313,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1310,6 +1329,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1325,6 +1345,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1340,6 +1361,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1355,6 +1377,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1370,6 +1393,7 @@ exports[`Histogram Initially should have default markup 1`] = `
           onMouseUp={[Function]}
           style={
             Object {
+              "cursor": "default",
               "pointerEvents": "all",
             }
           }
@@ -1386,7 +1410,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  border: 1px solid #d9d9d9;
+  border: 1px solid #d3dae6;
   background: #ffffff;
   border-radius: 5px;
   font-size: 14px;
@@ -1394,11 +1418,11 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
 }
 
 .c1 {
-  background: #f5f5f5;
-  border-bottom: 1px solid #d9d9d9;
+  background: #f5f7fa;
+  border-bottom: 1px solid #d3dae6;
   border-radius: 5px 5px 0 0;
   padding: 8px;
-  color: #999999;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -1407,15 +1431,15 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
   font-size: 12px;
 }
 
-.c3 {
-  color: #666666;
-  font-size: 14px;
-}
-
 .c4 {
-  color: #999999;
+  color: #98a2b3;
   margin: 8px;
   font-size: 12px;
+}
+
+.c3 {
+  color: #69707d;
+  font-size: 14px;
 }
 
 <div

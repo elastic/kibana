@@ -27,7 +27,7 @@ export class QuotaMetric extends Metric {
         max: { field: `${this.fieldSource}.${this.periodsField}` }
       },
       quota: {
-        // Use min for this value. Basically equivalient to max, but picks -1
+        // Use min for this value. Basically environment to max, but picks -1
         // as the value if quota is disabled in one of the docs, which affects
         // the logic by routing to the non-quota scenario
         min: {

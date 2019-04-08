@@ -39,7 +39,10 @@ var ignore = [
 
   // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
   // is `x-pack` and `b` is not `node_modules`
-  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/
+  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
+
+  // ignore paths matching `/canvas/canvas_plugin/`
+  /\/canvas\/canvas_plugin\//,
 ];
 
 if (global.__BUILT_WITH_BABEL__) {
@@ -52,6 +55,13 @@ if (global.__BUILT_WITH_BABEL__) {
   // building their server code at require-time since version 4.2
   // TODO: the plugin install process could transpile plugin server code...
   ignore.push(resolve(__dirname, '../../../src'));
+} else {
+  ignore.push(
+    // ignore any path in the packages, unless it is in the package's
+    // root `src` directory, in any test or __tests__ directory, or it
+    // ends with .test.js, .test.ts, or .test.tsx
+    /\/packages\/(eslint-|kbn-)[^\/]+\/(?!src\/.*|(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
+  );
 }
 
 // modifies all future calls to require() to automatically

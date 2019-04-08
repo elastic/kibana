@@ -10,8 +10,7 @@
       {
         "detector_description": "high_mean(\"transaction.duration.us\")",
         "function": "high_mean",
-        "field_name": "transaction.duration.us",
-        "rules": []
+        "field_name": "transaction.duration.us"
       }
     ],
     "influencers": []
@@ -24,6 +23,5 @@
   },
   "model_plot_config": {
     "enabled": true
-  },
-  "model_snapshot_retention_days": 1
+  }
 }

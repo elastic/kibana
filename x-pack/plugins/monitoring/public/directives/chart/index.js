@@ -4,64 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import moment from 'moment';
 import { uiModules } from 'ui/modules';
-import {
-  getTitle,
-  getUnits,
-  MonitoringTimeseries,
-  InfoTooltip,
-} from 'plugins/monitoring/components/chart';
-import { Tooltip } from 'pivotal-ui/react/tooltip';
-import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
-import { KuiInfoButton } from '@kbn/ui-framework/components';
+import { timefilter } from 'ui/timefilter';
+import { MonitoringTimeseriesContainer } from '../../components/chart/monitoring_timeseries_container';
+import { EuiSpacer } from '@elastic/eui';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringChart', (timefilter) => {
+uiModule.directive('monitoringChart', () => {
   return {
     restrict: 'E',
     scope: {
       series: '='
     },
     link(scope, $elem) {
-
-      const series = scope.series;
-      const units = getUnits(series);
-
       function onBrush({ xaxis }) {
-        scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute'
         });
       }
 
       scope.$watch('series', series => {
         render(
-          <div className="monitoring-chart__container">
-            <h2 className="euiTitle">
-              { getTitle(series) }{ units ? ` (${units})` : '' }
-              <OverlayTrigger
-                placement="left"
-                trigger="click"
-                overlay={
-                  <Tooltip>
-                    <InfoTooltip series={series}/>
-                  </Tooltip>
-                }
-              >
-                <span className="monitoring-chart-tooltip__trigger overlay-trigger">
-                  <KuiInfoButton />
-                </span>
-              </OverlayTrigger>
-            </h2>
-            <MonitoringTimeseries
-              series={series}
-              onBrush={onBrush}
-            />
-          </div>,
+          <I18nContext>
+            <Fragment>
+              <MonitoringTimeseriesContainer
+                series={series}
+                onBrush={onBrush}
+              />
+              <EuiSpacer size="m"/>
+            </Fragment>
+          </I18nContext>,
           $elem[0]
         );
       });

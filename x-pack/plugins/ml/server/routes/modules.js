@@ -28,6 +28,7 @@ function saveModuleItems(
   groups,
   indexPatternName,
   query,
+  useDedicatedIndex,
   startDatafeed,
   start,
   end,
@@ -40,6 +41,7 @@ function saveModuleItems(
     groups,
     indexPatternName,
     query,
+    useDedicatedIndex,
     startDatafeed,
     start,
     end,
@@ -51,12 +53,11 @@ export function dataRecognizer(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/modules/recognize/{indexPatternTitle}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       return recognize(callWithRequest, indexPatternTitle)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -66,12 +67,11 @@ export function dataRecognizer(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/modules/get_module/{moduleId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const moduleId = request.params.moduleId;
       return getModule(callWithRequest, moduleId)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -81,7 +81,7 @@ export function dataRecognizer(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/modules/setup/{moduleId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const moduleId = request.params.moduleId;
 
@@ -90,6 +90,7 @@ export function dataRecognizer(server, commonRouteConfig) {
         groups,
         indexPatternName,
         query,
+        useDedicatedIndex,
         startDatafeed,
         start,
         end
@@ -102,13 +103,13 @@ export function dataRecognizer(server, commonRouteConfig) {
         groups,
         indexPatternName,
         query,
+        useDedicatedIndex,
         startDatafeed,
         start,
         end,
         request
       )
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

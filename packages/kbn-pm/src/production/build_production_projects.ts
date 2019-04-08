@@ -24,11 +24,7 @@ import { join, relative, resolve } from 'path';
 import { getProjectPaths } from '../config';
 import { isDirectory, isFile } from '../utils/fs';
 import { log } from '../utils/log';
-import {
-  createProductionPackageJson,
-  readPackageJson,
-  writePackageJson,
-} from '../utils/package_json';
+import { readPackageJson, writePackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import {
   buildProjectGraph,
@@ -39,10 +35,10 @@ import {
 
 export async function buildProductionProjects({
   kibanaRoot,
-  buildRoot,
+  buildRoots,
 }: {
   kibanaRoot: string;
-  buildRoot: string;
+  buildRoots: string[];
 }) {
   const projects = await getProductionProjects(kibanaRoot);
   const projectGraph = buildProjectGraph(projects);
@@ -55,7 +51,9 @@ export async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
+      for (const buildRoot of buildRoots) {
+        await copyToBuild(project, kibanaRoot, buildRoot);
+      }
     }
   }
 }
@@ -70,11 +68,9 @@ async function getProductionProjects(rootPath: string) {
   const projectPaths = getProjectPaths(rootPath, {});
   const projects = await getProjects(rootPath, projectPaths);
 
-  const productionProjects = includeTransitiveProjects(
-    [projects.get('kibana')!],
-    projects,
-    { onlyProductionDependencies: true }
-  );
+  const productionProjects = includeTransitiveProjects([projects.get('kibana')!], projects, {
+    onlyProductionDependencies: true,
+  });
 
   // We remove Kibana, as we're already building Kibana
   productionProjects.delete('kibana');
@@ -107,11 +103,7 @@ async function buildProject(project: Project) {
  * manage dependencies is that it will "dedupe" them, so we don't include
  * unnecessary copies of dependencies.
  */
-async function copyToBuild(
-  project: Project,
-  kibanaRoot: string,
-  buildRoot: string
-) {
+async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: string) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
@@ -134,6 +126,5 @@ async function copyToBuild(
     ? await readPackageJson(buildProjectPath)
     : project.json;
 
-  const preparedPackageJson = createProductionPackageJson(packageJson);
-  await writePackageJson(buildProjectPath, preparedPackageJson);
+  await writePackageJson(buildProjectPath, packageJson);
 }

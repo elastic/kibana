@@ -18,70 +18,70 @@
  */
 
 import { resolve } from 'path';
+import { format as formatUrl } from 'url';
+import opn from 'opn';
+
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
+import * as Rx from 'rxjs';
+import { first, mapTo, filter, map, take } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
-import BasePathProxy from './base_path_proxy';
-import { Config } from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { Config } from '../../legacy/server/config/config';
+import { transformDeprecations } from '../../legacy/server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  static async create(opts = {}, settings = {}) {
-    const transformedSettings = transformDeprecations(settings);
-    const config = await Config.withDefaultSchema(transformedSettings);
-
-    return new ClusterManager(opts, config);
+  static create(opts, settings = {}, basePathProxy) {
+    return new ClusterManager(
+      opts,
+      Config.withDefaultSchema(transformDeprecations(settings)),
+      basePathProxy
+    );
   }
 
-  constructor(opts, config) {
+  constructor(opts, config, basePathProxy) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
     this.inReplMode = !!opts.repl;
+    this.basePathProxy = basePathProxy;
 
     const serverArgv = [];
-    const optimizerArgv = [
-      '--plugins.initialize=false',
-      '--server.autoListen=false',
-    ];
+    const optimizerArgv = ['--plugins.initialize=false', '--server.autoListen=false'];
 
-    if (opts.basePath) {
-      this.basePathProxy = new BasePathProxy(this, config);
-
+    if (this.basePathProxy) {
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true',
+        '--server.rewriteBasePath=true'
       );
 
       serverArgv.push(
         `--server.port=${this.basePathProxy.targetPort}`,
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true',
+        '--server.rewriteBasePath=true'
       );
     }
 
     this.workers = [
-      this.optimizer = new Worker({
+      (this.optimizer = new Worker({
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
         argv: optimizerArgv,
-        watch: false
-      }),
-
-      this.server = new Worker({
+        watch: false,
+      })),
+      (this.server = new Worker({
         type: 'server',
         log: this.log,
-        argv: serverArgv
-      })
+        argv: serverArgv,
+      })),
     ];
 
     // broker messages between workers
-    this.workers.forEach((worker) => {
-      worker.on('broadcast', (msg) => {
-        this.workers.forEach((to) => {
+    this.workers.forEach(worker => {
+      worker.on('broadcast', msg => {
+        this.workers.forEach(to => {
           if (to !== worker && to.online) {
             to.fork.send(msg);
           }
@@ -91,54 +91,88 @@ export default class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
+    if (opts.open) {
+      this.setupOpen(formatUrl({
+        protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
+        hostname: config.get('server.host'),
+        port: config.get('server.port'),
+        pathname: (this.basePathProxy ? this.basePathProxy.basePath : ''),
+      }));
+    }
+
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
-      const extraPaths = [
-        ...pluginPaths,
-        ...scanDirs,
-      ];
+      const extraPaths = [...pluginPaths, ...scanDirs];
 
       const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
         .concat(pluginPaths)
-        .reduce((acc, path) => acc.concat(
-          resolve(path, 'test'),
-          resolve(path, 'build'),
-          resolve(path, 'target'),
-          resolve(path, 'scripts'),
-          resolve(path, 'docs'),
-        ), []);
+        .reduce(
+          (acc, path) =>
+            acc.concat(
+              resolve(path, 'test'),
+              resolve(path, 'build'),
+              resolve(path, 'target'),
+              resolve(path, 'scripts'),
+              resolve(path, 'docs'),
+              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+            ),
+          []
+        );
 
       this.setupWatching(extraPaths, extraIgnores);
-    }
-
-    else this.startCluster();
+    } else this.startCluster();
   }
 
   startCluster() {
     this.setupManualRestart();
     invoke(this.workers, 'start');
     if (this.basePathProxy) {
-      this.basePathProxy.listen();
+      this.basePathProxy.start({
+        blockUntil: this.blockUntil.bind(this),
+        shouldRedirectFromOldBasePath: this.shouldRedirectFromOldBasePath.bind(this),
+      });
     }
+  }
+
+  setupOpen(openUrl) {
+    const serverListening$ = Rx.merge(
+      Rx.fromEvent(this.server, 'listening')
+        .pipe(mapTo(true)),
+      Rx.fromEvent(this.server, 'fork:exit')
+        .pipe(mapTo(false)),
+      Rx.fromEvent(this.server, 'crashed')
+        .pipe(mapTo(false))
+    );
+
+    const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus')
+      .pipe(map(msg => !!msg.success));
+
+    Rx.combineLatest(serverListening$, optimizeSuccess$)
+      .pipe(
+        filter(([serverListening, optimizeSuccess]) => serverListening && optimizeSuccess),
+        take(1),
+      )
+      .toPromise()
+      .then(() => opn(openUrl));
   }
 
   setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../utils');
+    const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
-      fromRoot('src/core_plugins'),
-      fromRoot('src/server'),
-      fromRoot('src/ui'),
-      fromRoot('src/utils'),
+      fromRoot('src/core'),
+      fromRoot('src/legacy/core_plugins'),
+      fromRoot('src/legacy/server'),
+      fromRoot('src/legacy/ui'),
+      fromRoot('src/legacy/utils'),
       fromRoot('x-pack/common'),
       fromRoot('x-pack/plugins'),
       fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
-      ...extraPaths
+      ...extraPaths,
     ].map(path => resolve(path));
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
@@ -146,21 +180,24 @@ export default class ClusterManager {
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
-        ...extraIgnores
-      ]
+        ...extraIgnores,
+      ],
     });
 
     this.watcher.on('add', this.onWatcherAdd);
     this.watcher.on('error', this.onWatcherError);
 
-    this.watcher.on('ready', once(() => {
-      // start sending changes to workers
-      this.watcher.removeListener('add', this.onWatcherAdd);
-      this.watcher.on('all', this.onWatcherChange);
+    this.watcher.on(
+      'ready',
+      once(() => {
+        // start sending changes to workers
+        this.watcher.removeListener('add', this.onWatcherAdd);
+        this.watcher.on('all', this.onWatcherChange);
 
-      this.log.good('watching for changes', `(${this.addedCount} files)`);
-      this.startCluster();
-    }));
+        this.log.good('watching for changes', `(${this.addedCount} files)`);
+        this.startCluster();
+      })
+    );
   }
 
   setupManualRestart() {
@@ -174,7 +211,7 @@ export default class ClusterManager {
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
-    const clear = () => nls = 0;
+    const clear = () => (nls = 0);
     const clearSoon = debounce(clear, 2000);
 
     rl.setPrompt('');
@@ -211,5 +248,26 @@ export default class ClusterManager {
   onWatcherError(err) {
     this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
+  }
+
+  shouldRedirectFromOldBasePath(path) {
+    const isApp = path.startsWith('app/');
+    const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
+
+    return isApp || isKnownShortPath;
+  }
+
+  blockUntil() {
+    // Wait until `server` worker either crashes or starts to listen.
+    if (this.server.listening || this.server.crashed) {
+      return Promise.resolve();
+    }
+
+    return Rx.race(
+      Rx.fromEvent(this.server, 'listening'),
+      Rx.fromEvent(this.server, 'crashed')
+    )
+      .pipe(first())
+      .toPromise();
   }
 }

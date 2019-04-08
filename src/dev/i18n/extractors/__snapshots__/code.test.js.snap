@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/extractors/code extracts React, server-side and angular service default messages 1`] = `
+Array [
+  Array [
+    "kbn.mgmt.id-1",
+    Object {
+      "description": undefined,
+      "message": "Message text 1",
+    },
+  ],
+  Array [
+    "kbn.mgmt.id-2",
+    Object {
+      "description": "Message description",
+      "message": "Message text 2",
+    },
+  ],
+  Array [
+    "kbn.mgmt.id-3",
+    Object {
+      "description": undefined,
+      "message": "Message text 3",
+    },
+  ],
+]
+`;
+
+exports[`dev/i18n/extractors/code throws on empty id 1`] = `
+Array [
+  Array [
+    [Error: Empty "id" value in i18n() or i18n.translate() is not allowed.],
+  ],
+]
+`;
+
+exports[`dev/i18n/extractors/code throws on missing defaultMessage 1`] = `
+Array [
+  Array [
+    [Error: Empty defaultMessage in intl.formatMessage() is not allowed ("message-id").],
+  ],
+]
+`;

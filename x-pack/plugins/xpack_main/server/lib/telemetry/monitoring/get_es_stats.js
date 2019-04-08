@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../monitoring/common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
@@ -25,12 +26,12 @@ export function getElasticsearchStats(server, callCluster, clusterUuids) {
  * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids Cluster UUIDs to limit the request against
- * @return {Promise} Response for the aggregations to fetch detaild for the product.
+ * @return {Promise} Response for the aggregations to fetch details for the product.
  */
 export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
   const config = server.config();
   const params = {
-    index: config.get('xpack.monitoring.elasticsearch.index_pattern'),
+    index: INDEX_PATTERN_ELASTICSEARCH,
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [

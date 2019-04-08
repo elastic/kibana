@@ -9,18 +9,29 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
+import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
+
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { annotationRoutes } from './server/routes/annotations';
 import { jobRoutes } from './server/routes/anomaly_detectors';
 import { dataFeedRoutes } from './server/routes/datafeeds';
 import { indicesRoutes } from './server/routes/indices';
 import { jobValidationRoutes } from './server/routes/job_validation';
+import mappings from './mappings';
+import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
 import { dataRecognizer } from './server/routes/modules';
 import { dataVisualizerRoutes } from './server/routes/data_visualizer';
 import { calendars } from './server/routes/calendars';
 import { fieldsService } from './server/routes/fields_service';
+import { filtersRoutes } from './server/routes/filters';
 import { resultsServiceRoutes } from './server/routes/results_service';
+import { jobServiceRoutes } from './server/routes/job_service';
+import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
+import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { i18n } from '@kbn/i18n';
+import { initMlServerLog } from './server/client/log';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -31,17 +42,34 @@ export const ml = (kibana) => {
 
     uiExports: {
       app: {
-        title: 'Machine Learning',
-        description: 'Machine Learning for the Elastic Stack',
+        title: i18n.translate('xpack.ml.mlNavTitle', {
+          defaultMessage: 'Machine Learning'
+        }),
+        description: i18n.translate('xpack.ml.mlNavDescription', {
+          defaultMessage: 'Machine Learning for the Elastic Stack'
+        }),
         icon: 'plugins/ml/ml.svg',
+        euiIconType: 'machineLearningApp',
         main: 'plugins/ml/app',
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
-      home: ['plugins/ml/register_feature']
+      savedObjectSchemas: {
+        'ml-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings,
+      home: ['plugins/ml/register_feature'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          mlEnabled: config.get('xpack.ml.enabled'),
+        };
+      },
     },
 
-
-    init: function (server) {
+    init: async function (server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       mirrorPluginStatus(xpackMainPlugin, thisPlugin);
@@ -54,12 +82,12 @@ export const ml = (kibana) => {
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
-          function forbidApiAccess(request, reply) {
+          function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.isAvailable) {
-              reply();
+              return null;
             } else {
-              reply(Boom.forbidden(licenseCheckResults.message));
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]
@@ -69,10 +97,11 @@ export const ml = (kibana) => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
-          esServerUrl: config.get('elasticsearch.url')
+          mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
 
+      annotationRoutes(server, commonRouteConfig);
       jobRoutes(server, commonRouteConfig);
       dataFeedRoutes(server, commonRouteConfig);
       indicesRoutes(server, commonRouteConfig);
@@ -83,7 +112,14 @@ export const ml = (kibana) => {
       dataVisualizerRoutes(server, commonRouteConfig);
       calendars(server, commonRouteConfig);
       fieldsService(server, commonRouteConfig);
+      filtersRoutes(server, commonRouteConfig);
       resultsServiceRoutes(server, commonRouteConfig);
+      jobServiceRoutes(server, commonRouteConfig);
+      jobAuditMessagesRoutes(server, commonRouteConfig);
+      fileDataVisualizerRoutes(server, commonRouteConfig);
+
+      initMlServerLog(server);
+      makeMlUsageCollector(server);
     }
 
   });

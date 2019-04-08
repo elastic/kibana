@@ -5,20 +5,18 @@
  */
 
 
-
-import { privilegesProvider } from 'plugins/ml/privilege/get_privileges';
-import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
+import { i18n } from '@kbn/i18n';
+import { getPrivileges } from './get_privileges';
+import { hasLicenseExpired } from '../license/check_license';
 
 let privileges = {};
 
 export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
-  const mlPrivilegeService = Private(privilegesProvider);
-
   return new Promise((resolve, reject) => {
-    mlPrivilegeService.getPrivileges()
+    getPrivileges()
       .then((priv) => {
         privileges = priv;
-        // the minimum privilege for using ML is being able to get the jobs list.
+        // the minimum privilege for using ML with a platinum license is being able to get the jobs list.
         // all other functionality is controlled by the return privileges object
         if (privileges.canGetJobs) {
           return resolve(privileges);
@@ -31,10 +29,8 @@ export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
 }
 
 export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
-  const mlPrivilegeService = Private(privilegesProvider);
-
   return new Promise((resolve, reject) => {
-    mlPrivilegeService.getPrivileges()
+    getPrivileges()
       .then((priv) => {
         privileges = priv;
         if (privileges.canCreateJob) {
@@ -49,10 +45,27 @@ export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
   });
 }
 
+export function checkFindFileStructurePrivilege(Private, Promise, kbnUrl) {
+  return new Promise((resolve, reject) => {
+    getPrivileges()
+      .then((priv) => {
+        privileges = priv;
+        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // all other functionality is controlled by the return privileges object
+        if (privileges.canFindFileStructure) {
+          return resolve(privileges);
+        } else {
+          kbnUrl.redirect('/access-denied');
+          return reject();
+        }
+      });
+  });
+}
+
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
 export function checkPermission(privilegeType) {
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   return (privileges[privilegeType] === true && licenseHasExpired !== true);
 }
 
@@ -60,23 +73,44 @@ export function checkPermission(privilegeType) {
 // expired or if they don't have the privilege to press that button
 export function createPermissionFailureMessage(privilegeType) {
   let message = '';
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
-    message = 'Your license has expired.';
+    message = i18n.translate('xpack.ml.privilege.licenseHasExpiredTooltip', {
+      defaultMessage: 'Your license has expired.'
+    });
   } else if (privilegeType === 'canCreateJob') {
-    message = 'You do not have permission to create Machine Learning jobs.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.createMLJobsTooltip', {
+      defaultMessage: 'You do not have permission to create Machine Learning jobs.'
+    });
   } else if (privilegeType === 'canStartStopDatafeed') {
-    message = 'You do not have permission to start or stop datafeeds.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDatafeedsTooltip', {
+      defaultMessage: 'You do not have permission to start or stop datafeeds.'
+    });
   } else if (privilegeType === 'canUpdateJob') {
-    message = 'You do not have permission to edit jobs.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.editJobsTooltip', {
+      defaultMessage: 'You do not have permission to edit jobs.'
+    });
   } else if (privilegeType === 'canDeleteJob') {
-    message = 'You do not have permission to delete jobs.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteJobsTooltip', {
+      defaultMessage: 'You do not have permission to delete jobs.'
+    });
   } else if (privilegeType === 'canCreateCalendar') {
-    message = 'You do not have permission to create calendars.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.createCalendarsTooltip', {
+      defaultMessage: 'You do not have permission to create calendars.'
+    });
   } else if (privilegeType === 'canDeleteCalendar') {
-    message = 'You do not have permission to delete calendars.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteCalendarsTooltip', {
+      defaultMessage: 'You do not have permission to delete calendars.'
+    });
   } else if (privilegeType === 'canForecastJob') {
-    message = 'You do not have permission to run forecasts.';
+    message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
+      defaultMessage: 'You do not have permission to run forecasts.'
+    });
   }
-  return `${message} Please contact your administrator.`;
+  return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {
+    defaultMessage: '{message} Please contact your administrator.',
+    values: {
+      message,
+    }
+  });
 }

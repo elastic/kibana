@@ -55,7 +55,7 @@ module.directive('mlInfluencersSelection', function () {
 
       function getNonDefaultFields(defaultFields) {
         return $scope.formConfig.influencerFields.filter(f => {
-          return (defaultFields.find(sp => sp === f) === undefined);
+          return (defaultFields.find(sp => sp.name === f.name) === undefined);
         });
       }
 

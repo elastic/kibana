@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import reducer from '../rootReducer';
+import { rootReducer } from '../rootReducer';
+
+const ISO_DATE_PATTERN = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
 
 describe('root reducer', () => {
   it('should return the initial state', () => {
-    expect(reducer(undefined, {})).toEqual({
+    const state = rootReducer(undefined, {});
+
+    expect(state.urlParams.start).toMatch(ISO_DATE_PATTERN);
+    expect(state.urlParams.end).toMatch(ISO_DATE_PATTERN);
+
+    delete state.urlParams.start;
+    delete state.urlParams.end;
+
+    expect(state).toEqual({
       location: { hash: '', pathname: '', search: '' },
       reactReduxRequest: {},
-      sorting: {
-        service: { descending: false, key: 'serviceName' },
-        transaction: { descending: true, key: 'impact' }
-      },
       urlParams: {}
     });
   });

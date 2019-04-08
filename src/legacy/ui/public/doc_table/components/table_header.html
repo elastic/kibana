@@ -1,0 +1,79 @@
+<tr>
+  <td width="1%"></td>
+  <th
+    ng-if="indexPattern.timeFieldName && !hideTimeColumn"
+    data-test-subj="docTableHeaderField"
+    scope="col"
+  >
+    <span>
+      <span
+        i18n-id="common.ui.docTable.tableHeader.timeHeaderCellTitle"
+        i18n-default-message="Time"
+      ></span>
+      <button
+      id="docTableHeaderFieldSort{{indexPattern.timeFieldName}}"
+      tabindex="0"
+      aria-label="{{ getAriaLabelForColumn(indexPattern.timeFieldName) }}"
+      ng-class="headerClass(indexPattern.timeFieldName)"
+      role="button"
+      ng-click="cycleSortOrder(indexPattern.timeFieldName)"
+      tooltip="{{ ::'common.ui.docTable.tableHeader.sortByTimeTooltip' | i18n: {defaultMessage: 'Sort by time'} }}"
+    ></button>
+    </span>
+  </th>
+  <th
+    ng-repeat="name in columns"
+    data-test-subj="docTableHeaderField"
+    scope="col"
+  >
+    <span
+      data-test-subj="docTableHeader-{{name}}"
+    >
+      {{name | shortDots}}
+      <button
+        data-test-subj="docTableHeaderFieldSort_{{name}}"
+        id="docTableHeaderFieldSort{{name}}"
+        ng-if="isSortableColumn(name)"
+        aria-label="{{ getAriaLabelForColumn(name) }}"
+        ng-class="headerClass(name)"
+        ng-click="cycleSortOrder(name)"
+        tooltip="{{tooltip(name)}}"
+        tooltip-append-to-body="1"
+      ></button>
+    </span>
+    <button
+      class="fa fa-remove kbnDocTableHeader__move"
+      ng-click="onRemoveColumn(name)"
+      ng-if="canRemoveColumn(name)"
+      tooltip-append-to-body="1"
+      tooltip="{{ ::'common.ui.docTable.tableHeader.removeColumnButtonTooltip' | i18n: {defaultMessage: 'Remove column'} }}"
+      aria-label="{{ 'common.ui.docTable.tableHeader.removeColumnButtonAriaLabel' | i18n: {
+        defaultMessage: 'Remove {columnName} column',
+        values: {columnName: name}
+      } }}"
+      data-test-subj="docTableRemoveHeader-{{name}}"
+    ></button>
+    <button
+      class="fa fa-angle-double-left kbnDocTableHeader__move"
+      ng-click="moveColumnLeft(name)"
+      ng-if="canMoveColumnLeft(name)"
+      tooltip-append-to-body="1"
+      tooltip="{{ ::'common.ui.docTable.tableHeader.moveColumnLeftButtonTooltip' | i18n: {defaultMessage: 'Move column to the left'} }}"
+      aria-label="{{ 'common.ui.docTable.tableHeader.moveColumnLeftButtonAriaLabel' | i18n: {
+        defaultMessage: 'Move {columnName} column to the left',
+        values: {columnName: name}
+      } }}"
+    ></button>
+    <button
+      class="fa fa-angle-double-right kbnDocTableHeader__move"
+      ng-click="moveColumnRight(name)"
+      ng-if="canMoveColumnRight(name)"
+      tooltip-append-to-body="1"
+      tooltip="{{ ::'common.ui.docTable.tableHeader.moveColumnRightButtonTooltip' | i18n: {defaultMessage: 'Move column to the right'} }}"
+      aria-label="{{ 'common.ui.docTable.tableHeader.moveColumnRightButtonAriaLabel' | i18n: {
+        defaultMessage: 'Move {columnName} column to the right',
+        values: {columnName: name}
+      } }}"
+    ></button>
+  </th>
+</tr>

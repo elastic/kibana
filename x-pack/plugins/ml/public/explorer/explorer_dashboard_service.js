@@ -11,27 +11,9 @@
  * components in the Explorer dashboard.
  */
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import { Subject } from 'rxjs';
 
-import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
+export const ALLOW_CELL_RANGE_SELECTION = false;
 
-module.service('mlExplorerDashboardService', function () {
-  this.allowCellRangeSelection = true;
-
-  const listenerFactory = listenerFactoryProvider();
-  const dragSelect = this.dragSelect = listenerFactory();
-  const swimlaneCellClick = this.swimlaneCellClick = listenerFactory();
-  const swimlaneDataChange = this.swimlaneDataChange = listenerFactory();
-  const swimlaneRenderDone = this.swimlaneRenderDone = listenerFactory();
-  this.anomalyDataChange = listenerFactory();
-
-  this.init = function () {
-    // Clear out any old listeners.
-    dragSelect.unwatchAll();
-    swimlaneCellClick.unwatchAll();
-    swimlaneDataChange.unwatchAll();
-    swimlaneRenderDone.unwatchAll();
-  };
-
-});
+export const dragSelect$ = new Subject();
+export const explorer$ = new Subject();

@@ -27,7 +27,7 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   const pluginDirs = [
     ...(config.pluginDirs || []).map(resolveToRoot),
     resolve(kibanaPath, 'plugins'),
-    resolve(kibanaPath, 'src/core_plugins'),
+    resolve(kibanaPath, 'src/legacy/core_plugins'),
   ];
 
   const pluginPaths = [
@@ -55,7 +55,7 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   return pluginsFromMap.concat(
     glob.sync(globPatterns).map(pkgJsonPath => {
       const path = dirname(pkgJsonPath);
-      const pkg = require(pkgJsonPath);
+      const pkg = require(pkgJsonPath); // eslint-disable-line import/no-dynamic-require
       return {
         name: pkg.name,
         directory: path,

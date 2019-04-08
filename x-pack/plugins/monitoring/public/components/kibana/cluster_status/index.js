@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function ClusterStatus({ stats }) {
+function ClusterStatusUI({ stats, intl }) {
   const {
     concurrent_connections: connections,
     count: instances,
@@ -22,36 +23,49 @@ export function ClusterStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Instances',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.clusterStatus.instancesLabel',
+        defaultMessage: 'Instances'
+      }),
       value: instances,
-      dataTestSubj: 'instances'
+      'data-test-subj': 'instances'
     },
     {
-      label: 'Memory',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.clusterStatus.memoryLabel',
+        defaultMessage: 'Memory'
+      }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
-      dataTestSubj: 'memory'
+      'data-test-subj': 'memory'
     },
     {
-      label: 'Requests',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.clusterStatus.requestsLabel',
+        defaultMessage: 'Requests'
+      }),
       value: requests,
-      dataTestSubj: 'requests'
+      'data-test-subj': 'requests'
     },
     {
-      label: 'Connections',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.clusterStatus.connectionsLabel',
+        defaultMessage: 'Connections'
+      }),
       value: connections,
-      dataTestSubj: 'connections'
+      'data-test-subj': 'connections'
     },
     {
-      label: 'Max. Response Time',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel',
+        defaultMessage: 'Max. Response Time'
+      }),
       value: formatMetric(maxResponseTime, '0', 'ms'),
-      dataTestSubj: 'maxResponseTime'
+      'data-test-subj': 'maxResponseTime'
     }
   ];
 
   const IconComponent = ({ status }) => (
-    <Fragment>
-      Status: <KibanaStatusIcon status={status} />
-    </Fragment>
+    <KibanaStatusIcon status={status} />
   );
 
   return (
@@ -63,3 +77,5 @@ export function ClusterStatus({ stats }) {
     />
   );
 }
+
+export const ClusterStatus = injectI18n(ClusterStatusUI);

@@ -23,26 +23,32 @@ import { createEsTestCluster } from '../../es';
 
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
-export async function runElasticsearch({ config, log }) {
-  const isOss = config.get('esTestCluster.license') === 'oss';
+export async function runElasticsearch({ config, options }) {
+  const { log, esFrom } = options;
+  const license = config.get('esTestCluster.license');
+  const isTrialLicense = config.get('esTestCluster.license') === 'trial';
 
   const cluster = createEsTestCluster({
     port: config.get('servers.elasticsearch.port'),
-    password: !isOss
+    password: isTrialLicense
       ? DEFAULT_SUPERUSER_PASS
       : config.get('servers.elasticsearch.password'),
-    license: config.get('esTestCluster.license'),
+    license,
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
-    from: config.get('esTestCluster.from'),
+    esFrom: esFrom || config.get('esTestCluster.from'),
+    dataArchive: config.get('esTestCluster.dataArchive'),
   });
 
   const esArgs = config.get('esTestCluster.serverArgs');
 
   await cluster.start(esArgs);
 
-  if (!isOss) {
-    await setupUsers(log, config);
+  if (isTrialLicense) {
+    await setupUsers(log, config.get('servers.elasticsearch.port'), [
+      config.get('servers.elasticsearch'),
+      config.get('servers.kibana'),
+    ]);
   }
 
   return cluster;

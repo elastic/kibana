@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "include": [
-    "index.d.ts"
+    "index.d.ts",
+    "src/**/*.d.ts"
   ],
 }

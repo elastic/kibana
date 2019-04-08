@@ -1,0 +1,11 @@
+@import 'src/legacy/ui/public/styles/styling_constants';
+
+// Prefix all styles with "vga" to avoid conflicts.
+// Examples
+//   vgaChart
+//   vgaChart__legend
+//   vgaChart__legend--small
+//   vgaChart__legend-isLoading
+
+@import './vega_vis';
+@import './vega_editor';

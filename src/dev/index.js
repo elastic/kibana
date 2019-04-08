@@ -18,8 +18,8 @@
  */
 
 export {
-  createAutoJunitReporter,
-  setupJunitReportGeneration,
+  createAutoJUnitReporter,
+  setupJUnitReportGeneration,
 } from './mocha';
 
 export {

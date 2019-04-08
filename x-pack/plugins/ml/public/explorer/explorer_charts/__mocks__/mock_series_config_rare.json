@@ -1,0 +1,55 @@
+{
+  "jobId": "ffb-rare-by-response-code-0942",
+  "detectorIndex": 0,
+  "metricFunction": "count",
+  "timeField": "@timestamp",
+  "interval": "15m",
+  "datafeedConfig": {
+    "datafeed_id": "datafeed-ffb-rare-by-response-code-0942",
+    "job_id": "ffb-rare-by-response-code-0942",
+    "query_delay": "66615ms",
+    "indices": [
+      "filebeat-6.0.0-2017-nginx-elasticco-anon"
+    ],
+    "query": {
+      "match_all": {
+        "boost": 1
+      }
+    },
+    "scroll_size": 1000,
+    "chunking_config": {
+      "mode": "auto"
+    },
+    "state": "stopped"
+  },
+  "functionDescription": "rare",
+  "bucketSpanSeconds": 900,
+  "detectorLabel": "rare by \"nginx.access.response_code\"",
+  "entityFields": [
+    {
+      "fieldName": "nginx.access.response_code",
+      "fieldValue": "303",
+      "fieldType": "by"
+    }
+  ],
+  "infoTooltip": {
+    "jobId": "ffb-rare-by-response-code-0942",
+    "aggregationInterval": "15m",
+    "chartFunction": "count",
+    "entityFields": [
+      {
+        "fieldName": "nginx.access.response_code",
+        "fieldValue": "303"
+      }
+    ]
+  },
+  "loading": false,
+  "plotEarliest": 1487774250000,
+  "plotLatest": 1487900250000,
+  "selectedEarliest": 1487836800000,
+  "selectedLatest": 1487837699999,
+  "chartLimits": {
+    "max": 9294.095580000001,
+    "min": 5.74774
+  }
+}

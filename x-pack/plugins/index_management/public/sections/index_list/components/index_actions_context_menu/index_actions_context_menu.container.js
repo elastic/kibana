@@ -7,6 +7,12 @@
 import { connect } from 'react-redux';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../../../constants';
+import {
   clearCacheIndices,
   closeIndices,
   deleteIndices,
@@ -15,11 +21,16 @@ import {
   openIndices,
   editIndexSettings,
   refreshIndices,
-  openDetailPanel
+  openDetailPanel,
+  performExtensionAction,
+  reloadIndices,
+  freezeIndices,
+  unfreezeIndices,
 } from '../../../../store/actions';
 
 import {
-  getIndexStatusByIndexName
+  getIndexStatusByIndexName,
+  getIndicesByName
 } from '../../../../store/selectors';
 
 const mapStateToProps = (state, ownProps) => {
@@ -29,7 +40,8 @@ const mapStateToProps = (state, ownProps) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
   return {
-    indexStatusByName
+    indexStatusByName,
+    indices: getIndicesByName(state, indexNames)
   };
 };
 
@@ -53,26 +65,38 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     refreshIndices: () => {
       dispatch(refreshIndices({ indexNames }));
     },
+    freezeIndices: () => {
+      dispatch(freezeIndices({ indexNames }));
+    },
+    unfreezeIndices: () => {
+      dispatch(unfreezeIndices({ indexNames }));
+    },
     forcemergeIndices: (maxNumSegments) => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
     },
     showSettings: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Settings' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_SETTINGS }));
     },
     showMapping: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Mapping' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_MAPPING }));
     },
     showStats: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Stats' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_STATS }));
     },
     editIndex: () => {
       const indexName = indexNames ? indexNames[0] : null;
       if (indexName) {
-        dispatch(openDetailPanel({ indexName, panelType: 'Edit settings' }));
+        dispatch(openDetailPanel({ indexName, panelType: TAB_EDIT_SETTINGS }));
       }
     },
     deleteIndices: () => {
       dispatch(deleteIndices({ indexNames }));
+    },
+    reloadIndices: () => {
+      dispatch(reloadIndices(indexNames));
+    },
+    performExtensionAction: (requestMethod, successMessage) => {
+      dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
     }
   };
 };

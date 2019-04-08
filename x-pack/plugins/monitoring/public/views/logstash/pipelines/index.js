@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { find } from 'lodash';
+import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
+import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import {
   isPipelineMonitoringSupportedInVersion
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
+import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
+import { MonitoringViewBaseEuiTableController } from '../..';
 
 /*
  * Logstash Pipelines Listing page
@@ -20,7 +27,6 @@ import template from './index.html';
 const getPageData = ($injector) => {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timefilter = $injector.get('timefilter');
   const Private = $injector.get('Private');
 
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash/pipelines`;
@@ -60,29 +66,65 @@ uiRoutes
       },
       pageData: getPageData
     },
-    controller($injector, $scope) {
-      const $route = $injector.get('$route');
-      const globalState = $injector.get('globalState');
-      const timefilter = $injector.get('timefilter');
-      const title = $injector.get('title');
-      const $executor = $injector.get('$executor');
+    controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
+      constructor($injector, $scope, i18n) {
+        super({
+          title: 'Logstash Pipelines',
+          storageKey: 'logstash.pipelines',
+          getPageData,
+          $scope,
+          $injector
+        });
 
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-      $scope.pageData = $route.current.locals.pageData;
+        const $route = $injector.get('$route');
+        const kbnUrl = $injector.get('kbnUrl');
+        const config = $injector.get('config');
+        this.data = $route.current.locals.pageData;
+        const globalState = $injector.get('globalState');
+        $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
-      $scope.upgradeMessage = makeUpgradeMessage($scope.pageData.clusterStatus.versions);
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
+        function onBrush(xaxis) {
+          timefilter.setTime({
+            from: moment(xaxis.from),
+            to: moment(xaxis.to),
+            mode: 'absolute'
+          });
+        }
 
-      title($scope.cluster, 'Logstash Pipelines');
+        const renderReact = (pageData) => {
+          if (!pageData) {
+            return;
+          }
 
-      $executor.register({
-        execute: () => getPageData($injector),
-        handleResponse: (response) => $scope.pageData = response
-      });
+          const upgradeMessage = pageData
+            ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
+            : null;
 
-      $executor.start();
+          render(
+            <I18nContext>
+              <PipelineListing
+                className="monitoringLogstashPipelinesTable"
+                onBrush={onBrush}
+                stats={pageData.clusterStatus}
+                data={pageData.pipelines}
+                sorting={this.sorting}
+                pagination={this.pagination}
+                onTableChange={this.onTableChange}
+                upgradeMessage={upgradeMessage}
+                dateFormat={config.get('dateFormat')}
+                angular={{
+                  kbnUrl,
+                  scope: $scope,
+                }}
+              />
+            </I18nContext>,
+            document.getElementById('monitoringLogstashPipelinesApp')
+          );
+        };
 
-      $scope.$on('$destroy', $executor.destroy);
+        $scope.$watch(() => this.data, pageData => {
+          renderReact(pageData);
+        });
+      }
     }
   });

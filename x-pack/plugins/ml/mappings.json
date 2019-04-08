@@ -1,0 +1,13 @@
+{
+  "ml-telemetry": {
+    "properties": {
+      "file_data_visualizer": {
+        "properties": {
+          "index_creation_count": {
+            "type" : "long"
+          }
+        }
+      }
+    }
+  }
+}

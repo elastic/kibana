@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 
 export function handleSettingsError(err) {
-  return wrap(err, err.statusCode);
+  return boomify(err, { statusCode: err.statusCode });
 }

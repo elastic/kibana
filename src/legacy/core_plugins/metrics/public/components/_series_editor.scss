@@ -1,0 +1,22 @@
+@import 'node_modules/@elastic/eui/src/components/panel/mixins';
+
+.tvbSeriesEditor__container {
+  padding: $euiSize;
+}
+
+@include euiPanel('tvbSeriesEditor');
+
+.tvbSeriesEditor {
+  margin-bottom: $euiSize;
+  padding: $euiSizeS;
+
+  // When dragging a collapsed item, make sure the contents doesn't show
+  &.ui-sortable-dragging {
+    overflow: hidden;
+  }
+}
+
+.tvbSeries__body {
+  margin-left: $euiSizeXL;
+  margin-top: $euiSizeS;
+}

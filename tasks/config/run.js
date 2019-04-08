@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -41,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -58,21 +55,8 @@ module.exports = function (grunt) {
     };
   }
 
-  const apiTestServerFlags = [
-    '--optimize.enabled=false',
-    '--elasticsearch.url=' + esTestConfig.getUrl(),
-    '--elasticsearch.healthCheck.delay=' + HOUR,
-    '--server.port=' + kbnTestConfig.getPort(),
-    '--server.xsrf.disableProtection=true',
-  ];
-
-  const funcTestServerFlags = [
-    '--server.maxPayloadBytes=1648576', //default is 1048576
-    '--elasticsearch.url=' + esTestConfig.getUrl(),
-    '--server.port=' + kbnTestConfig.getPort(),
-  ];
-
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
@@ -86,6 +70,13 @@ module.exports = function (grunt) {
       args: [
         require.resolve('../../scripts/eslint'),
         '--no-cache'
+      ]
+    },
+
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
       ]
     },
 
@@ -108,6 +99,34 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    typeCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_ts_projects')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
@@ -117,56 +136,6 @@ module.exports = function (grunt) {
       ]
     },
 
-    // used by the test:api task
-    //    runs the kibana server prepared for the api_integration tests
-    apiTestServer: createKbnServerTask({
-      flags: [
-        ...apiTestServerFlags
-      ]
-    }),
-
-    // used by the test:api:server task
-    //    runs the kibana server in --dev mode, prepared for developing api_integration tests
-    //    and watching for changes so the server will restart when necessary
-    devApiTestServer: createKbnServerTask({
-      flags: [
-        '--dev',
-        '--no-base-path',
-        ...apiTestServerFlags,
-      ]
-    }),
-
-    // used by test:ui task
-    //    runs the kibana server prepared for the functional tests
-    funcTestServer: createKbnServerTask({
-      flags: [
-        ...funcTestServerFlags,
-      ]
-    }),
-
-    // used by the test:ui:server task
-    //    runs the kibana server in dev mode, prepared for the functional tests
-    devFuncTestServer: createKbnServerTask({
-      flags: [
-        ...funcTestServerFlags,
-        '--dev',
-        '--dev_mode.enabled=false',
-        '--no-base-path',
-        '--optimize.watchPort=5611',
-        '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
-      ]
-    }),
-
-    // used by test:uiRelease task
-    //    runs the kibana server from the oss distributable prepared for the functional tests
-    ossDistFuncTestServer: createKbnServerTask({
-      runBuild: `oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-      flags: [
-        ...funcTestServerFlags,
-      ]
-    }),
-
     // used by the test:browser task
     //    runs the kibana server to serve the browser test bundle
     browserTestServer: createKbnServerTask({
@@ -174,9 +143,16 @@ module.exports = function (grunt) {
         ...browserTestServerFlags,
       ]
     }),
+    browserSCSS: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
+        '--optimize',
+        '--optimize.enabled=false'
+      ]
+    }),
 
     // used by the test:coverage task
-    //    runs the kibana server to serve the intrumented version of the browser test bundle
+    //    runs the kibana server to serve the instrumented version of the browser test bundle
     browserTestCoverageServer: createKbnServerTask({
       flags: [
         ...browserTestServerFlags,
@@ -199,22 +175,6 @@ module.exports = function (grunt) {
       ]
     }),
 
-    testEsServer: {
-      options: {
-        wait: false,
-        ready: /started/,
-        quiet: false,
-      },
-      cmd: process.execPath,
-      args: [
-        'scripts/es',
-        grunt.option('from') || 'snapshot',
-        '--license', 'oss',
-        '-E', `http.port=${esTestConfig.getPort()}`,
-        '-E', `discovery.zen.ping.unicast.hosts=localhost:${esTestConfig.getPort()}`,
-      ],
-    },
-
     verifyNotice: {
       options: {
         wait: true,
@@ -224,6 +184,53 @@ module.exports = function (grunt) {
         'scripts/notice',
         '--validate'
       ]
-    }
+    },
+
+    apiIntegrationTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/api_integration/config.js',
+        '--bail',
+        '--debug',
+      ],
+    },
+
+    serverIntegrationTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/server_integration/http/ssl/config.js',
+        '--config', 'test/server_integration/http/ssl_redirect/config.js',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    },
+
+    pluginFunctionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/plugin_functional/config.js',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    },
+
+    functionalTests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/functional/config.js',
+        '--bail',
+        '--debug',
+      ],
+    },
+
+    ...getFunctionalTestGroupRunConfigs({
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
   };
 };

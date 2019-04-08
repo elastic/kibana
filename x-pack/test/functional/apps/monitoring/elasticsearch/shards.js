@@ -19,8 +19,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-        from: '2017-10-05 19:34:48',
-        to: '2017-10-05 20:35:12',
+        from: '2017-10-05 19:34:48.000',
+        to: '2017-10-05 20:35:12.000',
       });
     });
 
@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         // go to nodes listing
         await overview.clickEsNodes();

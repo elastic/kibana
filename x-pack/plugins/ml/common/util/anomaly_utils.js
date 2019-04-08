@@ -12,6 +12,9 @@
 */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
+import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
@@ -21,19 +24,50 @@ const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean',
 const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
   'median', 'varp', 'info_content', 'time'];
 
+let severityTypes;
+
+function getSeverityTypes() {
+  if (severityTypes) {
+    return severityTypes;
+  }
+
+  return severityTypes = {
+    critical: { id: 'critical', label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
+      defaultMessage: 'critical',
+    }) },
+    major: { id: 'major', label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
+      defaultMessage: 'major',
+    }) },
+    minor: { id: 'minor', label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
+      defaultMessage: 'minor',
+    }) },
+    warning: { id: 'warning', label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
+      defaultMessage: 'warning',
+    }) },
+    unknown: { id: 'unknown', label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
+      defaultMessage: 'unknown',
+    }) },
+    low: { id: 'low', label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
+      defaultMessage: 'low',
+    }) },
+  };
+}
+
 // Returns a severity label (one of critical, major, minor, warning or unknown)
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverity(normalizedScore) {
+  const severityTypesList = getSeverityTypes();
+
   if (normalizedScore >= 75) {
-    return 'critical';
+    return severityTypesList.critical;
   } else if (normalizedScore >= 50) {
-    return 'major';
+    return severityTypesList.major;
   } else if (normalizedScore >= 25) {
-    return 'minor';
+    return severityTypesList.minor;
   } else if (normalizedScore >= 0) {
-    return 'warning';
+    return severityTypesList.warning;
   } else {
-    return 'unknown';
+    return severityTypesList.unknown;
   }
 }
 
@@ -41,18 +75,20 @@ export function getSeverity(normalizedScore) {
 // for the supplied normalized anomaly score (a value between 0 and 100), where scores
 // less than 3 are assigned a severity of 'low'.
 export function getSeverityWithLow(normalizedScore) {
+  const severityTypesList = getSeverityTypes();
+
   if (normalizedScore >= 75) {
-    return 'critical';
+    return severityTypesList.critical;
   } else if (normalizedScore >= 50) {
-    return 'major';
+    return severityTypesList.major;
   } else if (normalizedScore >= 25) {
-    return 'minor';
+    return severityTypesList.minor;
   } else if (normalizedScore >= 3) {
-    return 'warning';
+    return severityTypesList.warning;
   } else if (normalizedScore >= 0) {
-    return 'low';
+    return severityTypesList.low;
   } else {
-    return 'unknown';
+    return severityTypesList.unknown;
   }
 }
 
@@ -74,28 +110,27 @@ export function getSeverityColor(normalizedScore) {
   }
 }
 
-// Recurses through an object holding the list of detector descriptions against job IDs
-// checking for duplicate descriptions. For any detectors with duplicate descriptions, the
-// description is modified by appending the job ID in parentheses.
-// Only checks for duplicates across jobs; any duplicates within a job are left as-is.
-export function labelDuplicateDetectorDescriptions(detectorsByJob) {
-  const checkedJobIds = [];
-  _.each(detectorsByJob, function (detectors, jobId) {
-    checkedJobIds.push(jobId);
-    const otherJobs = _.omit(detectorsByJob, checkedJobIds);
-    _.each(detectors, function (description, i) {
-      _.each(otherJobs, function (otherJobDetectors, otherJobId) {
-        _.each(otherJobDetectors, function (otherDescription, j) {
-          if (description === otherDescription) {
-            detectors[i] = description + ' (' + jobId + ')';
-            otherJobDetectors[j] = description + ' (' + otherJobId + ')';
-          }
-        });
-      });
+// Returns a label to use for the multi-bucket impact of an anomaly
+// according to the value of the multi_bucket_impact field of a record,
+// which ranges from -5 to +5.
+export function getMultiBucketImpactLabel(multiBucketImpact) {
+  if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.highLabel', {
+      defaultMessage: 'high',
     });
-  });
-
-  return detectorsByJob;
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.mediumLabel', {
+      defaultMessage: 'medium',
+    });
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.lowLabel', {
+      defaultMessage: 'low',
+    });
+  } else {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.noneLabel', {
+      defaultMessage: 'none',
+    });
+  }
 }
 
 // Returns the name of the field to use as the entity name from the source record
@@ -150,6 +185,14 @@ export function showActualForFunction(functionDescription) {
 // whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
 export function showTypicalForFunction(functionDescription) {
   return _.indexOf(DISPLAY_TYPICAL_FUNCTIONS, functionDescription) > -1;
+}
+
+// Returns whether a rule can be configured against the specified anomaly.
+export function isRuleSupported(record) {
+  // A rule can be configured with a numeric condition if the function supports it,
+  // and/or with scope if there is a partitioning fields.
+  return (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1) ||
+    (getEntityFieldName(record) !== undefined);
 }
 
 // Two functions for converting aggregation type names.

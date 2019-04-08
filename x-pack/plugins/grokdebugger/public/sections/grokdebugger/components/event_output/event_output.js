@@ -4,37 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import template from './event_output.html';
-import './event_output.less';
-import 'ace';
+import React from 'react';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiCodeEditor
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-const app = uiModules.get('xpack/grokdebugger');
-
-app.directive('eventOutput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      structuredEvent: '='
-    },
-    bindToController: true,
-    controllerAs: 'eventOutput',
-    controller: class EventOutputController {
-      constructor($scope) {
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
-            readOnly: true,
+export function EventOutput({ value }) {
+  return (
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.grokDebugger.structuredDataLabel"
+          defaultMessage="Structured Data"
+        />
+      )}
+      fullWidth
+      data-test-subj="aceEventOutput"
+    >
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          mode="json"
+          isReadOnly
+          width="100%"
+          height="340px"
+          value={JSON.stringify(value, null, 2)}
+          setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
-            minLines: 20,
-            maxLines: 25
-          });
-          editor.$blockScrolling = Infinity;
-        };
-      }
-    }
-  };
-});
+          }}
+        />
+      </EuiPanel>
+    </EuiFormRow>
+  );
+}

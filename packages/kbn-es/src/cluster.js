@@ -19,10 +19,13 @@
 
 const execa = require('execa');
 const chalk = require('chalk');
-const { installSnapshot, installSource, installArchive } = require('./install');
+const path = require('path');
+const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
+const { promisify } = require('util');
+const treeKillAsync = promisify(require('tree-kill'));
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -42,6 +45,28 @@ exports.Cluster = class Cluster {
     this._log.indent(4);
 
     const { installPath } = await installSource({ log: this._log, ...options });
+
+    this._log.indent(-4);
+
+    return { installPath };
+  }
+
+  /**
+   * Download ES from a snapshot
+   *
+   * @param {Object} options
+   * @property {Array} options.installPath
+   * @property {Array} options.sourcePath
+   * @returns {Promise<{installPath}>}
+   */
+  async downloadSnapshot(options = {}) {
+    this._log.info(chalk.bold('Downloading snapshot'));
+    this._log.indent(4);
+
+    const { installPath } = await downloadSnapshot({
+      log: this._log,
+      ...options,
+    });
 
     this._log.indent(-4);
 
@@ -93,6 +118,28 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Unpakcs a tar or zip file containing the data directory for an
+   * ES cluster.
+   *
+   * @param {String} installPath
+   * @param {String} archivePath
+   */
+  async extractDataDirectory(installPath, archivePath) {
+    this._log.info(chalk.bold(`Extracting data directory`));
+    this._log.indent(4);
+
+    // decompress excludes the root directory as that is how our archives are
+    // structured. This works in our favor as we can explicitly extract into the data dir
+    const extractPath = path.resolve(installPath, 'data');
+    this._log.info(`Data archive: ${archivePath}`);
+    this._log.info(`Extract path: ${extractPath}`);
+
+    await decompress(archivePath, extractPath);
+
+    this._log.indent(-4);
+  }
+
+  /**
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
@@ -141,11 +188,17 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async stop() {
+    if (this._stopCalled) {
+      return;
+    }
+    this._stopCalled = true;
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
 
-    this._process.kill();
+    await treeKillAsync(this._process.pid);
+
     await this._outcome;
   }
 
@@ -186,12 +239,14 @@ exports.Cluster = class Cluster {
       lines.forEach(line => this._log.info(line.formattedMessage));
     });
 
-    this._process.stderr.on('data', data =>
-      this._log.error(chalk.red(data.toString()))
-    );
+    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
     this._outcome = new Promise((resolve, reject) => {
       this._process.once('exit', code => {
+        if (this._stopCalled) {
+          resolve();
+          return;
+        }
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
           reject(createCliError(`ES exited with code ${code}`));

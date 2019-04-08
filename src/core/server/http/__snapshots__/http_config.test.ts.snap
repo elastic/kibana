@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`accepts valid hostnames: valid host names 1`] = `
+Object {
+  "host1": "www.example.com",
+  "host2": "8.8.8.8",
+  "host3": "::1",
+  "host4": "localhost",
+}
+`;
+
+exports[`has defaults for config 1`] = `
+Object {
+  "autoListen": true,
+  "cors": false,
+  "host": "localhost",
+  "maxPayload": ByteSizeValue {
+    "valueInBytes": 1048576,
+  },
+  "port": 5601,
+  "rewriteBasePath": false,
+  "ssl": Object {
+    "cipherSuites": Array [
+      "ECDHE-RSA-AES128-GCM-SHA256",
+      "ECDHE-ECDSA-AES128-GCM-SHA256",
+      "ECDHE-RSA-AES256-GCM-SHA384",
+      "ECDHE-ECDSA-AES256-GCM-SHA384",
+      "DHE-RSA-AES128-GCM-SHA256",
+      "ECDHE-RSA-AES128-SHA256",
+      "DHE-RSA-AES128-SHA256",
+      "ECDHE-RSA-AES256-SHA384",
+      "DHE-RSA-AES256-SHA384",
+      "ECDHE-RSA-AES256-SHA256",
+      "DHE-RSA-AES256-SHA256",
+      "HIGH",
+      "!aNULL",
+      "!eNULL",
+      "!EXPORT",
+      "!DES",
+      "!RC4",
+      "!MD5",
+      "!PSK",
+      "!SRP",
+      "!CAMELLIA",
+    ],
+    "enabled": false,
+    "supportedProtocols": Array [
+      "TLSv1.1",
+      "TLSv1.2",
+    ],
+  },
+}
+`;
+
+exports[`throws if basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
+
+exports[`throws if invalid hostname 1`] = `"[host]: value is [asdf$%^] but it must be a valid hostname (see RFC 1123)."`;
+
+exports[`with TLS should accept known protocols\` 1`] = `
+"[ssl.supportedProtocols.0]: types that failed validation:
+- [ssl.supportedProtocols.0.0]: expected value to equal [TLSv1] but got [SOMEv100500]
+- [ssl.supportedProtocols.0.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
+- [ssl.supportedProtocols.0.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+`;
+
+exports[`with TLS should accept known protocols\` 2`] = `
+"[ssl.supportedProtocols.3]: types that failed validation:
+- [ssl.supportedProtocols.3.0]: expected value to equal [TLSv1] but got [SOMEv100500]
+- [ssl.supportedProtocols.3.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
+- [ssl.supportedProtocols.3.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
+`;
+
+exports[`with TLS throws if TLS is enabled but \`certificate\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;
+
+exports[`with TLS throws if TLS is enabled but \`key\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;
+
+exports[`with TLS throws if TLS is enabled but \`redirectHttpFromPort\` is equal to \`port\` 1`] = `"Kibana does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."`;

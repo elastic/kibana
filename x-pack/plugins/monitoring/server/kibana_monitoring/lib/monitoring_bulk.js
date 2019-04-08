@@ -39,14 +39,14 @@ export function monitoringBulk(Client, _config, components) {
       }
     },
     urls: [{
-      fmt: '/_xpack/monitoring/<%=type%>/_bulk',
+      fmt: '/_monitoring/<%=type%>/bulk',
       req: {
         type: {
           type: 'string'
         }
       }
     }, {
-      fmt: '/_xpack/monitoring/_bulk'
+      fmt: '/_monitoring/bulk'
     }],
     needBody: true,
     bulkBody: true,

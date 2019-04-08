@@ -34,18 +34,17 @@ export function registerDeleteRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/watcher/watches',
-    method: 'DELETE',
-    handler: (request, reply) => {
+    path: '/api/watcher/watches/delete',
+    method: 'POST',
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
-      return deleteWatches(callWithRequest, request.payload.watchIds)
-        .then(results => {
-          reply({ results });
-        })
-        .catch(err => {
-          reply(wrapUnknownError(err));
-        });
+      try {
+        const results = await deleteWatches(callWithRequest, request.payload.watchIds);
+        return { results };
+      } catch (err) {
+        throw wrapUnknownError(err);
+      }
     },
     config: {
       pre: [ licensePreRouting ]

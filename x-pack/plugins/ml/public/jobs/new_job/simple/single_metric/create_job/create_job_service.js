@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
+import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -69,7 +70,8 @@ export function SingleMetricJobServiceProvider() {
           .then((resp) => {
 
             const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-            let highestValue = 0;
+            let highestValue;
+            let lowestValue;
 
             _.each(aggregationsByTime, (dataForTime) => {
               const time = dataForTime.key;
@@ -85,8 +87,10 @@ export function SingleMetricJobServiceProvider() {
               if (!isFinite(value) || dataForTime.doc_count === 0) {
                 value = null;
               }
-              if (value > highestValue) {
-                highestValue = value;
+
+              if (value !== null) {
+                highestValue = (highestValue === undefined) ? value : Math.max(value, highestValue);
+                lowestValue = (lowestValue === undefined) ? value : Math.min(value, lowestValue);
               }
 
               obj.results[time] = {
@@ -97,14 +101,36 @@ export function SingleMetricJobServiceProvider() {
             this.chartData.totalResults = resp.hits.total;
             this.chartData.line = processLineChartResults(obj.results);
 
-            this.chartData.highestValue = Math.ceil(highestValue);
-            // Append extra 10px to width of tick label for highest axis value to allow for tick padding.
-            if (this.chartData.fieldFormat !== undefined) {
-              const highValueFormatted = this.chartData.fieldFormat.convert(this.chartData.highestValue, 'text');
-              this.chartData.chartTicksMargin.width = calculateTextWidth(highValueFormatted, false) + 10;
+            // Calculate the width required for the chart ticks margin,
+            // which is the larger of the minimum or maximum value when formatted
+            lowestValue = (lowestValue === undefined) ? 0 : lowestValue;
+            highestValue = (highestValue === undefined) ? 1 : highestValue;
+
+            // For small ranges e.g 0.15 to 0.55 don't floor/ceil values as
+            // the resulting ints would require less width when rendering
+            const valueRange = highestValue - lowestValue;
+            if (valueRange > 1) {
+              lowestValue = Math.floor(lowestValue);
+              this.chartData.highestValue = Math.ceil(highestValue);
             } else {
-              this.chartData.chartTicksMargin.width = calculateTextWidth(this.chartData.highestValue, true) + 10;
+
+              this.chartData.highestValue = highestValue;
             }
+
+            let lowValueWidth = 0;
+            let highValueWidth = 0;
+            if (this.chartData.fieldFormat !== undefined) {
+              const lowValueFormatted = this.chartData.fieldFormat.convert(lowestValue, 'text');
+              const highValueFormatted = this.chartData.fieldFormat.convert(this.chartData.highestValue, 'text');
+              lowValueWidth = calculateTextWidth(lowValueFormatted, false);
+              highValueWidth = calculateTextWidth(highValueFormatted, false);
+            } else {
+              lowValueWidth = calculateTextWidth(lowestValue, true);
+              highValueWidth = calculateTextWidth(this.chartData.highestValue, true);
+            }
+
+            // Append extra 10px to width of tick label for widest axis value to allow for tick padding.
+            this.chartData.chartTicksMargin.width = Math.max(lowValueWidth, highValueWidth) + 10;
 
             resolve(this.chartData);
           })
@@ -131,12 +157,7 @@ export function SingleMetricJobServiceProvider() {
         function: func
       };
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       if (formConfig.field && formConfig.field.id) {
         dtr.field_name = formConfig.field.id;
@@ -171,6 +192,14 @@ export function SingleMetricJobServiceProvider() {
 
       if (formConfig.useDedicatedIndex) {
         job.results_index_name = job.job_id;
+      }
+
+      if (formConfig.usesSavedSearch === false) {
+        // Jobs created from saved searches cannot be cloned in the wizard as the
+        // ML job config holds no reference to the saved search ID.
+        job.custom_settings = {
+          created_by: WIZARD_TYPE.SINGLE_METRIC
+        };
       }
 
       // Use the original es agg type rather than the ML version
@@ -426,6 +455,7 @@ function getSearchJsonFromConfig(formConfig) {
   const json = {
     index: formConfig.indexPattern.title,
     size: 0,
+    rest_total_hits_as_int: true,
     body: {
       query: {},
       aggs: {

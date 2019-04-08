@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
-const TEST_ANCHOR_TYPE = 'doc';
+const TEST_ANCHOR_TYPE = '_doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
@@ -31,9 +31,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'context']);
 
-  // Flaky: https://github.com/elastic/kibana/issues/16002
-  describe.skip('context filters', function contextSize() {
-    before(async function () {
+  describe('context filters', function contextSize() {
+    beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
@@ -64,7 +63,9 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be toggleable via the filter bar', async function () {
       const table = await docTable.getTable();
-
+      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 

@@ -27,19 +27,20 @@ import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
 import del from 'del';
-import { createPromiseFromStreams, createMapStream } from '../../../utils';
+import deleteEmpty from 'delete-empty';
+import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import { Extract } from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
 const statAsync = promisify(fs.stat);
-const chmodAsync = promisify(fs.chmod);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
+const copyFileAsync = promisify(fs.copyFile);
 
-function assertAbsolute(path) {
+export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
     throw new TypeError(
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'
@@ -79,35 +80,55 @@ export async function copy(source, destination) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  const stat = await statAsync(source);
-
-  // mkdirp after the stat(), stat will throw if source
-  // doesn't exist and ideally we won't create the parent directory
-  // unless the source exists
+  // do a stat call to make sure the source exists before creating the destination directory
+  await statAsync(source);
   await mkdirp(dirname(destination));
-
-  await createPromiseFromStreams([
-    fs.createReadStream(source),
-    fs.createWriteStream(destination),
-  ]);
-
-  await chmodAsync(destination, stat.mode);
+  await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
 }
 
-export async function deleteAll(log, patterns) {
+export async function deleteAll(patterns, log) {
   if (!Array.isArray(patterns)) {
     throw new TypeError('Expected patterns to be an array');
   }
 
-  log.debug('Deleting patterns:', longInspect(patterns));
+  if (log) {
+    log.debug('Deleting patterns:', longInspect(patterns));
+  }
 
   for (const pattern of patterns) {
     assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
   }
 
-  const files = await del(patterns);
-  log.debug('Deleted %d files/directories', files.length);
-  log.verbose('Deleted:', longInspect(files));
+  const files = await del(patterns, {
+    concurrency: 4
+  });
+
+  if (log) {
+    log.debug('Deleted %d files/directories', files.length);
+    log.verbose('Deleted:', longInspect(files));
+  }
+}
+
+export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {
+  if (typeof rootFolderPath !== 'string') {
+    throw new TypeError('Expected root folder to be a string path');
+  }
+
+  log.debug('Deleting all empty folders and their children recursively starting on ', rootFolderPath);
+  assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
+
+  // Delete empty is used to gather all the empty folders and
+  // then we use del to actually delete them
+  const emptyFoldersList = await deleteEmpty(rootFolderPath, { dryRun: true });
+  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
+    return !foldersToKeep.some(folderToKeep => folderToDelete.includes(folderToKeep));
+  });
+  const deletedEmptyFolders = await del(foldersToDelete, {
+    concurrency: 4
+  });
+
+  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
+  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
 }
 
 export async function copyAll(sourceDir, destination, options = {}) {
@@ -127,9 +148,22 @@ export async function copyAll(sourceDir, destination, options = {}) {
       base: sourceDir,
       dot,
     }),
-    vfs.dest(destination),
-    ...(Boolean(time) ? [createMapStream(file => utimesAsync(file.path, time, time))] : []),
+    vfs.dest(destination)
   ]);
+
+  // we must update access and modified file times after the file copy
+  // has completed, otherwise the copy action can effect modify times.
+  if (Boolean(time)) {
+    await createPromiseFromStreams([
+      vfs.src(select, {
+        buffer: false,
+        cwd: destination,
+        base: destination,
+        dot,
+      }),
+      createMapStream(file => utimesAsync(file.path, time, time))
+    ]);
+  }
 }
 
 export async function getFileHash(path, algo) {

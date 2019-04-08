@@ -11,6 +11,7 @@ import { getIndices } from '../../../../lib/elasticsearch/indices';
 import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 export function esIndicesRoute(server) {
   server.route({
@@ -33,24 +34,24 @@ export function esIndicesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;
       const { ccs } = req.payload;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeIndices: true });
         const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
 
-        reply({
+        return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
-          indices
-        });
+          indices,
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

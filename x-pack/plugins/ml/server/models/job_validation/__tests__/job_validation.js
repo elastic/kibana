@@ -37,7 +37,7 @@ describe('ML - validateJob', () => {
     const payload = { job: {} };
 
     validateJob(callWithRequest, payload).then(
-      () => done(new Error('Promise should not resolve for this test with job.analisys_config not being an object.')),
+      () => done(new Error('Promise should not resolve for this test with job.analysis_config not being an object.')),
       () => done()
     );
   });
@@ -286,6 +286,115 @@ describe('ML - validateJob', () => {
           'detectors_function_not_empty',
           'index_fields_valid',
           'time_field_invalid'
+        ]);
+      }
+    );
+  });
+
+  it('categorization job using mlcategory passes aggregatable field check', () => {
+    const payload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [{
+            function: 'count',
+            by_field_name: 'mlcategory'
+          }],
+          categorization_field_name: 'message_text',
+          influencers: []
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: { indices: [] }
+      },
+      fields: { testField: {} }
+    };
+
+    return validateJob(callWithRequest, payload).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'success_cardinality',
+          'time_field_invalid',
+          'influencer_low_suggestion'
+        ]);
+      }
+    );
+  });
+
+  it('non-existent field reported as non aggregatable', () => {
+    const payload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [{
+            function: 'count',
+            partition_field_name: 'ailine'
+          }],
+          influencers: []
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: { indices: [] }
+      },
+      fields: { testField: {} }
+    };
+
+    return validateJob(callWithRequest, payload).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'field_not_aggregatable',
+          'time_field_invalid'
+        ]);
+      }
+    );
+  });
+
+  it('script field not reported as non aggregatable', () => {
+    const payload = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [{
+            function: 'count',
+            partition_field_name: 'custom_script_field'
+          }],
+          influencers: []
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: {
+          indices: [],
+          script_fields: {
+            custom_script_field: {
+              script: {
+                source: `'some script'`,
+                lang: 'painless'
+              }
+            }
+          },
+        }
+      },
+      fields: { testField: {} }
+    };
+
+    return validateJob(callWithRequest, payload).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'success_cardinality',
+          'time_field_invalid',
+          'influencer_low_suggestion'
         ]);
       }
     );

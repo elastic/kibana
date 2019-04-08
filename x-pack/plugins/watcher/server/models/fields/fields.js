@@ -7,12 +7,13 @@
 import { badRequest } from 'boom';
 import { forEach, keys, sortBy } from 'lodash';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
+import { i18n } from '@kbn/i18n';
 
 function buildFieldList(fields) {
   const result = [];
 
   forEach(fields, (field, name) => {
-    // If the field exists in multiple indexes, the types may be inconsistant.
+    // If the field exists in multiple indexes, the types may be inconsistent.
     // In this case, default to the first type.
     const type = keys(field)[0];
 
@@ -52,7 +53,14 @@ export class Fields {
 
   static fromUpstreamJson(json) {
     if (!json.fields) {
-      throw badRequest('json argument must contain a fields property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.fields.fieldsPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {fields} property',
+          values: {
+            fields: 'fields'
+          }
+        }),
+      );
     }
 
     const fields = buildFieldList(json.fields);

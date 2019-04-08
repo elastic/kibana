@@ -1,0 +1,16 @@
+{
+  "ilm.move_to_step": {
+    "data_autocomplete_rules": {
+      "current_step": {
+        "phase": "",
+        "action": "",
+        "name": ""
+      },
+      "next_step": {
+        "phase": "",
+        "action": "",
+        "name": ""
+      }
+    }
+  }  
+}

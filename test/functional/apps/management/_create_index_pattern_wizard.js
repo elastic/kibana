@@ -21,22 +21,21 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('"Create Index Pattern" wizard', function () {
-    beforeEach(function () {
+
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        })
-        .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
-        });
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
     describe('step 1 next button', function () {
       it('is disabled by default', async function () {
+        await (await testSubjects.find('createIndexPatternButton')).click();
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
         expect(isEnabled).not.to.be.ok();

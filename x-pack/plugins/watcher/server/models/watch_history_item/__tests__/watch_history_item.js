@@ -73,7 +73,8 @@ describe('watch_history_item', () => {
             state: {
               active: upstreamJson.watchHistoryItemJson.status.state.active
             }
-          }
+          },
+          watchErrors: {}
         });
       });
 

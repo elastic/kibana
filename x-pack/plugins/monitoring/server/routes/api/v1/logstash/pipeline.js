@@ -8,13 +8,14 @@ import Joi from 'joi';
 import { handleError } from '../../../../lib/errors';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 /*
  * Logstash Pipeline route.
  */
 export function logstashPipelineRoute(server) {
   /**
-   * Logtash Pipeline Viewer request.
+   * Logstash Pipeline Viewer request.
    *
    * This will fetch all data required to display a Logstash Pipeline Viewer page.
    *
@@ -37,18 +38,18 @@ export function logstashPipelineRoute(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req) => {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
+      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       const pipelineId = req.params.pipelineId;
-      const pipelineHash = req.params.pipelineHash;
+      // Optional params default to empty string, set to null to be more explicit.
+      const pipelineHash = req.params.pipelineHash || null;
 
       return getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, pipelineHash)
-        .then(reply)
-        .catch(err => reply(handleError(err, req)));
+        .catch(err => handleError(err, req));
     }
   });
 }

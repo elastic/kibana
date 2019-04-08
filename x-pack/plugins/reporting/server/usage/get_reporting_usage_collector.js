@@ -8,7 +8,7 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { UsageCollector } from '../../../monitoring/server/kibana_monitoring';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -104,7 +104,7 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
   return {
     _all: (total || total === 0) ? total : undefined,
     ...jobTypes,
-    "status": {
+    'status': {
       ...statusCounts
     }
   };
@@ -112,13 +112,14 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
 
 /*
  * @param {Object} server
- * @param {Function} callCluster - function that uses either callWithRequest or callWithInternal to fetch data from ES
  * @return {Object} kibana usage stats type collection object
  */
-export function getReportingUsageCollector(server, callCluster) {
-  return new UsageCollector(server, {
+export function getReportingUsageCollector(server) {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: async () => {
+
+    fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of reporting (csv at least) is available for all valid licenses
@@ -131,7 +132,7 @@ export function getReportingUsageCollector(server, callCluster) {
 
       let browserType;
       if (enabled) {
-        // Allow this to explictly throw an exception if/when this config is deprecated,
+        // Allow this to explicitly throw an exception if/when this config is deprecated,
         // because we shouldn't collect browserType in that case!
         browserType = config.get('xpack.reporting.capture.browser.type');
       }
@@ -146,6 +147,24 @@ export function getReportingUsageCollector(server, callCluster) {
         },
         last7Days: {
           ...statsOverLast7Days
+        }
+      };
+    },
+
+    /*
+     * Format the response data into a model for internal upload
+     * 1. Make this data part of the "kibana_stats" type
+     * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
+     */
+    formatForBulkUpload: result => {
+      return {
+        type: KIBANA_STATS_TYPE_MONITORING,
+        payload: {
+          usage: {
+            xpack: {
+              reporting: result
+            }
+          }
         }
       };
     }

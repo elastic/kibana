@@ -66,7 +66,7 @@ describe('pipeline', () => {
           username: 'elastic',
           pipeline: 'input {} filter { grok {} }\n output {}'
         };
-        // can't do an object level comparision because modified field is always `now`
+        // can't do an object level comparison because modified field is always `now`
         expect(pipeline.upstreamJSON.last_modified).to.be.a('string');
         expect(pipeline.upstreamJSON.description).to.be(expectedUpstreamJSON.description);
         expect(pipeline.upstreamJSON.pipeline_metadata).to.eql(expectedUpstreamJSON.pipeline_metadata);

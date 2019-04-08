@@ -15,86 +15,78 @@ image:images/Dashboard_example.png[Example dashboard]
 [[dashboard-getting-started]]
 == Building a Dashboard
 
+If you haven't yet indexed data into {es} or created an index pattern, 
+you'll be prompted to do so as you follow the steps for creating a dashboard.  
+Or, you can use one of the prebuilt sample data sets, available from the 
+Kibana home page.
+
 . In the side navigation, click *Dashboard*.
-. Click *Create new dashboard.*
+. Click *Create new dashboard.*  
 . Click *Add*.
 
 [[adding-visualizations-to-a-dashboard]]
-. To add a visualization, select its name from the list of visualizations
-or click *Add new visualization* to create one.
-If you have a large number of visualizations, you can filter the list.
+. Use *Add Panels* to add visualizations and saved searches to the dashboard. 
+If you have a large number of visualizations, you can filter the lists. 
 +
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-. To add a saved search, click the *Saved Search* tab, and then select a name from the list.
-
 [[saving-dashboards]]
-. When you're finished adding and arranging the dashboard content,
-go to the menu bar, click *Save*, and enter
-a name. Optionally, you can store the time period specified in the time
-filter by selecting *Store time with dashboard*.
+. When you're finished adding and arranging the panels,
+go to the menu bar and click *Save*.
 
-By default, Kibana dashboards use a light color theme. To use a dark color theme,
-click *Options* and select *Use dark theme*. To set the dark theme as the default, go
-to *Management > Advanced Settings* and set `dashboard:defaultDarkTheme`
-to `On`.
+. In *Save Dashboard*, enter a dashboard title and optionally a description. 
+
+. To store the time period specified in the time filter, enable *Store time
+with dashboard*.
+
+. Click *Save*.
 
 [[loading-a-saved-dashboard]]
-TIP: You can import, export, and delete dashboards in *Kibana > Management >
-Saved Objects > Dashboards*.
+To import, export, and delete dashboards, see <<managing-saved-objects>>.
 
 [[customizing-your-dashboard]]
 == Arranging Dashboard Elements
 
 The visualizations and searches in a dashboard are stored in panels that you can move,
-resize, and delete.  To start editing, open the dashboard and click *Edit*
-in the menu bar.
-
-[role="screenshot"]
-image:images/Dashboard_Resize_Menu.png[Example dashboard]
+resize, edit, and delete.  To start editing, click *Edit* in the menu bar.
 
 [[moving-containers]]
-To move a panel, click and hold the
-header of a panel and drag to the new location.
+* To move a panel, click and hold the panel header and drag to the new location.
 
 [[resizing-containers]]
-To resize a panel, click the resize control on the lower right and drag
+* To resize a panel, click the resize control on the lower right and drag
 to the new dimensions.
 
 [[removing-containers]]
-Additional commands for managing the
-panel and its contents are in the gear menu in the upper right.
+Additional commands for managing the panel and its contents 
+are in the gear menu in the upper right.
+
+[role="screenshot"]
+image:images/Dashboard_Resize_Menu.png[Example dashboard]
 
 NOTE: Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.
 
 [[viewing-detailed-information]]
-== Viewing Visualization Data
+== Inspecting a Visualization from the Dashboard
 
-If your visualization supports it, you can display the raw data behind
-the visualization using the Expand/Collapse button.
+Many visualizations allow you to inspect the data and requests behind the 
+visualization. 
 
-. Open the dashboard.
-. Hover over the visualization and click the *Expand* button in the lower
-left.
-+
-The underlying data is displayed in a table. You can also view
-the raw Elasticsearch request, the response in JSON, and the request statistics.
-These statistics show the query duration, request duration, total number
-of matching records, and the index that was searched.
-+
+In the dashboard, expand the visualization's panel menu (or gear menu if in 
+*Edit* mode) and select *Inspect*.
+
+The initial view shows the underlying data for the visualization. To view the 
+requests that were made for the visualization, choose *Requests* from the *View* 
+menu.
+
+The views you'll see depend on the element that you inspect.
+
 [role="screenshot"]
 image:images/Dashboard_visualization_data.png[Example of visualization data]
 
-To export the visualization data as a comma separated values
-(CSV) file, click *Raw* or *Formatted* at the bottom of the data
-table. *Raw* exports the response data as provided. *Formatted*
-exports the reponse data using applicable Kibana <<managing-fields,field
-formatters>>.
 
-To return to the visualization, click the *Collapse* button in the lower left
-corner.
 
 [[sharing-dashboards]]
 == Sharing a Dashboard
@@ -115,4 +107,4 @@ TIP: You can create a link to a dashboard by title by doing this: +
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools.  To create a short URL, you must have write access to `.kibana`.
+tools.  To create a short URL, you must have write access to {kib}.

@@ -7,26 +7,26 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
-  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
 
     before(async () => {
-      originalWindowSize = await remote.getWindowSize();
-      await remote.setWindowSize(1600, 1000);
+      originalWindowSize = await browser.getWindowSize();
+      await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/empty');
     });
 
     after(async () => {
       await esArchiver.unload('logstash/empty');
-      await remote.setWindowSize(originalWindowSize.width, originalWindowSize.height);
+      await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
     it('starts with the default values', async () => {
@@ -66,25 +66,32 @@ export default function ({ getService, getPageObjects }) {
 
         await pipelineEditor.clickSave();
         await pipelineList.assertExists();
-        const rows = await pipelineList.getRowsFromTable();
-        const newRow = rows.find(row => row.id === id);
+        await pipelineList.setFilter(id);
 
-        expect(newRow)
-          .to.have.property('description', description);
+        await retry.try(async () => {
+          const rows = await pipelineList.readRows();
+          const newRow = rows.find(row => row.id === id);
+
+          expect(newRow)
+            .to.have.property('description', description);
+        });
       });
     });
 
     describe('cancel button', () => {
       it('discards the pipeline and redirects to the list', async () => {
         await PageObjects.logstash.gotoPipelineList();
-        const originalRows = await pipelineList.getRowsFromTable();
+        await pipelineList.assertExists();
+        const originalRows = await pipelineList.readRows();
 
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.clickCancel();
 
-        await pipelineList.assertExists();
-        const currentRows = await pipelineList.getRowsFromTable();
-        expect(originalRows).to.eql(currentRows);
+        await retry.try(async () => {
+          await pipelineList.assertExists();
+          const currentRows = await pipelineList.readRows();
+          expect(originalRows).to.eql(currentRows);
+        });
       });
     });
 
@@ -92,19 +99,6 @@ export default function ({ getService, getPageObjects }) {
       it('is not visible', async () => {
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.assertNoDeleteButton();
-      });
-    });
-
-    describe('breadcrumbs navigation', () => {
-      it('prompts the user about unsaved changes', async () => {
-        await PageObjects.logstash.gotoNewPipelineEditor();
-
-        const description = random.text();
-        await pipelineEditor.setDescription(description);
-
-        await pipelineEditor.clickManagementBreadcrumb();
-        await pipelineEditor.assertUnsavedChangesModal();
-        await testSubjects.click('confirmModalConfirmButton');
       });
     });
   });

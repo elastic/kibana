@@ -6,30 +6,30 @@
 
 import routes from 'ui/routes';
 import 'ui/url';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_history_item_route.html';
 import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/watch_history';
 import './components/watch_history_item';
 import { updateHistorySection } from 'plugins/watcher/lib/update_management_sections';
+import { getWatchHistoryBreadcrumbs } from '../../lib/breadcrumbs';
 
 routes
   .when('/management/elasticsearch/watcher/watches/watch/:watchId/history-item/:watchHistoryItemId', {
     template: template,
+    k7Breadcrumbs: getWatchHistoryBreadcrumbs,
     resolve: {
       watch: function ($injector) {
         const $route = $injector.get('$route');
         const watchService = $injector.get('xpackWatcherWatchService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Watcher' });
-
         const watchId = $route.current.params.watchId;
 
         return watchService.loadWatch(watchId)
           .catch(err => {
             if (err.status !== 403) {
-              notifier.error(err);
+              toastNotifications.addDanger(err.data.message);
             }
 
             kbnUrl.redirect('/management/elasticsearch/watcher/watches');
@@ -43,8 +43,6 @@ routes
         const watchHistoryService = $injector.get('xpackWatcherWatchHistoryService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Watcher' });
-
         const watchId = $route.current.params.watchId;
         const watchHistoryItemId = $route.current.params.watchHistoryItemId;
 
@@ -57,7 +55,7 @@ routes
           })
           .catch(err => {
             if (err.status !== 403) {
-              notifier.error(err);
+              toastNotifications.addDanger(err.data.message);
             }
 
             kbnUrl.redirect(`/management/elasticsearch/watcher/watches/watch/${watchId}/status`);

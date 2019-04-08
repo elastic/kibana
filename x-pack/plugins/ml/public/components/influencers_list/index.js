@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import './influencers_list_directive';
-import './styles/main.less';
+export * from './influencers_list';

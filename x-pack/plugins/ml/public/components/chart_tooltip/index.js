@@ -7,4 +7,3 @@
 
 
 import './chart_tooltip';
-import './styles/main.less';

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap } from 'boom';
-
+import { boomify } from 'boom';
+import { i18n } from '@kbn/i18n';
 /*
  * Check if the given error message is a known "safe" type of error
  * in which case we want to give the status as 503 and show the error message.
@@ -17,9 +17,12 @@ import { wrap } from 'boom';
 const KNOWN_ERROR_STATUS_CODE = 503;
 
 const mapTypeMessage = {
-  ConnectionFault: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
-  NoConnections: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
-  StatusCodeError: 'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+  ConnectionFault: i18n.translate('xpack.monitoring.errors.connectionFaultErrorMessage', {
+    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.' }),
+  NoConnections: i18n.translate('xpack.monitoring.errors.noConnectionsErrorMessage', {
+    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.' }),
+  StatusCodeError: i18n.translate('xpack.monitoring.errors.statusCodeErrorMessage', {
+    defaultMessage: 'Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.' })
 };
 
 export function isKnownError(err) {
@@ -29,5 +32,5 @@ export function isKnownError(err) {
 
 export function handleKnownError(err) {
   err.message = err.message + ': ' + mapTypeMessage[err.constructor.name];
-  return wrap(err, KNOWN_ERROR_STATUS_CODE);
+  return boomify(err, { statusCode: KNOWN_ERROR_STATUS_CODE });
 }

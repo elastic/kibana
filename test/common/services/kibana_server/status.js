@@ -19,14 +19,12 @@
 
 import { resolve as resolveUrl } from 'url';
 
-import { fromNode } from 'bluebird';
 import Wreck from 'wreck';
 
-const get = async (url) => fromNode(cb => {
-  Wreck.get(url, { json: 'force' }, (err, resp, payload) => {
-    cb(err, payload); // resp is an Http#IncomingMessage, payload is the parsed version
-  });
-});
+const get = async (url) => {
+  const { payload } = await Wreck.get(url, { json: 'force' });
+  return payload;
+};
 
 export class KibanaServerStatus {
   constructor(kibanaServerUrl) {

@@ -7,13 +7,26 @@
 /*
  * Logstash Node Pipeline View
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from'ui/routes';
+import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import template from './index.html';
+import { i18n } from '@kbn/i18n';
+import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/list';
+import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
+import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
+import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
+import { MonitoringViewBaseController } from '../../base_controller';
+import { I18nContext } from 'ui/i18n';
+import {
+  EuiPageBody,
+  EuiPage,
+  EuiPageContent,
+} from '@elastic/eui';
 
 function getPageData($injector) {
   const $route = $injector.get('$route');
@@ -25,7 +38,9 @@ function getPageData($injector) {
   const { ccs, cluster_uuid: clusterUuid } = globalState;
   const pipelineId = $route.current.params.id;
   const pipelineHash = $route.current.params.hash || '';
-  const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`;
+  const url = pipelineHash
+    ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
+    : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
   return $http.post(url, {
     ccs
   })
@@ -40,8 +55,16 @@ function getPageData($injector) {
 
         return {
           ...version,
-          relativeFirstSeen: `${relativeFirstSeen} ago`,
-          relativeLastSeen: isLastSeenCloseToNow ? 'now' : `until ${relativeLastSeen} ago`
+          relativeFirstSeen: i18n.translate('xpack.monitoring.logstash.pipeline.relativeFirstSeenAgoLabel', {
+            defaultMessage: '{relativeFirstSeen} ago', values: { relativeFirstSeen }
+          }),
+          relativeLastSeen: isLastSeenCloseToNow ?
+            i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenNowLabel', {
+              defaultMessage: 'now'
+            })
+            : i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenAgoLabel', {
+              defaultMessage: 'until {relativeLastSeen} ago', values: { relativeLastSeen }
+            })
         };
       });
 
@@ -62,31 +85,50 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const $route = $injector.get('$route');
-    const $executor = $injector.get('$executor');
-    const globalState = $injector.get('globalState');
-    const title = $injector.get('title');
-    const timefilter = $injector.get('timefilter');
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope, i18n) {
+      const config = $injector.get('config');
+      const dateFormat = config.get('dateFormat');
 
-    timefilter.disableTimeRangeSelector(); // Do not display time picker in UI
-    timefilter.enableAutoRefreshSelector();
+      super({
+        title: i18n('xpack.monitoring.logstash.pipeline.routeTitle', {
+          defaultMessage: 'Logstash - Pipeline'
+        }),
+        storageKey: 'logstash.pipelines',
+        getPageData,
+        reactNodeId: 'monitoringLogstashPipelineApp',
+        $scope,
+        options: {
+          enableTimeFilter: false,
+        },
+        $injector
+      });
 
-    function setClusters(clusters) {
-      $scope.clusters = clusters;
-      $scope.cluster = find($scope.clusters, { cluster_uuid: globalState.cluster_uuid });
+      const timeseriesTooltipXValueFormatter = xValue =>
+        moment(xValue).format(dateFormat);
+
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.pipeline) {
+          return;
+        }
+        this.pipelineState = new PipelineState(data.pipeline);
+        this.renderReact(
+          <I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPageContent>
+                  <PipelineViewer
+                    pipeline={List.fromPipeline(
+                      Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
+                    )}
+                    timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+                  />
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nContext>
+        );
+      });
     }
-    setClusters($route.current.locals.clusters);
-    $scope.pageData = $route.current.locals.pageData;
-    title($scope.cluster, `Logstash - Pipeline`);
-
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => {
-        $scope.pageData = response;
-      }
-    });
-    $executor.start();
-    $scope.$on('$destroy', $executor.destroy);
   }
 });

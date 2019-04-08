@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CONFIG_TELEMETRY } from '../../../common/constants';
 import { handleOldSettings } from './handle_old_settings';
 
 /**
@@ -13,9 +12,9 @@ import { handleOldSettings } from './handle_old_settings';
  * This method can have side-effects related to deprecated config settings.
  *
  * @param {Object} config The advanced settings config object.
- * @param {Object} _handleOldSettings handleOldSettings function, but overrideable for tests.
+ * @param {Object} _handleOldSettings handleOldSettings function, but overridable for tests.
  * @return {Boolean} {@code true} if the banner should be displayed. {@code false} otherwise.
  */
-export async function shouldShowBanner(config, { _handleOldSettings = handleOldSettings } = { }) {
-  return config.get(CONFIG_TELEMETRY, null) === null && await _handleOldSettings(config);
+export async function shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings = handleOldSettings } = {}) {
+  return telemetryOptInProvider.getOptIn() === null && await _handleOldSettings(config, telemetryOptInProvider);
 }

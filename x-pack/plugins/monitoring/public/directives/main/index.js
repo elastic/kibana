@@ -22,6 +22,7 @@ export class MonitoringMainController {
     this.inKibana = false;
     this.inLogstash = false;
     this.inBeats = false;
+    this.inApm = false;
   }
 
   // kick things off from the directive link function
@@ -38,6 +39,7 @@ export class MonitoringMainController {
       this.inKibana = this.product === 'kibana';
       this.inLogstash = this.product === 'logstash';
       this.inBeats = this.product === 'beats';
+      this.inApm = this.product === 'apm';
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
@@ -69,7 +71,7 @@ export class MonitoringMainController {
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
+uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
   return {
     restrict: 'E',
     transclude: true,
@@ -78,26 +80,42 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      if (!scope.cluster) {
+        const $route = $injector.get('$route');
+        const globalState = $injector.get('globalState');
+        scope.cluster = ($route.current.locals.clusters || []).find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
+      }
 
-      controller.setup({
-        licenseService: license,
-        breadcrumbsService: breadcrumbs,
-        kbnUrlService: kbnUrl,
-        attributes: {
-          name: attributes.name,
-          product: attributes.product,
-          instance: attributes.instance,
-          resolver: attributes.resolver,
-          page: attributes.page,
-          tabIconClass: attributes.tabIconClass,
-          tabIconLabel: attributes.tabIconLabel,
-          pipelineId: attributes.pipelineId,
-          pipelineHash: attributes.pipelineHash,
-          pipelineVersions: get(scope, 'pageData.versions')
-        },
-        clusterName: get(scope, 'cluster.cluster_name')
+      function getSetupObj() {
+        return {
+          licenseService: license,
+          breadcrumbsService: breadcrumbs,
+          kbnUrlService: kbnUrl,
+          attributes: {
+            name: attributes.name,
+            product: attributes.product,
+            instance: attributes.instance,
+            resolver: attributes.resolver,
+            page: attributes.page,
+            tabIconClass: attributes.tabIconClass,
+            tabIconLabel: attributes.tabIconLabel,
+            pipelineId: attributes.pipelineId,
+            pipelineHash: attributes.pipelineHash,
+            pipelineVersions: get(scope, 'pageData.versions'),
+            isCcrEnabled: attributes.isCcrEnabled
+          },
+          clusterName: get(scope, 'cluster.cluster_name')
+        };
+      }
+
+      const setupObj = getSetupObj();
+      controller.setup(setupObj);
+      Object.keys(setupObj.attributes).forEach(key => {
+        attributes.$observe(key, () => controller.setup(getSetupObj()));
       });
-
+      scope.$watch('pageData.versions', versions => {
+        controller.pipelineVersions = versions;
+      });
     }
   };
 });

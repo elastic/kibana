@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The delete saved object API permanently removes a Kibana saved object. Once a
 saved object has been deleted, _it cannot be recovered_.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `DELETE /api/saved_objects/<type>/<id>`

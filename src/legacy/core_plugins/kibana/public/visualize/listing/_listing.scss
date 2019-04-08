@@ -1,0 +1,17 @@
+.visListingTable__typeImage,
+.visListingTable__typeIcon {
+  margin-right: $euiSizeS;
+  position: relative;
+  top: -1px;
+}
+
+.visListingTable__typeImage {
+  @include size($euiSize);
+}
+
+.visListingTable__experimentalIcon {
+  width: $euiSizeL;
+  vertical-align: baseline;
+  padding: 0 $euiSizeS;    
+  margin-left: $euiSizeS;
+}

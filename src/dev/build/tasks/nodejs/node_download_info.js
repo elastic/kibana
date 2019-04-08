@@ -35,6 +35,7 @@ export function getNodeDownloadInfo(config, platform) {
     url,
     downloadName,
     downloadPath,
-    extractDir
+    extractDir,
+    version,
   };
 }

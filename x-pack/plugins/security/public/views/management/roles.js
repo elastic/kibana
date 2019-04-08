@@ -13,31 +13,42 @@ import template from 'plugins/security/views/management/roles.html';
 import 'plugins/security/services/shield_role';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { ROLES_PATH, EDIT_ROLES_PATH } from './management_urls';
+import { getRolesBreadcrumbs } from './breadcrumbs';
 
 routes.when(ROLES_PATH, {
   template,
+  k7Breadcrumbs: getRolesBreadcrumbs,
   resolve: {
     roles(ShieldRole, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldRole.query().$promise
-        .catch(checkLicenseError(kbnUrl, Promise, Private))
+      return ShieldRole.query()
+        .$promise.catch(checkLicenseError(kbnUrl, Promise, Private))
         .catch(_.identity); // Return the error if there is one
-    }
+    },
   },
-  controller($scope, $route, $q, confirmModal) {
+  controller($scope, $route, $q, confirmModal, i18n) {
     $scope.roles = $route.current.locals.roles;
     $scope.forbidden = !_.isArray($scope.roles);
     $scope.selectedRoles = [];
     $scope.sort = { orderBy: 'name', reverse: false };
     $scope.editRolesHref = `#${EDIT_ROLES_PATH}`;
-    $scope.getEditRoleHref = (role) => `#${EDIT_ROLES_PATH}/${role}`;
+    $scope.getEditRoleHref = role => `#${EDIT_ROLES_PATH}/${role}`;
 
     $scope.deleteRoles = () => {
       const doDelete = () => {
-        $q.all($scope.selectedRoles.map((role) => role.$delete()))
-          .then(() => toastNotifications.addSuccess(`Deleted ${$scope.selectedRoles.length > 1 ? 'roles' : 'role'}`))
+        $q.all($scope.selectedRoles.map(role => role.$delete()))
+          .then(() =>
+            toastNotifications.addSuccess(
+              i18n('xpack.security.management.roles.deleteRoleTitle', {
+                defaultMessage: 'Deleted {value, plural, one {role} other {roles}}',
+                values: {
+                  value: $scope.selectedRoles.length,
+                },
+              })
+            )
+          )
           .then(() => {
-            $scope.selectedRoles.map((role) => {
+            $scope.selectedRoles.map(role => {
               const i = $scope.roles.indexOf(role);
               $scope.roles.splice(i, 1);
             });
@@ -45,11 +56,16 @@ routes.when(ROLES_PATH, {
           });
       };
       const confirmModalOptions = {
-        confirmButtonText: 'Delete role(s)',
-        onConfirm: doDelete
+        confirmButtonText: i18n('xpack.security.management.roles.deleteRoleConfirmButtonLabel', {
+          defaultMessage: 'Delete role(s)',
+        }),
+        onConfirm: doDelete,
       };
-      confirmModal(`
-        Are you sure you want to delete the selected role(s)? This action is irreversible!`,
+      confirmModal(
+        i18n('xpack.security.management.roles.deletingRolesWarningMessage', {
+          defaultMessage:
+            'Are you sure you want to delete the selected role(s)? This action is irreversible!',
+        }),
         confirmModalOptions
       );
     };
@@ -83,7 +99,16 @@ routes.when(ROLES_PATH, {
     $scope.toggleSort = toggleSort;
 
     function getActionableRoles() {
-      return $scope.roles.filter((role) => !role.metadata._reserved);
+      return $scope.roles.filter(role => !role.metadata._reserved);
     }
-  }
+
+    $scope.reversedTooltip = i18n('xpack.security.management.roles.reversedTooltip', {
+      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+    });
+
+    $scope.reversedAriaLabel = i18n('xpack.security.management.roles.reversedAriaLabel', {
+      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+    });
+
+  },
 });

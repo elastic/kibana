@@ -23,17 +23,13 @@ const mkdirp = require('mkdirp');
 
 /**
  * Copies config references to an absolute path to
- * the provided destination. This is necicary as ES security
+ * the provided destination. This is necessary as ES security
  * requires files to be within the installation directory
  *
  * @param {Array} config
  * @param {String} dest
  */
-exports.extractConfigFiles = function extractConfigFiles(
-  config,
-  dest,
-  options = {}
-) {
+exports.extractConfigFiles = function extractConfigFiles(config, dest, options = {}) {
   const originalConfig = typeof config === 'string' ? [config] : config;
   const localConfig = [];
 

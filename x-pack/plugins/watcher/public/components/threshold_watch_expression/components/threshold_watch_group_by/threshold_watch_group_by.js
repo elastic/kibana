@@ -12,7 +12,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchGroupBy', function ($injector) {
+app.directive('thresholdWatchGroupBy', function ($injector, i18n) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -57,7 +57,15 @@ app.directive('thresholdWatchGroupBy', function ($injector) {
       }
 
       get itemDescription() {
-        return (this.groupByType && this.groupByType.sizeRequired) ? 'Grouped over' : 'Over';
+        const itemDescription = (this.groupByType && this.groupByType.sizeRequired)
+          ? i18n('xpack.watcher.thresholdWatchExpression.groupBy.groupedItemDescription', {
+            defaultMessage: 'Grouped over',
+          })
+          : i18n('xpack.watcher.thresholdWatchExpression.groupBy.itemDescription', {
+            defaultMessage: 'Over',
+          });
+
+        return itemDescription;
       }
 
       get itemValue() {

@@ -9,7 +9,7 @@
 
 /*
  * A class for determining whether a data set is polled.
- * returns a flag indentifying whether the data is polled
+ * returns a flag identifying whether the data is polled
  * And a minimum bucket span
  */
 

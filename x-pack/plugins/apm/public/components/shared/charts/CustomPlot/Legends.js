@@ -9,22 +9,32 @@ import React from 'react';
 import styled from 'styled-components';
 import Legend from '../Legend';
 import {
+  unit,
   units,
   fontSizes,
   px,
-  colors,
   truncate
 } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  margin-left: ${px(unit * 5)};
+  flex-wrap: wrap;
+
+  /* add margin to all direct descendant divs */
+  & > div {
+    margin-top: ${px(units.half)};
+    margin-right: ${px(unit)};
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 `;
 
 const LegendContent = styled.span`
   white-space: nowrap;
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   display: flex;
 `;
 
@@ -35,13 +45,13 @@ const TruncatedLabel = styled.span`
 
 const SeriesValue = styled.span`
   margin-left: ${px(units.quarter)};
-  color: ${colors.black};
+  color: ${theme.euiColorFullShade};
   display: inline-block;
 `;
 
 const MoreSeriesContainer = styled.div`
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 function MoreSeries({ hiddenSeriesCount }) {
@@ -49,13 +59,18 @@ function MoreSeries({ hiddenSeriesCount }) {
     return null;
   }
 
-  return <MoreSeriesContainer>(+{hiddenSeriesCount})</MoreSeriesContainer>;
+  return (
+    <MoreSeriesContainer>
+      (+
+      {hiddenSeriesCount})
+    </MoreSeriesContainer>
+  );
 }
 
 export default function Legends({
-  noHits,
   clickLegend,
   hiddenSeriesCount,
+  noHits,
   series,
   seriesEnabledState,
   truncateLegends
@@ -67,6 +82,9 @@ export default function Legends({
   return (
     <Container>
       {series.map((serie, i) => {
+        if (serie.hideLegend) {
+          return null;
+        }
         const text = (
           <LegendContent>
             {truncateLegends ? (
@@ -95,7 +113,6 @@ export default function Legends({
 }
 
 Legends.propTypes = {
-  chartTitle: PropTypes.string,
   clickLegend: PropTypes.func.isRequired,
   hiddenSeriesCount: PropTypes.number.isRequired,
   noHits: PropTypes.bool.isRequired,

@@ -6,42 +6,64 @@
 
 
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { i18n } from '@kbn/i18n';
 
-let indexPatterns = [];
+let indexPatternCache = [];
 let fullIndexPatterns = [];
 let currentIndexPattern = null;
 let currentSavedSearch = null;
 
-export function loadIndexPatterns(Private, courier) {
-  fullIndexPatterns = courier.indexPatterns;
+export let refreshIndexPatterns = null;
+
+export function loadIndexPatterns(Private, indexPatterns) {
+  fullIndexPatterns = indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
-    fields: ['title'],
+    fields: ['id', 'title', 'type', 'fields'],
     perPage: 10000
   }).then((response) => {
-    indexPatterns = response.savedObjects;
-    return indexPatterns;
+    indexPatternCache = response.savedObjects;
+
+    if (refreshIndexPatterns === null) {
+      refreshIndexPatterns = () => {
+        return new Promise((resolve, reject) => {
+          loadIndexPatterns(Private, indexPatterns)
+          	.then((resp) => {
+              resolve(resp);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+      };
+    }
+
+    return indexPatternCache;
   });
 }
 
 export function getIndexPatterns() {
-  return indexPatterns;
+  return indexPatternCache;
+}
+
+export function getIndexPatternNames() {
+  return indexPatternCache.map(i => (i.attributes && i.attributes.title));
 }
 
 export function getIndexPatternIdFromName(name) {
-  for (let j = 0; j < indexPatterns.length; j++) {
-    if (indexPatterns[j].get('title') === name) {
-      return indexPatterns[j].id;
+  for (let j = 0; j < indexPatternCache.length; j++) {
+    if (indexPatternCache[j].get('title') === name) {
+      return indexPatternCache[j].id;
     }
   }
   return name;
 }
 
-export function loadCurrentIndexPattern(courier, $route) {
-  fullIndexPatterns = courier.indexPatterns;
+export function loadCurrentIndexPattern(indexPatterns, $route) {
+  fullIndexPatterns = indexPatterns;
   currentIndexPattern = fullIndexPatterns.get($route.current.params.index);
   return currentIndexPattern;
 }
@@ -50,7 +72,7 @@ export function getIndexPatternById(id) {
   return fullIndexPatterns.get(id);
 }
 
-export function loadCurrentSavedSearch(courier, $route, savedSearches) {
+export function loadCurrentSavedSearch($route, savedSearches) {
   currentSavedSearch = savedSearches.get($route.current.params.savedSearchId);
   return currentSavedSearch;
 }
@@ -69,9 +91,15 @@ export function getCurrentSavedSearch() {
 export function timeBasedIndexCheck(indexPattern, showNotification = false) {
   if (indexPattern.isTimeBased() === false) {
     if (showNotification) {
-      const message = `The index pattern ${indexPattern.title} is not time series based. \
-        Anomaly detection can only be run over indices which are time based.`;
-      notify.warning(message, { lifetime: 0 });
+      toastNotifications.addWarning({
+        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
+          values: { indexPatternTitle: indexPattern.title }
+        }),
+        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+          defaultMessage: 'Anomaly detection only runs over time-based indices'
+        }),
+      });
     }
     return false;
   } else {

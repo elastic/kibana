@@ -1,0 +1,12 @@
+.timVis {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .timChart {
+    min-width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}

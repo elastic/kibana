@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
@@ -26,7 +26,7 @@ function prepareTest(messages) {
     <ValidateJob getJobConfig={getJobConfig} mlJobService={mlJobService} />
   );
 
-  const wrapper = shallow(component);
+  const wrapper = shallowWithIntl(component);
 
   return { wrapper, p };
 }
@@ -62,7 +62,7 @@ describe('ValidateJob', () => {
     ]
   });
 
-  test('renders button and modal with a messsage', () => {
+  test('renders button and modal with a message', () => {
     test2.wrapper.instance().openModal();
     test2.p.then(() => {
       test2.wrapper.update();

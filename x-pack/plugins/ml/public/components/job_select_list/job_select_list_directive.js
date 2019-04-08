@@ -21,16 +21,17 @@ import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobSelectList', function (Private, timefilter) {
+module.directive('mlJobSelectList', function (Private) {
   return {
     restrict: 'AE',
     replace: true,
     transclude: true,
     template,
-    controller: function ($scope) {
+    controller: function ($scope, i18n) {
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
@@ -116,6 +117,7 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
           } else {
             $scope.noJobsCreated = true;
           }
+          $scope.$applyAsync();
         }).catch((resp) => {
           console.log('mlJobSelectList controller - error getting job info from ES:', resp);
         });
@@ -207,7 +209,13 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
 
           const fromString = timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
           const toString =  timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-          timeRange.label = `${fromString} to ${toString}`;
+          timeRange.label = i18n('xpack.ml.jobSelectList.groupTimeRangeLabel', {
+            defaultMessage: '{fromString} to {toString}',
+            values: {
+              fromString,
+              toString,
+            }
+          });
 
           group.timeRange = timeRange;
           return group;
@@ -254,8 +262,10 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
           if (times.length) {
             const min = _.min(times);
             const max = _.max(times);
-            timefilter.time.from = moment(min).toISOString();
-            timefilter.time.to = moment(max).toISOString();
+            timefilter.setTime({
+              from: moment(min).toISOString(),
+              to: moment(max).toISOString()
+            });
           }
         }
         mlJobSelectService.jobSelectListState.applyTimeRange = $scope.applyTimeRange;
@@ -353,15 +363,23 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
 
             const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
             const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-            job.timeRange.label = `${fromString} to ${toString}`;
+            job.timeRange.label = i18n('xpack.ml.jobSelectList.jobTimeRangeLabel', {
+              defaultMessage: '{fromString} to {toString}',
+              values: {
+                fromString,
+                toString,
+              }
+            });
           }
         });
 
       }
 
       $scope.useTimeRange = function (job) {
-        timefilter.time.from = job.timeRange.fromMoment.toISOString();
-        timefilter.time.to = job.timeRange.toMoment.toISOString();
+        timefilter.setTime({
+          from: job.timeRange.fromMoment.toISOString(),
+          to: job.timeRange.toMoment.toISOString()
+        });
       };
     },
     link: function (scope, element, attrs) {

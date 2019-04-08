@@ -28,6 +28,15 @@ export class XPackInfo {
    */
   _featureLicenseCheckResultsGenerators = new Map();
 
+
+  /**
+   * Set of listener functions that will be called whenever the license
+   * info changes
+   * @type {Set<Function>}
+   */
+  _licenseInfoChangedListeners = new Set();
+
+
   /**
    * Cache that may contain last xpack info API response or error, json representation
    * of xpack info and xpack info signature.
@@ -87,15 +96,31 @@ export class XPackInfo {
   }
 
   /**
+   * Checks whether ES was available
+   * @returns {boolean}
+   */
+  isXpackUnavailable() {
+    return this._cache.error instanceof Error && this._cache.error.status === 400;
+  }
+
+  /**
    * If present, describes the reason why XPack info is not available.
    * @returns {Error|string}
    */
   unavailableReason() {
-    if (this._cache.error instanceof Error && this._cache.error.status === 400) {
+    if (!this._cache.error && this._cache.response && !this._cache.response.license) {
+      return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
+    }
+
+    if (this.isXpackUnavailable()) {
       return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
     }
 
     return this._cache.error;
+  }
+
+  onLicenseInfoChange(handler) {
+    this._licenseInfoChangedListeners.add(handler);
   }
 
   /**
@@ -116,7 +141,9 @@ export class XPackInfo {
         path: '/_xpack'
       });
 
-      if (this._hasLicenseInfoChanged(response)) {
+      const licenseInfoChanged = this._hasLicenseInfoChanged(response);
+
+      if (licenseInfoChanged) {
         const licenseInfoParts = [
           `mode: ${get(response, 'license.mode')}`,
           `status: ${get(response, 'license.status')}`,
@@ -132,16 +159,24 @@ export class XPackInfo {
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
       this._cache = { response };
+
+      if (licenseInfoChanged) {
+        // call license info changed listeners
+        for (const listener of this._licenseInfoChangedListeners) {
+          listener();
+        }
+      }
+
     } catch(error) {
       this._log(
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
+        ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };

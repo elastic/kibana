@@ -9,11 +9,17 @@
 import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
+import { mlLog } from '../../client/log';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
 const INDEX_PATTERN_ID = 'INDEX_PATTERN_ID';
 const INDEX_PATTERN_NAME = 'INDEX_PATTERN_NAME';
+export const SAVED_OBJECT_TYPES = {
+  DASHBOARD: 'dashboard',
+  SEARCH: 'search',
+  VISUALIZATION: 'visualization'
+};
 
 export class DataRecognizer {
   constructor(callWithRequest) {
@@ -58,10 +64,14 @@ export class DataRecognizer {
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(dirs.map(async (dir) => {
       const file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
-      configs.push({
-        dirName: dir,
-        json: JSON.parse(file)
-      });
+      try {
+        configs.push({
+          dirName: dir,
+          json: JSON.parse(file)
+        });
+      } catch (error) {
+        mlLog('warning', `Error parsing ${dir}/manifest.json`);
+      }
     }));
 
     return configs;
@@ -115,7 +125,12 @@ export class DataRecognizer {
       query: moduleConfig.query
     };
 
-    const resp = await this.callWithRequest('search', { index, size, body });
+    const resp = await this.callWithRequest('search', {
+      index,
+      rest_total_hits_as_int: true,
+      size,
+      body
+    });
     return (resp.hits.total !== 0);
   }
 
@@ -132,7 +147,7 @@ export class DataRecognizer {
       dirName = manifestFile.dirName;
     }
     else {
-      return Boom.notFound(`Module with the id "${id}" not found`);
+      throw Boom.notFound(`Module with the id "${id}" not found`);
     }
 
     const jobs = [];
@@ -197,6 +212,7 @@ export class DataRecognizer {
     groups,
     indexPatternName,
     query,
+    useDedicatedIndex,
     startDatafeed,
     start,
     end,
@@ -213,7 +229,7 @@ export class DataRecognizer {
       manifestFile && manifestFile.json &&
       manifestFile.json.defaultIndexPattern === undefined) {
 
-      return Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
+      throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
     this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
@@ -233,6 +249,11 @@ export class DataRecognizer {
       if (Array.isArray(groups)) {
         // update groups list for each job
         moduleConfig.jobs.forEach(job => job.config.groups = groups);
+      }
+
+      // Set the results_index_name property for each job if useDedicatedIndex is true
+      if (useDedicatedIndex === true) {
+        moduleConfig.jobs.forEach(job => job.config.results_index_name = job.id);
       }
       saveResults.jobs = await this.saveJobs(moduleConfig.jobs);
     }
@@ -361,12 +382,16 @@ export class DataRecognizer {
 
   // save the savedObjects if they do not exist already
   async saveKibanaObjects(objectExistResults) {
-    let results = [];
+    let results = { saved_objects: [] };
     const filteredSavedObjects = objectExistResults.filter(o => o.exists === false).map(o => o.savedObject);
     if (filteredSavedObjects.length) {
-      results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);
+      results = await this.savedObjectsClient.bulkCreate(
+        // Add an empty migrationVersion attribute to each saved object to ensure
+        // it is automatically migrated to the 7.0+ format with a references attribute.
+        filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }))
+      );
     }
-    return results;
+    return results.saved_objects;
   }
 
   // save the jobs.
@@ -561,8 +586,8 @@ export class DataRecognizer {
     }
   }
 
-  // loop through each kibana saved objects and replace the INDEX_PATTERN_ID
-  // marker for the id of the specified index pattern
+  // loop through each kibana saved object and replace any INDEX_PATTERN_ID and
+  // INDEX_PATTERN_NAME markers for the id or name of the specified index pattern
   updateSavedObjectIndexPatterns(moduleConfig) {
     if (moduleConfig.kibana) {
       Object.keys(moduleConfig.kibana).forEach((category) => {
@@ -571,6 +596,16 @@ export class DataRecognizer {
           if (jsonString.match(INDEX_PATTERN_ID)) {
             jsonString = jsonString.replace(new RegExp(INDEX_PATTERN_ID, 'g'), this.indexPatternId);
             item.config.kibanaSavedObjectMeta.searchSourceJSON = jsonString;
+          }
+
+          if (category === SAVED_OBJECT_TYPES.VISUALIZATION) {
+            // Look for any INDEX_PATTERN_NAME tokens in visualization visState,
+            // as e.g. Vega visualizations reference the Elasticsearch index pattern directly.
+            let visStateString = item.config.visState;
+            if (visStateString !== undefined && visStateString.match(INDEX_PATTERN_NAME)) {
+              visStateString = visStateString.replace(new RegExp(INDEX_PATTERN_NAME, 'g'), this.indexPatternName);
+              item.config.visState = visStateString;
+            }
           }
         });
       });

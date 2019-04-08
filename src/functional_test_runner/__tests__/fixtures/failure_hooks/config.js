@@ -42,6 +42,9 @@ export default function () {
             log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
           });
       }
+    },
+    mochaReporter: {
+      captureLogOutput: false
     }
   };
 }

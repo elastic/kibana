@@ -7,22 +7,23 @@
 
 export function UsageAPIProvider({ getService }) {
   const supertest = getService('supertest');
+  const supertestNoAuth = getService('supertestWithoutAuth');
 
   return {
-    async getUsageStats() {
-      const { body } = await supertest
-        .get('/api/_xpack/usage')
+    async getUsageStatsNoAuth() {
+      const { body } = await supertestNoAuth
+        .get('/api/stats?extended=true')
         .set('kbn-xsrf', 'xxx')
-        .expect(200);
-      return body;
+        .expect(401);
+      return body.usage;
     },
 
-    async getUsageStatsFromDeprecatedPre64Endpoint() {
+    async getUsageStats() {
       const { body } = await supertest
-        .get('/api/_kibana/v1/stats')
+        .get('/api/stats?extended=true')
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      return body;
+      return body.usage;
     },
   };
 }

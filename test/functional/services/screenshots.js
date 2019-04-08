@@ -30,7 +30,7 @@ const writeFileAsync = promisify(writeFile);
 export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
@@ -83,10 +83,10 @@ export async function ScreenshotsProvider({ getService }) {
       try {
         log.info(`Taking screenshot "${path}"`);
         const [screenshot] = await Promise.all([
-          remote.takeScreenshot(),
+          browser.takeScreenshot(),
           fcb(cb => mkdirp(dirname(path), cb)),
         ]);
-        await fcb(cb => writeFile(path, screenshot, cb));
+        await fcb(cb => writeFile(path, screenshot, 'base64', cb));
       } catch (err) {
         log.error('SCREENSHOT FAILED');
         log.error(err);

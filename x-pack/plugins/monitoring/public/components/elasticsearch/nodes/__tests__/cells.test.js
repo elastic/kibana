@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
 import { MetricCell } from '../cells';
 
 describe('Node Listing Metric Cell', () => {
@@ -28,7 +28,7 @@ describe('Node Listing Metric Cell', () => {
         summary: { minVal: 0, maxVal: 2, lastVal: 0, slope: -1 }
       }
     };
-    expect(render(<MetricCell {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });
 
   it('should format a non-percentage metric', () => {
@@ -55,11 +55,11 @@ describe('Node Listing Metric Cell', () => {
         }
       }
     };
-    expect(render(<MetricCell {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });
 
   it('should format N/A as the metric for an offline node', () => {
     const props = { isOnline: false };
-    expect(render(<MetricCell {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });
 });

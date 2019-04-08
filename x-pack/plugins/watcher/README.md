@@ -23,9 +23,8 @@ public/
           directives/ (Subcomponents of my_directive_name are defined here, and this follows the same structure as *A)
           index.js (no code here; only `export from my_directive_name.js`)
           my_directive_name.js
-          my_directive_name.less
           my_directive_name.html
-        index.js (imports the directives in this folder, ie: my_directive_name)
+        index.js (imports the directives in this folder, i.e.,my_directive_name)
       routes/
         index.js (no code here; only imports routes.js)
         routes.js
@@ -66,7 +65,7 @@ watch.put(...)
 For example, see `clamp`.
 
 ## Controller classes
-- All functions in controller classes should be defined as arrow function constants. This is to ensure the `this` context is consistant, regardless of where it is being called.
+- All functions in controller classes should be defined as arrow function constants. This is to ensure the `this` context is consistent, regardless of where it is being called.
 
 GOOD
 ```
@@ -90,7 +89,7 @@ BAD
   }
 ```
 
-- Constructors should be used to initiallize state and define $scope.$watch(es)
+- Constructors should be used to initialize state and define $scope.$watch(es)
 
 GOOD
 ```

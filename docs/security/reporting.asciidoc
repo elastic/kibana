@@ -23,7 +23,7 @@ the following request creates a `reporter` user that has the
 +
 [source, sh]
 ---------------------------------------------------------------
-POST /_xpack/security/user/reporter
+POST /_security/user/reporter
 {
   "password" : "x-pack-test-password",
   "roles" : ["kibana_user", "reporting_user"],

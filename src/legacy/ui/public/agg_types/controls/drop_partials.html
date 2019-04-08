@@ -1,0 +1,14 @@
+<div class="checkbox" ng-if="agg.params.field.name === agg.getIndexPattern().timeFieldName">
+  <label>
+    <input ng-model="agg.params.drop_partials" type="checkbox" data-test-subj="dropPartialBucketsCheckbox">
+    <span
+      i18n-id="common.ui.aggTypes.dropPartialBucketsLabel"
+      i18n-default-message="Drop partial buckets"
+    ></span>
+    &nbsp;
+    <icon-tip
+      position="'right'"
+      content="::'common.ui.aggTypes.dropPartialBucketsTooltip' | i18n: { defaultMessage: 'Remove buckets that span time outside the time range so the histogram doesn\'t start and end with incomplete buckets.' }"
+    ></icon-tip>
+  </label>
+</div>

@@ -29,11 +29,7 @@ export interface ICommand {
   name: string;
   description: string;
 
-  run: (
-    projects: ProjectMap,
-    projectGraph: ProjectGraph,
-    config: ICommandConfig
-  ) => Promise<void>;
+  run: (projects: ProjectMap, projectGraph: ProjectGraph, config: ICommandConfig) => Promise<void>;
 }
 
 import { BootstrapCommand } from './bootstrap';

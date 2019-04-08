@@ -17,14 +17,10 @@
  * under the License.
  */
 
-const { createToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
-const {
-  installSource,
-  installSnapshot,
-  installArchive,
-} = require('../install');
+const { installSource, installSnapshot, installArchive } = require('../install');
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -34,9 +30,7 @@ jest.mock('../install', () => ({
 
 jest.mock('execa', () => jest.fn());
 
-const log = createToolingLog('verbose');
-log.onData = jest.fn();
-log.on('data', log.onData);
+const log = new ToolingLog();
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -55,9 +49,7 @@ async function ensureResolve(promise) {
   return await Promise.race([
     promise,
     sleep(100).then(() => {
-      throw new Error(
-        'promise was supposed to resolve with installSource() resolution'
-      );
+      throw new Error('promise was supposed to resolve with installSource() resolution');
     }),
   ]);
 }
@@ -203,33 +195,25 @@ describe('#start(installPath)', () => {
   it('rejects when bin/elasticsearch exists with 0 before starting', async () => {
     mockEsBin({ exitCode: 0, start: false });
 
-    await expect(new Cluster(log).start()).rejects.toThrowError(
-      'ES exited without starting'
-    );
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 143 before starting', async () => {
     mockEsBin({ exitCode: 143, start: false });
 
-    await expect(new Cluster(log).start()).rejects.toThrowError(
-      'ES exited without starting'
-    );
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 130 before starting', async () => {
     mockEsBin({ exitCode: 130, start: false });
 
-    await expect(new Cluster(log).start()).rejects.toThrowError(
-      'ES exited without starting'
-    );
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 1 before starting', async () => {
     mockEsBin({ exitCode: 1, start: false });
 
-    await expect(new Cluster(log).start()).rejects.toThrowError(
-      'ES exited with code 1'
-    );
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited with code 1');
   });
 
   it('resolves when bin/elasticsearch logs "started"', async () => {
@@ -243,9 +227,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster(log);
     await cluster.start();
-    await expect(cluster.start()).rejects.toThrowError(
-      'ES has already been started'
-    );
+    await expect(cluster.start()).rejects.toThrowError('ES has already been started');
   });
 
   it('rejects if #run() was called previously', async () => {
@@ -253,9 +235,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster(log);
     await cluster.run();
-    await expect(cluster.start()).rejects.toThrowError(
-      'ES has already been started'
-    );
+    await expect(cluster.start()).rejects.toThrowError('ES has already been started');
   });
 });
 
@@ -281,9 +261,7 @@ describe('#run()', () => {
   it('rejects when bin/elasticsearch exists with 1', async () => {
     mockEsBin({ exitCode: 1 });
 
-    await expect(new Cluster(log).run()).rejects.toThrowError(
-      'ES exited with code 1'
-    );
+    await expect(new Cluster(log).run()).rejects.toThrowError('ES exited with code 1');
   });
 
   it('rejects if #start() was called previously', async () => {
@@ -291,9 +269,7 @@ describe('#run()', () => {
 
     const cluster = new Cluster(log);
     await cluster.start();
-    await expect(cluster.run()).rejects.toThrowError(
-      'ES has already been started'
-    );
+    await expect(cluster.run()).rejects.toThrowError('ES has already been started');
   });
 
   it('rejects if #run() was called previously', async () => {
@@ -301,18 +277,14 @@ describe('#run()', () => {
 
     const cluster = new Cluster(log);
     await cluster.run();
-    await expect(cluster.run()).rejects.toThrowError(
-      'ES has already been started'
-    );
+    await expect(cluster.run()).rejects.toThrowError('ES has already been started');
   });
 });
 
 describe('#stop()', () => {
   it('rejects if #run() or #start() was not called', async () => {
     const cluster = new Cluster(log);
-    await expect(cluster.stop()).rejects.toThrowError(
-      'ES has not been started'
-    );
+    await expect(cluster.stop()).rejects.toThrowError('ES has not been started');
   });
 
   it('resolves when ES exits with 0', async () => {

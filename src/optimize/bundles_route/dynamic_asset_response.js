@@ -54,6 +54,7 @@ import { replacePlaceholder } from '../public_path_placeholder';
 export async function createDynamicAssetResponse(options) {
   const {
     request,
+    h,
     bundlesPath,
     publicPath,
     fileHashCache,
@@ -65,7 +66,7 @@ export async function createDynamicAssetResponse(options) {
 
     // prevent path traversal, only process paths that resolve within bundlesPath
     if (!path.startsWith(bundlesPath)) {
-      return Boom.forbidden(null, 'EACCES');
+      throw Boom.forbidden(null, 'EACCES');
     }
 
     // we use and manage a file descriptor mostly because
@@ -83,13 +84,12 @@ export async function createDynamicAssetResponse(options) {
     });
     fd = null; // read stream is now responsible for fd
 
-    const response = request.generateResponse(replacePlaceholder(read, publicPath));
-    response.code(200);
-    response.etag(`${hash}-${publicPath}`);
-    response.header('cache-control', 'must-revalidate');
-    response.type(request.server.mime.path(path).type);
-    return response;
-
+    return h.response(replacePlaceholder(read, publicPath))
+      .takeover()
+      .code(200)
+      .etag(`${hash}-${publicPath}`)
+      .header('cache-control', 'must-revalidate')
+      .type(request.server.mime.path(path).type);
   } catch (error) {
     if (fd) {
       try {
@@ -101,9 +101,9 @@ export async function createDynamicAssetResponse(options) {
     }
 
     if (error.code === 'ENOENT') {
-      return Boom.notFound();
+      throw Boom.notFound();
     }
 
-    return Boom.boomify(error);
+    throw Boom.boomify(error);
   }
 }

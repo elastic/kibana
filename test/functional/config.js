@@ -17,38 +17,9 @@
  * under the License.
  */
 
-import {
-  CommonPageProvider,
-  ConsolePageProvider,
-  ShieldPageProvider,
-  ContextPageProvider,
-  DiscoverPageProvider,
-  HeaderPageProvider,
-  HomePageProvider,
-  DashboardPageProvider,
-  VisualizePageProvider,
-  SettingsPageProvider,
-  MonitoringPageProvider,
-  PointSeriesPageProvider,
-  VisualBuilderPageProvider,
-  TimelionPageProvider,
-} from './page_objects';
-
-import {
-  RemoteProvider,
-  FilterBarProvider,
-  QueryBarProvider,
-  FindProvider,
-  TestSubjectsProvider,
-  DocTableProvider,
-  ScreenshotsProvider,
-  DashboardVisualizationProvider,
-  DashboardExpectProvider,
-  FailureDebuggingProvider,
-  VisualizeListingTableProvider,
-  DashboardAddPanelProvider,
-  DashboardPanelActionsProvider,
-} from './services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
+import { services as commonServiceProviders } from '../common/services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
@@ -57,7 +28,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./apps/console'),
       require.resolve('./apps/getting_started'),
-      // require.resolve('./apps/context'),
+      require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
@@ -67,44 +38,12 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
     ],
-    pageObjects: {
-      common: CommonPageProvider,
-      console: ConsolePageProvider,
-      shield: ShieldPageProvider,
-      context: ContextPageProvider,
-      discover: DiscoverPageProvider,
-      header: HeaderPageProvider,
-      home: HomePageProvider,
-      dashboard: DashboardPageProvider,
-      visualize: VisualizePageProvider,
-      settings: SettingsPageProvider,
-      monitoring: MonitoringPageProvider,
-      pointSeries: PointSeriesPageProvider,
-      visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
-    },
+    pageObjects,
     services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      kibanaServer: commonConfig.get('services.kibanaServer'),
-      retry: commonConfig.get('services.retry'),
-      remote: RemoteProvider,
-      filterBar: FilterBarProvider,
-      queryBar: QueryBarProvider,
-      find: FindProvider,
-      testSubjects: TestSubjectsProvider,
-      docTable: DocTableProvider,
-      screenshots: ScreenshotsProvider,
-      dashboardVisualizations: DashboardVisualizationProvider,
-      dashboardExpect: DashboardExpectProvider,
-      failureDebugging: FailureDebuggingProvider,
-      visualizeListingTable: VisualizeListingTableProvider,
-      dashboardAddPanel: DashboardAddPanelProvider,
-      dashboardPanelActions: DashboardPanelActionsProvider,
+      ...commonServiceProviders,
+      ...services
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
@@ -114,6 +53,14 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false
+      },
     },
 
     apps: {
@@ -146,6 +93,10 @@ export default async function ({ readConfigFile }) {
       console: {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
+      },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
       },
       home: {
         pathname: '/app/kibana',

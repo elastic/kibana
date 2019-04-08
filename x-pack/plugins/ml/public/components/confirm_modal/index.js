@@ -8,4 +8,3 @@
 
 import './confirm_modal_service';
 import './confirm_modal_controller';
-import './styles/main.less';

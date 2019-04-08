@@ -8,61 +8,108 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render } from 'react-dom';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import {
-  KuiTableRowCell,
-  KuiTableRow
-} from '@kbn/ui-framework/components';
-import { MonitoringTable } from 'plugins/monitoring/components/table';
+import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';
-import { SORT_ASCENDING } from '../../../../common/constants';
 import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import {
   EuiLink,
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
+import { ClusterStatus } from '../../../components/elasticsearch/cluster_status';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-const filterFields = [ 'job_id', 'state', 'node.name' ];
-const columns = [
-  { title: 'Job ID', sortKey: 'job_id', sortOrder: SORT_ASCENDING },
-  { title: 'State', sortKey: 'state' },
-  { title: 'Processed Records', sortKey: 'data_counts.processed_record_count' },
-  { title: 'Model Size', sortKey: 'model_size_stats.model_bytes' },
-  { title: 'Node', sortKey: 'node.name' }
-];
-const jobRowFactory = (scope, kbnUrl) => {
-  const goToNode = nodeId => {
-    scope.$evalAsync(() => kbnUrl.changePath(`/elasticsearch/nodes/${nodeId}`));
-  };
-  const getNode = node => {
-    if (node) {
+const getColumns = (kbnUrl, scope) => ([
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.jobIdTitle', {
+      defaultMessage: 'Job ID'
+    }),
+    field: 'job_id',
+    sortable: true
+  },
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.stateTitle', {
+      defaultMessage: 'State'
+    }),
+    field: 'state',
+    sortable: true,
+    render: state => (
+      <div>
+        <MachineLearningJobStatusIcon status={state} />&nbsp;
+        { capitalize(state) }
+      </div>
+    )
+  },
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.processedRecordsTitle', {
+      defaultMessage: 'Processed Records'
+    }),
+    field: 'data_counts.processed_record_count',
+    sortable: true,
+    render: value => (
+      <span>
+        {numeral(value).format(LARGE_ABBREVIATED)}
+      </span>
+    )
+  },
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.modelSizeTitle', {
+      defaultMessage: 'Model Size'
+    }),
+    field: 'model_size_stats.model_bytes',
+    sortable: true,
+    render: value => (
+      <span>
+        {numeral(value).format(LARGE_BYTES)}
+      </span>
+    )
+  },
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.forecastsTitle', {
+      defaultMessage: 'Forecasts'
+    }),
+    field: 'forecasts_stats.total',
+    sortable: true,
+    render: value => (
+      <span>
+        {numeral(value).format(LARGE_ABBREVIATED)}
+      </span>
+    )
+  },
+  {
+    name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.nodeTitle', {
+      defaultMessage: 'Node'
+    }),
+    field: 'node.name',
+    sortable: true,
+    render: (name, node) => {
+      if (node) {
+        return (
+          <EuiLink
+            onClick={() => {
+              scope.$evalAsync(() => kbnUrl.changePath(`/elasticsearch/nodes/${node.id}`));
+            }}
+          >
+            { name }
+          </EuiLink>
+        );
+      }
+
       return (
-        <EuiLink
-          onClick={goToNode.bind(null, node.id)}
-        >
-          { node.name }
-        </EuiLink>
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.mlJobListing.noDataLabel"
+          defaultMessage="N/A"
+        />
       );
     }
-    return 'N/A';
-  };
-
-  return function JobRow(props) {
-    return (
-      <KuiTableRow>
-        <KuiTableRowCell>{ props.job_id }</KuiTableRowCell>
-        <KuiTableRowCell>
-          <MachineLearningJobStatusIcon status={props.state} />&nbsp;
-          { capitalize(props.state) }
-        </KuiTableRowCell>
-        <KuiTableRowCell>{ numeral(props.data_counts.processed_record_count).format(LARGE_ABBREVIATED) }</KuiTableRowCell>
-        <KuiTableRowCell>{ numeral(props.model_size_stats.model_bytes).format(LARGE_BYTES) }</KuiTableRowCell>
-        <KuiTableRowCell>
-          { getNode(props.node) }
-        </KuiTableRowCell>
-      </KuiTableRow>
-    );
-  };
-};
+  }
+]);
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringMlListing', kbnUrl => {
@@ -70,40 +117,58 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
     restrict: 'E',
     scope: {
       jobs: '=',
-      pageIndex: '=',
-      filterText: '=',
-      sortKey: '=',
-      sortOrder: '=',
-      onNewState: '=',
+      paginationSettings: '=',
+      sorting: '=',
+      onTableChange: '=',
+      status: '=',
     },
     link(scope, $el) {
+      const columns = getColumns(kbnUrl, scope);
 
-      const getNoDataMessage = filterText => {
-        if (filterText) {
-          return (
-            `There are no Machine Learning Jobs that match the filter [${filterText.trim()}] or the time range.
-Try changing the filter or time range.`
-          );
-        }
-        return 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.';
-      };
+      const filterJobsPlaceholder = i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder', {
+        defaultMessage: 'Filter Jobs…'
+      });
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
-          <MonitoringTable
-            className="mlJobsTable"
-            rows={jobs}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Jobs..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={jobRowFactory(scope, kbnUrl)}
-            getNoDataMessage={getNoDataMessage}
-          />
+          <I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <ClusterStatus stats={scope.status} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiMonitoringTable
+                    className="mlJobsTable"
+                    rows={jobs}
+                    columns={columns}
+                    sorting={{
+                      ...scope.sorting,
+                      sort: {
+                        ...scope.sorting.sort,
+                        field: 'job_id'
+                      }
+                    }}
+                    pagination={scope.paginationSettings}
+                    message={i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription', {
+                      defaultMessage: 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.'
+                    })}
+                    search={{
+                      box: {
+                        incremental: true,
+                        placeholder: filterJobsPlaceholder
+                      },
+                    }}
+                    onTableChange={scope.onTableChange}
+                    executeQueryOptions={{
+                      defaultFields: ['job_id']
+                    }}
+                  />
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nContext>
         );
         render(mlTable, $el[0]);
       });

@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './watch_action.html';
-import './watch_action.less';
 import angular from 'angular';
 import '../watch_email_action';
 import '../watch_logging_action';

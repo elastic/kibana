@@ -5,28 +5,33 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
-  KuiTable,
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiTableBody,
-} from '@kbn/ui-framework/components';
+  EuiBasicTable,
+} from '@elastic/eui';
 
 export function LatestVersions({ latestVersions }) {
-  const versions = latestVersions.map(({ version, count }, index) => {
-    return (
-      <KuiTableRow key={`latest-version-${index}`}>
-        <KuiTableRowCell>{version}</KuiTableRowCell>
-        <KuiTableRowCell align="right">{count}</KuiTableRowCell>
-      </KuiTableRow>
-    );
-  });
-
   return (
-    <KuiTable>
-      <KuiTableBody>
-        {versions}
-      </KuiTableBody>
-    </KuiTable>
+    <EuiBasicTable
+      items={latestVersions}
+      columns={[
+        {
+          field: 'version',
+          name: '',
+        },
+        {
+          field: 'count',
+          dataType: 'number',
+          name: '',
+        }
+      ]}
+    />
   );
 }
+
+LatestVersions.propTypes = {
+  latestVersions: PropTypes.arrayOf(PropTypes.shape({
+    version: PropTypes.string.isRequired,
+    count: PropTypes.number.isRequired,
+  })).isRequired,
+};

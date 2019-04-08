@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 
+import migrations from './migrations';
 import { initServer } from './server';
 import mappings from './mappings.json';
 
@@ -21,12 +22,14 @@ export function graph(kibana) {
         title: 'Graph',
         order: 9000,
         icon: 'plugins/graph/icon.png',
-        description: 'Graph exploration',
+        euiIconType: 'graphApp',
         main: 'plugins/graph/app',
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],
-      mappings
+      mappings,
+      migrations,
     },
 
     config(Joi) {
@@ -41,8 +44,6 @@ export function graph(kibana) {
       server.injectUiAppVars('graph', () => {
         const config = server.config();
         return {
-          esApiVersion: config.get('elasticsearch.apiVersion'),
-          esShardTimeout: config.get('elasticsearch.shardTimeout'),
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
           canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };

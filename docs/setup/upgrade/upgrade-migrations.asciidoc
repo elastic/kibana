@@ -1,0 +1,48 @@
+[[upgrade-migrations]]
+=== Saved object migrations
+
+Every time Kibana is upgraded it checks to see if all saved objects, such as dashboards, visualizations, and index patterns, are compatible with the new version. If any objects need to be updated, then the automatic saved object migration process is kicked off.
+
+[float]
+[[upgrade-migrations-process]]
+==== How the process works
+
+Saved objects are stored in an index named `.kibana_N`, where `N` is a number that increments over time as Kibana is upgraded. The index alias `.kibana` points to the latest up-to-date index for a given install.
+
+NOTE: Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`, so the first time you upgrade to Kibana version 6.5+, Kibana will migrate into `.kibana_1` and set `.kibana` up as an index alias.
+
+While Kibana is starting up and before serving any HTTP traffic, it checks to see if any internal mapping changes or data transformations for existing saved objects are required.
+
+When changes are necessary, a new incremental `.kibana_N` index is created with updated mappings, then the saved objects are loaded in batches from the existing index, transformed to whatever extent necessary, and added to this new index.
+
+Once the objects are migrated, the `.kibana` index alias is updated to point to the new index, and Kibana finishes starting up and serving HTTP traffic.
+
+[float]
+[[upgrade-migrations-old-indices]]
+==== Handling old `.kibana` indices
+
+After migrations have run, there will be multiple Kibana indices in Elasticsearch: (`.kibana_1`, `.kibana_2`, etc). Kibana only uses the index that the `.kibana` alias points to. The other Kibana indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling Kibana back to a previous version.
+
+[float]
+[[upgrade-migrations-errors]]
+==== Handling errors during saved object migrations
+
+If Kibana terminates unexpectedly while migrating a saved object index, some additional work may be required in order to get Kibana to re-attempt the migration.
+
+For example, if the `.kibana` alias is pointing to `.kibana_4`, and there is a `.kibana_5` index in Elasticsearch, the `.kibana_5` index will need to be deleted. Kibana will never attempt to overwrite an existing index.
+
+[float]
+[[upgrade-migrations-multiple-instances]]
+==== Support for multiple kibana instances
+
+If you're running multiple Kibana instances for a single index behind a load balancer, it's important that you stop all instances before upgrading, so you do not have multiple different versions of Kibana trying to perform saved object migrations.
+
+The first instance that triggers saved object migrations will run the entire process. Any other instances started up while a migration is running will log a message and then wait until saved object migration has completed before they start serving HTTP traffic.
+
+[float]
+[[upgrade-migrations-rolling-back]]
+==== Rolling back to a previous version of Kibana
+
+When rolling Kibana back to a previous version, point the `.kibana` alias to the appropriate Kibana index. When you have the previous version running again, delete the more recent `.kibana_N` index or indices so that future upgrades are based on the current Kibana index.
+
+WARNING: Rolling back to a previous Kibana version can result in saved object data loss if you had successfully upgraded and made changes to saved objects before rolling back.

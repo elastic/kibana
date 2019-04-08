@@ -42,10 +42,11 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 1,
+                  version: 'WzIsMV0=',
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });
@@ -87,7 +88,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -140,6 +141,25 @@ export default function ({ getService }) {
         ));
       });
 
+      describe('missing type', () => {
+        it('should return 400', async () => (
+          await supertest
+            .get('/api/saved_objects/_find')
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'child "type" fails because ["type" is required]',
+                statusCode: 400,
+                validation: {
+                  keys: ['type'],
+                  source: 'query'
+                }
+              });
+            })
+        ));
+      });
+
       describe('page beyond total', () => {
         it('should return 200 with empty response', async () => (
           await supertest
@@ -159,7 +179,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({

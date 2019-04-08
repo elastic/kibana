@@ -1,0 +1,27 @@
+[[managing-index-lifecycle-policies]]
+=== Managing index lifecycle policies
+
+Your configured policies appear on the *Index lifecycle policies* page. 
+You can update an existing index lifecycle policy to fix errors or change 
+strategies for newly created indices. To edit a policy, select its name. 
+
+[role="screenshot"]
+image::images/index_lifecycle_policies_options.png[][UI for viewing and editing an index lifecycle policy]
+
+In addition, you can:
+
+* *View indices linked to the policy.* This is important when editing a policy. 
+Any changes you make affect all indices attached to the policy.  The settings 
+for the current phase are cached, so the update doesn’t affect that phase. This 
+prevents conflicts when you’re modifying a phase that is currently executing on 
+an index. The changes takes effect when the next phase in the index lifecycle begins.  
+
+* *Add the policy to an index template.*  When an index is automatically 
+created using the index template, the policy is applied. If the index is rolled 
+over, the policies for any matching index templates are applied to the newly 
+created index. For more information, see {ref}/indices-templates.html[Index templates].   
+
+* *Delete a policy.* You can’t delete a policy that is currently in use or 
+recover a deleted index.
+
+

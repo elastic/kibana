@@ -64,22 +64,22 @@ export function registerGetRoute(server) {
   server.route({
     path: '/api/watcher/indices',
     method: 'POST',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { pattern } = request.payload;
 
       return getIndices(callWithRequest, pattern)
         .then(indices => {
-          reply({ indices });
+          return { indices };
         })
         .catch(err => {
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

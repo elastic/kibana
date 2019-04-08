@@ -10,9 +10,6 @@ import {
   PluginVertex,
   TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT
 } from '../plugin_vertex';
-import inputIcon from '@elastic/eui/src/components/icon/assets/logstash_input.svg';
-import filterIcon from '@elastic/eui/src/components/icon/assets/logstash_filter.svg';
-import outputIcon from '@elastic/eui/src/components/icon/assets/logstash_output.svg';
 
 describe('PluginVertex', () => {
   let graph;
@@ -86,7 +83,7 @@ describe('PluginVertex', () => {
     expect(pluginVertex.latestEventsPerSecond).to.be(20);
   });
 
-  describe("isTimeConsuming", () => {
+  describe('isTimeConsuming', () => {
     let percentExecution;
 
     beforeEach(() => {
@@ -99,7 +96,7 @@ describe('PluginVertex', () => {
       expect(pluginVertex.isTimeConsuming()).to.be(false);
     });
 
-    it("should have a true isTimeConsuming result when the plugin consumes a large amount of execution time", () => {
+    it('should have a true isTimeConsuming result when the plugin consumes a large amount of execution time', () => {
       vertexJson.stats.percent_of_total_processor_duration.data[1][1] = 0.1 +
         (percentExecution * (TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT));
       const pluginVertex = new PluginVertex(graph, vertexJson);
@@ -107,7 +104,7 @@ describe('PluginVertex', () => {
     });
   });
 
-  describe("isSlow", () => {
+  describe('isSlow', () => {
     beforeEach(() => {
       graph.processorVertices[0].millis_per_event = 1;
       graph.processorVertices[1].millis_per_event = 999999999999999999;
@@ -148,14 +145,14 @@ describe('PluginVertex', () => {
 
     it('should use the correct icon', () => {
       const pluginVertex = new PluginVertex(graph, vertexJson);
-      expect(pluginVertex.icon).to.be(inputIcon);
+      expect(pluginVertex.iconType).to.be('logstashInput');
     });
   });
 
   it('icon should throw an error if type of plugin is unknown', () => {
     vertexJson.plugin_type = 'foobar';
     const pluginVertex = new PluginVertex(graph, vertexJson);
-    const fn = () => pluginVertex.icon;
+    const fn = () => pluginVertex.iconType;
     expect(fn).to.throwError();
   });
 
@@ -181,7 +178,7 @@ describe('PluginVertex', () => {
 
     it('should use the correct icon', () => {
       const pluginVertex = new PluginVertex(graph, vertexJson);
-      expect(pluginVertex.icon).to.be(filterIcon);
+      expect(pluginVertex.iconType).to.be('logstashFilter');
     });
   });
 
@@ -207,7 +204,7 @@ describe('PluginVertex', () => {
 
     it('should use the correct icon', () => {
       const pluginVertex = new PluginVertex(graph, vertexJson);
-      expect(pluginVertex.icon).to.be(outputIcon);
+      expect(pluginVertex.iconType).to.be('logstashOutput');
     });
   });
 });

@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './detector_filter_modal_controller';

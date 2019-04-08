@@ -1,0 +1,226 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#debug() sends a msg of type "debug" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "debug",
+    },
+  ],
+]
+`;
+
+exports[`#error() sends a msg of type "error" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        [Error: error message],
+      ],
+      "indent": 0,
+      "type": "error",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "string message",
+      ],
+      "indent": 0,
+      "type": "error",
+    },
+  ],
+]
+`;
+
+exports[`#getWritten$() does not emit msg if all writers return false 1`] = `Array []`;
+
+exports[`#getWritten$() does not emit msg when no writers 1`] = `Array []`;
+
+exports[`#getWritten$() emits msg if all writers return true 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "foo",
+    ],
+    "indent": 0,
+    "type": "debug",
+  },
+  Object {
+    "args": Array [
+      "bar",
+    ],
+    "indent": 0,
+    "type": "info",
+  },
+  Object {
+    "args": Array [
+      "baz",
+    ],
+    "indent": 0,
+    "type": "verbose",
+  },
+]
+`;
+
+exports[`#getWritten$() emits msg if some writers return true 1`] = `
+Array [
+  Object {
+    "args": Array [
+      "foo",
+    ],
+    "indent": 0,
+    "type": "debug",
+  },
+  Object {
+    "args": Array [
+      "bar",
+    ],
+    "indent": 0,
+    "type": "info",
+  },
+  Object {
+    "args": Array [
+      "baz",
+    ],
+    "indent": 0,
+    "type": "verbose",
+  },
+]
+`;
+
+exports[`#indent() changes the indent on each written msg 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+      ],
+      "indent": 1,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "bar",
+      ],
+      "indent": 3,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "baz",
+      ],
+      "indent": 6,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "box",
+      ],
+      "indent": 4,
+      "type": "debug",
+    },
+  ],
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+      ],
+      "indent": 0,
+      "type": "debug",
+    },
+  ],
+]
+`;
+
+exports[`#info() sends a msg of type "info" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "info",
+    },
+  ],
+]
+`;
+
+exports[`#success() sends a msg of type "success" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "success",
+    },
+  ],
+]
+`;
+
+exports[`#verbose() sends a msg of type "verbose" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "verbose",
+    },
+  ],
+]
+`;
+
+exports[`#warning() sends a msg of type "warning" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "warning",
+    },
+  ],
+]
+`;
+
+exports[`#write() sends a msg of type "write" to each writer with indent and arguments 1`] = `
+Array [
+  Array [
+    Object {
+      "args": Array [
+        "foo",
+        "bar",
+        "baz",
+      ],
+      "indent": 0,
+      "type": "write",
+    },
+  ],
+]
+`;

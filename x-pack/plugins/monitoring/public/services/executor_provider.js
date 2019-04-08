@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash';
-export function executorProvider(Promise, $timeout, timefilter) {
+import { timefilter } from 'ui/timefilter';
+export function executorProvider(Promise, $timeout) {
 
   const queue = [];
   let executionTimer;
@@ -30,8 +30,6 @@ export function executorProvider(Promise, $timeout, timefilter) {
      */
   function cancel() {
     killTimer();
-    timefilter.off('update', killIfPaused);
-    timefilter.off('fetch', reFetch);
   }
 
   /**
@@ -73,7 +71,7 @@ export function executorProvider(Promise, $timeout, timefilter) {
   }
 
   function killIfPaused() {
-    if (timefilter.refreshInterval.pause) {
+    if (timefilter.getRefreshInterval().pause) {
       killTimer();
     }
   }
@@ -83,10 +81,8 @@ export function executorProvider(Promise, $timeout, timefilter) {
      * @returns {void}
      */
   function start() {
-    timefilter.on('fetch', reFetch);
-    timefilter.on('update', killIfPaused);
-    if ((ignorePaused || timefilter.refreshInterval.pause === false) && timefilter.refreshInterval.value > 0) {
-      executionTimer = $timeout(run, timefilter.refreshInterval.value);
+    if ((ignorePaused || timefilter.getRefreshInterval().pause === false) && timefilter.getRefreshInterval().value > 0) {
+      executionTimer = $timeout(run, timefilter.getRefreshInterval().value);
     }
   }
 
@@ -95,17 +91,9 @@ export function executorProvider(Promise, $timeout, timefilter) {
      */
   return {
     register,
-    start(options = {}) {
-      options = defaults(options, {
-        ignorePaused: false,
-        now: false
-      });
-      if (options.now) {
-        return run();
-      }
-      if (options.ignorePaused) {
-        ignorePaused = options.ignorePaused;
-      }
+    start($scope) {
+      $scope.$listenAndDigestAsync(timefilter, 'fetch', reFetch);
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', killIfPaused);
       start();
     },
     run,

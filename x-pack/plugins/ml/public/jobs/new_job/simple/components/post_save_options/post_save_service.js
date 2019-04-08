@@ -30,20 +30,24 @@ class PostSaveService {
     this.externalCreateWatch;
   }
 
-  startRealtimeJob(jobId) {
+  startRealtimeJob(jobId, i18n) {
     return new Promise((resolve, reject) => {
       this.status.realtimeJob = this.STATUS.SAVING;
 
       const datafeedId = mlJobService.getDatafeedId(jobId);
 
       mlJobService.openJob(jobId)
-        .finally(() => {
+        .catch(() => {})
+        .then(() => {
           mlJobService.startDatafeed(datafeedId, jobId, 0, undefined)
             .then(() => {
               this.status.realtimeJob = this.STATUS.SAVED;
               resolve();
             }).catch((resp) => {
-              msgs.error('Could not start datafeed: ', resp);
+              msgs.error(
+                i18n('xpack.ml.newJob.simple.postSaveOptions.couldNotStartDatafeedErrorMessage', {
+                  defaultMessage: 'Could not start datafeed:'
+                }), resp);
               this.status.realtimeJob = this.STATUS.SAVE_FAILED;
               reject();
             });
@@ -52,15 +56,25 @@ class PostSaveService {
     });
   }
 
-  apply(jobId, runInRealtime, createWatch) {
-    if (runInRealtime) {
-      this.startRealtimeJob(jobId)
-        .then(() => {
-          if (createWatch) {
-            mlCreateWatchService.createNewWatch(jobId);
-          }
-        });
-    }
+  apply(jobId, runInRealtime, createWatch, i18n) {
+    return new Promise((resolve) => {
+      if (runInRealtime) {
+        this.startRealtimeJob(jobId, i18n)
+          .then(() => {
+            if (createWatch) {
+              mlCreateWatchService.createNewWatch(jobId)
+                .catch(() => {})
+                .then(() => {
+                  resolve();
+                });
+            } else {
+              resolve();
+            }
+          });
+      } else {
+        resolve();
+      }
+    });
   }
 }
 

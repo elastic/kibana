@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const find = getService('find');
+  const inspector = getService('inspector');
   const markdown = `
 # Heading 1
 
@@ -30,7 +31,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('visualize app', async () => {
     before(async function () {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();
@@ -38,9 +39,8 @@ export default function ({ getPageObjects, getService }) {
 
     describe('markdown vis', async () => {
 
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
-        expect(spyToggleExists).to.be(false);
+      it('should not have inspector enabled', async function () {
+        await inspector.expectIsNotEnabled();
       });
 
       it('should render markdown as html', async function () {
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should resize the editor', async function () {
-        const editorSidebar = await find.byCssSelector('.vis-editor-sidebar');
+        const editorSidebar = await find.byCssSelector('.visEditor__sidebar');
         const initialSize = await editorSidebar.getSize();
         await PageObjects.visualize.sizeUpEditor();
         const afterSize = await editorSidebar.getSize();

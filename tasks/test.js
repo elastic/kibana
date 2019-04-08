@@ -31,16 +31,13 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', [
-    'checkPlugins',
-    'run:mocha',
-  ]);
+  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
+  grunt.registerTask('test:server', () => {
+    grunt.log.writeln('`grunt test:server` is deprecated - use `grunt test:mocha`');
+    grunt.task.run(['test:mocha']);
+  });
 
-  grunt.registerTask('test:browser', [
-    'checkPlugins',
-    'run:browserTestServer',
-    'karma:unit',
-  ]);
+  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -48,83 +45,41 @@ module.exports = function (grunt) {
       .map(key => `karma:${key}`);
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
-
-    grunt.task.run([
-      'run:browserTestServer',
-      ...ciShardTasks
-    ]);
+    grunt.task.run(['run:browserSCSS']);
+    grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
   });
 
-  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+  grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
+    'checkPlugins',
     'test:server',
-    'test:ui',
+    'run:functionalTests',
     'test:jest',
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'test:api'
+    'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:dev', [
-    'checkPlugins',
-    'run:devBrowserTestServer',
-    'karma:dev'
-  ]);
-
-  grunt.registerTask('test:ui', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:funcTestServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:funcTestServer'
-  ]);
-
-  grunt.registerTask('test:uiRelease', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:ossDistFuncTestServer',
-    'functional_test_runner:functional',
-    'stop:testEsServer',
-    'stop:ossDistFuncTestServer'
-  ]);
-
-  grunt.registerTask('test:ui:server', [
-    'checkPlugins',
-    'run:testEsServer',
-    'run:devFuncTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api', [
-    'run:testEsServer',
-    'run:apiTestServer',
-    'functional_test_runner:apiIntegration',
-    'stop:testEsServer',
-    'stop:apiTestServer'
-  ]);
-
-  grunt.registerTask('test:api:server', [
-    'run:testEsServer',
-    'run:devApiTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
-  });
+  grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
-    grunt.task.run(_.compact([
-      !grunt.option('quick') && 'run:eslint',
-      !grunt.option('quick') && 'run:tslint',
-      'run:checkFileCasing',
-      'licenses',
-      'test:quick',
-      'verifyTranslations',
-    ]));
+    grunt.task.run(
+      _.compact([
+        !grunt.option('quick') && 'run:eslint',
+        !grunt.option('quick') && 'run:tslint',
+        !grunt.option('quick') && 'run:sasslint',
+        !grunt.option('quick') && 'run:checkTsProjects',
+        !grunt.option('quick') && 'run:typeCheck',
+        !grunt.option('quick') && 'run:i18nCheck',
+        'run:checkFileCasing',
+        'licenses',
+        'test:quick',
+      ])
+    );
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
@@ -137,8 +92,8 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
-      opts: { stdio: 'inherit' }
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-plugins'],
+      opts: { stdio: 'inherit' },
     };
 
     return new Promise((resolve, reject) => {

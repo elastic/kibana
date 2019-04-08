@@ -1,0 +1,15 @@
+// SASSTODO: Dangerous EUI overwrites
+.euiDescriptionList.euiDescriptionList--column.rule-detector-description-list {
+  .euiDescriptionList__title {
+    flex-basis: 15%;
+  }
+
+  .euiDescriptionList__description {
+    flex-basis: 85%;
+  }
+}
+
+// SASSTODO: Dangerous EUI overwrites
+.euiDescriptionList.euiDescriptionList--column.rule-detector-description-list > * {
+  margin-top: $euiSizeXS;
+}

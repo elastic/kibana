@@ -18,7 +18,7 @@
  */
 
 /**
- * Attempt to apply basic webpack alias transfomations so we can
+ * Attempt to apply basic webpack alias transformations so we can
  * avoid triggering the webpack resolver for many imports
  *
  * @param {string} source

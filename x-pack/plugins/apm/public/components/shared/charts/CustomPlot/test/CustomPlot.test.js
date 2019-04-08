@@ -18,6 +18,10 @@ import {
   getEmptySerie
 } from '../../../../../store/selectors/chartSelectors';
 
+function getXValueByIndex(index) {
+  return responseWithData.responseTimes.avg[index].x;
+}
+
 describe('when response has data', () => {
   let wrapper;
   let onHover;
@@ -26,7 +30,6 @@ describe('when response has data', () => {
 
   beforeEach(() => {
     const series = getResponseTimeSeries(responseWithData);
-
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();
@@ -49,7 +52,7 @@ describe('when response has data', () => {
 
   describe('Initially', () => {
     it('should have 3 enabled series', () => {
-      expect(wrapper.find('AreaSeries').length).toBe(3);
+      expect(wrapper.find('LineSeries').length).toBe(3);
     });
 
     it('should have 3 legends ', () => {
@@ -96,7 +99,7 @@ describe('when response has data', () => {
       });
 
       it('should have 2 enabled series', () => {
-        expect(wrapper.find('AreaSeries').length).toBe(2);
+        expect(wrapper.find('LineSeries').length).toBe(2);
       });
 
       it('should add disabled prop to Legends', () => {
@@ -157,19 +160,20 @@ describe('when response has data', () => {
   });
 
   describe('when hovering over', () => {
+    const index = 22;
     beforeEach(() => {
       wrapper
         .find('.rv-voronoi__cell')
-        .at(22)
+        .at(index)
         .simulate('mouseOver');
     });
 
     it('should call onHover', () => {
-      expect(onHover).toHaveBeenCalledWith(22);
+      expect(onHover).toHaveBeenCalledWith(getXValueByIndex(index));
     });
   });
 
-  describe('when setting hoverIndex', () => {
+  describe('when setting hoverX', () => {
     beforeEach(() => {
       // Avoid timezone issues in snapshots
       jest.spyOn(moment.prototype, 'format').mockImplementation(function() {
@@ -177,9 +181,9 @@ describe('when response has data', () => {
       });
 
       // Simulate hovering over multiple buckets
-      wrapper.setProps({ hoverIndex: 13 });
-      wrapper.setProps({ hoverIndex: 14 });
-      wrapper.setProps({ hoverIndex: 15 });
+      wrapper.setProps({ hoverX: getXValueByIndex(13) });
+      wrapper.setProps({ hoverX: getXValueByIndex(14) });
+      wrapper.setProps({ hoverX: getXValueByIndex(15) });
     });
 
     it('should display tooltip', () => {
@@ -239,8 +243,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(20)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
@@ -261,8 +265,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(10)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {

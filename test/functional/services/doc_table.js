@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export function DocTableProvider({ getService }) {
+export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'header']);
+
 
   class DocTable {
     async getTable() {
@@ -70,11 +72,13 @@ export function DocTableProvider({ getService }) {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleRowExpanded(row) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
       await rowExpandToggle.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
 
       const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {

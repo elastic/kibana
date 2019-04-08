@@ -1,0 +1,113 @@
+[[role-management-api-get]]
+=== Get Role
+
+experimental[This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental.]
+
+Retrieves all {kib} roles, or a specific role.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Authorization
+
+To use this API, you must have at least the `manage_security` cluster privilege.
+
+==== Get all {kib} roles
+
+===== Request
+
+To retrieve all roles, issue a GET request to the
+/api/security/role endpoint.
+
+[source,js]
+--------------------------------------------------
+GET /api/security/role
+--------------------------------------------------
+// KIBANA
+
+===== Response
+
+A successful call returns a response code of `200` and a response body containing a JSON 
+representation of the roles.
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "name": "my_kibana_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "indices": [ ],
+      "cluster": [ ],
+      "run_as": [ ]
+    },
+    "kibana": [ {
+        "privileges": [ "all" ]
+    } ],
+  },
+  {
+    "name": "my_admin_role",
+    "metadata" : {
+      "version" : 1
+    },
+    "transient_metadata": {
+      "enabled": true
+    },
+    "elasticsearch": {
+      "cluster" : [ "all" ],
+      "indices" : [ {
+        "names" : [ "index1", "index2" ],
+        "privileges" : [ "all" ],
+        "field_security" : {
+          "grant" : [ "title", "body" ]
+        },
+        "query" : "{\"match\": {\"title\": \"foo\"}}"
+      } ],
+    },
+    "kibana": [ ]
+  }
+]
+--------------------------------------------------
+
+==== Get a specific role
+
+===== Request
+
+To retrieve a specific role, issue a GET request to
+the `/api/security/role/<rolename>` endpoint:
+
+[source,js]
+--------------------------------------------------
+GET /api/security/role/my_kibana_role
+--------------------------------------------------
+// KIBANA
+
+===== Response
+
+A successful call returns a response code of `200` and a response body containing a JSON 
+representation of the role.
+
+[source,js]
+--------------------------------------------------
+{
+  "name": "my_kibana_role",
+  "metadata" : {
+    "version" : 1
+  },
+  "transient_metadata": {
+    "enabled": true
+  },
+  "elasticsearch": {
+    "cluster": [ ],
+    "indices": [ ],
+    "run_as": [ ]
+  },
+  "kibana": [ {
+      "privileges": [ "all" ]
+  } ],
+}
+--------------------------------------------------
