@@ -45,19 +45,17 @@ function FieldSelectUi({
 
   const typeFilter = generateByTypeFilter(restrict);
   const options = (fields[indexPattern] || [])
-    .filter((field) => typeFilter(field) && isFieldEnabled(field.name, type, uiRestrictions))
+    .filter(field => typeFilter(field) && isFieldEnabled(field.name, type, uiRestrictions))
     .map(field => ({ label: field.name, value: field.name }));
 
-  const selectedOption = options.find(option => {
-    return value === option.value;
-  });
+  const selectedOption = options.find(option => value === option.value);
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
   return (
     <EuiComboBox
       placeholder={intl.formatMessage({
         id: 'tsvb.fieldSelect.selectFieldPlaceholder',
-        defaultMessage: 'Select field…',
+        defaultMessage: 'Select field...',
       })}
       isDisabled={disabled}
       options={options}

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import GroupBySelect from './group_by_select';
+import { GroupBySelect } from './group_by_select';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
@@ -31,7 +31,7 @@ const SplitByTermsUi = props => {
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(props.onChange);
   const handleSelectChange = createSelectHandler(props.onChange);
-  const { indexPattern, intl } = props;
+  const { indexPattern, intl, uiRestrictions } = props;
   const defaults = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
   const model = { ...defaults, ...props.model };
   const { metrics } = model;
@@ -72,6 +72,7 @@ const SplitByTermsUi = props => {
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
+              uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -89,6 +90,8 @@ const SplitByTermsUi = props => {
               onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
               fields={props.fields}
+              uiRestrictions={uiRestrictions}
+              type={'terms'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -156,7 +159,8 @@ SplitByTermsUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPattern: PropTypes.string,
-  fields: PropTypes.object
+  fields: PropTypes.object,
+  uiRestrictions: PropTypes.object,
 };
 
 export const SplitByTerms = injectI18n(SplitByTermsUi);
