@@ -19,9 +19,10 @@
 
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
 export const metric = () => ({
-  name: 'metricvis',
+  name: 'metricVis',
   type: 'render',
   context: {
     types: [
@@ -36,12 +37,13 @@ export const metric = () => ({
       types: ['boolean'],
       default: false,
       help: i18n.translate('metricVis.function.percentage.help', {
-        defaultMessage: 'Shows metric in percentage mode. Dont forget to set colorRange.'
+        defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.'
       })
     },
     colorSchema: {
       types: ['string'],
       default: '"Green to Red"',
+      options: Object.values(vislibColorMaps).map(value => value.id),
       help: i18n.translate('metricVis.function.colorSchema.help', {
         defaultMessage: 'Color schema to use'
       })
@@ -58,7 +60,7 @@ export const metric = () => ({
       types: ['string'],
       default: '"[{ from: 0, to: 10000 }]"',
       help: i18n.translate('metricVis.function.colorRange.help', {
-        defaultMessage: 'Color ranges'
+        defaultMessage: 'Color ranges: array of objects with from and to property.'
       })
     },
     useRanges: {
@@ -76,6 +78,9 @@ export const metric = () => ({
     bgFill: {
       types: ['string'],
       default: '"#000"',
+      help: i18n.translate('metricVis.function.subText.help', {
+        defaultMessage: 'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).'
+      })
     },
     fontSize: {
       types: ['number'],
