@@ -5,11 +5,10 @@
  */
 
 import { Location } from 'history';
-import { last, pick } from 'lodash';
+import { last } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { PERSISTENT_APM_PARAMS } from '../../shared/Links/APMLink';
+import { getAPMHref } from '../../shared/Links/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './routeConfig';
 
@@ -20,12 +19,9 @@ interface Props {
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
-    const query = toQuery(this.props.location.search);
-    const persistentParams = pick(query, PERSISTENT_APM_PARAMS);
-    const search = fromQuery(persistentParams);
     const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
       text: value,
-      href: `#${match.url}?${search}`
+      href: getAPMHref(match.url, this.props.location.search)
     }));
 
     const current = last(breadcrumbs) || { text: '' };

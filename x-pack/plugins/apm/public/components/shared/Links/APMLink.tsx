@@ -26,8 +26,9 @@ export const PERSISTENT_APM_PARAMS = [
   'refreshInterval'
 ];
 
-function getSearchWithCurrentTimeRange(
-  currentSearch: string,
+export function getAPMHref(
+  path: string,
+  currentSearch: string, // TODO: Replace with passing in URL PARAMS here
   query: APMQueryParams = {}
 ) {
   const currentQuery = toQuery(currentSearch);
@@ -36,15 +37,16 @@ function getSearchWithCurrentTimeRange(
     ...pick(currentQuery, PERSISTENT_APM_PARAMS),
     ...query
   };
-  return fromQuery(nextQuery);
-}
+  const nextSearch = fromQuery(nextQuery);
 
-export function APMLink({ path, query, ...rest }: Props) {
-  const { search } = useLocation();
-  const nextSearch = getSearchWithCurrentTimeRange(search, query);
-  const href = url.format({
+  return url.format({
     pathname: '',
     hash: `${path}?${nextSearch}`
   });
+}
+
+export function APMLink({ path = '', query, ...rest }: Props) {
+  const { search } = useLocation();
+  const href = getAPMHref(path, search, query);
   return <EuiLink {...rest} href={href} />;
 }
