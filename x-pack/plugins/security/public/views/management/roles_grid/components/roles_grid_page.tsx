@@ -16,6 +16,7 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
@@ -84,7 +85,7 @@ class RolesGridPageUI extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.roles.subtitle"
-                  defaultMessage="Apply roles to groups of users and manage permissions across the stack"
+                  defaultMessage="Apply roles to groups of users and manage permissions across the stack."
                 />
               </p>
             </EuiText>
@@ -111,6 +112,7 @@ class RolesGridPageUI extends Component<Props, State> {
             // @ts-ignore missing rowProps typedef
             <EuiInMemoryTable
               itemId="name"
+              responsive={false}
               columns={this.getColumnConfig(intl)}
               selection={{
                 itemId: 'name',
@@ -198,21 +200,15 @@ class RolesGridPageUI extends Component<Props, State> {
       {
         field: 'metadata._reserved',
         name: (
-          <div>
-            <FormattedMessage
-              id="xpack.security.management.roles.reservedColumnName"
-              defaultMessage="Reserved"
-            />
+          <EuiToolTip content={reservedRoleDesc}>
             <span className="rolesGridPage__reservedRoleTooltip">
-              <EuiIconTip
-                type="questionInCircle"
-                size="m"
-                color="euiColorMediumShade"
-                className="rolesGridPage__reservedRoleTooltip"
-                title={reservedRoleDesc}
+              <FormattedMessage
+                id="xpack.security.management.roles.reservedColumnName"
+                defaultMessage="Reserved"
               />
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
-          </div>
+          </EuiToolTip>
         ),
         sortable: true,
         dataType: 'boolean',
@@ -225,8 +221,9 @@ class RolesGridPageUI extends Component<Props, State> {
           });
 
           return reserved ? (
-            // @ts-ignore missing "title" proptype
-            <EuiIcon aria-label={label} title={label} data-test-subj="reservedRole" type="check" />
+            <span title={label}>
+              <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
+            </span>
           ) : null;
         },
       },
