@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CapabilitiesService, CapabilitiesSetup, UICapabilities } from './capabilities_service';
+import { Capabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<CapabilitiesSetup> = {
@@ -26,7 +26,7 @@ const createSetupContractMock = () => {
     catalogue: {},
     management: {},
     navLinks: {},
-  } as UICapabilities);
+  } as Capabilities);
   return setupContract;
 };
 

@@ -7,7 +7,8 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 
 import { LogsPageContent } from './page_content';
 import { LogsToolbar } from './toolbar';

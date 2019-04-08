@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { UICapabilities } from '../../../../core/public/capabilities';
+import { UICapabilities } from '.';
 
 uiRoutes.addSetupWork(
   (uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any, kbnUrl: any) => {

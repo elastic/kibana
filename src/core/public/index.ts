@@ -18,7 +18,7 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { CapabilitiesSetup } from './capabilities';
+import { Capabilities, CapabilitiesSetup } from './capabilities';
 import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
@@ -53,6 +53,7 @@ export {
   FatalErrorsSetup,
   I18nSetup,
   CapabilitiesSetup,
+  Capabilities,
   ChromeSetup,
   ChromeBreadcrumb,
   ChromeBrand,

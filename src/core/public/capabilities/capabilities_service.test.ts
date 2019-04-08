@@ -55,8 +55,6 @@ describe('#start', () => {
     const capabilities = startContract.getCapabilities();
 
     // @ts-ignore TypeScript knows this shouldn't be possible
-    expect(() => (capabilities.foo = 'foo')).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot assign to read only property 'foo' of object '#<Object>'"`
-    );
+    expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 });

@@ -16,7 +16,8 @@ import {
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
 import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';

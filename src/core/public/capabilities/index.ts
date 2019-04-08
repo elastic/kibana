@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { UICapabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+export { Capabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';

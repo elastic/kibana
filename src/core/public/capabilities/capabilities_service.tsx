@@ -24,7 +24,7 @@ interface StartDeps {
 }
 
 /** @internal */
-export interface UICapabilities {
+export interface Capabilities {
   navLinks: Record<string, boolean>;
   management: {
     [sectionId: string]: Record<string, boolean>;
@@ -43,9 +43,7 @@ export class CapabilitiesService {
        * Get the UI capabilities.
        */
       getCapabilities: () =>
-        deepFreeze<UICapabilities>(injectedMetadata.getInjectedVar(
-          'uiCapabilities'
-        ) as UICapabilities),
+        deepFreeze<Capabilities>(injectedMetadata.getInjectedVar('uiCapabilities') as Capabilities),
     };
   }
 }

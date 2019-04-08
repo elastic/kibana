@@ -8,7 +8,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 
 import { SnapshotPageContent } from './page_content';
 import { SnapshotToolbar } from './toolbar';
