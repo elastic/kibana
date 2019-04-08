@@ -28,15 +28,6 @@ import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
-import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from '../../autocomplete_providers';
-import chrome from '../../chrome';
-import { fromUser, matchPairs, toUser } from '../lib';
-import { QueryLanguageSwitcher } from './language_switcher';
-import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 import {
   EuiButton,
@@ -54,6 +45,16 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
+
+import {
+  AutocompleteSuggestion,
+  AutocompleteSuggestionType,
+  getAutocompleteProvider,
+} from '../../autocomplete_providers';
+import chrome from '../../chrome';
+import { fromUser, matchPairs, toUser } from '../lib';
+import { QueryLanguageSwitcher } from './language_switcher';
+import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -577,7 +578,7 @@ export class QueryBarUI extends Component<Props, State> {
               aria-owns="kbnTypeahead__items"
               aria-controls="kbnTypeahead__items"
             >
-              <form role="form" name="queryBarForm">
+              <form name="queryBarForm">
                 <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
