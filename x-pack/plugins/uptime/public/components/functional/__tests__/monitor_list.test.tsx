@@ -439,7 +439,11 @@ describe('MonitorList component', () => {
 
   it('renders a monitor list without errors', () => {
     const component = shallowWithIntl(
-      <MonitorListComponent dangerColor="red" data={{ monitorStatus: { monitors } }} loading={false} />
+      <MonitorListComponent
+        dangerColor="red"
+        data={{ monitorStatus: { monitors } }}
+        loading={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });

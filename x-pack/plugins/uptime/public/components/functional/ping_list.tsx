@@ -204,11 +204,11 @@ export const PingListComponent = ({
                     if (selectedOptions[0]) {
                       setSelectedOption(selectedOptions[0]);
                     }
-                    console.log(selectedOptions[0]);
                     if (typeof selectedOptions[0].value === 'string') {
-                      console.log('setting status')
                       // @ts-ignore it's definitely a string
-                      onSelectedStatusUpdate(selectedOptions[0].value !== '' ? selectedOptions[0].value : null);
+                      onSelectedStatusUpdate(
+                        selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                      );
                     }
                   }}
                 />
