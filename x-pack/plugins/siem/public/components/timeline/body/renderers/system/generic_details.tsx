@@ -145,9 +145,9 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId
   const processPid: string | null | undefined = get('process.pid[0]', data);
   const processName: string | null | undefined = get('process.name[0]', data);
   const processExecutable: string | null | undefined = get('process.executable[0]', data);
-  const sshSignature: string | null | undefined = get('system.auth.ssh.signature', data);
-  const sshMethod: string | null | undefined = get('system.auth.ssh.method', data);
-  const workingDirectory: string | null | undefined = get('process.working_directory', data);
+  const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
+  const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
+  const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
   return (
     <Details>
       <SystemGenericLine

@@ -326,23 +326,23 @@ export interface Ecs {
 }
 
 export interface AuditdEcsFields {
-  result?: string | null;
+  result?: ToStringArray | null;
 
-  session?: string | null;
+  session?: ToStringArray | null;
 
   data?: AuditdData | null;
 
   summary?: Summary | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface AuditdData {
-  acct?: string | null;
+  acct?: ToStringArray | null;
 
-  terminal?: string | null;
+  terminal?: ToStringArray | null;
 
-  op?: string | null;
+  op?: ToStringArray | null;
 }
 
 export interface Summary {
@@ -350,19 +350,19 @@ export interface Summary {
 
   object?: PrimarySecondary | null;
 
-  how?: string | null;
+  how?: ToStringArray | null;
 
-  message_type?: string | null;
+  message_type?: ToStringArray | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface PrimarySecondary {
-  primary?: string | null;
+  primary?: ToStringArray | null;
 
-  secondary?: string | null;
+  secondary?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface DestinationEcsFields {
@@ -660,15 +660,9 @@ export interface ProcessEcsFields {
 
   title?: ToStringArray | null;
 
-  thread?: Thread | null;
+  thread?: ToStringArray | null;
 
-  working_directory?: string | null;
-}
-
-export interface Thread {
-  id?: number | null;
-
-  start?: string | null;
+  working_directory?: ToStringArray | null;
 }
 
 export interface FileFields {
@@ -730,9 +724,9 @@ export interface AuthEcsFields {
 }
 
 export interface SshEcsFields {
-  method?: string | null;
+  method?: ToStringArray | null;
 
-  signature?: string | null;
+  signature?: ToStringArray | null;
 }
 
 export interface TimelineData {
@@ -984,6 +978,12 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface Thread {
+  id?: ToStringArray | null;
+
+  start?: ToStringArray | null;
 }
 
 // ====================================================
@@ -2493,9 +2493,9 @@ export namespace GetTimelineQuery {
   export type Ssh = {
     __typename?: 'SshEcsFields';
 
-    signature?: string | null;
+    signature?: ToStringArray | null;
 
-    method?: string | null;
+    method?: ToStringArray | null;
   };
 
   export type Audit = {
@@ -2563,9 +2563,9 @@ export namespace GetTimelineQuery {
   export type Auditd = {
     __typename?: 'AuditdEcsFields';
 
-    result?: string | null;
+    result?: ToStringArray | null;
 
-    session?: string | null;
+    session?: ToStringArray | null;
 
     data?: _Data | null;
 
@@ -2575,11 +2575,11 @@ export namespace GetTimelineQuery {
   export type _Data = {
     __typename?: 'AuditdData';
 
-    acct?: string | null;
+    acct?: ToStringArray | null;
 
-    terminal?: string | null;
+    terminal?: ToStringArray | null;
 
-    op?: string | null;
+    op?: ToStringArray | null;
   };
 
   export type Summary = {
@@ -2589,29 +2589,29 @@ export namespace GetTimelineQuery {
 
     object?: Object | null;
 
-    how?: string | null;
+    how?: ToStringArray | null;
 
-    message_type?: string | null;
+    message_type?: ToStringArray | null;
 
-    sequence?: number | null;
+    sequence?: ToStringArray | null;
   };
 
   export type Actor = {
     __typename?: 'PrimarySecondary';
 
-    primary?: string | null;
+    primary?: ToStringArray | null;
 
-    secondary?: string | null;
+    secondary?: ToStringArray | null;
   };
 
   export type Object = {
     __typename?: 'PrimarySecondary';
 
-    primary?: string | null;
+    primary?: ToStringArray | null;
 
-    secondary?: string | null;
+    secondary?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type File = {
@@ -2887,7 +2887,7 @@ export namespace GetTimelineQuery {
 
     title?: ToStringArray | null;
 
-    working_directory?: string | null;
+    working_directory?: ToStringArray | null;
   };
 
   export type Zeek = {

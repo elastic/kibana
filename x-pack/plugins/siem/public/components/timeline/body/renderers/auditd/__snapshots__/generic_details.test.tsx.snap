@@ -113,23 +113,45 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
         "_id": "22",
         "auditd": Object {
           "data": Object {
-            "acct": "alice",
-            "op": "PAM:setcred",
-            "terminal": "ssh",
+            "acct": Array [
+              "alice",
+            ],
+            "op": Array [
+              "PAM:setcred",
+            ],
+            "terminal": Array [
+              "ssh",
+            ],
           },
-          "result": "success",
-          "session": "340",
+          "result": Array [
+            "success",
+          ],
+          "session": Array [
+            "340",
+          ],
           "summary": Object {
             "actor": Object {
-              "primary": "alice",
-              "secondary": "alice",
+              "primary": Array [
+                "alice",
+              ],
+              "secondary": Array [
+                "alice",
+              ],
             },
-            "how": "/usr/sbin/sshd",
+            "how": Array [
+              "/usr/sbin/sshd",
+            ],
             "message_type": null,
             "object": Object {
-              "primary": "ssh",
-              "secondary": "8.42.77.171",
-              "type": "user-session",
+              "primary": Array [
+                "ssh",
+              ],
+              "secondary": Array [
+                "8.42.77.171",
+              ],
+              "type": Array [
+                "user-session",
+              ],
             },
             "sequence": null,
           },

@@ -46,31 +46,31 @@ export const ecsSchema = gql`
   }
 
   type PrimarySecondary {
-    primary: String
-    secondary: String
-    type: String
+    primary: ToStringArray
+    secondary: ToStringArray
+    type: ToStringArray
   }
 
   type Summary {
     actor: PrimarySecondary
     object: PrimarySecondary
-    how: String
-    message_type: String
-    sequence: Float
+    how: ToStringArray
+    message_type: ToStringArray
+    sequence: ToStringArray
   }
 
   type AuditdData {
-    acct: String
-    terminal: String
-    op: String
+    acct: ToStringArray
+    terminal: ToStringArray
+    op: ToStringArray
   }
 
   type AuditdEcsFields {
-    result: String
-    session: String
+    result: ToStringArray
+    session: ToStringArray
     data: AuditdData
     summary: Summary
-    sequence: Float
+    sequence: ToStringArray
   }
 
   type OsEcsFields {
@@ -93,8 +93,8 @@ export const ecsSchema = gql`
   }
 
   type Thread {
-    id: Float
-    start: String
+    id: ToStringArray
+    start: ToStringArray
   }
 
   type ProcessEcsFields {
@@ -104,8 +104,8 @@ export const ecsSchema = gql`
     args: ToStringArray
     executable: ToStringArray
     title: ToStringArray
-    thread: Thread
-    working_directory: String
+    thread: ToStringArray
+    working_directory: ToStringArray
   }
 
   type SourceEcsFields {
@@ -198,6 +198,7 @@ export const ecsSchema = gql`
     RA: Boolean
     TC: Boolean
   }
+
   type FileFields {
     path: String
     target_path: String
@@ -214,6 +215,7 @@ export const ecsSchema = gql`
     mtime: Date
     ctime: Date
   }
+
   type ZeekHttpData {
     resp_mime_types: [String!]
     trans_depth: String
@@ -323,8 +325,8 @@ export const ecsSchema = gql`
   }
 
   type SshEcsFields {
-    method: String
-    signature: String
+    method: ToStringArray
+    signature: ToStringArray
   }
 
   type AuthEcsFields {

@@ -17,19 +17,35 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
             "_id": "27",
             "auditd": Object {
               "data": null,
-              "result": "success",
-              "session": "246",
+              "result": Array [
+                "success",
+              ],
+              "session": Array [
+                "246",
+              ],
               "summary": Object {
                 "actor": Object {
-                  "primary": "alice",
-                  "secondary": "alice",
+                  "primary": Array [
+                    "alice",
+                  ],
+                  "secondary": Array [
+                    "alice",
+                  ],
                 },
-                "how": "/usr/bin/wget",
+                "how": Array [
+                  "/usr/bin/wget",
+                ],
                 "message_type": null,
                 "object": Object {
-                  "primary": "93.184.216.34",
-                  "secondary": "80",
-                  "type": "socket",
+                  "primary": Array [
+                    "93.184.216.34",
+                  ],
+                  "secondary": Array [
+                    "80",
+                  ],
+                  "type": Array [
+                    "socket",
+                  ],
                 },
                 "sequence": null,
               },
@@ -111,19 +127,33 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "_id": "28",
             "auditd": Object {
               "data": null,
-              "result": "success",
-              "session": "unset",
+              "result": Array [
+                "success",
+              ],
+              "session": Array [
+                "unset",
+              ],
               "summary": Object {
                 "actor": Object {
-                  "primary": "unset",
-                  "secondary": "root",
+                  "primary": Array [
+                    "unset",
+                  ],
+                  "secondary": Array [
+                    "root",
+                  ],
                 },
-                "how": "/lib/systemd/systemd-journald",
+                "how": Array [
+                  "/lib/systemd/systemd-journald",
+                ],
                 "message_type": null,
                 "object": Object {
-                  "primary": "/proc/15990/attr/current",
+                  "primary": Array [
+                    "/proc/15990/attr/current",
+                  ],
                   "secondary": null,
-                  "type": "file",
+                  "type": Array [
+                    "file",
+                  ],
                 },
                 "sequence": null,
               },
@@ -182,7 +212,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "title": Array [
                 "/lib/systemd/systemd-journald",
               ],
-              "working_directory": "/",
+              "working_directory": Array [
+                "/",
+              ],
             },
             "source": null,
             "suricata": null,
