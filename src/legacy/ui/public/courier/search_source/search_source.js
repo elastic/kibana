@@ -73,7 +73,6 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, translateToQuery } from '@kbn/es-query';
 
-import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequest } from '../fetch/request';
 
@@ -82,7 +81,6 @@ import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 
 const FIELDS = [
-  'type',
   'query',
   'filter',
   'sort',
@@ -104,13 +102,10 @@ function parseInitialFields(initialFields = {}) {
     : _.cloneDeep(initialFields);
 }
 
-export function SearchSourceProvider(Promise, Private, config) {
+export function SearchSourceProvider(Private, config) {
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
-  const getConfig = (...args) => config.get(...args);
-
-  const forIp = Symbol('for which index pattern?');
 
   class SearchSource {
     constructor(initialFields) {
@@ -145,34 +140,6 @@ export function SearchSourceProvider(Promise, Private, config) {
         throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
 
-      if (field === 'index') {
-        const fields = this._fields;
-
-        const hasSource = fields.source;
-        const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
-        const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
-        if (sourceIsForOurIp) {
-          delete fields.source;
-        }
-
-        if (value === null || value === undefined) {
-          delete fields.index;
-          return this;
-        }
-
-        fields[field] = value;
-        if (!fields.source) {
-          // imply source filtering based on the index pattern, but allow overriding
-          // it by simply setting another field for "source". When index is changed
-          fields.source = function () {
-            return value.getSourceFiltering();
-          };
-          fields.source[forIp] = value;
-        }
-
-        return this;
-      }
-
       if (value == null) {
         delete this._fields[field];
         return this;
@@ -198,7 +165,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       if (value !== void 0 || !recurse || !parent) {
         return value;
       }
-      return parent.getField(field);
+      return parent.getField(field, recurse);
     };
 
     /**
@@ -245,7 +212,7 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @return {undefined|searchSource}
      */
     getParent() {
-      return this._parent || undefined;
+      return this._parent;
     }
 
     /**
@@ -300,9 +267,8 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
       }
 
-      return Promise
-        .map(handlers, fn => fn(this, request))
-        .then(_.noop);
+      const promises = handlers.map(fn => fn(this, request));
+      return Promise.all(promises).then(_.noop);
     }
 
     async getSearchRequestBody() {
@@ -343,58 +309,41 @@ export function SearchSourceProvider(Promise, Private, config) {
      * @param  {object} data - the current merged data
      * @param  {*} val - the value at `key`
      * @param  {*} key - The key of `val`
-     * @return {undefined}
      */
     _mergeProp(data, val, key) {
       if (typeof val === 'function') {
-        const source = this;
-        return Promise.cast(val(this))
-          .then(function (newVal) {
-            return source._mergeProp(data, newVal, key);
-          });
+        val = val(this);
       }
 
       if (val == null || !key || !_.isString(key)) return;
 
       switch (key) {
         case 'filter':
-          const filters = Array.isArray(val) ? val : [val];
-          data.filters = [...(data.filters || []), ...filters];
-          return;
+          return (data.filters = (data.filters || []).concat(val));
         case 'index':
-        case 'type':
         case 'id':
+          return data[key] == null && (data[key] = val);
         case 'highlightAll':
-          if (key && data[key] == null) {
-            data[key] = val;
-          }
-          return;
+          if (!val || !config.get('doc_table:highlight')) return;
+          return addToBody('highlight', getHighlightRequest());
         case 'searchAfter':
-          key = 'search_after';
-          addToBody();
-          break;
+          return addToBody('search_after', val);
         case 'source':
-          key = '_source';
-          addToBody();
-          break;
+          return addToBody('_source', val);
         case 'sort':
-          val = normalizeSortRequest(val, this.getField('index'));
-          addToBody();
-          break;
+          return addToBody(key, normalizeSortRequest(val, this.getField('index')));
         case 'query':
-          data.query = (data.query || []).concat(val);
-          break;
+          return (data[key] = (data[key] || []).concat(val));
         case 'fields':
-          data[key] = _.uniq([...(data[key] || []), ...val]);
-          break;
+          return (data[key] = _.uniq((data[key] || []).concat(val)));
         default:
-          addToBody();
+          return addToBody(key, val);
       }
 
       /**
        * Add the key and val to the body of the request
        */
-      function addToBody() {
+      function addToBody(key, val) {
         data.body = data.body || {};
         // ignore if we already have a value
         if (data.body[key] == null) {
@@ -404,13 +353,13 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     /**
-     * Walk the inheritance chain of a source and return it's
+     * Walk the inheritance chain of a source and return its
      * flat representation (taking into account merging rules)
      * @returns {Promise}
      * @resolved {Object|null} - the flat data of the SearchSource
      */
     _flatten() {
-      // the merged data of this dataSource and it's ancestors
+      // the merged data of this dataSource and its ancestors
       const flatData = {};
 
       // function used to write each property from each data object in the chain to flat data
@@ -419,87 +368,62 @@ export function SearchSourceProvider(Promise, Private, config) {
       // start the chain at this source
       let current = this;
 
-      // call the ittr and return it's promise
-      return (function ittr() {
-        // iterate the _fields object (not array) and
-        // pass each key:value pair to source._mergeProp. if _mergeProp
-        // returns a promise, then wait for it to complete and call _mergeProp again
-        return Promise.all(_.map(current._fields, function ittr(value, key) {
-          if (Promise.is(value)) {
-            return value.then(function (value) {
-              return ittr(value, key);
-            });
-          }
-
-          const prom = root._mergeProp(flatData, value, key);
-          return Promise.is(prom) ? prom : null;
-        }))
-          .then(function () {
-            // move to this sources parent
-            const parent = current.getParent();
-            // keep calling until we reach the top parent
-            if (parent) {
-              current = parent;
-              return ittr();
-            }
-          });
-      }())
-        .then(function () {
-          // This is down here to prevent the circular dependency
-          flatData.body = flatData.body || {};
-
-          const computedFields = flatData.index.getComputedFields();
-          flatData.body.stored_fields = computedFields.storedFields;
-          flatData.body.script_fields = flatData.body.script_fields || {};
-          flatData.body.docvalue_fields = flatData.body.docvalue_fields || [];
-
-          _.extend(flatData.body.script_fields, computedFields.scriptFields);
-          flatData.body.docvalue_fields = _.union(flatData.body.docvalue_fields, computedFields.docvalueFields);
-
-          if (flatData.body._source) {
-            // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatData.body._source.excludes);
-            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
-              docvalueField => filter(docvalueField.field)
-            );
-          }
-
-          // if we only want to search for certain fields
-          const fields = flatData.fields;
-          if (fields) {
-            // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-            flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
-            flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
-
-            // request the remaining fields from both stored_fields and _source
-            const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
-            flatData.body.stored_fields = remainingFields;
-            _.set(flatData.body, '_source.includes', remainingFields);
-          }
-
-          const esQueryConfigs = getEsQueryConfig(config);
-          flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
-
-          if (flatData.highlightAll != null) {
-            if (flatData.highlightAll && flatData.body.query) {
-              flatData.body.highlight = getHighlightRequest(flatData.body.query, getConfig);
-            }
-            delete flatData.highlightAll;
-          }
-
-          // re-write filters within filter aggregations
-          Object.values(flatData.body.aggs || flatData.body.aggregations).forEach(function translate(agg) {
-            if (agg && agg.filters) {
-              const filters = agg.filters.filters;
-              Object.keys(filters).forEach(function (filterId) {
-                filters[filterId] = translateToQuery(filters[filterId]);
-              });
-              translate(agg.aggs || agg.aggregations);
-            }
-          });
-
-          return flatData;
+      // iterate through ancestry until no more parents are found, merging props as you go
+      while (current) {
+        _.forEach(current._fields, function ittr(value, key) {
+          root._mergeProp(flatData, value, key);
         });
+        current = current.getParent();
+      }
+
+      flatData.body = flatData.body || {};
+
+      const { storedFields, scriptFields, docvalueFields } = flatData.index.getComputedFields();
+      flatData.body.stored_fields = storedFields;
+      flatData.body.script_fields = _.extend(flatData.body.script_fields || {}, scriptFields);
+      flatData.body.docvalue_fields = _.union(flatData.body.docvalue_fields || [], docvalueFields);
+
+      if (!flatData.body._source && flatData.index) {
+        // If _source hasn't explicitly been specified, use the value from the index pattern
+        flatData.body._source = flatData.index.getSourceFiltering();
+      }
+
+      if (flatData.body._source) {
+        // exclude source fields for this index pattern specified by the user
+        const filter = fieldWildcardFilter(flatData.body._source.excludes);
+        flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
+          docvalueField => filter(docvalueField.field)
+        );
+      }
+
+      // if we only want to search for certain fields
+      const fields = flatData.fields;
+      if (fields) {
+        // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+        flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
+        flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
+
+        // request the remaining fields from both stored_fields and _source
+        const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
+        flatData.body.stored_fields = remainingFields;
+        _.set(flatData.body, '_source.includes', remainingFields);
+      }
+
+      const esQueryConfigs = getEsQueryConfig(config);
+      flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
+
+      // re-write filters within filter aggregations
+      Object.values(flatData.body.aggs || flatData.body.aggregations || {}).forEach(function translate(agg) {
+        if (agg && agg.filters) {
+          const filters = agg.filters.filters;
+          Object.keys(filters).forEach(function (filterId) {
+            filters[filterId] = translateToQuery(filters[filterId]);
+          });
+          translate(agg.aggs || agg.aggregations);
+        }
+      });
+
+      return flatData;
     }
   }
 
