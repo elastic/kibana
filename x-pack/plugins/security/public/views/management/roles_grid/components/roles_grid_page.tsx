@@ -14,7 +14,6 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiText,
-  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
