@@ -349,6 +349,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async pressEnterKey() {
+      log.debug('DashboardPage.pressEnterKey');
+      await PageObjects.common.pressEnterKey();
+    }
+
     /**
      *
      * @param dashboardTitle {String}
@@ -373,6 +378,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (saveOptions.waitDialogIsClosed) {
         await testSubjects.waitForDeleted(modalDialog);
       }
+    }
+
+    /**
+     * @param dashboardTitle {String}
+     */
+    async enterDashboardTitleAndPressEnter(dashboardTitle) {
+      await testSubjects.click('dashboardSaveMenuItem');
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
+
+      log.debug('entering new title');
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
+
+      await this.pressEnterKey();
+      await testSubjects.waitForDeleted(modalDialog);
     }
 
     async selectDashboard(dashName) {

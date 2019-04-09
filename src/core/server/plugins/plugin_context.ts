@@ -29,6 +29,8 @@ import { PluginsServiceSetupDeps } from './plugins_service';
 
 /**
  * Context that's available to plugins during initialization stage.
+ *
+ * @public
  */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
@@ -45,6 +47,8 @@ export interface PluginInitializerContext {
 
 /**
  * Context passed to the plugins `setup` method.
+ *
+ * @public
  */
 export interface PluginSetupContext {
   elasticsearch: {

@@ -28,7 +28,7 @@ import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 import { timefilter } from '../../timefilter';
-import dropPartialTemplate from '../controls/drop_partials.html';
+import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -165,7 +165,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editor: dropPartialTemplate,
+      editorComponent: DropPartialsParamEditor,
     },
 
     {

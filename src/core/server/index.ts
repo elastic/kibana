@@ -21,8 +21,15 @@ import { Authenticate, HttpServiceSetup, KibanaRequest, OnRequest, Router } from
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
-export { Logger, LoggerFactory } from './logging';
+export {
+  CallAPIOptions,
+  ClusterClient,
+  Headers,
+  ScopedClusterClient,
+  ElasticsearchClientConfig,
+  APICaller,
+} from './elasticsearch';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   PluginInitializerContext,
@@ -30,6 +37,7 @@ export {
   PluginSetupContext,
 } from './plugins';
 
+/** @public */
 export interface CoreSetup {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
