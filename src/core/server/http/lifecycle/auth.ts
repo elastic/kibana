@@ -25,7 +25,9 @@ enum ResultType {
   redirected = 'redirected',
   rejected = 'rejected',
 }
-
+interface ErrorParams {
+  statusCode?: number;
+}
 class AuthResult {
   public static authenticated(credentials: any = {}) {
     return new AuthResult(ResultType.authenticated, credentials);
@@ -33,8 +35,8 @@ class AuthResult {
   public static redirected(url: string) {
     return new AuthResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error) {
-    return new AuthResult(ResultType.rejected, error);
+  public static rejected(error: Error, { statusCode }: ErrorParams) {
+    return new AuthResult(ResultType.rejected, { error, statusCode });
   }
   public static isValidResult(candidate: any) {
     return candidate instanceof AuthResult;
@@ -63,13 +65,17 @@ export type Authenticate<T> = (
   t: typeof toolkit
 ) => Promise<AuthResult>;
 
-export function adoptToHapiAuthFormat<T>(fn: Authenticate<T>, sessionStorage: SessionStorage<T>) {
+export function adoptToHapiAuthFormat<T = any>(
+  fn: Authenticate<T>,
+  sessionStorage: SessionStorage<T>
+) {
   return async function interceptAuth(
     req: Request,
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
       const result = await fn(req, sessionStorage.asScoped(req), toolkit);
+
       if (AuthResult.isValidResult(result)) {
         if (result.isAuthenticated()) {
           return h.authenticated({ credentials: result.payload });
@@ -78,12 +84,12 @@ export function adoptToHapiAuthFormat<T>(fn: Authenticate<T>, sessionStorage: Se
           return h.redirect(result.payload).takeover();
         }
         if (result.isRejected()) {
-          const { statusCode } = result.payload;
-          return Boom.boomify(result.payload, { statusCode });
+          const { error, statusCode } = result.payload;
+          return Boom.boomify(error, { statusCode });
         }
       }
       throw new Error(
-        `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}`
+        `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
       );
     } catch (error) {
       return new Boom(error.message, { statusCode: 500 });
