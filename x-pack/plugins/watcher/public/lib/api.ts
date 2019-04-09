@@ -7,8 +7,11 @@ import { Watch } from 'plugins/watcher/models/watch';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { WatchStatus } from 'plugins/watcher/models/watch_status';
 
+import { __await } from 'tslib';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
+import { BaseWatch, ExecutedWatchDetails } from '../../common/types/watch_types';
+
 let httpClient: ng.IHttpService;
 export const setHttpClient = (anHttpClient: ng.IHttpService) => {
   httpClient = anHttpClient;
@@ -76,4 +79,47 @@ export const activateWatch = async (id: string) => {
     data: { watchStatus },
   } = await getHttpClient().put(`${basePath}/watch/${id}/activate`, null);
   return WatchStatus.fromUpstreamJson(watchStatus);
+};
+
+export const fetchWatch = async (watchId: string) => {
+  const body = {
+    watchId,
+  };
+  const {
+    data: { results },
+  } = await getHttpClient().post(`${basePath}/watches/`, body);
+  return results;
+};
+export const loadWatch = async (id: string) => {
+  const { data: watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
+  return Watch.fromUpstreamJson(watch.watch);
+};
+export const getMatchingIndices = async (pattern: string) => {
+  if (!pattern.startsWith('*')) {
+    pattern = `*${pattern}`;
+  }
+  if (!pattern.endsWith('*')) {
+    pattern = `${pattern}*`;
+  }
+  const {
+    data: { indices },
+  } = await getHttpClient().post(`${basePath}/indices`, { pattern });
+  return indices;
+};
+export const fetchFields = async (indexes: string[]) => {
+  const {
+    data: { fields },
+  } = await getHttpClient().post(`${basePath}/fields`, { indexes });
+  return fields;
+};
+export const createWatch = async (watch: BaseWatch) => {
+  const { data } = await getHttpClient().put(`${basePath}/watch/${watch.id}`, watch.upstreamJson);
+  return data;
+};
+export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, watch: BaseWatch) => {
+  const { data } = await getHttpClient().put(`${basePath}/watch/execute`, {
+    executeDetails: executeWatchDetails.upstreamJson,
+    watch: watch.upstreamJson,
+  });
+  return data;
 };
