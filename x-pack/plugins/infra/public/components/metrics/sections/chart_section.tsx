@@ -30,6 +30,7 @@ import {
 import { createFormatter } from '../../../utils/formatters';
 
 const MARGIN_LEFT = 60;
+
 const chartComponentsByType = {
   [InfraMetricLayoutVisualizationType.line]: EuiLineSeries,
   [InfraMetricLayoutVisualizationType.area]: EuiAreaSeries,

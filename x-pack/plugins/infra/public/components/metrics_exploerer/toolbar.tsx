@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -49,10 +49,12 @@ export const MetricsExplorerToolbar = injectI18n(
     onMetricsChange,
     onAggregationChange,
   }: Props) => {
+    const isDefaultOptions =
+      options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
     return (
       <Toolbar>
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={options.aggregation === MetricsExplorerAggregation.count ? 1 : false}>
+          <EuiFlexItem grow={options.aggregation === MetricsExplorerAggregation.count ? 2 : false}>
             <MetricsExplorerAggregationPicker
               fullWidth
               options={options}
@@ -68,8 +70,9 @@ export const MetricsExplorerToolbar = injectI18n(
             </EuiText>
           )}
           {options.aggregation !== MetricsExplorerAggregation.count && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={2}>
               <MetricsExplorerMetrics
+                autoFocus={isDefaultOptions}
                 fields={derivedIndexPattern.fields}
                 options={options}
                 onChange={onMetricsChange}
@@ -82,7 +85,7 @@ export const MetricsExplorerToolbar = injectI18n(
               defaultMessage="graph per"
             />
           </EuiText>
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <MetricsExplorerGroupBy
               onChange={onGroupByChange}
               fields={derivedIndexPattern.fields}

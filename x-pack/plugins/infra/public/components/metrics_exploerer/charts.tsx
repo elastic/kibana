@@ -34,11 +34,12 @@ import {
   MetricsExplorerMetric,
 } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
-import { NoData } from '../empty_states/no_data';
 import { InfraLoadingPanel } from '../loading';
 import { createMetricLabel } from './create_metric_label';
 import { createFormatter } from '../../utils/formatters';
 import { InfraFormatterType } from '../../lib/lib';
+import { NoData } from '../empty_states/no_data';
+
 const LEFT_MARGIN = 60;
 
 const titleFormatter = (dataPoints: EuiDataPoint[]) => {

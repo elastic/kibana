@@ -6,7 +6,7 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { StaticIndexPatternField } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
@@ -17,6 +17,7 @@ import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_me
 
 interface Props {
   intl: InjectedIntl;
+  autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
   fields: StaticIndexPatternField[];
@@ -27,12 +28,24 @@ interface SelectedOption {
   label: string;
 }
 
-export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fields }: Props) => {
-  const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
+export const MetricsExplorerMetrics = injectI18n(
+  ({ intl, options, onChange, fields, autoFocus = false }: Props) => {
+    const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
+    const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+    const [focusOnce, setFocusState] = useState<boolean>(false);
 
-  const handleChange = useCallback(
-    selectedOptions => {
-      if (selectedOptions.length < 4) {
+    useEffect(
+      () => {
+        if (inputRef && autoFocus && !focusOnce) {
+          inputRef.focus();
+          setFocusState(true);
+        }
+      },
+      [inputRef]
+    );
+
+    const handleChange = useCallback(
+      selectedOptions => {
         onChange(
           selectedOptions.map((opt: SelectedOption, index: number) => ({
             aggregation: options.aggregation,
@@ -40,34 +53,35 @@ export const MetricsExplorerMetrics = injectI18n(({ intl, options, onChange, fie
             color: colors[index],
           }))
         );
-      }
-    },
-    [options, onChange]
-  );
+      },
+      [options, onChange]
+    );
 
-  const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
-  const selectedOptios = options.metrics
-    .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
-    .map(metric => ({
-      label: metric.field || '',
-      value: metric.field || '',
-      color: colorTransformer(metric.color || MetricsExplorerColor.color0),
-    }));
+    const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
+    const selectedOptios = options.metrics
+      .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
+      .map(metric => ({
+        label: metric.field || '',
+        value: metric.field || '',
+        color: colorTransformer(metric.color || MetricsExplorerColor.color0),
+      }));
 
-  const placeholderText = intl.formatMessage({
-    id: 'xpack.infra.metricsExplorer.metricComboBoxPlaceholder',
-    defaultMessage: 'choose a metric to plot',
-  });
+    const placeholderText = intl.formatMessage({
+      id: 'xpack.infra.metricsExplorer.metricComboBoxPlaceholder',
+      defaultMessage: 'choose a metric to plot',
+    });
 
-  return (
-    <EuiComboBox
-      isDisabled={options.aggregation === MetricsExplorerAggregation.count}
-      placeholder={placeholderText}
-      fullWidth
-      options={comboOptions}
-      selectedOptions={selectedOptios}
-      onChange={handleChange}
-      isClearable={false}
-    />
-  );
-});
+    return (
+      <EuiComboBox
+        isDisabled={options.aggregation === MetricsExplorerAggregation.count}
+        placeholder={placeholderText}
+        fullWidth
+        options={comboOptions}
+        selectedOptions={selectedOptios}
+        onChange={handleChange}
+        isClearable={false}
+        inputRef={setInputRef}
+      />
+    );
+  }
+);
