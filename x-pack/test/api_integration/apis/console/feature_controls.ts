@@ -7,7 +7,7 @@
 import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function securityTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');

@@ -4,8 +4,10 @@
 
 ```ts
 
+import * as CSS from 'csstype';
 import { default } from 'react';
 import { Observable } from 'rxjs';
+import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -70,6 +72,8 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    overlays: OverlaySetup;
+    // (undocumented)
     uiSettings: UiSettingsSetup;
 }
 
@@ -99,6 +103,14 @@ export class CoreSystem {
 // 
 // @public (undocumented)
 export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+
+// @public
+export class FlyoutRef {
+    // (undocumented)
+    constructor();
+    close(): Promise<void>;
+    readonly onClose: Promise<void>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 
@@ -158,6 +170,17 @@ export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>
 // 
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+
+// @public (undocumented)
+export interface OverlaySetup {
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => FlyoutRef;
+}
 
 // @public
 export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {

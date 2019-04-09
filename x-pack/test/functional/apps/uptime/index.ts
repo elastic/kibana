@@ -8,7 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 const ARCHIVE = 'uptime/full_heartbeat';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');

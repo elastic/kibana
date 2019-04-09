@@ -157,6 +157,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 
@@ -169,6 +170,7 @@ const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
 const capabilitiesSetup = capabilitiesServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
+const overlaySetup = overlayServiceMock.createSetupContract();
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -187,6 +189,7 @@ const defaultSetupDeps = {
   capabilities: capabilitiesSetup,
   uiSettings: uiSettingsSetup,
   chrome: chromeSetup,
+  overlays: overlaySetup,
 };
 
 afterEach(() => {

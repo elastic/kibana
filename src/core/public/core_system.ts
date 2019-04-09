@@ -31,6 +31,7 @@ import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
+import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 
@@ -43,7 +44,7 @@ interface Params {
 }
 
 /** @internal */
-// tslint:disable-next-line no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CoreContext {}
 
 /**
@@ -65,11 +66,13 @@ export class CoreSystem {
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
   private readonly capabilities: CapabilitiesService;
+  private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement$: Subject<HTMLDivElement>;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
+  private readonly overlayTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const {
@@ -105,6 +108,8 @@ export class CoreSystem {
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.overlayTargetDomElement = document.createElement('div');
+    this.overlay = new OverlayService(this.overlayTargetDomElement);
     this.chrome = new ChromeService({ browserSupportsCsp });
 
     const core: CoreContext = {};
@@ -125,6 +130,7 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.setup();
       const fatalErrors = this.fatalErrors.setup({ i18n });
       const http = this.http.setup({ fatalErrors });
+      const overlays = this.overlay.setup({ i18n });
       const basePath = this.basePath.setup({ injectedMetadata });
       const capabilities = this.capabilities.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
@@ -148,6 +154,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        overlays,
       };
 
       await this.plugins.setup(core);
@@ -159,6 +166,7 @@ export class CoreSystem {
       const notificationsTargetDomElement = document.createElement('div');
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement);
 
       // Only provide the DOM element to notifications once it's attached to the page.
       // This prevents notifications from timing out before being displayed.

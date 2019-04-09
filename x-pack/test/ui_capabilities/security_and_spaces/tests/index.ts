@@ -11,7 +11,7 @@ import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function uiCapabilitiesTests({
   loadTestFile,
   getService,

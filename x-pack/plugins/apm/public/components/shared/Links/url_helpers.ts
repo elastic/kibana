@@ -10,6 +10,7 @@ import { pick } from 'lodash';
 import qs from 'querystring';
 import chrome from 'ui/chrome';
 import url from 'url';
+import { StringMap } from '../../../../typings/common';
 import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
@@ -49,15 +50,17 @@ function getSearchString(
   return fromQuery(query);
 }
 
-export interface KibanaHrefArgs<T = APMQueryParams> {
+export type QueryStringMap = StringMap<
+  string | number | boolean | undefined | null
+>;
+
+export interface KibanaHrefArgs {
   location: Location;
   pathname?: string;
   hash?: string;
-  query?: T;
+  query?: QueryStringMap;
 }
 
-// TODO: Will eventually need to solve for the case when we need to use this helper to link to
-// another Kibana app which requires url query params not covered by APMQueryParams
 export function getKibanaHref({
   location,
   pathname = '',

@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import '../doc_table';
 import { uiCapabilities } from 'ui/capabilities';
-import 'ui/doc_table';
-
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactory } from 'ui/embeddable';
 import {
