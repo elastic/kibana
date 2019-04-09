@@ -10,4 +10,5 @@ export const UIM_APP_LOAD = 'app_load';
 export const UIM_CLUSTER_ADD = 'cluster_add';
 export const UIM_CLUSTER_UPDATE = 'cluster_update';
 export const UIM_CLUSTER_REMOVE = 'cluster_remove';
+export const UIM_CLUSTER_REMOVE_MANY = 'cluster_remove_many';
 export const UIM_SHOW_DETAILS_CLICK = 'show_details_click';
