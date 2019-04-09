@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,14 +22,23 @@ import { i18n } from '@kbn/i18n';
 export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, closeLayerTOC, openLayerTOC }) {
   if (!isLayerTOCOpen) {
     return (
-      <EuiButton
-        className="mapLayerControl__openLayerTOCButton"
-        onClick={openLayerTOC}
-        iconType="arrowLeft"
-        aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-          defaultMessage: 'Open layer table of contents'
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
+          defaultMessage: 'Expand layers panel'
         })}
-      />
+        position="left"
+      >
+        <EuiButtonIcon
+          className="mapLayerControl__openLayerTOCButton"
+          color="text"
+          onClick={openLayerTOC}
+          iconType="arrowLeft"
+          aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
+            defaultMessage: 'Expand layers panel'
+          })}
+        />
+      </EuiToolTip>
     );
   }
 
@@ -40,6 +50,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
         <EuiButton
           className="mapLayerControl__addLayerButton"
           fill
+          fullWidth
           onClick={showAddLayerWizard}
           data-test-subj="addLayerButton"
         >
@@ -55,7 +66,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
   return (
     <Fragment>
       <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
-        <EuiFlexItem className="mapWidgetControl__header" grow={false}>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
@@ -63,7 +74,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
             gutterSize="none"
           >
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xxxs" className="mapWidgetControl__header">
                 <h2>
                   <FormattedMessage
                     id="xpack.maps.layerControl.layersTitle"
@@ -73,13 +84,22 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={closeLayerTOC}
-                iconType="arrowRight"
-                aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
-                  defaultMessage: 'Close layer table of contents'
+              <EuiToolTip
+                delay="long"
+                content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
+                  defaultMessage: 'Collapse layers panel'
                 })}
-              />
+              >
+                <EuiButtonIcon
+                  className="mapLayerControl__closeLayerTOCButton"
+                  onClick={closeLayerTOC}
+                  iconType="arrowRight"
+                  color="text"
+                  aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
+                    defaultMessage: 'Collapse layers panel'
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
