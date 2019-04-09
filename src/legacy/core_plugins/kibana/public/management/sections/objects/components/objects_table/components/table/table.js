@@ -295,7 +295,7 @@ class TableUI extends PureComponent {
                   label={(
                     <FormattedMessage
                       id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include dependencies"
+                      defaultMessage="Include related objects"
                     />
                   )}
                   checked={this.state.isIncludeReferencesDeepChecked}

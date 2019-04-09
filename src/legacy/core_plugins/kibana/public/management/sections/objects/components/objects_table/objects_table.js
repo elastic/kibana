@@ -610,7 +610,7 @@ class ObjectsTableUI extends Component {
                   label={(
                     <FormattedMessage
                       id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include dependencies"
+                      defaultMessage="Include related objects"
                     />
                   )}
                   checked={isIncludeReferencesDeepChecked}

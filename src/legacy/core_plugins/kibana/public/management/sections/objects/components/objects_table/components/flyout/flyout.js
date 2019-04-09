@@ -763,16 +763,25 @@ class FlyoutUI extends Component {
 
     let legacyFileWarning;
     if (this.state.isLegacyFile) {
-      legacyFileWarning = (<EuiCallOut
-        title={(
-          <FormattedMessage
-            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
-            defaultMessage="Importing .json files is deprecated"
-          />
-        )}
-        color="warning"
-        iconType="help"
-      />);
+      legacyFileWarning = (
+        <EuiCallOut
+          title={(
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+              defaultMessage="Support for JSON files is going away"
+            />
+          )}
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+              defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+            />
+          </p>
+        </EuiCallOut>
+      );
     }
 
     let indexPatternConflictsWarning;

@@ -304,12 +304,20 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         size="m"
         title={
           <FormattedMessage
-            defaultMessage="Importing .json files is deprecated"
+            defaultMessage="Support for JSON files is going away"
             id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
             values={Object {}}
           />
         }
-      />
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+            values={Object {}}
+          />
+        </p>
+      </EuiCallOut>
     </span>
     <span>
       <EuiSpacer

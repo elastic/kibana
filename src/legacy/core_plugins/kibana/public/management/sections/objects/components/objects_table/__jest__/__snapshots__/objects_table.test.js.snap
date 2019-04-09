@@ -148,7 +148,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
           checked={true}
           label={
             <FormattedMessage
-              defaultMessage="Include dependencies"
+              defaultMessage="Include related objects"
               id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
               values={Object {}}
             />

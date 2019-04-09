@@ -85,7 +85,7 @@ exports[`Table should render normally 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include dependencies"
+                  defaultMessage="Include related objects"
                   id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={Object {}}
                 />
