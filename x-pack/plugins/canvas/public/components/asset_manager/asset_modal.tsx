@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 // @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
