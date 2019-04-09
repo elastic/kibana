@@ -123,6 +123,9 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     find(checkboxTestSubject).simulate('change', { target: { checked: true } });
   };
 
+  // It works the exact same way :)
+  const toggleEuiSwitch = selectCheckBox;
+
   /**
    * The EUI ComboBox is a special input as we need to press the ENTER key
    * in order for the EuiComboBox to register the value
@@ -185,6 +188,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     form: {
       setInputValue,
       selectCheckBox,
+      toggleEuiSwitch,
       setComboBoxValue
     }
   };

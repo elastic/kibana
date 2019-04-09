@@ -376,6 +376,7 @@ export const RemoteClusterForm = injectI18n(
               })}
               checked={skipUnavailable}
               onChange={this.onSkipUnavailableChange}
+              data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

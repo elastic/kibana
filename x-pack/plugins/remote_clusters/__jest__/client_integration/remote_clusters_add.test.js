@@ -54,9 +54,10 @@ describe('Create Remote cluster', () => {
     let getUserActions;
     let clickSaveForm;
     let getFormErrorsMessages;
+    let form;
 
     beforeEach(() => {
-      ({ exists, find, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+      ({ form, exists, find, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('remoteClusterAdd'));
     });
 
@@ -67,6 +68,17 @@ describe('Create Remote cluster', () => {
 
     test('should have a link to the documentation', () => {
       expect(exists('remoteClusterDocsButton')).toBe(true);
+    });
+
+    test('should have a toggle to Skip unavailable remote cluster', () => {
+      expect(exists('remoteClusterFormSkipUnavailableFormToggle')).toBe(true);
+
+      // By default it should be set to "false"
+      expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(false);
+
+      form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
+
+      expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(true);
     });
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
@@ -163,147 +175,4 @@ describe('Create Remote cluster', () => {
       });
     });
   });
-
-  // describe('remote clusters', () => {
-  //   describe('when no remote clusters were found', () => {
-  //     test('should indicate it and have a button to add one', async () => {
-  //       setLoadRemoteClusteresResponse([]);
-
-  //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-  //       await nextTick();
-  //       component.update();
-  //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
-
-  //       expect(errorCallOut.length).toBe(1);
-  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
-  //     });
-  //   });
-
-  //   describe('when there was an error loading the remote clusters', () => {
-  //     test('should also indicate it and have a button to add one', async () => {
-  //       setLoadRemoteClusteresResponse(undefined, { body: 'Houston we got a problem' });
-
-  //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-  //       await nextTick();
-  //       component.update();
-  //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
-
-  //       expect(errorCallOut.length).toBe(1);
-  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
-  //     });
-  //   });
-
-  //   describe('when none of the remote clusters is connected', () => {
-  //     const clusterName = 'new-york';
-  //     const remoteClusters = [{
-  //       name: clusterName,
-  //       seeds: ['localhost:9600'],
-  //       isConnected: false,
-  //     }];
-
-  //     beforeEach(async () => {
-  //       setLoadRemoteClusteresResponse(remoteClusters);
-
-  //       ({ find, exists, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-  //       await nextTick();
-  //       component.update();
-  //     });
-
-  //     test('should show a callout warning and have a button to edit the cluster', () => {
-  //       const errorCallOut = find('remoteClusterFieldCallOutError');
-
-  //       expect(errorCallOut.length).toBe(1);
-  //       expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(`Remote cluster '${clusterName}' is not connected`);
-  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterEditButton').length).toBe(1);
-  //     });
-
-  //     test('should have a button to add another remote cluster', () => {
-  //       expect(exists('ccrRemoteClusterInlineAddButton')).toBe(true);
-  //     });
-
-  //     test('should indicate in the select option that the cluster is not connected', () => {
-  //       const selectOptions = find('ccrRemoteClusterSelect').find('option');
-  //       expect(selectOptions.at(0).text()).toBe(`${clusterName} (not connected)`);
-  //     });
-  //   });
-  // });
-
-  //   describe('index patterns', () => {
-  //     beforeEach(async () => {
-  //       ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-  //       ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
-
-  //       await nextTick();
-  //       component.update();
-  //     });
-
-  //     test('should not allow spaces', () => {
-  //       expect(getFormErrorsMessages()).toEqual([]);
-
-  //       form.setIndexPatternValue('with space');
-
-  //       expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the index pattern.');
-  //     });
-
-  //     test('should not allow invalid characters', () => {
-  //       const expectInvalidChar = (char) => {
-  //         form.setIndexPatternValue(`with${char}space`);
-  //         expect(getFormErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
-  //       };
-
-  //       return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
-  //         return promise.then(() => expectInvalidChar(char));
-  //       }, Promise.resolve());
-  //     });
-  //   });
-  // });
-
-  // describe('generated indices preview', () => {
-  //   beforeEach(async () => {
-  //     ({ exists, find, component, form, getUserActions } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-  //     ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
-
-  //     await nextTick();
-  //     component.update();
-  //   });
-
-  //   test('should display a preview of the possible indices generated by the remote cluster', () => {
-  //     expect(exists('ccrAutoFollowPatternIndicesPreview')).toBe(false);
-
-  //     form.setIndexPatternValue('kibana-');
-
-  //     expect(exists('ccrAutoFollowPatternIndicesPreview')).toBe(true);
-  //   });
-
-  //   test('should display 3 indices example when providing a wildcard(*)', () => {
-  //     form.setIndexPatternValue('kibana-*');
-  //     const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
-
-  //     expect(indicesPreview.length).toBe(3);
-  //     expect(indicesPreview.at(0).text()).toContain('kibana-');
-  //   });
-
-  //   test('should only display 1 index example when *not* providing a wildcard', () => {
-  //     form.setIndexPatternValue('kibana');
-  //     const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
-
-  //     expect(indicesPreview.length).toBe(1);
-  //     expect(indicesPreview.at(0).text()).toEqual('kibana');
-  //   });
-
-  //   test('should add the prefix and the suffix to the preview', () => {
-  //     const prefix = getRandomString();
-  //     const suffix = getRandomString();
-
-  //     form.setIndexPatternValue('kibana');
-  //     form.setInputValue('ccrAutoFollowPatternFormPrefixInput', prefix);
-  //     form.setInputValue('ccrAutoFollowPatternFormSuffixInput', suffix);
-
-  //     const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
-  //     const textPreview = indicesPreview.at(0).text();
-
-  //     expect(textPreview).toContain(prefix);
-  //     expect(textPreview).toContain(suffix);
-  //   });
-  // });
 });
