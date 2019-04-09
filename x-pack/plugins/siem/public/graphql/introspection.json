@@ -397,6 +397,37 @@
             "deprecationReason": null
           },
           {
+            "name": "KpiHosts",
+            "description": "",
+            "args": [
+              {
+                "name": "id",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "timerange",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filterQuery",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              }
+            ],
+            "type": { "kind": "OBJECT", "name": "KpiHostsData", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NetworkTopNFlow",
             "description": "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified",
             "args": [
@@ -4660,6 +4691,57 @@
           },
           {
             "name": "tlsHandshakes",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "KpiHostsData",
+        "description": "",
+        "fields": [
+          {
+            "name": "hosts",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "installedPackages",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "processCount",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authenticationSuccess",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authenticationFailure",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

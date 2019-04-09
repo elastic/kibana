@@ -46,13 +46,13 @@ export interface Source {
 
   TimelineDetails: TimelineDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  KpiHosts?: KpiHostsData | null;
-
   Hosts: HostsData;
 
   IpOverview?: IpOverviewData | null;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts?: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -839,10 +839,6 @@ export interface AutonomousSystem {
   ip?: string | null;
 }
 
-export interface KpiHostsData {
-  hosts?: number | null;
-}
-
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -857,6 +853,18 @@ export interface KpiNetworkData {
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+}
+
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  installedPackages?: number | null;
+
+  processCount?: number | null;
+
+  authenticationSuccess?: number | null;
+
+  authenticationFailure?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1097,6 +1105,13 @@ export interface IpOverviewSourceArgs {
   ip: string;
 }
 export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiHostsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1934,6 +1949,42 @@ export namespace GetKpiEventsQuery {
   };
 }
 
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts?: KpiHosts | null;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts?: number | null;
+
+    installedPackages?: number | null;
+
+    processCount?: number | null;
+
+    authenticationSuccess?: number | null;
+
+    authenticationFailure?: number | null;
+  };
+}
+
 export namespace GetKpiNetworkQuery {
   export type Variables = {
     sourceId: string;
@@ -1971,34 +2022,6 @@ export namespace GetKpiNetworkQuery {
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
-  };
-}
-
-export namespace GetKpiHostsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiHosts?: KpiHosts | null;
-  };
-
-  export type KpiHosts = {
-    __typename?: 'KpiHostsData';
-
-    hosts?: number | null;
   };
 }
 

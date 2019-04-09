@@ -74,14 +74,14 @@ export interface Source {
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
-
-  KpiHosts: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
   IpOverview?: IpOverviewData | null;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts?: KpiHostsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -868,14 +868,6 @@ export interface AutonomousSystem {
   ip?: string | null;
 }
 
-export interface KpiHostsData {
-  hosts?: number | null;
-  installedPackages?: number | null;
-  processCount?: number | null;
-  authenticationSuccess?: number | null;
-  authenticationFailure?: number | null;
-}
-
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -890,6 +882,18 @@ export interface KpiNetworkData {
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+}
+
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  installedPackages?: number | null;
+
+  processCount?: number | null;
+
+  authenticationSuccess?: number | null;
+
+  authenticationFailure?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1136,6 +1140,13 @@ export interface KpiNetworkSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface KpiHostsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface NetworkTopNFlowSourceArgs {
   direction: NetworkTopNFlowDirection;
 
@@ -1299,13 +1310,13 @@ export namespace SourceResolvers {
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-    KpiHosts?: KpiHostsResolver<KpiHostsData | null, TypeParent, Context>;
-
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
+
+    KpiHosts?: KpiHostsResolver<KpiHostsData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -1422,12 +1433,12 @@ export namespace SourceResolvers {
     ip: string;
   }
 
-  export type KpiHostsResolver<
-    R = KpiHostsData | null,
+  export type KpiNetworkResolver<
+    R = KpiNetworkData | null,
     Parent = Source,
     Context = SiemContext
-  > = Resolver<R, Parent, Context, KpiHostsArgs>;
-  export interface KpiHostsArgs {
+  > = Resolver<R, Parent, Context, KpiNetworkArgs>;
+  export interface KpiNetworkArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -1435,12 +1446,12 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type KpiNetworkResolver<
-    R = KpiNetworkData | null,
+  export type KpiHostsResolver<
+    R = KpiHostsData | null,
     Parent = Source,
     Context = SiemContext
-  > = Resolver<R, Parent, Context, KpiNetworkArgs>;
-  export interface KpiNetworkArgs {
+  > = Resolver<R, Parent, Context, KpiHostsArgs>;
+  export interface KpiHostsArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -4157,6 +4168,46 @@ export namespace KpiNetworkDataResolvers {
   export type TlsHandshakesResolver<
     R = number | null,
     Parent = KpiNetworkData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KpiHostsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostsData> {
+    hosts?: HostsResolver<number | null, TypeParent, Context>;
+
+    installedPackages?: InstalledPackagesResolver<number | null, TypeParent, Context>;
+
+    processCount?: ProcessCountResolver<number | null, TypeParent, Context>;
+
+    authenticationSuccess?: AuthenticationSuccessResolver<number | null, TypeParent, Context>;
+
+    authenticationFailure?: AuthenticationFailureResolver<number | null, TypeParent, Context>;
+  }
+
+  export type HostsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InstalledPackagesResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ProcessCountResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthenticationSuccessResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthenticationFailureResolver<
+    R = number | null,
+    Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
