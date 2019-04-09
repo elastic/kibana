@@ -156,25 +156,9 @@ export const initTestBed = (component, props = {}, options) => {
   const testBed = registerTestBed(component, {}, ccrStore)(props, options);
   const getUserActions = initUserActions(testBed);
 
-  // Cutsom Form helpers
-  const setIndexPatternValue = (value) => {
-    const comboBox = testBed.find('ccrAutoFollowPatternFormIndexPatternInput');
-    const indexPatternsInput = findTestSubject(comboBox, 'comboBoxSearchInput');
-    testBed.form.setInputValue(indexPatternsInput, value);
-
-    // We need to press the ENTER key in order for the EuiComboBox to register
-    // the value. (keyCode 13 === ENTER)
-    comboBox.simulate('keydown', { keyCode: 13 });
-    testBed.component.update();
-  };
-
   return {
     ...testBed,
     getUserActions,
-    form: {
-      ...testBed.form,
-      setIndexPatternValue,
-    }
   };
 };
 

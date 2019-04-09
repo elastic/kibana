@@ -61,6 +61,11 @@ const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => 
  * - form.selectCheckBox() Method to select a form checkbox
  */
 export const registerTestBed = (Component, defaultProps, store = {}) => (props, options = defaultOptions) => {
+  /**
+   * ----------------------------------------------------------------
+   * Component mount
+   * ----------------------------------------------------------------
+   */
   const Comp = options.memoryRouter.wrapRoute === false
     ? Component
     : withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter);
@@ -93,11 +98,13 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     return errorMessagesWrappers.map(err => err.text());
   };
 
-  const setInputValue = (inputTestSubject, value, isAsync = false) => {
-    const formInput = typeof inputTestSubject === 'string'
-      ? find(inputTestSubject)
-      : inputTestSubject;
-
+  /**
+   * ----------------------------------------------------------------
+   * Forms
+   * ----------------------------------------------------------------
+   */
+  const setInputValue = (input, value, isAsync = false) => {
+    const formInput = typeof input === 'string' ? find(input) : input;
 
     formInput.simulate('change', { target: { value } });
     component.update();
@@ -115,6 +122,28 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
   const selectCheckBox = (checkboxTestSubject) => {
     find(checkboxTestSubject).simulate('change', { target: { checked: true } });
   };
+
+  /**
+   * The EUI ComboBox is a special input as we need to press the ENTER key
+   * in order for the EuiComboBox to register the value
+   *
+   * @param {string} value The value to add to the combobox
+   */
+  const setComboBoxValue = (comboBoxTestSubject, value) => {
+    const comboBox = find(comboBoxTestSubject);
+    const formInput = findTestSubjectHelper(comboBox, 'comboBoxSearchInput');
+    setInputValue(formInput, value);
+
+    // keyCode 13 === ENTER
+    comboBox.simulate('keydown', { keyCode: 13 });
+    component.update();
+  };
+
+  /**
+   * ----------------------------------------------------------------
+   * Tables
+   * ----------------------------------------------------------------
+   */
 
   /**
    * Helper to parse an EUI table and return its rows and column reactWrapper
@@ -155,7 +184,8 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     getMetadataFromEuiTable,
     form: {
       setInputValue,
-      selectCheckBox
+      selectCheckBox,
+      setComboBoxValue
     }
   };
 };
