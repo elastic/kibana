@@ -16,6 +16,7 @@ import {
   FieldOperation,
   isFieldApplicableForScale,
   SelectOperation,
+  SelectOperator,
   SumOperation,
   TermsOperation,
   WindowFunction,
@@ -37,6 +38,8 @@ export interface OperationEditorProps {
   visModel: VisModel;
   allowedScale: Scale;
   allowedCardinality: Cardinality;
+  defaultOperator: (field: DatasourceField) => SelectOperator;
+  canDrop?: (field: DatasourceField) => boolean;
 }
 
 export interface OperationDefinition {

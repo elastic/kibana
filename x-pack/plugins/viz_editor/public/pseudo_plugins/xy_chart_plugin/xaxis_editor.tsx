@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { DatasourceField, fieldToOperation, SelectOperation } from '../../../common';
+import { DatasourceField } from '../../../common';
 import { selectColumn, updateColumn, VisModel } from '../../../public';
-import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function XAxisEditor({
@@ -19,15 +18,6 @@ export function XAxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const onDropField = (field: DatasourceField) => {
-    const operation: SelectOperation =
-      field.type === 'date'
-        ? fieldToOperation(field, 'date_histogram')
-        : fieldToOperation(field, 'terms');
-
-    onChangeVisModel(updateColumn(col, operation, visModel));
-  };
-
   const column = selectColumn(col, visModel);
 
   if (!column) {
@@ -36,21 +26,18 @@ export function XAxisEditor({
   }
 
   return (
-    <Draggable
-      canHandleDrop={(f: DatasourceField) => f && (f.type === 'string' || f.type === 'date')}
-      onDrop={onDropField}
+    <OperationEditor
+      column={column}
+      visModel={visModel}
+      onColumnChange={newColumn => {
+        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      }}
+      allowedScale="ordinal"
+      allowedCardinality="multi"
+      defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
+      canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
     >
-      <OperationEditor
-        column={column}
-        visModel={visModel}
-        onColumnChange={newColumn => {
-          onChangeVisModel(updateColumn(col, newColumn, visModel));
-        }}
-        allowedScale="ordinal"
-        allowedCardinality="multi"
-      >
-        {getOperationSummary(column)}
-      </OperationEditor>
-    </Draggable>
+      {getOperationSummary(column)}
+    </OperationEditor>
   );
 }

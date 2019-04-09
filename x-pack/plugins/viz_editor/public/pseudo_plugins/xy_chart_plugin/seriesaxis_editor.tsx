@@ -6,9 +6,7 @@
 
 import React from 'react';
 import { selectColumn, updateColumn, VisModel } from '../..';
-import { DatasourceField, fieldToOperation, SelectOperation } from '../../../common';
-import { removeColumn } from '../../common';
-import { Draggable } from '../../common/components/draggable';
+import { DatasourceField } from '../../../common';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function SeriesAxisEditor({
@@ -20,15 +18,6 @@ export function SeriesAxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const onDropField = (field: DatasourceField) => {
-    const operation: SelectOperation =
-      field.type === 'date'
-        ? fieldToOperation(field, 'date_histogram')
-        : fieldToOperation(field, 'terms');
-
-    onChangeVisModel(updateColumn(col, operation, visModel));
-  };
-
   const column = selectColumn(col, visModel);
 
   if (!column) {
@@ -37,41 +26,18 @@ export function SeriesAxisEditor({
   }
 
   return (
-    <Draggable
-      canHandleDrop={(f: DatasourceField) => f && (f.type === 'string' || f.type === 'date')}
-      onDrop={onDropField}
+    <OperationEditor
+      column={column}
+      visModel={visModel}
+      onColumnChange={newColumn => {
+        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      }}
+      allowedScale="ordinal"
+      allowedCardinality="multi"
+      defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
+      canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
     >
-      <OperationEditor
-        column={column}
-        visModel={visModel}
-        onColumnChange={newColumn => {
-          onChangeVisModel(updateColumn(col, newColumn, visModel));
-        }}
-        removable
-        onColumnRemove={() => {
-          // TODO there should be a helper function for that
-          const updatedModel: VisModel = {
-            ...removeColumn(col, visModel),
-            private: {
-              ...visModel.private,
-              xyChart: {
-                ...visModel.private.xyChart,
-                seriesAxis: {
-                  ...visModel.private.xyChart.seriesAxis,
-                  columns: visModel.private.xyChart.seriesAxis.columns.filter(
-                    (currentCol: any) => currentCol !== col
-                  ),
-                },
-              },
-            },
-          };
-          onChangeVisModel(updatedModel);
-        }}
-        allowedScale="ordinal"
-        allowedCardinality="multi"
-      >
-        {getOperationSummary(column)}
-      </OperationEditor>
-    </Draggable>
+      {getOperationSummary(column)}
+    </OperationEditor>
   );
 }

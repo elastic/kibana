@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { DatasourceField, fieldToOperation } from '../../../common';
+import { DatasourceField } from '../../../common';
 import { selectColumn, updateColumn, VisModel } from '../../../public';
-import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function YAxisEditor({
@@ -19,16 +18,6 @@ export function YAxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const currentOperation: any = selectColumn(col, visModel) || { operation: 'count' };
-  const fieldName = currentOperation.argument && currentOperation.argument.field;
-  const onDropField = (field: DatasourceField) => {
-    const operation = fieldName
-      ? { ...currentOperation, argument: { ...currentOperation.argument, field: field.name } }
-      : fieldToOperation(field, 'sum');
-
-    onChangeVisModel(updateColumn(col, operation, visModel));
-  };
-
   const column = selectColumn(col, visModel);
 
   if (!column) {
@@ -37,21 +26,18 @@ export function YAxisEditor({
   }
 
   return (
-    <Draggable
-      canHandleDrop={(f: DatasourceField) => f && f.type === 'number'}
-      onDrop={onDropField}
+    <OperationEditor
+      column={column}
+      visModel={visModel}
+      onColumnChange={newColumn => {
+        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      }}
+      allowedScale="interval"
+      allowedCardinality="single"
+      defaultOperator={() => 'sum'}
+      canDrop={(f: DatasourceField) => f && f.type === 'number'}
     >
-      <OperationEditor
-        column={column}
-        visModel={visModel}
-        onColumnChange={newColumn => {
-          onChangeVisModel(updateColumn(col, newColumn, visModel));
-        }}
-        allowedScale="interval"
-        allowedCardinality="single"
-      >
-        {getOperationSummary(column)}
-      </OperationEditor>
-    </Draggable>
+      {getOperationSummary(column)}
+    </OperationEditor>
   );
 }

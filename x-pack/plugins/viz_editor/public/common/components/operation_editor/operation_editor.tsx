@@ -9,7 +9,9 @@ import { EuiSideNav } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
+import { DatasourceField, fieldToOperation, SelectOperation } from '../../../../common';
 import { isApplicableForCardinality, isApplicableForScale } from '../../lib';
+import { Draggable } from '../draggable';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
 export function OperationEditor(props: OperationEditorProps) {
@@ -22,13 +24,32 @@ export function OperationEditor(props: OperationEditorProps) {
     onColumnRemove,
     allowedScale,
     allowedCardinality,
+    defaultOperator,
+    canDrop,
   } = props;
   const [state, setState] = useState({
     isOpen: false,
   });
+  const onDropField = (field: DatasourceField) => {
+    const updatedColumn =
+      'argument' in column && column.argument.field
+        ? ({ ...column, argument: { ...column.argument, field: field.name } } as SelectOperation)
+        : fieldToOperation(field, defaultOperator(field));
+
+    // keep alias to avoid updating references
+    updatedColumn.alias = column.alias;
+
+    onColumnChange(updatedColumn);
+  };
   const close = () => setState({ isOpen: false });
+
   const button = (
-    <EuiLink onClick={() => setState({ ...state, isOpen: !state.isOpen })}>{children}</EuiLink>
+    <Draggable
+      canHandleDrop={(f: DatasourceField) => (canDrop ? canDrop(f) : true)}
+      onDrop={onDropField}
+    >
+      <EuiLink onClick={() => setState({ ...state, isOpen: !state.isOpen })}>{children}</EuiLink>
+    </Draggable>
   );
   const changeOperation = (operationType: string) => {
     const opDefinition = getOperationDefinition(operationType);

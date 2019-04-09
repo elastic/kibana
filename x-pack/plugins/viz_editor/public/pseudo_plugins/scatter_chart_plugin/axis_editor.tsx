@@ -7,7 +7,6 @@
 import React from 'react';
 import { selectColumn, updateColumn, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
-import { Draggable } from '../../common/components/draggable';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function AxisEditor({
@@ -19,16 +18,6 @@ export function AxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const onDropField = (field: DatasourceField) => {
-    onChangeVisModel(
-      updateColumn(
-        col,
-        { operator: 'column', alias: field.name, argument: { field: field.name } },
-        visModel
-      )
-    );
-  };
-
   const column = selectColumn(col, visModel);
 
   if (!column) {
@@ -37,21 +26,18 @@ export function AxisEditor({
   }
 
   return (
-    <Draggable
-      canHandleDrop={(f: DatasourceField) => f && f.type === 'number'}
-      onDrop={onDropField}
+    <OperationEditor
+      column={column}
+      visModel={visModel}
+      onColumnChange={newColumn => {
+        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      }}
+      allowedScale="interval"
+      allowedCardinality="multi"
+      defaultOperator={() => 'column'}
+      canDrop={(f: DatasourceField) => f && f.type === 'number'}
     >
-      <OperationEditor
-        column={column}
-        visModel={visModel}
-        onColumnChange={newColumn => {
-          onChangeVisModel(updateColumn(col, newColumn, visModel));
-        }}
-        allowedScale="interval"
-        allowedCardinality="multi"
-      >
-        {getOperationSummary(column)}
-      </OperationEditor>
-    </Draggable>
+      {getOperationSummary(column)}
+    </OperationEditor>
   );
 }
