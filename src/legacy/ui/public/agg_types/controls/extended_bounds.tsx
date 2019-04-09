@@ -19,13 +19,7 @@
 
 import React, { useEffect } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,11 +53,11 @@ function ExtendedBoundsParamEditor({
   aggParam,
   value,
   setValue,
-  setValidity
+  setValidity,
 }: AggParamEditorProps<Bounds>) {
-  const { min_doc_count, field } = agg.params;
+  const { min_doc_count: minDocCount, field } = agg.params;
 
-  if (!min_doc_count || !field || (field.type !== 'number' && field.type !== 'date')) {
+  if (!minDocCount || !field || (field.type !== 'number' && field.type !== 'date')) {
     setValidity(true);
     return null;
   }
@@ -79,7 +73,12 @@ function ExtendedBoundsParamEditor({
         id="common.ui.aggTypes.extendedBoundsLabel"
         defaultMessage="Extended Bounds"
       />{' '}
-      <EuiIconTip position="right" content={tooltipContent} type="questionInCircle" aria-label={tooltipContent} />
+      <EuiIconTip
+        position="right"
+        content={tooltipContent}
+        type="questionInCircle"
+        aria-label={tooltipContent}
+      />
     </>
   );
 
@@ -96,7 +95,7 @@ function ExtendedBoundsParamEditor({
 
   if (isInvalid) {
     error = i18n.translate('common.ui.aggTypes.extendedBounds.errorMessage', {
-      defaultMessage: 'Min should be less than or equal to Max'
+      defaultMessage: 'Min should be less than or equal to Max',
     });
   }
 
@@ -108,12 +107,13 @@ function ExtendedBoundsParamEditor({
       label={mainLabel}
       isInvalid={isInvalid}
       error={error}
-      className="visEditorSidebar__aggParamFormRow">
+      className="visEditorSidebar__aggParamFormRow"
+    >
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow label={minLabel} fullWidth={true} isInvalid={isInvalid}>
             <EuiFieldNumber
-              value={isBoundEmpty(value.min)? '' : Number(value.min)}
+              value={isBoundEmpty(value.min) ? '' : Number(value.min)}
               onChange={ev => setValue({ ...value, min: ev.target.value })}
               fullWidth={true}
               isInvalid={isInvalid}
@@ -123,7 +123,7 @@ function ExtendedBoundsParamEditor({
         <EuiFlexItem>
           <EuiFormRow label={maxLabel} fullWidth={true} isInvalid={isInvalid}>
             <EuiFieldNumber
-              value={isBoundEmpty(value.max)? '' : Number(value.max)}
+              value={isBoundEmpty(value.max) ? '' : Number(value.max)}
               onChange={ev => setValue({ ...value, max: ev.target.value })}
               fullWidth={true}
               isInvalid={isInvalid}
