@@ -182,7 +182,7 @@ const rotationTooltipAnnotation = select(getRotationTooltipAnnotation)(
   cursorPosition
 );
 
-const groupAction = select(getGroupAction)(actionEvent);
+const groupAction = select(getGroupAction)(actionEvent, mouseIsDown);
 
 const groupingTuple = select(getGroupingTuple)(
   configuration,

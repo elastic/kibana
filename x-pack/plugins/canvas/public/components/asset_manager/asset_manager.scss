@@ -32,16 +32,16 @@
   .canvasAssetManager__modalFooter {
     justify-content: space-between;
   }
+
+  .canvasAssetManager__emptyPanel {
+    max-width: 400px;
+    margin: $euiSizeXL auto 0;
+  }
 }
 
 .canvasAsset {
   text-align: center;
   overflow: hidden; // hides image from outer panel boundaries
-
-  .canvasAsset__emptyPanel {
-    max-width: 400px;
-    margin: 0 auto;
-  }
 
   .canvasAsset__thumb {
     margin: -$euiSizeS;

@@ -19,7 +19,7 @@
 
 import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
 
-export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards) {
+export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
   const queryASTs = queries.map(query => {
     try {
       return fromKueryExpression(query.query, { allowLeadingWildcards });
@@ -32,12 +32,12 @@ export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWild
       throw Error('OutdatedKuerySyntaxError');
     }
   });
-  return buildQuery(indexPattern, queryASTs);
+  return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
 }
 
-function buildQuery(indexPattern, queryASTs) {
+function buildQuery(indexPattern, queryASTs, config = null) {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern);
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
   return {
     must: [],
     filter: [],

@@ -16,7 +16,7 @@ import {
 } from '../../../store/urlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
-export interface DatePickerProps extends RouteComponentProps {
+interface DatePickerProps extends RouteComponentProps {
   dispatchRefreshTimeRange: typeof refreshTimeRange;
   urlParams: IUrlParams;
 }
