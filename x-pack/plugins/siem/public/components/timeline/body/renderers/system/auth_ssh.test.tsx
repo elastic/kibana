@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../mock';
 
 import { AuthSsh } from '.';
 
-describe('AuthSssh', () => {
+describe('AuthSsh', () => {
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
