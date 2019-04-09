@@ -6,6 +6,7 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [BasePathSetup](./kibana-plugin-public.basepathsetup.md) | Provides access the 'server.basePath' configuration option in kibana.yml |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
@@ -25,7 +26,6 @@
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [BasePathSetup](./kibana-plugin-public.basepathsetup.md) |  |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |  |

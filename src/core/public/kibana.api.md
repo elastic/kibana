@@ -9,10 +9,14 @@ import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
-// Warning: (ae-forgotten-export) The symbol "BasePathService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type BasePathSetup = ReturnType<BasePathService['setup']>;
+// @public
+export class BasePathSetup {
+    // @internal
+    constructor(basePath: string);
+    addToPath(path: string): string;
+    get(): string;
+    removeFromPath(path: string): string;
+}
 
 // @public (undocumented)
 export interface ChromeBrand {
