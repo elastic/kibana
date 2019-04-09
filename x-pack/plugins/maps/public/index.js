@@ -51,7 +51,7 @@ routes
 
       return {
         text: i18n('xpack.maps.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
+          defaultMessage: 'Read only',
         }),
         tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
           defaultMessage: 'You lack the authority',

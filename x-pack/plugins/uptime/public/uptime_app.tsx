@@ -123,15 +123,15 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls();
     setBadge(
       !uiCapabilities.uptime.save
-      ? {
-          text: i18n.translate('xpack.uptime.badge.readOnly.text', {
-            defaultMessage: 'Read Only',
-          }),
-          tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
-            defaultMessage: 'You lack the authority',
-          }),
-        }
-      : undefined
+        ? {
+            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+              defaultMessage: 'Read only',
+            }),
+            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+              defaultMessage: 'You lack the authority',
+            }),
+          }
+        : undefined
     );
   }, []);
 

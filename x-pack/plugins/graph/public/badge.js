@@ -12,7 +12,7 @@ export function getReadonlyBadge(i18n, uiCapabilities) {
 
   return {
     text: i18n('xpack.graph.badge.readOnly.text', {
-      defaultMessage: 'Read Only',
+      defaultMessage: 'Read only',
     }),
     tooltip: i18n('xpack.graph.badge.readOnly.tooltip', {
       defaultMessage: 'You lack the authority',
