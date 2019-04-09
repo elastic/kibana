@@ -47,7 +47,9 @@ const handleMouseMove = (
   canvasOrigin
 ) => {
   const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-  commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+  if (commit) {
+    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+  }
 };
 
 const handleMouseLeave = (commit, { buttons }) => {
@@ -59,7 +61,7 @@ const handleMouseLeave = (commit, { buttons }) => {
 const handleMouseDown = (commit, e, canvasOrigin) => {
   e.stopPropagation();
   const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
-  if (buttons !== 1) {
+  if (buttons !== 1 || !commit) {
     resetHandler();
     return; // left-click only
   }
