@@ -26,11 +26,11 @@ const $q = { defer: () => ({ resolve() {} }) };
 // axios has a $http like interface so using it to simulate $http
 setHttpClient(axios.create(), $q);
 
-const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) => {
+const initUserActions = ({ table, find, form }) => (section) => {
   const userActions = {
     // Follower indices LIST
     followerIndicesList() {
-      const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
+      const { rows } = table.getMetaData('ccrFollowerIndexListTable');
 
       const selectFollowerIndexAt = (index = 0) => {
         const row = rows[index];
@@ -72,7 +72,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) =
     },
     // Auto-follow patterns LIST
     autoFollowPatternList() {
-      const { rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable');
+      const { rows } = table.getMetaData('ccrAutoFollowPatternListTable');
 
       const selectAutoFollowPatternAt = (index = 0) => {
         const row = rows[index];

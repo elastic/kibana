@@ -28,7 +28,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
   let form;
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
+      table,
       form
     } = initTestBed());
   });
@@ -81,7 +81,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       find('rollupJobShowFieldChooserButton').simulate('click');
 
       // Select the first term field
-      getMetadataFromEuiTable(`rollupJob${step}FieldChooser-table`)
+      table.getMetaData(`rollupJob${step}FieldChooser-table`)
         .rows[0]
         .reactWrapper
         .simulate('click');

@@ -70,7 +70,7 @@ describe('<JobList />', () => {
   describe('detail panel', () => {
     let server;
     let component;
-    let getMetadataFromEuiTable;
+    let table;
     let exists;
 
     const testBedOptions = {
@@ -97,14 +97,14 @@ describe('<JobList />', () => {
       server.respondWith([200, {}, '']);
 
       const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
-      ({ component, exists, getMetadataFromEuiTable } = initTestBed(undefined, testBedOptions));
+      ({ component, exists, table } = initTestBed(undefined, testBedOptions));
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
     });
 
     test('should open the detail panel when clicking on a job in the table', () => {
-      const { rows } = getMetadataFromEuiTable('rollupJobsListTable');
+      const { rows } = table.getMetaData('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');
 
       expect(exists('rollupJobDetailFlyout')).toBe(false); // make sure it is not shown
@@ -115,7 +115,7 @@ describe('<JobList />', () => {
     });
 
     test('should add the Job id to the route query params when opening the detail panel', () => {
-      const { rows } = getMetadataFromEuiTable('rollupJobsListTable');
+      const { rows } = table.getMetaData('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');
 
       expect(getRouter().history.location.search).toEqual('');

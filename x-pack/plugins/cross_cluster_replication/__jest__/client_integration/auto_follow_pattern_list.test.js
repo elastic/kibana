@@ -26,7 +26,7 @@ describe('<AutoFollowPatternList />', () => {
   let find;
   let exists;
   let component;
-  let getMetadataFromEuiTable;
+  let table;
   let getUserActions;
   let tableCellsValues;
   let rows;
@@ -109,7 +109,7 @@ describe('<AutoFollowPatternList />', () => {
         find,
         exists,
         component,
-        getMetadataFromEuiTable,
+        table,
         getUserActions,
       } = initTestBed(AutoFollowPatternList));
 
@@ -125,7 +125,7 @@ describe('<AutoFollowPatternList />', () => {
       } = getUserActions('autoFollowPatternList'));
 
       // Read the index list table
-      ({ tableCellsValues, rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable'));
+      ({ tableCellsValues, rows } = table.getMetaData('ccrAutoFollowPatternListTable'));
     });
 
     afterEach(async () => {
@@ -202,7 +202,7 @@ describe('<AutoFollowPatternList />', () => {
         await nextTick();
         component.update();
 
-        ({ rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable'));
+        ({ rows } = table.getMetaData('ccrAutoFollowPatternListTable'));
 
         expect(rows.length).toBe(1);
         expect(rows[0].columns[1].value).toEqual(autoFollowPattern2.name);
