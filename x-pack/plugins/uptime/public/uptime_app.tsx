@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
@@ -152,8 +153,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.setBadge(
       !uiCapabilities.uptime.save
         ? {
-            text: 'Read Only',
-            tooltip: 'You lack the authority',
+            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+              defaultMessage: 'Read Only',
+            }),
+            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+              defaultMessage: 'You lack the authority',
+            }),
           }
         : undefined
     );
