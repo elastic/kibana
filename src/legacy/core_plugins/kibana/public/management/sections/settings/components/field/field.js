@@ -288,7 +288,7 @@ class FieldUI extends PureComponent {
       toastNotifications.add({
         title: this.props.intl.formatMessage({
           id: 'kbn.management.settings.field.requiresPageReloadToastDescription',
-          defaultMessage: 'You need to reload the page for the changes to the "{settingName}" setting to take affect.',
+          defaultMessage: 'Please reload the page for the "{settingName}" setting to take effect.',
         }, {
           settingName: this.props.setting.displayName || this.props.setting.name,
         }),
@@ -299,7 +299,7 @@ class FieldUI extends PureComponent {
                 <EuiButton size="s" onClick={() => window.location.reload()}>
                   {this.props.intl.formatMessage({
                     id: 'kbn.management.settings.field.requiresPageReloadToastButtonLabel',
-                    defaultMessage: 'Reload page now'
+                    defaultMessage: 'Reload page'
                   })}
                 </EuiButton>
               </EuiFlexItem>
