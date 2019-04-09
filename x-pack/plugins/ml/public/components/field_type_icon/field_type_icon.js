@@ -14,7 +14,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl, ariaSuffix }) {
+export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl, needsAria = true }) {
   let ariaLabel = '';
   let iconClass = '';
   let iconChar = '';
@@ -82,10 +82,6 @@ export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled 
       return null;
   }
 
-  if (ariaSuffix) {
-    ariaLabel += `, ${ariaSuffix}`;
-  }
-
   let className = 'field-type-icon';
   if (iconClass !== '') {
     className += ' kuiIcon ' + iconClass;
@@ -94,7 +90,8 @@ export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled 
   const containerProps = {
     ariaLabel,
     className,
-    iconChar
+    iconChar,
+    needsAria
   };
 
   if (tooltipEnabled === true) {
@@ -124,13 +121,25 @@ FieldTypeIcon.WrappedComponent.propTypes = {
 
 // If the tooltip is used, it will apply its events to its first inner child.
 // To pass on its properties we apply `rest` to the outer `span` element.
-function FieldTypeIconContainer({ ariaLabel, className, iconChar, ...rest }) {
+function FieldTypeIconContainer({
+  ariaLabel,
+  className,
+  iconChar,
+  needsAria,
+  ...rest
+}) {
+
+  const wrapperProps = { className };
+  if (needsAria) {
+    wrapperProps['aria-label'] = ariaLabel;
+  }
+
   return (
-    <span className="field-type-icon-container" {...rest} tabIndex="0">
+    <span className="field-type-icon-container" {...rest}>
       {(iconChar === '') ? (
-        <span aria-label={ariaLabel} className={className} />
+        <span {...wrapperProps} />
       ) : (
-        <span aria-label={ariaLabel} className={className}>
+        <span {...wrapperProps}>
           <strong aria-hidden="true">{iconChar}</strong>
         </span>
       )}

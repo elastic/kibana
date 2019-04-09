@@ -6,6 +6,7 @@
 
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -28,8 +29,21 @@ export function FieldStatsCard({ field }) {
           <div
             className={`ml-field-title-bar ${type}`}
           >
-            <FieldTypeIcon type={type} ariaSuffix={field.name} />
-            <div className="field-name">{field.name}</div>
+            <FieldTypeIcon type={type} needsAria={false} />
+
+            <div
+              className="field-name"
+              tabIndex="0"
+              aria-label={i18n.translate('xpack.ml.fileDatavisualizer.fieldStatsCard.cardTitle', {
+                defaultMessage: '{typeOfData} type, {cardTitle}',
+                values: {
+                  typeOfData: type,
+                  cardTitle: field.name
+                }
+              })}
+            >
+              {field.name}
+            </div>
           </div>
 
           <div className="card-contents">
