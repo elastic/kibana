@@ -80,6 +80,12 @@ export const SuperDatePickerComponent = class extends Component<
     );
   }
 
+  public componentWillReceiveProps(nextProps: SuperDatePickerProps) {
+    this.setState({
+      isLoading: nextProps.isLoading,
+    });
+  }
+
   private formatDate = (date: string) => {
     const momentDate = dateMath.parse(date);
     return momentDate ? momentDate.valueOf() : 0;
@@ -105,15 +111,7 @@ export const SuperDatePickerComponent = class extends Component<
         recentlyUsedRanges,
         isLoading: true,
       };
-    }, this.startLoading);
-  };
-
-  private startLoading = () => {
-    setTimeout(this.stopLoading, 1000);
-  };
-
-  private stopLoading = () => {
-    this.setState({ isLoading: false });
+    });
   };
 };
 

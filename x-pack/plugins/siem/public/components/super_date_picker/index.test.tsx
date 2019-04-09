@@ -72,7 +72,7 @@ describe('SIEM Super Date Picker', () => {
       });
     });
 
-    test('addes new value to recentlyUsedRanges', () => {
+    test('adds new value to recentlyUsedRanges', () => {
       // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
       const wrapper = shallow(<SuperDatePickerComponent {...mockCardItemsData} />);
       const recentlyUsedRanges = [
