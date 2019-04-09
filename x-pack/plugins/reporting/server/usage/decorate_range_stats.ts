@@ -46,7 +46,12 @@ export const decorateRangeStats = (
 ): RangeStats => {
   const { _all: rangeAll, status: rangeStatus, [PDF_JOB_TYPE]: rangeStatsPdf, ...rangeStatsBasic } = rangeStats;
 
-  const keysBasic = Object.keys(rangeStatsBasic) as ReportingFeature[];
+  // combine the known types with any unknown type found in reporting data
+  const keysBasic = uniq([
+    CSV_JOB_TYPE,
+    PNG_JOB_TYPE,
+    ...Object.keys(rangeStatsBasic),
+  ]) as ExportType[];
   const rangeBasic = keysBasic.reduce((accum, currentKey) => {
     return {
       ...accum,
