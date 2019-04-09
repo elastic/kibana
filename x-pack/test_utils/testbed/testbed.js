@@ -165,7 +165,7 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
    *
    * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
    */
-  const getMetadataFromEuiTable = (tableTestSubject) => {
+  const getMetaData = (tableTestSubject) => {
     const table = find(tableTestSubject);
 
     if (!table.length) {
@@ -195,7 +195,9 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
     exists,
     find,
     setProps,
-    getMetadataFromEuiTable,
+    table: {
+      getMetaData,
+    },
     form: {
       setInputValue,
       selectCheckBox,

@@ -25,11 +25,11 @@ const reactRouter = {
 
 registerRouter(reactRouter);
 
-const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
+const initUserActions = ({ table, find }) => (section) => {
   const userActions = {
     // Remote cluster list user actions
     remoteClusterList() {
-      const { rows } = getMetadataFromEuiTable('remoteClusterListTable');
+      const { rows } = table.getMetaData('remoteClusterListTable');
 
       const selectRemoteClusterAt = (index = 0) => {
         const row = rows[index];

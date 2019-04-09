@@ -28,7 +28,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -40,7 +40,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
+      table,
     } = initTestBed());
   });
 
@@ -122,7 +122,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
         mockIndexPatternValidityResponse({ numericFields: [], keywordFields: [] });
         await goToStepAndOpenFieldChooser();
 
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([['No items found']]);
       });
@@ -135,7 +135,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should display the numeric & keyword fields available', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField', 'numeric'],
@@ -146,13 +146,13 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should add term to the field list when clicking on it', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
         expect(tableCellsValues).toEqual([['No terms fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobTermsFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobTermsFieldList'));
         const [firstRow] = tableCellsValues;
         const [term, type] = firstRow;
         expect(term).toEqual('a-numericField');
@@ -165,7 +165,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
     it('should have an empty field list', async () => {
       await goToStep(3);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
       expect(tableCellsValues).toEqual([['No terms fields added']]);
     });
 
@@ -173,11 +173,11 @@ describe('Create Rollup Job, step 3: Terms', () => {
       // First let's add a term to the list
       mockIndexPatternValidityResponse({ numericFields, keywordFields });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+      const { rows: fieldChooserRows } = table.getMetaData('rollupJobTermsFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');
 
       // Make sure rows value has been set
-      let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+      let { rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList');
       expect(fieldListRows[0].columns[0].value).not.toEqual('No terms fields added');
 
       const columnsFirstRow = fieldListRows[0].columns;
@@ -185,7 +185,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
       const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
       deleteButton.simulate('click');
 
-      ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobTermsFieldList'));
+      ({ rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList'));
       expect(fieldListRows[0].columns[0].value).toEqual('No terms fields added');
     });
   });

@@ -28,7 +28,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
   let form;
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
+      table,
       form,
     } = initTestBed());
   });
@@ -123,7 +123,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
         mockIndexPatternValidityResponse({ numericFields: [] });
         await goToStepAndOpenFieldChooser();
 
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
         expect(tableCellsValues).toEqual([['No items found']]);
       });
@@ -136,7 +136,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should display the histogram fields available', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField'],
@@ -145,13 +145,13 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should add histogram field to the field list when clicking on it', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
         expect(tableCellsValues).toEqual([['No histogram fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList'));
         const [firstRow] = tableCellsValues;
         expect(firstRow[0]).toEqual('a-numericField');
       });
@@ -162,7 +162,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     it('should have an empty field list', async () => {
       await goToStep(4);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
       expect(tableCellsValues).toEqual([['No histogram fields added']]);
     });
 
@@ -170,11 +170,11 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       // First let's add a term to the list
       mockIndexPatternValidityResponse({ numericFields });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+      const { rows: fieldChooserRows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');
 
       // Make sure rows value has been set
-      let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+      let { rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList');
       expect(fieldListRows[0].columns[0].value).not.toEqual('No histogram fields added');
 
       const columnsFirstRow = fieldListRows[0].columns;
@@ -182,7 +182,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
       deleteButton.simulate('click');
 
-      ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobHistogramFieldList'));
+      ({ rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList'));
       expect(fieldListRows[0].columns[0].value).toEqual('No histogram fields added');
     });
   });
@@ -190,7 +190,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   describe('interval', () => {
     const addHistogramFieldToList = () => {
       find('rollupJobShowFieldChooserButton').simulate('click');
-      const { rows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+      const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
       rows[0].reactWrapper.simulate('click');
     };
 
