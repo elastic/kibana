@@ -9,6 +9,7 @@ import './angular/config';
 import './angular/services';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { uiCapabilities } from 'ui/capabilities';
 import { CanvasRootController } from './angular/controllers';
@@ -38,4 +39,15 @@ chrome.helpExtension.set(domNode => {
 });
 
 // set the read-only badge when appropriate
-chrome.badge.set(!uiCapabilities.canvas.save ? 'readOnly' : undefined);
+chrome.badge.set(
+  uiCapabilities.canvas.save
+    ? undefined
+    : {
+        text: i18n.translate('xpack.canvas.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      }
+);

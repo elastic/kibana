@@ -72,10 +72,19 @@ require('ui/routes')
         ? getSavedSheetBreadcrumbs
         : getCreateBreadcrumbs
     ),
-    badge: (uiCapabilities) => {
-      if (!uiCapabilities.timelion.save) {
-        return 'readOnly';
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.timelion.save) {
+        return undefined;
       }
+
+      return {
+        text: i18n('kbn.timelion.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n('kbn.timelion.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      };
     },
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {

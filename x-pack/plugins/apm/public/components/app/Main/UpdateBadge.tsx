@@ -4,18 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 import chrome from 'ui/chrome';
 
 interface Props {
   uiCapabilities: UICapabilities;
+  intl: InjectedIntl;
 }
 
 class UpdateBadgeComponent extends React.Component<Props> {
   public componentDidMount() {
-    const { uiCapabilities } = this.props;
-    chrome.badge.set(!uiCapabilities.apm.save ? 'readOnly' : undefined);
+    const { uiCapabilities, intl } = this.props;
+    chrome.badge.set(
+      !uiCapabilities.apm.save
+        ? {
+            text: intl.formatMessage({
+              defaultMessage: 'Read Only',
+              id: 'xpack.apm.header.badge.readOnly.text'
+            }),
+            tooltip: intl.formatMessage({
+              defaultMessage: 'You lack the authority',
+              id: 'xpack.aapm.header.badge.readOnly.tooltip'
+            })
+          }
+        : undefined
+    );
   }
 
   public render() {
@@ -23,4 +38,6 @@ class UpdateBadgeComponent extends React.Component<Props> {
   }
 }
 
-export const UpdateBadge = injectUICapabilities(UpdateBadgeComponent);
+export const UpdateBadge = injectUICapabilities(
+  injectI18n(UpdateBadgeComponent)
+);
