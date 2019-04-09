@@ -46,7 +46,6 @@ export interface UptimePersistedState {
 }
 
 export interface UptimeAppProps {
-  // TODO: if we add a context to the Uptime UI, this should be included in it
   basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
@@ -132,6 +131,7 @@ const Application = (props: UptimeAppProps) => {
             value={{
               autorefreshInterval,
               autorefreshIsPaused,
+              basePath,
               dateRangeStart,
               dateRangeEnd,
               colors,

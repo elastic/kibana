@@ -11,6 +11,7 @@ import { UptimeAppColors } from './uptime_app';
 interface UMContext {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
+  basePath: string;
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -28,6 +29,7 @@ const colors: UptimeAppColors = {
 const defaultContext: UMContext = {
   autorefreshIsPaused: true,
   autorefreshInterval: 10000,
+  basePath: '',
   colors,
   dateRangeStart: 'now-15m',
   dateRangeEnd: 'now',
