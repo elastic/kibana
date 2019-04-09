@@ -94,7 +94,7 @@ export const migrations = {
     }
   },
   visualization: {
-    '6.7.0': removeDateHistogramTimeZones,
+    '6.7.2': removeDateHistogramTimeZones,
     '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];

@@ -60,7 +60,7 @@ Object {
 
 describe('visualization', () => {
   describe('date histogram time zone removal', () => {
-    const migrate = doc => migrations.visualization['6.7.0'](doc);
+    const migrate = doc => migrations.visualization['6.7.2'](doc);
     let doc;
     beforeEach(() => {
       doc = {
@@ -164,6 +164,15 @@ describe('visualization', () => {
     it('should not fail on date histograms without a time_zone', () => {
       const migratedDoc = migrate(doc);
       const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should be able to apply the migration twice, since we need it for 6.7.2 and 7.0.1', () => {
+      const migratedDoc = migrate(migrate(doc));
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
       expect(aggs[2]).not.toHaveProperty('params.time_zone');
     });
   });
