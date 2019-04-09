@@ -90,7 +90,7 @@ function createBadgeApi(chrome: { [key: string]: any }) {
         }
 
         try {
-          chrome.badge.set($injector.invoke(badgeProvider));
+          newPlatformChrome.setBadge($injector.invoke(badgeProvider));
         } catch (error) {
           fatalError(error);
         }

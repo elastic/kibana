@@ -34,7 +34,7 @@ function setup() {
   const chrome: any = {};
   const internals: any = {};
   initChromeBadgeApi(chrome, internals);
-  return { chrome, $setupBadgeAutoClear: internals.$setupBadgeAutoClear };
+  return { chrome, internals, getBadge$ };
 }
 
 afterEach(() => {
@@ -59,6 +59,139 @@ describe('badge', () => {
       chrome.badge.set(badge);
       expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(1);
       expect(newPlatformChrome.setBadge).toHaveBeenCalledWith(badge);
+    });
+  });
+});
+
+describe('internals', () => {
+  const createMockInjector = (services: Record<string, any>) => {
+    return {
+      invoke: (fn: () => {}) => {
+        return fn();
+      },
+      get(service: string) {
+        return services[service];
+      },
+      has(service: string) {
+        return Boolean(services[service]);
+      },
+    };
+  };
+  const createMockRootScope = () => {
+    let $routeChangeStart: null | (() => void) = null;
+    let $routeChangeSuccess: null | (() => void) = null;
+    return {
+      $on: jest.fn().mockImplementation((event, fn) => {
+        if (event === '$routeChangeStart') {
+          $routeChangeStart = fn;
+          return;
+        }
+
+        if (event === '$routeChangeSuccess') {
+          $routeChangeSuccess = fn;
+          return;
+        }
+
+        throw new Error(`Unexpected event ${event}`);
+      }),
+      mock: {
+        emitRouteChangeSuccess() {
+          if ($routeChangeSuccess == null) {
+            throw new Error(`$routeChangeSuccess can't be null or undefined`);
+          }
+
+          $routeChangeSuccess();
+        },
+
+        emitRouteChangeStart() {
+          if ($routeChangeStart == null) {
+            throw new Error(`$routeChangeStart can't be null or undefined`);
+          }
+
+          $routeChangeStart();
+        },
+      },
+    };
+  };
+
+  describe('$setupBadgeAutoClear', () => {
+    it(`if there isn't a "$route" service, $routeChangeSuccess sets the badge to "undefined"`, () => {
+      const mockInjector = createMockInjector({});
+      const mockRootScope = createMockRootScope();
+      const { internals } = setup();
+      internals.$setupBadgeAutoClear(mockRootScope, mockInjector);
+      mockRootScope.mock.emitRouteChangeStart();
+      mockRootScope.mock.emitRouteChangeSuccess();
+      expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(1);
+      expect(newPlatformChrome.setBadge).toBeCalledWith(undefined);
+    });
+
+    it(`if the badge has already been set, $routeChangeSuccess doesn't set the badge`, () => {
+      const mockInjector = createMockInjector({});
+      const mockRootScope = createMockRootScope();
+      const { internals, getBadge$ } = setup();
+      internals.$setupBadgeAutoClear(mockRootScope, mockInjector);
+      mockRootScope.mock.emitRouteChangeStart();
+      const badge = { text: 'foo', tooltip: `foo's title` };
+      getBadge$.next(badge);
+      mockRootScope.mock.emitRouteChangeSuccess();
+      expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(0);
+    });
+
+    it(`if the current route is a redirectTo, $routeChangeSuccess doesn't set the badge`, () => {
+      const mockInjector = createMockInjector({
+        $route: {
+          current: {
+            $$route: {
+              redirectTo: '/login',
+            },
+          },
+        },
+      });
+      const mockRootScope = createMockRootScope();
+      const { internals } = setup();
+      internals.$setupBadgeAutoClear(mockRootScope, mockInjector);
+      mockRootScope.mock.emitRouteChangeStart();
+      mockRootScope.mock.emitRouteChangeSuccess();
+      expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(0);
+    });
+
+    it(`if the current route doesn't have a "badge" provider, $routeChangeSuccess sets the badge to "undefined"`, () => {
+      const mockInjector = createMockInjector({
+        $route: {
+          current: {
+            $$route: {},
+          },
+        },
+      });
+      const mockRootScope = createMockRootScope();
+      const { internals } = setup();
+      internals.$setupBadgeAutoClear(mockRootScope, mockInjector);
+      mockRootScope.mock.emitRouteChangeStart();
+      mockRootScope.mock.emitRouteChangeSuccess();
+      expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(1);
+      expect(newPlatformChrome.setBadge).toBeCalledWith(undefined);
+    });
+
+    it(`if the current route has a "badge" provider, $routeChangeSuccess sets the badge to value returned by provider`, () => {
+      const badge = {
+        text: 'foo',
+        tooltip: `foo's tooltip`,
+      };
+      const mockInjector = createMockInjector({
+        $route: {
+          current: {
+            badge: () => badge,
+          },
+        },
+      });
+      const mockRootScope = createMockRootScope();
+      const { internals } = setup();
+      internals.$setupBadgeAutoClear(mockRootScope, mockInjector);
+      mockRootScope.mock.emitRouteChangeStart();
+      mockRootScope.mock.emitRouteChangeSuccess();
+      expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(1);
+      expect(newPlatformChrome.setBadge).toBeCalledWith(badge);
     });
   });
 });
