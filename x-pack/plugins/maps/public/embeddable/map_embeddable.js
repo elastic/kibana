@@ -20,9 +20,9 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
-  setRefreshConfig,
+  setRefreshConfig
 } from '../actions/store_actions';
-import { setReadOnly } from '../store/ui';
+import { setReadOnly, setFilterable } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 
@@ -82,6 +82,7 @@ export class MapEmbeddable extends Embeddable {
    */
   render(domNode, containerState) {
     this._store.dispatch(setReadOnly(true));
+    this._store.dispatch(setFilterable(true));
 
     if (this._embeddableConfig.mapCenter) {
       this._store.dispatch(setGotoWithCenter({

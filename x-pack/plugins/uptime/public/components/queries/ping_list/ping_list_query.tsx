@@ -6,34 +6,41 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { UMPingSortDirectionArg } from '../../../../common/domain_types';
+import { PingResults } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { PingList } from '../../functional';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getPingsQuery } from './get_pings';
 
-const DEFAULT_MAX_SEARCH_SIZE = 100;
+interface PingListQueryResult {
+  allPings?: PingResults;
+}
 
 interface PingListProps {
   monitorId?: string;
+  selectedOption?: EuiComboBoxOptionProps;
   sort?: UMPingSortDirectionArg;
   size?: number;
+  onStatusSelectionChange: (selectedOptions: EuiComboBoxOptionProps[]) => void;
 }
 
-type Props = PingListProps & UptimeCommonProps;
+type Props = PingListProps &
+  UptimeCommonProps &
+  UptimeGraphQLQueryProps<PingListQueryResult> &
+  PingListProps;
 
 interface PingListState {
   statusOptions: EuiComboBoxOptionProps[];
-  selectedOption: EuiComboBoxOptionProps;
-  maxSearchSize: number;
 }
 
-export class PingListQuery extends React.Component<Props, PingListState> {
+export class Query extends React.Component<Props, PingListState> {
   constructor(props: Props) {
     super(props);
 
-    const statusOptions = [
+    const statusOptions: EuiComboBoxOptionProps[] = [
       {
         label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
           defaultMessage: 'All',
@@ -55,74 +62,26 @@ export class PingListQuery extends React.Component<Props, PingListState> {
     ];
     this.state = {
       statusOptions,
-      selectedOption: statusOptions[2],
-      maxSearchSize: DEFAULT_MAX_SEARCH_SIZE,
     };
+    this.props.onStatusSelectionChange([this.state.statusOptions[2]]);
   }
+
   public render() {
-    const {
-      monitorId,
-      dateRangeStart,
-      dateRangeEnd,
-      autorefreshIsPaused,
-      autorefreshInterval,
-      sort,
-      size,
-    } = this.props;
-    const { selectedOption } = this.state;
+    const { loading, data } = this.props;
+    const allPings: PingResults | undefined = get(data, 'allPings', undefined);
     return (
-      <Query
-        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-        variables={{
-          monitorId,
-          dateRangeStart,
-          dateRangeEnd,
-          status:
-            selectedOption.value === 'up' || selectedOption.value === 'down'
-              ? selectedOption.value
-              : '',
-          // TODO: get rid of the magic number
-          size: this.state.maxSearchSize || size || DEFAULT_MAX_SEARCH_SIZE,
-          sort: sort || 'desc',
-        }}
-        query={getPingsQuery}
-      >
-        {({ loading, error, data }) => {
-          if (error) {
-            return i18n.translate('xpack.uptime.pingList.errorMessage', {
-              values: { message: error.message },
-              defaultMessage: 'Error {message}',
-            });
-          }
-          const { allPings } = data;
-          return (
-            <PingList
-              loading={loading}
-              maxSearchSize={this.state.maxSearchSize}
-              pingResults={allPings}
-              searchSizeOnBlur={this.onSearchSizeBlur}
-              selectedOption={this.state.selectedOption}
-              selectedOptionChanged={this.onSelectedOptionChange}
-              statusOptions={this.state.statusOptions}
-            />
-          );
-        }}
-      </Query>
+      <PingList
+        loading={loading}
+        pingResults={allPings}
+        selectedOption={this.props.selectedOption || this.state.statusOptions[2]}
+        selectedOptionChanged={this.props.onStatusSelectionChange}
+        statusOptions={this.state.statusOptions}
+      />
     );
   }
-
-  private onSearchSizeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const sanitizedValue = parseInt(e.target.value, 10);
-    if (!isNaN(sanitizedValue)) {
-      this.setState({
-        maxSearchSize: sanitizedValue >= 10000 ? 10000 : sanitizedValue,
-      });
-    }
-  };
-
-  private onSelectedOptionChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    if (selectedOptions[0]) {
-      this.setState({ selectedOption: selectedOptions[0] });
-    }
-  };
 }
+
+export const PingListQuery = withUptimeGraphQL<PingListQueryResult, PingListProps>(
+  Query,
+  getPingsQuery
+);

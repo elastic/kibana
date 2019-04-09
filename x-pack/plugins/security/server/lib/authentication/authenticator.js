@@ -129,7 +129,7 @@ class Authenticator {
     assertRequest(request);
 
     const isSystemApiRequest = this._server.plugins.kibana.systemApi.isSystemApiRequest(request);
-    const existingSession = await this._session.get(request);
+    const existingSession = await this._getSessionValue(request);
 
     let authenticationResult;
     for (const [providerType, provider] of this._providerIterator(existingSession)) {

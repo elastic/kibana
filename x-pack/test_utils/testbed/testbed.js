@@ -94,7 +94,11 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
   };
 
   const setInputValue = (inputTestSubject, value, isAsync = false) => {
-    const formInput = find(inputTestSubject);
+    const formInput = typeof inputTestSubject === 'string'
+      ? find(inputTestSubject)
+      : inputTestSubject;
+
+
     formInput.simulate('change', { target: { value } });
     component.update();
 

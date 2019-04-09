@@ -20,6 +20,7 @@ import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
+import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 export async function startApp(libs: InfraFrontendLibs) {
   const history = createHashHistory();
@@ -30,21 +31,27 @@ export async function startApp(libs: InfraFrontendLibs) {
     observableApi: libs$.pipe(pluck('observableApi')),
   });
 
-  libs.framework.render(
-    <I18nContext>
-      <EuiErrorBoundary>
-        <ConstateProvider devtools>
-          <ReduxStoreProvider store={store}>
-            <ApolloProvider client={libs.apolloClient}>
-              <ApolloClientContext.Provider value={libs.apolloClient}>
-                <EuiThemeProvider darkMode={libs.framework.darkMode}>
-                  <PageRouter history={history} />
-                </EuiThemeProvider>
-              </ApolloClientContext.Provider>
-            </ApolloProvider>
-          </ReduxStoreProvider>
-        </ConstateProvider>
-      </EuiErrorBoundary>
-    </I18nContext>
-  );
+  const InfraPluginRoot: React.FunctionComponent = () => {
+    const [darkMode] = useKibanaUiSetting('theme:darkMode');
+
+    return (
+      <I18nContext>
+        <EuiErrorBoundary>
+          <ConstateProvider devtools>
+            <ReduxStoreProvider store={store}>
+              <ApolloProvider client={libs.apolloClient}>
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <PageRouter history={history} />
+                  </EuiThemeProvider>
+                </ApolloClientContext.Provider>
+              </ApolloProvider>
+            </ReduxStoreProvider>
+          </ConstateProvider>
+        </EuiErrorBoundary>
+      </I18nContext>
+    );
+  };
+
+  libs.framework.render(<InfraPluginRoot />);
 }
