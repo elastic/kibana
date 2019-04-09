@@ -10,18 +10,20 @@ import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 
 import { mlJobService } from '../../services/job_service';
+import { JobSelectorContent } from './job_selector_content';
 
 import {
   EuiBadge,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
-  // EuiFlyout,
-  // EuiFlyoutBody,
-  // EuiFlyoutHeader,
-  // EuiButton,
-  // EuiText,
-  // EuiTitle
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiButton,
+  EuiText,
+  EuiTitle
 } from '@elastic/eui';
 
 
@@ -31,12 +33,10 @@ export function JobSelector({
   singleSelection,
   timeseriesOnly
 }) {
-  console.log(timeseriesOnly, singleSelection);
+  const [jobIds, setJobIds] = useState(selectedJobIds);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const [jobIds, setJobIds] = useState(selectedJobIds); // eslint-disable-line
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false); // eslint-disable-line
-
-  function closeFlyout() { // eslint-disable-line
+  function closeFlyout() {
     setIsFlyoutVisible(false);
   }
 
@@ -55,12 +55,12 @@ export function JobSelector({
             setJobIds(selected);
             jobSelectService.next(selected);
           }
-          // TODO: broadcast that there are no jobs - explorer updates with noJobsSelected
+          // TODO: broadcast that there are no jobs. Explorer updates with noJobsSelected
         });
     }
   }, []); // eslint-disable-line
 
-  function renderSelectedIds() {
+  function renderJobSelectionBar() {
     return (
       <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -89,10 +89,59 @@ export function JobSelector({
     return (<p>Loading...</p>);
   }
 
+  function renderFlyout() {
+    if (isFlyoutVisible) {
+      return (
+        <EuiFlyout
+          onClose={closeFlyout}
+          aria-labelledby="flyoutTitle"
+          size="l"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="flyoutTitle">
+                Job Selection
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiText>
+              <JobSelectorContent
+                singleSelection={singleSelection}
+                timeseriesOnly={timeseriesOnly}
+              />
+            </EuiText>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={closeFlyout}
+                  fill
+                >
+                  Apply
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={closeFlyout}
+                >
+                  Close
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      );
+    }
+  }
+
   return (
     <div className="mlJobSelectorBar">
-      {jobIds.length > 0 && renderSelectedIds()}
+      {jobIds.length > 0 && renderJobSelectionBar()}
       {jobIds.length === 0 && renderLoadingIndicator()}
+      {renderFlyout()}
     </div>
   );
 }
