@@ -34,13 +34,19 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         });
         switch (scenario.username) {
           case 'superuser':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            break;
           case 'all':
           case 'read':
           case 'dual_privileges_all':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('ml', 'monitoring')
+            );
             break;
           case 'foo_all':
           case 'foo_read':
@@ -50,8 +56,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('management', 'foo')
             );
             break;
-          case 'no_kibana_privileges':
           case 'legacy_all':
+          case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;

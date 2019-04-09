@@ -27,14 +27,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await esArchiver.unload('dashboard/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('global dashboard all privileges', () => {

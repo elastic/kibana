@@ -184,14 +184,17 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         name: 'Privileges',
         render: (privileges: RoleKibanaPrivilege, record: TableRow) => {
           const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
-          const basePrivilege = effectivePrivileges[record.spacesIndex].base;
+          const effectivePrivilege = effectivePrivileges[record.spacesIndex];
+          const basePrivilege = effectivePrivilege.base;
 
           const isAllowedCustomizations =
             allowedPrivileges[record.spacesIndex].base.privileges.length > 1;
 
           const showCustomize = hasCustomizations && isAllowedCustomizations;
 
-          if (record.isGlobal) {
+          if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
+            return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
+          } else if (record.isGlobal) {
             return (
               <PrivilegeDisplay
                 privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}

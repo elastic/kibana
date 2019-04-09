@@ -11,6 +11,7 @@ test(`uses application as top-level key`, () => {
     global: {},
     space: {},
     features: {},
+    reserved: {},
   });
   expect(Object.keys(result)).toEqual(['foo-application']);
 });
@@ -25,6 +26,7 @@ describe('global', () => {
       },
       space: {},
       features: {},
+      reserved: {},
     });
     expect(result[application]).toEqual({
       all: {
@@ -51,6 +53,7 @@ describe('global', () => {
         },
         space: {},
         features: {},
+        reserved: {},
       });
     }).toThrowErrorMatchingSnapshot();
   });
@@ -66,6 +69,7 @@ describe('space', () => {
         read: ['action-3', 'action-4'],
       },
       features: {},
+      reserved: {},
     });
     expect(result[application]).toEqual({
       space_all: {
@@ -92,6 +96,7 @@ describe('space', () => {
           foo: ['action-1', 'action-2'],
         },
         features: {},
+        reserved: {},
       });
     }).toThrowErrorMatchingSnapshot();
   });
@@ -113,6 +118,7 @@ describe('features', () => {
           qux: ['action-3', 'action-4'],
         },
       },
+      reserved: {},
     });
     expect(result[application]).toEqual({
       'feature_foo.quz': {
@@ -154,6 +160,7 @@ describe('features', () => {
         },
         bar: {},
       },
+      reserved: {},
     });
     expect(result[application]).toEqual({
       'feature_foo.quz': {
@@ -183,6 +190,36 @@ describe('features', () => {
         foo: {
           bar_baz: ['action-1', 'action-2'],
         },
+      },
+      reserved: {},
+    });
+  });
+});
+
+describe('reserved', () => {
+  test(`includes reserved privileges with a reserved_ prefix`, () => {
+    const application = 'foo-application';
+    const result = serializePrivileges(application, {
+      global: {},
+      space: {},
+      features: {},
+      reserved: {
+        foo: ['action-1', 'action-2'],
+        bar: ['action-3', 'action-4'],
+      },
+    });
+    expect(result[application]).toEqual({
+      reserved_foo: {
+        application,
+        name: 'reserved_foo',
+        actions: ['action-1', 'action-2'],
+        metadata: {},
+      },
+      reserved_bar: {
+        application,
+        name: 'reserved_bar',
+        actions: ['action-3', 'action-4'],
+        metadata: {},
       },
     });
   });

@@ -64,20 +64,19 @@ export const init = (monitoringPlugin, server) => {
     navLinkId: 'monitoring',
     app: ['monitoring', 'kibana'],
     catalogue: ['monitoring'],
-    privileges: {
-      all: {
-        catalogue: ['monitoring'],
-        grantWithBaseRead: true,
+    privileges: {},
+    reserved: {
+      privilege: {
         savedObject: {
           all: [],
-          read: ['config'],
+          read: ['config']
         },
         ui: [],
       },
-    },
-    privilegesTooltip: i18n.translate('xpack.monitoring.privileges.tooltip', {
-      defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
-    })
+      description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+        defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
+      })
+    }
   });
 
   const bulkUploader = initBulkUploader(kbnServer, server);

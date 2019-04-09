@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { User } from '../common/types';
+import { CustomRoleSpecification, User } from '../common/types';
 
 // For all scenarios, we define both an instance in addition
 // to a "type" definition so that we can use the exhaustive switch in
 // typescript to ensure all scenarios are handled.
+
+const allRole: CustomRoleSpecification = {
+  name: 'all_role',
+  kibana: [
+    {
+      base: ['all'],
+      spaces: ['*'],
+    },
+  ],
+};
 
 interface NoKibanaPrivileges extends User {
   username: 'no_kibana_privileges';
@@ -121,15 +131,7 @@ const All: All = {
   username: 'all',
   fullName: 'all',
   password: 'all-password',
-  role: {
-    name: 'all_role',
-    kibana: [
-      {
-        base: ['all'],
-        spaces: ['*'],
-      },
-    ],
-  },
+  role: allRole,
 };
 
 interface Read extends User {

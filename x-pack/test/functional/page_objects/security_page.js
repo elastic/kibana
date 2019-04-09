@@ -16,7 +16,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
 
   class LoginPage {
     async login(username, password, options = {}) {
@@ -27,6 +27,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
       const expectSpaceSelector = options.expectSpaceSelector || false;
       const expectSuccess = options.expectSuccess;
+      const expectForbidden = options.expectForbidden || false;
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -37,6 +38,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       if (expectSpaceSelector) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
+      } else if (expectForbidden) {
+        await retry.try(async () => {
+          await PageObjects.error.expectForbidden();
+        });
+        log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectSuccess) {
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
         log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
@@ -73,7 +79,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async login(username, password, options = {}) {
       await this.loginPage.login(username, password, options);
 
-      if (options.expectSpaceSelector) {
+      if (options.expectSpaceSelector || options.expectForbidden) {
         return;
       }
 

@@ -221,6 +221,9 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
       bar: {
         read: ['action:bar_read'],
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: null,
@@ -250,6 +253,12 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
           name: 'feature_bar.read',
           actions: ['action:bar_read'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -264,7 +273,8 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
     },
     space: {
       read: ['action:bar']
-    }
+    },
+    reserved: {},
   },
   existingPrivileges: {
     [application]: {
@@ -291,6 +301,12 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
         name: 'space_baz',
         actions: ['action:not-baz'],
         metadata: {},
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
+        metadata: {},
       }
     }
   },
@@ -310,7 +326,7 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
           metadata: {},
         }
       }
-    }, ['read', 'space_baz']);
+    }, ['read', 'space_baz', 'reserved_customApplication']);
   }
 });
 
@@ -330,6 +346,9 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
       bar: {
         read: ['action:quz']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -355,6 +374,12 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
         application,
         name: 'feature_bar.read',
         actions: ['action:not-quz'],
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
+        metadata: {},
       }
     }
   },
@@ -384,6 +409,12 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
           name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -406,6 +437,9 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
       bar: {
         read: ['action:quz']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -431,6 +465,12 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
         application,
         name: 'feature_bar.read',
         actions: ['action:quz'],
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
+        metadata: {},
       }
     }
   },
@@ -460,6 +500,12 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
           name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -482,6 +528,9 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
       bar: {
         read: ['action:quz']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -507,6 +556,12 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
         application,
         name: 'feature_bar.read',
         actions: ['action:not-quz'],
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
+        metadata: {},
       }
     }
   },
@@ -536,6 +591,89 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
           name: 'feature_bar.read',
           actions: ['action:quz'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when reserved actions don't match`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo']
+    },
+    space: {
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'all',
+        actions: ['action:foo'],
+        metadata: {},
+      },
+      space_read: {
+        application,
+        name: 'space_read',
+        actions: ['action:bar'],
+        metadata: {},
+      },
+      'feature_foo.all': {
+        application,
+        name: 'feature_foo.all',
+        actions: ['action:baz'],
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:not-customApplication'],
+        metadata: {},
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_read: {
+          application,
+          name: 'space_read',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        'feature_foo.all': {
+          application,
+          name: 'feature_foo.all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -544,7 +682,6 @@ registerPrivilegesWithClusterTest(`updates privileges when feature actions don't
 
 registerPrivilegesWithClusterTest(`updates privileges when global privilege added`, {
   privilegeMap: {
-    features: {},
     global: {
       all: ['action:foo'],
       read: ['action:quz']
@@ -556,6 +693,9 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
       foo: {
         all: ['action:foo-all']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -576,6 +716,12 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
         application,
         name: 'feature_foo.all',
         actions: ['action:foo-all'],
+        metadata: {},
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
         metadata: {},
       }
     }
@@ -606,6 +752,12 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
           name: 'feature_foo.all',
           actions: ['action:foo-all'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -614,7 +766,6 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
 
 registerPrivilegesWithClusterTest(`updates privileges when space privilege added`, {
   privilegeMap: {
-    features: {},
     global: {
       all: ['action:foo'],
     },
@@ -626,6 +777,9 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
       foo: {
         all: ['action:foo-all']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -646,6 +800,12 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
         application,
         name: 'feature_foo.all',
         actions: ['action:foo-all'],
+        metadata: {},
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
         metadata: {},
       }
     }
@@ -676,6 +836,12 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
           name: 'feature_foo.all',
           actions: ['action:foo-all'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
         }
       }
     });
@@ -696,6 +862,9 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
         all: ['action:foo-all'],
         read: ['action:foo-read']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication']
     }
   },
   existingPrivileges: {
@@ -716,6 +885,12 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
         application,
         name: 'feature_foo.all',
         actions: ['action:foo-all'],
+        metadata: {},
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication'],
         metadata: {},
       }
     }
@@ -746,6 +921,97 @@ registerPrivilegesWithClusterTest(`updates privileges when feature privilege add
           name: 'feature_foo.read',
           actions: ['action:foo-read'],
           metadata: {},
+        },
+        reserved_customApplication: {
+          application,
+          name: 'reserved_customApplication',
+          actions: ['action:customApplication'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when reserved privilege added`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo'],
+    },
+    space: {
+      all: ['action:bar'],
+    },
+    features: {
+      foo: {
+        all: ['action:foo-all'],
+      }
+    },
+    reserved: {
+      customApplication1: ['action:customApplication1'],
+      customApplication2: ['action:customApplication2']
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      space_all: {
+        application,
+        name: 'space_all',
+        actions: ['action:not-bar'],
+        metadata: {},
+      },
+      'feature_foo.all': {
+        application,
+        name: 'feature_foo.all',
+        actions: ['action:foo-all'],
+        metadata: {},
+      },
+      reserved_customApplication1: {
+        application,
+        name: 'reserved_customApplication1',
+        actions: ['action:customApplication1'],
+        metadata: {},
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_all: {
+          application,
+          name: 'space_all',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        'feature_foo.all': {
+          application,
+          name: 'feature_foo.all',
+          actions: ['action:foo-all'],
+          metadata: {},
+        },
+        reserved_customApplication1: {
+          application,
+          name: 'reserved_customApplication1',
+          actions: ['action:customApplication1'],
+          metadata: {},
+        },
+        reserved_customApplication2: {
+          application,
+          name: 'reserved_customApplication2',
+          actions: ['action:customApplication2'],
+          metadata: {},
         }
       }
     });
@@ -764,6 +1030,9 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
       foo: {
         all: ['action:foo-all', 'action:bar-all']
       }
+    },
+    reserved: {
+      customApplication: ['action:customApplication1', 'action:customApplication2']
     }
   },
   existingPrivileges: {
@@ -785,6 +1054,12 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
         name: 'feature_foo.all',
         actions: ['action:bar-all', 'action:foo-all'],
         metadata: {},
+      },
+      reserved_customApplication: {
+        application,
+        name: 'reserved_customApplication',
+        actions: ['action:customApplication2', 'action:customApplication1'],
+        metadata: {},
       }
     }
   },
@@ -797,7 +1072,8 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
   privilegeMap: {
     features: {},
     global: {},
-    space: {}
+    space: {},
+    reserved: {},
   },
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
@@ -813,7 +1089,8 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors putting pri
     },
     space: {
       read: []
-    }
+    },
+    reserved: {},
   },
   existingPrivileges: null,
   throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
