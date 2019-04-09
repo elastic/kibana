@@ -417,7 +417,7 @@ describe('Field', () => {
     await save();
     expect(toastNotifications.add).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: expect.stringContaining('You need to reload the page'),
+        title: expect.stringContaining('Please reload the page'),
       }),
     );
   });
