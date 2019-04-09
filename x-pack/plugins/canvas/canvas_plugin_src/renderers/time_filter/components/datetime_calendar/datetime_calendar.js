@@ -20,7 +20,7 @@ export const DatetimeCalendar = ({
   maxDate,
 }) => (
   <div className="canvasDateTimeCal">
-    <DatetimeInput moment={dateMath.parse(value)} setMoment={onValueChange} />
+    <DatetimeInput value={value} onChange={onValueChange} />
     <EuiDatePicker
       inline
       showTimeSelect
