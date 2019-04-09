@@ -100,7 +100,7 @@ export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading 
     {overviewNetworkStats(data).map((item, index) => (
       <React.Fragment key={index}>
         <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription>
+        <DescriptionListDescription data-test-subj="stat-loader-description">
           <StatValue isLoading={loading} value={item.description} />
         </DescriptionListDescription>
       </React.Fragment>

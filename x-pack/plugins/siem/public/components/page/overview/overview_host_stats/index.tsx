@@ -115,7 +115,7 @@ export const OverviewHostStats = pure<OverviewHostProps>(({ data, loading }) => 
     {overviewHostStats(data).map((item, index) => (
       <React.Fragment key={index}>
         <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-        <DescriptionListDescription>
+        <DescriptionListDescription data-test-subj="stat-loader-description">
           <StatValue isLoading={loading} value={item.description} />
         </DescriptionListDescription>
       </React.Fragment>
