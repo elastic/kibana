@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -120,10 +121,15 @@ const Application = (props: UptimeAppProps) => {
   useEffect(() => {
     setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
-    setBadge(!uiCapabilities.uptime.save
+    setBadge(
+      !uiCapabilities.uptime.save
       ? {
-          text: 'Read Only',
-          tooltip: 'You lack the authority',
+          text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+            defaultMessage: 'Read Only',
+          }),
+          tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+            defaultMessage: 'You lack the authority',
+          }),
         }
       : undefined
     );
