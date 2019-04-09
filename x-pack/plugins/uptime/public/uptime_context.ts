@@ -15,6 +15,7 @@ interface UMContext {
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
+  lastRefresh: number;
   refreshApp: () => void;
   setHeadingText?: (text: string) => void;
 }
@@ -33,6 +34,7 @@ const defaultContext: UMContext = {
   colors,
   dateRangeStart: 'now-15m',
   dateRangeEnd: 'now',
+  lastRefresh: 0,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },

@@ -18,7 +18,7 @@ export interface UptimeGraphQLQueryProps<T> {
 
 interface UptimeGraphQLProps {
   implementsCustomErrorState?: boolean;
-  lastRefresh?: number;
+  lastRefresh: number;
   variables: OperationVariables;
 }
 

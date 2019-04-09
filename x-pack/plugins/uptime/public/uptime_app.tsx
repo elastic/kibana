@@ -111,7 +111,7 @@ const Application = (props: UptimeAppProps) => {
   );
   const [dateRangeStart, setDateRangeStart] = useState<string>(initialDateRangeStart);
   const [dateRangeEnd, setDateRangeEnd] = useState<string>(initialDateRangeEnd);
-  const [, setLastRefresh] = useState<number>(Date.now());
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
   const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -135,6 +135,7 @@ const Application = (props: UptimeAppProps) => {
               dateRangeStart,
               dateRangeEnd,
               colors,
+              lastRefresh,
               refreshApp,
               setHeadingText,
             }}

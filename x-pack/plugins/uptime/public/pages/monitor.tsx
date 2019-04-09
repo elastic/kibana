@@ -37,9 +37,14 @@ interface MonitorPageProps {
 export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
   const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
-    UptimeContext
-  );
+  const {
+    colors,
+    dateRangeStart,
+    dateRangeEnd,
+    lastRefresh,
+    refreshApp,
+    setHeadingText,
+  } = useContext(UptimeContext);
   useEffect(() => {
     query({
       query: gql`
@@ -63,16 +68,22 @@ export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProp
   }, []);
   return (
     <Fragment>
-      <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
+      <MonitorPageTitle lastRefresh={lastRefresh} monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
       <MonitorStatusBar
+        lastRefresh={lastRefresh}
         monitorId={monitorId}
         variables={{ dateRangeStart, dateRangeEnd, monitorId }}
       />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <MonitorCharts
+        {...colors}
+        lastRefresh={lastRefresh}
+        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+      />
       <EuiSpacer size="s" />
       <PingList
+        lastRefresh={lastRefresh}
         onSelectedStatusUpdate={setSelectedStatus}
         onUpdateApp={refreshApp}
         variables={{
