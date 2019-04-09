@@ -95,6 +95,21 @@ describe('visualization', () => {
               },
               {
                 'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
                 'id': '3',
                 'params': {
                   'customBucket': {
@@ -143,7 +158,13 @@ describe('visualization', () => {
     it('should remove time_zone from nested aggregations', () => {
       const migratedDoc = migrate(doc);
       const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
-      expect(aggs[2]).not.toHaveProperty('params.customBucket.params.time_zone');
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+    });
+
+    it('should not fail on date histograms without a time_zone', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
     });
   });
 
