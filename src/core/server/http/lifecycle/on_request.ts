@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
 import { KibanaRequest } from '../router';
@@ -26,6 +27,9 @@ enum ResultType {
   rejected = 'rejected',
 }
 
+interface ErrorParams {
+  statusCode?: number;
+}
 class OnRequestResult {
   public static next() {
     return new OnRequestResult(ResultType.next);
@@ -33,8 +37,8 @@ class OnRequestResult {
   public static redirected(url: string) {
     return new OnRequestResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error) {
-    return new OnRequestResult(ResultType.rejected, error);
+  public static rejected(error: Error, { statusCode }: ErrorParams) {
+    return new OnRequestResult(ResultType.rejected, { error, statusCode });
   }
   public static isValidResult(candidate: any) {
     return candidate instanceof OnRequestResult;
@@ -61,6 +65,15 @@ export type OnRequest<Params = any, Query = any, Body = any> = (
   req: KibanaRequest<Params, Query, Body>,
   t: typeof toolkit
 ) => OnRequestResult;
+
+/**
+ * Adopt custom request interceptor to Hapi lifecycle system.
+ * @param fn - an extension point allowing to perform custom logic for
+ * incoming HTTP requests. Should finish with one of the following commands:
+ * - t.next(). to pass a request to the next handler.
+ * - t.redirected(url). to interrupt request handling and redirect to configured url.
+ * - t.rejected(error). to fail the request with specified error.
+ */
 export function adoptToHapiOnRequestFormat(fn: OnRequest) {
   return async function interceptRequest(
     req: Request,
@@ -76,13 +89,13 @@ export function adoptToHapiOnRequestFormat(fn: OnRequest) {
           return h.redirect(result.payload).takeover();
         }
         if (result.isRejected()) {
-          const { statusCode } = result.payload;
-          return Boom.boomify(result.payload, { statusCode });
+          const { error, statusCode } = result.payload;
+          return Boom.boomify(error, { statusCode });
         }
       }
 
       throw new Error(
-        `Unexpected result from OnRequest. Expected OnRequestResult, but given: ${result}`
+        `Unexpected result from OnRequest. Expected OnRequestResult, but given: ${result}.`
       );
     } catch (error) {
       return new Boom(error.message, { statusCode: 500 });
