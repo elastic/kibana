@@ -23,6 +23,7 @@ import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
+import { getKibanaHref } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -147,7 +148,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     ]
       .filter(({ target }) => Boolean(target))
       .map(({ icon, label, hash, query }, index) => {
-        const href = getRisonHref({
+        const href = getKibanaHref({
           location,
           pathname,
           hash,
