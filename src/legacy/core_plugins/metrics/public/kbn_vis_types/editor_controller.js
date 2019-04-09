@@ -35,11 +35,18 @@ function ReactEditorControllerProvider(Private, config) {
       };
     }
 
-    getDefaultIndexPattern = async () => {
+    fetchDefaultIndexPattern = async () => {
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
 
       return indexPattern.attributes.title;
+    };
+
+    fetchDefaultParams = async () => {
+      this.state.vis.params.default_index_pattern = await this.fetchDefaultIndexPattern();
+      this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
+
+      this.state.isLoaded = true;
     };
 
     getComponent = () => {
@@ -49,8 +56,7 @@ function ReactEditorControllerProvider(Private, config) {
     async render(params) {
       const Component = this.getComponent();
 
-      // ReactEditorController it's a not React component! Not all hooks supported
-      !this.state.isLoaded && await this.componentDidMount();
+      !this.state.isLoaded && await this.fetchDefaultParams();
 
       render(
         <I18nContext>
@@ -67,12 +73,6 @@ function ReactEditorControllerProvider(Private, config) {
           />
         </I18nContext>,
         this.el);
-    }
-
-    async componentDidMount() {
-      this.state.vis.params.default_index_pattern = await this.getDefaultIndexPattern();
-      this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
-      this.state.isLoaded = true;
     }
 
     destroy() {

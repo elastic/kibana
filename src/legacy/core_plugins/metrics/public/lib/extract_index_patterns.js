@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { uniq } from 'lodash';
+
 export function extractIndexPatterns(params, fetchedFields) {
   const patternsToFetch = [];
 
@@ -45,5 +45,5 @@ export function extractIndexPatterns(params, fetchedFields) {
     patternsToFetch.push('');
   }
 
-  return uniq(patternsToFetch);
+  return uniq(patternsToFetch).sort();
 }
