@@ -129,6 +129,7 @@ export const SystemGenericFileLine = pure<Props>(
                 field="message"
                 queryValue={message}
                 value={message}
+                iconType="editorComment"
               />
             </TokensFlexItem>
           </EuiFlexGroup>
