@@ -19,6 +19,7 @@ import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { Main } from './components/app/Main';
 import { history } from './components/shared/Links/url_helpers';
+import { LocationProvider } from './context/LocationContext';
 // @ts-ignore
 import configureStore from './store/config/configureStore';
 import './style/global_overrides.css';
@@ -53,7 +54,9 @@ waitForRoot.then(() => {
     <I18nContext>
       <Provider store={store}>
         <Router history={history}>
-          <Main />
+          <LocationProvider history={history}>
+            <Main />
+          </LocationProvider>
         </Router>
       </Provider>
     </I18nContext>,
