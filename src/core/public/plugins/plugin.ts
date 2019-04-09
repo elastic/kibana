@@ -27,7 +27,7 @@ import { loadPluginBundle } from './plugin_loader';
  * @public
  */
 export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
-  setup: (core: PluginSetupContext, dependencies: TPluginsSetup) => TSetup | Promise<TSetup>;
+  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
   stop?: () => void;
 }
 
