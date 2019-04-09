@@ -79,8 +79,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
     },
   } = visModel;
 
-  const xColumn = selectColumn(xAxis.columns[0], visModel);
-  const yColumn = selectColumn(yAxis.columns[0], visModel);
+  const xColumn = selectColumn(xAxis.columns[0], visModel) as ColumnOperation;
+  const yColumn = selectColumn(yAxis.columns[0], visModel) as ColumnOperation;
 
   const xScaleType = hasDate ? 'time' : 'linear';
 
@@ -99,7 +99,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${xColumn && xColumn.alias}"},
+        "domain": {"data": "table", "field": "${xColumn && xColumn.argument.field}"},
         "range": "width"
       },
       {
@@ -108,7 +108,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${yColumn && yColumn.alias}"},
+        "domain": {"data": "table", "field": "${yColumn && yColumn.argument.field}"},
         "range": "height"
       }
     ],
@@ -143,8 +143,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "from": {"data": "table"},
         "encode": {
           "update": {
-            "x": {"scale": "x", "field": "${xColumn && xColumn.alias}"},
-            "y": {"scale": "y", "field": "${yColumn && yColumn.alias}"},
+            "x": {"scale": "x", "field": "${xColumn && xColumn.argument.field}"},
+            "y": {"scale": "y", "field": "${yColumn && yColumn.argument.field}"},
             "shape": {"value": "circle"},
             "strokeWidth": {"value": 2},
             "opacity": {"value": 0.5},
@@ -229,18 +229,21 @@ function getSuggestionsForField(
   const { datasource } = visModel;
 
   const select: ColumnOperation[] = [
-    fieldToOperation(field, 'column') as ColumnOperation,
-    fieldToOperation(field, 'column') as ColumnOperation,
+    { ...(fieldToOperation(field, 'column') as ColumnOperation), alias: '0' },
+    { ...(fieldToOperation(field, 'column') as ColumnOperation), alias: '1' },
   ];
 
   let hasDate = false;
 
   if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
     hasDate = true;
-    select[1] = fieldToOperation(
-      datasource.fields.find(f => f.name === datasource.timeFieldName)!,
-      'column'
-    ) as ColumnOperation;
+    select[1] = {
+      ...(fieldToOperation(
+        datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+        'column'
+      ) as ColumnOperation),
+      alias: '1',
+    };
   }
 
   const prefilledVisModel: ScatterChartVisModel = {
@@ -255,8 +258,8 @@ function getSuggestionsForField(
     private: {
       ...visModel.private,
       scatterChart: {
-        xAxis: { title: 'X Axis', columns: [`q1_${select[1].alias}`] },
-        yAxis: { title: 'Y Axis', columns: [`q1_${select[0].alias}`] },
+        xAxis: { title: 'X Axis', columns: [`q1_1`] },
+        yAxis: { title: 'Y Axis', columns: [`q1_0`] },
         hasDate,
       },
     },
