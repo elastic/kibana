@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 
 import {
   AutonomousSystem,
   DomainsData,
+  DomainsEdges,
+  FlowTarget,
   GeoEcsFields,
   HostEcsFields,
   IpOverviewData,
 } from '../../graphql/types';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
 import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
 import { buildQuery } from './query_overview.dsl';
-import { IpDetailsAdapter, IpOverviewHit, OverviewHit } from './types';
+import { DomainsBuckets, IpDetailsAdapter, IpOverviewHit, OverviewHit } from './types';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -50,20 +52,23 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       buildDomainsQuery(options)
     );
 
-    // const { cursor, limit } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
-    // const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    // const hasNextPage = networkTopNFlowEdges.length > limit;
-    // const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    // const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
-
-    // tslint:disable-next-line:no-console
-    console.log(JSON.stringify(response, null, 2));
+    const { cursor, limit } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.domain_count.value', response);
+    const domainsEdges: DomainsEdges[] = getDomainsEdges(response, options);
+    const hasNextPage = domainsEdges.length > limit;
+    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
+    const edges = domainsEdges.splice(beginning, limit - beginning);
 
     return {
-      edges: [],
+      edges,
       totalCount,
-      pageInfo: {},
+      pageInfo: {
+        hasNextPage,
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
+      },
     };
   }
 }
@@ -103,4 +108,42 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
       },
     },
   };
+};
+
+const getDomainsEdges = (
+  response: DatabaseSearchResponse<DomainsData, TermAggregation>,
+  options: DomainsRequestOptions
+): DomainsEdges[] => {
+  return formatDomainsEdges(
+    getOr([], `aggregations.${options.flowTarget}_domains.buckets`, response),
+    options.flowTarget
+  );
+};
+
+const formatDomainsEdges = (buckets: DomainsBuckets[], flowTarget: FlowTarget): DomainsEdges[] =>
+  buckets.map((bucket: DomainsBuckets) => ({
+    node: {
+      _id: bucket.key,
+      [flowTarget]: {
+        uniqueIpCount: getOrNumber('uniqueIpCount.value', bucket),
+        domainName: bucket.key,
+      },
+      network: {
+        bytes: getOrNumber('bytes.value', bucket),
+        packets: getOrNumber('packets.value', bucket),
+        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key),
+      },
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));
+
+const getOrNumber = (path: string, bucket: DomainsBuckets) => {
+  const numb = get(path, bucket);
+  if (numb == null) {
+    return null;
+  }
+  return numb;
 };

@@ -79,7 +79,56 @@ export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
   },
 };
 
-export const mockDomainsData: { Domains: DomainsData } = {};
+export const mockDomainsData: { Domains: DomainsData } = {
+  Domains: {
+    edges: [
+      {
+        node: {
+          _id: 'mirrors.digitalocean.com',
+          source: {
+            uniqueIpCount: 1,
+            domainName: 'mirrors.digitalocean.com',
+          },
+          network: {
+            bytes: 0,
+            packets: 0,
+            direction: [],
+          },
+        },
+        cursor: {
+          value: 'mirrors.digitalocean.com',
+          tiebreaker: null,
+        },
+      },
+      {
+        node: {
+          _id: 'security.ubuntu.com',
+          source: {
+            uniqueIpCount: 1,
+            domainName: 'security.ubuntu.com',
+          },
+          network: {
+            bytes: 0,
+            packets: 0,
+            direction: [],
+          },
+        },
+        cursor: {
+          value: 'security.ubuntu.com',
+          tiebreaker: null,
+        },
+      },
+    ],
+    totalCount: 2,
+    pageInfo: {
+      hasNextPage: false,
+      endCursor: {
+        value: '10',
+        tiebreaker: null,
+      },
+    },
+  },
+};
 
 export const getIpOverviewQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SiemContext) => {

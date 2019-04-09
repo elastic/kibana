@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsData, IpOverviewData } from '../../graphql/types';
+import { DomainsData, IpOverviewData, NetworkDirectionEcs } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
@@ -76,4 +76,28 @@ export interface IpOverviewHit {
   };
   took: number;
   timeout: number;
+}
+
+export interface DirectionBuckets {
+  key: NetworkDirectionEcs;
+}
+
+export interface DomainsBuckets {
+  key: string;
+  timestamp: {
+    value: number;
+    value_as_string: string;
+  };
+  uniqueIpCount: {
+    value: number;
+  };
+  bytes: {
+    value: number;
+  };
+  packets: {
+    value: number;
+  };
+  direction: {
+    buckets: DirectionBuckets[];
+  };
 }

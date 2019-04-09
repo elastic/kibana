@@ -10,8 +10,8 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { DomainsRequestOptions } from './index';
 
 // TODO: Extract as helper -- shared with query_top_n_flow
-const getOppositeField = (type: FlowTarget): FlowTarget => {
-  switch (type) {
+const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
+  switch (flowTarget) {
     case FlowTarget.source:
       return FlowTarget.destination;
     case FlowTarget.destination:
@@ -21,22 +21,27 @@ const getOppositeField = (type: FlowTarget): FlowTarget => {
     case FlowTarget.client:
       return FlowTarget.server;
     default:
-      return type;
+      return flowTarget;
   }
 };
 
 const getAggs = (
   ip: string,
-  type: FlowTarget,
+  flowTarget: FlowTarget,
   flowDirection: FlowDirection,
   domainsSortField: DomainsSortField,
   limit: number
 ) => {
   return {
-    [`${type}_domains`]: {
+    domain_count: {
+      cardinality: {
+        field: `${getOppositeField(flowTarget)}.domain`,
+      },
+    },
+    [`${flowTarget}_domains`]: {
       terms: {
-        field: `${getOppositeField(type)}.domain`,
-        size: 20,
+        field: `${getOppositeField(flowTarget)}.domain`,
+        size: limit + 1,
       },
       aggs: {
         firstSeen: {
@@ -61,7 +66,7 @@ const getAggs = (
         },
         uniqueIpCount: {
           cardinality: {
-            field: `${type}.ip`,
+            field: `${flowTarget}.ip`,
           },
         },
         packets: {
@@ -77,13 +82,13 @@ const getAggs = (
         all: {
           filter: {
             term: {
-              [`${type}.ip`]: ip,
+              [`${flowTarget}.ip`]: ip,
             },
           },
           aggs: {
             domains: {
               terms: {
-                field: `${getOppositeField(type)}.domain`,
+                field: `${getOppositeField(flowTarget)}.domain`,
                 size: limit + 1,
               },
               aggs: {
@@ -104,6 +109,60 @@ const getAggs = (
       },
     },
   };
+};
+
+const getUniDirectionalFilter = (flowDirection: FlowDirection) =>
+  flowDirection === FlowDirection.uniDirectional
+    ? {
+        must_not: [
+          {
+            exists: {
+              field: 'destination.bytes',
+            },
+          },
+        ],
+      }
+    : {};
+
+const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTarget) => {
+  if (
+    flowDirection === FlowDirection.biDirectional &&
+    [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
+  ) {
+    return {
+      must: [
+        {
+          exists: {
+            field: 'source.bytes',
+          },
+        },
+        {
+          exists: {
+            field: 'destination.bytes',
+          },
+        },
+      ],
+    };
+  } else if (
+    flowDirection === FlowDirection.biDirectional &&
+    [FlowTarget.client, FlowTarget.server].includes(flowTarget)
+  ) {
+    return {
+      must: [
+        {
+          exists: {
+            field: 'client.bytes',
+          },
+        },
+        {
+          exists: {
+            field: 'server.bytes',
+          },
+        },
+      ],
+    };
+  }
+  return [];
 };
 
 export const buildDomainsQuery = ({
@@ -137,13 +196,8 @@ export const buildDomainsQuery = ({
       query: {
         bool: {
           filter,
-          must_not: [
-            {
-              exists: {
-                field: `${flowTarget}.bytes`,
-              },
-            },
-          ],
+          ...getUniDirectionalFilter(flowDirection),
+          ...getBiDirectionalFilter(flowDirection, flowTarget),
         },
       },
       size: 0,

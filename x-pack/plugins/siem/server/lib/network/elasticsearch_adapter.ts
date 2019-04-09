@@ -64,7 +64,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
-    const networkDnsEdges: NetworkDnsEdges[] = formatDnsEgdes(
+    const networkDnsEdges: NetworkDnsEdges[] = formatDnsEdges(
       getOr([], 'aggregations.dns_name_query_count.buckets', response)
     );
     const hasNextPage = networkDnsEdges.length > limit;
@@ -90,18 +90,18 @@ const getTopNFlowEdges = (
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
   if (options.flowDirection === FlowDirection.uniDirectional) {
-    return formatTopNFlowEgdes(
+    return formatTopNFlowEdges(
       getOr([], 'aggregations.top_uni_flow.buckets', response),
       options.flowTarget
     );
   }
-  return formatTopNFlowEgdes(
+  return formatTopNFlowEdges(
     getOr([], 'aggregations.top_bi_flow.buckets', response),
     options.flowTarget
   );
 };
 
-const formatTopNFlowEgdes = (
+const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
   flowTarget: FlowTarget
 ): NetworkTopNFlowEdges[] =>
@@ -126,7 +126,7 @@ const formatTopNFlowEgdes = (
     },
   }));
 
-const formatDnsEgdes = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
+const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
   buckets.map((bucket: NetworkDnsBuckets) => ({
     node: {
       _id: bucket.key,
