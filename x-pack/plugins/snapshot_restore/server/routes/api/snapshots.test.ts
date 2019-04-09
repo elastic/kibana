@@ -8,10 +8,11 @@ import { Request, ResponseToolkit } from 'hapi';
 import { getAllHandler, getOneHandler } from './snapshots';
 
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
-  const mockRequest = {} as Request;
   const mockResponseToolkit = {} as ResponseToolkit;
 
   describe('getAllHandler()', () => {
+    const mockRequest = {} as Request;
+
     test('combines snapshots and their repositories returned from ES', async () => {
       const mockSnapshotGetRepositoryEsResponse = {
         fooRepository: {},
@@ -44,9 +45,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ],
       };
 
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
+      expect(response).toEqual(expectedResponse);
     });
 
     test('returns empty arrays if no snapshots returned from ES', async () => {
@@ -54,9 +54,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
       const expectedResponse = { errors: [], snapshots: [] };
 
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
+      expect(response).toEqual(expectedResponse);
     });
 
     test('throws if ES error', async () => {
@@ -88,9 +87,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
       const expectedResponse = { snapshot };
 
-      await expect(
-        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
+      const response = await getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit);
+      expect(response).toEqual(expectedResponse);
     });
 
     test('throws if ES error (including 404s)', async () => {

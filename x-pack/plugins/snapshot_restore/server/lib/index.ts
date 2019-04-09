@@ -4,3 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { booleanizeSettings } from './booleanize_settings';
+export { deserializeSnapshotSummary, deserializeSnapshotDetails } from './snapshot_serialization';
