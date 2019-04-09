@@ -571,3 +571,14 @@ test('returns server and connection options on start', async () => {
   expect(innerServer).toBe((server as any).server);
   expect(options).toMatchSnapshot();
 });
+
+test('registers auth request interceptor only once', async () => {
+  const { registerAuth } = await server.start(config);
+  const doRegister = () =>
+    registerAuth(() => null as any, {
+      password: 'asdasdasdasdadakdaksdjhasjdasdh',
+    } as any);
+
+  await doRegister();
+  expect(doRegister()).rejects.toThrowError('Auth hook was already registered');
+});

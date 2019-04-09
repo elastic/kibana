@@ -38,6 +38,7 @@ export interface HttpServerInfo {
 export class HttpServer {
   private server?: Server;
   private registeredRouters: Set<Router> = new Set();
+  private authRegistered: boolean = false;
 
   constructor(private readonly log: Logger) {}
 
@@ -150,6 +151,10 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.authRegistered) {
+      throw new Error('Auth hook was already registered');
+    }
+    this.authRegistered = true;
 
     const sessionStorage = await createCookieSessionStorageFor<T>(this.server, cookieOptions);
 
