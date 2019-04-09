@@ -101,21 +101,6 @@ const Title = styled(EuiTitle)`
 `;
 
 class CodeContent extends React.PureComponent<Props> {
-  public buttonOptions = [
-    {
-      id: ButtonOption.Code,
-      label: ButtonOption.Code,
-    },
-    {
-      id: ButtonOption.Blame,
-      label: ButtonOption.Blame,
-    },
-    {
-      id: ButtonOption.History,
-      label: ButtonOption.History,
-    },
-  ];
-
   public rawButtonOptions = [{ id: 'Raw', label: 'Raw' }];
 
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
@@ -184,12 +169,30 @@ class CodeContent extends React.PureComponent<Props> {
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
+      const { isUnsupported, isOversize, isImage } = this.props.file!;
+
+      const buttonOptions = [
+        {
+          id: ButtonOption.Code,
+          label: ButtonOption.Code,
+        },
+        {
+          id: ButtonOption.Blame,
+          label: ButtonOption.Blame,
+          isDisabled: isUnsupported || isImage || isOversize,
+        },
+        {
+          id: ButtonOption.History,
+          label: ButtonOption.History,
+        },
+      ];
+
       return (
         <ButtonsContainer>
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.buttonOptions}
+            options={buttonOptions}
             type="single"
             idSelected={buttonId}
             onChange={this.switchButton}
@@ -312,7 +315,13 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url, isUnsupported, isOversize } = file;
+        const {
+          lang: fileLanguage,
+          content: fileContent,
+          isUnsupported,
+          isOversize,
+          isImage,
+        } = file;
         if (isUnsupported) {
           return (
             <ErrorPanel
@@ -335,10 +344,11 @@ class CodeContent extends React.PureComponent<Props> {
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
-        } else if (this.props.file!.isImage) {
+        } else if (isImage) {
+          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
           return (
             <div className="code-auto-margin">
-              <img src={url} alt={url} />
+              <img src={rawUrl} alt={rawUrl} />
             </div>
           );
         }
