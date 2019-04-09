@@ -14,7 +14,6 @@ import _ from 'lodash'; // Find a way to remove this
 
 import { JobSelector } from './job_selector';
 import { getSelectedJobIds } from './job_select_service_utils';
-// import { mlJobService } from 'plugins/ml/services/job_service';
 import { BehaviorSubject } from 'rxjs';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -33,6 +32,7 @@ module
       }
 
       const props = {
+        jobSelectService: mlJobSelectService,
         selectedJobIds,
         timeseriesOnly: attrs.timeseriesonly,
         singleSelection: attrs.singleselection
@@ -54,9 +54,7 @@ module
     };
   })
   .service('mlJobSelectService', function ($injector) {
-    // TODO: Load jobs from here or utils so we can see what's valid
     const globalState = $injector.get('globalState');
     const initialSelectedJobIds = getSelectedJobIds(globalState);
-
     return new BehaviorSubject(initialSelectedJobIds);
   });
