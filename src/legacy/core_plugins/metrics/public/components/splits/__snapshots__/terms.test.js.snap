@@ -32,6 +32,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         label={
           <FormattedMessage
             defaultMessage="By"
+            description="This labels a field selector allowing the user to chose 'by' which field to group."
             id="tsvb.splits.terms.byLabel"
             values={Object {}}
           />
