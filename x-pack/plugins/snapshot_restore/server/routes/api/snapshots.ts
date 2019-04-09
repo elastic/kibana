@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import {
-  Snapshot,
-  SnapshotDetails,
-  SnapshotDetailsEs,
-  SnapshotSummaryEs,
-} from '../../../common/types';
+import { Snapshot, SnapshotDetails } from '../../../common/types';
 import { deserializeSnapshotDetails, deserializeSnapshotSummary } from '../../lib';
+import { SnapshotDetailsEs, SnapshotSummaryEs } from '../../types';
 
 export function registerSnapshotsRoutes(router: Router) {
   router.get('snapshots', getAllHandler);

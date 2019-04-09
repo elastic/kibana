@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SnapshotDetails,
-  SnapshotDetailsEs,
-  SnapshotSummary,
-  SnapshotSummaryEs,
-} from '../../common/types';
+import { SnapshotDetails, SnapshotSummary } from '../../common/types';
+import { SnapshotDetailsEs, SnapshotSummaryEs } from '../types';
 
 export function deserializeSnapshotSummary(snapshotSummaryEs: SnapshotSummaryEs): SnapshotSummary {
   if (!snapshotSummaryEs || typeof snapshotSummaryEs !== 'object') {
