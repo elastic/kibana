@@ -14,6 +14,7 @@ import { Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorStatusBarQuery } from '../../queries';
 import { EmptyStatusBar } from './empty_status_bar';
+import { convertMicrosecondsToMilliseconds } from '../../lib/helper';
 
 interface MonitorStatusBarQueryResult {
   monitorStatus?: Ping[];
@@ -29,6 +30,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
     const { monitor, timestamp } = data.monitorStatus[0];
     const duration = get(monitor, 'duration.us', undefined);
+    const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get(data.monitorStatus[0], 'url.full');
     return (
       <EuiPanel>
@@ -78,7 +80,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
             >
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
-                values={{ duration }}
+                values={{ duration: convertMicrosecondsToMilliseconds(duration) }}
                 defaultMessage="{duration}ms"
                 description="The 'ms' is an abbreviation for 'milliseconds'."
               />
@@ -93,7 +95,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
             )}
             grow={false}
           >
-            {moment(timestamp).fromNow()}
+            {moment(parseInt(timestamp, 10)).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
