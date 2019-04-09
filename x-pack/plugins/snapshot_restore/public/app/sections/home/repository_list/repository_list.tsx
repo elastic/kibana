@@ -64,7 +64,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositories"
-          defaultMessage="Loading repositories..."
+          defaultMessage="Loading repositories…"
         />
       </SectionLoading>
     );
