@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode, EuiLink } from '@elastic/eui';
+import { documentationLinks } from '../../lib/documentation_links';
 
 export class SlackAction extends BaseAction {
   constructor(props = {}) {
@@ -22,10 +26,25 @@ export class SlackAction extends BaseAction {
 
     if (!this.to.length) {
       errors.push({
-        message: i18n.translate('xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description', {
-          // eslint-disable-next-line max-len
-          defaultMessage: 'This watch will only be valid if you specify a “to” property in the Slack "message_default" setting in Elasticsearch.'
-        })
+        message: <FormattedMessage
+          id="xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description"
+          defaultMessage="Set {ymlValue} in your elasticsearch.yml file to make this watch valid. {docsLink}"
+          values={{
+            ymlValue: (
+              <EuiCode>message_defaults.to</EuiCode>
+            ),
+            docsLink: (
+              <EuiLink href={documentationLinks.watcher.watchNotificationSettings} target="_blank">
+                {i18n.translate(
+                  'xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.documentationLink',
+                  {
+                    defaultMessage: 'Learn more.',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
       });
     }
 

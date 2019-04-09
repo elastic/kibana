@@ -139,6 +139,13 @@ export async function onWatchSave(
               defaultMessage: 'Saving this watch will overwrite previous content.',
             }
           ),
+          buttonLabel: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchButtonLabel',
+            {
+              defaultMessage: 'Overwrite',
+            }
+          ),
+          buttonType: 'danger',
         },
       };
     }

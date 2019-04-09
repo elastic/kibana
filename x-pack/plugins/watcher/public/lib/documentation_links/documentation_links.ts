@@ -11,5 +11,11 @@ export const documentationLinks = {
     putWatchApi: makeDocumentationLink(
       '{baseUrl}guide/en/elasticsearch/reference/{urlVersion}/watcher-api-put-watch.html'
     ),
+    executeWatchApi: makeDocumentationLink(
+      '{baseUrl}guide/en/elasticsearch/reference/{urlVersion}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode'
+    ),
+    watchNotificationSettings: makeDocumentationLink(
+      '{baseUrl}guide/en/elasticsearch/reference/{urlVersion}/notification-settings.html#slack-notification-settings'
+    ),
   },
 };

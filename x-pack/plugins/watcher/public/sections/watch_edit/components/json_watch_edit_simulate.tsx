@@ -16,12 +16,14 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { toastNotifications } from 'ui/notify';
@@ -29,6 +31,7 @@ import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
 import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { executeWatch } from '../../../lib/api';
+import { documentationLinks } from '../../../lib/documentation_links';
 import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
 import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
@@ -144,7 +147,8 @@ export const JsonWatchEditSimulate = ({
       <EuiText>
         <p>
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.pageDescription', {
-            defaultMessage: 'Modify the fields below to simulate a watch execution.',
+            defaultMessage:
+              'Use the simulator to override the watch schedule, input results, conditions, and actions.',
           })}
         </p>
       </EuiText>
@@ -156,15 +160,14 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesTitle',
-                { defaultMessage: 'Trigger overrides' }
+                { defaultMessage: 'Trigger' }
               )}
             </h3>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesDescription',
             {
-              defaultMessage:
-                'These fields are parsed as the data of the trigger event that will be used during the watch execution.',
+              defaultMessage: 'Schedule the time and date for starting the watch.',
             }
           )}
         >
@@ -278,7 +281,7 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesTitle',
-                { defaultMessage: 'Input overrides' }
+                { defaultMessage: 'Input' }
               )}
             </h3>
           }
@@ -286,7 +289,7 @@ export const JsonWatchEditSimulate = ({
             'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesDescription',
             {
               defaultMessage:
-                'When present, the watch uses this object as a payload instead of executing its own input.',
+                'Enter JSON data to override the watch payload that comes from running the input.',
             }
           )}
         >
@@ -357,7 +360,7 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesTitle',
-                { defaultMessage: 'Condition overrides' }
+                { defaultMessage: 'Condition' }
               )}
             </h3>
           }
@@ -390,17 +393,28 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesTitle',
-                { defaultMessage: 'Action overrides' }
+                { defaultMessage: 'Actions' }
               )}
             </h3>
           }
-          description={i18n.translate(
-            'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription',
-            {
-              defaultMessage:
-                'The action modes determine how to handle the watch actions as part of the watch execution.',
-            }
-          )}
+          description={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription"
+              defaultMessage="Allow the watch to execute or skip actions. {actionsLink}"
+              values={{
+                actionsLink: (
+                  <EuiLink href={documentationLinks.watcher.executeWatchApi} target="_blank">
+                    {i18n.translate(
+                      'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription.linkLabel',
+                      {
+                        defaultMessage: 'Learn about actions.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         >
           <EuiFormRow
             describedByIds={['simulateExecutionActionModesDescription']}
