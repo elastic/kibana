@@ -179,8 +179,8 @@ function getSuggestionsForField(
       private: {
         ...visModel.private,
         pieChart: {
-          sliceAxis: { title: 'Slice By', columns: ['q1_1'] },
-          angleAxis: { title: 'Size By', columns: ['q1_0'] },
+          sliceAxis: { title: 'Slice By', columns: [`q1_${field.name}`] },
+          angleAxis: { title: 'Size By', columns: ['q1_count'] },
         },
       },
     };

@@ -166,12 +166,14 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayT
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+      seriesAxis: { title: 'Series Axis', columns: [] },
       displayType: displayType || 'line',
     });
   } else {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
+      seriesAxis: { title: 'Series Axis', columns: [] },
       displayType: displayType || 'line',
     });
   }

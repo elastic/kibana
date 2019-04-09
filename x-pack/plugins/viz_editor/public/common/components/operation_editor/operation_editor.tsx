@@ -32,7 +32,9 @@ export function OperationEditor(props: OperationEditorProps) {
   });
   const onDropField = (field: DatasourceField) => {
     const updatedColumn =
-      'argument' in column && column.argument.field
+      'argument' in column &&
+      column.argument.field &&
+      getOperationDefinition(column.operator).applicableFields([field], props).length === 1
         ? ({ ...column, argument: { ...column.argument, field: field.name } } as SelectOperation)
         : fieldToOperation(field, defaultOperator(field));
 

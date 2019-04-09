@@ -87,7 +87,7 @@ function fieldOperationEditor(props: OperationEditorProps) {
       onChange={e =>
         onColumnChange({
           ...operation,
-          alias: e.target.value,
+          alias: column.alias || e.target.value,
           argument: {
             ...argument,
             field: e.target.value,
@@ -346,7 +346,8 @@ export const operations: OperationDefinition[] = [
     ): ColumnOperation {
       return {
         operator: 'column',
-        alias: getFieldName(currentOperation, fields),
+        alias:
+          (currentOperation && currentOperation.alias) || getFieldName(currentOperation, fields),
         argument: { field: getFieldName(currentOperation, fields) },
       };
     },
@@ -364,10 +365,10 @@ export const operations: OperationDefinition[] = [
     name: operationToName('count'),
     operator: 'count',
     applicableFields: () => [],
-    toSelectClause(): CountOperation {
+    toSelectClause(currentOperation): CountOperation {
       return {
         operator: 'count',
-        alias: 'count',
+        alias: (currentOperation && currentOperation.alias) || 'count',
       };
     },
     summarize(op: CountOperation) {
@@ -394,7 +395,9 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
-        alias: getFieldName(currentOperation, numericAggFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
     summarize(op: AvgOperation) {
@@ -422,7 +425,9 @@ export const operations: OperationDefinition[] = [
           interval: 'd',
           field: getFieldName(currentOperation, dateAggFields(fields)),
         },
-        alias: getFieldName(currentOperation, dateAggFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, dateAggFields(fields)),
       };
     },
     summarize(op: DateHistogramOperation) {
@@ -449,7 +454,9 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, aggregatableFields(fields)),
         },
-        alias: getFieldName(currentOperation, aggregatableFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
     summarize(op: CardinalityOperation) {
@@ -480,7 +487,9 @@ export const operations: OperationDefinition[] = [
           field: getFieldName(currentOperation, aggregatableFields(fields)),
           size: 5,
         },
-        alias: getFieldName(currentOperation, aggregatableFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
     summarize(op: CardinalityOperation) {
@@ -510,7 +519,9 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
-        alias: getFieldName(currentOperation, numericAggFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
     summarize(op: SumOperation) {
@@ -543,7 +554,9 @@ export const operations: OperationDefinition[] = [
           windowFunction: 'max',
           windowSize: 10,
         },
-        alias: getFieldName(currentOperation, numericAggFields(fields)),
+        alias:
+          (currentOperation && currentOperation.alias) ||
+          getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
   },
