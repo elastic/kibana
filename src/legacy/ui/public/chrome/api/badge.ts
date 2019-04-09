@@ -99,7 +99,10 @@ function createBadgeApi(chrome: { [key: string]: any }) {
   };
 }
 
-export function initBadgeApi(chrome: { [key: string]: any }, internals: { [key: string]: any }) {
+export function initChromeBadgeApi(
+  chrome: { [key: string]: any },
+  internals: { [key: string]: any }
+) {
   const { badge, $setupBadgeAutoClear } = createBadgeApi(chrome);
   chrome.badge = badge;
   internals.$setupBadgeAutoClear = $setupBadgeAutoClear;
