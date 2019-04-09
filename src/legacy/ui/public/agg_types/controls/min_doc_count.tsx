@@ -34,7 +34,7 @@ function MinDocCountParamEditor({ value, setValue }: AggParamEditorProps<boolean
 
   return (
     <div className="visEditorSidebar__aggParamFormRow">
-      <EuiToolTip content={content} delay="long">
+      <EuiToolTip content={content} delay="long" position="right">
         <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
       </EuiToolTip>
       <EuiSpacer size="s" />

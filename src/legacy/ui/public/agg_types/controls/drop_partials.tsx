@@ -39,7 +39,7 @@ function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEdi
 
   return (
     <>
-      <EuiToolTip content={content} delay="long">
+      <EuiToolTip content={content} delay="long" position="right">
         <EuiSwitch
           label={label}
           checked={value}
