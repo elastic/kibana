@@ -12,10 +12,6 @@ import {
 } from '../../../common/types';
 import { deserializeSnapshotDetails, deserializeSnapshotSummary } from '../../lib';
 
-interface IdToSnapshotMap {
-  [id: number]: Snapshot;
-}
-
 export function registerSnapshotsRoutes(router: Router) {
   router.get('snapshots', getAllHandler);
   router.get('snapshots/{repository}/{snapshot}', getOneHandler);
@@ -65,7 +61,7 @@ export const getAllHandler: RouterRouteHandler = async (
   // Multiple repositories can have identical configurations. This means that the same snapshot
   // may be listed as belonging to multiple repositories. A map lets us dedupe the snapshots and
   // aggregate the repositories that are associated with each one.
-  const idToSnapshotMap: IdToSnapshotMap = repositoriesSnapshots
+  const idToSnapshotMap: Record<string, Snapshot> = repositoriesSnapshots
     .filter(Boolean)
     .reduce((idToSnapshot, snapshots: SnapshotSummaryEs[]) => {
       // create an object to store each snapshot and the
