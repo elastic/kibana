@@ -63,7 +63,8 @@ function getApmServerInstructionSet(config) {
           {
             title: 'Enable the APM Server in the ESS console',
             textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPost', {
-              defaultMessage: 'To enable the APM Server go to [the ESS console]({essConsoleLink}).',
+              defaultMessage:
+                'To enable the APM Server go to [the ESS console]({essConsoleLink}). Once enabled, refresh this page.',
               values: {
                 essConsoleLink: apmUiUrl,
               },
