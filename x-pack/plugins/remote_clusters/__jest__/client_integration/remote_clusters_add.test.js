@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, nextTick } from './test_helpers';
+import { initTestBed, nextTick, NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './test_helpers';
 import { RemoteClusterAdd } from '../../public/sections/remote_cluster_add';
 // import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
 import { registerRouter } from '../../public/services/routing';
@@ -108,6 +108,10 @@ describe('Create Remote cluster', () => {
 
       test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', () => {
         const expectInvalidChar = (char) => {
+          if (char === '-' || char === '_') {
+            return;
+          }
+
           try {
             form.setInputValue('remoteClusterFormNameInput', `with${char}`);
             expect(getFormErrorsMessages()).toContain(`Remove the character ${char} from the name.`);
@@ -116,83 +120,113 @@ describe('Create Remote cluster', () => {
           }
         };
 
-        const nonAlphaNumericChars = [
-          '#', '@', '.', '$', '*', '(', ')', '+', ';', '~', ':', '\'', '/', '%', '?', ',', '=', '&', '!',
-        ];
-
-        const accentedChars = ['À', 'à', 'Á', 'á', 'Â', 'â', 'Ã', 'ã', 'Ä', 'ä', 'Ç', 'ç', 'È', 'è', 'É', 'é', 'Ê', 'ê', 'Ë', 'ë', 'Ì',
-          'ì', 'Í', 'í', 'Î', 'î', 'Ï', 'ï', 'Ñ', 'ñ', 'Ò', 'ò', 'Ó', 'ó', 'Ô', 'ô', 'Õ', 'õ', 'Ö', 'ö', 'Š', 'š', 'Ú', 'ù', 'Û', 'ú',
-          'Ü', 'û', 'Ù', 'ü', 'Ý', 'ý', 'Ÿ', 'ÿ', 'Ž', 'ž'];
-
         clickSaveForm(); // display form errors
 
-        [...nonAlphaNumericChars, ...accentedChars].forEach(expectInvalidChar);
+        [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS].forEach(expectInvalidChar);
       });
     });
 
-    // describe('remote clusters', () => {
-    //   describe('when no remote clusters were found', () => {
-    //     test('should indicate it and have a button to add one', async () => {
-    //       setLoadRemoteClusteresResponse([]);
+    describe('seeds', () => {
+      let getUserActions;
+      let form;
+      let getFormErrorsMessages;
+      let clickSaveForm;
 
-    //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-    //       await nextTick();
-    //       component.update();
-    //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
+      beforeEach(async () => {
+        ({ form, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+        ({ clickSaveForm } = getUserActions('remoteClusterAdd'));
+      });
 
-    //       expect(errorCallOut.length).toBe(1);
-    //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
-    //     });
-    //   });
+      test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', () => {
+        clickSaveForm(); // display form errors
 
-    //   describe('when there was an error loading the remote clusters', () => {
-    //     test('should also indicate it and have a button to add one', async () => {
-    //       setLoadRemoteClusteresResponse(undefined, { body: 'Houston we got a problem' });
+        const notInArray = array => value => array.indexOf(value) < 0;
 
-    //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-    //       await nextTick();
-    //       component.update();
-    //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
+        const expectInvalidChar = (char) => {
+          form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
+          expect(getFormErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`); // eslint-disable-line max-len
+        };
 
-    //       expect(errorCallOut.length).toBe(1);
-    //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
-    //     });
-    //   });
+        [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
+          .filter(notInArray(['-', '_', ':']))
+          .forEach(expectInvalidChar);
+      });
 
-    //   describe('when none of the remote clusters is connected', () => {
-    //     const clusterName = 'new-york';
-    //     const remoteClusters = [{
-    //       name: clusterName,
-    //       seeds: ['localhost:9600'],
-    //       isConnected: false,
-    //     }];
+      test('should require a numeric "port" to be set', () => {
+        clickSaveForm();
 
-    //     beforeEach(async () => {
-    //       setLoadRemoteClusteresResponse(remoteClusters);
+        form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1');
+        expect(getFormErrorsMessages()).toContain('A port is required.');
 
-    //       ({ find, exists, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
-    //       await nextTick();
-    //       component.update();
-    //     });
-
-    //     test('should show a callout warning and have a button to edit the cluster', () => {
-    //       const errorCallOut = find('remoteClusterFieldCallOutError');
-
-    //       expect(errorCallOut.length).toBe(1);
-    //       expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(`Remote cluster '${clusterName}' is not connected`);
-    //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterEditButton').length).toBe(1);
-    //     });
-
-    //     test('should have a button to add another remote cluster', () => {
-    //       expect(exists('ccrRemoteClusterInlineAddButton')).toBe(true);
-    //     });
-
-    //     test('should indicate in the select option that the cluster is not connected', () => {
-    //       const selectOptions = find('ccrRemoteClusterSelect').find('option');
-    //       expect(selectOptions.at(0).text()).toBe(`${clusterName} (not connected)`);
-    //     });
-    //   });
+        form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1:abc');
+        expect(getFormErrorsMessages()).toContain('A port is required.');
+      });
+    });
   });
+
+  // describe('remote clusters', () => {
+  //   describe('when no remote clusters were found', () => {
+  //     test('should indicate it and have a button to add one', async () => {
+  //       setLoadRemoteClusteresResponse([]);
+
+  //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+  //       await nextTick();
+  //       component.update();
+  //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
+
+  //       expect(errorCallOut.length).toBe(1);
+  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
+  //     });
+  //   });
+
+  //   describe('when there was an error loading the remote clusters', () => {
+  //     test('should also indicate it and have a button to add one', async () => {
+  //       setLoadRemoteClusteresResponse(undefined, { body: 'Houston we got a problem' });
+
+  //       ({ find, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+  //       await nextTick();
+  //       component.update();
+  //       const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
+
+  //       expect(errorCallOut.length).toBe(1);
+  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
+  //     });
+  //   });
+
+  //   describe('when none of the remote clusters is connected', () => {
+  //     const clusterName = 'new-york';
+  //     const remoteClusters = [{
+  //       name: clusterName,
+  //       seeds: ['localhost:9600'],
+  //       isConnected: false,
+  //     }];
+
+  //     beforeEach(async () => {
+  //       setLoadRemoteClusteresResponse(remoteClusters);
+
+  //       ({ find, exists, component } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+  //       await nextTick();
+  //       component.update();
+  //     });
+
+  //     test('should show a callout warning and have a button to edit the cluster', () => {
+  //       const errorCallOut = find('remoteClusterFieldCallOutError');
+
+  //       expect(errorCallOut.length).toBe(1);
+  //       expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(`Remote cluster '${clusterName}' is not connected`);
+  //       expect(findTestSubject(errorCallOut, 'ccrRemoteClusterEditButton').length).toBe(1);
+  //     });
+
+  //     test('should have a button to add another remote cluster', () => {
+  //       expect(exists('ccrRemoteClusterInlineAddButton')).toBe(true);
+  //     });
+
+  //     test('should indicate in the select option that the cluster is not connected', () => {
+  //       const selectOptions = find('ccrRemoteClusterSelect').find('option');
+  //       expect(selectOptions.at(0).text()).toBe(`${clusterName} (not connected)`);
+  //     });
+  //   });
+  // });
 
   //   describe('index patterns', () => {
   //     beforeEach(async () => {

@@ -97,7 +97,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) =
         if (action === 'delete') {
           button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListDeleteActionButton');
         } else if (action === 'edit') {
-          findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
+          button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
         }
 
         if (!button) {

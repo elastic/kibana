@@ -296,6 +296,7 @@ export const RemoteClusterForm = injectI18n(
               onSearchChange={this.onSeedsInputChange}
               isInvalid={showErrors}
               fullWidth
+              data-test-subj="remoteClusterFormSeedsInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
