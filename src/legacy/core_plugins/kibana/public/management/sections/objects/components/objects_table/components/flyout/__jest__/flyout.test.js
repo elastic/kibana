@@ -124,7 +124,7 @@ describe('Flyout', () => {
     const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await Promise.resolve();
     // Ensure the state changes are reflected
     component.update();
 
