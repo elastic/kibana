@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   text?: string;
 }
 
-export const Loading: SFC<Props> = ({
+export const Loading: FunctionComponent<Props> = ({
   animated = false,
   text = '',
   backgroundColor = '#000000',

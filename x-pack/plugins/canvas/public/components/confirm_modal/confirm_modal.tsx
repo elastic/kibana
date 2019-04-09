@@ -7,7 +7,7 @@
 /* eslint-disable react/forbid-elements */
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   isOpen: boolean;
@@ -20,7 +20,7 @@ interface Props {
   className?: string;
 }
 
-export const ConfirmModal: SFC<Props> = props => {
+export const ConfirmModal: FunctionComponent<Props> = props => {
   const {
     isOpen,
     title,
