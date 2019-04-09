@@ -168,7 +168,7 @@ const Application = (props: UptimeAppProps) => {
                           refreshApp();
                         }}
                         // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
-                        onRefresh={() => refreshApp()}
+                        onRefresh={refreshApp}
                         onRefreshChange={({
                           isPaused,
                           refreshInterval,
