@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { saveToFile } from '../save_to_file';
+import { kfetch } from 'ui/kfetch';
 
-jest.mock('@elastic/filesaver', () => ({
-  saveAs: jest.fn(),
-}));
-
-describe('saveToFile', () => {
-  let saveAs;
-
-  beforeEach(() => {
-    saveAs = require('@elastic/filesaver').saveAs;
-    saveAs.mockClear();
+export async function fetchExportObjects(objects, includeReferencesDeep = false) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      objects,
+      includeReferencesDeep,
+    }),
   });
-
-  it('should use the file saver utility', async () => {
-    saveToFile(JSON.stringify({ foo: 1 }));
-    expect(saveAs.mock.calls.length).toBe(1);
-  });
-});
+}

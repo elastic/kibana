@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { importFile } from '../import_file';
+import { importLegacyFile } from '../import_legacy_file';
 
 describe('importFile', () => {
   it('should import a file', async () => {
@@ -33,7 +33,7 @@ describe('importFile', () => {
 
     const file = 'foo';
 
-    const imported = await importFile(file, FileReader);
+    const imported = await importLegacyFile(file, FileReader);
     expect(imported).toEqual({ text: file });
   });
 
@@ -51,7 +51,7 @@ describe('importFile', () => {
     const file = 'foo';
 
     try {
-      await importFile(file, FileReader);
+      await importLegacyFile(file, FileReader);
     } catch (e) {
       // There isn't a great way to handle throwing exceptions
       // with async/await but this seems to work :shrug:
