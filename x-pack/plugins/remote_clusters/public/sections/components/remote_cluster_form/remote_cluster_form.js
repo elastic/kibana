@@ -590,6 +590,7 @@ export const RemoteClusterForm = injectI18n(
                   onChange={e => this.onFieldsChange({ name: e.target.value })}
                   fullWidth
                   disabled={disabledName}
+                  data-test-subj="remoteClusterFormNameInput"
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>

@@ -77,6 +77,16 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickRemoteClusterAt,
       };
     },
+    // Remote cluster Add
+    remoteClusterAdd() {
+      const clickSaveForm = () => {
+        find('remoteClusterFormSaveButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
+      };
+    }
   };
 
   return userActions[section]();
