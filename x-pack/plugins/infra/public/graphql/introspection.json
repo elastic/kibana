@@ -543,6 +543,26 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "logColumns",
+            "description": "The columns to use for log display",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "UNION", "name": "InfraSourceLogColumn", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -626,6 +646,65 @@
           {
             "name": "timestamp",
             "description": "The field to use as a timestamp for metrics and logs",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "UNION",
+        "name": "InfraSourceLogColumn",
+        "description": "All known log column types",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          { "kind": "OBJECT", "name": "InfraSourceTimestampLogColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraSourceMessageLogColumn", "ofType": null }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceTimestampLogColumn",
+        "description": "The built-in timestamp log column",
+        "fields": [
+          {
+            "name": "kind",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceMessageLogColumn",
+        "description": "The built-in message log column",
+        "fields": [
+          {
+            "name": "kind",
+            "description": "",
             "args": [],
             "type": {
               "kind": "NON_NULL",

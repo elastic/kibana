@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const defaultSourceConfiguration = {
+import { InfraSourceConfiguration } from './types';
+
+export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
   description: '',
   metricAlias: 'metricbeat-*',
@@ -17,4 +19,12 @@ export const defaultSourceConfiguration = {
     tiebreaker: '_doc',
     timestamp: '@timestamp',
   },
+  logColumns: [
+    {
+      kind: 'timestamp',
+    },
+    {
+      kind: 'message',
+    },
+  ],
 };

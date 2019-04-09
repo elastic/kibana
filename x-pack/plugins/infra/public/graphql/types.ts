@@ -55,6 +55,8 @@ export interface InfraSourceConfiguration {
   logAlias: string;
   /** The field mapping to use for this source */
   fields: InfraSourceFields;
+  /** The columns to use for log display */
+  logColumns: InfraSourceLogColumn[];
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
@@ -70,6 +72,14 @@ export interface InfraSourceFields {
   tiebreaker: string;
   /** The field to use as a timestamp for metrics and logs */
   timestamp: string;
+}
+/** The built-in timestamp log column */
+export interface InfraSourceTimestampLogColumn {
+  kind: string;
+}
+/** The built-in message log column */
+export interface InfraSourceMessageLogColumn {
+  kind: string;
 }
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
@@ -601,6 +611,9 @@ export enum InfraOperator {
 // Unions
 // ====================================================
 
+/** All known log column types */
+export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
+
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
@@ -1016,6 +1029,8 @@ export namespace SourceConfigurationFields {
     metricAlias: string;
 
     fields: Fields;
+
+    logColumns: LogColumns[];
   };
 
   export type Fields = {
@@ -1032,6 +1047,22 @@ export namespace SourceConfigurationFields {
     tiebreaker: string;
 
     timestamp: string;
+  };
+
+  export type LogColumns =
+    | InfraSourceTimestampLogColumnInlineFragment
+    | InfraSourceMessageLogColumnInlineFragment;
+
+  export type InfraSourceTimestampLogColumnInlineFragment = {
+    __typename?: 'InfraSourceTimestampLogColumn';
+
+    kind: string;
+  };
+
+  export type InfraSourceMessageLogColumnInlineFragment = {
+    __typename?: 'InfraSourceMessageLogColumn';
+
+    kind: string;
   };
 }
 

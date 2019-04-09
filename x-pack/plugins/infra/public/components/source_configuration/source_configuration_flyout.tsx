@@ -63,6 +63,7 @@ export const SourceConfigurationFlyout: React.FunctionComponent<
             },
             logAlias: configuration.logAlias,
             metricAlias: configuration.metricAlias,
+            logColumns: configuration.logColumns.map(({ __typename, ...logColumn }) => logColumn),
           }
         : defaultFormState,
     [configuration]
@@ -218,4 +219,5 @@ const defaultFormState = {
   },
   logAlias: '',
   metricAlias: '',
+  logColumns: [],
 };

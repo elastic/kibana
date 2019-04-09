@@ -20,6 +20,7 @@ const initialConfiguration: InfraSourceConfiguration = {
     tiebreaker: 'INITIAL_TIEBREAKER_FIELD',
     timestamp: 'INITIAL_TIMESTAMP_FIELD',
   },
+  logColumns: [],
 };
 
 describe('infrastructure source configuration', () => {

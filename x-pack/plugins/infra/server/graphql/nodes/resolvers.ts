@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { failure } from 'io-ts/lib/PathReporter';
+
 import { InfraResponseResolvers, InfraSourceResolvers } from '../../graphql/types';
 import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
 import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
+import { SourceConfigurationRuntimeType } from '../../lib/sources';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf, ResultOf } from '../../utils/typed_resolvers';
@@ -57,11 +60,18 @@ export const createNodeResolvers = (
       const { source, timerange, filterQuery } = mapResponse;
       const { groupBy, nodeType } = extractGroupByAndNodeFromPath(args.path);
       UsageCollector.countNode(nodeType);
+
+      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
+        source.configuration
+      ).getOrElseL(errors => {
+        throw new Error(failure(errors).join('\n'));
+      });
+
       const options: InfraNodeRequestOptions = {
         filterQuery: parseFilterQuery(filterQuery),
         nodeType,
         groupBy,
-        sourceConfiguration: source.configuration,
+        sourceConfiguration,
         metric: args.metric,
         timerange,
       };

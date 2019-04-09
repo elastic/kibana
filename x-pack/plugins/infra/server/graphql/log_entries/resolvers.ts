@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { failure } from 'io-ts/lib/PathReporter';
+
 import {
   InfraLogMessageConstantSegment,
   InfraLogMessageFieldSegment,
@@ -11,6 +13,7 @@ import {
   InfraSourceResolvers,
 } from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
+import { SourceConfigurationRuntimeType } from '../../lib/sources';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
@@ -122,7 +125,13 @@ export const createLogEntriesResolvers = (libs: {
       };
     },
     async logItem(source, args, { req }) {
-      return await libs.logEntries.getLogItem(req, args.id, source.configuration);
+      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
+        source.configuration
+      ).getOrElseL(errors => {
+        throw new Error(failure(errors).join('\n'));
+      });
+
+      return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },
   },
   InfraLogMessageSegment: {

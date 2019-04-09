@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { convertChangeToUpdater } from '../../../common/source_configuration';
-import { UpdateSourceInput } from '../../graphql/types';
+import { UpdateSourceInput, InfraSourceLogColumn } from '../../graphql/types';
 
 export interface InputFieldProps<
   Value extends string = string,
@@ -37,6 +37,7 @@ interface FormState {
     tiebreaker: string;
     timestamp: string;
   };
+  logColumns: InfraSourceLogColumn[];
 }
 
 export const useSourceConfigurationFormState = ({

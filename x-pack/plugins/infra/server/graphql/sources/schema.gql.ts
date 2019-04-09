@@ -36,6 +36,8 @@ export const sourcesSchema = gql`
     logAlias: String!
     "The field mapping to use for this source"
     fields: InfraSourceFields!
+    "The columns to use for log display"
+    logColumns: [InfraSourceLogColumn!]!
   }
 
   "A mapping of semantic fields to their document counterparts"
@@ -53,6 +55,19 @@ export const sourcesSchema = gql`
     "The field to use as a timestamp for metrics and logs"
     timestamp: String!
   }
+
+  "The built-in timestamp log column"
+  type InfraSourceTimestampLogColumn {
+    kind: String!
+  }
+
+  "The built-in message log column"
+  type InfraSourceMessageLogColumn {
+    kind: String!
+  }
+
+  "All known log column types"
+  union InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn
 
   extend type Query {
     """

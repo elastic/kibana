@@ -83,6 +83,8 @@ export interface InfraSourceConfiguration {
   logAlias: string;
   /** The field mapping to use for this source */
   fields: InfraSourceFields;
+  /** The columns to use for log display */
+  logColumns: InfraSourceLogColumn[];
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
@@ -98,6 +100,14 @@ export interface InfraSourceFields {
   tiebreaker: string;
   /** The field to use as a timestamp for metrics and logs */
   timestamp: string;
+}
+/** The built-in timestamp log column */
+export interface InfraSourceTimestampLogColumn {
+  kind: string;
+}
+/** The built-in message log column */
+export interface InfraSourceMessageLogColumn {
+  kind: string;
 }
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
@@ -629,6 +639,9 @@ export enum InfraOperator {
 // Unions
 // ====================================================
 
+/** All known log column types */
+export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
+
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
@@ -841,6 +854,8 @@ export namespace InfraSourceConfigurationResolvers {
     logAlias?: LogAliasResolver<string, TypeParent, Context>;
     /** The field mapping to use for this source */
     fields?: FieldsResolver<InfraSourceFields, TypeParent, Context>;
+    /** The columns to use for log display */
+    logColumns?: LogColumnsResolver<InfraSourceLogColumn[], TypeParent, Context>;
   }
 
   export type NameResolver<
@@ -865,6 +880,11 @@ export namespace InfraSourceConfigurationResolvers {
   > = Resolver<R, Parent, Context>;
   export type FieldsResolver<
     R = InfraSourceFields,
+    Parent = InfraSourceConfiguration,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type LogColumnsResolver<
+    R = InfraSourceLogColumn[],
     Parent = InfraSourceConfiguration,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
@@ -914,6 +934,30 @@ export namespace InfraSourceFieldsResolvers {
   export type TimestampResolver<
     R = string,
     Parent = InfraSourceFields,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** The built-in timestamp log column */
+export namespace InfraSourceTimestampLogColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceTimestampLogColumn> {
+    kind?: KindResolver<string, TypeParent, Context>;
+  }
+
+  export type KindResolver<
+    R = string,
+    Parent = InfraSourceTimestampLogColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** The built-in message log column */
+export namespace InfraSourceMessageLogColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceMessageLogColumn> {
+    kind?: KindResolver<string, TypeParent, Context>;
+  }
+
+  export type KindResolver<
+    R = string,
+    Parent = InfraSourceMessageLogColumn,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

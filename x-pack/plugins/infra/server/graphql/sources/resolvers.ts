@@ -5,9 +5,18 @@
  */
 
 import { convertChangeToUpdater } from '../../../common/source_configuration';
-import { InfraSourceResolvers, MutationResolvers, QueryResolvers } from '../../graphql/types';
+import {
+  InfraSourceLogColumn,
+  InfraSourceResolvers,
+  MutationResolvers,
+  QueryResolvers,
+} from '../../graphql/types';
 import { InfraSourceStatus } from '../../lib/source_status';
-import { InfraSources } from '../../lib/sources';
+import {
+  InfraSources,
+  StaticSourceConfigurationTimestampColumnRuntimeType,
+  StaticSourceConfigurationMessageColumnRuntimeType,
+} from '../../lib/sources';
 import {
   ChildResolverOf,
   InfraResolverOf,
@@ -59,6 +68,11 @@ export const createSourcesResolvers = (
   InfraSource: {
     status: InfraSourceStatusResolver;
   };
+  InfraSourceLogColumn: {
+    __resolveType(
+      logColumn: InfraSourceLogColumn
+    ): 'InfraSourceTimestampLogColumn' | 'InfraSourceMessageLogColumn' | null;
+  };
   Mutation: {
     createSource: MutationCreateSourceResolver;
     deleteSource: MutationDeleteSourceResolver;
@@ -80,6 +94,19 @@ export const createSourcesResolvers = (
   InfraSource: {
     async status(source) {
       return source;
+    },
+  },
+  InfraSourceLogColumn: {
+    __resolveType(logColumn) {
+      if (StaticSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceTimestampLogColumn';
+      }
+
+      if (StaticSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceMessageLogColumn';
+      }
+
+      return null;
     },
   },
   Mutation: {
