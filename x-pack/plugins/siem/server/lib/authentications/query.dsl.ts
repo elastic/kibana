@@ -35,7 +35,7 @@ export const buildQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.module': 'system' } },
-    { terms: { 'event.action': ['user_login'] } },
+    { term: { 'event.action': 'user_login' } },
     {
       range: {
         [timestamp]: {

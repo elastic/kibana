@@ -14,8 +14,8 @@ const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
-const HOST_NAME = 'suricata-sensor-amsterdam';
-const TOTAL_COUNT = 1;
+const HOST_NAME = 'suricata-zeek-sensor-toronto';
+const TOTAL_COUNT = 4;
 const EDGE_LENGTH = 1;
 
 const authenticationsTests: KbnTestProvider = ({ getService }) => {
@@ -63,16 +63,16 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 1,
+              limit: 2,
               cursor: '1',
             },
           },
         })
         .then(resp => {
           const authentications = resp.data.source.Authentications;
-
-          expect(authentications.edges.length).to.be(0);
-          expect(authentications.totalCount).to.be(1);
+          expect(authentications.edges.length).to.be(EDGE_LENGTH);
+          expect(authentications.totalCount).to.be(TOTAL_COUNT);
+          expect(authentications.edges[0]!.node.lastSuccess!.host!.name).to.be(HOST_NAME);
         });
     });
   });
