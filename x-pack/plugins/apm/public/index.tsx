@@ -7,10 +7,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
-import { PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/public';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
@@ -45,6 +46,10 @@ const checkForRoot = () => {
 };
 
 checkForRoot().then(() => {
-  const initializerContext = {} as PluginInitializerContext;
-  plugin(initializerContext).setup();
+  const core = {
+    i18n: {
+      Context: I18nContext
+    }
+  } as CoreSetup;
+  plugin().setup(core);
 });

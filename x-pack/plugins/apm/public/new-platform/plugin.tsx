@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { I18nContext } from 'ui/i18n';
+import { CoreSetup } from 'src/core/public';
 import { Main } from '../components/app/Main';
 import { history } from '../components/shared/Links/url_helpers';
 import { LocationProvider } from '../context/LocationContext';
@@ -18,10 +18,11 @@ import configureStore from '../store/config/configureStore';
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
 export class Plugin {
-  public setup() {
+  public setup(core: CoreSetup) {
+    const { i18n } = core;
     const store = configureStore();
     ReactDOM.render(
-      <I18nContext>
+      <i18n.Context>
         <Provider store={store}>
           <Router history={history}>
             <LocationProvider history={history}>
@@ -29,7 +30,7 @@ export class Plugin {
             </LocationProvider>
           </Router>
         </Provider>
-      </I18nContext>,
+      </i18n.Context>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
   }
