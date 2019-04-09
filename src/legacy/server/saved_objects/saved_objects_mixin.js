@@ -38,6 +38,7 @@ import {
   createExportRoute,
   createImportRoute,
   createResolveImportErrorsRoute,
+  createLogLegacyImportRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
@@ -71,6 +72,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createExportRoute(prereqs, server));
   server.route(createImportRoute(prereqs, server));
   server.route(createResolveImportErrorsRoute(prereqs, server));
+  server.route(createLogLegacyImportRoute());
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
