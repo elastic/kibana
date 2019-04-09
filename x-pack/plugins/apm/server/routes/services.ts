@@ -15,7 +15,7 @@ import { getServices } from '../lib/services/get_services';
 
 const ROOT = '/api/apm/services';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
@@ -34,7 +34,7 @@ export function initServicesApi(server: Server) {
       const services = await getServices(setup).catch(defaultErrorHandler);
 
       // Store telemetry data derived from services
-      const agentNames = services.map(
+      const agentNames = services.items.map(
         ({ agentName }) => agentName as AgentName
       );
       const apmTelemetry = createApmTelementry(agentNames);

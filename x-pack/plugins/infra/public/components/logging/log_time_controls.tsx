@@ -8,7 +8,8 @@ import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 
 const noop = () => undefined;
 
@@ -96,6 +97,6 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
 
 export const LogTimeControls = injectI18n(LogTimeControlsUI);
 
-const InlineWrapper = styled.div`
+const InlineWrapper = euiStyled.div`
   display: inline-block;
 `;

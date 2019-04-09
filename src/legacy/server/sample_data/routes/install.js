@@ -121,7 +121,7 @@ export const createInstallRoute = () => ({
           const createIndexParams = {
             index: index,
             body: {
-              settings: { index: { number_of_shards: 1, number_of_replicas: 0 } },
+              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
           };

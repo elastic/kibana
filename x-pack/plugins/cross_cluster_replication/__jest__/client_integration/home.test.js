@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockAllHttpRequests, nextTick } from './test_helpers';
+import { initTestBed, registerHttpRequestMockHelpers, nextTick } from './test_helpers';
 import { CrossClusterReplicationHome } from '../../public/app/sections/home/home';
 import { BASE_PATH } from '../../common/constants';
 import routing from '../../public/app/services/routing';
@@ -17,7 +17,8 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -38,7 +39,12 @@ describe('<CrossClusterReplicationHome />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    mockAllHttpRequests(server);
+
+    // Register helpers to mock Http Requests
+    const { setLoadFollowerIndicesResponse } = registerHttpRequestMockHelpers(server);
+
+    // Set "default" mock responses by not providing any arguments
+    setLoadFollowerIndicesResponse();
   });
 
   describe('on component mount', () => {
@@ -48,7 +54,7 @@ describe('<CrossClusterReplicationHome />', () => {
 
     test('should set the correct an app title', () => {
       expect(exists('ccrAppTitle')).toBe(true);
-      expect(find('ccrAppTitle').text()).toEqual('Cross Cluster Replication');
+      expect(find('ccrAppTitle').text()).toEqual('Cross-Cluster Replication');
     });
 
     test('should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"', () => {

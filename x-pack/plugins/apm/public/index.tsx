@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -18,8 +18,8 @@ import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { Main } from './components/app/Main';
-import { GlobalProgress } from './components/app/Main/GlobalProgress';
 import { history } from './components/shared/Links/url_helpers';
+import { LocationProvider } from './context/LocationContext';
 // @ts-ignore
 import configureStore from './store/config/configureStore';
 import './style/global_overrides.css';
@@ -53,12 +53,11 @@ waitForRoot.then(() => {
   ReactDOM.render(
     <I18nContext>
       <Provider store={store}>
-        <Fragment>
-          <GlobalProgress />
-          <Router history={history}>
+        <Router history={history}>
+          <LocationProvider history={history}>
             <Main />
-          </Router>
-        </Fragment>
+          </LocationProvider>
+        </Router>
       </Provider>
     </I18nContext>,
     document.getElementById(REACT_APP_ROOT_ID)

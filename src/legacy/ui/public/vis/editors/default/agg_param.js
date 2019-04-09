@@ -29,7 +29,10 @@ uiModules
     ['aggParam', { watchDepth: 'reference' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'value',
+    'isInvalid',
+    'field'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -54,6 +57,9 @@ uiModules
             agg-param="aggParam"
             on-change="onChange"
             value="paramValue"
+            is-invalid="isInvalid"
+            set-validity="setValidity"
+            field="agg.params.field"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -82,6 +88,7 @@ uiModules
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
             }, true);
+            $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
           }
 
           $scope.onChange = (value) => {
@@ -91,6 +98,13 @@ uiModules
 
             if(ngModelCtrl) {
               ngModelCtrl.$setDirty();
+            }
+          };
+
+          $scope.setValidity = (isValid) => {
+            if(ngModelCtrl) {
+              $scope.isInvalid = !isValid;
+              ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
             }
           };
         }
