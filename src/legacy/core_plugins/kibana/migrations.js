@@ -57,6 +57,34 @@ function migrateIndexPattern(doc) {
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
+function removeDateHistogramTimeZones(doc) {
+  const newDoc = cloneDeep(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  if (visStateJSON) {
+    let visState;
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.aggs) {
+      visState.aggs.forEach(agg => {
+        // We're checking always for the existance of agg.params here. This should always exist, but better
+        // be safe then sorry during migrations.
+        if (agg.type === 'date_histogram' && agg.params) {
+          delete agg.params.time_zone;
+        }
+
+        if (get(agg, 'params.customBucket.type', null) === 'date_histogram' && agg.params.customBucket.params) {
+          delete agg.params.customBucket.params.time_zone;
+        }
+      });
+      newDoc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return newDoc;
+}
+
 export const migrations = {
   'index-pattern': {
     '6.5.0': (doc) => {
@@ -66,6 +94,7 @@ export const migrations = {
     }
   },
   visualization: {
+    '6.7.0': removeDateHistogramTimeZones,
     '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];
@@ -146,6 +175,7 @@ export const migrations = {
         throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
       }
     },
+    '7.0.1': removeDateHistogramTimeZones,
     '7.1.0': doc => {
       // [TSVB] Migrate percentile-rank aggregation (value -> values)
       const migratePercentileRankAggregation = doc => {
