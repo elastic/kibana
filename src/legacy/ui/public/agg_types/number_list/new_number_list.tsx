@@ -18,30 +18,33 @@
  */
 
 import React from 'react';
+import { isUndefined } from 'lodash';
 
 import { EuiFieldNumber, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { parseRange } from '../../utils/range';
+import { parseRange, Range } from '../../utils/range';
 
 interface NumberListProps {
   list: any[];
   unitName: string;
   validateAscendingOrder: boolean;
   labelledbyId: string;
-  range: string
+  range?: string
   onchange(index: number, action: 1 | -1): void;
 }
 
 const defaultRange = parseRange('[0,Infinity)');
 
 function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId, range, onChange }: NumberListProps) {
-  let numberRange = defaultRange;
+  let numberRange: Range;
 
   try {
-    numberRange = parseRange(range);
+    numberRange = range ? parseRange(range) : defaultRange;
   } catch (e) {
     throw new TypeError('Unable to parse range: ' + e.message);
   }
+
+  const validateAscOrder = isUndefined(validateAscendingOrder) ? true : validateAscendingOrder;
 
   const onChangeValue = () => {};
 

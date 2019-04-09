@@ -17,23 +17,30 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { NumberList } from '../number_list/new_number_list';
 
-function PercentileRanksEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<number[]>) {
+function PercentileRanksEditor({ agg, aggParam, value, setValidity, setValue }: AggParamEditorProps<number[]>) {
   const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
   const onChange = (list) => {
     setValue(list);
   };
 
+  useEffect(
+    () => {
+      setValidity(!!value.length);
+    },
+    [value]
+  );
+
 
   return (
     <EuiFormRow label={label} fullWidth={true} id={`visEditorPercentileRanksLabel${agg.id}`} className="visEditorSidebar__aggParamFormRow">
-      <NumberList onChange={onChange} fullWidth={true} list={value} unitName="value" labelledbyId={`visEditorPercentileRanksLabel${agg.id}`}/>
+      <NumberList onChange={onChange} fullWidth={true} list={value} unitName="value" labelledbyId={`visEditorPercentileRanksLabel${agg.id}`} range="[-Infinity,Infinity]"/>
       
     </EuiFormRow>
   );
