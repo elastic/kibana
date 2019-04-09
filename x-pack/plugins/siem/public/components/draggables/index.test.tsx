@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock';
 import { getEmptyString } from '../empty_value';
@@ -21,7 +22,7 @@ import {
 describe('draggables', () => {
   describe('rendering', () => {
     test('it renders the default DefaultDraggable', () => {
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <DefaultDraggable
           id="draggable-id"
           field="some-field"
@@ -35,7 +36,7 @@ describe('draggables', () => {
     });
 
     test('it renders the default Badge', () => {
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <DraggableBadge
           contextId="context-id"
           eventId="event-id"

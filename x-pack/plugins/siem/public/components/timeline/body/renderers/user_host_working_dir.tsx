@@ -20,8 +20,8 @@ interface Props {
 }
 
 export const UserHostWorkingDir = pure<Props>(
-  ({ contextId, eventId, userName, hostName, workingDirectory }) => {
-    return (
+  ({ contextId, eventId, userName, hostName, workingDirectory }) =>
+    userName != null || hostName != null || workingDirectory != null ? (
       <>
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
@@ -44,6 +44,5 @@ export const UserHostWorkingDir = pure<Props>(
           workingDirectory={workingDirectory}
         />
       </>
-    );
-  }
+    ) : null
 );

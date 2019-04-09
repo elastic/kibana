@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
@@ -15,7 +16,7 @@ import { AuthSsh } from '.';
 describe('AuthSssh', () => {
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <TestProviders>
           <AuthSsh
             contextId="[context-123]"

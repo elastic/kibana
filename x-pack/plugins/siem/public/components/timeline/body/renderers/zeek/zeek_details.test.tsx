@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
@@ -16,10 +17,8 @@ import { ZeekDetails } from '.';
 describe('ZeekDetails', () => {
   describe('rendering', () => {
     test('it renders the default ZeekDetails', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <ZeekDetails data={mockTimelineData[2].ecs} browserFields={mockBrowserFields} />
-        </TestProviders>
+      const wrapper = shallow(
+        <ZeekDetails data={mockTimelineData[2].ecs} browserFields={mockBrowserFields} />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

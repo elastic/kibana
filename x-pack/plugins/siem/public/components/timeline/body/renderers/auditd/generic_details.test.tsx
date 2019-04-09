@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
@@ -19,15 +20,13 @@ describe('GenericDetails', () => {
     test('it renders the default AuditAcquiredCredsDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <AuditdGenericDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={browserFields}
-            data={mockTimelineData[21].ecs}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuditdGenericDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={browserFields}
+          data={mockTimelineData[21].ecs}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

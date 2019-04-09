@@ -5,9 +5,10 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
@@ -16,21 +17,19 @@ import { SessionUserHostWorkingDir } from '.';
 describe('SessionUserHostWorkingDir', () => {
   describe('rendering', () => {
     test('it renders the default SessionUserHostWorkingDir', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <EuiFlexItem grow={false} component="span">
-            <SessionUserHostWorkingDir
-              eventId="eventid-123"
-              session="session-123"
-              contextId="contextid-123"
-              hostName="hostname-123"
-              userName="username-123"
-              primary="primary-123"
-              secondary="secondary-123"
-              workingDirectory="workingdir-123"
-            />
-          </EuiFlexItem>
-        </TestProviders>
+      const wrapper = shallow(
+        <EuiFlexItem grow={false} component="span">
+          <SessionUserHostWorkingDir
+            eventId="eventid-123"
+            session="session-123"
+            contextId="contextid-123"
+            hostName="hostname-123"
+            userName="username-123"
+            primary="primary-123"
+            secondary="secondary-123"
+            workingDirectory="workingdir-123"
+          />
+        </EuiFlexItem>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

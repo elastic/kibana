@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
@@ -35,11 +36,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <ZeekSignature data={zeek} />
-        </TestProviders>
-      );
+      const wrapper = shallow(<ZeekSignature data={zeek} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });

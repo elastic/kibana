@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
@@ -20,14 +21,8 @@ import {
 describe('SuricataSignature', () => {
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <SuricataSignature
-            id="doc-id-123"
-            signatureId="id-123"
-            signature="ET SCAN ATTACK Hello"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <SuricataSignature id="doc-id-123" signatureId="id-123" signature="ET SCAN ATTACK Hello" />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

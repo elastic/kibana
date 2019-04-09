@@ -5,11 +5,11 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   defaultToEmptyTag,
@@ -24,11 +24,7 @@ describe('EmptyValue', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   test('it renders against snapshot', () => {
-    const wrapper = shallowWithIntl(
-      <ThemeProvider theme={theme}>
-        <p>{getEmptyString()}</p>
-      </ThemeProvider>
-    );
+    const wrapper = shallow(<p>{getEmptyString()}</p>);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
