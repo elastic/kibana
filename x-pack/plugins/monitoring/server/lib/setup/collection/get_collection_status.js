@@ -144,7 +144,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
   ];
 
   const recentDocuments = await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid);
-  const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets');
+  const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
