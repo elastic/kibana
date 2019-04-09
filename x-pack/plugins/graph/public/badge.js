@@ -6,7 +6,16 @@
 
 
 export function getReadonlyBadge(i18n, uiCapabilities) {
-  if (!uiCapabilities.graph.save) {
-    return 'readOnly';
+  if (uiCapabilities.graph.save) {
+    return null;
   }
+
+  return {
+    text: i18n('xpack.graph.badge.readOnly.text', {
+      defaultMessage: 'Read Only',
+    }),
+    tooltip: i18n('xpack.graph.badge.readOnly.tooltip', {
+      defaultMessage: 'You lack the authority',
+    }),
+  };
 }

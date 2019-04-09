@@ -81,8 +81,7 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
-    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined | string>(undefined);
-    const namedBadges = new Map<string, ChromeBadge>();
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -184,25 +183,14 @@ export class ChromeService {
         ),
 
       /**
-       * Sets a named badge which can be used by setBadge
-       */
-      addNamedBadge: (name: string, badge: ChromeBadge) => {
-        namedBadges.set(name, badge);
-      },
-
-      /**
        * Get an observable of the current badge
        */
-      getBadge$: (): Rx.Observable<ChromeBadge | undefined> =>
-        badge$.pipe(
-          map(badge => (typeof badge === 'string' ? namedBadges.get(badge) : badge)),
-          takeUntil(this.stop$)
-        ),
+      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
       /**
        * Override the current badge
        */
-      setBadge: (badge: ChromeBadge | undefined | string) => {
+      setBadge: (badge: ChromeBadge | undefined) => {
         badge$.next(badge);
       },
 

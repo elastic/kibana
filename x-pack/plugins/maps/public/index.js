@@ -36,12 +36,6 @@ import { recentlyAccessed } from 'ui/persisted_log';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
-const badge = (uiCapabilities) => {
-  if (!uiCapabilities.maps.save) {
-    return 'readOnly';
-  }
-};
-
 app.directive('mapListing', function (reactDirective) {
   return reactDirective(MapListing);
 });
@@ -49,9 +43,24 @@ app.directive('mapListing', function (reactDirective) {
 routes.enable();
 
 routes
+  .defaults(/.*/, {
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.maps.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('xpack.maps.badge.readOnly.text', {
+          defaultMessage: 'Read Only',
+        }),
+        tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
+          defaultMessage: 'You lack the authority',
+        }),
+      };
+    }
+  })
   .when('/', {
     template: listingTemplate,
-    badge,
     controller($scope, gisMapSavedObjectLoader, config) {
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.find = (search) => {
@@ -78,7 +87,6 @@ routes
   .when('/map', {
     template: mapTemplate,
     controller: 'GisMapController',
-    badge,
     resolve: {
       map: function (gisMapSavedObjectLoader, redirectWhenMissing) {
         return gisMapSavedObjectLoader.get()
@@ -91,7 +99,6 @@ routes
   .when('/map/:id', {
     template: mapTemplate,
     controller: 'GisMapController',
-    badge,
     resolve: {
       map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route,
         Private) {

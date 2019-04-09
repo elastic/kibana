@@ -120,8 +120,12 @@ const Application = (props: UptimeAppProps) => {
   useEffect(() => {
     setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
-    setBadge(
-      !uiCapabilities.uptime.save ? 'readOnly' : undefined
+    setBadge(!uiCapabilities.uptime.save
+      ? {
+          text: 'Read Only',
+          tooltip: 'You lack the authority',
+        }
+      : undefined
     );
   }, []);
 

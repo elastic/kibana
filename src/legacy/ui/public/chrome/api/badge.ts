@@ -62,10 +62,6 @@ function createBadgeApi(chrome: { [key: string]: any }) {
       set(newBadge: Badge | undefined) {
         newPlatformChrome.setBadge(newBadge);
       },
-
-      addNamedBadge(name: string, badge: Badge) {
-        newPlatformChrome.addNamedBadge(name, badge);
-      },
     },
 
     /**
