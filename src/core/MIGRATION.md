@@ -94,7 +94,7 @@ export class Plugin {
     // called when plugin is torn down, aka window.onbeforeunload
   }
 }
-```x
+```
 
 **[4] `server/index.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
