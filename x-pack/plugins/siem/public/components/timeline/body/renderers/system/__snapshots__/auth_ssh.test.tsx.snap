@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AuthSssh rendering it renders against shallow snapshot 1`] = `
+exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
 <Component>
   <pure(Component)
     contextId="[context-123]"
