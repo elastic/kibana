@@ -25,18 +25,31 @@ import { PanelOptionEditor } from '../panel_options_editor';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-const TAB = {
-  ANNOTATIONS: 'annotations',
-  DATA: 'data',
-  OPTIONS: 'options',
-};
+const TABS = [
+  {
+    id: 'tsvb.timeseries.dataTab.dataButtonLabel',
+    name: 'data',
+    defaultMessage: 'Data',
+  },
+  {
+    id: 'tsvb.timeseries.optionsTab.panelOptionsButtonLabel',
+    name: 'options',
+    defaultMessage: 'Panel options',
+  },
+  {
+    id: 'tsvb.timeseries.annotationsTab.annotationsButtonLabel',
+    name: 'annotations',
+    defaultMessage: 'Annotations',
+  },
+];
 
 function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
-  const [tab, switchTab] = useState(TAB.DATA);
+  const [tab, switchTab] = useState(TABS[0].name);
+  const [isTimeMarkerChecked, toggleTimeMarker] = useState(false);
   let view = null;
 
   switch (tab) {
-    case TAB.DATA:
+    case TABS[0].name:
       view = (
         <SeriesEditor
           fields={fields}
@@ -46,7 +59,19 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
         />
       );
       break;
-    case TAB.ANNOTATIONS:
+    case TABS[1].name:
+      view = (
+        <PanelOptionEditor
+          fields={fields}
+          model={model}
+          onChange={onChange}
+          intl={intl}
+          isTimeMarkerChecked={isTimeMarkerChecked}
+          toggleTimeMarker={toggleTimeMarker}
+        />
+      );
+      break;
+    case TABS[2].name:
       view = (
         <AnnotationsEditor
           fields={fields}
@@ -56,48 +81,23 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
         />
       );
       break;
-    case TAB.OPTIONS:
-      view = (
-        <PanelOptionEditor
-          fields={fields}
-          model={model}
-          onChange={onChange}
-          intl={intl}
-        />
-      );
-      break;
   }
 
   return (
     <div>
       <EuiTabs size="s">
-        <EuiTab
-          isSelected={tab === TAB.DATA}
-          onClick={() => switchTab(TAB.DATA)}
-        >
-          <FormattedMessage
-            id="tsvb.timeseries.dataTab.dataButtonLabel"
-            defaultMessage="Data"
-          />
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === TAB.OPTIONS}
-          onClick={() => switchTab(TAB.OPTIONS)}
-        >
-          <FormattedMessage
-            id="tsvb.timeseries.optionsTab.panelOptionsButtonLabel"
-            defaultMessage="Panel options"
-          />
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === TAB.ANNOTATIONS}
-          onClick={() => switchTab(TAB.ANNOTATIONS)}
-        >
-          <FormattedMessage
-            id="tsvb.timeseries.annotationsTab.annotationsButtonLabel"
-            defaultMessage="Annotations"
-          />
-        </EuiTab>
+        {TABS.map(({ id, name, defaultMessage }) => (
+          <EuiTab
+            key={id}
+            isSelected={tab === name}
+            onClick={() => switchTab(name)}
+          >
+            <FormattedMessage
+              id={id}
+              defaultMessage={defaultMessage}
+            />
+          </EuiTab>
+        ))}
       </EuiTabs>
       {view}
     </div>

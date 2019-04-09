@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -50,8 +50,7 @@ const DEFAULTS = {
   show_grid: 1
 };
 
-export function PanelOptionEditor({ fields, model: seriesModel, onChange, intl }) {
-  const [isTimeMarkerChecked, toggleTimeMarker] = useState(false);
+export function PanelOptionEditor({ fields, model: seriesModel, onChange, intl, isTimeMarkerChecked, toggleTimeMarker }) {
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
   const model = { ...DEFAULTS, ...seriesModel };
@@ -320,4 +319,6 @@ PanelOptionEditor.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func.isRequired,
+  isTimeMarkerChecked: PropTypes.bool.isRequired,
+  toggleTimeMarker: PropTypes.func.isRequired,
 };
