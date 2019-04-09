@@ -133,7 +133,7 @@ describe('getCollectionStatus', () => {
             },
             {
               key: '.monitoring-kibana-7-mb-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }] }
+              kibana_uuids: { buckets: [{ key: 'kibana_1' }, { key: 'kibana_2' }] }
             },
             {
               key: '.monitoring-kibana-7-2019',
@@ -154,8 +154,8 @@ describe('getCollectionStatus', () => {
 
     const result = await getCollectionStatus(req, getIndexPatterns(req.server));
 
-    expect(result.kibana.totalUniqueInstanceCount).to.be(1);
-    expect(result.kibana.totalUniqueFullyMigratedCount).to.be(0);
+    expect(result.kibana.totalUniqueInstanceCount).to.be(2);
+    expect(result.kibana.totalUniqueFullyMigratedCount).to.be(1);
     expect(result.kibana.byUuid.kibana_1.isPartiallyMigrated).to.be(true);
     expect(result.kibana.byUuid.kibana_1.lastInternallyCollectedTimestamp).to.be(12);
 
