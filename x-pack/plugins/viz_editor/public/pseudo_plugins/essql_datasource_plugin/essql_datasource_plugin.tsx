@@ -65,6 +65,12 @@ function toExpression(viewState: VisModel) {
   return `essql query='${
     viewState.datasource ? viewState.datasource.meta.sql : ''
   }' | remap_essql keep='${
+    viewState.datasource
+      ? JSON.stringify(
+          firstQuery.select.map(column => ('argument' in column ? column.argument.field : ''))
+        )
+      : '[]'
+  }' columnNames='${
     viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
   }' `;
 }

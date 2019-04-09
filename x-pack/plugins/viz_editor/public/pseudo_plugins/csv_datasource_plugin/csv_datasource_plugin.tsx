@@ -66,6 +66,12 @@ function toExpression(viewState: VisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
   return `literal_table keep='${
+    viewState.datasource
+      ? JSON.stringify(
+          firstQuery.select.map(column => ('argument' in column ? column.argument.field : ''))
+        )
+      : '[]'
+  }' columnNames='${
     viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
   }' lines='${
     viewState.datasource ? JSON.stringify(viewState.datasource.meta.text.split('\n')) : '[]'

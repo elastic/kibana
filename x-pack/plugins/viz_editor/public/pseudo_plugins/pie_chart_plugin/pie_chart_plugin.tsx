@@ -155,6 +155,9 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: PieChartVisModel
 ): Suggestion[] {
+  if (!field.aggregatable) {
+    return [];
+  }
   const operationNames = getOperatorsForField(field);
 
   if (operationNames.length === 0) {
