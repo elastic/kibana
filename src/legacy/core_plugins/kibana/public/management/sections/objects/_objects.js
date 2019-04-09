@@ -21,7 +21,6 @@ import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectIndexHTML from './_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
@@ -70,10 +69,6 @@ function updateObjectsTable($scope, $injector, i18n) {
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
-              toastNotifications.addWarning(i18n('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
-                defaultMessage: 'Unknown saved object type: {type}',
-                values: { type }
-              }));
               return null;
             }
 

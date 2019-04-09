@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -25,14 +25,13 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiLink,
   EuiIcon,
   EuiCallOut,
   EuiLoadingKibana,
   EuiInMemoryTable,
-  EuiToolTip
+  EuiToolTip,
+  EuiSpacer
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getSavedObjectIcon, getSavedObjectLabel } from '../../../../lib';
@@ -52,7 +51,8 @@ class RelationshipsUI extends Component {
     super(props);
 
     this.state = {
-      relationships: undefined,
+      referencedToObjects: undefined,
+      referencedByObjects: undefined,
       isLoading: false,
       error: undefined,
     };
@@ -74,8 +74,8 @@ class RelationshipsUI extends Component {
     this.setState({ isLoading: true });
 
     try {
-      const relationships = await getRelationships(type, id);
-      this.setState({ relationships, isLoading: false, error: undefined });
+      const { referencedToObjects, referencedByObjects } = await getRelationships(type, id);
+      this.setState({ referencedToObjects, referencedByObjects, isLoading: false, error: undefined });
     } catch (err) {
       this.setState({ error: err.message, isLoading: false });
     }
@@ -102,7 +102,7 @@ class RelationshipsUI extends Component {
 
   renderRelationships() {
     const { getEditUrl, goInApp, intl } = this.props;
-    const { relationships, isLoading, error } = this.state;
+    const { referencedToObjects, referencedByObjects, isLoading, error } = this.state;
 
     if (error) {
       return this.renderError();
@@ -112,174 +112,96 @@ class RelationshipsUI extends Component {
       return <EuiLoadingKibana size="xl" />;
     }
 
-    const items = [];
+    const columns = [
+      {
+        field: 'type',
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTypeName', defaultMessage: 'Type' }),
+        width: '50px',
+        align: 'center',
+        description:
+          intl.formatMessage({
+            id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription', defaultMessage: 'Type of the saved object'
+          }),
+        sortable: false,
+        render: type => {
+          return (
+            <EuiToolTip
+              position="top"
+              content={getSavedObjectLabel(type)}
+            >
+              <EuiIcon
+                aria-label={getSavedObjectLabel(type)}
+                type={getSavedObjectIcon(type)}
+                size="s"
+              />
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        field: 'title',
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title' }),
+        description:
+        intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnTitleDescription', defaultMessage: 'Title of the saved object'
+        }),
+        dataType: 'string',
+        sortable: false,
+        render: (title, object) => (
+          <EuiLink href={getEditUrl(object.id, object.type)}>{title}</EuiLink>
+        ),
+      },
+      {
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnActionsName', defaultMessage: 'Actions' }),
+        actions: [
+          {
+            name: intl.formatMessage({
+              id: 'kbn.management.objects.objectsTable.relationships.columnActions.viewInAppActionName', defaultMessage: 'In app'
+            }),
+            description:
+              intl.formatMessage({
+                id: 'kbn.management.objects.objectsTable.relationships.columnActions.viewInAppActionDescription',
+                defaultMessage: 'View this saved object within Kibana'
+              }),
+            type: 'icon',
+            icon: 'eye',
+            onClick: object => goInApp(object.id, object.type),
+          },
+        ],
+      },
+    ];
 
-    for (const [type, list] of Object.entries(relationships)) {
-      if (list.length === 0) {
-        items.push(
-          <EuiDescriptionListTitle key={`${type}_not_found`}>
+    return (
+      <div>
+        <EuiTitle size="s">
+          <h3>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.itemNotFoundText"
-              defaultMessage="No {type} found."
-              values={{ type }}
+              id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
+              defaultMessage="This object depends on the following objects"
             />
-          </EuiDescriptionListTitle>
-        );
-      } else {
-        // let node;
-        let calloutTitle = (<FormattedMessage
-          id="kbn.management.objects.objectsTable.relationships.warningTitle"
-          defaultMessage="Warning"
-        />);
-        let calloutColor = 'warning';
-        let calloutText;
-
-        switch (this.props.type) {
-          case 'dashboard':
-            calloutColor = 'success';
-            calloutTitle = (<FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutTitle"
-              defaultMessage="Dashboard"
-            />);
-            calloutText = (<FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutText"
-              defaultMessage="Here are some visualizations used on this dashboard.
-              You can safely delete this dashboard and the visualizations will still work properly."
-            />);
-            break;
-          case 'search':
-            if (type === 'visualization') {
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.search.visualizations.calloutText"
-                defaultMessage="Here are some visualizations that use this saved search. If
-                you delete this saved search, these visualizations will not
-                longer work properly."
-              />);
-            } else {
-              calloutColor = 'success';
-              calloutTitle = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.search.calloutTitle"
-                defaultMessage="Saved Search"
-              />);
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.search.calloutText"
-                defaultMessage="Here is the index pattern tied to this saved search."
-              />);
-            }
-            break;
-          case 'visualization':
-            if (type === 'index-pattern') {
-              calloutColor = 'success';
-              calloutTitle = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.visualization.indexPattern.calloutTitle"
-                defaultMessage="Index Pattern"
-              />);
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.visualization.indexPattern.calloutText"
-                defaultMessage="Here is the index pattern tied to this visualization."
-              />);
-            } else if (type === 'search') {
-              calloutColor = 'success';
-              calloutTitle = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.visualization.search.calloutTitle"
-                defaultMessage="Saved Search"
-              />);
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.visualization.search.calloutText"
-                defaultMessage="Here is the saved search tied to this visualization."
-              />);
-            } else {
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.visualization.calloutText"
-                defaultMessage="Here are some dashboards which contain this visualization. If
-                you delete this visualization, these dashboards will no longer
-                show them."
-              />);
-            }
-            break;
-          case 'index-pattern':
-            if (type === 'visualization') {
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.indexPattern.visualizations.calloutText"
-                defaultMessage="Here are some visualizations that use this index pattern. If
-                you delete this index pattern, these visualizations will not
-                longer work properly."
-              />);
-            } else if (type === 'search') {
-              calloutText = (<FormattedMessage
-                id="kbn.management.objects.objectsTable.relationships.indexPattern.searches.calloutText"
-                defaultMessage="Here are some saved searches that use this index pattern. If
-                you delete this index pattern, these saved searches will not
-                longer work properly."
-              />);
-            }
-            break;
-        }
-
-        items.push(
-          <Fragment key={type}>
-            <EuiDescriptionListTitle style={{ marginBottom: '1rem' }}>
-              <EuiCallOut color={calloutColor} title={calloutTitle}>
-                <p>{calloutText}</p>
-              </EuiCallOut>
-            </EuiDescriptionListTitle>
-            <EuiInMemoryTable
-              items={list}
-              columns={[
-                {
-                  width: '24px',
-                  render: () => (
-                    <EuiToolTip
-                      position="top"
-                      content={getSavedObjectLabel(type)}
-                    >
-                      <EuiIcon
-                        aria-label={getSavedObjectLabel(type)}
-                        size="s"
-                        type={getSavedObjectIcon(type)}
-                      />
-                    </EuiToolTip>
-                  ),
-                },
-                {
-                  name: intl.formatMessage({
-                    id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title'
-                  }),
-                  field: 'title',
-                  render: (title, item) => (
-                    <EuiLink href={`${getEditUrl(item.id, type)}`}>
-                      {title}
-                    </EuiLink>
-                  ),
-                },
-                {
-                  name: intl.formatMessage({
-                    id: 'kbn.management.objects.objectsTable.relationships.columnActionsName', defaultMessage: 'Actions'
-                  }),
-                  actions: [
-                    {
-                      name: intl.formatMessage({
-                        id: 'kbn.management.objects.objectsTable.relationships.columnActions.inAppName',
-                        defaultMessage: 'In app'
-                      }),
-                      description: intl.formatMessage({
-                        id: 'kbn.management.objects.objectsTable.relationships.columnActions.inAppDescription',
-                        defaultMessage: 'View this saved object within Kibana'
-                      }),
-                      icon: 'eye',
-                      onClick: object => goInApp(object.id, type),
-                    },
-                  ],
-                },
-              ]}
-              pagination={true}
+          </h3>
+        </EuiTitle>
+        <EuiInMemoryTable
+          items={referencedToObjects}
+          columns={columns}
+          pagination={true}
+        />
+        <EuiSpacer size="m" />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
+              defaultMessage="These objects depend on this object"
             />
-          </Fragment>
-        );
-      }
-    }
-
-    return <EuiDescriptionList>{items}</EuiDescriptionList>;
+          </h3>
+        </EuiTitle>
+        <EuiInMemoryTable
+          items={referencedByObjects}
+          columns={columns}
+          pagination={true}
+        />
+      </div>
+    );
   }
 
   render() {
