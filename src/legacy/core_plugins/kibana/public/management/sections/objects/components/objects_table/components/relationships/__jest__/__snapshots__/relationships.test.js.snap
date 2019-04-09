@@ -39,8 +39,8 @@ exports[`Relationships should render dashboards normally 1`] = `
       >
         <h3>
           <FormattedMessage
-            defaultMessage="This object depends on the following objects"
-            id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
+            defaultMessage="Related objects"
+            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
             values={Object {}}
           />
         </h3>
@@ -80,62 +80,18 @@ exports[`Relationships should render dashboards normally 1`] = `
           ]
         }
         executeQueryOptions={Object {}}
-        items={Array []}
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiSpacer
-        size="m"
-      />
-      <EuiTitle
-        size="s"
-        textTransform="none"
-      >
-        <h3>
-          <FormattedMessage
-            defaultMessage="These objects depend on this object"
-            id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiInMemoryTable
-        columns={
+        items={
           Array [
             Object {
-              "align": "center",
-              "description": "Type of the saved object",
-              "field": "type",
-              "name": "Type",
-              "render": [Function],
-              "sortable": false,
-              "width": "50px",
+              "id": "1",
+              "type": "visualization",
             },
             Object {
-              "dataType": "string",
-              "description": "Title of the saved object",
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
-                  "type": "icon",
-                },
-              ],
-              "name": "Actions",
+              "id": "2",
+              "type": "visualization",
             },
           ]
         }
-        executeQueryOptions={Object {}}
-        items={Array []}
         pagination={true}
         responsive={true}
         sorting={false}
@@ -233,8 +189,8 @@ exports[`Relationships should render index patterns normally 1`] = `
       >
         <h3>
           <FormattedMessage
-            defaultMessage="This object depends on the following objects"
-            id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
+            defaultMessage="Related objects"
+            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
             values={Object {}}
           />
         </h3>
@@ -274,62 +230,18 @@ exports[`Relationships should render index patterns normally 1`] = `
           ]
         }
         executeQueryOptions={Object {}}
-        items={Array []}
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiSpacer
-        size="m"
-      />
-      <EuiTitle
-        size="s"
-        textTransform="none"
-      >
-        <h3>
-          <FormattedMessage
-            defaultMessage="These objects depend on this object"
-            id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiInMemoryTable
-        columns={
+        items={
           Array [
             Object {
-              "align": "center",
-              "description": "Type of the saved object",
-              "field": "type",
-              "name": "Type",
-              "render": [Function],
-              "sortable": false,
-              "width": "50px",
+              "id": "1",
+              "type": "search",
             },
             Object {
-              "dataType": "string",
-              "description": "Title of the saved object",
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
-                  "type": "icon",
-                },
-              ],
-              "name": "Actions",
+              "id": "2",
+              "type": "visualization",
             },
           ]
         }
-        executeQueryOptions={Object {}}
-        items={Array []}
         pagination={true}
         responsive={true}
         sorting={false}
@@ -378,8 +290,8 @@ exports[`Relationships should render searches normally 1`] = `
       >
         <h3>
           <FormattedMessage
-            defaultMessage="This object depends on the following objects"
-            id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
+            defaultMessage="Related objects"
+            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
             values={Object {}}
           />
         </h3>
@@ -419,62 +331,18 @@ exports[`Relationships should render searches normally 1`] = `
           ]
         }
         executeQueryOptions={Object {}}
-        items={Array []}
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiSpacer
-        size="m"
-      />
-      <EuiTitle
-        size="s"
-        textTransform="none"
-      >
-        <h3>
-          <FormattedMessage
-            defaultMessage="These objects depend on this object"
-            id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiInMemoryTable
-        columns={
+        items={
           Array [
             Object {
-              "align": "center",
-              "description": "Type of the saved object",
-              "field": "type",
-              "name": "Type",
-              "render": [Function],
-              "sortable": false,
-              "width": "50px",
+              "id": "1",
+              "type": "index-pattern",
             },
             Object {
-              "dataType": "string",
-              "description": "Title of the saved object",
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
-                  "type": "icon",
-                },
-              ],
-              "name": "Actions",
+              "id": "2",
+              "type": "visualization",
             },
           ]
         }
-        executeQueryOptions={Object {}}
-        items={Array []}
         pagination={true}
         responsive={true}
         sorting={false}
@@ -523,8 +391,8 @@ exports[`Relationships should render visualizations normally 1`] = `
       >
         <h3>
           <FormattedMessage
-            defaultMessage="This object depends on the following objects"
-            id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
+            defaultMessage="Related objects"
+            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
             values={Object {}}
           />
         </h3>
@@ -564,62 +432,18 @@ exports[`Relationships should render visualizations normally 1`] = `
           ]
         }
         executeQueryOptions={Object {}}
-        items={Array []}
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiSpacer
-        size="m"
-      />
-      <EuiTitle
-        size="s"
-        textTransform="none"
-      >
-        <h3>
-          <FormattedMessage
-            defaultMessage="These objects depend on this object"
-            id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiInMemoryTable
-        columns={
+        items={
           Array [
             Object {
-              "align": "center",
-              "description": "Type of the saved object",
-              "field": "type",
-              "name": "Type",
-              "render": [Function],
-              "sortable": false,
-              "width": "50px",
+              "id": "1",
+              "type": "dashboard",
             },
             Object {
-              "dataType": "string",
-              "description": "Title of the saved object",
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-              "sortable": false,
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
-                  "type": "icon",
-                },
-              ],
-              "name": "Actions",
+              "id": "2",
+              "type": "dashboard",
             },
           ]
         }
-        executeQueryOptions={Object {}}
-        items={Array []}
         pagination={true}
         responsive={true}
         sorting={false}

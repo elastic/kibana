@@ -30,7 +30,7 @@ export async function findRelationships(type, id, options = {}) {
     referencedToBulkGetOpts.set(`${type}:${id}`, { id, type });
   }
 
-  const [referencedToObjects, referencedByObjects] = await Promise.all([
+  const [referencedObjects, referencedResponse] = await Promise.all([
     referencedToBulkGetOpts.size > 0
       ? savedObjectsClient.bulkGet([...referencedToBulkGetOpts.values()])
       : Promise.resolve({ saved_objects: [] }),
@@ -42,10 +42,10 @@ export async function findRelationships(type, id, options = {}) {
     }),
   ]);
 
-  return {
-    referencedToObjects: referencedToObjects.saved_objects.map(extractCommonProperties),
-    referencedByObjects: referencedByObjects.saved_objects.map(extractCommonProperties),
-  };
+  return [].concat(
+    referencedObjects.saved_objects.map(extractCommonProperties),
+    referencedResponse.saved_objects.map(extractCommonProperties),
+  );
 }
 
 function extractCommonProperties(savedObject) {

@@ -51,8 +51,7 @@ class RelationshipsUI extends Component {
     super(props);
 
     this.state = {
-      referencedToObjects: undefined,
-      referencedByObjects: undefined,
+      relationships: undefined,
       isLoading: false,
       error: undefined,
     };
@@ -74,8 +73,8 @@ class RelationshipsUI extends Component {
     this.setState({ isLoading: true });
 
     try {
-      const { referencedToObjects, referencedByObjects } = await getRelationships(type, id);
-      this.setState({ referencedToObjects, referencedByObjects, isLoading: false, error: undefined });
+      const relationships = await getRelationships(type, id);
+      this.setState({ relationships, isLoading: false, error: undefined });
     } catch (err) {
       this.setState({ error: err.message, isLoading: false });
     }
@@ -102,7 +101,7 @@ class RelationshipsUI extends Component {
 
   renderRelationships() {
     const { getEditUrl, goInApp, intl } = this.props;
-    const { referencedToObjects, referencedByObjects, isLoading, error } = this.state;
+    const { relationships, isLoading, error } = this.state;
 
     if (error) {
       return this.renderError();
@@ -176,27 +175,13 @@ class RelationshipsUI extends Component {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
-              defaultMessage="Dependencies"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiInMemoryTable
-          items={referencedToObjects}
-          columns={columns}
-          pagination={true}
-        />
-        <EuiSpacer size="m" />
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
+              id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
               defaultMessage="Related objects"
             />
           </h3>
         </EuiTitle>
         <EuiInMemoryTable
-          items={referencedByObjects}
+          items={relationships}
           columns={columns}
           pagination={true}
         />

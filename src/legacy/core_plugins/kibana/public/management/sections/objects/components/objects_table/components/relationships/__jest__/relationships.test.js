@@ -52,18 +52,16 @@ import { Relationships } from '../relationships';
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
     const props = {
-      getRelationships: jest.fn().mockImplementation(() => ({
-        searches: [
-          {
-            id: '1',
-          }
-        ],
-        visualizations: [
-          {
-            id: '2',
-          }
-        ],
-      })),
+      getRelationships: jest.fn().mockImplementation(() => ([
+        {
+          type: 'search',
+          id: '1',
+        },
+        {
+          type: 'visualization',
+          id: '2',
+        },
+      ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
       id: '1',
@@ -92,18 +90,16 @@ describe('Relationships', () => {
 
   it('should render searches normally', async () => {
     const props = {
-      getRelationships: jest.fn().mockImplementation(() => ({
-        'index-pattern': [
-          {
-            id: '1',
-          }
-        ],
-        visualization: [
-          {
-            id: '2',
-          }
-        ],
-      })),
+      getRelationships: jest.fn().mockImplementation(() => ([
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'visualization',
+          id: '2',
+        },
+      ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
       id: '1',
@@ -132,16 +128,16 @@ describe('Relationships', () => {
 
   it('should render visualizations normally', async () => {
     const props = {
-      getRelationships: jest.fn().mockImplementation(() => ({
-        dashboard: [
-          {
-            id: '1',
-          },
-          {
-            id: '2',
-          }
-        ],
-      })),
+      getRelationships: jest.fn().mockImplementation(() => ([
+        {
+          type: 'dashboard',
+          id: '1',
+        },
+        {
+          type: 'dashboard',
+          id: '2',
+        },
+      ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
       id: '1',
@@ -170,16 +166,16 @@ describe('Relationships', () => {
 
   it('should render dashboards normally', async () => {
     const props = {
-      getRelationships: jest.fn().mockImplementation(() => ({
-        visualization: [
-          {
-            id: '1',
-          },
-          {
-            id: '2',
-          }
-        ],
-      })),
+      getRelationships: jest.fn().mockImplementation(() => ([
+        {
+          type: 'visualization',
+          id: '1',
+        },
+        {
+          type: 'visualization',
+          id: '2',
+        },
+      ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
       id: '1',
