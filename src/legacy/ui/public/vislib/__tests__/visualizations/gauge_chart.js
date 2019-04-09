@@ -36,7 +36,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
     addTooltip: true,
     addLegend: false,
     gauge: {
-      verticalSplit: false,
+      alignment: 'horizontal',
       autoExtend: false,
       percentageMode: false,
       gaugeStyle: 'Full',
@@ -125,7 +125,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
   it('creates gauge with vertical mode', function () {
     generateVis({
       gauge: {
-        verticalSplit: true
+        alignment: 'vertical'
       }
     });
     expect($(chartEl).find('svg').width()).to.equal($(chartEl).width());

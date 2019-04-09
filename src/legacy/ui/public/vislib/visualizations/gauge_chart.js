@@ -42,18 +42,55 @@ export function GaugeChartProvider(Private) {
         .call(events.addMouseoutEvent());
     }
 
+    /**
+     * returns the displayed width and height of a single gauge depending on selected alignment
+     * @param alignment - automatic | horizontal | vertical
+     * @param containerDom
+     * @param nrOfItems
+     * @returns {{width: number, height: number}}
+     */
+    calcGaugeDim(alignment, containerDom, nrOfItems) {
+      const $container = $(containerDom);
+      const containerMargin = 20;
+      //there are a few pixel of margin between multiple gauges
+      //subtracting this margin prevents displaying scrollbars
+      const gaugeBottomMargin = 25;
+      const availableWidth = $container.width() - containerMargin;
+      const availableHeight = $container.height() - containerMargin;
+
+      const adaptedWidth = Math.floor(availableWidth / nrOfItems);
+      const adaptedHeight = Math.floor(availableHeight / nrOfItems) - gaugeBottomMargin;
+
+      switch (alignment) {
+
+        case 'vertical':
+          return {
+            width: availableWidth,
+            height: adaptedHeight,
+          };
+
+        case 'horizontal':
+          return {
+            width: adaptedWidth,
+            height: availableHeight
+          };
+
+        default:
+          return {
+            width: availableWidth < availableHeight ? availableWidth : adaptedWidth,
+            height: availableWidth < availableHeight ? adaptedHeight : availableHeight,
+          };
+      }
+    }
+
     draw() {
       const self = this;
-      const verticalSplit = this.gaugeConfig.verticalSplit;
+      const { gaugeConfig } = this;
 
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const containerMargin = 20;
-          const containerWidth = $(this).width() - containerMargin;
-          const containerHeight = $(this).height() - containerMargin;
-          const width = Math.floor(verticalSplit ? $(this).width() : containerWidth / data.series.length);
-          const height = Math.floor((verticalSplit ? containerHeight / data.series.length : $(this).height()) - 25);
+          const { width, height } = self.calcGaugeDim(gaugeConfig.alignment, this, data.series.length);
 
           if (height < 0 || width < 0) return;
 
@@ -74,7 +111,7 @@ export function GaugeChartProvider(Private) {
 
             svg.attr('height', height);
             const transformX = width / 2;
-            const transformY = self.gaugeConfig.gaugeType === 'Arc' ? height / (2 * 0.75) : height / 2;
+            const transformY = gaugeConfig.gaugeType === 'Arc' ? height / (2 * 0.75) : height / 2;
             g.attr('transform', `translate(${transformX}, ${transformY})`);
 
             self.addEvents(gauges);
@@ -86,7 +123,7 @@ export function GaugeChartProvider(Private) {
             .text(data.label || data.yAxisLabel);
 
           self.events.emit('rendered', {
-            chart: data
+            chart: data,
           });
 
           return div;
