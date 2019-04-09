@@ -7,13 +7,12 @@
 type Callback = (isVisible: boolean) => void;
 
 export class Delayed {
-  public isVisible = false;
-  public timeoutId?: number;
-  public displayedAt = 0;
-  public enqueuedAt = 0;
-  public minimumVisibleDuration: number;
-  public hideDelayMs: number;
-  public showDelayMs: number;
+  private displayedAt = 0;
+  private hideDelayMs: number;
+  private isVisible = false;
+  private minimumVisibleDuration: number;
+  private showDelayMs: number;
+  private timeoutId?: number;
 
   constructor({
     minimumVisibleDuration = 1000,
@@ -25,13 +24,9 @@ export class Delayed {
     this.showDelayMs = showDelayMs;
   }
 
-  public onChangeCallback: Callback = () => null;
+  private onChangeCallback: Callback = () => null;
 
-  public show() {
-    this.updateState(true);
-  }
-
-  public updateState(isVisible: boolean) {
+  private updateState(isVisible: boolean) {
     window.clearTimeout(this.timeoutId);
     const ms = !isVisible
       ? Math.max(
@@ -49,6 +44,10 @@ export class Delayed {
         }
       }
     }, ms);
+  }
+
+  public show() {
+    this.updateState(true);
   }
 
   public hide() {
