@@ -22,7 +22,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui/lib/services';
 
-jest.mock('ui/kfetch', () => jest.fn());
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {

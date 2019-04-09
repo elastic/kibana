@@ -22,7 +22,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Flyout } from '../flyout';
 
-jest.mock('ui/kfetch', () => jest.fn());
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
