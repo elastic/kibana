@@ -23,14 +23,14 @@ import { manageAngularLifecycle } from '../../lib/manage_angular_lifecycle';
 import { WatchEdit } from './components/watch_edit';
 
 let elem;
-const renderReact = async (elem, watchType, watchId, savedObjectsClient, kbnUrl, licenseService) => {
+const renderReact = async (elem, watchType, watchId, savedObjectsClient, urlService, licenseService) => {
   render(
     <I18nContext>
       <WatchEdit
         watchId={watchId}
         watchType={watchType}
         savedObjectsClient={savedObjectsClient}
-        kbnUrl={kbnUrl}
+        urlService={urlService}
         licenseService={licenseService}
       />
     </I18nContext>,
@@ -49,6 +49,13 @@ routes
         constructor($injector, $scope, $http, Private) {
           const $route = $injector.get('$route');
           const kbnUrl = $injector.get('kbnUrl');
+          const $rootScope = $injector.get('$rootScope');
+          const urlService = {
+            change: (url) =>{
+              kbnUrl.change(url);
+              $rootScope.$digest();
+            }
+          };
           const licenseService = $injector.get('xpackWatcherLicenseService');
           this.watch = $route.current.locals.xpackWatch;
           this.WATCH_TYPES = WATCH_TYPES;
@@ -64,7 +71,7 @@ routes
             elem = document.getElementById('watchEditReactRoot');
             const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-            renderReact(elem, watchType, watchId, savedObjectsClient, kbnUrl, licenseService);
+            renderReact(elem, watchType, watchId, savedObjectsClient, urlService, licenseService);
             manageAngularLifecycle($scope, $route, elem);
           });
         }

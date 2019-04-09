@@ -7,7 +7,7 @@
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Watch } from 'plugins/watcher/models/watch';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { loadWatch } from '../../../lib/api';
@@ -32,31 +32,49 @@ const getTitle = (watch: BaseWatch) => {
     });
   }
 };
+const watchReducer = (state: any, action: any) => {
+  const { command, payload } = action;
+  switch (command) {
+    case 'setWatch':
+      return payload;
+    case 'setProperty':
+      return new (Watch.getWatchTypes())[state.type]({ ...state, ...payload });
+    case 'addAction':
+      const newWatch = new (Watch.getWatchTypes())[state.type](state);
+      newWatch.addAction(payload);
+      return newWatch;
+  }
+};
 
 export const WatchEdit = ({
   watchId,
   watchType,
   savedObjectsClient,
-  kbnUrl,
+  urlService,
   licenseService,
 }: {
   watchId: string;
   watchType: string;
   savedObjectsClient: any;
-  kbnUrl: any;
+  urlService: any;
   licenseService: any;
 }) => {
   // hooks
-  const [watch, setWatch] = useState<any>(null);
+  const [watch, dispatch] = useReducer(watchReducer, null);
+  const setWatchProperty = (property: string, value: any) => {
+    dispatch({ command: 'setProperty', payload: { [property]: value } });
+  };
+  const addAction = (action: any) => {
+    dispatch({ command: 'addAction', payload: action });
+  };
   const getWatch = async () => {
-    let theWatch;
     if (watchId) {
-      theWatch = await loadWatch(watchId);
-      setWatch(theWatch);
+      const theWatch = await loadWatch(watchId);
+      dispatch({ command: 'setWatch', payload: theWatch });
     } else {
       const WatchType = Watch.getWatchTypes()[watchType];
       if (WatchType) {
-        setWatch(new WatchType());
+        dispatch({ command: 'setWatch', payload: new WatchType() });
       }
     }
   };
@@ -70,18 +88,15 @@ export const WatchEdit = ({
   let EditComponent = null;
   if (watch.type === WATCH_TYPES.THRESHOLD) {
     EditComponent = ThresholdWatchEdit;
-  } else {
-    EditComponent = EuiSpacer;
-  }
-  if (watch.type === WATCH_TYPES.JSON) {
+  } else if (watch.type === WATCH_TYPES.JSON) {
     EditComponent = JsonWatchEdit;
   }
   return (
-    <WatchContext.Provider value={{ watch, setWatch }}>
+    <WatchContext.Provider value={{ watch, setWatchProperty, addAction }}>
       <EditComponent
         savedObjectsClient={savedObjectsClient}
         pageTitle={pageTitle}
-        kbnUrl={kbnUrl}
+        urlService={urlService}
         licenseService={licenseService}
       />
     </WatchContext.Provider>

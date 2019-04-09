@@ -27,17 +27,18 @@ const DEFAULT_VALUES = {
  */
 export class ThresholdWatch extends BaseWatch {
   constructor(props = {}) {
+    console.log('CONSTRUCT', props);
     props.id = props.id || uuid.v4();
     props.type = WATCH_TYPES.THRESHOLD;
     super(props);
 
-    this.index = props.index || [];
+    this.index = props.index;
     this.timeField = props.timeField;
-    this.triggerIntervalSize = props.triggerIntervalSize || DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE;
+    this.triggerIntervalSize = props.triggerIntervalSize === null ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE : props.triggerIntervalSize;
     this.triggerIntervalUnit = props.triggerIntervalUnit || DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT;
     this.aggType = props.aggType || DEFAULT_VALUES.AGG_TYPE;
     this.aggField = props.aggField;
-    this.termSize = props.termSize || DEFAULT_VALUES.TERM_SIZE;
+    this.termSize = props.termSize === null ? DEFAULT_VALUES.TERM_SIZE : props.termSize;
     this.termField = props.termField;
     this.thresholdComparator = props.thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR;
     this.timeWindowSize = props.timeWindowSize || DEFAULT_VALUES.TIME_WINDOW_SIZE;
@@ -84,7 +85,38 @@ export class ThresholdWatch extends BaseWatch {
     );
     return `${staticPart} ${dynamicPartText}`;
   }
-
+  validate() {
+    const validationResult = super.validate();
+    const errors = {
+      name: [],
+      index: [],
+      timeField: [],
+      triggerIntervalSize: [],
+    };
+    validationResult.errors = errors;
+    if (!this.name) {
+      errors.name.push(i18n.translate('xpack.watcher.sections.watchEdit.threshold.error.requiredNameText', {
+        defaultMessage: 'Name is required',
+      }));
+    }
+    if (this.index !== undefined && this.index.length < 1) {
+      errors.index.push(i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.enterOneOrMoreIndicesValidationMessage', {
+        defaultMessage: 'Enter one or more indices'
+      }));
+    }
+    if (!this.timeField) {
+      errors.timeField.push(i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldIsRequiredValidationText', {
+        defaultMessage: 'A time field is required'
+      }));
+    }
+    if (!this.triggerIntervalSize) {
+      errors.triggerIntervalSize.push(
+        i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage', {
+          defaultMessage: 'Interval size is required'
+        }));
+    }
+    return validationResult;
+  }
   get upstreamJson() {
     const result = super.upstreamJson;
     Object.assign(result, {

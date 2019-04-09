@@ -22,7 +22,7 @@ import { JsonWatch } from 'plugins/watcher/models/watch/json_watch';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';
-import { onWatchSave, saveWatch } from '../json_watch_edit_actions';
+import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
 
 const JSON_WATCH_IDS = {
@@ -39,14 +39,14 @@ function validateId(id: string) {
     });
   } else if (!regex.test(id)) {
     return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
-      defaultMessage: 'ID must only letters, underscores, dashes, and numbers.',
+      defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
     });
   }
   return false;
 }
 
 export const JsonWatchEditForm = ({
-  kbnUrl,
+  urlService,
   licenseService,
   watchJsonString,
   setWatchJsonString,
@@ -55,7 +55,7 @@ export const JsonWatchEditForm = ({
   isShowingErrors,
   setIsShowingErrors,
 }: {
-  kbnUrl: any;
+  urlService: any;
   licenseService: any;
   watchJsonString: string;
   setWatchJsonString: (json: string) => void;
@@ -64,7 +64,7 @@ export const JsonWatchEditForm = ({
   isShowingErrors: boolean;
   setIsShowingErrors: (isShowingErrors: boolean) => void;
 }) => {
-  const { watch, setWatch } = useContext(WatchContext);
+  const { watch, setWatchProperty } = useContext(WatchContext);
   // hooks
   const [modal, setModal] = useState<{ message: string } | null>(null);
   return (
@@ -73,7 +73,7 @@ export const JsonWatchEditForm = ({
         modalOptions={modal}
         callback={async isConfirmed => {
           if (isConfirmed) {
-            saveWatch(watch, kbnUrl, licenseService);
+            saveWatch(watch, urlService, licenseService);
           }
           setModal(null);
         }}
@@ -103,7 +103,7 @@ export const JsonWatchEditForm = ({
               );
               setErrors(newErrors);
               setIsShowingErrors(isInvalidForm);
-              setWatch(new JsonWatch({ ...watch, id }));
+              setWatchProperty('id', id);
             }}
           />
         </ErrableFormRow>
@@ -119,7 +119,7 @@ export const JsonWatchEditForm = ({
             name="name"
             value={watch.name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setWatch(new JsonWatch({ ...watch, name: e.target.value }));
+              setWatchProperty('name', e.target.value);
             }}
           />
         </EuiFormRow>
@@ -161,12 +161,7 @@ export const JsonWatchEditForm = ({
               try {
                 const watchJson = JSON.parse(json);
                 if (watchJson && typeof watchJson === 'object') {
-                  setWatch(
-                    new JsonWatch({
-                      ...watch,
-                      watch: watchJson,
-                    })
-                  );
+                  setWatchProperty('watch', watchJson);
                   const newErrors = { ...errors, [JSON_WATCH_IDS.JSON]: [] };
                   const isInvalidForm = !!Object.keys(newErrors).find(
                     errorKey => newErrors[errorKey].length >= 1
@@ -199,7 +194,7 @@ export const JsonWatchEditForm = ({
                 setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
                 setIsShowingErrors(!!error);
                 if (!error) {
-                  const savedWatch = await onWatchSave(watch, kbnUrl, licenseService);
+                  const savedWatch = await onWatchSave(watch, urlService, licenseService);
                   if (savedWatch && savedWatch.error) {
                     return setModal(savedWatch.error);
                   }
