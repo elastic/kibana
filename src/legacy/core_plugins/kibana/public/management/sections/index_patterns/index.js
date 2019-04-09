@@ -93,7 +93,7 @@ uiRoutes
 
       return {
         text: i18n('kbn.management.indexPatterns.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
+          defaultMessage: 'Read only',
         }),
         tooltip: i18n('kbn.management.indexPatterns.badge.readOnly.tooltip', {
           defaultMessage: 'You lack the authority',

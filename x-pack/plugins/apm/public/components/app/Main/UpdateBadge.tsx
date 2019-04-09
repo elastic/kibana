@@ -21,7 +21,7 @@ class UpdateBadgeComponent extends React.Component<Props> {
       !uiCapabilities.apm.save
         ? {
             text: intl.formatMessage({
-              defaultMessage: 'Read Only',
+              defaultMessage: 'Read only',
               id: 'xpack.apm.header.badge.readOnly.text'
             }),
             tooltip: intl.formatMessage({

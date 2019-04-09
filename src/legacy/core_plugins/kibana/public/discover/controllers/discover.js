@@ -97,7 +97,7 @@ uiRoutes
 
       return {
         text: i18n('kbn.discover.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
+          defaultMessage: 'Read only',
         }),
         tooltip: i18n('kbn.discover.badge.readOnly.tooltip', {
           defaultMessage: 'You lack the authority',

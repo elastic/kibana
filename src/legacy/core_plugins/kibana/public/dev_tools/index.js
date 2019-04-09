@@ -41,7 +41,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
 
     return {
       text: i18n('kbn.devTools.badge.readOnly.text', {
-        defaultMessage: 'Read Only',
+        defaultMessage: 'Read only',
       }),
       tooltip: i18n('kbn.devTools.badge.readOnly.tooltip', {
         defaultMessage: 'You lack the authority',

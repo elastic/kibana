@@ -28,7 +28,7 @@ export const Header = injectI18n(
             readOnlyBadge
               ? {
                   text: intl.formatMessage({
-                    defaultMessage: 'Read Only',
+                    defaultMessage: 'Read only',
                     id: 'xpack.infra.header.badge.readOnly.text',
                   }),
                   tooltip: intl.formatMessage({

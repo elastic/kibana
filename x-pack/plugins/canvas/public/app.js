@@ -44,7 +44,7 @@ chrome.badge.set(
     ? undefined
     : {
         text: i18n.translate('xpack.canvas.badge.readOnly.text', {
-          defaultMessage: 'Read Only',
+          defaultMessage: 'Read only',
         }),
         tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
           defaultMessage: 'You lack the authority',

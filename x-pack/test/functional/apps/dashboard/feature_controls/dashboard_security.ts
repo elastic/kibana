@@ -228,7 +228,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read Only');
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
