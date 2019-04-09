@@ -14,7 +14,7 @@ import {
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');

@@ -10,7 +10,7 @@ import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
