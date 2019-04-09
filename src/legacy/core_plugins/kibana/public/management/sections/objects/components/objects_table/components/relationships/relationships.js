@@ -177,7 +177,7 @@ class RelationshipsUI extends Component {
           <h3>
             <FormattedMessage
               id="kbn.management.objects.objectsTable.relationships.referencedToObjectsTitle"
-              defaultMessage="This object depends on the following objects"
+              defaultMessage="Dependencies"
             />
           </h3>
         </EuiTitle>
@@ -191,7 +191,7 @@ class RelationshipsUI extends Component {
           <h3>
             <FormattedMessage
               id="kbn.management.objects.objectsTable.relationships.referencedByObjectsTitle"
-              defaultMessage="These objects depend on this object"
+              defaultMessage="Related objects"
             />
           </h3>
         </EuiTitle>
