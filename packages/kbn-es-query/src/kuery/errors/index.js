@@ -24,6 +24,10 @@ const errors = [
     defaultMessage: '"or" requires a left and right side',
     key: 'kbnESQuery.kql.missingOrSubQuerySyntaxError',
   },
+  {
+    defaultMessage: '"not" requires a sub-query',
+    key: 'kbnESQuery.kql.missingNotSubQuerySyntaxError',
+  },
 ];
 
 export class KQLSyntaxError extends Error {

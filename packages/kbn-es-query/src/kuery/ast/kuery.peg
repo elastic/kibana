@@ -53,6 +53,9 @@ NotQuery
     if (query.type === 'cursor') return query;
     return buildFunctionNode('not', [query]);
   }
+  / Not {
+    error('kbnESQuery.kql.missingNotSubQuerySyntaxError');
+  }
   / SubQuery
 
 SubQuery
@@ -163,6 +166,9 @@ NotListOfValues
       };
     }
     return (field) => buildFunctionNode('not', [partial(field)]);
+  }
+  / Not {
+    error('kbnESQuery.kql.missingNotSubQuerySyntaxError');
   }
   / ListOfValues
 

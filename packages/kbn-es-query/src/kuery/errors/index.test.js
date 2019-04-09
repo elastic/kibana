@@ -30,6 +30,7 @@ describe('kql syntax errors', () => {
 
   it('should throw an error for an OR query missing a left side sub-query', () => {
     expect(() => {
+      fromKueryExpression('or response:200');
     }).toThrow('KQL Syntax Error: "or" requires a left and right side');
   });
 
@@ -43,6 +44,18 @@ describe('kql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:(or 200)');
     }).toThrow('KQL Syntax Error: "or" requires a left and right side');
+  });
+
+  it('should throw an error for a NOT query missing a sub-query', () => {
+    expect(() => {
+      fromKueryExpression('response:200 and not ');
+    }).toThrow('KQL Syntax Error: "not" requires a sub-query');
+  });
+
+  it('should throw an error for a NOT list missing a sub-query', () => {
+    expect(() => {
+      fromKueryExpression('response:(200 and not )');
+    }).toThrow('KQL Syntax Error: "not" requires a sub-query');
   });
 
 });
