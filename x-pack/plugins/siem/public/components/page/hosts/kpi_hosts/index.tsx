@@ -29,6 +29,42 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
       },
     ],
   },
+  {
+    fields: [
+      {
+        key: 'installedPackages',
+        description: i18n.INSTALLED_PACKAGES,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'processCount',
+        description: i18n.PROCESS_COUNT,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'authenticationSuccess',
+        description: i18n.AUTHENTICATION_SUCCESS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'authenticationFailure',
+        description: i18n.AUTHENTICATION_FAILURE,
+        value: null,
+      },
+    ],
+  },
 ];
 
 export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {

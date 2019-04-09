@@ -8,7 +8,32 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiHostsESMSearchBody } from './types';
 
-export const buildGeneralQuery = ({
+const getProcessQueryFilter = () => [
+  {
+    bool: {
+      should: [
+        {
+          match: {
+            'event.action': 'process_started',
+          },
+        },
+        {
+          match: {
+            'event.action': 'executed',
+          },
+        },
+        {
+          match: {
+            'event.code': 4688,
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+];
+
+export const buildProcessQuery = ({
   filterQuery,
   timerange: { from, to },
   sourceConfiguration: {
@@ -21,6 +46,7 @@ export const buildGeneralQuery = ({
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
+    ...getProcessQueryFilter(),
     {
       range: {
         [timestamp]: {
@@ -38,18 +64,6 @@ export const buildGeneralQuery = ({
       ignoreUnavailable: true,
     },
     {
-      aggregations: {
-        host: {
-          cardinality: {
-            field: 'host.name',
-          },
-        },
-        installedPackages: {
-          cardinality: {
-            field: 'system.audit.package.entity_id',
-          },
-        },
-      },
       query: {
         bool: {
           filter,

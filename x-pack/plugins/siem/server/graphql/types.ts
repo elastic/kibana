@@ -870,6 +870,10 @@ export interface AutonomousSystem {
 
 export interface KpiHostsData {
   hosts?: number | null;
+  installedPackages?: number | null;
+  processCount?: number | null;
+  authenticationSuccess?: number | null;
+  authenticationFailure?: number | null;
 }
 
 export interface KpiNetworkData {

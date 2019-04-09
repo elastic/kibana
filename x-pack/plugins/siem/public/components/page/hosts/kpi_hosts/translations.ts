@@ -8,3 +8,28 @@ import { i18n } from '@kbn/i18n';
 export const HOSTS = i18n.translate('xpack.siem.kpiHosts.source.hostsTitle', {
   defaultMessage: 'Hosts',
 });
+
+export const INSTALLED_PACKAGES = i18n.translate(
+  'xpack.siem.kpiHosts.source.installedPackagesTitle',
+  {
+    defaultMessage: 'Installed Packages',
+  }
+);
+
+export const PROCESS_COUNT = i18n.translate('xpack.siem.kpiHosts.source.processCountsTitle', {
+  defaultMessage: 'Processes',
+});
+
+export const AUTHENTICATION_SUCCESS = i18n.translate(
+  'xpack.siem.kpiHosts.source.authenticationSuccessTitle',
+  {
+    defaultMessage: 'Authentication Success',
+  }
+);
+
+export const AUTHENTICATION_FAILURE = i18n.translate(
+  'xpack.siem.kpiHosts.source.authenticationFailureTitle',
+  {
+    defaultMessage: 'Authentication Failure',
+  }
+);

@@ -8,7 +8,27 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiHostsESMSearchBody } from './types';
 
-export const buildGeneralQuery = ({
+const getAuthQueryFilter = () => [
+  {
+    bool: {
+      should: [
+        {
+          match: {
+            'event.type': 'authentication_success',
+          },
+        },
+        {
+          match: {
+            'event.type': 'authentication_failure',
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+];
+
+export const buildAuthQuery = ({
   filterQuery,
   timerange: { from, to },
   sourceConfiguration: {
@@ -21,6 +41,7 @@ export const buildGeneralQuery = ({
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
+    ...getAuthQueryFilter(),
     {
       range: {
         [timestamp]: {
@@ -38,15 +59,19 @@ export const buildGeneralQuery = ({
       ignoreUnavailable: true,
     },
     {
-      aggregations: {
-        host: {
-          cardinality: {
-            field: 'host.name',
+      aggs: {
+        authentication_success: {
+          filter: {
+            term: {
+              'event.type': 'authentication_success',
+            },
           },
         },
-        installedPackages: {
-          cardinality: {
-            field: 'system.audit.package.entity_id',
+        authentication_failure: {
+          filter: {
+            term: {
+              'event.type': 'authentication_failure',
+            },
           },
         },
       },

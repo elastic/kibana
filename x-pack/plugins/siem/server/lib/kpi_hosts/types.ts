@@ -16,6 +16,18 @@ export interface KpiHostsHit extends SearchHit {
     host: {
       value: number;
     };
+    installedPackages: {
+      value: number;
+    };
+    processCount: {
+      value: number;
+    };
+    authenticationSuccess: {
+      value: number;
+    };
+    authenticationFailure: {
+      value: number;
+    };
   };
 }
 

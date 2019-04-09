@@ -9,6 +9,10 @@ import gql from 'graphql-tag';
 export const kpiHostsSchema = gql`
   type KpiHostsData {
     hosts: Float
+    installedPackages: Float
+    processCount: Float
+    authenticationSuccess: Float
+    authenticationFailure: Float
   }
 
   extend type Source {
