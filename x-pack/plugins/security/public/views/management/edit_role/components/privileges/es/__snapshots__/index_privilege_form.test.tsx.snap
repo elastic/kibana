@@ -176,7 +176,7 @@ exports[`it renders without crashing 1`] = `
             disabled={false}
             label={
               <FormattedMessage
-                defaultMessage="Grant read privileges to specific documents."
+                defaultMessage="Grant read privileges to specific documents"
                 id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
                 values={Object {}}
               />
