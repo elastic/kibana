@@ -49,7 +49,7 @@ import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import * as filterActions from 'ui/doc_table/actions/filter';
+import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
@@ -142,6 +142,7 @@ app.directive('dashboardApp', function ($injector) {
           refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
+        $scope.screenTitle = dashboardStateManager.getTitle();
 
         const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {
