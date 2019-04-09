@@ -65,7 +65,10 @@ work in {kib} dashboards until the `index.query.default_field` setting is added
 to each index. Indices created in {beats} 6.7 or later are unaffected.
 To add the setting to the index, you can use the 7.0
 {kibana-ref}/upgrade-assistant.html[Upgrade Assistant], or
-{beats-ref}/upgrading.html#dashboard-shard-failed[add the setting manually]. 
+//{beats-ref}/upgrading.html#dashboard-shard-failed[
+add the setting manually
+//]
+. 
 
 
 include::upgrade/upgrade-standard.asciidoc[]
