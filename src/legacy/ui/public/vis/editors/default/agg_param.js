@@ -106,6 +106,7 @@ uiModules
                 showValidation();
               }
             }, true);
+            $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
           }
 
           $scope.onChange = (value) => {
