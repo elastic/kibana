@@ -29,7 +29,6 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   let goToStep;
   let getMetadataFromEuiTable;
   let form;
-  let getFormErrorsMessages;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -43,7 +42,6 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       goToStep,
       getMetadataFromEuiTable,
       form,
-      getFormErrorsMessages,
     } = initTestBed());
   });
 
@@ -212,19 +210,19 @@ describe('Create Rollup Job, step 4: Histogram', () => {
         userActions.clickNextStep();
 
         expect(exists('rollupJobCreateStepError')).toBeTruthy();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
       });
 
       it('should be a whole number', () => {
         form.setInputValue('rollupJobCreateHistogramInterval', 5.5);
         userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
       });
 
       it('should be greater than zero', () => {
         form.setInputValue('rollupJobCreateHistogramInterval', -1);
         userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be greater than zero.']);
+        expect(form.getErrorsMessages()).toEqual(['Interval must be greater than zero.']);
       });
     });
 
