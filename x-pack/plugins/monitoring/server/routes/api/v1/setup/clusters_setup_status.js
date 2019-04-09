@@ -16,9 +16,9 @@ export function clustersSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup',
+    path: '/api/monitoring/v1/setup/collection',
     handler: async (req) => {
-      let setupCapabilities = null;
+      let status = null;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
@@ -26,12 +26,12 @@ export function clustersSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        setupCapabilities = await getCollectionStatus(req, indexPatterns);
+        status = await getCollectionStatus(req, indexPatterns);
       } catch (err) {
         throw handleError(err, req);
       }
 
-      return setupCapabilities;
+      return status;
     }
   });
 }

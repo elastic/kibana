@@ -16,7 +16,7 @@ export function clusterSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/{clusterUuid}',
+    path: '/api/monitoring/v1/setup/collection/{clusterUuid}',
     config: {
       validate: {
         params: Joi.object({
@@ -28,7 +28,7 @@ export function clusterSetupStatusRoute(server) {
       }
     },
     handler: async (req) => {
-      let setupCapabilities = null;
+      let status = null;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
@@ -36,12 +36,12 @@ export function clusterSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        setupCapabilities = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
       } catch (err) {
         throw handleError(err, req);
       }
 
-      return setupCapabilities;
+      return status;
     }
   });
 }

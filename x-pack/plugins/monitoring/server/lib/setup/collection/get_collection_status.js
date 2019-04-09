@@ -9,12 +9,15 @@ import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID, APM_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
+  const start = get(req.payload, 'timeRange.min', 'now-30s');
+  const end = get(req.payload, 'timeRange.max', 'now');
+
   const filters = [
     {
       range: {
         'timestamp': {
-          gte: 'now-30s',
-          lte: 'now'
+          gte: start,
+          lte: end
         }
       }
     }
