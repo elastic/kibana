@@ -23,9 +23,14 @@ type Props = OverviewPageProps;
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
 export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
-  const { colors, dateRangeStart, dateRangeEnd, lastRefresh, refreshApp, setHeadingText } = useContext(
-    UptimeContext
-  );
+  const {
+    colors,
+    dateRangeStart,
+    dateRangeEnd,
+    lastRefresh,
+    refreshApp,
+    setHeadingText,
+  } = useContext(UptimeContext);
   const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
   const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
 
@@ -62,7 +67,12 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
 
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} lastRefresh={lastRefresh} variables={sharedProps}>
+      <EmptyState
+        basePath={basePath}
+        implementsCustomErrorState={true}
+        lastRefresh={lastRefresh}
+        variables={sharedProps}
+      >
         <FilterBar
           currentQuery={currentFilterQueryObj}
           lastRefresh={lastRefresh}
@@ -72,7 +82,11 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
         <EuiSpacer size="s" />
         <Snapshot colors={colors} lastRefresh={lastRefresh} variables={sharedProps} />
         <EuiSpacer size="s" />
-        <MonitorList dangerColor={colors.danger} lastRefresh={lastRefresh} variables={sharedProps} />
+        <MonitorList
+          dangerColor={colors.danger}
+          lastRefresh={lastRefresh}
+          variables={sharedProps}
+        />
         <EuiSpacer size="s" />
         <ErrorList lastRefresh={lastRefresh} variables={sharedProps} />
       </EmptyState>
