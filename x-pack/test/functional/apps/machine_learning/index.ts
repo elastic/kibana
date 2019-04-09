@@ -5,7 +5,7 @@
  */
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('machine learning', function() {
     this.tags('ciGroup3');
