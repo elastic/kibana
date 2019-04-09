@@ -1,21 +1,21 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import { PDF_JOB_TYPE } from '../../common/constants';
-import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ReportingFeature } from './';
+import { uniq } from 'lodash';
+import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
+import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ExportType } from './';
 
 function getForFeature(
   range: Partial<RangeStats>,
-  featureKey: ReportingFeature,
+  typeKey: ExportType,
   featureAvailability: FeatureAvailabilityMap,
   additional?: any
 ): AvailableTotal & typeof additional {
-  const isAvailable = (feature: ReportingFeature) =>
-    featureAvailability[feature] != null ? featureAvailability[feature] : false;
-  const jobType = range[featureKey] || { total: 0, ...additional };
+  const isAvailable = (feature: ExportType) => !!featureAvailability[feature];
+  const jobType = range[typeKey] || { total: 0, ...additional };
 
   // merge the additional stats for the jobType
   type AdditionalType = { [K in keyof typeof additional]: K };
@@ -27,24 +27,29 @@ function getForFeature(
   }
 
   return {
-    available: isAvailable(featureKey),
+    available: isAvailable(typeKey),
     total: jobType.total,
     ...filledAdditional,
   };
 }
 
 /*
-* Decorates range stats (stats for last day, last 7 days, etc) with feature
-* availability booleans, and zero-filling for unused features
-*
-* This function builds the result object for all export types found in the
-* Reporting data, even if the type is unknown to this Kibana instance
-*/
+ * Decorates range stats (stats for last day, last 7 days, etc) with feature
+ * availability booleans, and zero-filling for unused features
+ *
+ * This function builds the result object for all export types found in the
+ * Reporting data, even if the type is unknown to this Kibana instance.
+ */
 export const decorateRangeStats = (
   rangeStats: Partial<RangeStats> = {},
   featureAvailability: FeatureAvailabilityMap
 ): RangeStats => {
-  const { _all: rangeAll, status: rangeStatus, [PDF_JOB_TYPE]: rangeStatsPdf, ...rangeStatsBasic } = rangeStats;
+  const {
+    _all: rangeAll,
+    status: rangeStatus,
+    [PDF_JOB_TYPE]: rangeStatsPdf,
+    ...rangeStatsBasic
+  } = rangeStats;
 
   // combine the known types with any unknown type found in reporting data
   const keysBasic = uniq([
@@ -56,13 +61,13 @@ export const decorateRangeStats = (
     return {
       ...accum,
       [currentKey]: getForFeature(rangeStatsBasic, currentKey, featureAvailability),
-    }
+    };
   }, {}) as Partial<RangeStats>;
   const rangePdf = {
     [PDF_JOB_TYPE]: getForFeature(rangeStats, PDF_JOB_TYPE, featureAvailability, {
       app: { dashboard: 0, visualization: 0 },
       layout: { preserve_layout: 0, print: 0 },
-    })
+    }),
   };
 
   const resultStats = {

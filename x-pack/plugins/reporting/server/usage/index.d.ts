@@ -64,5 +64,5 @@ export type UsageObject = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ReportingFeature = 'csv' | 'printable_pdf' | 'PNG';
-export type FeatureAvailabilityMap = { [F in ReportingFeature]: boolean };
+export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
+export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
