@@ -29,15 +29,30 @@ interface Storage {
   expires: number;
 }
 
+export const url = {
+  auth: '/auth',
+  authHasSession: '/auth/has_session',
+  authClearSession: '/auth/clear_session',
+  authRedirect: '/auth/redirect',
+};
+
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
     const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
-      if (request.path === '/auth/has_session') {
+      if (request.path === url.authHasSession) {
         const prevSession = await sessionStorage.get();
         const userData = prevSession.value;
         sessionStorage.set({ value: userData, expires: Date.now() + 1000 });
 
         return t.authenticated({ credentials: userData });
+      }
+      if (request.path === url.authClearSession) {
+        sessionStorage.clear();
+
+        return t.rejected(Boom.unauthorized());
+      }
+      if (request.path === url.authRedirect) {
+        return t.redirected('/login');
       }
 
       if (request.headers.authorization) {
