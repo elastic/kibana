@@ -77,7 +77,48 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
-  test('retries importin a dashboard', async () => {
+  test('defaults migrationVersion to empty object', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_resolve_import_errors',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[{"type":"dashboard","id":"my-dashboard"}]',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({ success: true, successCount: 1 });
+    expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
+    const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
+    expect(firstBulkCreateCallArray).toHaveLength(1);
+    expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
+  });
+
+  test('retries importing a dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
@@ -123,6 +164,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             "title": "Look at my dashboard",
           },
           "id": "my-dashboard",
+          "migrationVersion": Object {},
           "type": "dashboard",
         },
       ],
@@ -185,6 +227,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             "title": "Look at my dashboard",
           },
           "id": "my-dashboard",
+          "migrationVersion": Object {},
           "type": "dashboard",
         },
       ],
@@ -266,6 +309,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             "title": "Look at my visualization",
           },
           "id": "my-vis",
+          "migrationVersion": Object {},
           "references": Array [
             Object {
               "id": "existing",
