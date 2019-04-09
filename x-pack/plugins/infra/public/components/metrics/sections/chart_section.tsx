@@ -175,6 +175,7 @@ export const ChartSection = injectI18n(
               <EuiXAxis marginLeft={MARGIN_LEFT} />
               <EuiYAxis tickFormat={formatterFunction} marginLeft={MARGIN_LEFT} />
               <EuiCrosshairX
+                marginLeft={MARGIN_LEFT}
                 seriesNames={seriesLabels}
                 itemsFormat={itemsFormatter}
                 titleFormat={titleFormatter}
