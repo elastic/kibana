@@ -1,10 +1,10 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License;
+* you may not use this file except in compliance with the Elastic License.
+*/
 
-import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
+import { PDF_JOB_TYPE } from '../../common/constants';
 import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ReportingFeature } from './';
 
 function getForFeature(
@@ -34,21 +34,38 @@ function getForFeature(
 }
 
 /*
- * Decorate range stats (stats for last day, last 7 days, etc) with feature
- * availability booleans, and zero-filling for unused features
- */
+* Decorates range stats (stats for last day, last 7 days, etc) with feature
+* availability booleans, and zero-filling for unused features
+*
+* This function builds the result object for all export types found in the
+* Reporting data, even if the type is unknown to this Kibana instance
+*/
 export const decorateRangeStats = (
-  range: Partial<RangeStats> = {},
+  rangeStats: Partial<RangeStats> = {},
   featureAvailability: FeatureAvailabilityMap
 ): RangeStats => {
-  return {
-    _all: range._all || 0,
-    status: { completed: 0, failed: 0, ...range.status },
-    [CSV_JOB_TYPE]: getForFeature(range, CSV_JOB_TYPE, featureAvailability),
-    [PNG_JOB_TYPE]: getForFeature(range, PNG_JOB_TYPE, featureAvailability),
-    [PDF_JOB_TYPE]: getForFeature(range, PDF_JOB_TYPE, featureAvailability, {
+  const { _all: rangeAll, status: rangeStatus, [PDF_JOB_TYPE]: rangeStatsPdf, ...rangeStatsBasic } = rangeStats;
+
+  const keysBasic = Object.keys(rangeStatsBasic) as ReportingFeature[];
+  const rangeBasic = keysBasic.reduce((accum, currentKey) => {
+    return {
+      ...accum,
+      [currentKey]: getForFeature(rangeStatsBasic, currentKey, featureAvailability),
+    }
+  }, {}) as Partial<RangeStats>;
+  const rangePdf = {
+    [PDF_JOB_TYPE]: getForFeature(rangeStats, PDF_JOB_TYPE, featureAvailability, {
       app: { dashboard: 0, visualization: 0 },
       layout: { preserve_layout: 0, print: 0 },
-    }),
+    })
   };
+
+  const resultStats = {
+    _all: rangeAll || 0,
+    status: { completed: 0, failed: 0, ...rangeStatus },
+    ...rangePdf,
+    ...rangeBasic,
+  } as RangeStats;
+
+  return resultStats;
 };
