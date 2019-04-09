@@ -20,11 +20,11 @@ export const OverviewComponent = pure(() => (
     <Welcome />
 
     <GlobalTime>
-      {({ poll, to, from }) => (
+      {({ poll, to, from, setQuery }) => (
         <EuiFlexGroup gutterSize="xl">
           <Summary />
-          <OverviewHost poll={poll} endDate={to} startDate={from} />
-          <OverviewNetwork poll={poll} endDate={to} startDate={from} />
+          <OverviewHost poll={poll} endDate={to} startDate={from} setQuery={setQuery} />
+          <OverviewNetwork poll={poll} endDate={to} startDate={from} setQuery={setQuery} />
         </EuiFlexGroup>
       )}
     </GlobalTime>
