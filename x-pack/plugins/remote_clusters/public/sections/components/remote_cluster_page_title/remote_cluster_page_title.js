@@ -26,7 +26,7 @@ export const RemoteClusterPageTitle = ({ title }) => (
     <EuiPageContentHeader>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="l" data-test-subj="remoteClusterAddPageTitle">
+          <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
             <h1>{title}</h1>
           </EuiTitle>
         </EuiFlexItem>

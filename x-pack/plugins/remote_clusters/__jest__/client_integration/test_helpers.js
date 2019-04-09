@@ -114,7 +114,7 @@ export const registerHttpRequestMockHelpers = server => {
   const setLoadRemoteClustersResponse = (response) => {
     const defaultResponse = [];
 
-    server.respondWith('GET', 'api/remote_clusters', [
+    server.respondWith('GET', '/api/remote_clusters', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response ? response : defaultResponse),
