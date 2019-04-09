@@ -61,7 +61,7 @@ export class PluginsSystem {
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have server-side code or is a
           // missing optional dependency.
-          if (contracts.get(dependencyName) !== undefined) {
+          if (contracts.has(dependencyName)) {
             depContracts[dependencyName] = contracts.get(dependencyName);
           }
 
