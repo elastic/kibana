@@ -43,7 +43,7 @@ describe('Create Follower index', () => {
   let getFormErrorsMessages;
   let clickSaveForm;
   let toggleAdvancedSettings;
-  let setLoadRemoteClusteresResponse;
+  let setLoadRemoteClustersResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -51,11 +51,11 @@ describe('Create Follower index', () => {
 
     // Register helpers to mock Http Requests
     ({
-      setLoadRemoteClusteresResponse,
+      setLoadRemoteClustersResponse,
     } = registerHttpRequestMockHelpers(server));
 
     // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClusteresResponse();
+    setLoadRemoteClustersResponse();
 
     // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);

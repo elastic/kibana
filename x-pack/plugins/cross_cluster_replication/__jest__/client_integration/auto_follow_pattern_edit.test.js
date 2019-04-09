@@ -52,7 +52,7 @@ describe('Edit Auto-follow pattern', () => {
   let getUserActions;
   let getFormErrorsMessages;
   let clickSaveForm;
-  let setLoadRemoteClusteresResponse;
+  let setLoadRemoteClustersResponse;
   let setGetAutoFollowPatternResponse;
 
   beforeEach(() => {
@@ -61,12 +61,12 @@ describe('Edit Auto-follow pattern', () => {
 
     // Register helpers to mock Http Requests
     ({
-      setLoadRemoteClusteresResponse,
+      setLoadRemoteClustersResponse,
       setGetAutoFollowPatternResponse
     } = registerHttpRequestMockHelpers(server));
 
     // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClusteresResponse();
+    setLoadRemoteClustersResponse();
 
     // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);
@@ -79,7 +79,7 @@ describe('Edit Auto-follow pattern', () => {
     ];
 
     beforeEach(async () => {
-      setLoadRemoteClusteresResponse(remoteClusters);
+      setLoadRemoteClustersResponse(remoteClusters);
       setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN);
       ({ component, find } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
 
@@ -116,7 +116,7 @@ describe('Edit Auto-follow pattern', () => {
 
   describe('when the remote cluster is disconnected', () => {
     beforeEach(async () => {
-      setLoadRemoteClusteresResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
+      setLoadRemoteClustersResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
       setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN);
       ({ component, find, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
