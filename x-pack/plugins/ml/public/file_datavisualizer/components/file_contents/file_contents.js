@@ -32,10 +32,12 @@ export function FileContents({ data, format, numberOfLines }) {
     }
   });
   const ariaLabelI18n = i18n.translate('xpack.ml.fileDatavisualizer.fileContents.ariaLabelBeforeSentUserToCodeEditor', {
-    defaultMessage: `{translatedHeader}. {translatedAmountOfFirstLines} is shown in a code editor below. Hit Tab key to go to code editor.`,
+    defaultMessage:
+      'File contents.'
+      + ' First {numberOfLines, plural, zero {# line is} one {# line is} other {# lines are}}'
+      + ' shown in a code editor below. Hit Tab key to go to code editor.',
     values: {
-      translatedHeader: fileContentsHeader,
-      translatedAmountOfFirstLines: fileContentsDescription,
+      numberOfLines
 
     }
   });
