@@ -11,7 +11,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 
-import { ZeekDetails } from './zeek_details';
+import { ZeekDetails } from '.';
 
 describe('ZeekDetails', () => {
   describe('rendering', () => {

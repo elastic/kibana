@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Row, RowRenderer, RowRendererContainer } from '..';
 
-import { SuricataDetails } from './suricata_details';
+import { SuricataDetails } from '.';
 
 export const suricataRowRenderer: RowRenderer = {
   isInstance: ecs => {

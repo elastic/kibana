@@ -16,7 +16,7 @@ import { ExternalLinkIcon } from '../../../../external_link_icon';
 import { GoogleLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
 
-import { getBeginningTokens } from './suricata_links';
+import { getBeginningTokens } from '.';
 
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
 

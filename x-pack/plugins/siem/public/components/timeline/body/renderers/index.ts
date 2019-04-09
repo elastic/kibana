@@ -20,6 +20,7 @@ export * from './args';
 export * from './auditd';
 export * from './column_renderer';
 export * from './empty_column_renderer';
+export * from './formatted_field';
 export * from './get_column_renderer';
 export * from './get_row_renderer';
 export * from './helpers';

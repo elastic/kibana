@@ -11,7 +11,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TestProviders } from '../../../../mock';
 import { getEmptyString } from '../../../empty_value';
 
-import { Args } from './args';
+import { Args } from '.';
 
 describe('Args', () => {
   describe('rendering', () => {

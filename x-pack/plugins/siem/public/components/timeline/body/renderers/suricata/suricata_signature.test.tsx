@@ -15,7 +15,7 @@ import {
   SURICATA_SIGNATURE_ID_FIELD_NAME,
   SuricataSignature,
   Tokens,
-} from './suricata_signature';
+} from '.';
 
 describe('SuricataSignature', () => {
   describe('rendering', () => {

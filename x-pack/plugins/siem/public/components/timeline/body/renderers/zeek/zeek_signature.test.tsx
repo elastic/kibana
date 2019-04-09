@@ -24,7 +24,7 @@ import {
   sha1StringRenderer,
   TotalVirusLinkSha,
   ZeekSignature,
-} from './zeek_signature';
+} from '.';
 
 describe('ZeekSignature', () => {
   let zeek: Ecs;

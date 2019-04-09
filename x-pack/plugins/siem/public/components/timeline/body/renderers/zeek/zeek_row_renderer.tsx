@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Row, RowRenderer, RowRendererContainer } from '..';
 
-import { ZeekDetails } from './zeek_details';
+import { ZeekDetails } from '.';
 
 export const zeekRowRenderer: RowRenderer = {
   isInstance: ecs => {
