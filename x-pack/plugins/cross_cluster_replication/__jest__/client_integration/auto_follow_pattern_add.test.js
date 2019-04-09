@@ -46,7 +46,6 @@ describe('Create Auto-follow pattern', () => {
   let component;
   let getUserActions;
   let form;
-  let getFormErrorsMessages;
   let clickSaveForm;
   let setLoadRemoteClustersResponse;
 
@@ -83,7 +82,7 @@ describe('Create Auto-follow pattern', () => {
 
   describe('when remote clusters are loaded', () => {
     beforeEach(async () => {
-      ({ find, exists, component, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+      ({ find, exists, component, getUserActions, form } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
 
       ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
 
@@ -102,7 +101,7 @@ describe('Create Auto-follow pattern', () => {
       clickSaveForm();
 
       expect(exists('autoFollowPatternFormError')).toBe(true);
-      expect(getFormErrorsMessages()).toEqual([
+      expect(form.getErrorsMessages()).toEqual([
         'Name is required.',
         'At least one leader index pattern is required.',
       ]);
@@ -113,7 +112,7 @@ describe('Create Auto-follow pattern', () => {
   describe('form validation', () => {
     describe('auto-follow pattern name', () => {
       beforeEach(async () => {
-        ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+        ({ component, form, getUserActions } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
         ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
 
         await nextTick();
@@ -123,19 +122,19 @@ describe('Create Auto-follow pattern', () => {
       test('should not allow spaces', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with space');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the name.');
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "_" (underscore) as first character', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', '_withUnderscore');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain(`Name can't begin with an underscore.`);
+        expect(form.getErrorsMessages()).toContain(`Name can't begin with an underscore.`);
       });
 
       test('should not allow a "," (comma)', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with,coma');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain(`Commas are not allowed in the name.`);
+        expect(form.getErrorsMessages()).toContain(`Commas are not allowed in the name.`);
       });
     });
 
@@ -205,7 +204,7 @@ describe('Create Auto-follow pattern', () => {
 
     describe('index patterns', () => {
       beforeEach(async () => {
-        ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+        ({ component, form, getUserActions } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
         ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
 
         await nextTick();
@@ -213,17 +212,17 @@ describe('Create Auto-follow pattern', () => {
       });
 
       test('should not allow spaces', () => {
-        expect(getFormErrorsMessages()).toEqual([]);
+        expect(form.getErrorsMessages()).toEqual([]);
 
         form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'with space');
 
-        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the index pattern.');
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the index pattern.');
       });
 
       test('should not allow invalid characters', () => {
         const expectInvalidChar = (char) => {
           form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', `with${char}space`);
-          expect(getFormErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
+          expect(form.getErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
         };
 
         return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {

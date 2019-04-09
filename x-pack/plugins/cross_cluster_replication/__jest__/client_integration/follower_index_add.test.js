@@ -49,7 +49,6 @@ describe('Create Follower index', () => {
   let component;
   let getUserActions;
   let form;
-  let getFormErrorsMessages;
   let clickSaveForm;
   let toggleAdvancedSettings;
   let setLoadRemoteClustersResponse;
@@ -87,7 +86,7 @@ describe('Create Follower index', () => {
 
   describe('when remote clusters are loaded', () => {
     beforeEach(async () => {
-      ({ find, exists, component, getUserActions, getFormErrorsMessages } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+      ({ find, exists, component, getUserActions, form } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
 
       ({ clickSaveForm } = getUserActions('followerIndexForm'));
 
@@ -106,7 +105,7 @@ describe('Create Follower index', () => {
       clickSaveForm();
 
       expect(exists('followerIndexFormError')).toBe(true);
-      expect(getFormErrorsMessages()).toEqual([
+      expect(form.getErrorsMessages()).toEqual([
         'Leader index is required.',
         'Name is required.'
       ]);
@@ -116,7 +115,7 @@ describe('Create Follower index', () => {
 
   describe('form validation', () => {
     beforeEach(async () => {
-      ({ component, form, getUserActions, getFormErrorsMessages, exists, find } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+      ({ component, form, getUserActions, exists, find } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
 
       ({ clickSaveForm, toggleAdvancedSettings } = getUserActions('followerIndexForm'));
 
@@ -145,7 +144,7 @@ describe('Create Follower index', () => {
       test('should not allow spaces', () => {
         form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', 'with space');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
       });
 
       test('should not allow invalid characters', () => {
@@ -153,7 +152,7 @@ describe('Create Follower index', () => {
 
         const expectInvalidChar = (char) => {
           form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', `with${char}`);
-          expect(getFormErrorsMessages()).toContain(`Remove the characters ${char} from your leader index.`);
+          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your leader index.`);
         };
 
         return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
@@ -166,13 +165,13 @@ describe('Create Follower index', () => {
       test('should not allow spaces', () => {
         form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', 'with space');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the name.');
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "." (period) as first character', () => {
         form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', '.withDot');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain(`Name can't begin with a period.`);
+        expect(form.getErrorsMessages()).toContain(`Name can't begin with a period.`);
       });
 
       test('should not allow invalid characters', () => {
@@ -180,7 +179,7 @@ describe('Create Follower index', () => {
 
         const expectInvalidChar = (char) => {
           form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', `with${char}`);
-          expect(getFormErrorsMessages()).toContain(`Remove the characters ${char} from your name.`);
+          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your name.`);
         };
 
         return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
@@ -215,7 +214,7 @@ describe('Create Follower index', () => {
           await nextTick(550);
           component.update();
 
-          expect(getFormErrorsMessages()).toContain('An index with the same name already exists.');
+          expect(form.getErrorsMessages()).toContain('An index with the same name already exists.');
         });
       });
     });

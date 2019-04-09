@@ -26,7 +26,6 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   let find;
   let exists;
   let userActions;
-  let getFormErrorsMessages;
   let form;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
@@ -40,7 +39,6 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       find,
       exists,
       userActions,
-      getFormErrorsMessages,
       form,
       getEuiStepsHorizontalActive,
       goToStep,
@@ -113,7 +111,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       userActions.clickNextStep();
 
       expect(exists('rollupJobCreateStepError')).toBeTruthy();
-      expect(getFormErrorsMessages()).toEqual(['Interval is required.']);
+      expect(form.getErrorsMessages()).toEqual(['Interval is required.']);
       expect(find('rollupJobNextButton').props().disabled).toBe(true);
     });
 
@@ -125,13 +123,13 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       it('should validate the interval format', () => {
         form.setInputValue('rollupJobInterval', 'abc');
         userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Invalid interval format.');
+        expect(form.getErrorsMessages()).toContain('Invalid interval format.');
       });
 
       it('should validate the calendar format', () => {
         form.setInputValue('rollupJobInterval', '3y');
         userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
+        expect(form.getErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
       });
     });
   });

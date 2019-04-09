@@ -41,7 +41,6 @@ const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => 
   };
 };
 
-
 /**
  * Register a testBed for a React component to be tested inside a Redux provider
  *
@@ -55,48 +54,56 @@ const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => 
  * - exists() Method to check if a test subject exists in the mounted component
  * - find() Method to find a test subject in the mounted componenet
  * - setProp() Method to update the props on the wrapped component
- * - getFormErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
  * - getMetadataFromEuiTable() Method that will extract the table rows and column + their values from an Eui tablle component
  * - form.setInput() Method to update a form input value
  * - form.selectCheckBox() Method to select a form checkbox
+ * - form.getErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
  */
-export const registerTestBed = (Component, defaultProps, store = {}) => (props, options = defaultOptions) => {
+export const registerTestBed = (Component, defaultProps = {}, store = {}) => (props, options = defaultOptions) => {
+  const wrapRoute = options.memoryRouter.wrapRoute !== false;
+
   /**
    * ----------------------------------------------------------------
    * Component mount
    * ----------------------------------------------------------------
    */
-  const Comp = options.memoryRouter.wrapRoute === false
-    ? Component
-    : withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter);
+  const Comp = wrapRoute
+    ? withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter)
+    : Component;
 
-  const component = mountWithIntl(
-    <Provider store={store}>
-      <MemoryRouter
-        initialEntries={options.memoryRouter.initialEntries || ['/']}
-        initialIndex={options.memoryRouter.initialIndex || 0}
-      >
+  const component = wrapRoute
+    ? (mountWithIntl(
+      <Provider store={store}>
+        <MemoryRouter
+          initialEntries={options.memoryRouter.initialEntries || ['/']}
+          initialIndex={options.memoryRouter.initialIndex || 0}
+        >
+          <Comp {...defaultProps} {...props} />
+        </MemoryRouter>
+      </Provider>
+    ))
+    : (mountWithIntl(
+      <Provider store={store}>
         <Comp {...defaultProps} {...props} />
-      </MemoryRouter>
-    </Provider>
-  );
+      </Provider>
+    ));
 
-  const setProps = (props) => component.setProps({
-    children: (
-      <Component
-        {...defaultProps}
-        {...props}
-      />
-    )
-  });
+  const setProps = (props) => {
+    if (wrapRoute) {
+      throw new Error('setProps() can only be called on a component **not** wrapped by a router route.');
+    }
+    return component.setProps({
+      children: (
+        <Component
+          {...defaultProps}
+          {...props}
+        />
+      )
+    });
+  };
 
   const exists = registerTestSubjExists(component);
   const find = testSubject => findTestSubjectHelper(component, testSubject);
-
-  const getFormErrorsMessages = () => {
-    const errorMessagesWrappers = component.find('.euiFormErrorText');
-    return errorMessagesWrappers.map(err => err.text());
-  };
 
   /**
    * ----------------------------------------------------------------
@@ -142,6 +149,11 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     component.update();
   };
 
+  const getErrorsMessages = () => {
+    const errorMessagesWrappers = component.find('.euiFormErrorText');
+    return errorMessagesWrappers.map(err => err.text());
+  };
+
   /**
    * ----------------------------------------------------------------
    * Tables
@@ -183,13 +195,13 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props, 
     exists,
     find,
     setProps,
-    getFormErrorsMessages,
     getMetadataFromEuiTable,
     form: {
       setInputValue,
       selectCheckBox,
       toggleEuiSwitch,
-      setComboBoxValue
+      setComboBoxValue,
+      getErrorsMessages
     }
   };
 };
