@@ -60,7 +60,7 @@ describe('Edit Auto-follow pattern', () => {
   let find;
   let component;
   let getUserActions;
-  let getFormErrorsMessages;
+  let form;
   let clickSaveForm;
   let setLoadRemoteClustersResponse;
   let setGetFollowerIndexResponse;
@@ -147,7 +147,7 @@ describe('Edit Auto-follow pattern', () => {
     beforeEach(async () => {
       setLoadRemoteClustersResponse([{ name: 'new-york', seeds: ['localhost:123'], isConnected: false }]);
       setGetFollowerIndexResponse(FOLLOWER_INDEX);
-      ({ component, find, getUserActions, getFormErrorsMessages } = initTestBed(FollowerIndexEdit, undefined, testBedOptions));
+      ({ component, find, getUserActions, form } = initTestBed(FollowerIndexEdit, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('followerIndexForm'));
 
       await nextTick();
@@ -166,7 +166,7 @@ describe('Edit Auto-follow pattern', () => {
     test('should prevent saving the form and display an error message for the required remote cluster', () => {
       clickSaveForm();
 
-      expect(getFormErrorsMessages()).toEqual(['A connected remote cluster is required.']);
+      expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
       expect(find('ccrFollowerIndexFormSubmitButton').props().disabled).toBe(true);
     });
   });

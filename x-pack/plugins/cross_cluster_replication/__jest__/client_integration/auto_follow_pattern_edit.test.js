@@ -50,7 +50,7 @@ describe('Edit Auto-follow pattern', () => {
   let find;
   let component;
   let getUserActions;
-  let getFormErrorsMessages;
+  let form;
   let clickSaveForm;
   let setLoadRemoteClustersResponse;
   let setGetAutoFollowPatternResponse;
@@ -118,7 +118,7 @@ describe('Edit Auto-follow pattern', () => {
     beforeEach(async () => {
       setLoadRemoteClustersResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
       setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN);
-      ({ component, find, getUserActions, getFormErrorsMessages } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
+      ({ component, find, getUserActions, form } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
 
       await nextTick();
@@ -137,7 +137,7 @@ describe('Edit Auto-follow pattern', () => {
     test('should prevent saving the form and display an error message for the required remote cluster', () => {
       clickSaveForm();
 
-      expect(getFormErrorsMessages()).toEqual(['A connected remote cluster is required.']);
+      expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
       expect(find('ccrAutoFollowPatternFormSubmitButton').props().disabled).toBe(true);
     });
   });

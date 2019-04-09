@@ -25,11 +25,10 @@ describe('Create Remote cluster', () => {
     let exists;
     let getUserActions;
     let clickSaveForm;
-    let getFormErrorsMessages;
     let form;
 
     beforeEach(() => {
-      ({ form, exists, find, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+      ({ form, exists, find, getUserActions } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('remoteClusterAdd'));
     });
 
@@ -60,7 +59,7 @@ describe('Create Remote cluster', () => {
       clickSaveForm();
 
       expect(exists('remoteClusterFormGlobalError')).toBe(true);
-      expect(getFormErrorsMessages()).toEqual([
+      expect(form.getErrorsMessages()).toEqual([
         'Name is required.',
         'At least one seed node is required.',
       ]);
@@ -73,11 +72,10 @@ describe('Create Remote cluster', () => {
       let component;
       let getUserActions;
       let form;
-      let getFormErrorsMessages;
       let clickSaveForm;
 
       beforeEach(async () => {
-        ({ component, form, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+        ({ component, form, getUserActions } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
         ({ clickSaveForm } = getUserActions('remoteClusterAdd'));
 
         await nextTick();
@@ -87,7 +85,7 @@ describe('Create Remote cluster', () => {
       test('should not allow spaces', () => {
         form.setInputValue('remoteClusterFormNameInput', 'with space');
         clickSaveForm();
-        expect(getFormErrorsMessages()).toContain('Spaces are not allowed in the name.');
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', () => {
@@ -98,7 +96,7 @@ describe('Create Remote cluster', () => {
 
           try {
             form.setInputValue('remoteClusterFormNameInput', `with${char}`);
-            expect(getFormErrorsMessages()).toContain(`Remove the character ${char} from the name.`);
+            expect(form.getErrorsMessages()).toContain(`Remove the character ${char} from the name.`);
           } catch {
             throw Error(`Char "${char}" expected invalid but was allowed`);
           }
@@ -113,11 +111,10 @@ describe('Create Remote cluster', () => {
     describe('seeds', () => {
       let getUserActions;
       let form;
-      let getFormErrorsMessages;
       let clickSaveForm;
 
       beforeEach(async () => {
-        ({ form, getUserActions, getFormErrorsMessages } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
+        ({ form, getUserActions } = initTestBed(RemoteClusterAdd, undefined, testBedOptions));
         ({ clickSaveForm } = getUserActions('remoteClusterAdd'));
       });
 
@@ -128,7 +125,7 @@ describe('Create Remote cluster', () => {
 
         const expectInvalidChar = (char) => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
-          expect(getFormErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`); // eslint-disable-line max-len
+          expect(form.getErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`); // eslint-disable-line max-len
         };
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
@@ -140,10 +137,10 @@ describe('Create Remote cluster', () => {
         clickSaveForm();
 
         form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1');
-        expect(getFormErrorsMessages()).toContain('A port is required.');
+        expect(form.getErrorsMessages()).toContain('A port is required.');
 
         form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1:abc');
-        expect(getFormErrorsMessages()).toContain('A port is required.');
+        expect(form.getErrorsMessages()).toContain('A port is required.');
       });
     });
   });
