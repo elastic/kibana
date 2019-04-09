@@ -17,6 +17,7 @@
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the start lifecycle |
+|  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) | The available core services passed to a plugin's <code>Plugin#setup</code> method. |
@@ -30,7 +31,6 @@
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
-|  [I18nSetup](./kibana-plugin-public.i18nsetup.md) |  |
 |  [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |

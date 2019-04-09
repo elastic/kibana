@@ -102,10 +102,12 @@ export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
 
-// Warning: (ae-forgotten-export) The symbol "I18nService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type I18nSetup = ReturnType<I18nService['setup']>;
+// @public
+export interface I18nSetup {
+    Context: ({ children }: {
+        children: default.ReactNode;
+    }) => JSX.Element;
+}
 
 // Warning: (ae-internal-missing-underscore) The name InjectedMetadataParams should be prefixed with an underscore because the declaration is marked as "@internal"
 // 
