@@ -23,7 +23,7 @@ import { SearchError } from '../search_strategy/search_error';
 import { i18n } from '@kbn/i18n';
 
 export function callResponseHandlers(searchRequests, responses) {
-  return Promise.all(searchRequests.map(async (searchRequest, index) => {
+  return Promise.all(searchRequests.map((searchRequest, index) => {
     const response = responses[index];
 
     if (response.timed_out) {
@@ -47,8 +47,6 @@ export function callResponseHandlers(searchRequests, responses) {
       return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
     }
 
-    await searchRequest.handleResponse(response);
-    searchRequest.complete();
-    return response;
+    return searchRequest.handleResponse(response);
   }));
 }

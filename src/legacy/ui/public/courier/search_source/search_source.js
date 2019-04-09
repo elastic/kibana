@@ -219,14 +219,9 @@ export function SearchSourceProvider(Private, config) {
      * @async
      */
     fetch() {
-      const self = this;
-      const errorHandler = (request, error) => {
-        request.reject(error);
-        request.abort();
-      };
-      const req = self._createRequest({ errorHandler });
-      fetchSoon.fetchSearchRequests([req]);
-      return req.getCompletePromise();
+      const request = this._createRequest();
+      this.requestIsStarting(request);
+      return fetchSoon(request);
     }
 
     /**
@@ -248,11 +243,11 @@ export function SearchSourceProvider(Private, config) {
 
     /**
      *  Called by requests of this search source when they are started
-     *  @param  {Courier.Request} request
+     *  @param  {SearchRequest} request
      *  @return {Promise<undefined>}
      */
     requestIsStarting(request) {
-      this.history = [request];
+      this.history.push(request);
 
       const handlers = [...this._requestStartHandlers];
       // If callparentStartHandlers has been set to true, we also call all
@@ -296,8 +291,8 @@ export function SearchSourceProvider(Private, config) {
      *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest({ errorHandler }) {
-      return new SearchRequest({ source: this, errorHandler });
+    _createRequest() {
+      return new SearchRequest({ source: this });
     }
 
     /**

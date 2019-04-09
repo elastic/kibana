@@ -96,14 +96,15 @@ function getResponseInspectorStats(searchSource, resp) {
     };
   }
 
-  if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
+  const requestTime = lastRequest && lastRequest.getRequestTime();
+  if (typeof requestTime === 'number') {
     stats.requestTime = {
       label: i18n.translate('common.ui.courier.requestTimeLabel', {
         defaultMessage: 'Request time'
       }),
       value: i18n.translate('common.ui.courier.requestTimeValue', {
         defaultMessage: '{requestTime}ms',
-        values: { requestTime: lastRequest.ms },
+        values: { requestTime },
       }),
       description: i18n.translate('common.ui.courier.requestTimeDescription', {
         defaultMessage: 'The time of the request from the browser to Elasticsearch and back. ' +

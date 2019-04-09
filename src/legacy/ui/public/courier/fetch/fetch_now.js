@@ -45,23 +45,12 @@ export function FetchNowProvider(Private) {
   };
 
   async function fetchSearchResults(searchRequests) {
-    await startRequests(searchRequests);
     try {
       const responses = await callClient(searchRequests);
-      return callResponseHandlers(searchRequests, responses);
+      return responses && callResponseHandlers(searchRequests, responses);
     } catch (e) {
       // Silently swallow errors that result from search requests so the consumer can surface
       // them as notifications instead of courier forcing fatal errors.
     }
-  }
-
-  function startRequests(searchRequests) {
-    return Promise.all(searchRequests.map(async searchRequest => {
-      try {
-        searchRequest.start();
-      } catch (e) {
-        searchRequest.handleFailure(e);
-      }
-    }));
   }
 }

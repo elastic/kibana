@@ -45,18 +45,15 @@ export function FetchSoonProvider(Private) {
     maxWait: 50
   });
 
-  this.abortAll = () => {
-    requestsToFetch.forEach(request => request.abort());
-  };
-
   /**
-   * Fetch a list of requests
-   * @param {array} requests - the requests to fetch
-   * @async
+   * Adds the given request to the array of requests to fetch, and makes a debounced call to
+   * fetchNow, then returns the promise from the request (which will resolve with the response or
+   * reject with an error)
+   * @param {SearchRequest} request
    */
-  this.fetchSearchRequests = (requests) => {
-    requestsToFetch = [...requestsToFetch, ...requests];
-    debouncedFetchNow(requests);
-    return Promise.all(requests.map(req => req.getCompletePromise()));
+  return function fetchSoon(request) {
+    requestsToFetch = [...requestsToFetch, request];
+    debouncedFetchNow(requestsToFetch);
+    return request.getPromise();
   };
 }

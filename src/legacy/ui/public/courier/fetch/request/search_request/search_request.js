@@ -19,63 +19,39 @@
 
 import moment from 'moment';
 
-import { i18n } from '@kbn/i18n';
-
 export class SearchRequest {
-  constructor({ source, errorHandler }) {
-    if (!errorHandler) {
-      throw new Error(
-        i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
-          defaultMessage: '{errorHandler} is required',
-          values: { errorHandler: 'errorHandler' }
-        })
-      );
-    }
-
-    this._promise = new Promise((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
-    });
-
-    this.errorHandler = errorHandler;
+  constructor({ source }) {
     this.source = source;
 
+    this._promise = new Promise((resolve, reject) => {
+      this._resolve = resolve;
+      this._reject = reject;
+    });
+
     // Track execution time.
-    this.moment = undefined;
-    this.ms = undefined;
+    this._moment = moment();
+    this._ms = undefined;
   }
 
-  start() {
-    this.moment = moment();
-    return this.source.requestIsStarting(this);
+  handleResponse(resp) {
+    this._ms = this._moment.diff() * -1;
+    this._resolve(resp);
+  }
+
+  handleFailure(error) {
+    this._ms = this._moment.diff() * -1;
+    this._reject(error);
   }
 
   getFetchParams() {
     return this.source._flatten();
   }
 
-  handleResponse(resp) {
-    this.success = true;
-    this.resp = resp;
-  }
-
-  handleFailure(error) {
-    this.success = false;
-    this.resp = error;
-    this.resp = (error && error.resp) || error;
-    return this.errorHandler(this, error);
-  }
-
-  abort() {
-    this.aborted = true;
-  }
-
-  complete() {
-    this.ms = this.moment.diff() * -1;
-    this.resolve(this.resp);
-  }
-
-  getCompletePromise() {
+  getPromise() {
     return this._promise;
+  }
+
+  getRequestTime() {
+    return this._ms;
   }
 }
