@@ -33,7 +33,7 @@ export async function fetch({
   setup
 }: MetricsRequestArgs): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end, 'auto');
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_NAME]: 'metric' } },
@@ -62,7 +62,9 @@ export async function fetch({
         timeseriesData: {
           date_histogram: {
             field: '@timestamp',
-            interval: intervalString,
+
+            // ensure minimum bucket size of 30s since this is the default resolution for metric data
+            interval: `${Math.max(bucketSize, 30)}s`,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end }
           },
