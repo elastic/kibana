@@ -94,6 +94,8 @@ export function toExpression(viewState: VisModel) {
       firstQuery.select.map(operation =>
         operation.operator === 'column' ? operation.argument.field : ''
       )
+    )}' fieldNames='${JSON.stringify(
+      firstQuery.select.map(operation => (operation.operator === 'column' ? operation.alias : ''))
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }
   return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${
