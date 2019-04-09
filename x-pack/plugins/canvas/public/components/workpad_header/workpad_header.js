@@ -67,7 +67,7 @@ export class WorkpadHeader extends React.PureComponent {
           />
           <EuiModalFooter>
             <EuiButton size="s" onClick={() => setShowElementModal(false)}>
-              Dismiss
+              Close
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
