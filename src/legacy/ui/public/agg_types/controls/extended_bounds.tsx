@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiFieldNumber,
@@ -25,15 +25,33 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Bounds {
-  min: number | string;
-  max: number | string;
+  min: string;
+  max: string;
+}
+
+function isBoundEmpty(value: string): boolean {
+  return value === '';
+}
+
+function areBoundsInvalid({ min, max }: Bounds): boolean {
+  if (isBoundEmpty(min) && isBoundEmpty(max)) {
+    return false;
+  }
+
+  const minValue: number = parseInt(min, 10);
+  const maxValue: number = parseInt(max, 10);
+
+  if (isNaN(minValue) || isNaN(maxValue)) {
+    return true;
+  }
+
+  return minValue > maxValue;
 }
 
 function ExtendedBoundsParamEditor({
@@ -41,74 +59,80 @@ function ExtendedBoundsParamEditor({
   aggParam,
   value,
   setValue,
+  setValidity
 }: AggParamEditorProps<Bounds>) {
   const { min_doc_count, field } = agg.params;
 
-  if (min_doc_count && field && (field.type === 'number' || field.type === 'date')) {
-    const mainLabel = i18n.translate('common.ui.aggTypes.extendedBoundsLabel', {
-      defaultMessage: 'Extended Bounds',
-    });
-
-    const tooltipContent = i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
-      defaultMessage:
-        'Min and Max do not filter the results, but rather extend the bounds of the result set',
-    });
-
-    const minLabel = i18n.translate('common.ui.aggTypes.extendedBounds.minLabel', {
-      defaultMessage: 'Min',
-    });
-
-    const maxLabel = i18n.translate('common.ui.aggTypes.extendedBounds.maxLabel', {
-      defaultMessage: 'Max',
-    });
-
-    const helpText = i18n.translate('common.ui.aggTypes.extendedBounds.label.optionalText', {
-      defaultMessage: 'optional',
-    });
-
-    return (
-      <div className="visEditorSidebar__aggParamFormRow">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <label>{mainLabel}</label>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={tooltipContent} position="right" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="xs" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow label={minLabel} fullWidth={true} helpText={helpText}>
-              <EuiFieldNumber
-                value={value.min === '' ? '' : Number(value.min)}
-                onChange={ev => {
-                  debugger;
-                  setValue({ ...value, min: ev.target.value })
-                }}
-                fullWidth={true}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label={maxLabel} fullWidth={true} helpText={helpText}>
-              <EuiFieldNumber
-                value={value.max === '' ? '' : Number(value.max)}
-                onChange={ev => setValue({ ...value, max: ev.target.value })}
-                fullWidth={true}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
+  if (!min_doc_count || !field || (field.type !== 'number' && field.type !== 'date')) {
+    setValidity(true);
+    return null;
   }
 
-  return null;
+  const tooltipContent = i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
+    defaultMessage:
+      'Min and Max do not filter the results, but rather extend the bounds of the result set',
+  });
+
+  const mainLabel = (
+    <>
+      <FormattedMessage
+        id="common.ui.aggTypes.extendedBoundsLabel"
+        defaultMessage="Extended Bounds"
+      />{' '}
+      <EuiIconTip position="right" content={tooltipContent} type="questionInCircle" aria-label={tooltipContent} />
+    </>
+  );
+
+  const minLabel = i18n.translate('common.ui.aggTypes.extendedBounds.minLabel', {
+    defaultMessage: 'Min',
+  });
+
+  const maxLabel = i18n.translate('common.ui.aggTypes.extendedBounds.maxLabel', {
+    defaultMessage: 'Max',
+  });
+
+  const isInvalid = areBoundsInvalid(value);
+  let error;
+
+  if (isInvalid) {
+    error = i18n.translate('common.ui.aggTypes.extendedBounds.errorMessage', {
+      defaultMessage: 'Min should be less than or equal to Max'
+    });
+  }
+
+  useEffect(() => setValidity(!isInvalid));
+
+  return (
+    <EuiFormRow
+      fullWidth={true}
+      label={mainLabel}
+      isInvalid={isInvalid}
+      error={error}
+      className="visEditorSidebar__aggParamFormRow">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow label={minLabel} fullWidth={true} isInvalid={isInvalid}>
+            <EuiFieldNumber
+              value={isBoundEmpty(value.min)? '' : Number(value.min)}
+              onChange={ev => setValue({ ...value, min: ev.target.value })}
+              fullWidth={true}
+              isInvalid={isInvalid}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label={maxLabel} fullWidth={true} isInvalid={isInvalid}>
+            <EuiFieldNumber
+              value={isBoundEmpty(value.max)? '' : Number(value.max)}
+              onChange={ev => setValue({ ...value, max: ev.target.value })}
+              fullWidth={true}
+              isInvalid={isInvalid}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
 }
 
 export { ExtendedBoundsParamEditor };
