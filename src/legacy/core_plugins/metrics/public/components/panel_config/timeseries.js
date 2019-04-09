@@ -25,12 +25,18 @@ import { PanelOptionEditor } from '../panel_options_editor';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
+const TAB = {
+  ANNOTATIONS: 'annotations',
+  DATA: 'data',
+  OPTIONS: 'options',
+};
+
 function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
-  const [tab, switchTab] = useState('data');
-  let view;
+  const [tab, switchTab] = useState(TAB.DATA);
+  let view = null;
 
   switch (tab) {
-    case 'data':
+    case TAB.DATA:
       view = (
         <SeriesEditor
           fields={fields}
@@ -40,7 +46,7 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
         />
       );
       break;
-    case 'annotations':
+    case TAB.ANNOTATIONS:
       view = (
         <AnnotationsEditor
           fields={fields}
@@ -50,7 +56,7 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
         />
       );
       break;
-    default:
+    case TAB.OPTIONS:
       view = (
         <PanelOptionEditor
           fields={fields}
@@ -59,14 +65,15 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
           intl={intl}
         />
       );
+      break;
   }
 
   return (
     <div>
       <EuiTabs size="s">
         <EuiTab
-          isSelected={tab === 'data'}
-          onClick={() => switchTab('data')}
+          isSelected={tab === TAB.DATA}
+          onClick={() => switchTab(TAB.DATA)}
         >
           <FormattedMessage
             id="tsvb.timeseries.dataTab.dataButtonLabel"
@@ -74,8 +81,8 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
           />
         </EuiTab>
         <EuiTab
-          isSelected={tab === 'options'}
-          onClick={() => switchTab('options')}
+          isSelected={tab === TAB.OPTIONS}
+          onClick={() => switchTab(TAB.OPTIONS)}
         >
           <FormattedMessage
             id="tsvb.timeseries.optionsTab.panelOptionsButtonLabel"
@@ -83,8 +90,8 @@ function TimeseriesPanelConfigUI({ model, onChange, intl, fields, name }) {
           />
         </EuiTab>
         <EuiTab
-          isSelected={tab === 'annotations'}
-          onClick={() => switchTab('annotations')}
+          isSelected={tab === TAB.ANNOTATIONS}
+          onClick={() => switchTab(TAB.ANNOTATIONS)}
         >
           <FormattedMessage
             id="tsvb.timeseries.annotationsTab.annotationsButtonLabel"
