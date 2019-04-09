@@ -18,6 +18,11 @@ export interface InfraSnapshotMetricResponse {
   };
 }
 
+// Jumping through TypeScript hoops here:
+// We need an interface that has the known members 'key' and 'doc_count' and also
+// an unknown number of members with unknown names but known format, containing the
+// metrics.
+// This union type is the only way I found to express this that TypeScript accepts.
 export interface InfraSnapshotBucketWithKey {
   key: string | number;
   doc_count: number;
@@ -51,13 +56,15 @@ export const getNodePath = (
 
 export const getNodeMetricsForLookup = (metrics: InfraSnapshotMetricResponse[]) => {
   const nodeMetricsForLookup: any = {};
-  // console.log('got metrics, looks like this: ', JSON.stringify(metrics, null, 2));
   metrics.forEach(metric => {
     nodeMetricsForLookup[`${metric.key.node}`] = metric.histogram.buckets;
   });
   return nodeMetricsForLookup;
 };
 
+// In the returned object,
+// value contains the value from the last bucket spanning a full interval
+// max and avg are calculated from all buckets returned for the timerange
 export const getNodeMetrics = (
   nodeBuckets: InfraSnapshotMetricBucket[],
   options: InfraSnapshotRequestOptions
@@ -77,8 +84,6 @@ export const getNodeMetrics = (
     max: calculateMax(nodeBuckets, options.metric.type),
     avg: calculateAvg(nodeBuckets, options.metric.type),
   };
-  // tslint:disable-next-line:no-console
-  console.log('getNodeMetrics will return', result);
   return result;
 };
 

@@ -15,7 +15,7 @@ import {
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
 import { InfraSources } from '../sources';
 
-import { JsonObject } from 'x-pack/plugins/infra/common/typed_json';
+import { JsonObject } from '../../../common/typed_json';
 import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
 import { getGroupedNodesSources, getMetricsAggregations, getMetricsSources } from './query_helpers';
 import { getNodeMetrics, getNodeMetricsForLookup, getNodePath } from './response_helpers';
@@ -38,6 +38,10 @@ export class InfraSnapshot {
     request: InfraFrameworkRequest,
     options: InfraSnapshotRequestOptions
   ): Promise<InfraSnapshotNode[]> {
+    // Both requestGroupedNodes and requestNodeMetrics may send several requests to elasticsearch
+    // in order to page through the results of their respective composite aggregations.
+    // Both chains of requests are supposed to run in parallel, and their results be merged
+    // when they have both been completed.
     const groupedNodesPromise = requestGroupedNodes(request, options, this.libs.framework);
     const nodeMetricsPromise = requestNodeMetrics(request, options, this.libs.framework);
 
@@ -53,6 +57,7 @@ const requestGroupedNodes = async (
   options: InfraSnapshotRequestOptions,
   framework: InfraBackendFrameworkAdapter
 ) => {
+  // This needs to be typed as 'any' as the query will be altered below to add the 'after_key' field.
   const query: any = {
     allowNoIndices: true,
     index: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
@@ -93,6 +98,8 @@ const requestGroupedNodes = async (
   }
 
   let buckets = response.aggregations.nodes.buckets;
+
+  // Getting an empty response back is the only way to find out that there are no further results.
   while (response.aggregations.nodes.buckets.length > 0) {
     query.body.aggs.nodes.composite.after = response.aggregations.nodes.after_key;
     response = await framework.callWithRequest<any, any>(request, 'search', query);
@@ -111,6 +118,7 @@ const requestNodeMetrics = async (
       ? `${options.sourceConfiguration.logAlias}`
       : `${options.sourceConfiguration.metricAlias}`;
 
+  // This needs to be typed as 'any' as the query will be altered below to add the 'after_key' field.
   const query: any = {
     allowNoIndices: true,
     index,
@@ -160,6 +168,8 @@ const requestNodeMetrics = async (
   }
 
   let buckets = response.aggregations.nodes.buckets;
+
+  // Getting an empty response back is the only way to find out that there are no further results.
   while (response.aggregations.nodes.buckets.length > 0) {
     query.body.aggs.nodes.composite.after = response.aggregations.nodes.after_key;
     response = await framework.callWithRequest<any, any>(request, 'search', query);

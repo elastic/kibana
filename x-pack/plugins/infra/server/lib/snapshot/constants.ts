@@ -6,4 +6,4 @@
 
 // TODO: Make SNAPSHOT_COMPOSITE_REQUEST_SIZE configurable from kibana.yml
 
-export const SNAPSHOT_COMPOSITE_REQUEST_SIZE = 1;
+export const SNAPSHOT_COMPOSITE_REQUEST_SIZE = 75;

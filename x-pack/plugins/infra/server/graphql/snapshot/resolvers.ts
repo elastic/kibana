@@ -45,8 +45,6 @@ export const createSnapshotResolvers = (
 } => ({
   InfraSource: {
     async snapshot(source, args) {
-      // tslint:disable-next-line:no-console
-      console.log('snapshot resolver is being called');
       return {
         source,
         timerange: args.timerange,
