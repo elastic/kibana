@@ -19,9 +19,7 @@
 
 import { resolveImportErrors } from '../resolve_import_errors';
 
-jest.mock('ui/kfetch', () => ({
-  kfetch: jest.fn(),
-}));
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 function getFormData(form) {
   const formData = {};
