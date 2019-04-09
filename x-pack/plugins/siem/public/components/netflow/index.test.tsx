@@ -5,10 +5,9 @@
  */
 
 import toJson from 'enzyme-to-json';
-import { shallow } from 'hoek';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -121,7 +120,7 @@ const getNetflowInstance = () => (
 
 describe('Netflow', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = shallowWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
