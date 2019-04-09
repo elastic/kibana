@@ -39,7 +39,7 @@ class Plugin {
     return {
       data$: this.initializerContext.config.create(TestBedConfig).pipe(
         map(config => {
-          this.log.debug(`I've got value from my config: ${config.secret}`);
+          this.log.error(`I've got value from my config: ${config.secret}`);
           return `Some exposed data derived from config: ${config.secret}`;
         })
       ),

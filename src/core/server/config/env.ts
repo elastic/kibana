@@ -117,6 +117,7 @@ export class Env {
       resolve(this.homeDir, 'src', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
+      resolve(this.homeDir, 'x-pack', 'plugins'),
     ];
 
     this.cliArgs = Object.freeze(options.cliArgs);

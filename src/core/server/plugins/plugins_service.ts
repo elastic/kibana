@@ -60,6 +60,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
       .pipe(first())
       .toPromise();
 
+    console.log(config)
+
     const { error$, plugin$ } = discover(config, this.coreContext);
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
