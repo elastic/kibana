@@ -80,22 +80,18 @@ export class CoreSystem {
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
-        fatalErrors: {
-            add: (error: string | Error, source?: string | undefined) => never;
-            get$: () => import("rxjs").Observable<{
-                message: string;
-                stack: string | undefined;
-            }>;
-        };
+        fatalErrors: import(".").FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
     }
 
-// Warning: (ae-forgotten-export) The symbol "FatalErrorsService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+// @public
+export interface FatalErrorsSetup {
+    add: (error: string | Error, source?: string) => never;
+    // Warning: (ae-forgotten-export) The symbol "ErrorInfo" needs to be exported by the entry point index.d.ts
+    get$: () => Rx.Observable<ErrorInfo>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 

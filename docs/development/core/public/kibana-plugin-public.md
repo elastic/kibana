@@ -17,6 +17,7 @@
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the start lifecycle |
+|  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) | Provides access to the metadata injected by the server into the page |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -30,7 +31,6 @@
 |  --- | --- |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
-|  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
