@@ -103,18 +103,16 @@ export class GitOperations {
     if (revision.toUpperCase() === 'HEAD') {
       return await repo.getHeadCommit();
     }
-    try {
-      return await repo.getBranchCommit(revision);
-    } catch (e) {
-      if (e.errno === Error.CODE.ENOTFOUND) {
-        return checkExists(
-          () => this.findCommit(repo, revision),
-          `revision or branch ${revision} not found in ${repo.path()}`
-        );
-      } else {
-        throw e;
-      }
+    // branches and tags
+    const refs = [`refs/remotes/origin/${revision}`, `refs/tags/${revision}`];
+    const commit = await this.findCommitByRefs(repo, refs);
+    if (commit === null) {
+      return (await checkExists(
+        () => this.findCommit(repo, revision),
+        `revision or branch ${revision} not found in ${repo.path()}`
+      )) as Commit;
     }
+    return commit;
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
@@ -157,6 +155,7 @@ export class GitOperations {
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
     let count = 0;
+
     async function walk(t: Tree) {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
@@ -169,6 +168,7 @@ export class GitOperations {
         }
       }
     }
+
     await walk(tree);
     return count;
   }
@@ -180,6 +180,7 @@ export class GitOperations {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
+
     async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
@@ -192,6 +193,7 @@ export class GitOperations {
         }
       }
     }
+
     return await walk(tree);
   }
 
@@ -355,6 +357,7 @@ export class GitOperations {
     const entry = await commit.getEntry(path);
     return (await entry.getBlob()).content().toString('utf8');
   }
+
   private async walkTree(
     fileTree: FileTree,
     tree: Tree,
@@ -417,18 +420,37 @@ export class GitOperations {
     return fileTree;
   }
 
-  private async findCommit(repo: Repository, revision: string): Promise<Commit> {
-    const obj = await Object.lookupPrefix(
-      repo,
-      Oid.fromString(revision),
-      revision.length,
-      Object.TYPE.COMMIT
-    );
-    if (obj) {
-      return repo.getCommit(obj.id());
+  private async findCommit(repo: Repository, revision: string): Promise<Commit | null> {
+    try {
+      const obj = await Object.lookupPrefix(
+        repo,
+        Oid.fromString(revision),
+        revision.length,
+        Object.TYPE.COMMIT
+      );
+      if (obj) {
+        return repo.getCommit(obj.id());
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
-    // @ts-ignore
-    return null;
+  }
+
+  private async findCommitByRefs(repo: Repository, refs: string[]): Promise<Commit | null> {
+    if (refs.length === 0) {
+      return null;
+    }
+    const [ref, ...rest] = refs;
+    try {
+      return await repo.getReferenceCommit(ref);
+    } catch (e) {
+      if (e.errno === Error.CODE.ENOTFOUND) {
+        return await this.findCommitByRefs(repo, rest);
+      } else {
+        throw e;
+      }
+    }
   }
 }
 
