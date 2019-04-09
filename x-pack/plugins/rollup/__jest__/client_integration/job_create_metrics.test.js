@@ -27,7 +27,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -39,7 +39,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
+      table,
     } = initTestBed());
   });
 
@@ -123,7 +123,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should display the fields with metrics and its type', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField', 'numeric'],
@@ -134,13 +134,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should add metric field to the field list when clicking on a row', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList');
         expect(tableCellsValues).toEqual([['No metrics fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row in field chooser
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList'));
         const [firstRow] = tableCellsValues;
         const [field, type] = firstRow;
         expect(field).toEqual(rows[0].columns[0].value);
@@ -154,7 +154,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       if(!exists('rollupJobMetricsFieldChooser-table')) {
         find('rollupJobShowFieldChooserButton').simulate('click');
       }
-      const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+      const { rows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
       for (let i = 0; i < rows.length; i++) {
         if (rows[i].columns[1].value === type) {
           rows[i].reactWrapper.simulate('click');
@@ -166,7 +166,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     it('should have an empty field list', async () => {
       await goToStep(5);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList');
       expect(tableCellsValues).toEqual([['No metrics fields added']]);
     });
 
@@ -188,7 +188,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length);
@@ -207,7 +207,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length);
@@ -226,11 +226,11 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have a delete button on each row to remove the metric field', async () => {
-        const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { rows: fieldChooserRows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
         fieldChooserRows[0].reactWrapper.simulate('click'); // select first item
 
         // Make sure rows value has been set
-        let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        let { rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList');
         expect(fieldListRows[0].columns[0].value).not.toEqual('No metrics fields added');
 
         const columnsFirstRow = fieldListRows[0].columns;
@@ -238,7 +238,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
         deleteButton.simulate('click');
 
-        ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+        ({ rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList'));
         expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
       });
     });

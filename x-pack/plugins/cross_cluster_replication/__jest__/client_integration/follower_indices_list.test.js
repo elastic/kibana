@@ -26,7 +26,7 @@ describe('<FollowerIndicesList />', () => {
   let find;
   let exists;
   let component;
-  let getMetadataFromEuiTable;
+  let table;
   let getUserActions;
   let tableCellsValues;
   let setLoadFollowerIndicesResponse;
@@ -92,7 +92,7 @@ describe('<FollowerIndicesList />', () => {
         find,
         exists,
         component,
-        getMetadataFromEuiTable,
+        table,
         getUserActions,
       } = initTestBed(FollowerIndicesList));
 
@@ -108,7 +108,7 @@ describe('<FollowerIndicesList />', () => {
       } = getUserActions('followerIndicesList'));
 
       // Read the index list table
-      ({ tableCellsValues } = getMetadataFromEuiTable('ccrFollowerIndexListTable'));
+      ({ tableCellsValues } = table.getMetaData('ccrFollowerIndexListTable'));
     });
 
     afterEach(async () => {

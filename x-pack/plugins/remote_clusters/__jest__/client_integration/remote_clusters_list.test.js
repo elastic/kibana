@@ -27,7 +27,7 @@ describe('<RemoteClusterList />', () => {
   let find;
   let exists;
   let component;
-  let getMetadataFromEuiTable;
+  let table;
   let getUserActions;
   let tableCellsValues;
   let rows;
@@ -101,7 +101,7 @@ describe('<RemoteClusterList />', () => {
         component,
         find,
         exists,
-        getMetadataFromEuiTable,
+        table,
         getUserActions,
       } = initTestBed(RemoteClusterList, undefined, testBedOptions));
 
@@ -117,7 +117,7 @@ describe('<RemoteClusterList />', () => {
       } = getUserActions('remoteClusterList'));
 
       // Read the remote clusters list table
-      ({ rows, tableCellsValues } = getMetadataFromEuiTable('remoteClusterListTable'));
+      ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
     });
 
     test('should not display the empty prompt', () => {
@@ -219,7 +219,7 @@ describe('<RemoteClusterList />', () => {
         await nextTick(550); // there is a 500ms timeout in the api action
         component.update();
 
-        ({ rows } = getMetadataFromEuiTable('remoteClusterListTable'));
+        ({ rows } = table.getMetaData('remoteClusterListTable'));
 
         expect(rows.length).toBe(1);
         expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
