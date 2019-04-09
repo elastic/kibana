@@ -120,6 +120,21 @@ describe('Flyout', () => {
     expect(component.state('file')).toBe(mockFile);
   });
 
+  it('should allow removing a file', async () => {
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+    // Ensure all promises resolve
+    await Promise.resolve();
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component.state('file')).toBe(undefined);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    expect(component.state('file')).toBe(mockFile);
+    component.find('EuiFilePicker').simulate('change', []);
+    expect(component.state('file')).toBe(undefined);
+  });
+
   it('should handle invalid files', async () => {
     const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
     const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
