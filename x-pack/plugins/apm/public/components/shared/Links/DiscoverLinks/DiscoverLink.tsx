@@ -32,7 +32,7 @@ interface Props {
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
   const apmIndexPattern = useAPMIndexPattern();
-  const location = useLocation();
+  const { location } = useLocation();
 
   if (!apmIndexPattern.id) {
     return null;

@@ -46,7 +46,9 @@ export function getAPMHref(
 }
 
 export function APMLink({ path = '', query, ...rest }: Props) {
-  const { search } = useLocation();
-  const href = getAPMHref(path, search, query);
+  const { location, urlParams } = useLocation();
+  console.log('location', location, 'url params', urlParams);
+
+  const href = getAPMHref(path, location.search, query);
   return <EuiLink {...rest} href={href} />;
 }

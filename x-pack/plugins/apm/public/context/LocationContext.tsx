@@ -5,19 +5,54 @@
  */
 
 import { History, Location } from 'history';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useReducer, useState } from 'react';
+import {
+  IUrlParams,
+  urlParamsReducer,
+  refreshTimeRange,
+  TimeRange,
+  resolveUrlParams
+} from '../store/urlParams';
+import { LOCATION_UPDATE } from '../store/location';
 
 interface Props {
   history: History;
 }
 
-const initialLocation = {} as Location;
+interface State {
+  location: Location;
+  urlParams: IUrlParams;
+  refreshTimeRange?: (time: TimeRange) => void;
+}
 
-const LocationContext = createContext(initialLocation);
+const initialState: State = {
+  location: {} as Location,
+  urlParams: {} as IUrlParams
+};
+
+const LocationContext = createContext(initialState);
 const LocationProvider: React.FC<Props> = ({ history, ...props }) => {
   const [location, setLocation] = useState(history.location);
-  history.listen(updatedLocation => setLocation(updatedLocation));
-  return <LocationContext.Provider {...props} value={location} />;
+  const [urlParams, dispatch] = useReducer(
+    urlParamsReducer,
+    resolveUrlParams(location)
+  );
+
+  history.listen(updatedLocation => {
+    setLocation(updatedLocation);
+    dispatch({ type: LOCATION_UPDATE, location: updatedLocation });
+  });
+
+  return (
+    <LocationContext.Provider
+      {...props}
+      value={{
+        location,
+        urlParams,
+        refreshTimeRange: (time: TimeRange) => dispatch(refreshTimeRange(time))
+      }}
+    />
+  );
 };
 
 export { LocationContext, LocationProvider };

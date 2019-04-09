@@ -25,7 +25,7 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {} }: Props) {
-  const location = useLocation();
+  const { location } = useLocation();
 
   const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
     location.search

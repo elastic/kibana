@@ -6,15 +6,10 @@
 
 import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { IReduxState } from '../../../store/rootReducer';
-import {
-  getUrlParams,
-  IUrlParams,
-  refreshTimeRange
-} from '../../../store/urlParams';
+import { IUrlParams, refreshTimeRange } from '../../../store/urlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
+import { LocationContext } from '../../../context/LocationContext';
 
 interface DatePickerProps extends RouteComponentProps {
   dispatchRefreshTimeRange: typeof refreshTimeRange;
@@ -49,42 +44,41 @@ export class DatePickerComponent extends React.Component<DatePickerProps> {
     this.updateUrl({ rangeFrom: start, rangeTo: end });
   };
 
-  public onRefresh: EuiSuperDatePickerProps['onRefresh'] = ({ start, end }) => {
-    this.props.dispatchRefreshTimeRange({ rangeFrom: start, rangeTo: end });
-  };
-
   public render() {
-    const {
-      rangeFrom,
-      rangeTo,
-      refreshPaused,
-      refreshInterval
-    } = this.props.urlParams;
     return (
-      <EuiSuperDatePicker
-        start={rangeFrom}
-        end={rangeTo}
-        isPaused={refreshPaused}
-        refreshInterval={refreshInterval}
-        onTimeChange={this.onTimeChange}
-        onRefresh={this.onRefresh}
-        onRefreshChange={this.onRefreshChange}
-        showUpdateButton={true}
-      />
+      <LocationContext.Consumer>
+        {({ urlParams, refreshTimeRange }) => {
+          const {
+            rangeFrom,
+            rangeTo,
+            refreshPaused,
+            refreshInterval
+          } = urlParams;
+
+          return (
+            <EuiSuperDatePicker
+              start={rangeFrom}
+              end={rangeTo}
+              isPaused={refreshPaused}
+              refreshInterval={refreshInterval}
+              onTimeChange={this.onTimeChange}
+              onRefresh={({ start, end }) => {
+                if (refreshTimeRange) {
+                  refreshTimeRange({
+                    rangeFrom: start,
+                    rangeTo: end
+                  });
+                }
+              }}
+              onRefreshChange={this.onRefreshChange}
+              showUpdateButton={true}
+            />
+          );
+        }}
+      </LocationContext.Consumer>
     );
   }
 }
 
-const mapStateToProps = (state: IReduxState) => ({
-  urlParams: getUrlParams(state)
-});
-const mapDispatchToProps = { dispatchRefreshTimeRange: refreshTimeRange };
-
-const DatePicker = withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(DatePickerComponent)
-);
-
+const DatePicker = withRouter(DatePickerComponent);
 export { DatePicker };
