@@ -79,8 +79,8 @@ class VisEditor extends Component {
     }
 
     if (this.props.isEditorMode) {
-      const { params, fields } = this.props.vis;
-      const extractedIndexPatterns = extractIndexPatterns(params, fields);
+      const { params } = this.props.vis;
+      const extractedIndexPatterns = extractIndexPatterns(params);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
         fetchFields(extractedIndexPatterns)
