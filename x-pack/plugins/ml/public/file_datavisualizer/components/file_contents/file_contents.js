@@ -26,7 +26,7 @@ export function FileContents({ data, format, numberOfLines }) {
     defaultMessage: 'File contents'
   });
   const fileContentsDescription = i18n.translate('xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription', {
-    defaultMessage: `First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}`,
+    defaultMessage: 'First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}',
     values: {
       numberOfLines
     }
