@@ -18,8 +18,10 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
@@ -60,7 +62,7 @@ describe('Edit Auto-follow pattern', () => {
   let getUserActions;
   let getFormErrorsMessages;
   let clickSaveForm;
-  let setLoadRemoteClusteresResponse;
+  let setLoadRemoteClustersResponse;
   let setGetFollowerIndexResponse;
 
   beforeEach(() => {
@@ -69,12 +71,12 @@ describe('Edit Auto-follow pattern', () => {
 
     // Register helpers to mock Http Requests
     ({
-      setLoadRemoteClusteresResponse,
+      setLoadRemoteClustersResponse,
       setGetFollowerIndexResponse
     } = registerHttpRequestMockHelpers(server));
 
     // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClusteresResponse();
+    setLoadRemoteClustersResponse();
 
     // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);
@@ -86,7 +88,7 @@ describe('Edit Auto-follow pattern', () => {
     ];
 
     beforeEach(async () => {
-      setLoadRemoteClusteresResponse(remoteClusters);
+      setLoadRemoteClustersResponse(remoteClusters);
       setGetFollowerIndexResponse(FOLLOWER_INDEX);
       ({ component, find } = initTestBed(FollowerIndexEdit, undefined, testBedOptions));
 
@@ -99,7 +101,7 @@ describe('Edit Auto-follow pattern', () => {
      * the "create" follower index, we won't test it again but simply make sure that
      * the form component is indeed shared between the 2 app sections.
      */
-    test('should use the same Form component that the "<FollowerIndexAdd />" component', async () => {
+    test('should use the same Form component as the "<FollowerIndexAdd />" component', async () => {
       const { component: addFollowerIndexComponent } = initTestBed(FollowerIndexAdd, undefined, testBedOptions);
 
       await nextTick();
@@ -113,26 +115,37 @@ describe('Edit Auto-follow pattern', () => {
     });
 
     test('should populate the form fields with the values from the follower index loaded', () => {
-      expect(find('ccrRemoteClusterInput').props().value).toBe(FOLLOWER_INDEX.remoteCluster);
-      expect(find('ccrFollowerIndexFormLeaderIndexInput').props().value).toBe(FOLLOWER_INDEX.leaderIndex);
-      expect(find('ccrFollowerIndexFormFollowerIndexInput').props().value).toBe(FOLLOWER_INDEX.name);
-      expect(find('ccrFollowerIndexFormMaxReadRequestOperationCountInput').props().value).toBe(FOLLOWER_INDEX.maxReadRequestOperationCount);
-      expect(find('ccrFollowerIndexFormMaxOutstandingReadRequestsInput').props().value).toBe(FOLLOWER_INDEX.maxOutstandingReadRequests);
-      expect(find('ccrFollowerIndexFormMaxReadRequestSizeInput').props().value).toBe(FOLLOWER_INDEX.maxReadRequestSize);
-      expect(find('ccrFollowerIndexFormMaxWriteRequestOperationCountInput').props().value)
-        .toBe(FOLLOWER_INDEX.maxWriteRequestOperationCount);
-      expect(find('ccrFollowerIndexFormMaxWriteRequestSizeInput').props().value).toBe(FOLLOWER_INDEX.maxWriteRequestSize);
-      expect(find('ccrFollowerIndexFormMaxOutstandingWriteRequestsInput').props().value).toBe(FOLLOWER_INDEX.maxOutstandingWriteRequests);
-      expect(find('ccrFollowerIndexFormMaxWriteBufferCountInput').props().value).toBe(FOLLOWER_INDEX.maxWriteBufferCount);
-      expect(find('ccrFollowerIndexFormMaxWriteBufferSizeInput').props().value).toBe(FOLLOWER_INDEX.maxWriteBufferSize);
-      expect(find('ccrFollowerIndexFormMaxRetryDelayInput').props().value).toBe(FOLLOWER_INDEX.maxRetryDelay);
-      expect(find('ccrFollowerIndexFormReadPollTimeoutInput').props().value).toBe(FOLLOWER_INDEX.readPollTimeout);
+      const inputToPropMap = {
+        ccrRemoteClusterInput: 'remoteCluster',
+        ccrFollowerIndexFormLeaderIndexInput: 'leaderIndex',
+        ccrFollowerIndexFormFollowerIndexInput: 'name',
+        ccrFollowerIndexFormMaxReadRequestOperationCountInput: 'maxReadRequestOperationCount',
+        ccrFollowerIndexFormMaxOutstandingReadRequestsInput: 'maxOutstandingReadRequests',
+        ccrFollowerIndexFormMaxReadRequestSizeInput: 'maxReadRequestSize',
+        ccrFollowerIndexFormMaxWriteRequestOperationCountInput: 'maxWriteRequestOperationCount',
+        ccrFollowerIndexFormMaxWriteRequestSizeInput: 'maxWriteRequestSize',
+        ccrFollowerIndexFormMaxOutstandingWriteRequestsInput: 'maxOutstandingWriteRequests',
+        ccrFollowerIndexFormMaxWriteBufferCountInput: 'maxWriteBufferCount',
+        ccrFollowerIndexFormMaxWriteBufferSizeInput: 'maxWriteBufferSize',
+        ccrFollowerIndexFormMaxRetryDelayInput: 'maxRetryDelay',
+        ccrFollowerIndexFormReadPollTimeoutInput: 'readPollTimeout',
+      };
+
+      Object.entries(inputToPropMap).forEach(([input, prop]) => {
+        const expected = FOLLOWER_INDEX[prop];
+        const { value } = find(input).props();
+        try {
+          expect(value).toBe(expected);
+        } catch {
+          throw new Error(`Input "${input}" does not equal "${expected}". (Value received: "${value}")`);
+        }
+      });
     });
   });
 
   describe('when the remote cluster is disconnected', () => {
     beforeEach(async () => {
-      setLoadRemoteClusteresResponse([{ name: 'new-york', seeds: ['localhost:123'], isConnected: false }]);
+      setLoadRemoteClustersResponse([{ name: 'new-york', seeds: ['localhost:123'], isConnected: false }]);
       setGetFollowerIndexResponse(FOLLOWER_INDEX);
       ({ component, find, getUserActions, getFormErrorsMessages } = initTestBed(FollowerIndexEdit, undefined, testBedOptions));
       ({ clickSaveForm } = getUserActions('followerIndexForm'));

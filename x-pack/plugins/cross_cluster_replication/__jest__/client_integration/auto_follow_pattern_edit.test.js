@@ -18,8 +18,10 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
@@ -90,7 +92,7 @@ describe('Edit Auto-follow pattern', () => {
      * the "create" auto-follow pattern, we won't test it again but simply make sure that
      * the form component is indeed shared between the 2 app sections.
      */
-    test('should use the same Form component that the "<AutoFollowPatternAdd />" component', async () => {
+    test('should use the same Form component as the "<AutoFollowPatternAdd />" component', async () => {
       const { component: addAutofollowPatternComponent } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions);
 
       await nextTick();

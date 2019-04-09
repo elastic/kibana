@@ -226,7 +226,7 @@ export const registerHttpRequestMockHelpers = server => {
     );
   };
 
-  const setLoadRemoteClusteresResponse = (response = [], error) => {
+  const setLoadRemoteClustersResponse = (response = [], error) => {
     if (error) {
       server.respondWith('GET', '/api/remote_clusters',
         [error.status || 400, { 'Content-Type': 'application/json' }, JSON.stringify(error.body)]
@@ -264,7 +264,7 @@ export const registerHttpRequestMockHelpers = server => {
     setLoadAutoFollowPatternsResponse,
     setDeleteAutoFollowPatternResponse,
     setAutoFollowStatsResponse,
-    setLoadRemoteClusteresResponse,
+    setLoadRemoteClustersResponse,
     setGetAutoFollowPatternResponse,
     setGetClusterIndicesResponse,
     setGetFollowerIndexResponse,

@@ -20,8 +20,10 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
@@ -117,7 +119,7 @@ describe('Create Follower index', () => {
       // The implementation of the remote cluster "Select" + validation is
       // done inside the <RemoteClustersFormField /> component. The same component that we use in the <AutoFollowPatternAdd /> section.
       // To avoid copy/pasting the same tests here, we simply make sure that both sections use the <RemoteClustersFormField />
-      test('should use the same <RemoteClustersFormField /> component that in the <AutoFollowPatternAdd /> section', async () => {
+      test('should use the same <RemoteClustersFormField /> component as the <AutoFollowPatternAdd /> section', async () => {
         const { component: autoFollowPatternAddComponent } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions);
         await nextTick();
         autoFollowPatternAddComponent.update();
@@ -193,7 +195,7 @@ describe('Create Follower index', () => {
           await nextTick(550); // we need to wait as there is a debounce of 500ms on the http validation
 
           expect(server.requests.length).toBe(totalRequests + 1);
-          expect(server.requests[totalRequests].url).toBe('/api/index_management/indices');
+          expect(server.requests[server.requests.length - 1].url).toBe('/api/index_management/indices');
         });
 
         test('should display an error if the index already exists', async () => {

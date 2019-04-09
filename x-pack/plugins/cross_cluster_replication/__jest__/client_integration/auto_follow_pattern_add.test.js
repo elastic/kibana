@@ -17,8 +17,10 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } = jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
+    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
@@ -37,7 +39,7 @@ describe('Create Auto-follow pattern', () => {
   let form;
   let getFormErrorsMessages;
   let clickSaveForm;
-  let setLoadRemoteClusteresResponse;
+  let setLoadRemoteClustersResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -45,11 +47,11 @@ describe('Create Auto-follow pattern', () => {
 
     // Register helpers to mock Http Requests
     ({
-      setLoadRemoteClusteresResponse
+      setLoadRemoteClustersResponse
     } = registerHttpRequestMockHelpers(server));
 
     // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClusteresResponse();
+    setLoadRemoteClustersResponse();
 
     // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);
@@ -121,7 +123,7 @@ describe('Create Auto-follow pattern', () => {
         expect(getFormErrorsMessages()).toContain(`Name can't begin with an underscore.`);
       });
 
-      test('should not allow a "," (coma)', () => {
+      test('should not allow a "," (comma)', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with,coma');
         clickSaveForm();
         expect(getFormErrorsMessages()).toContain(`Commas are not allowed in the name.`);
@@ -131,7 +133,7 @@ describe('Create Auto-follow pattern', () => {
     describe('remote clusters', () => {
       describe('when no remote clusters were found', () => {
         test('should indicate it and have a button to add one', async () => {
-          setLoadRemoteClusteresResponse([]);
+          setLoadRemoteClustersResponse([]);
 
           ({ find, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
           await nextTick();
@@ -144,8 +146,8 @@ describe('Create Auto-follow pattern', () => {
       });
 
       describe('when there was an error loading the remote clusters', () => {
-        test('should also indicate it and have a button to add one', async () => {
-          setLoadRemoteClusteresResponse(undefined, { body: 'Houston we got a problem' });
+        test('should indicate no clusters found and have a button to add one', async () => {
+          setLoadRemoteClustersResponse(undefined, { body: 'Houston we got a problem' });
 
           ({ find, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
           await nextTick();
@@ -166,7 +168,7 @@ describe('Create Auto-follow pattern', () => {
         }];
 
         beforeEach(async () => {
-          setLoadRemoteClusteresResponse(remoteClusters);
+          setLoadRemoteClustersResponse(remoteClusters);
 
           ({ find, exists, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
           await nextTick();
