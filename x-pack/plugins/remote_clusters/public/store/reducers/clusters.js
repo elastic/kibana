@@ -9,6 +9,7 @@ import {
   LOAD_CLUSTERS_SUCCESS,
   LOAD_CLUSTERS_FAILURE,
   REFRESH_CLUSTERS_SUCCESS,
+  REMOVE_CLUSTERS_FINISH,
 } from '../action_types';
 
 const initialState = {
@@ -19,17 +20,16 @@ const initialState = {
   allNames: [],
 };
 
-function mapClustersToNames(clusters) {
-  const clustersByName = {};
-  clusters.forEach(cluster => {
-    clustersByName[cluster.name] = cluster;
-  });
-  return clustersByName;
-}
+// Convert an  Array of clusters to an object where
+// each key is the cluster name
+const mapClustersToNames = (clusters) => (
+  clusters.reduce((byName, cluster) => ({
+    ...byName,
+    [cluster.name]: cluster
+  }), {})
+);
 
-function getClustersNames(clusters) {
-  return clusters.map(cluster => cluster.name);
-}
+const getClustersNames = (clusters) => clusters.map(cluster => cluster.name);
 
 export function clusters(state = initialState, action) {
   const { type, payload } = action;
@@ -61,6 +61,20 @@ export function clusters(state = initialState, action) {
         ...state,
         isLoading: false,
         clusterLoadError: payload.error
+      };
+
+    case REMOVE_CLUSTERS_FINISH:
+      const clustersRemoved = payload;
+
+      const updatedList = Object.keys(state.byName)
+        .filter(name => clustersRemoved.indexOf(name) < 0)
+        .map(name => state.byName[name]);
+
+      return {
+        ...state,
+        asList: updatedList,
+        byName: mapClustersToNames(updatedList),
+        allNames: getClustersNames(updatedList)
       };
 
     default:

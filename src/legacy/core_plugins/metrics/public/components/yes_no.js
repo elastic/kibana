@@ -41,6 +41,7 @@ function YesNo(props) {
         label={(<FormattedMessage
           id="tsvb.yesButtonLabel"
           defaultMessage="Yes"
+          description="The 'yes' in a yes/no answer choice."
         />)}
         className="eui-displayInlineBlock"
         name={inputName}
@@ -56,6 +57,7 @@ function YesNo(props) {
         label={(<FormattedMessage
           id="tsvb.noButtonLabel"
           defaultMessage="No"
+          description="The 'no' in a yes/no answer choice."
         />)}
         className="eui-displayInlineBlock"
         name={inputName}
