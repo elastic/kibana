@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 const errors = [
   {
-    defaultMessage: '"or" requires a left and right and side',
+    defaultMessage: '"or" requires a left and right side',
     key: 'kbnESQuery.kql.missingOrSubQuerySyntaxError',
   },
 ];

@@ -27,10 +27,16 @@ start
 
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
+  / 'or'i Space+ OrQuery {
+    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
+  }
   / left:AndQuery Or right:OrQuery {
     const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
+  }
+  / AndQuery Or {
+    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
   }
   / AndQuery
 
@@ -117,7 +123,10 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+  = 'or'i Space+ OrListOfValues {
+    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
+  }
+  / partialLeft:AndListOfValues Or partialRight:OrListOfValues {
     const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
     if (cursor) {
       return {
@@ -127,6 +136,9 @@ OrListOfValues
     }
     return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
   }
+  / AndListOfValues Or {
+    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
+   }
   / AndListOfValues
 
 AndListOfValues
