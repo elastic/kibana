@@ -23,7 +23,7 @@ export const TIMEPICKER_DEFAULTS = {
   refreshInterval: '0'
 };
 
-interface TimeRange {
+export interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
@@ -61,6 +61,61 @@ function getEnd(prevState: IUrlParams, rangeTo?: string) {
   return prevState.end;
 }
 
+export function resolveUrlParams(location: Location, state: IUrlParams = {}) {
+  const {
+    processorEvent,
+    serviceName,
+    transactionName,
+    transactionType,
+    errorGroupId
+  } = getPathParams(location.pathname);
+
+  const {
+    traceId,
+    transactionId,
+    detailTab,
+    flyoutDetailTab,
+    waterfallItemId,
+    spanId,
+    page,
+    sortDirection,
+    sortField,
+    kuery,
+    refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
+    refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
+    rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
+    rangeTo = TIMEPICKER_DEFAULTS.rangeTo
+  } = toQuery(location.search);
+
+  return removeUndefinedProps({
+    ...state,
+    // date params
+    start: getStart(state, rangeFrom),
+    end: getEnd(state, rangeTo),
+    rangeFrom,
+    rangeTo,
+    refreshPaused: toBoolean(refreshPaused),
+    refreshInterval: toNumber(refreshInterval),
+    // query params
+    sortDirection,
+    sortField,
+    page: toNumber(page) || 0,
+    transactionId: toString(transactionId),
+    traceId: toString(traceId),
+    waterfallItemId: toString(waterfallItemId),
+    detailTab: toString(detailTab),
+    flyoutDetailTab: toString(flyoutDetailTab),
+    spanId: toNumber(spanId),
+    kuery: legacyDecodeURIComponent(kuery),
+    // path params
+    processorEvent,
+    serviceName,
+    transactionType: legacyDecodeURIComponent(transactionType),
+    transactionName: legacyDecodeURIComponent(transactionName),
+    errorGroupId
+  });
+}
+
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
 
@@ -75,61 +130,7 @@ export function urlParamsReducer(
 ): IUrlParams {
   switch (action.type) {
     case LOCATION_UPDATE: {
-      const {
-        processorEvent,
-        serviceName,
-        transactionName,
-        transactionType,
-        errorGroupId
-      } = getPathParams(action.location.pathname);
-
-      const {
-        traceId,
-        transactionId,
-        detailTab,
-        flyoutDetailTab,
-        waterfallItemId,
-        spanId,
-        page,
-        sortDirection,
-        sortField,
-        kuery,
-        refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
-        refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
-        rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
-        rangeTo = TIMEPICKER_DEFAULTS.rangeTo
-      } = toQuery(action.location.search);
-
-      return removeUndefinedProps({
-        ...state,
-
-        // date params
-        start: getStart(state, rangeFrom),
-        end: getEnd(state, rangeTo),
-        rangeFrom,
-        rangeTo,
-        refreshPaused: toBoolean(refreshPaused),
-        refreshInterval: toNumber(refreshInterval),
-
-        // query params
-        sortDirection,
-        sortField,
-        page: toNumber(page) || 0,
-        transactionId: toString(transactionId),
-        traceId: toString(traceId),
-        waterfallItemId: toString(waterfallItemId),
-        detailTab: toString(detailTab),
-        flyoutDetailTab: toString(flyoutDetailTab),
-        spanId: toNumber(spanId),
-        kuery: legacyDecodeURIComponent(kuery),
-
-        // path params
-        processorEvent,
-        serviceName,
-        transactionType: legacyDecodeURIComponent(transactionType),
-        transactionName: legacyDecodeURIComponent(transactionName),
-        errorGroupId
-      });
+      return resolveUrlParams(action.location);
     }
 
     case TIME_RANGE_REFRESH:
