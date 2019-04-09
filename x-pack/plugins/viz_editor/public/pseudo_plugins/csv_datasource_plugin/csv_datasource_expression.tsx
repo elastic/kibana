@@ -37,7 +37,7 @@ function filterRows(keep: string[], columnNames: string[], rows: Array<{ [id: st
 function literalTableFunction() {
   return {
     name: 'literal_table',
-    type: 'datatable',
+    type: 'kibana_datatable',
     args: {
       lines: {
         types: ['string'],
@@ -76,7 +76,7 @@ function literalTableFunction() {
       });
 
       return {
-        type: 'datatable',
+        type: 'kibana_datatable',
         rows: filterRows(keepColumns, columnNames, parsedRows),
         columns: filterColumns(keepColumns, columnNames, columns),
       };
