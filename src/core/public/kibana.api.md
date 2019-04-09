@@ -178,7 +178,7 @@ export interface OverlaySetup {
 // @public
 export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, dependencies: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
     stop?: () => void;
 }

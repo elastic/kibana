@@ -14,6 +14,6 @@ export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> =
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [setup](./kibana-plugin-public.plugin.setup.md) | <code>(core: PluginSetupContext, dependencies: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
+|  [setup](./kibana-plugin-public.plugin.setup.md) | <code>(core: PluginSetupContext, plugins: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
 |  [stop](./kibana-plugin-public.plugin.stop.md) | <code>() =&gt; void</code> |  |
 
