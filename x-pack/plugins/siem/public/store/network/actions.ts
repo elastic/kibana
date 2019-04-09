@@ -64,11 +64,12 @@ export const applyNetworkFilterQuery = actionCreator<{
   networkType: NetworkType;
 }>('APPLY_NETWORK_FILTER_QUERY');
 
-// IP Overview Actions
-export const updateIpOverviewFlowTarget = actionCreator<{
+// IP Details Actions
+export const updateIpDetailsFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
-}>('UPDATE_IP_OVERVIEW_TARGET');
+}>('UPDATE_IP_DETAILS_TARGET');
 
+// Domains Table Actions
 export const updateDomainsLimit = actionCreator<{
   limit: number;
 }>('UPDATE_DOMAINS_LIMIT');
@@ -80,7 +81,3 @@ export const updateDomainsFlowDirection = actionCreator<{
 export const updateDomainsSort = actionCreator<{
   domainsSortField: DomainsSortField;
 }>('UPDATE_DOMAINS_SORT');
-
-export const updateDomainsFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
-}>('UPDATE_DOMAINS_TARGET');

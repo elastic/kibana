@@ -68,14 +68,11 @@ export const mockGlobalState: State = {
     details: {
       filterQuery: null,
       filterQueryDraft: null,
+      flowTarget: FlowTarget.source,
       queries: {
-        ipOverview: {
-          flowTarget: FlowTarget.source,
-        },
         domains: {
           limit: 10,
           flowDirection: FlowDirection.uniDirectional,
-          flowTarget: FlowTarget.source,
           domainsSortField: { field: DomainsFields.domainName, direction: Direction.desc },
         },
       },

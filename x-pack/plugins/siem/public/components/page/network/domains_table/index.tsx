@@ -56,10 +56,6 @@ interface DomainsTableDispatchProps {
     domainsSort: DomainsSortField;
     networkType: networkModel.NetworkType;
   }>;
-  updateDomainsTarget: ActionCreator<{
-    flowTarget: FlowTarget;
-    networkType: networkModel.NetworkType;
-  }>;
 }
 
 type DomainsTableProps = OwnProps & DomainsTableReduxProps & DomainsTableDispatchProps;
@@ -162,16 +158,17 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     }
   };
 
-  // private onChangeDomainsFlowTarget = (flowTarget: FlowTarget) =>
-  //   this.props.updateDomainsFlowTarget({ flowTarget, networkType: this.props.type });
-
   private onChangeDomainsDirection = (_: string, flowDirection: FlowDirection) =>
     this.props.updateDomainsDirection({ flowDirection, networkType: this.props.type });
 }
 
 const makeMapStateToProps = () => {
   const getDomainsSelector = networkSelectors.domainsSelector();
-  const mapStateToProps = (state: State) => getDomainsSelector(state);
+  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
+  const mapStateToProps = (state: State) => ({
+    ...getDomainsSelector(state),
+    flowTarget: getIpDetailsFlowTargetSelector(state),
+  });
   return mapStateToProps;
 };
 
@@ -181,6 +178,5 @@ export const DomainsTable = connect(
     updateDomainsLimit: networkActions.updateDomainsLimit,
     updateDomainsDirection: networkActions.updateDomainsFlowDirection,
     updateDomainsSort: networkActions.updateDomainsSort,
-    updateDomainsTarget: networkActions.updateDomainsFlowTarget,
   }
 )(DomainsTableComponent);

@@ -47,8 +47,8 @@ interface DescriptionList {
 }
 
 interface OwnProps {
-  ip: string;
   data: IpOverviewData;
+  ip: string;
   loading: boolean;
   type: networkModel.NetworkType;
 }
@@ -57,13 +57,13 @@ interface IpOverviewReduxProps {
   flowTarget: FlowTarget;
 }
 
-interface IpOverViewDispatchProps {
-  updateIpOverviewFlowType: ActionCreator<{
+interface IpOverviewDispatchProps {
+  updateIpDetailsFlowType: ActionCreator<{
     flowTarget: FlowTarget;
   }>;
 }
 
-type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps;
+type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverviewDispatchProps;
 
 class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {
@@ -161,19 +161,21 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   };
 
   private onChangeTarget = (flowTarget: FlowTarget) => {
-    this.props.updateIpOverviewFlowType({ flowTarget });
+    this.props.updateIpDetailsFlowType({ flowTarget });
   };
 }
 
 const makeMapStateToProps = () => {
-  const getIpOverviewSelector = networkSelectors.ipOverviewSelector();
-  const mapStateToProps = (state: State) => getIpOverviewSelector(state);
+  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
+  const mapStateToProps = (state: State) => ({
+    flowTarget: getIpDetailsFlowTargetSelector(state),
+  });
   return mapStateToProps;
 };
 
 export const IpOverview = connect(
   makeMapStateToProps,
   {
-    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowTarget,
+    updateIpDetailsFlowType: networkActions.updateIpDetailsFlowTarget,
   }
 )(IpOverviewComponent);

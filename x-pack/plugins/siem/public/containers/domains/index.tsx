@@ -29,15 +29,15 @@ export interface DomainsArgs {
 
 export interface OwnProps extends QueryTemplateProps {
   children: (args: DomainsArgs) => React.ReactNode;
+  flowTarget: FlowTarget;
+  ip: string;
   type: networkModel.NetworkType;
 }
 
 export interface DomainsComponentReduxProps {
   limit: number;
-  ip: string;
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
-  flowTarget: FlowTarget;
 }
 
 type DomainsProps = OwnProps & DomainsComponentReduxProps;
@@ -130,7 +130,11 @@ class DomainsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getDomainsSelector = networkSelectors.domainsSelector();
-  const mapStateToProps = (state: State) => getDomainsSelector(state);
+  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
+  const mapStateToProps = (state: State) => ({
+    ...getDomainsSelector(state),
+    flowTarget: getIpDetailsFlowTargetSelector(state),
+  });
 
   return mapStateToProps;
 };

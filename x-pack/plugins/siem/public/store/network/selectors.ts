@@ -52,10 +52,10 @@ export const isNetworkFilterQueryDraftValid = () =>
   );
 
 // IP Details Selectors
-export const ipOverviewSelector = () =>
+export const ipDetailsFlowTargetSelector = () =>
   createSelector(
     selectNetworkDetails,
-    network => network.queries.ipOverview
+    network => network.flowTarget
   );
 
 export const domainsSelector = () =>

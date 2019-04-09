@@ -47,23 +47,18 @@ export interface NetworkPageModel {
 
 // IP Details Models
 export interface DomainsQuery extends BasicQuery {
-  flowTarget: FlowTarget;
   flowDirection: FlowDirection;
   domainsSortField: DomainsSortField;
 }
 
-export interface IpOverviewQuery {
-  flowTarget: FlowTarget;
-}
-
 interface IpOverviewQueries {
   domains: DomainsQuery;
-  ipOverview: IpOverviewQuery;
 }
 
 export interface NetworkDetailsModel {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
+  flowTarget: FlowTarget;
   queries: IpOverviewQueries;
 }
 

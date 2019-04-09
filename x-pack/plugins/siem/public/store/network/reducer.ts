@@ -22,10 +22,9 @@ import {
   updateDnsLimit,
   updateDnsSort,
   updateDomainsFlowDirection,
-  updateDomainsFlowTarget,
   updateDomainsLimit,
   updateDomainsSort,
-  updateIpOverviewFlowTarget,
+  updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
@@ -63,12 +62,8 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
-      ipOverview: {
-        flowTarget: FlowTarget.source,
-      },
       domains: {
         flowDirection: FlowDirection.uniDirectional,
-        flowTarget: FlowTarget.source,
         limit: DEFAULT_TABLE_LIMIT,
         domainsSortField: {
           field: DomainsFields.domainName,
@@ -78,6 +73,7 @@ export const initialNetworkState: NetworkState = {
     },
     filterQuery: null,
     filterQueryDraft: null,
+    flowTarget: FlowTarget.source,
   },
 };
 
@@ -195,17 +191,11 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       filterQuery,
     },
   }))
-  .case(updateIpOverviewFlowTarget, (state, { flowTarget }) => ({
+  .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
     ...state,
     [NetworkType.details]: {
       ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        ipOverview: {
-          ...state[NetworkType.details].queries.ipOverview,
-          flowTarget,
-        },
-      },
+      flowTarget,
     },
   }))
   .case(updateDomainsLimit, (state, { limit }) => ({
@@ -243,19 +233,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         domains: {
           ...state[NetworkType.details].queries.domains,
           domainsSortField,
-        },
-      },
-    },
-  }))
-  .case(updateDomainsFlowTarget, (state, { flowTarget }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        domains: {
-          ...state[NetworkType.details].queries.domains,
-          flowTarget,
         },
       },
     },
