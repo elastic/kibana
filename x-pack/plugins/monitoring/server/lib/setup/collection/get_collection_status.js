@@ -119,6 +119,21 @@ function getUuidBucketName(productName) {
   }
 }
 
+/**
+ * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
+ * and determine which products fall into one of three states:
+ * - isPartiallyMigrated: This means we are seeing some monitoring documents from MB and some from internal collection
+ * - isFullyMigrated: This means we are only seeing monitoring documents from MB
+ * - isInternalCollector: This means we are only seeing monitoring documents from internal collection
+ *
+ * If a product is partially migrated, this function will also return the timestamp of the last seen monitoring
+ * document from internal collection. This will help the user understand if they successfully disabled internal
+ * collection and just need to wait for the time window of the query to exclude the older, internally collected documents
+
+ * @param {*} req Standard request object. Can contain a timeRange to use for the query
+ * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
+ * @param {*} clusterUuid Optional and will be used to filter down the query if used
+ */
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
