@@ -29,7 +29,7 @@ import { FetchNowProvider } from './fetch_now';
  * @param Promise
  * @constructor
  */
-export function FetchSoonProvider(Private, Promise) {
+export function FetchSoonProvider(Private) {
 
   const fetchNow = Private(FetchNowProvider);
   let requestsToFetch = [];

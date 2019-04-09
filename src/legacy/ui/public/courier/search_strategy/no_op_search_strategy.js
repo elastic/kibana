@@ -39,7 +39,6 @@ export const noOpSearchStrategy = {
     return {
       searching: Promise.reject(searchError),
       abort: () => {},
-      failedSearchRequests: [],
     };
   },
 

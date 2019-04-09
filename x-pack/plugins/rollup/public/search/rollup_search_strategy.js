@@ -7,41 +7,6 @@
 import { kfetchAbortable } from 'ui/kfetch';
 import { SearchError, getSearchErrorType } from 'ui/courier';
 
-function getAllFetchParams(searchRequests, Promise) {
-  return Promise.map(searchRequests, (searchRequest) => {
-    return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
-      .then((fetchParams) => {
-        return (searchRequest.fetchParams = fetchParams);
-      })
-      .then(value => ({ resolved: value }))
-      .catch(error => ({ rejected: error }));
-  });
-}
-
-function serializeAllFetchParams(fetchParams, searchRequests) {
-  const searchRequestsWithFetchParams = [];
-  const failedSearchRequests = [];
-
-  // Gather the fetch param responses from all the successful requests.
-  fetchParams.forEach((result, index) => {
-    if (result.resolved) {
-      searchRequestsWithFetchParams.push(result.resolved);
-    } else {
-      const searchRequest = searchRequests[index];
-
-      searchRequest.handleFailure(result.rejected);
-      failedSearchRequests.push(searchRequest);
-    }
-  });
-
-  const serializedFetchParams = serializeFetchParams(searchRequestsWithFetchParams);
-
-  return {
-    serializedFetchParams,
-    failedSearchRequests,
-  };
-}
-
 function serializeFetchParams(searchRequestsWithFetchParams) {
   return JSON.stringify(searchRequestsWithFetchParams.map(searchRequestWithFetchParams => {
     const indexPattern = searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
@@ -84,16 +49,13 @@ function shimHitsInFetchResponse(response) {
 export const rollupSearchStrategy = {
   id: 'rollup',
 
-  search: async ({ searchRequests, Promise }) => {
+  search: async ({ searchRequests }) => {
     // Flatten the searchSource within each searchRequest to get the fetch params,
     // e.g. body, filters, index pattern, query.
-    const allFetchParams = await getAllFetchParams(searchRequests, Promise);
+    const allFetchParams = searchRequests.map(searchRequest => searchRequest.getFetchParams());
 
     // Serialize the fetch params into a format suitable for the body of an ES query.
-    const {
-      serializedFetchParams,
-      failedSearchRequests,
-    } = await serializeAllFetchParams(allFetchParams, searchRequests);
+    const serializedFetchParams = serializeFetchParams(allFetchParams);
 
     const {
       fetching,
@@ -127,7 +89,6 @@ export const rollupSearchStrategy = {
         });
       }),
       abort,
-      failedSearchRequests,
     };
   },
 

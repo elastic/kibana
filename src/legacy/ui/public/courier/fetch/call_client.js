@@ -22,7 +22,7 @@ import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_inde
 import { getSearchStrategyForSearchRequest } from '../search_strategy';
 import { serializeFetchParams } from './request/serialize_fetch_params';
 
-export function CallClientProvider(Private, Promise, es, config, sessionId, esShardTimeout) {
+export function CallClientProvider(Private, es, config, sessionId, esShardTimeout) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
 
   return async function callClient(searchRequests) {
@@ -48,7 +48,6 @@ export function CallClientProvider(Private, Promise, es, config, sessionId, esSh
         const { searching } = await searchStrategy.search({
           searchRequests: requests,
           es,
-          Promise,
           serializeFetchParams,
           includeFrozen,
           maxConcurrentShardRequests,
