@@ -19,7 +19,7 @@ Requests are made directly from the browser to EMS.
 === Disabling Elastic Maps Service
 
 You might experience EMS connection issues if your Kibana server or browser are on a private network or
-behind a firewall. If this happens to you, you can disable the EMS connection to avoid unnecessary EMS meta data requests.
+behind a firewall. If this happens, you can disable the EMS connection to avoid unnecessary EMS requests.
 
 To disable EMS, change your <<settings, kibana.yml>> file.
 
