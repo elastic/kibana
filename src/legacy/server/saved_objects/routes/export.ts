@@ -24,8 +24,6 @@ import { SavedObjectsClient } from '../';
 import { getSortedObjectsForExport } from '../export';
 import { Prerequisites } from './types';
 
-const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
-
 interface ExportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
@@ -49,13 +47,12 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string().valid(ALLOWED_TYPES))
+            .items(Joi.string())
             .single()
             .optional(),
           objects: Joi.array()
             .items({
               type: Joi.string()
-                .valid(ALLOWED_TYPES)
                 .required(),
               id: Joi.string().required(),
             })
