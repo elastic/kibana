@@ -58,7 +58,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toBeNull();
     });
 
-    test('it returns userName if that is all that is defined', () => {
+    test('it returns userName if that is the only attribute defined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
@@ -75,7 +75,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('[user-name-123]');
     });
 
-    test('it returns hostName if that is all that is defined', () => {
+    test('it returns hostName if that is the only attribute defined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
@@ -92,7 +92,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('[host-name-123]');
     });
 
-    test('it returns "in" + workingDirectory if that is all that is defined', () => {
+    test('it returns "in" + workingDirectory if that is the only attribute defined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
