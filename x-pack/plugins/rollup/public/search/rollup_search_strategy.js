@@ -67,27 +67,23 @@ export const rollupSearchStrategy = {
     });
 
     return {
-      searching: new Promise((resolve, reject) => {
-        fetching.then(result => {
-          resolve(shimHitsInFetchResponse(result));
-        }).catch(error => {
+      searching: fetching
+        .then(result => shimHitsInFetchResponse(result))
+        .catch(error => {
           const {
             body: { statusText, error: title, message },
             res: { url },
           } = error;
 
           // Format kfetch error as a SearchError.
-          const searchError = new SearchError({
+          throw new SearchError({
             status: statusText,
             title,
             message: `Rollup search error: ${message}`,
             path: url,
             type: getSearchErrorType({ message }),
           });
-
-          reject(searchError);
-        });
-      }),
+        }),
       abort,
     };
   },

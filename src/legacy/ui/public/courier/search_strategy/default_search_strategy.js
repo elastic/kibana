@@ -58,24 +58,20 @@ export const defaultSearchStrategy = {
 
     return {
       // Munge data into shape expected by consumer.
-      searching: new Promise((resolve, reject) => {
+      searching: searching
         // Unwrap the responses object returned by the ES client.
-        searching.then(({ responses }) => {
-          resolve(responses);
-        }).catch(error => {
+        .then(({ responses }) => responses)
+        .catch(error => {
           // Format ES client error as a SearchError.
           const { statusCode, displayName, message, path } = error;
 
-          const searchError = new SearchError({
+          throw new SearchError({
             status: statusCode,
             title: displayName,
             message,
             path,
           });
-
-          reject(searchError);
-        });
-      }),
+        }),
       abort: searching.abort,
     };
   },
