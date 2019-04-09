@@ -25,9 +25,12 @@ import { Field } from './field';
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
-    addDanger: () => {}
+    addDanger: () => {},
+    add: jest.fn(),
   }
 }));
+
+import { toastNotifications } from 'ui/notify';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
@@ -393,5 +396,29 @@ describe('Field', () => {
         });
       });
     }
+  });
+
+  it('should show a reload toast when saving setting requiring a page reload', async () => {
+    const setting = {
+      ...settings.string,
+      requiresPageReload: true,
+    };
+    const wrapper = mountWithIntl(
+      <Field.WrappedComponent
+        setting={setting}
+        save={save}
+        clear={clear}
+      />
+    );
+    wrapper.instance().onFieldChange({ target: { value: 'a new value' } });
+    wrapper.update();
+    findTestSubject(wrapper, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
+    expect(save).toHaveBeenCalled();
+    await save();
+    expect(toastNotifications.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining('You need to reload the page'),
+      }),
+    );
   });
 });
