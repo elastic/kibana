@@ -17,7 +17,7 @@ import {
 
 export function AnalysisSummary({ results }) {
   const items = createDisplayItems(results);
-  const itemsWithI18n = pimpOutDisplayItemsWithAriaAndI18n(items);
+  const itemsWithI18n = addAriaAndI18nToDisplayItems(items);
 
   return (
     <React.Fragment>
@@ -42,10 +42,13 @@ export function AnalysisSummary({ results }) {
   );
 }
 
-function pimpOutDisplayItemsWithAriaAndI18n(items) {
-  return items.map(item => Object.assign(item, {
-    title: <span aria-label={`${item.title}: ${item.description}`}>{item.title}</span>
-  }));
+function addAriaAndI18nToDisplayItems(items) {
+  return items.map(item => (
+    {
+      ...item,
+      title: <span aria-label={`${item.title}: ${item.description}`}>{item.title}</span>
+    }
+  ));
 }
 
 function createDisplayItems(results) {
