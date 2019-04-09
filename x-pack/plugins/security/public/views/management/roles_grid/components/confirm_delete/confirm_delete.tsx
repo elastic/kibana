@@ -98,7 +98,7 @@ class ConfirmDeleteUI extends Component<Props, {}> {
             <p>
               <FormattedMessage
                 id="xpack.security.management.roles.deletingRolesWarningMessage"
-                defaultMessage="This operation cannot be undone."
+                defaultMessage="You can't undo this operation."
               />
             </p>
           </div>

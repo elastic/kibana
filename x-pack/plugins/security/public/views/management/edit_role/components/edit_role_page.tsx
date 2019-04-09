@@ -113,7 +113,7 @@ class EditRolePageUI extends Component<Props, State> {
                 title={
                   <FormattedMessage
                     id="xpack.security.management.editRole.disabledRoleMessage"
-                    defaultMessage="This role is currently disabled. You may only view or delete it."
+                    defaultMessage="This role is currently disabled. You can only view or delete it."
                   />
                 }
               />
