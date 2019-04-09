@@ -148,10 +148,45 @@ export interface InjectedMetadataParams {
     };
 }
 
-// Warning: (ae-forgotten-export) The symbol "InjectedMetadataService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
+// @public
+export interface InjectedMetadataSetup {
+    // (undocumented)
+    getBasePath: () => string;
+    // (undocumented)
+    getCspConfig: () => {
+        warnLegacyBrowsers: boolean;
+    };
+    // (undocumented)
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    // (undocumented)
+    getInjectedVars: () => {
+        [key: string]: unknown;
+    };
+    // (undocumented)
+    getKibanaVersion: () => string;
+    // (undocumented)
+    getLegacyMetadata: () => {
+        app: unknown;
+        translations: unknown;
+        bundleId: string;
+        nav: unknown;
+        version: string;
+        branch: string;
+        buildNum: number;
+        buildSha: string;
+        basePath: string;
+        serverName: string;
+        devMode: boolean;
+        uiSettings: {
+            defaults: UiSettingsState;
+            user?: UiSettingsState | undefined;
+        };
+    };
+    getPlugins: () => Array<{
+        id: string;
+        plugin: DiscoveredPlugin;
+    }>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "NotificationsService" needs to be exported by the entry point index.d.ts
 // 

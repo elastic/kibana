@@ -1,0 +1,25 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) &gt; [getLegacyMetadata](./kibana-plugin-public.injectedmetadatasetup.getlegacymetadata.md)
+
+## InjectedMetadataSetup.getLegacyMetadata property
+
+<b>Signature:</b>
+
+```typescript
+getLegacyMetadata: () => {
+        app: unknown;
+        translations: unknown;
+        bundleId: string;
+        nav: unknown;
+        version: string;
+        branch: string;
+        buildNum: number;
+        buildSha: string;
+        basePath: string;
+        serverName: string;
+        devMode: boolean;
+        uiSettings: {
+            defaults: UiSettingsState;
+            user?: UiSettingsState | undefined;
+        };
+    };
+```
