@@ -64,6 +64,7 @@ function FieldParamEditor({
         },
       })
     );
+    setTouched();
   }
 
   useEffect(
@@ -86,6 +87,7 @@ function FieldParamEditor({
           defaultMessage: 'Select a field…',
         })}
         options={indexedFields}
+        isDisabled={!indexedFields.length}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         isClearable={false}

@@ -102,7 +102,7 @@ uiModules
               // The model can become touched either onBlur event or when the form is submitted.
               return ngModelCtrl.$touched;
             }, (value) => {
-              if (value === true) {
+              if (value) {
                 showValidation();
               }
             }, true);

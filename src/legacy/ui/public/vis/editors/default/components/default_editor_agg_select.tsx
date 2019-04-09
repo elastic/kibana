@@ -82,6 +82,21 @@ function DefaultEditorAggSelect({
     </EuiLink>
   );
 
+  const errors = [];
+
+  if (!aggTypeOptions.length) {
+    errors.push(
+      i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
+        defaultMessage:
+          'The {indexPatternTitle} index pattern does not contain any of aggregations.',
+        values: {
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+        },
+      })
+    );
+    setTouched();
+  }
+
   useEffect(
     () => {
       // The selector will be invalid when the value is empty.
@@ -94,6 +109,7 @@ function DefaultEditorAggSelect({
     <EuiFormRow
       label={label}
       labelAppend={helpLink}
+      error={errors}
       isInvalid={isSelectInvalid}
       fullWidth={true}
       className="visEditorAggSelect__formRow"
@@ -103,6 +119,7 @@ function DefaultEditorAggSelect({
           defaultMessage: 'Select an aggregation…',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
+        isDisabled={!aggTypeOptions.length}
         options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
