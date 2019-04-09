@@ -19,7 +19,8 @@ import {
 
 import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
-import { API_STATUS } from '../../../constants';
+import { trackUiMetric } from '../../../services/track_ui_metric';
+import { API_STATUS, UIM_FOLLOWER_INDEX_TAB_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { FollowerIndicesTable, DetailPanel } from './components';
 
@@ -57,6 +58,7 @@ export class FollowerIndicesList extends PureComponent {
   componentDidMount() {
     const { loadFollowerIndices, selectFollowerIndex, history } = this.props;
 
+    trackUiMetric(UIM_FOLLOWER_INDEX_TAB_LOAD);
     loadFollowerIndices();
 
     // Select the pattern in the URL query params
