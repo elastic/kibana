@@ -183,6 +183,16 @@ export interface InfraLogEntry {
   gid: string;
   /** The source id */
   source: string;
+  /** The columns used for rendering the log entry */
+  columns: InfraLogEntryColumn[];
+}
+/** A special built-in column that contains the log entry's timestamp */
+export interface InfraLogEntryTimestampColumn {
+  /** The timestamp */
+  timestamp: number;
+}
+/** A special built-in column that contains the log entry's constructed message */
+export interface InfraLogEntryMessageColumn {
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -195,7 +205,7 @@ export interface InfraLogMessageFieldSegment {
   /** A list of highlighted substrings of the value */
   highlights: string[];
 }
-/** A segment of the log entry message that was derived from a field */
+/** A segment of the log entry message that was derived from a string literal */
 export interface InfraLogMessageConstantSegment {
   /** The segment's message */
   constant: string;
@@ -641,6 +651,9 @@ export enum InfraOperator {
 
 /** All known log column types */
 export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
+
+/** A column of a log entry */
+export type InfraLogEntryColumn = InfraLogEntryTimestampColumn | InfraLogEntryMessageColumn;
 
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
@@ -1182,8 +1195,8 @@ export namespace InfraLogEntryResolvers {
     gid?: GidResolver<string, TypeParent, Context>;
     /** The source id */
     source?: SourceResolver<string, TypeParent, Context>;
-    /** A list of the formatted log entry segments */
-    message?: MessageResolver<InfraLogMessageSegment[], TypeParent, Context>;
+    /** The columns used for rendering the log entry */
+    columns?: ColumnsResolver<InfraLogEntryColumn[], TypeParent, Context>;
   }
 
   export type KeyResolver<
@@ -1201,9 +1214,35 @@ export namespace InfraLogEntryResolvers {
     Parent,
     Context
   >;
+  export type ColumnsResolver<
+    R = InfraLogEntryColumn[],
+    Parent = InfraLogEntry,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** A special built-in column that contains the log entry's timestamp */
+export namespace InfraLogEntryTimestampColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryTimestampColumn> {
+    /** The timestamp */
+    timestamp?: TimestampResolver<number, TypeParent, Context>;
+  }
+
+  export type TimestampResolver<
+    R = number,
+    Parent = InfraLogEntryTimestampColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** A special built-in column that contains the log entry's constructed message */
+export namespace InfraLogEntryMessageColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryMessageColumn> {
+    /** A list of the formatted log entry segments */
+    message?: MessageResolver<InfraLogMessageSegment[], TypeParent, Context>;
+  }
+
   export type MessageResolver<
     R = InfraLogMessageSegment[],
-    Parent = InfraLogEntry,
+    Parent = InfraLogEntryMessageColumn,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1234,7 +1273,7 @@ export namespace InfraLogMessageFieldSegmentResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-/** A segment of the log entry message that was derived from a field */
+/** A segment of the log entry message that was derived from a string literal */
 export namespace InfraLogMessageConstantSegmentResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraLogMessageConstantSegment> {
     /** The segment's message */

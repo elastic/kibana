@@ -5,13 +5,19 @@
  */
 
 import { darken, transparentize } from 'polished';
-import * as React from 'react';
+import React, { useState, useCallback, Fragment } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { LogEntry } from '../../../../common/log_entry';
-import { SearchResult } from '../../../../common/log_search_result';
+import {
+  LogEntry,
+  LogEntryMessageSegment,
+  isConstantSegment,
+  isFieldSegment,
+  isMessageColumn,
+  isTimestampColumn,
+} from '../../../utils/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
 import { FormattedTime } from '../../formatted_time';
 import { LogTextStreamItemDateField } from './item_date_field';
@@ -19,91 +25,92 @@ import { LogTextStreamItemMessageField } from './item_message_field';
 
 interface LogTextStreamLogEntryItemViewProps {
   boundingBoxRef?: React.Ref<Element>;
+  intl: InjectedIntl;
   logEntry: LogEntry;
-  searchResult?: SearchResult;
+  openFlyoutWithItem: (id: string) => void;
   scale: TextScale;
   wrap: boolean;
-  openFlyoutWithItem: (id: string) => void;
-  intl: InjectedIntl;
-}
-
-interface LogTextStreamLogEntryItemViewState {
-  isHovered: boolean;
 }
 
 export const LogTextStreamLogEntryItemView = injectI18n(
-  class extends React.PureComponent<
-    LogTextStreamLogEntryItemViewProps,
-    LogTextStreamLogEntryItemViewState
-  > {
-    public readonly state = {
-      isHovered: false,
-    };
+  ({
+    boundingBoxRef,
+    intl,
+    logEntry,
+    openFlyoutWithItem,
+    scale,
+    wrap,
+  }: LogTextStreamLogEntryItemViewProps) => {
+    const [isHovered, setIsHovered] = useState(false);
 
-    public handleMouseEnter: React.MouseEventHandler<HTMLDivElement> = () => {
-      this.setState({
-        isHovered: true,
-      });
-    };
+    const setItemIsHovered = useCallback(() => {
+      setIsHovered(true);
+    }, []);
 
-    public handleMouseLeave: React.MouseEventHandler<HTMLDivElement> = () => {
-      this.setState({
-        isHovered: false,
-      });
-    };
+    const setItemIsNotHovered = useCallback(() => {
+      setIsHovered(false);
+    }, []);
 
-    public handleClick: React.MouseEventHandler<HTMLButtonElement> = () => {
-      this.props.openFlyoutWithItem(this.props.logEntry.gid);
-    };
+    const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
+      openFlyoutWithItem,
+      logEntry.gid,
+    ]);
 
-    public render() {
-      const { intl, boundingBoxRef, logEntry, scale, searchResult, wrap } = this.props;
-      const { isHovered } = this.state;
-      const viewDetailsLabel = intl.formatMessage({
-        id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
-        defaultMessage: 'View Details',
-      });
-
-      return (
-        <LogTextStreamLogEntryItemDiv
-          innerRef={
-            /* Workaround for missing RefObject support in styled-components */
-            boundingBoxRef as any
+    return (
+      <LogTextStreamLogEntryItemDiv
+        innerRef={
+          /* Workaround for missing RefObject support in styled-components */
+          boundingBoxRef as any
+        }
+        onMouseEnter={setItemIsHovered}
+        onMouseLeave={setItemIsNotHovered}
+      >
+        {logEntry.columns.map(column => {
+          if (isTimestampColumn(column)) {
+            return (
+              <LogTextStreamItemDateField
+                hasHighlights={false}
+                isHovered={isHovered}
+                key="timestamp"
+                scale={scale}
+              >
+                <FormattedTime time={column.timestamp} />
+              </LogTextStreamItemDateField>
+            );
+          } else if (isMessageColumn(column)) {
+            const viewDetailsLabel = intl.formatMessage({
+              id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
+              defaultMessage: 'View Details',
+            });
+            return (
+              <Fragment key="message">
+                <LogTextStreamIconDiv isHovered={isHovered}>
+                  {isHovered ? (
+                    <EuiToolTip content={viewDetailsLabel}>
+                      <EuiButtonIcon
+                        onClick={openFlyout}
+                        iconType="expand"
+                        aria-label={viewDetailsLabel}
+                      />
+                    </EuiToolTip>
+                  ) : (
+                    <EmptyIcon />
+                  )}
+                </LogTextStreamIconDiv>
+                <LogTextStreamItemMessageField
+                  highlights={[]}
+                  isHovered={isHovered}
+                  isWrapped={wrap}
+                  scale={scale}
+                >
+                  {column.message.map(formatMessageSegment).join('')}
+                </LogTextStreamItemMessageField>{' '}
+              </Fragment>
+            );
           }
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        >
-          <LogTextStreamItemDateField
-            hasHighlights={!!searchResult}
-            isHovered={isHovered}
-            scale={scale}
-          >
-            <FormattedTime time={logEntry.fields.time} />
-          </LogTextStreamItemDateField>
-          <LogTextStreamIconDiv isHovered={isHovered}>
-            {isHovered ? (
-              <EuiToolTip content={viewDetailsLabel}>
-                <EuiButtonIcon
-                  onClick={this.handleClick}
-                  iconType="expand"
-                  aria-label={viewDetailsLabel}
-                />
-              </EuiToolTip>
-            ) : (
-              <EmptyIcon />
-            )}
-          </LogTextStreamIconDiv>
-          <LogTextStreamItemMessageField
-            highlights={searchResult ? searchResult.matches.message || [] : []}
-            isHovered={isHovered}
-            isWrapped={wrap}
-            scale={scale}
-          >
-            {logEntry.fields.message}
-          </LogTextStreamItemMessageField>
-        </LogTextStreamLogEntryItemDiv>
-      );
-    }
+        })}
+      </LogTextStreamLogEntryItemDiv>
+    );
   }
 );
 
@@ -140,3 +147,13 @@ const LogTextStreamLogEntryItemDiv = euiStyled.div`
   justify-content: flex-start;
   align-items: stretch;
 `;
+
+const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
+  if (isFieldSegment(messageSegment)) {
+    return messageSegment.value;
+  } else if (isConstantSegment(messageSegment)) {
+    return messageSegment.constant;
+  }
+
+  return 'failed to format message';
+};

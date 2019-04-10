@@ -209,7 +209,14 @@ const convertLogDocumentToEntry = (
   key: document.key,
   gid: document.gid,
   source: sourceId,
-  message: formatLogMessage(document.fields),
+  columns: [
+    {
+      timestamp: document.key.time,
+    },
+    {
+      message: formatLogMessage(document.fields),
+    },
+  ],
 });
 
 const convertDateRangeBucketToSummaryBucket = (

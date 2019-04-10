@@ -7,6 +7,9 @@
 import { failure } from 'io-ts/lib/PathReporter';
 
 import {
+  InfraLogEntryColumn,
+  InfraLogEntryMessageColumn,
+  InfraLogEntryTimestampColumn,
   InfraLogMessageConstantSegment,
   InfraLogMessageFieldSegment,
   InfraLogMessageSegment,
@@ -47,6 +50,11 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
     logItem: InfraSourceLogItem;
+  };
+  InfraLogEntryColumn: {
+    __resolveType(
+      logEntryColumn: InfraLogEntryColumn
+    ): 'InfraLogEntryTimestampColumn' | 'InfraLogEntryMessageColumn' | null;
   };
   InfraLogMessageSegment: {
     __resolveType(
@@ -134,8 +142,21 @@ export const createLogEntriesResolvers = (libs: {
       return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },
   },
+  InfraLogEntryColumn: {
+    __resolveType(logEntryColumn) {
+      if (isTimestampColumn(logEntryColumn)) {
+        return 'InfraLogEntryTimestampColumn';
+      }
+
+      if (isMessageColumn(logEntryColumn)) {
+        return 'InfraLogEntryMessageColumn';
+      }
+
+      return null;
+    },
+  },
   InfraLogMessageSegment: {
-    __resolveType: (messageSegment: InfraLogMessageSegment) => {
+    __resolveType(messageSegment) {
       if (isConstantSegment(messageSegment)) {
         return 'InfraLogMessageConstantSegment';
       }
@@ -148,6 +169,12 @@ export const createLogEntriesResolvers = (libs: {
     },
   },
 });
+
+const isTimestampColumn = (column: InfraLogEntryColumn): column is InfraLogEntryTimestampColumn =>
+  'timestamp' in column;
+
+const isMessageColumn = (column: InfraLogEntryColumn): column is InfraLogEntryMessageColumn =>
+  'message' in column;
 
 const isConstantSegment = (
   segment: InfraLogMessageSegment

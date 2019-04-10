@@ -7,11 +7,17 @@
 import { bisector } from 'd3-array';
 
 import { compareToTimeKey, getIndexAtTimeKey, TimeKey } from '../../../common/time';
-import { LogEntries as LogEntriesQuery } from '../../graphql/types';
+import { InfraLogEntryFields } from '../../graphql/types';
 
-export type LogEntry = LogEntriesQuery.Entries;
+export type LogEntry = InfraLogEntryFields.Fragment;
 
-export type LogEntryMessageSegment = LogEntriesQuery.Message;
+export type LogEntryColumn = InfraLogEntryFields.Columns;
+export type LogEntryMessageColumn = InfraLogEntryFields.InfraLogEntryMessageColumnInlineFragment;
+export type LogEntryTimestampColumn = InfraLogEntryFields.InfraLogEntryTimestampColumnInlineFragment;
+
+export type LogEntryMessageSegment = InfraLogEntryFields.Message;
+export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;
+export type LogEntryFieldMessageSegment = InfraLogEntryFields.InfraLogMessageFieldSegmentInlineFragment;
 
 export const getLogEntryKey = (entry: LogEntry) => entry.key;
 
@@ -26,3 +32,18 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 
   return entryIndex !== null ? entries[entryIndex] : null;
 };
+
+export const isTimestampColumn = (column: LogEntryColumn): column is LogEntryTimestampColumn =>
+  'timestamp' in column;
+
+export const isMessageColumn = (column: LogEntryColumn): column is LogEntryMessageColumn =>
+  'message' in column;
+
+export const isConstantSegment = (
+  segment: LogEntryMessageSegment
+): segment is LogEntryConstantMessageSegment =>
+  segment.__typename === 'InfraLogMessageConstantSegment';
+
+export const isFieldSegment = (
+  segment: LogEntryMessageSegment
+): segment is LogEntryFieldMessageSegment => segment.__typename === 'InfraLogMessageFieldSegment';

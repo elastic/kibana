@@ -155,6 +155,16 @@ export interface InfraLogEntry {
   gid: string;
   /** The source id */
   source: string;
+  /** The columns used for rendering the log entry */
+  columns: InfraLogEntryColumn[];
+}
+/** A special built-in column that contains the log entry's timestamp */
+export interface InfraLogEntryTimestampColumn {
+  /** The timestamp */
+  timestamp: number;
+}
+/** A special built-in column that contains the log entry's constructed message */
+export interface InfraLogEntryMessageColumn {
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -167,7 +177,7 @@ export interface InfraLogMessageFieldSegment {
   /** A list of highlighted substrings of the value */
   highlights: string[];
 }
-/** A segment of the log entry message that was derived from a field */
+/** A segment of the log entry message that was derived from a string literal */
 export interface InfraLogMessageConstantSegment {
   /** The segment's message */
   constant: string;
@@ -614,6 +624,9 @@ export enum InfraOperator {
 /** All known log column types */
 export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
 
+/** A column of a log entry */
+export type InfraLogEntryColumn = InfraLogEntryTimestampColumn | InfraLogEntryMessageColumn;
+
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
@@ -979,41 +992,7 @@ export namespace LogEntries {
 
   export type End = InfraTimeKeyFields.Fragment;
 
-  export type Entries = {
-    __typename?: 'InfraLogEntry';
-
-    gid: string;
-
-    key: Key;
-
-    message: Message[];
-  };
-
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
-
-  export type Message =
-    | InfraLogMessageFieldSegmentInlineFragment
-    | InfraLogMessageConstantSegmentInlineFragment;
-
-  export type InfraLogMessageFieldSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageFieldSegment';
-
-    field: string;
-
-    value: string;
-  };
-
-  export type InfraLogMessageConstantSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageConstantSegment';
-
-    constant: string;
-  };
+  export type Entries = InfraLogEntryFields.Fragment;
 }
 
 export namespace SourceConfigurationFields {
@@ -1109,5 +1088,59 @@ export namespace InfraSourceFields {
     version?: string | null;
 
     updatedAt?: number | null;
+  };
+}
+
+export namespace InfraLogEntryFields {
+  export type Fragment = {
+    __typename?: 'InfraLogEntry';
+
+    gid: string;
+
+    key: Key;
+
+    columns: Columns[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
+  };
+
+  export type Columns =
+    | InfraLogEntryTimestampColumnInlineFragment
+    | InfraLogEntryMessageColumnInlineFragment;
+
+  export type InfraLogEntryTimestampColumnInlineFragment = {
+    __typename?: 'InfraLogEntryTimestampColumn';
+
+    timestamp: number;
+  };
+
+  export type InfraLogEntryMessageColumnInlineFragment = {
+    __typename?: 'InfraLogEntryMessageColumn';
+
+    message: Message[];
+  };
+
+  export type Message =
+    | InfraLogMessageFieldSegmentInlineFragment
+    | InfraLogMessageConstantSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+
+    field: string;
+
+    value: string;
+  };
+
+  export type InfraLogMessageConstantSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageConstantSegment';
+
+    constant: string;
   };
 }
