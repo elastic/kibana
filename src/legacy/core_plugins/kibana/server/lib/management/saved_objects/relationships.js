@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import { injectMetaAttributes } from './inject_meta_attributes';
+
 export async function findRelationships(type, id, options = {}) {
   const {
     size,
     savedObjectsClient,
     savedObjectTypes,
+    savedObjectSchemas,
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
@@ -37,14 +40,13 @@ export async function findRelationships(type, id, options = {}) {
     savedObjectsClient.find({
       hasReference: { type, id },
       perPage: size,
-      fields: ['title'],
       type: savedObjectTypes,
     }),
   ]);
 
   return [].concat(
-    referencedObjects.saved_objects.map(extractCommonProperties),
-    referencedResponse.saved_objects.map(extractCommonProperties),
+    injectMetaAttributes(referencedObjects.saved_objects, savedObjectSchemas).map(extractCommonProperties),
+    injectMetaAttributes(referencedResponse.saved_objects, savedObjectSchemas).map(extractCommonProperties),
   );
 }
 
@@ -52,6 +54,6 @@ function extractCommonProperties(savedObject) {
   return {
     id: savedObject.id,
     type: savedObject.type,
-    title: savedObject.attributes.title,
+    meta: savedObject.meta,
   };
 }

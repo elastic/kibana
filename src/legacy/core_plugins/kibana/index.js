@@ -129,6 +129,58 @@ export default function (kibana) {
       ],
 
       savedObjectSchemas: {
+        'index-pattern': {
+          icon: 'indexPatternApp',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `#/management/kibana/index_patterns/${obj.id}`;
+          },
+          getInAppUrl(obj) {
+            return `/management/kibana/index_patterns/${obj.id}`;
+          },
+        },
+        visualization: {
+          icon: 'visualizeApp',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `#/management/kibana/objects/savedVisualizations/${obj.id}`;
+          },
+          getInAppUrl(obj) {
+            return `/visualize/edit/${obj.id}`;
+          },
+        },
+        search: {
+          icon: 'search',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `#/management/kibana/objects/savedSearches/${obj.id}`;
+          },
+          getInAppUrl(obj) {
+            return `/discover/${obj.id}`;
+          },
+        },
+        dashboard: {
+          icon: 'dashboardApp',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `#/management/kibana/objects/savedDashboards/${obj.id}`;
+          },
+          getInAppUrl(obj) {
+            return `/dashboard/${obj.id}`;
+          },
+        },
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },

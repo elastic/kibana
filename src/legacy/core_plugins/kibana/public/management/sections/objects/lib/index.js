@@ -19,10 +19,8 @@
 
 export * from './fetch_export_by_type';
 export * from './fetch_export_objects';
-export * from './get_in_app_url';
 export * from './get_relationships';
 export * from './get_saved_object_counts';
-export * from './get_saved_object_icon';
 export * from './get_saved_object_label';
 export * from './import_file';
 export * from './import_legacy_file';

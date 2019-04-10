@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { kfetch } from 'ui/kfetch';
 import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -26,6 +27,7 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 import { toastNotifications } from 'ui/notify';
+import { keysToCamelCaseShallow } from 'ui/utils/case_conversion';
 
 import {
   EuiSpacer,
@@ -53,7 +55,6 @@ import {
 } from '@elastic/eui';
 import {
   parseQuery,
-  getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
@@ -100,9 +101,7 @@ class ObjectsTableUI extends Component {
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
       isDeleting: false,
@@ -174,15 +173,14 @@ class ObjectsTableUI extends Component {
   }
 
   debouncedFetch = debounce(async () => {
-    const { intl, savedObjectsClient } = this.props;
+    const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
-      fields: ['title', 'id'],
-      searchFields: ['title'],
+      fields: ['id'],
       type: INCLUDED_TYPES.filter(
         type => !visibleTypes || visibleTypes.includes(type)
       ),
@@ -193,7 +191,12 @@ class ObjectsTableUI extends Component {
 
     let resp;
     try {
-      resp = await savedObjectsClient.find(findOptions);
+      resp = await kfetch({
+        method: 'GET',
+        pathname: '/api/kibana/management/saved_objects/_find',
+        query: findOptions,
+      });
+      resp = keysToCamelCaseShallow(resp);
     } catch (error) {
       if (this._isMounted) {
         this.setState({
@@ -221,12 +224,7 @@ class ObjectsTableUI extends Component {
       }
 
       return {
-        savedObjects: resp.savedObjects.map(savedObject => ({
-          title: savedObject.attributes.title,
-          type: savedObject.type,
-          id: savedObject.id,
-          icon: getSavedObjectIcon(savedObject.type),
-        })),
+        savedObjects: resp.savedObjects,
         filteredItemCount: resp.total,
         isSearching: false,
       };
@@ -238,12 +236,7 @@ class ObjectsTableUI extends Component {
   };
 
   onSelectionChanged = selection => {
-    const selectedSavedObjects = selection.map(item => ({
-      id: item.id,
-      type: item.type,
-      title: item.title,
-    }));
-    this.setState({ selectedSavedObjects });
+    this.setState({ selectedSavedObjects: selection });
   };
 
   onQueryChange = ({ query }) => {
@@ -272,21 +265,17 @@ class ObjectsTableUI extends Component {
     }, this.fetchSavedObjects);
   };
 
-  onShowRelationships = (id, type, title) => {
+  onShowRelationships = (object) => {
     this.setState({
       isShowingRelationships: true,
-      relationshipId: id,
-      relationshipType: type,
-      relationshipTitle: title,
+      relationshipObject: object,
     });
   };
 
   onHideRelationships = () => {
     this.setState({
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
     });
   };
 
@@ -416,9 +405,7 @@ class ObjectsTableUI extends Component {
 
     return (
       <Relationships
-        id={this.state.relationshipId}
-        type={this.state.relationshipType}
-        title={this.state.relationshipTitle}
+        savedObject={this.state.relationshipObject}
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
@@ -500,12 +487,12 @@ class ObjectsTableUI extends Component {
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
                 }),
                 width: '50px',
-                render: type => (
+                render: (type, object) => (
                   <EuiToolTip
                     position="top"
                     content={getSavedObjectLabel(type)}
                   >
-                    <EuiIcon type={getSavedObjectIcon(type)} />
+                    <EuiIcon type={object.meta.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
@@ -516,7 +503,7 @@ class ObjectsTableUI extends Component {
                 }),
               },
               {
-                field: 'title',
+                field: 'meta.title',
                 name: intl.formatMessage({
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   defaultMessage: 'Title',

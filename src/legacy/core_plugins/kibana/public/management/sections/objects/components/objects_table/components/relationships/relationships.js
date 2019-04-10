@@ -31,17 +31,14 @@ import {
   EuiLoadingKibana,
   EuiInMemoryTable,
   EuiToolTip,
-  EuiSpacer
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getSavedObjectIcon, getSavedObjectLabel } from '../../../../lib';
+import { getSavedObjectLabel } from '../../../../lib';
 
 class RelationshipsUI extends Component {
   static propTypes = {
     getRelationships: PropTypes.func.isRequired,
-    id: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
+    savedObject: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
@@ -62,18 +59,18 @@ class RelationshipsUI extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.id !== this.props.id) {
+    if (nextProps.savedObject.id !== this.props.savedObject.id) {
       this.getRelationshipData();
     }
   }
 
   async getRelationshipData() {
-    const { id, type, getRelationships } = this.props;
+    const { savedObject, getRelationships } = this.props;
 
     this.setState({ isLoading: true });
 
     try {
-      const relationships = await getRelationships(type, id);
+      const relationships = await getRelationships(savedObject.type, savedObject.id);
       this.setState({ relationships, isLoading: false, error: undefined });
     } catch (err) {
       this.setState({ error: err.message, isLoading: false });
@@ -122,7 +119,7 @@ class RelationshipsUI extends Component {
             id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription', defaultMessage: 'Type of the saved object'
           }),
         sortable: false,
-        render: type => {
+        render: (type, object) => {
           return (
             <EuiToolTip
               position="top"
@@ -130,7 +127,7 @@ class RelationshipsUI extends Component {
             >
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
-                type={getSavedObjectIcon(type)}
+                type={object.meta.icon || 'apps'}
                 size="s"
               />
             </EuiToolTip>
@@ -138,7 +135,7 @@ class RelationshipsUI extends Component {
         },
       },
       {
-        field: 'title',
+        field: 'meta.title',
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title' }),
         description:
         intl.formatMessage({
@@ -147,7 +144,7 @@ class RelationshipsUI extends Component {
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
-          <EuiLink href={getEditUrl(object.id, object.type)}>{title}</EuiLink>
+          <EuiLink href={getEditUrl(object)}>{title}</EuiLink>
         ),
       },
       {
@@ -164,7 +161,7 @@ class RelationshipsUI extends Component {
               }),
             type: 'icon',
             icon: 'eye',
-            onClick: object => goInApp(object.id, object.type),
+            onClick: object => goInApp(object),
           },
         ],
       },
@@ -190,22 +187,22 @@ class RelationshipsUI extends Component {
   }
 
   render() {
-    const { close, title, type } = this.props;
+    const { close, savedObject } = this.props;
 
     return (
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>
-              <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+              <EuiToolTip position="top" content={getSavedObjectLabel(savedObject.type)}>
                 <EuiIcon
-                  aria-label={getSavedObjectLabel(type)}
+                  aria-label={getSavedObjectLabel(savedObject.type)}
                   size="m"
-                  type={getSavedObjectIcon(type)}
+                  type={savedObject.meta.icon || 'apps'}
                 />
               </EuiToolTip>
               &nbsp;&nbsp;
-              {title}
+              {savedObject.meta.title}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

@@ -41,10 +41,12 @@ export function registerRelationships(server) {
       const id = req.params.id;
       const size = req.query.size;
       const savedObjectsClient = req.getSavedObjectsClient();
+      const { savedObjectSchemas } = req.server.kibanaMigrator.kbnServer.uiExports;
 
       return await findRelationships(type, id, {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         // Pass in all types except space, spaces wrapper will throw error
         savedObjectTypes: server.savedObjects.types.filter(type => type !== 'space'),
       });

@@ -26,14 +26,13 @@ import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
-import { getInAppUrl } from './lib/get_in_app_url';
 import { I18nContext } from 'ui/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector, i18n) {
+function updateObjectsTable($scope, $injector) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
@@ -42,10 +41,6 @@ function updateObjectsTable($scope, $injector, i18n) {
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
-  const allServices = savedObjectManagementRegistry.all();
-  const typeToServiceName = type => allServices.reduce((serviceName, service) => {
-    return service.title.includes(type) ? service.service : serviceName;
-  }, null);
 
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
@@ -63,19 +58,14 @@ function updateObjectsTable($scope, $injector, i18n) {
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
-          getEditUrl={(id, type) => {
-            if (type === 'index-pattern' || type === 'indexPatterns') {
-              return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);
+          getEditUrl={object => {
+            if (object.meta.editUrl) {
+              return kbnUrl.eval(object.meta.editUrl);
             }
-            const serviceName = typeToServiceName(type);
-            if (!serviceName) {
-              return null;
-            }
-
-            return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
           }}
-          goInApp={(id, type) => {
-            kbnUrl.change(getInAppUrl(id, type));
+          goInApp={object => {
+            const inAppUrl = object.meta.inAppUrl || `/${object.type.toLowerCase()}/${object.id}`;
+            kbnUrl.change(inAppUrl);
             $scope.$apply();
           }}
         />
@@ -104,8 +94,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector, i18n) {
-        updateObjectsTable($scope, $injector, i18n);
+      controller: function ($scope, $injector) {
+        updateObjectsTable($scope, $injector);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };

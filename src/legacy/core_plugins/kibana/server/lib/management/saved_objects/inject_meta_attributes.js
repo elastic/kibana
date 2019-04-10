@@ -17,22 +17,23 @@
  * under the License.
  */
 
-export function getSavedObjectIcon(type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return 'search';
-    case 'visualization':
-    case 'visualizations':
-      return 'visualizeApp';
-    case 'dashboard':
-    case 'dashboards':
-      return 'dashboardApp';
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return 'indexPatternApp';
-    default:
-      return 'apps';
-  }
+export function injectMetaAttributes(savedObjects, savedObjectSchemas) {
+  return savedObjects.map((savedObject) => {
+    const schema = savedObjectSchemas[savedObject.type];
+    if (!schema) {
+      return savedObject;
+    }
+    return {
+      ...savedObject,
+      meta: {
+        ...(savedObject.meta || {}),
+        ...({
+          icon: schema.icon,
+          title: schema.getTitle ? schema.getTitle(savedObject) : undefined,
+          editUrl: schema.getEditUrl ? schema.getEditUrl(savedObject) : undefined,
+          inAppUrl: schema.getInAppUrl ? schema.getInAppUrl(savedObject) : undefined,
+        }),
+      },
+    };
+  });
 }

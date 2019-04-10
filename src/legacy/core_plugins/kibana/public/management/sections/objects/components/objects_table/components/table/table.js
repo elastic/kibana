@@ -33,7 +33,7 @@ import {
   EuiSwitch,
   EuiFormRow
 } from '@elastic/eui';
-import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
+import { getSavedObjectLabel } from '../../../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableUI extends PureComponent {
@@ -166,7 +166,7 @@ class TableUI extends PureComponent {
             id: 'kbn.management.objects.objectsTable.table.columnTypeDescription', defaultMessage: 'Type of the saved object'
           }),
         sortable: false,
-        render: type => {
+        render: (type, object) => {
           return (
             <EuiToolTip
               position="top"
@@ -174,7 +174,7 @@ class TableUI extends PureComponent {
             >
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
-                type={getSavedObjectIcon(type)}
+                type={object.meta.icon || 'apps'}
                 size="s"
               />
             </EuiToolTip>
@@ -182,7 +182,7 @@ class TableUI extends PureComponent {
         },
       },
       {
-        field: 'title',
+        field: 'meta.title',
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnTitleName', defaultMessage: 'Title' }),
         description:
         intl.formatMessage({
@@ -191,7 +191,7 @@ class TableUI extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
-          <EuiLink href={getEditUrl(object.id, object.type)}>{title}</EuiLink>
+          <EuiLink href={getEditUrl(object)}>{title}</EuiLink>
         ),
       },
       {
@@ -208,7 +208,7 @@ class TableUI extends PureComponent {
               }),
             type: 'icon',
             icon: 'eye',
-            onClick: object => goInApp(object.id, object.type),
+            onClick: object => goInApp(object),
           },
           {
             name:
@@ -224,7 +224,7 @@ class TableUI extends PureComponent {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: object =>
-              onShowRelationships(object.id, object.type, object.title),
+              onShowRelationships(object),
           },
         ],
       },
