@@ -29,6 +29,7 @@ interface OwnProps {
   data: DomainsEdges[];
   loading: boolean;
   hasNextPage: boolean;
+  ip: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -90,6 +91,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     const {
       data,
       hasNextPage,
+      ip,
       limit,
       loading,
       loadMore,
@@ -104,7 +106,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     return (
       <LoadMoreTable
-        columns={getDomainsColumns(startDate, flowDirection, flowTarget, type, DomainsTableId)}
+        columns={getDomainsColumns(ip, startDate, flowDirection, flowTarget, type, DomainsTableId)}
         loadingTitle={i18n.DOMAINS}
         loading={loading}
         pageOfItems={data}

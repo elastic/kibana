@@ -6,6 +6,7 @@
 
 import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 
 import {
@@ -20,15 +21,16 @@ import { networkModel } from '../../../../store';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { FormattedDate } from '../../../formatted_date';
 import { Columns } from '../../../load_more_table';
 import { AddToKql } from '../network_top_n_flow_table/add_to_kql';
 
+import { FirstLastSeen } from './first_last_seen';
 import * as i18n from './translations';
 
 type valueof<T> = T[keyof T];
 
 export const getDomainsColumns = (
+  ip: string,
   startDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
@@ -117,24 +119,41 @@ export const getDomainsColumns = (
     },
   },
   {
-    field: `node.${flowTarget}.firstSeen`,
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (firstSeen: string | null | undefined) => (
-      <FormattedDate value={firstSeen} fieldName={`${flowTarget}.firstSeen`} />
-    ),
+    render: ({ node }) => {
+      const domainNameAttr = `${flowTarget}.domainName`;
+      const domainName = getOr(null, domainNameAttr, node);
+      if (domainName != null) {
+        return (
+          <FirstLastSeen
+            ip={ip}
+            domainName={domainName}
+            flowTarget={flowTarget}
+            type="first-seen"
+          />
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
   {
-    field: `node.${flowTarget}.lastSeen`,
     name: i18n.LAST_SEEN,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (lastSeen: string | null | undefined) => (
-      <FormattedDate value={lastSeen} fieldName={`${flowTarget}.lastSeen`} />
-    ),
+    render: ({ node }) => {
+      const domainNameAttr = `${flowTarget}.domainName`;
+      const domainName = getOr(null, domainNameAttr, node);
+      if (domainName != null) {
+        return (
+          <FirstLastSeen ip={ip} domainName={domainName} flowTarget={flowTarget} type="last-seen" />
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
 ];
 

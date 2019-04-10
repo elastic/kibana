@@ -4,13 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsData, IpOverviewData, NetworkDirectionEcs } from '../../graphql/types';
+import {
+  DomainsData,
+  FlowTarget,
+  IpOverviewData,
+  LastFirstSeen,
+  NetworkDirectionEcs,
+  SourceConfiguration,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
 export interface IpDetailsAdapter {
   getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
   getDomains(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
+  getDomainsLastFirstSeen(
+    req: FrameworkRequest,
+    options: DomainLastFirstSeenRequestOptions
+  ): Promise<LastFirstSeen>;
 }
 
 interface ResultHit<T> {
@@ -99,5 +110,23 @@ export interface DomainsBuckets {
   };
   direction: {
     buckets: DirectionBuckets[];
+  };
+}
+
+export interface DomainLastFirstSeenRequestOptions {
+  ip: string;
+  domainName: string;
+  flowTarget: FlowTarget;
+  sourceConfiguration: SourceConfiguration;
+}
+
+export interface DomainLastFirstSeenItem {
+  firstSeen?: {
+    value: number;
+    value_as_string: string;
+  };
+  lastSeen?: {
+    value: number;
+    value_as_string: string;
   };
 }

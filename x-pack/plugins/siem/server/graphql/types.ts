@@ -81,6 +81,8 @@ export interface Source {
 
   Domains: DomainsData;
 
+  DomainLastFirstSeen: LastFirstSeen;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -876,6 +878,12 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
+export interface LastFirstSeen {
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1146,6 +1154,15 @@ export interface DomainsSourceArgs {
 
   timerange: TimerangeInput;
 }
+export interface DomainLastFirstSeenSourceArgs {
+  id?: string | null;
+
+  ip: string;
+
+  domainName: string;
+
+  flowTarget: FlowTarget;
+}
 export interface KpiNetworkSourceArgs {
   id?: string | null;
 
@@ -1325,6 +1342,8 @@ export namespace SourceResolvers {
 
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
+    DomainLastFirstSeen?: DomainLastFirstSeenResolver<LastFirstSeen, TypeParent, Context>;
+
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
@@ -1464,6 +1483,21 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
+  }
+
+  export type DomainLastFirstSeenResolver<
+    R = LastFirstSeen,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DomainLastFirstSeenArgs>;
+  export interface DomainLastFirstSeenArgs {
+    id?: string | null;
+
+    ip: string;
+
+    domainName: string;
+
+    flowTarget: FlowTarget;
   }
 
   export type KpiNetworkResolver<
@@ -4156,6 +4190,25 @@ export namespace DomainsNetworkFieldResolvers {
   export type DirectionResolver<
     R = NetworkDirectionEcs[] | null,
     Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace LastFirstSeenResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = LastFirstSeen> {
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type FirstSeenResolver<
+    R = Date | null,
+    Parent = LastFirstSeen,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = LastFirstSeen,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

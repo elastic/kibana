@@ -52,6 +52,8 @@ export interface Source {
 
   Domains: DomainsData;
 
+  DomainLastFirstSeen: LastFirstSeen;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -847,6 +849,12 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
+export interface LastFirstSeen {
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1116,6 +1124,15 @@ export interface DomainsSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+}
+export interface DomainLastFirstSeenSourceArgs {
+  id?: string | null;
+
+  ip: string;
+
+  domainName: string;
+
+  flowTarget: FlowTarget;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1484,6 +1501,37 @@ export namespace GetDomainsQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetDomainLastFirstSeenQuery {
+  export type Variables = {
+    sourceId: string;
+    ip: string;
+    domainName: string;
+    flowTarget: FlowTarget;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    DomainLastFirstSeen: DomainLastFirstSeen;
+  };
+
+  export type DomainLastFirstSeen = {
+    __typename?: 'LastFirstSeen';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
   };
 }
 

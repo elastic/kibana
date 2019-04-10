@@ -5,10 +5,16 @@
  */
 
 import { DomainsSortField } from '../../../public/graphql/types';
-import { DomainsData, FlowDirection, FlowTarget, IpOverviewData } from '../../graphql/types';
+import {
+  DomainsData,
+  FlowDirection,
+  FlowTarget,
+  IpOverviewData,
+  LastFirstSeen,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 
-import { IpDetailsAdapter } from './types';
+import { DomainLastFirstSeenRequestOptions, IpDetailsAdapter } from './types';
 
 export * from './elasticsearch_adapter';
 
@@ -38,5 +44,12 @@ export class IpDetails {
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
     return await this.adapter.getDomains(req, options);
+  }
+
+  public async getDomainLastFirstSeen(
+    req: FrameworkRequest,
+    options: DomainLastFirstSeenRequestOptions
+  ): Promise<LastFirstSeen> {
+    return await this.adapter.getDomainsLastFirstSeen(req, options);
   }
 }

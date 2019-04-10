@@ -14,14 +14,23 @@ import {
   GeoEcsFields,
   HostEcsFields,
   IpOverviewData,
+  LastFirstSeen,
 } from '../../graphql/types';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
-import { TermAggregation } from '../types';
+import { SearchHit, TermAggregation } from '../types';
 
 import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
+import { buildLastFirstSeenDomainQuery } from './query_last_first_seen_domain.dsl';
 import { buildQuery } from './query_overview.dsl';
-import { DomainsBuckets, IpDetailsAdapter, IpOverviewHit, OverviewHit } from './types';
+import {
+  DomainLastFirstSeenItem,
+  DomainLastFirstSeenRequestOptions,
+  DomainsBuckets,
+  IpDetailsAdapter,
+  IpOverviewHit,
+  OverviewHit,
+} from './types';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -69,6 +78,23 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
           tiebreaker: null,
         },
       },
+    };
+  }
+
+  public async getDomainsLastFirstSeen(
+    request: FrameworkRequest,
+    options: DomainLastFirstSeenRequestOptions
+  ): Promise<LastFirstSeen> {
+    const response = await this.framework.callWithRequest<SearchHit, TermAggregation>(
+      request,
+      'search',
+      buildLastFirstSeenDomainQuery(options)
+    );
+
+    const aggregations: DomainLastFirstSeenItem = get('aggregations', response) || {};
+    return {
+      firstSeen: get('firstSeen.value_as_string', aggregations),
+      lastSeen: get('lastSeen.value_as_string', aggregations),
     };
   }
 }

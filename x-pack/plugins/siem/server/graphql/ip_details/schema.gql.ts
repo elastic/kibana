@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const ipOverviewSchema = gql`
+const ipOverviewSchema = gql`
   type AutonomousSystem {
     as_org: String
     asn: String
@@ -33,7 +33,7 @@ export const ipOverviewSchema = gql`
   }
 `;
 
-export const domainsSchema = gql`
+const domainsSchema = gql`
   enum DomainsFields {
     domainName
     direction
@@ -96,4 +96,20 @@ export const domainsSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema];
+const lastFirstSeenSchema = gql`
+  type LastFirstSeen {
+    firstSeen: Date
+    lastSeen: Date
+  }
+
+  extend type Source {
+    DomainLastFirstSeen(
+      id: String
+      ip: String!
+      domainName: String!
+      flowTarget: FlowTarget!
+    ): LastFirstSeen!
+  }
+`;
+
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, lastFirstSeenSchema];

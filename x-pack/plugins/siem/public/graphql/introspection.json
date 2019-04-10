@@ -451,6 +451,55 @@
             "deprecationReason": null
           },
           {
+            "name": "DomainLastFirstSeen",
+            "description": "",
+            "args": [
+              {
+                "name": "id",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "ip",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "domainName",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "flowTarget",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "LastFirstSeen", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "KpiNetwork",
             "description": "",
             "args": [
@@ -4931,6 +4980,33 @@
           },
           { "name": "unknown", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "LastFirstSeen",
+        "description": "",
+        "fields": [
+          {
+            "name": "firstSeen",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSeen",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {

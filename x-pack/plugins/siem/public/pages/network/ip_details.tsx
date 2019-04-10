@@ -89,6 +89,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             data={domains}
                             id={id}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            ip={ip}
                             loading={loading}
                             loadMore={loadMore}
                             nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
