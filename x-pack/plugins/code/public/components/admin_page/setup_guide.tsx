@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiGlobalToastList,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
@@ -14,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React from 'react';
+import React, { Props } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -94,40 +95,80 @@ const steps = [
   },
 ];
 
-const SetupGuidePage = (props: { setupOk?: boolean }) => {
-  let setup = null;
-  if (props.setupOk !== undefined) {
-    setup = (
-      <React.Fragment>
-        {props.setupOk === false && (
-          <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
-            <p>
-              Please follow the guide below to configure your Kibana instance and then refresh this
-              page.
-            </p>
-          </EuiCallOut>
-        )}
-        {props.setupOk === true && (
-          <React.Fragment>
-            <EuiSpacer size="xs" />
-            <EuiButton iconType="sortLeft">
-              <Link to="/admin">Back To Project Dashboard</Link>
-            </EuiButton>
-          </React.Fragment>
-        )}
-        <EuiPanel>
-          <EuiTitle>
-            <h3>Getting started in Elastic Code</h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiSteps steps={steps} />
-        </EuiPanel>
-      </React.Fragment>
-    );
+// TODO add link to learn more button
+const toastMessage = (
+  <div>
+    <p>
+      We’ve made some changes to roles and permissions in Kibana. Read more about what these changes
+      mean for you below.{' '}
+    </p>
+    <EuiButton size="s" href="">Learn More</EuiButton>
+  </div>
+);
+
+class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideToast: boolean }> {
+  constructor(props: { setupOk?: boolean }) {
+    super(props);
+
+    this.state = {
+      hideToast: false,
+    };
   }
 
-  return <Root>{setup}</Root>;
-};
+  public render() {
+    let setup = null;
+    if (this.props.setupOk !== undefined) {
+      setup = (
+        <div>
+          {!this.state.hideToast && (
+            <EuiGlobalToastList
+              toasts={[
+                {
+                  title: 'Permission Changes',
+                  color: 'primary',
+                  iconType: 'iInCircle',
+                  text: toastMessage,
+                  id: '',
+                },
+              ]}
+              dismissToast={() => {
+                this.setState({ hideToast: true });
+              }}
+              toastLifeTimeMs={10000}
+            />
+          )}
+          <React.Fragment>
+            {this.props.setupOk === false && (
+              <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
+                <p>
+                  Please follow the guide below to configure your Kibana instance and then refresh
+                  this page.
+                </p>
+              </EuiCallOut>
+            )}
+            {this.props.setupOk === true && (
+              <React.Fragment>
+                <EuiSpacer size="xs" />
+                <EuiButton iconType="sortLeft">
+                  <Link to="/admin">Back To Project Dashboard</Link>
+                </EuiButton>
+              </React.Fragment>
+            )}
+            <EuiPanel>
+              <EuiTitle>
+                <h3>Getting started in Elastic Code</h3>
+              </EuiTitle>
+              <EuiSpacer />
+              <EuiSteps steps={steps} />
+            </EuiPanel>
+          </React.Fragment>
+        </div>
+      );
+    }
+    return <Root>{setup}</Root>;
+  }
+}
+
 const mapStateToProps = (state: RootState) => ({
   setupOk: state.setup.ok,
 });
