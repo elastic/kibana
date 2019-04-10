@@ -25,7 +25,6 @@ export interface CookieOptions<T> {
   password: string;
   validate: (sessionValue: T) => boolean | Promise<boolean>;
   isSecure: boolean;
-  sessionTimeout: number;
   path?: string;
 }
 
@@ -37,8 +36,12 @@ export class ScopedSessionStorage<T extends Record<string, any>> {
   /**
    * Retrieves session value from the session storage.
    */
-  public async get(): Promise<T> {
-    return await this.sessionGetter();
+  public async get(): Promise<T | null> {
+    try {
+      return await this.sessionGetter();
+    } catch (error) {
+      return null;
+    }
   }
   /**
    * Puts current session value into the session storage.

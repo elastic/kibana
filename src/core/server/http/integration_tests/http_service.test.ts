@@ -21,7 +21,9 @@ import path from 'path';
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
-import { url } from './__fixtures__/plugins/dummy_security/server/plugin';
+import { url, sessionDurationMs } from './__fixtures__/plugins/dummy_security/server/plugin';
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 describe('http service', () => {
   describe('setup contract', () => {
@@ -92,6 +94,29 @@ describe('http service', () => {
 
         const cookies2 = response2.header['set-cookie'];
         expect(cookies).not.toBe(cookies2);
+      });
+
+      it('Should support session validation', async () => {
+        const response = await kbnTestServer.request
+          .get(root, url.auth)
+          .expect(200, { content: 'ok' });
+
+        const cookies = response.header['set-cookie'];
+        const sessionCookie = request.cookie(cookies[0]);
+        if (!sessionCookie) {
+          throw new Error('session cookie expected to be defined');
+        }
+
+        await delay(sessionDurationMs);
+
+        const response2 = await kbnTestServer.request
+          .get(root, url.authHasSession)
+          .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+          .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'invalid session' });
+
+        expect(response2.header['set-cookie']).toEqual([
+          'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
+        ]);
       });
 
       it('Should support rejecting a request from an unauthenticated user', async () => {

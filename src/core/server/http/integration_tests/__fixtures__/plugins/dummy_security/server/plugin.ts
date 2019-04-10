@@ -36,28 +36,33 @@ export const url = {
   authRedirect: '/auth/redirect',
 };
 
+export const sessionDurationMs = 30;
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
     const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
       if (request.path === url.authHasSession) {
         const prevSession = await sessionStorage.get();
+        if (!prevSession) return t.rejected(new Error('invalid session'), { statusCode: 401 });
+
         const userData = prevSession.value;
-        sessionStorage.set({ value: userData, expires: Date.now() + 1000 });
+        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
 
         return t.authenticated({ credentials: userData });
       }
+
       if (request.path === url.authClearSession) {
         sessionStorage.clear();
 
         return t.rejected(Boom.unauthorized());
       }
+
       if (request.path === url.authRedirect) {
         return t.redirected('/login');
       }
 
       if (request.headers.authorization) {
         const user = { id: '42' };
-        sessionStorage.set({ value: user, expires: Date.now() + 1000 });
+        sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
         return t.authenticated({ credentials: user });
       } else {
         return t.rejected(Boom.unauthorized());
@@ -67,10 +72,9 @@ export class DummySecurityPlugin {
     const cookieOptions = {
       name: 'sid',
       password: 'something_at_least_32_characters',
-      validate: (session: Storage) => true,
+      validate: (session: Storage) => session.expires > Date.now(),
       isSecure: false,
       path: '/',
-      sessionTimeout: 10000000,
     };
     core.http.registerAuth(authenticate, cookieOptions);
     return {
