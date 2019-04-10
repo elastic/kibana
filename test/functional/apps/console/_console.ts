@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -31,7 +31,7 @@ GET _search
 
 `.trim();
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');

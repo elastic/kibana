@@ -19,7 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { BasePathStart } from '../base_path';
+import { BasePathSetup } from '../base_path';
 import { UiSettingsState } from './types';
 
 export interface UiSettingsApiResponse {
@@ -47,7 +47,7 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly basePath: BasePathStart, private readonly kibanaVersion: string) {}
+  constructor(private readonly basePath: BasePathSetup, private readonly kibanaVersion: string) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is

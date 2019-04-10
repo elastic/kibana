@@ -58,12 +58,8 @@ exports[`it renders without crashing 1`] = `
     >
       <EuiFlexGroup
         alignItems="center"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       />
       <EuiSpacer
         size="xl"

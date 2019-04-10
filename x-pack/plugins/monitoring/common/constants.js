@@ -153,9 +153,9 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
-export const INDEX_PATTERN = '.monitoring-*-6-*';
-export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*';
-export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*';
-export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6';
-export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*';
+export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
+export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
+export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
+export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
+export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
+export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';

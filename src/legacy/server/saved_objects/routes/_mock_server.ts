@@ -18,11 +18,13 @@
  */
 
 import Hapi from 'hapi';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
   'savedObjects.maxImportExportSize': 10000,
+  'savedObjects.maxImportPayloadBytes': 52428800,
 };
 
 export function createMockServer(config: { [key: string]: any } = defaultConfig) {

@@ -30,6 +30,11 @@ import { uploadWorkpad } from './upload_workpad';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
+const getDisplayName = (name, workpad, loadedWorkpad) => {
+  const workpadName = name.length ? name : <em>{workpad.id}</em>;
+  return workpad.id === loadedWorkpad ? <strong>{workpadName}</strong> : workpadName;
+};
+
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
@@ -134,18 +139,18 @@ export class WorkpadLoader extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { canUserWrite, createPending } = this.props;
+    const { canUserWrite, createPending, workpadId: loadedWorkpad } = this.props;
 
     const actions = [
       {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Download">
+              <EuiToolTip content="Export">
                 <EuiButtonIcon
                   iconType="exportAction"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
-                  aria-label="Download Workpad"
+                  aria-label="Export workpad"
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -169,11 +174,11 @@ export class WorkpadLoader extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Workpad Name',
+        name: 'Workpad name',
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
-          const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+          const workpadName = getDisplayName(name, workpad, loadedWorkpad);
 
           return (
             <Link
@@ -289,7 +294,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     const downloadButton = (
       <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
-        {`Download (${selectedWorkpads.length})`}
+        {`Export (${selectedWorkpads.length})`}
       </EuiButton>
     );
 

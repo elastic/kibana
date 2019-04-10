@@ -119,10 +119,13 @@ export function renderWithIntl<T>(
  * A wrapper object to provide access to the state of a hook under test and to
  * enable interaction with that hook.
  */
-interface ReactHookWrapper<HookValue> {
+interface ReactHookWrapper<Args, HookValue> {
   /* Ensures that async React operations have settled before and after the
-   * given actor callback is called. */
-  act: (actor: (lastHookValue: HookValue) => void) => void;
+   * given actor callback is called. The actor callback arguments provide easy
+   * access to the last hook value and allow for updating the arguments passed
+   * to the hook body to trigger reevaluation.
+   */
+  act: (actor: (lastHookValue: HookValue, setArgs: (args: Args) => void) => void) => void;
   /* The enzyme wrapper around the test component. */
   component: ReactWrapper;
   /* The most recent value return the by test harness of the hook. */
@@ -141,15 +144,19 @@ interface ReactHookWrapper<HookValue> {
  * @return {ReactHookWrapper} An object providing access to the hook state and
  * functions to interact with it.
  */
-export const mountHook = <HookValue extends any>(
-  body: () => HookValue,
-  WrapperComponent?: React.ComponentType
-): ReactHookWrapper<HookValue> => {
+export const mountHook = <Args extends {}, HookValue extends any>(
+  body: (args: Args) => HookValue,
+  WrapperComponent?: React.ComponentType,
+  initialArgs: Args = {} as Args
+): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
+  let component!: ReactWrapper;
 
-  const act = (actor: (lastHookValue: HookValue) => void) => {
-    reactAct(() => actor(getLastHookValue()));
-    component.update();
+  const act: ReactHookWrapper<Args, HookValue>['act'] = actor => {
+    reactAct(() => {
+      actor(getLastHookValue(), (args: Args) => component.setProps(args));
+      component.update();
+    });
   };
 
   const getLastHookValue = () => {
@@ -160,18 +167,22 @@ export const mountHook = <HookValue extends any>(
     return calls[calls.length - 1][0];
   };
 
-  const TestComponent = () => {
-    hookValueCallback(body());
+  const HookComponent = (props: Args) => {
+    hookValueCallback(body(props));
     return null;
   };
+  const TestComponent: React.FunctionComponent<Args> = args =>
+    WrapperComponent ? (
+      <WrapperComponent>
+        <HookComponent {...args} />
+      </WrapperComponent>
+    ) : (
+      <HookComponent {...args} />
+    );
 
-  const component = WrapperComponent
-    ? mount(
-        <WrapperComponent>
-          <TestComponent />
-        </WrapperComponent>
-      )
-    : mount(<TestComponent />);
+  reactAct(() => {
+    component = mount(<TestComponent {...initialArgs} />);
+  });
 
   return {
     act,

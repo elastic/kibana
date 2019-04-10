@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import chrome from 'ui/chrome';
+import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +16,7 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -23,10 +26,12 @@ import {
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE
+  FLYOUT_STATE,
+  setIsLayerTOCOpen
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -40,6 +45,7 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -48,7 +54,7 @@ const app = uiModules.get('app/maps', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {
 
-  const savedMap = $scope.map = $route.current.locals.map;
+  const savedMap = $route.current.locals.map;
   let unsubscribe;
 
   const store = createMapStore();
@@ -135,6 +141,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }));
     }
 
+    if (savedMap.uiStateJSON) {
+      const uiState = JSON.parse(savedMap.uiStateJSON);
+      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+    }
+
     const layerList = getInitialLayers(savedMap.layerListJSON);
     store.dispatch(replaceLayerList(layerList));
 
@@ -200,13 +211,20 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  // TODO subscribe to store change and change when store updates title
-  chrome.breadcrumbs.set([
-    { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-      defaultMessage: 'Maps'
-    }), href: '#' },
-    { text: $scope.map.title }
-  ]);
+  const updateBreadcrumbs = () => {
+    chrome.breadcrumbs.set([
+      {
+        text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+          defaultMessage: 'Maps'
+        }),
+        href: '#'
+      },
+      { text: savedMap.title }
+    ]);
+  };
+  updateBreadcrumbs();
+
+  addHelpMenuToAppChrome(chrome);
 
   async function doSave(saveOptions) {
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
@@ -237,6 +255,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         }),
         'data-test-subj': 'saveMapSuccess',
       });
+
+      updateBreadcrumbs();
 
       if (savedMap.id !== $route.current.params.id) {
         $scope.$evalAsync(() => {
@@ -307,7 +327,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
           onClose={() => {}}
           title={savedMap.title}
           showCopyOnSave={savedMap.id ? true : false}
-          objectType={'map'}
+          objectType={MAP_SAVED_OBJECT_TYPE}
         />);
       showSaveModal(saveModal);
     }

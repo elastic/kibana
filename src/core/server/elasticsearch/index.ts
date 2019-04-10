@@ -17,17 +17,7 @@
  * under the License.
  */
 
-export { ElasticsearchServiceStart } from './elasticsearch_service';
+export { ElasticsearchServiceSetup, ElasticsearchService } from './elasticsearch_service';
 export { CallAPIOptions, ClusterClient } from './cluster_client';
-
-import { CoreContext } from '../../types';
-import { ElasticsearchService } from './elasticsearch_service';
-
-/** @internal */
-export class ElasticsearchModule {
-  public readonly service: ElasticsearchService;
-
-  constructor(coreContext: CoreContext) {
-    this.service = new ElasticsearchService(coreContext);
-  }
-}
+export { ScopedClusterClient, Headers, APICaller } from './scoped_cluster_client';
+export { ElasticsearchClientConfig } from './elasticsearch_client_config';

@@ -6,7 +6,7 @@
 
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: TestInvoker) {
   describe('saved objects spaces only enabled', function() {
     this.tags('ciGroup5');
@@ -18,6 +18,8 @@ export default function({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./export'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
   });
 }

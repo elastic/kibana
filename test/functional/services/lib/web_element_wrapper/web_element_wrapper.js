@@ -19,6 +19,7 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { delay } from 'bluebird';
+import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -37,6 +38,17 @@ export class WebElementWrapper {
     this._defaultFindTimeout = timeout;
     this._fixedHeaderHeight = fixedHeaderHeight;
     this._logger = log;
+  }
+
+  async _findWithCustomTimeout(findFunction, timeout) {
+    if (timeout && timeout !== this._defaultFindTimeout) {
+      await this._driver.manage().setTimeouts({ implicit: timeout });
+    }
+    const elements = await findFunction();
+    if (timeout && timeout !== this._defaultFindTimeout) {
+      await this._driver.manage().setTimeouts({ implicit: this._defaultFindTimeout });
+    }
+    return elements;
   }
 
   _wrap(otherWebElement) {
@@ -285,10 +297,16 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByCssSelector(selector) {
-    return this._wrapAll(await this._webElement.findElements(this._By.css(selector)));
+  async findAllByCssSelector(selector, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.css(selector)),
+        timeout
+      )
+    );
   }
 
   /**
@@ -307,11 +325,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} className
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByClassName(className) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.className(className))
+  async findAllByClassName(className, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.className(className)),
+        timeout
+      )
     );
   }
 
@@ -331,11 +353,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} tagName
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByTagName(tagName) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.tagName(tagName))
+  async findAllByTagName(tagName, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.tagName(tagName)),
+        timeout
+      )
     );
   }
 
@@ -355,11 +381,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByXpath(selector) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.xpath(selector))
+  async findAllByXpath(selector, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.xpath(selector)),
+        timeout
+      )
     );
   }
 
@@ -379,31 +409,33 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByPartialLinkText(linkText) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.partialLinkText(linkText))
+  async findAllByPartialLinkText(linkText, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.partialLinkText(linkText)),
+        timeout
+      )
     );
   }
 
   /**
-   * Waits for all elements inside this element matching the given CSS class name to be destroyed.
+   * Waits for all elements inside this element matching the given CSS selector to be destroyed.
    *
    * @param {string} className
    * @return {Promise<void>}
    */
-  async waitForDeletedByClassName(className) {
-    await this._driver.wait(() => {
-      return this._webElement.findElements(this._By.className(className)).then((children) => {
-        if (children.length <= 0) {
-          return true;
-        }
-        return false;
-      });
+  async waitForDeletedByCssSelector(selector) {
+    await this._driver.manage().setTimeouts({ implicit: 1000 });
+    await this._driver.wait(async () => {
+      const found = await this._webElement.findElements(this._By.css(selector));
+      return found.length === 0;
     },
     this._defaultFindTimeout,
-    `The element with ${className} className was still present when it should have disappeared.`);
+    `The element with ${selector} selector was still present after ${this._defaultFindTimeout} sec.`);
+    await this._driver.manage().setTimeouts({ implicit: this._defaultFindTimeout });
   }
 
   /**
@@ -442,5 +474,20 @@ export class WebElementWrapper {
     };
 
     return $;
+  }
+
+  /**
+   * Creates the screenshot of the element
+   *
+   * @returns {Promise<void>}
+   */
+  async takeScreenshot() {
+    const screenshot = await this._driver.takeScreenshot();
+    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const { width, height, x, y } = await this.getPosition();
+    const src = PNG.sync.read(buffer);
+    const dst = new PNG({ width, height });
+    PNG.bitblt(src, dst, x, y, width, height, 0, 0);
+    return PNG.sync.write(dst);
   }
 }

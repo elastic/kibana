@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { addHelpMenuToAppChrome } from '../../help_menu_util';
+import chrome from 'ui/chrome';
 
 export const EMPTY_FILTER = '';
 
@@ -55,6 +57,7 @@ export class MapListing extends React.Component {
 
   componentDidMount() {
     this.fetchItems();
+    addHelpMenuToAppChrome(chrome);
   }
 
   debouncedFetch = _.debounce(async (filter) => {

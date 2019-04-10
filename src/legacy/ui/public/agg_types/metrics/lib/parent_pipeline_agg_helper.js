@@ -27,7 +27,7 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 import { i18n } from '@kbn/i18n';
 
 
-const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
+const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev', '!geo_bounds', '!geo_centroid'];
 const metricAggSchema = (new Schemas([
   {
     group: 'none',

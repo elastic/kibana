@@ -5,12 +5,8 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
-import { ShowJson } from './show_json';
-import { Summary } from './summary';
-import { EditSettingsJson } from './edit_settings_json';
-import { renderBadges } from '../../../../lib/render_badges';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -24,14 +20,61 @@ import {
   EuiTab,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexActionsContextMenu } from '../../components';
+import { renderBadges } from '../../../../lib/render_badges';
 import { INDEX_OPEN } from '../../../../../common/constants';
+import {
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../../../constants';
+import { IndexActionsContextMenu } from '../../components';
+import { ShowJson } from './show_json';
+import { Summary } from './summary';
+import { EditSettingsJson } from './edit_settings_json';
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+const tabToHumanizedMap = {
+  [TAB_SUMMARY]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabSummaryLabel"
+      defaultMessage="Summary"
+    />
+  ),
+  [TAB_SETTINGS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabSettingsLabel"
+      defaultMessage="Settings"
+    />
+  ),
+  [TAB_MAPPING]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabMappingLabel"
+      defaultMessage="Mapping"
+    />
+  ),
+  [TAB_STATS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabStatsLabel"
+      defaultMessage="Stats"
+    />
+  ),
+  [TAB_EDIT_SETTINGS]: (
+    <FormattedMessage
+      id="xpack.idxMgmt.detailPanel.tabEditSettingsLabel"
+      defaultMessage="Edit settings"
+    />
+  ),
+};
 
-const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
+const tabs = [
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+];
+
 export class DetailPanel extends Component {
   renderTabs() {
     const { panelType, indexName, index, openDetailPanel } = this.props;
@@ -42,10 +85,10 @@ export class DetailPanel extends Component {
           onClick={() => openDetailPanel({ panelType: tab, indexName })}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
-          disabled={tab === 'Stats' && index.status !== INDEX_OPEN}
+          disabled={tab === TAB_STATS && index.status !== INDEX_OPEN}
           key={i}
         >
-          {capitalizeFirstLetter(tab)}
+          {tabToHumanizedMap[tab]}
         </EuiTab>
       );
     });
@@ -57,12 +100,12 @@ export class DetailPanel extends Component {
     }
     let component = null;
     switch (panelType) {
-      case 'Edit settings':
+      case TAB_EDIT_SETTINGS:
         component = <EditSettingsJson />;
         break;
-      case 'Mapping':
-      case 'Settings':
-      case 'Stats':
+      case TAB_MAPPING:
+      case TAB_SETTINGS:
+      case TAB_STATS:
         component = <ShowJson />;
         break;
       default:

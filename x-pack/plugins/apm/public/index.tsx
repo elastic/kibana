@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 import 'react-vis/dist/style.css';
+import { CoreSetup } from 'src/core/public';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
@@ -17,15 +16,12 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
-import { Main } from './components/app/Main';
-import { GlobalProgress } from './components/app/Main/GlobalProgress';
-import { history } from './components/shared/Links/url_helpers';
 // @ts-ignore
 import configureStore from './store/config/configureStore';
+import { plugin } from './new-platform';
+import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-// @ts-ignore
-import { initTimepicker } from './utils/timepicker';
 
 // render APM feedback link in global help menu
 chrome.helpExtension.set(domElement => {
@@ -37,20 +33,23 @@ chrome.helpExtension.set(domElement => {
 
 // @ts-ignore
 chrome.setRootTemplate(template);
-const store = configureStore();
 
-initTimepicker(history, store.dispatch).then(() => {
-  ReactDOM.render(
-    <I18nContext>
-      <Provider store={store}>
-        <Fragment>
-          <GlobalProgress />
-          <Router history={history}>
-            <Main />
-          </Router>
-        </Fragment>
-      </Provider>
-    </I18nContext>,
-    document.getElementById('react-apm-root')
-  );
+const checkForRoot = () => {
+  return new Promise(resolve => {
+    const ready = !!document.getElementById(REACT_APP_ROOT_ID);
+    if (ready) {
+      resolve();
+    } else {
+      setTimeout(() => resolve(checkForRoot()), 10);
+    }
+  });
+};
+
+checkForRoot().then(() => {
+  const core = {
+    i18n: {
+      Context: I18nContext
+    }
+  } as CoreSetup;
+  plugin().setup(core);
 });

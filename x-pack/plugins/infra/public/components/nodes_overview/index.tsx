@@ -3,11 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import {
   InfraMetricType,
   InfraNode,
@@ -132,7 +134,21 @@ export const NodesOverview = injectI18n(
       return (
         <MainContainer>
           <ViewSwitcherContainer>
-            <ViewSwitcher view={view} onChange={this.handleViewChange} />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <ViewSwitcher view={view} onChange={this.handleViewChange} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+                      defaultMessage="Showing the last 1 minute of data from the time period"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </ViewSwitcherContainer>
           {view === 'table' ? (
             <TableContainer>
@@ -190,20 +206,20 @@ export const NodesOverview = injectI18n(
   }
 );
 
-const MainContainer = styled.div`
+const MainContainer = euiStyled.div`
   position: relative;
   flex: 1 1 auto;
 `;
 
-const TableContainer = styled.div`
+const TableContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const ViewSwitcherContainer = styled.div`
+const ViewSwitcherContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const MapContainer = styled.div`
+const MapContainer = euiStyled.div`
   position: absolute;
   display: flex;
   top: 0;

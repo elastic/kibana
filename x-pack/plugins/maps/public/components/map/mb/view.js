@@ -9,9 +9,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
-import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, FEATURE_ID_PROPERTY_NAME, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import { FeatureTooltip } from '../feature_tooltip';
+
+
+const TOOLTIP_TYPE = {
+  HOVER: 'HOVER',
+  LOCKED: 'LOCKED'
+};
 
 export class MBMapContainer extends React.Component {
 
@@ -25,6 +31,10 @@ export class MBMapContainer extends React.Component {
     });
   }
 
+  _onTooltipClose = () => {
+    this.props.setTooltipState(null);
+  };
+
   _debouncedSync = _.debounce(() => {
     if (this._isMounted) {
       this._syncMbMapWithLayerList();
@@ -32,59 +42,92 @@ export class MBMapContainer extends React.Component {
     }
   }, 256);
 
-  _updateTooltipState = _.debounce(async (e) => {
 
-    const mbLayerIds = this._getMbLayerIdsForTooltips();
-    const features = this._mbMap.queryRenderedFeatures(e.point, { layers: mbLayerIds });
+  _lockTooltip =  (e) => {
 
+    this._updateHoverTooltipState.cancel();//ignore any possible moves
+
+    const features = this._getFeaturesUnderPointer(e.point);
     if (!features.length) {
       this.props.setTooltipState(null);
       return;
     }
 
     const targetFeature = features[0];
+    const layer = this._getLayer(targetFeature.layer.id);
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
+    this.props.setTooltipState({
+      type: TOOLTIP_TYPE.LOCKED,
+      layerId: layer.getId(),
+      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
+      location: popupAnchorLocation
+    });
+  };
+
+  _updateHoverTooltipState = _.debounce((e) => {
+
+    if (this.props.tooltipState && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED) {
+      //ignore hover events when tooltip is locked
+      return;
+    }
+
+    const features = this._getFeaturesUnderPointer(e.point);
+    if (!features.length) {
+      this.props.setTooltipState(null);
+      return;
+    }
+
+    const targetFeature = features[0];
+
     if (this.props.tooltipState) {
-      const propertiesUnchanged = _.isEqual(this.props.tooltipState.activeFeature.properties, targetFeature.properties);
-      const geometryUnchanged = _.isEqual(this.props.tooltipState.activeFeature.geometry, targetFeature.geometry);
-      if(propertiesUnchanged && geometryUnchanged) {
+      if (targetFeature.properties[FEATURE_ID_PROPERTY_NAME] === this.props.tooltipState.featureId) {
         return;
       }
     }
 
     const layer = this._getLayer(targetFeature.layer.id);
-    const formattedProperties = await layer.getPropertiesForTooltip(targetFeature.properties);
-
-    let popupAnchorLocation = [e.lngLat.lng, e.lngLat.lat]; // default popup location to mouse location
-    if (targetFeature.geometry.type === 'Point') {
-      const coordinates = targetFeature.geometry.coordinates.slice();
-
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
-
-      popupAnchorLocation = coordinates;
-    }
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
 
     this.props.setTooltipState({
-      activeFeature: {
-        properties: targetFeature.properties,
-        geometry: targetFeature.geometry
-      },
-      formattedProperties: formattedProperties,
+      type: TOOLTIP_TYPE.HOVER,
+      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       layerId: layer.getId(),
       location: popupAnchorLocation
     });
 
   }, 100);
 
+  _justifyAnchorLocation(mbLngLat, targetFeature) {
+    let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
+    if (targetFeature.geometry.type === 'Point') {
+      const coordinates = targetFeature.geometry.coordinates.slice();
 
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      while (Math.abs(mbLngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += mbLngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      popupAnchorLocation = coordinates;
+    }
+    return popupAnchorLocation;
+  }
   _getMbLayerIdsForTooltips() {
-    return this.props.layerList.reduce((mbLayerIds, layer) => {
+
+    const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
       return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
     }, []);
+
+
+    //ensure all layers that are actually on the map
+    //the raw list may contain layer-ids that have not been added to the map yet.
+    //For example:
+    //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
+    //during that data-fetch window, the app should not query for layers that do not exist.
+    return mbLayerIds.filter((mbLayerId) => {
+      return !!this._mbMap.getLayer(mbLayerId);
+    });
   }
 
   _getMapState() {
@@ -104,6 +147,27 @@ export class MBMapContainer extends React.Component {
         maxLat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION)
       }
     };
+  }
+
+  _getFeaturesUnderPointer(mbLngLatPoint) {
+
+    if (!this._mbMap) {
+      return [];
+    }
+
+    const mbLayerIds = this._getMbLayerIdsForTooltips();
+    const PADDING = 2;//in pixels
+    const mbBbox = [
+      {
+        x: mbLngLatPoint.x - PADDING,
+        y: mbLngLatPoint.y - PADDING
+      },
+      {
+        x: mbLngLatPoint.x + PADDING,
+        y: mbLngLatPoint.y + PADDING
+      }
+    ];
+    return this._mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
   componentDidUpdate() {
@@ -162,7 +226,8 @@ export class MBMapContainer extends React.Component {
     });
 
 
-    this._mbMap.on('mousemove', this._updateTooltipState);
+    this._mbMap.on('mousemove', this._updateHoverTooltipState);
+    this._mbMap.on('click', this._lockTooltip);
 
     this.props.onMapReady(this._getMapState());
   }
@@ -181,26 +246,41 @@ export class MBMapContainer extends React.Component {
     }
   }
 
-  _showTooltip()  {
-    //todo: can still be optimized. No need to rerender if content remains identical
-    ReactDOM.render(
-      React.createElement(
-        FeatureTooltip, {
-          properties: this.props.tooltipState.formattedProperties,
-        }
-      ),
-      this._tooltipContainer
-    );
+  _renderContentToTooltip(content, location) {
+    if (!this._isMounted) {
+      return;
+    }
+    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
+    ReactDOM.render((
+      <FeatureTooltip
+        properties={content}
+        closeTooltip={this._onTooltipClose}
+        showFilterButtons={this.props.isFilterable && isLocked}
+        showCloseButton={isLocked}
+      />
+    ), this._tooltipContainer);
 
-    this._mbPopup.setLngLat(this.props.tooltipState.location)
+    this._mbPopup.setLngLat(location)
       .setDOMContent(this._tooltipContainer)
       .addTo(this._mbMap);
   }
 
+
+  async _showTooltip()  {
+    const tooltipLayer = this.props.layerList.find(layer => {
+      return layer.getId() === this.props.tooltipState.layerId;
+    });
+    const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
+    const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+    this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
+  }
+
   _syncTooltipState() {
     if (this.props.tooltipState) {
+      this._mbMap.getCanvas().style.cursor = 'pointer';
       this._showTooltip();
     } else {
+      this._mbMap.getCanvas().style.cursor = '';
       this._hideTooltip();
     }
   }

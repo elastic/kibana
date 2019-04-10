@@ -10,3 +10,13 @@ export {
   LICENSE_STATUS_EXPIRED,
   LICENSE_STATUS_VALID,
 } from './license_status';
+
+export {
+  LICENSE_TYPE_BASIC,
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_TRIAL,
+  RANKED_LICENSE_TYPES,
+  LicenseType,
+} from './license_types';

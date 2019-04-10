@@ -19,14 +19,13 @@
 
 import { first } from 'rxjs/operators';
 
-const MockClusterClient = jest.fn();
-jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
+import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { logger } from '../logging/__mocks__';
+import { CoreContext } from '../core_context';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 
@@ -34,6 +33,7 @@ let elasticsearchService: ElasticsearchService;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -53,11 +53,11 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
-describe('#start', () => {
+describe('#setup', () => {
   test('returns legacy Elasticsearch config as a part of the contract', async () => {
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
-    await expect(startContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
+    await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
   });
@@ -69,12 +69,12 @@ describe('#start', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
     const [esConfig, adminClient, dataClient] = await combineLatest(
-      startContract.legacy.config$,
-      startContract.adminClient$,
-      startContract.dataClient$
+      setupContract.legacy.config$,
+      setupContract.adminClient$,
+      setupContract.dataClient$
     )
       .pipe(first())
       .toPromise();
@@ -99,13 +99,13 @@ describe('#start', () => {
   });
 
   test('returns `createClient` as a part of the contract', async () => {
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
     const mockClusterClientInstance = { close: jest.fn() };
     MockClusterClient.mockImplementation(() => mockClusterClientInstance);
 
     const mockConfig = { logQueries: true };
-    const clusterClient = startContract.createClient('some-custom-type', mockConfig as any);
+    const clusterClient = setupContract.createClient('some-custom-type', mockConfig as any);
 
     expect(clusterClient).toBe(mockClusterClientInstance);
 
@@ -124,7 +124,7 @@ describe('#stop', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    await elasticsearchService.start();
+    await elasticsearchService.setup();
     await elasticsearchService.stop();
 
     expect(mockAdminClusterClientInstance.close).toHaveBeenCalledTimes(1);
