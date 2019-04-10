@@ -110,10 +110,6 @@ uiModules
           }
 
           $scope.onChange = (value) => {
-            if ($scope.aggParam.required && !value) {
-              // We prevent clearing control's value if this field is required.
-              return;
-            }
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
@@ -123,6 +119,7 @@ uiModules
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
+            showValidation();
           };
 
           $scope.setValidity = (isValid) => {
