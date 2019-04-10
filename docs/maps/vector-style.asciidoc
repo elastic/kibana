@@ -1,6 +1,8 @@
 [role="xpack"]
 [[vector-style]]
-=== Vector style
+=== Vector styling
+
+You can customize the look of your vector layers by configuring the following styling properties:
 
 *Border color*:: Defines the border color of the vector features.
 
@@ -10,12 +12,55 @@
 
 *Symbol size*:: Defines the symbol size of point features.
 
-Click the *link* button to toggle between static styling and data-driven styling.
+
+[float]
+[[maps-vector-style-static]]
+==== Static styling
+
+Use static styling to specificy a constant value for a style property.
 
 [role="screenshot"]
 image::maps/images/vector_style_static.png[]
 
+[float]
+[[maps-vector-style-data-driven]]
+==== Data driven styling
+
+Use data driven styling to symbolize features from numeric property values.
+Click image:maps/images/gs_link_icon.png[] to enable data driven styling for a style property.
+
+NOTE: The image:maps/images/gs_link_icon.png[] button is only available when your vector features contain numeric properties.
+
+The image below shows an example using the Kibana sample data set "Sample web logs".
+The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
+See <<add-sample-data, adding sample data>> to install the `kibana_sample_data_logs` index.
+
+The layer sets fill to a color ramp from light green to dark green.
+The layer specifies that the `hour_of_day` feature property is used to determine the color of each feature based on where the value fits on a linear scale between the minimum and maximum values.
+Light green circles symbolize documents that occur earlier in the day while dark green circles symbolize documents that occur later in the day.
+
+The layer sets symbol size to a range between 1 and 24 pixels.
+The layer specifies that the `bytes` feature property is used to determine the symbol size of each feature based on where the value fits on a linear scale between the minimum and maximum values.
+Smaller circles symbolize documents with smaller payloads while larger circles symbolize documents with larger payloads.
+
 [role="screenshot"]
 image::maps/images/vector_style_dynamic.png[]
 
-NOTE: The *link* button is only available when your vector features contain numeric properties.
+
+[float]
+[[maps-vector-style-classification]]
+==== Classification styling
+
+Use multiple layers, <<maps-layer-based-filtering, layer filtering>>, and <<maps-vector-style-static, static styling>> for classification styling.
+
+The image below shows an example using the Kibana sample data set "Sample web logs".
+See <<add-sample-data, adding sample data>> to install the `kibana_sample_data_logs` index.
+
+The *Mac OS requests* layer applies the layer filter `machine.os : osx` so the layer only contains Mac OS requests.
+The layer then sets the fill color to a static value of green.
+
+The *Window OS requests* layer applies the layer filter `machine.os : win*` so the layer only contains Window OS requests.
+The layer then sets the fill color to a static value of red.
+
+[role="screenshot"]
+image::maps/images/vector_style_classification.png[]
