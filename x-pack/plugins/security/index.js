@@ -180,7 +180,7 @@ export const security = (kibana) => new kibana.Plugin({
     const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
+    const auditLogger = new SecurityAuditLogger(new AuditLogger(server, 'security', server.config(), xpackInfo));
 
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
