@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('ui/kfetch', () => jest.fn());
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
