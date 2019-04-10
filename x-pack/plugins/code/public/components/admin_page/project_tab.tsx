@@ -82,7 +82,7 @@ interface Props {
   importLoading: boolean;
   toastMessage?: string;
   showToast: boolean;
-  toastType: ToastType;
+  toastType?: ToastType;
   closeToast: () => void;
 }
 interface State {
@@ -161,7 +161,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
               <h3>Repository URL</h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow isInvalid={this.state.isInvalid} error="This field shouldn't be empty.">
+              <EuiFormRow isInvalid={this.state.isInvalid} error="The URL shouldn't be empty.">
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
@@ -285,5 +285,4 @@ const mapDispatchToProps = {
 export const ProjectTab = connect(
   mapStateToProps,
   mapDispatchToProps
-  // @ts-ignore
 )(CodeProjectTab);
