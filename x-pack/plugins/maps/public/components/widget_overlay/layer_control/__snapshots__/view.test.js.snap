@@ -45,7 +45,7 @@ exports[`LayerControl is rendered 1`] = `
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               iconSize="m"
-              iconType="arrowRight"
+              iconType="menuRight"
               onClick={[Function]}
               type="button"
             />
@@ -93,7 +93,7 @@ exports[`LayerControl props Should not render LayerTOC when isLayerTOCOpen is fa
     className="mapLayerControl__openLayerTOCButton"
     color="text"
     iconSize="m"
-    iconType="arrowLeft"
+    iconType="menuLeft"
     onClick={[Function]}
     type="button"
   />
@@ -145,7 +145,7 @@ exports[`LayerControl props isReadOnly 1`] = `
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               iconSize="m"
-              iconType="arrowRight"
+              iconType="menuRight"
               onClick={[Function]}
               type="button"
             />

@@ -33,7 +33,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
           className="mapLayerControl__openLayerTOCButton"
           color="text"
           onClick={openLayerTOC}
-          iconType="arrowLeft"
+          iconType="menuLeft"
           aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
             defaultMessage: 'Expand layers panel'
           })}
@@ -93,7 +93,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
                   onClick={closeLayerTOC}
-                  iconType="arrowRight"
+                  iconType="menuRight"
                   color="text"
                   aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                     defaultMessage: 'Collapse layers panel'
