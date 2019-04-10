@@ -9,7 +9,7 @@ import { Request } from 'hapi';
 // @ts-ignore
 import { createTaggedLogger } from '../../../../server/lib';
 import { KbnServer, Logger } from '../../../../types';
-import { SearchPanel, VisPanel } from '../../types';
+import { SearchPanel, VisPanel } from '../../';
 import { generateCsvSearch } from './generate_csv_search';
 
 interface FakeRequest {
