@@ -2,6 +2,7 @@
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
+    "detected": null,
     "byUuid": {
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
         "isPartiallyMigrated": true,
@@ -12,6 +13,7 @@
   "beats": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
+    "detected": null,
     "byUuid": {
       "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
         "isInternalCollector": true,
@@ -22,6 +24,7 @@
   "logstash": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
+    "detected": null,
     "byUuid": {
       "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
         "isInternalCollector": true,
@@ -32,6 +35,7 @@
   "elasticsearch": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
+    "detected": null,
     "byUuid": {
       "agI8JhXhShasvuDgq0VxRg": {
         "isPartiallyMigrated": true,

@@ -6,31 +6,27 @@
     "byUuid": {
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
         "isFullyMigrated": true,
-        "lastTimestamp": 1554821537079
+        "lastTimestamp": 1554841069921
       }
     }
   },
   "beats": {
-    "totalUniqueInstanceCount": 1,
+    "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
-    "detected": null,
-    "byUuid": {
-      "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
-        "isInternalCollector": true,
-        "lastTimestamp": 1554821536716
-      }
-    }
+    "detected": {
+      "doesExist": false,
+      "mightExist": true
+    },
+    "byUuid": null
   },
   "logstash": {
-    "totalUniqueInstanceCount": 1,
+    "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
-    "detected": null,
-    "byUuid": {
-      "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
-        "isInternalCollector": true,
-        "lastTimestamp": 1554821539784
-      }
-    }
+    "detected": {
+      "doesExist": false,
+      "mightExist": false
+    },
+    "byUuid": null
   },
   "elasticsearch": {
     "totalUniqueInstanceCount": 1,
@@ -39,7 +35,7 @@
     "byUuid": {
       "agI8JhXhShasvuDgq0VxRg": {
         "isPartiallyMigrated": true,
-        "lastInternallyCollectedTimestamp": 1554821531545
+        "lastInternallyCollectedTimestamp": 1554841077638
       }
     }
   }

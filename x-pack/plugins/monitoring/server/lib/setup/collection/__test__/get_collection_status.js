@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { getCollectionStatus } from '../';
 import { getIndexPatterns } from '../../../cluster/get_index_patterns';
 
-const mockReq = (queryResult = {}) => {
+const mockReq = (searchResult = {}, msearchResult = { responses: [] }) => {
   return {
     server: {
       config() {
@@ -22,7 +22,9 @@ const mockReq = (queryResult = {}) => {
         elasticsearch: {
           getCluster() {
             return {
-              callWithRequest() { return Promise.resolve(queryResult); }
+              callWithRequest(_req, type) {
+                return Promise.resolve(type === 'search' ? searchResult : msearchResult);
+              }
             };
           }
         }
@@ -170,5 +172,20 @@ describe('getCollectionStatus', () => {
     expect(result.elasticsearch.totalUniqueInstanceCount).to.be(1);
     expect(result.elasticsearch.totalUniqueFullyMigratedCount).to.be(1);
     expect(result.elasticsearch.byUuid.es_1.isFullyMigrated).to.be(true);
+  });
+
+  it('should detect products based on other indices', async () => {
+    const req = mockReq({}, {
+      responses: [
+        { hits: { total: { value: 1 } } }
+      ]
+    });
+
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+
+    expect(result.kibana.detected.doesExist).to.be(true);
+    expect(result.elasticsearch.detected.doesExist).to.be(true);
+    expect(result.beats.detected.mightExist).to.be(true);
+    expect(result.logstash.detected.mightExist).to.be(false);
   });
 });

@@ -105,6 +105,51 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
   return await callWithRequest(req, 'search', params);
 };
 
+async function detectProducts(req) {
+  const result = {
+    [KIBANA_SYSTEM_ID]: {
+      doesExist: true,
+    },
+    'elasticsearch': {
+      doesExist: true,
+    },
+    [BEATS_SYSTEM_ID]: {
+      doesExist: false,
+      mightExist: false,
+    },
+    [APM_SYSTEM_ID]: {
+      doesExist: false,
+      mightExist: false,
+    },
+    [LOGSTASH_SYSTEM_ID]: {
+      doesExist: false,
+      mightExist: false,
+    }
+  };
+
+  const msearch = [
+    { index: '*beat-*' },
+    { size: 0, terminate_after: 0 },
+
+    { index: '.management-beats*' },
+    { size: 0, terminate_after: 0 },
+  ];
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const {
+    responses: [
+      beatsDetectionResponse1,
+      beatsDetectionResponse2
+    ]
+  } = await callWithRequest(req, 'msearch', { body: msearch });
+
+  if (get(beatsDetectionResponse1, 'hits.total.value', 0) > 0 || get(beatsDetectionResponse2, 'hits.total.value', 0) > 0) {
+    result[BEATS_SYSTEM_ID].mightExist = true;
+  }
+
+  return result;
+}
+
 function getUuidBucketName(productName) {
   switch (productName) {
     case 'elasticsearch':
@@ -129,6 +174,14 @@ function getUuidBucketName(productName) {
  * If a product is partially migrated, this function will also return the timestamp of the last seen monitoring
  * document from internal collection. This will help the user understand if they successfully disabled internal
  * collection and just need to wait for the time window of the query to exclude the older, internally collected documents
+ *
+ * If a product is not detected at all (no monitoring documents), we will attempt to do some self discovery
+ * based on assumptions around indices that might exist with various products. We will return something
+ * like this in that case:
+ * detected: {
+ *   doesExist: boolean, // This product definitely exists but does not have any monitoring documents (kibana and ES)
+ *   mightExist: boolean, // This product might exist based on the presence of some other indices
+ * }
 
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
@@ -143,7 +196,14 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     { name: 'elasticsearch', token: '-es-' },
   ];
 
-  const recentDocuments = await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid);
+  const [
+    recentDocuments,
+    detectedProducts
+  ] = await Promise.all([
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid),
+    await detectProducts(req)
+  ]);
+
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
@@ -151,10 +211,11 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     const indexBuckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
 
-    const capabilities = {
+    const productStatus = {
       totalUniqueInstanceCount: 0,
       totalUniqueFullyMigratedCount: 0,
-      byUuid: {},
+      detected: null,
+      byUuid: null,
     };
 
     const fullyMigratedUuidsMap = {};
@@ -163,7 +224,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
 
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
-      capabilities.totalUniqueInstanceCount = 0;
+      productStatus.totalUniqueInstanceCount = 0;
+      productStatus.detected = detectedProducts[product.name];
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
@@ -177,9 +239,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
         }
       }
-      capabilities.totalUniqueInstanceCount = Object.keys(map).length;
-      capabilities.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
-      capabilities.byUuid = {
+      productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
+      productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: { isInternalCollector: true, ...internalCollectorsUuidsMap[uuid] }
@@ -219,13 +281,13 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         }
       }
 
-      capabilities.totalUniqueInstanceCount = uniq([
+      productStatus.totalUniqueInstanceCount = uniq([
         ...Object.keys(internalCollectorsUuidsMap),
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
-      capabilities.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
-      capabilities.byUuid = {
+      productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
+      productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
           [uuid]: { isInternalCollector: true }
@@ -243,7 +305,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
 
     return {
       ...products,
-      [product.name]: capabilities,
+      [product.name]: productStatus,
     };
   }, {});
 

@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana_exclusive_mb'));
     loadTestFile(require.resolve('./es_and_kibana_mb'));
     loadTestFile(require.resolve('./es_and_kibana_exclusive_mb'));
+    loadTestFile(require.resolve('./detect_beats'));
   });
 }
