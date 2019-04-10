@@ -6,7 +6,14 @@
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer
+} from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -22,6 +29,9 @@ export function getDefaultJobCreateState() {
   } as JobDetailsExposedState;
 }
 
+function gotToDataFrameJobManagement() {
+  window.location.href = '#/data_frame';
+}
 interface Props {
   jobId: string;
   jobConfig: any;
@@ -72,6 +82,23 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
         <EuiButton isDisabled={created && started} onClick={startDataFrame}>
           Start data frame
         </EuiButton>
+      )}
+
+      {(created && started) && (
+        <Fragment>
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="list" />}
+                title="Job Management"
+                description="Return to the data frame job management page."
+                onClick={gotToDataFrameJobManagement}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
       )}
     </Fragment>
   );

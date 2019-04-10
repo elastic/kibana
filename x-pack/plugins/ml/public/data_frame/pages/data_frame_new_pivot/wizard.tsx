@@ -31,10 +31,10 @@ import {
   JobDetailsSummary,
 } from '../../components/job_details';
 
-const WIZARD_STEPS = {
-  DEFINE_PIVOT: 0,
-  JOB_DETAILS: 1,
-  JOB_CREATE: 2,
+enum WIZARD_STEPS {
+  DEFINE_PIVOT,
+  JOB_DETAILS,
+  JOB_CREATE,
 };
 
 interface Props {

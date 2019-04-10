@@ -7,31 +7,20 @@
 import Boom from 'boom';
 import _ from 'lodash';
 
-export interface IndexAnnotationArgs {
-  jobIds: string[];
-  earliestMs: number;
-  latestMs: number;
-  maxAnnotations: number;
-}
-
-export interface GetParams {
-  index: string;
-  size: number;
-  body: object;
-}
-
-export interface DeleteParams {
-  index: string;
-  refresh?: string;
-  id: string;
-}
-
-export type callWithRequestType = (action: string, params: any) => Promise<any>;
+export type callWithRequestType = (action: string, params?: any) => Promise<any>;
 
 export function dataFrameProvider(callWithRequest: callWithRequestType) {
+  async function getDataFrameTransformsJobs() {
+    try {
+      return await callWithRequest('ml.getDataFrameTransforms');
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
   async function createDataFrameTransformsJob(jobId: string, jobConfig: any) {
     try {
-      return await callWithRequest('ml.createDataFrame', { body: jobConfig, jobId });
+      return await callWithRequest('ml.putDataFrameTranformsJob', { body: jobConfig, jobId });
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -39,7 +28,7 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
 
   async function getDataFrameTransformsPreview(params: any) {
     try {
-      return await callWithRequest('ml.dataFramePreview', { body: params });
+      return await callWithRequest('ml.getDataFrameTransformsPreview', { body: params });
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -47,15 +36,25 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
 
   async function startDataFrameTransformsJob(jobId: string) {
     try {
-      return await callWithRequest('ml.startDataFrame', { jobId });
+      return await callWithRequest('ml.startDataFrameTransformsJob', { jobId });
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
+  async function stopDataFrameTransformsJob(jobId: string) {
+    try {
+      return await callWithRequest('ml.stopDataFrameTransformsJob', { jobId });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
   return {
+    getDataFrameTransformsJobs,
     createDataFrameTransformsJob,
     getDataFrameTransformsPreview,
     startDataFrameTransformsJob,
+    stopDataFrameTransformsJob,
   };
 }

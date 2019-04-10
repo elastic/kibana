@@ -105,7 +105,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.createDataFrame = ca({
+  ml.getDataFrameTransforms = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.putDataFrameTranformsJob = ca({
     urls: [
       {
         fmt: '/_data_frame/transforms/<%=jobId%>',
@@ -120,7 +129,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
-  ml.dataFramePreview = ca({
+  ml.getDataFrameTransformsPreview = ca({
     urls: [
       {
         fmt: '/_data_frame/transforms/_preview'
@@ -130,7 +139,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.startDataFrame = ca({
+  ml.startDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ml.stopDataFrameTransforms = ca({
     urls: [
       {
         fmt: '/_data_frame/transforms/<%=jobId%>/_start',
