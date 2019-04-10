@@ -159,6 +159,13 @@ export class FollowerIndexForm extends PureComponent {
   onIndexNameChange = ({ name }) => {
     this.onFieldsChange({ name });
 
+    const error = indexNameValidator(name);
+    if (error) {
+      // If there is a client side error
+      // there is no need to validate the name
+      return;
+    }
+
     if (!name || !name.trim()) {
       this.setState({
         isValidatingIndexName: false,
@@ -613,6 +620,7 @@ export class FollowerIndexForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
+            data-test-subj="followerIndexFormError"
           />
 
           <EuiSpacer size="l" />
@@ -681,7 +689,7 @@ export class FollowerIndexForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
+        <EuiForm data-test-subj="ccrFollowerIndexForm">
           {renderRemoteClusterField()}
           {renderLeaderIndex()}
           {renderFollowerIndexName()}

@@ -203,7 +203,11 @@ export const prepareJson = (variable: string, data: object): string => {
 };
 
 export const prepareString = (variable: string, data: string): string => {
-  return `${variable}='${data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
+  return `${variable}='${escapeString(data)}' `;
+};
+
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -228,8 +232,16 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${visConfig}`;
+    const { markdown, fontSize, openLinksInNewTab } = visState.params;
+    const escapedMarkdown = escapeString(markdown);
+    let expr = `markdownvis '${escapedMarkdown}' `;
+    if (fontSize) {
+      expr += ` fontSize=${fontSize} `;
+    }
+    if (openLinksInNewTab) {
+      expr += `openLinksInNewTab=${openLinksInNewTab} `;
+    }
+    return expr;
   },
   table: (visState, schemas) => {
     const visConfig = {
@@ -246,11 +258,35 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.tagcloud(schemas),
-    };
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+    const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
+    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
+    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel) {
+      expr += `showLabel=${showLabel} `;
+    }
+
+    if (bucket) {
+      expr += ` bucket={visdimension ${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `format=${bucket.format.id} `;
+        expr += prepareJson('formatParams', bucket.format.params);
+      }
+      expr += '} ';
+    }
+    return expr;
   },
   region_map: (visState, schemas) => {
     const visConfig = {

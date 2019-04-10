@@ -64,14 +64,12 @@ exports[`TOCEntry is rendered 1`] = `
       </span>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      TOC details mock
-    </div>
-  </EuiFlexItem>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    TOC details mock
+  </div>
 </div>
 `;
 
@@ -127,13 +125,11 @@ exports[`TOCEntry props isReadOnly 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      TOC details mock
-    </div>
-  </EuiFlexItem>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    TOC details mock
+  </div>
 </div>
 `;
