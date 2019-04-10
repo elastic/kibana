@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* eslint-disable max-classes-per-file */
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { modifyUrl } from '../utils';

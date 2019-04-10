@@ -36,7 +36,7 @@ export class I18nService {
     };
 
     const setup: I18nSetup = {
-      Context: function I18nContext({children}) {
+      Context: function I18nContext({ children }) {
         return (
           <I18nProvider>
             <EuiContext i18n={{ mapping }}>{children}</EuiContext>
