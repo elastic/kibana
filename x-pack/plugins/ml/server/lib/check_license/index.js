@@ -6,4 +6,4 @@
 
 
 
-export { checkLicense, isBasicLicense } from './check_license';
+export { checkLicense } from './check_license';
