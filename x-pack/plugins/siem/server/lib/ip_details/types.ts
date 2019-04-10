@@ -6,9 +6,9 @@
 
 import {
   DomainsData,
+  FirstLastSeenDomain,
   FlowTarget,
   IpOverviewData,
-  LastFirstSeen,
   NetworkDirectionEcs,
   SourceConfiguration,
 } from '../../graphql/types';
@@ -18,10 +18,10 @@ import { Hit, ShardsResponse, TotalValue } from '../types';
 export interface IpDetailsAdapter {
   getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
   getDomains(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
-  getDomainsLastFirstSeen(
+  getDomainsFirstLastSeen(
     req: FrameworkRequest,
-    options: DomainLastFirstSeenRequestOptions
-  ): Promise<LastFirstSeen>;
+    options: DomainFirstLastSeenRequestOptions
+  ): Promise<FirstLastSeenDomain>;
 }
 
 interface ResultHit<T> {
@@ -113,14 +113,14 @@ export interface DomainsBuckets {
   };
 }
 
-export interface DomainLastFirstSeenRequestOptions {
+export interface DomainFirstLastSeenRequestOptions {
   ip: string;
   domainName: string;
   flowTarget: FlowTarget;
   sourceConfiguration: SourceConfiguration;
 }
 
-export interface DomainLastFirstSeenItem {
+export interface DomainFirstLastSeenItem {
   firstSeen?: {
     value: number;
     value_as_string: string;

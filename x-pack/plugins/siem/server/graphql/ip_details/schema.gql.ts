@@ -96,20 +96,20 @@ const domainsSchema = gql`
   }
 `;
 
-const lastFirstSeenSchema = gql`
-  type LastFirstSeen {
+const firstLastSeenSchema = gql`
+  type FirstLastSeenDomain {
     firstSeen: Date
     lastSeen: Date
   }
 
   extend type Source {
-    DomainLastFirstSeen(
+    DomainFirstLastSeen(
       id: String
       ip: String!
       domainName: String!
       flowTarget: FlowTarget!
-    ): LastFirstSeen!
+    ): FirstLastSeenDomain!
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, lastFirstSeenSchema];
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, firstLastSeenSchema];

@@ -6,16 +6,16 @@
 
 import { FlowTarget } from '../../../graphql/types';
 
-import { DomainLastFirstSeenGqlQuery } from './last_first_seen.gql_query';
+import { DomainFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
 interface MockedProvidedQuery {
   request: object;
   result: object;
 }
-export const mocksLastSeenDomainQuery: MockedProvidedQuery[] = [
+export const mockFirstLastSeenDomainQuery: MockedProvidedQuery[] = [
   {
     request: {
-      query: DomainLastFirstSeenGqlQuery,
+      query: DomainFirstLastSeenGqlQuery,
       variables: {
         sourceId: 'default',
         ip: '10.10.10.10',
@@ -27,7 +27,7 @@ export const mocksLastSeenDomainQuery: MockedProvidedQuery[] = [
       data: {
         source: {
           id: 'default',
-          DomainLastFirstSeen: {
+          DomainFirstLastSeen: {
             firstSeen: '2019-04-08T16:09:40.692Z',
             lastSeen: '2019-04-08T18:35:45.064Z',
           },

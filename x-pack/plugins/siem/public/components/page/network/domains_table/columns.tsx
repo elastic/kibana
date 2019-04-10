@@ -24,7 +24,7 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
 import { AddToKql } from '../network_top_n_flow_table/add_to_kql';
 
-import { FirstLastSeen } from './first_last_seen';
+import { FirstLastSeenDomain } from './first_last_seen';
 import * as i18n from './translations';
 
 type valueof<T> = T[keyof T];
@@ -128,7 +128,7 @@ export const getDomainsColumns = (
       const domainName = getOr(null, domainNameAttr, node);
       if (domainName != null) {
         return (
-          <FirstLastSeen
+          <FirstLastSeenDomain
             ip={ip}
             domainName={domainName}
             flowTarget={flowTarget}
@@ -149,7 +149,12 @@ export const getDomainsColumns = (
       const domainName = getOr(null, domainNameAttr, node);
       if (domainName != null) {
         return (
-          <FirstLastSeen ip={ip} domainName={domainName} flowTarget={flowTarget} type="last-seen" />
+          <FirstLastSeenDomain
+            ip={ip}
+            domainName={domainName}
+            flowTarget={flowTarget}
+            type="last-seen"
+          />
         );
       }
       return getEmptyTagValue();

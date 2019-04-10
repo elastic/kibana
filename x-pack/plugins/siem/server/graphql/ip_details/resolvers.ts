@@ -20,8 +20,8 @@ export type QueryDomainsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryDomainLastFirstSeenResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.DomainLastFirstSeenResolver>,
+type QueryDomainFirstLastSeenResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.DomainFirstLastSeenResolver>,
   QuerySourceResolver
 >;
 
@@ -35,7 +35,7 @@ export const createIpDetailsResolvers = (
   Source: {
     IpOverview: QueryIpOverviewResolver;
     Domains: QueryDomainsResolver;
-    DomainLastFirstSeen: QueryDomainLastFirstSeenResolver;
+    DomainFirstLastSeen: QueryDomainFirstLastSeenResolver;
   };
 } => ({
   Source: {
@@ -53,14 +53,14 @@ export const createIpDetailsResolvers = (
       };
       return libs.ipDetails.getDomains(req, options);
     },
-    async DomainLastFirstSeen(source, args, { req }) {
+    async DomainFirstLastSeen(source, args, { req }) {
       const options = {
         sourceConfiguration: source.configuration,
         ip: args.ip,
         domainName: args.domainName,
         flowTarget: args.flowTarget,
       };
-      return libs.ipDetails.getDomainLastFirstSeen(req, options);
+      return libs.ipDetails.getDomainFirstLastSeen(req, options);
     },
   },
 });

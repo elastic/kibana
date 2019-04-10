@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainLastFirstSeenRequestOptions } from './types';
+import { DomainFirstLastSeenRequestOptions } from './types';
 
-export const buildLastFirstSeenDomainQuery = ({
+export const buildFirstLastSeenDomainQuery = ({
   ip,
   domainName,
   flowTarget,
@@ -17,7 +17,7 @@ export const buildLastFirstSeenDomainQuery = ({
     packetbeatAlias,
     winlogbeatAlias,
   },
-}: DomainLastFirstSeenRequestOptions) => {
+}: DomainFirstLastSeenRequestOptions) => {
   const filter = [
     { term: { [`${flowTarget}.ip`]: ip } },
     { term: { [`${flowTarget}.domain`]: domainName } },

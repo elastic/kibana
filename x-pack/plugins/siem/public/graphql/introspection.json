@@ -451,7 +451,7 @@
             "deprecationReason": null
           },
           {
-            "name": "DomainLastFirstSeen",
+            "name": "DomainFirstLastSeen",
             "description": "",
             "args": [
               {
@@ -494,7 +494,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "LastFirstSeen", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "FirstLastSeenDomain", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -4984,7 +4984,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "LastFirstSeen",
+        "name": "FirstLastSeenDomain",
         "description": "",
         "fields": [
           {

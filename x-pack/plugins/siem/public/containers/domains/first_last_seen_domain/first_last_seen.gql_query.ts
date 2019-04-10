@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const DomainLastFirstSeenGqlQuery = gql`
-  query GetDomainLastFirstSeenQuery(
+export const DomainFirstLastSeenGqlQuery = gql`
+  query GetDomainFirstLastSeenQuery(
     $sourceId: ID!
     $ip: String!
     $domainName: String!
@@ -15,7 +15,7 @@ export const DomainLastFirstSeenGqlQuery = gql`
   ) {
     source(id: $sourceId) {
       id
-      DomainLastFirstSeen(ip: $ip, domainName: $domainName, flowTarget: $flowTarget) {
+      DomainFirstLastSeen(ip: $ip, domainName: $domainName, flowTarget: $flowTarget) {
         firstSeen
         lastSeen
       }

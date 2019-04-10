@@ -8,13 +8,13 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import { FlowTarget, GetDomainLastFirstSeenQuery } from '../../../graphql/types';
+import { FlowTarget, GetDomainFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
 
-import { DomainLastFirstSeenGqlQuery } from './last_first_seen.gql_query';
+import { DomainFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
-export interface DomainLastFirstSeenArgs {
+export interface DomainFirstLastSeenArgs {
   id: string;
   firstSeen: Date;
   lastSeen: Date;
@@ -23,13 +23,13 @@ export interface DomainLastFirstSeenArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: DomainLastFirstSeenArgs) => React.ReactNode;
+  children: (args: DomainFirstLastSeenArgs) => React.ReactNode;
   ip: string;
   domainName: string;
   flowTarget: FlowTarget;
 }
 
-export function useDomainLastFirstSeenQuery<TCache = object>(
+export function useFirstLastSeenDomainQuery<TCache = object>(
   ip: string,
   domainName: string,
   flowTarget: FlowTarget,
@@ -40,19 +40,19 @@ export function useDomainLastFirstSeenQuery<TCache = object>(
   const [firstSeen, updateFirstSeen] = useState(null);
   const [lastSeen, updateLastSeen] = useState(null);
 
-  async function fetchDomainLastFirstSeen() {
+  async function fetchDomainFirstLastSeen() {
     updateLoading(true);
     return apolloClient
-      .query<GetDomainLastFirstSeenQuery.Query, GetDomainLastFirstSeenQuery.Variables>({
-        query: DomainLastFirstSeenGqlQuery,
+      .query<GetDomainFirstLastSeenQuery.Query, GetDomainFirstLastSeenQuery.Variables>({
+        query: DomainFirstLastSeenGqlQuery,
         fetchPolicy: 'cache-first',
         variables: { sourceId, ip, domainName, flowTarget },
       })
       .then(
         result => {
           updateLoading(false);
-          updateFirstSeen(get('data.source.DomainLastFirstSeen.firstSeen', result));
-          updateLastSeen(get('data.source.DomainLastFirstSeen.lastSeen', result));
+          updateFirstSeen(get('data.source.DomainFirstLastSeen.firstSeen', result));
+          updateLastSeen(get('data.source.DomainFirstLastSeen.lastSeen', result));
           return result;
         },
         error => {
@@ -66,7 +66,7 @@ export function useDomainLastFirstSeenQuery<TCache = object>(
 
   useEffect(() => {
     try {
-      fetchDomainLastFirstSeen();
+      fetchDomainFirstLastSeen();
     } catch (err) {
       updateFirstSeen(null);
       updateLastSeen(null);

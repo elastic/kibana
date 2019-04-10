@@ -52,7 +52,7 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainLastFirstSeen: LastFirstSeen;
+  DomainFirstLastSeen: FirstLastSeenDomain;
 
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -849,7 +849,7 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
-export interface LastFirstSeen {
+export interface FirstLastSeenDomain {
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
@@ -1125,7 +1125,7 @@ export interface DomainsSourceArgs {
 
   timerange: TimerangeInput;
 }
-export interface DomainLastFirstSeenSourceArgs {
+export interface DomainFirstLastSeenSourceArgs {
   id?: string | null;
 
   ip: string;
@@ -1395,6 +1395,37 @@ export namespace GetAuthenticationsQuery {
   };
 }
 
+export namespace GetDomainFirstLastSeenQuery {
+  export type Variables = {
+    sourceId: string;
+    ip: string;
+    domainName: string;
+    flowTarget: FlowTarget;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    DomainFirstLastSeen: DomainFirstLastSeen;
+  };
+
+  export type DomainFirstLastSeen = {
+    __typename?: 'FirstLastSeenDomain';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+  };
+}
+
 export namespace GetDomainsQuery {
   export type Variables = {
     sourceId: string;
@@ -1501,37 +1532,6 @@ export namespace GetDomainsQuery {
     __typename?: 'CursorType';
 
     value: string;
-  };
-}
-
-export namespace GetDomainLastFirstSeenQuery {
-  export type Variables = {
-    sourceId: string;
-    ip: string;
-    domainName: string;
-    flowTarget: FlowTarget;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    DomainLastFirstSeen: DomainLastFirstSeen;
-  };
-
-  export type DomainLastFirstSeen = {
-    __typename?: 'LastFirstSeen';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
   };
 }
 
