@@ -12,6 +12,8 @@ You can customize the look of your vector layers by configuring the following st
 
 *Symbol size*:: Defines the symbol size of point features.
 
+NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use fill color property.
+Set border color to style line geometries
 
 [float]
 [[maps-vector-style-static]]
