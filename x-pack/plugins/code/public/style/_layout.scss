@@ -58,6 +58,14 @@
   overflow: auto;
 }
 
+.codeContainer__searchBar {
+  width: 100%;
+}
+
+.codeContainer__select {
+  margin-right: $euiSizeS;
+}
+
 .codeFooter--error {
   color: $euiColorDanger;
 }

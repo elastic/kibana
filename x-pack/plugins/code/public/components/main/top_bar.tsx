@@ -5,9 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { ChangeEvent } from 'react';
-import styled from 'styled-components';
 import { SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
@@ -16,10 +14,6 @@ import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
 import { SearchOptions } from '../../actions';
-
-const SelectContainer = styled(EuiFlexItem)`
-  margin-right: ${theme.euiSizeS};
-`;
 
 interface Props {
   routeParams: MainRouteParams;
@@ -57,12 +51,12 @@ export class TopBar extends React.Component<Props, { value: string }> {
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
-              <SelectContainer grow={false} style={{ display: 'none' }}>
+              <EuiFlexItem className="codeContainer__select" grow={false} style={{ display: 'none' }}>
                 <EuiSelect
                   options={this.props.branches.map(b => ({ value: b.name, text: b.name }))}
                   onChange={this.onChange}
                 />
-              </SelectContainer>
+              </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
             </EuiFlexGroup>
           </EuiFlexItem>
