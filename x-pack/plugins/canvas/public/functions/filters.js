@@ -7,8 +7,21 @@
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
+import { get } from 'lodash';
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
+
+function getFiltersByGroup(filters, groups = []) {
+  if (!groups || groups.length === 0) {
+    return filters;
+  }
+
+  return filters.filter(filter => {
+    const ast = fromExpression(filter);
+    const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every(expGroup => groups.includes(expGroup));
+  });
+}
 
 export const filters = () => ({
   name: 'filters',
@@ -25,10 +38,11 @@ export const filters = () => ({
     },
   },
   help: 'Collect element filters on the workpad, usually to provide them to a data source',
-  fn: () => {
-    const filterExpression = getGlobalFilters(getState()).join(' | ');
+  fn: (_, { group }) => {
+    const filterList = getFiltersByGroup(getGlobalFilters(getState()), group);
 
-    if (filterExpression && filterExpression.length) {
+    if (filterList && filterList.length) {
+      const filterExpression = filterList.join(' | ');
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
