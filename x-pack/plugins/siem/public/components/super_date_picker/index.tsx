@@ -5,7 +5,13 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiSuperDatePicker,
+  EuiSuperDatePickerProps,
+  OnRefreshChangeProps,
+  OnRefreshProps,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -13,33 +19,62 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, State } from '../../store';
 
+type MyEuiSuperDatePickerProps = Pick<
+  EuiSuperDatePickerProps,
+  | 'end'
+  | 'isPaused'
+  | 'onTimeChange'
+  | 'onRefreshChange'
+  | 'onRefresh'
+  | 'recentlyUsedRanges'
+  | 'refreshInterval'
+  | 'showUpdateButton'
+  | 'start'
+> & {
+  isLoading?: boolean;
+};
+const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDatePicker;
+
 interface SuperDatePickerStateRedux {
+  duration: number;
+  kind: string;
+  option: string;
   start: number;
   end: number;
   isLoading: boolean;
+  refetch: inputsModel.Refetch[];
 }
 
 interface SuperDatePickerDispatchProps {
   setAbsoluteSuperDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
+  setRelativeSuperDatePicker: ActionCreator<{
+    id: string;
+    option: string;
+    from: number;
+    to: number;
+  }>;
+  startAutoReload: ActionCreator<{ id: string }>;
+  stopAutoReload: ActionCreator<{ id: string }>;
+  setDuration: ActionCreator<{ id: string; duration: number }>;
 }
 interface OwnProps {
   id: string;
   disabled?: boolean;
 }
 
+interface TimeArgs {
+  start: string;
+  end: string;
+}
+
 export type SuperDatePickerProps = OwnProps &
   SuperDatePickerDispatchProps &
   SuperDatePickerStateRedux;
 
-interface TimeArgs {
-  end: string;
-  start: string;
-}
-
 export interface SuperDatePickerState {
   isAutoRefreshOnly: boolean;
-  isLoading: boolean;
   isPaused: boolean;
+  isQuickSelection: boolean;
   recentlyUsedRanges: TimeArgs[];
   refreshInterval: number;
   showUpdateButton: boolean;
@@ -52,11 +87,10 @@ export const SuperDatePickerComponent = class extends Component<
   constructor(props: SuperDatePickerProps) {
     super(props);
 
-    const { isLoading } = props;
     this.state = {
       isAutoRefreshOnly: false,
-      isLoading,
-      isPaused: false,
+      isPaused: true,
+      isQuickSelection: true,
       recentlyUsedRanges: [],
       refreshInterval: 300000,
       showUpdateButton: true,
@@ -64,63 +98,120 @@ export const SuperDatePickerComponent = class extends Component<
   }
 
   public render() {
-    const { end, start } = this.props;
+    const { end, start, kind, option, isLoading } = this.props;
+    let endDate = new Date(end).toISOString();
+    let startDate = new Date(start).toISOString();
+    if (kind === 'relative') {
+      startDate = option;
+      endDate = 'now';
+    }
     return (
-      // @ts-ignore -- TODO: EuiSuperDatePicker needs isLoading in prop-types
-      <EuiSuperDatePicker
-        end={new Date(end).toISOString()}
-        isLoading={this.state.isLoading}
+      <MyEuiSuperDatePicker
+        end={endDate}
+        isLoading={isLoading}
         isPaused={this.state.isPaused}
         onTimeChange={this.onTimeChange}
+        onRefreshChange={this.onRefreshChange}
+        onRefresh={this.onRefresh}
         recentlyUsedRanges={this.state.recentlyUsedRanges}
         refreshInterval={this.state.refreshInterval}
         showUpdateButton={this.state.showUpdateButton}
-        start={new Date(start).toISOString()}
+        start={startDate}
       />
     );
   }
-
-  public componentWillReceiveProps(nextProps: SuperDatePickerProps) {
-    this.setState({
-      isLoading: nextProps.isLoading,
+  private onRefresh = ({ start, end, refreshInterval }: OnRefreshProps): void => {
+    this.updateReduxTime({
+      start,
+      end,
+      isQuickSelection: this.state.isQuickSelection,
+      isInvalid: false,
     });
-  }
+    this.refetchQuery(this.props.refetch);
+  };
+
+  private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
+    const { id, duration, stopAutoReload, startAutoReload } = this.props;
+
+    if (duration !== refreshInterval) {
+      this.props.setDuration({ id, duration: refreshInterval });
+    }
+
+    if (isPaused) {
+      stopAutoReload({ id });
+    } else {
+      startAutoReload({ id });
+    }
+
+    if (!this.state.isQuickSelection) {
+      this.refetchQuery(this.props.refetch);
+    }
+
+    this.setState({
+      ...this.state,
+      isPaused,
+    });
+  };
+
+  private refetchQuery = (query: inputsModel.Refetch[]) => {
+    query.forEach((refetch: inputsModel.Refetch) => refetch());
+  };
 
   private formatDate = (date: string) => {
     const momentDate = dateMath.parse(date);
     return momentDate ? momentDate.valueOf() : 0;
   };
 
-  private onTimeChange = ({ start, end }: TimeArgs) => {
-    const { id, setAbsoluteSuperDatePicker } = this.props;
-    setAbsoluteSuperDatePicker({
-      id,
-      from: this.formatDate(start),
-      to: this.formatDate(end),
-    });
-    this.setState((prevState: SuperDatePickerState) => {
-      let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(
-        recentlyUsedRange => !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
-      );
-      recentlyUsedRanges =
-        recentlyUsedRanges.length > 9
-          ? [{ start, end }, ...recentlyUsedRanges.slice(0, 9)]
-          : [{ start, end }, ...recentlyUsedRanges];
+  private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {
+    if (!isInvalid) {
+      this.updateReduxTime({ start, end, isQuickSelection, isInvalid });
+      this.setState((prevState: SuperDatePickerState) => {
+        let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(
+          recentlyUsedRange => !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
+        );
+        recentlyUsedRanges =
+          recentlyUsedRanges.length > 9
+            ? [{ start, end }, ...recentlyUsedRanges.slice(0, 9)]
+            : [{ start, end }, ...recentlyUsedRanges];
 
-      return {
-        recentlyUsedRanges,
-        isLoading: true,
-      };
-    });
+        return {
+          recentlyUsedRanges,
+          isQuickSelection,
+        };
+      });
+    }
+  };
+
+  private updateReduxTime = ({ start, end, isQuickSelection }: OnTimeChangeProps) => {
+    const { id, setAbsoluteSuperDatePicker, setRelativeSuperDatePicker } = this.props;
+
+    if (isQuickSelection) {
+      setRelativeSuperDatePicker({
+        id,
+        option: start,
+        from: this.formatDate(start),
+        to: this.formatDate(end),
+      });
+    } else {
+      setAbsoluteSuperDatePicker({
+        id,
+        from: this.formatDate(start),
+        to: this.formatDate(end),
+      });
+    }
   };
 };
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const myState = getOr({}, `inputs.${id}`, state);
   return {
+    duration: get('policy.duration', myState),
+    kind: get('timerange.kind', myState),
     start: get('timerange.from', myState),
     end: get('timerange.to', myState),
+    option: get('timerange.option', myState),
     isLoading: myState.query.filter((i: inputsModel.GlobalQuery) => i.loading === true).length > 0,
+    refetch: myState.query.map((i: inputsModel.GlobalQuery) => i.refetch),
   };
 };
 
@@ -128,5 +219,9 @@ export const SuperDatePicker = connect(
   mapStateToProps,
   {
     setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
+    setRelativeSuperDatePicker: inputsActions.setRelativeRangeDatePicker,
+    startAutoReload: inputsActions.startAutoReload,
+    stopAutoReload: inputsActions.stopAutoReload,
+    setDuration: inputsActions.setDuration,
   }
 )(SuperDatePickerComponent);

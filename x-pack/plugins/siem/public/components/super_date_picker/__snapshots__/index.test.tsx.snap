@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SIEM Super Date Picker it renders when given dates 1`] = `
+exports[`SIEM Super Date Picker #SuperDatePickerComponent it renders when given dates 1`] = `
 <EuiSuperDatePicker
   commonlyUsedRanges={
     Array [
@@ -50,7 +50,9 @@ exports[`SIEM Super Date Picker it renders when given dates 1`] = `
   end="2019-04-08T17:15:32.995Z"
   isAutoRefreshOnly={false}
   isLoading={false}
-  isPaused={false}
+  isPaused={true}
+  onRefresh={[Function]}
+  onRefreshChange={[Function]}
   onTimeChange={[Function]}
   recentlyUsedRanges={Array []}
   refreshInterval={300000}
