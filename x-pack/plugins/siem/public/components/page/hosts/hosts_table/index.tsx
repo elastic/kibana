@@ -141,8 +141,8 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('host.name', node);
-      const hostId: string | null = get('host.id', node);
+      const hostName: string | null | undefined = get('host.name', node);
+      const hostId: string | null | undefined = get('host.id', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
         return (
@@ -184,7 +184,7 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostname: string | null = get('host.name', node);
+      const hostname: string | null | undefined = get('host.name', node);
       if (hostname != null) {
         return <FirstLastSeenHost hostname={hostname} type="first-seen" />;
       }
@@ -196,7 +196,7 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostname: string | null = get('host.name', node);
+      const hostname: string | null | undefined = get('host.name', node);
       if (hostname != null) {
         return <FirstLastSeenHost hostname={hostname} type="last-seen" />;
       }
@@ -208,7 +208,7 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostOsName: string | null = get('host.os.name', node);
+      const hostOsName: string | null | undefined = get('host.os.name', node);
       if (hostOsName != null) {
         return (
           <AddToKql
@@ -228,7 +228,7 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostOsVersion: string | null = get('host.os.version', node);
+      const hostOsVersion: string | null | undefined = get('host.os.version', node);
       if (hostOsVersion != null) {
         return (
           <AddToKql

@@ -106,7 +106,7 @@ export const createDraggable = (
   field: string,
   startDate: number,
   endDate: number,
-  hostName: string
+  hostName: string | null | undefined
 ) =>
   summaryValue == null && hostName != null && ['firstSeen', 'lastSeen'].includes(field) ? (
     <FirstLastSeenHost hostname={hostName} type={kebabCase(field) as FirstLastSeenHostType} />
