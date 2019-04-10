@@ -58,6 +58,7 @@ new CoreSystem({
     csp: {
       warnLegacyBrowsers: false,
     },
+    uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,
@@ -83,6 +84,9 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      interpreterConfig: {
+        enableInVisualize: true
+      }
     },
   },
   rootDomElement,

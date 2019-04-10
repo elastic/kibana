@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
-import { MLJobApiResponse } from 'x-pack/plugins/apm/public/services/rest/ml';
+import { getMlJobId } from '../../../../../../common/ml_job_constants';
+import { MLJobApiResponse } from '../../../../../services/rest/ml';
 
 interface TransactionSelectProps {
   serviceName: string;
