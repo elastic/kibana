@@ -81,13 +81,13 @@ export class PluginWrapper<
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
    * for the `setup` lifecycle event.
-   * @param dependencies The dictionary where the key is the dependency name and the value
+   * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, dependencies: TPluginsSetup) {
+  public async setup(setupContext: PluginSetupContext, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
-    return await this.instance.setup(setupContext, dependencies);
+    return await this.instance.setup(setupContext, plugins);
   }
 
   /**
