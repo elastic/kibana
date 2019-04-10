@@ -3,7 +3,6 @@
 exports[`Metric component does not render warning badge when no warning present 1`] = `
 <EuiFlexItem
   className="monPipelineViewer__metricFlexItem"
-  component="div"
   grow={false}
 >
   <EuiText
@@ -22,7 +21,6 @@ exports[`Metric component does not render warning badge when no warning present 
 exports[`Metric component renders warning badge 1`] = `
 <EuiFlexItem
   className="monPipelineViewer__metricFlexItem"
-  component="div"
   grow={false}
 >
   <EuiBadge

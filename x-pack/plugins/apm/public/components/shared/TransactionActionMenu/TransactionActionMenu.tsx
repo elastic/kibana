@@ -17,12 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { getKibanaHref } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { idx } from '../../../../common/idx';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
+import { getRisonHref } from '../Links/rison_helpers';
+import { getKibanaHref } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -74,6 +74,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     const hostName = idx(transaction, _ => _.host.hostname);
     const podId = idx(transaction, _ => _.kubernetes.pod.uid);
     const containerId = idx(transaction, _ => _.container.id);
+    const traceId = idx(transaction, _ => _.trace.id);
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -89,7 +90,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/pod-logs/${podId}`,
         query: { time }
       },
-
       {
         icon: 'loggingApp',
         label: i18n.translate(
@@ -100,7 +100,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/container-logs/${containerId}`,
         query: { time }
       },
-
       {
         icon: 'loggingApp',
         label: i18n.translate(
@@ -111,7 +110,16 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/host-logs/${hostName}`,
         query: { time }
       },
-
+      {
+        icon: 'loggingApp',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
+          { defaultMessage: 'Show trace logs' }
+        ),
+        target: traceId,
+        hash: `/link-to/logs`,
+        query: { time, filter: `trace.id:${traceId}` }
+      },
       {
         icon: 'infraApp',
         label: i18n.translate(
@@ -122,7 +130,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery
       },
-
       {
         icon: 'infraApp',
         label: i18n.translate(
@@ -133,7 +140,6 @@ export class TransactionActionMenu extends React.Component<Props, State> {
         hash: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery
       },
-
       {
         icon: 'infraApp',
         label: i18n.translate(
@@ -147,12 +153,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     ]
       .filter(({ target }) => Boolean(target))
       .map(({ icon, label, hash, query }, index) => {
-        const href = getKibanaHref({
-          location,
-          pathname,
-          hash,
-          query: query as StringMap // TODO: differentiate between APM ui query args, and external query args
-        });
+        const href = getKibanaHref({ location, pathname, hash, query });
 
         return (
           <EuiContextMenuItem icon={icon} href={href} key={index}>
@@ -174,7 +175,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     return (
       <QueryWithIndexPattern query={getDiscoverQuery(transaction)}>
         {query => {
-          const discoverTransactionHref = getKibanaHref({
+          const discoverTransactionHref = getRisonHref({
             location,
             pathname: '/app/kibana',
             hash: '/discover',

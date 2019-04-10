@@ -19,11 +19,18 @@
 
 import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { CoreContext } from '../../types';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { CoreContext } from '../core_context';
+import { ClusterClient } from '../elasticsearch';
 import { LoggerFactory } from '../logging';
 import { Plugin, PluginManifest } from './plugin';
+import { PluginsServiceSetupDeps } from './plugins_service';
 
+/**
+ * Context that's available to plugins during initialization stage.
+ *
+ * @public
+ */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
@@ -37,8 +44,17 @@ export interface PluginInitializerContext {
   };
 }
 
-// tslint:disable no-empty-interface
-export interface PluginStartContext {}
+/**
+ * Context passed to the plugins `setup` method.
+ *
+ * @public
+ */
+export interface PluginSetupContext {
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+  };
+}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -94,21 +110,28 @@ export function createPluginInitializerContext(
 }
 
 /**
- * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
- * This facade should be safe to use only within `start` itself.
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
+ * This facade should be safe to use only within `setup` itself.
  *
- * This is called for each plugin when it's started, so each plugin gets its own
+ * This is called for each plugin when it's set up, so each plugin gets its own
  * version of these values.
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export function createPluginStartContext<TPluginContract, TPluginDependencies>(
+export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
-  plugin: Plugin<TPluginContract, TPluginDependencies>
-): PluginStartContext {
-  return {};
+  deps: PluginsServiceSetupDeps,
+  plugin: Plugin<TPlugin, TPluginDependencies>
+): PluginSetupContext {
+  return {
+    elasticsearch: {
+      adminClient$: deps.elasticsearch.adminClient$,
+      dataClient$: deps.elasticsearch.dataClient$,
+    },
+  };
 }

@@ -6,12 +6,12 @@
 
 import 'hapi';
 
-import { CloudPlugin } from 'x-pack/plugins/cloud';
-import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
+import { CloudPlugin } from '../plugins/cloud';
+import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
 
 declare module 'hapi' {
   interface PluginProperties {
-    cloud: CloudPlugin;
+    cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
   }
 }

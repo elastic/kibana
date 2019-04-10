@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib/format_msg';
-import { get } from 'lodash';
 
 const getToast = (err, opts = {}) => {
   const errData = get(err, 'response') || err;

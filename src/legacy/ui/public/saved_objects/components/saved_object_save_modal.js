@@ -63,7 +63,7 @@ export class SavedObjectSaveModal extends React.Component {
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
-  }
+  };
 
   saveSavedObject = async () => {
     if (this.state.isLoading) {
@@ -95,7 +95,12 @@ export class SavedObjectSaveModal extends React.Component {
     this.setState({
       copyOnSave: event.target.checked,
     });
-  }
+  };
+
+  onFormSubmit = (event) => {
+    event.preventDefault();
+    this.saveSavedObject();
+  };
 
   renderDuplicateTitleCallout = () => {
     if (!this.state.hasTitleDuplicate) {
@@ -134,7 +139,7 @@ export class SavedObjectSaveModal extends React.Component {
         <EuiSpacer />
       </Fragment>
     );
-  }
+  };
 
   renderCopyOnSave = () => {
     if (!this.props.showCopyOnSave) {
@@ -156,9 +161,11 @@ export class SavedObjectSaveModal extends React.Component {
         />
       </EuiFormRow>
     );
-  }
+  };
 
   render() {
+    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, isLoading } = this.state;
+
     return (
       <EuiOverlayMask>
         <EuiModal
@@ -166,69 +173,76 @@ export class SavedObjectSaveModal extends React.Component {
           className="dshSaveModal"
           onClose={this.props.onClose}
         >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.saveTitle"
-                defaultMessage="Save {objectType}"
-                values={{ objectType: this.props.objectType }}
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-
-            {this.renderDuplicateTitleCallout()}
-
-            <EuiForm>
-
-              {this.renderCopyOnSave()}
-
-              <EuiFormRow
-                label={(<FormattedMessage
-                  id="common.ui.savedObjects.saveModal.titleLabel"
-                  defaultMessage="Title"
-                />)}
-              >
-                <EuiFieldText
-                  autoFocus
-                  data-test-subj="savedObjectTitle"
-                  value={this.state.title}
-                  onChange={this.onTitleChange}
-                  isInvalid={this.state.hasTitleDuplicate || this.state.title.length === 0}
+          <form onSubmit={this.onFormSubmit}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <FormattedMessage
+                  id="common.ui.savedObjects.saveModal.saveTitle"
+                  defaultMessage="Save {objectType}"
+                  values={{ objectType: this.props.objectType }}
                 />
-              </EuiFormRow>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
 
-              {this.props.options}
+            <EuiModalBody>
 
-            </EuiForm>
+              {this.renderDuplicateTitleCallout()}
 
-          </EuiModalBody>
+              <EuiForm>
 
-          <EuiModalFooter>
-            <EuiButton
-              data-test-subj="saveCancelButton"
-              onClick={this.props.onClose}
-            >
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
+                {this.renderCopyOnSave()}
 
-            <EuiButton
-              fill
-              data-test-subj="confirmSaveSavedObjectButton"
-              onClick={this.saveSavedObject}
-              isLoading={this.state.isLoading}
-              isDisabled={this.state.title.length === 0}
-            >
-              <FormattedMessage
-                id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
-                defaultMessage="Confirm Save"
-              />
-            </EuiButton>
-          </EuiModalFooter>
+                <EuiFormRow
+                  label={(<FormattedMessage
+                    id="common.ui.savedObjects.saveModal.titleLabel"
+                    defaultMessage="Title"
+                  />)}
+                >
+                  <EuiFieldText
+                    autoFocus
+                    data-test-subj="savedObjectTitle"
+                    value={title}
+                    onChange={this.onTitleChange}
+                    isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+                  />
+                </EuiFormRow>
+
+                {this.props.options}
+
+              </EuiForm>
+
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButton
+                data-test-subj="saveCancelButton"
+                onClick={this.props.onClose}
+              >
+                <FormattedMessage
+                  id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButton>
+
+              <EuiButton
+                fill
+                data-test-subj="confirmSaveSavedObjectButton"
+                isLoading={isLoading}
+                isDisabled={title.length === 0}
+                type="submit"
+              >
+                {this.props.confirmButtonLabel
+                  ? this.props.confirmButtonLabel
+                  : (
+                    <FormattedMessage
+                      id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+                      defaultMessage="Confirm Save"
+                    />
+                  )
+                }
+              </EuiButton>
+            </EuiModalFooter>
+          </form>
         </EuiModal>
       </EuiOverlayMask>
     );
@@ -241,5 +255,6 @@ SavedObjectSaveModal.propTypes = {
   title: PropTypes.string.isRequired,
   showCopyOnSave: PropTypes.bool.isRequired,
   objectType: PropTypes.string.isRequired,
+  confirmButtonLabel: PropTypes.node,
   options: PropTypes.node,
 };

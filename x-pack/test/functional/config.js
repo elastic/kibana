@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable kibana-custom/no-default-export */
+/* eslint-disable import/no-default-export */
 
 import { resolve } from 'path';
 
@@ -231,7 +231,6 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'X-Pack Functional Tests',
-      rootDirectory: resolve(__dirname, '../../'),
     },
   };
 

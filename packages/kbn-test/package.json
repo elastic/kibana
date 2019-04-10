@@ -5,14 +5,14 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "babel src --out-dir target",
-    "kbn:bootstrap": "yarn build --quiet",
+    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
+    "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
     "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "babel-cli": "^6.26.0"
+    "@kbn/dev-utils": "1.0.0"
   },
   "dependencies": {
     "chalk": "^2.4.1",

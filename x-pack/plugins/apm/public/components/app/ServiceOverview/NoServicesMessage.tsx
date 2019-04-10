@@ -61,10 +61,10 @@ export function NoServicesMessage({ historicalDataFound }: Props) {
                 hash="/management/elasticsearch/upgrade_assistant"
               >
                 {i18n.translate(
-                  'xpack.apm.servicesTable.MigrationAssistantLink',
+                  'xpack.apm.servicesTable.UpgradeAssistantLink',
                   {
                     defaultMessage:
-                      'Learn more by visiting the Kibana Migration Assistant'
+                      'Learn more by visiting the Kibana Upgrade Assistant'
                   }
                 )}
               </KibanaLink>

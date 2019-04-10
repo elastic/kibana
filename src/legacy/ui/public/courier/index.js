@@ -19,7 +19,6 @@
 
 import './courier';
 
-export { SavedObjectProvider } from './saved_object';
 export { SearchSourceProvider } from './search_source';
 
 export {

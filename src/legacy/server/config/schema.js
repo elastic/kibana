@@ -152,7 +152,7 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    timezone: Joi.string().allow(false).default('UTC')
+    timezone: Joi.string()
   }).default(),
 
   ops: Joi.object({
@@ -197,6 +197,7 @@ export default () => Joi.object({
         )
         .default('#cheap-source-map'),
     }),
+    workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)
   }).default(),
   status: Joi.object({
@@ -249,6 +250,11 @@ export default () => Joi.object({
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),
+  }).default(),
+
+  savedObjects: Joi.object({
+    maxImportPayloadBytes: Joi.number().default(10485760),
+    maxImportExportSize: Joi.number().default(10000),
   }).default(),
 
 }).default();

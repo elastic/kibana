@@ -5,13 +5,14 @@
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
-    "test_utils/**/*",
-    "typings/**/*"
+    "test_utils/**/*"
   ],
   "exclude": [
-    "test/**/*"
+    "test/**/*",
+    "**/typespec_tests.ts"
   ],
   "compilerOptions": {
+    "outDir": ".",
     "paths": {
       "ui/*": [
         "src/legacy/ui/public/*"

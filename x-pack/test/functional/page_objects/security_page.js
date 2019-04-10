@@ -153,7 +153,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const btn = await find.byButtonText(privilege);
       await btn.click();
 
-      // const options = await find.byCssSelector(`.euiComboBoxOption`);
+      // const options = await find.byCssSelector(`.euiFilterSelectItem`);
       // Object.entries(options).forEach(([key, prop]) => {
       //   console.log({ key, proto: prop.__proto__ });
       // });
@@ -185,7 +185,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async user => {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
-        const emailElement = await user.findByCssSelector('[data-header="Email Address"]');
+        const emailElement = await user.findByCssSelector('[data-test-subj="userRowEmail"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
         const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
@@ -335,8 +335,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async selectRole(role) {
-      const dropdown = await testSubjects.find("userFormRolesDropdown");
-      const input = await dropdown.findByCssSelector("input");
+      const dropdown = await testSubjects.find('userFormRolesDropdown');
+      const input = await dropdown.findByCssSelector('input');
       await input.type(role);
       await testSubjects.click(`roleOption-${role}`);
       await testSubjects.click('comboBoxToggleListButton');

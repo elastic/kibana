@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 // import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
@@ -160,8 +160,8 @@ export default function ({ getService, getPageObjects }) {
       expect(smallVennTerm1).to.be('5');
       expect(smallVennTerm12).to.be(' (5) ');
       expect(smallVennTerm2).to.be('21');
-      expect(vennEllipse1).to.eql({ "cx": "3.8470077339232853", "cy": "2.5854414729132054", "rx": "1.2615662610100802" });
-      expect(vennEllipse2).to.eql({ "cx": "5.170882945826411", "cy": "2.5854414729132054", "rx": "2.5854414729132054" });
+      expect(vennEllipse1).to.eql({ 'cx': '3.8470077339232853', 'cy': '2.5854414729132054', 'rx': '1.2615662610100802' });
+      expect(vennEllipse2).to.eql({ 'cx': '5.170882945826411', 'cy': '2.5854414729132054', 'rx': '2.5854414729132054' });
     });
 
 

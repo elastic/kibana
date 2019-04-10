@@ -19,6 +19,9 @@
 
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
+import '../directives/auto_select_if_only_one';
+import '../directives/scroll_bottom';
+import '../filters/sort_prefix_first';
 import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 import { aggTypeFieldFilters } from '../param_types/filter';
@@ -75,7 +78,7 @@ export const topHitMetricAgg = new MetricAggType({
           output.params.script_fields = {
             [ field.name ]: {
               script: {
-                inline: field.script,
+                source: field.script,
                 lang: field.lang
               }
             }
@@ -203,7 +206,7 @@ export const topHitMetricAgg = new MetricAggType({
             {
               _script: {
                 script: {
-                  inline: sortField.script,
+                  source: sortField.script,
                   lang: sortField.lang
                 },
                 type: sortField.type,

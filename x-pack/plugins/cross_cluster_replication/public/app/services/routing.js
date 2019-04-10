@@ -44,7 +44,7 @@ class Routing {
    */
   getRouterLinkProps(to, base = BASE_PATH, params = {}, encodeParams = false) {
     const search = queryParamsFromObject(params, encodeParams) || '';
-    const location = typeof to === "string"
+    const location = typeof to === 'string'
       ? createLocation(base + to + search, null, null, this._reactRouter.history.location)
       : to;
     const href = this._reactRouter.history.createHref(location);

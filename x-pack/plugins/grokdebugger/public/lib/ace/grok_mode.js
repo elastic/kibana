@@ -7,7 +7,7 @@
 import ace from 'ace';
 import { GrokHighlightRules } from './grok_highlight_rules';
 
-const TextMode = ace.acequire("ace/mode/text").Mode;
+const TextMode = ace.acequire('ace/mode/text').Mode;
 
 export class GrokMode extends TextMode {
   constructor() {

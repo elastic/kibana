@@ -4,27 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
-import { RequestAdapter } from 'ui/inspector/adapters';
-import { MapAdapter } from './inspector/adapters/map_adapter';
-import { timefilter } from 'ui/timefilter/timefilter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
-export const timeService = timefilter;
 export let indexPatternService;
 export let SearchSource;
-export let emsServiceSettings;
+export let filterBarQueryFilter;
 
-export const inspectorAdapters = {
-  requests: new RequestAdapter(),
-};
-if (chrome.getInjected('showMapsInspectorAdapter', false)) {
-  inspectorAdapters.map = new MapAdapter();
-}
-
-export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc }) {
+export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(
     requestName,
     { id: requestId, description: requestDesc });
@@ -50,5 +39,5 @@ uiModules.get('app/maps').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
-  emsServiceSettings = $injector.get('serviceSettings');
+  filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
 });

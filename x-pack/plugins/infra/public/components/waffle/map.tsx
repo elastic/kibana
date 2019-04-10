@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { nodesToWaffleMap } from '../../containers/waffle/nodes_to_wafflemap';
 import {
   isWaffleMapGroupWithGroups,
@@ -26,6 +27,7 @@ interface Props {
   timeRange: InfraTimerangeInput;
   onFilter: (filter: string) => void;
   bounds: InfraWaffleMapBounds;
+  dataBounds: InfraWaffleMapBounds;
 }
 
 export const Map: React.SFC<Props> = ({
@@ -36,6 +38,7 @@ export const Map: React.SFC<Props> = ({
   formatter,
   bounds,
   nodeType,
+  dataBounds,
 }) => {
   const map = nodesToWaffleMap(nodes);
   return (
@@ -80,7 +83,12 @@ export const Map: React.SFC<Props> = ({
                 }
               })}
             </WaffleMapInnerContainer>
-            <Legend formatter={formatter} bounds={bounds} legend={options.legend} />
+            <Legend
+              formatter={formatter}
+              bounds={bounds}
+              dataBounds={dataBounds}
+              legend={options.legend}
+            />
           </WaffleMapOuterContainer>
         );
       }}
@@ -88,7 +96,7 @@ export const Map: React.SFC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = styled.div`
+const WaffleMapOuterContainer = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   justify-content: center;
@@ -97,7 +105,7 @@ const WaffleMapOuterContainer = styled.div`
   overflow-y: auto;
 `;
 
-const WaffleMapInnerContainer = styled.div`
+const WaffleMapInnerContainer = euiStyled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

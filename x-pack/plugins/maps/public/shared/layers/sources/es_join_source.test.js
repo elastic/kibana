@@ -145,21 +145,21 @@ describe('_makeAggConfigs', () => {
 
 describe('extractPropertiesMap', () => {
   const resp = {
-    "aggregations": {
-      "join": {
-        "buckets": [
+    'aggregations': {
+      'join': {
+        'buckets': [
           {
-            "key": 109,
-            "doc_count": 1130,
-            "__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr": {
-              "value": 36
+            'key': 109,
+            'doc_count': 1130,
+            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+              'value': 36
             }
           },
           {
-            "key": 62,
-            "doc_count": 448,
-            "__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr": {
-              "value": 0
+            'key': 62,
+            'doc_count': 448,
+            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+              'value': 0
             }
           },
         ]

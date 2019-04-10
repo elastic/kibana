@@ -9,10 +9,6 @@ visualizations, and saved searches. Dashboards and visualizations are
 exported as PDF documents, while saved searches in Discover
 are exported to CSV.
 
-NOTE: On Linux, the `libfontconfig` and `libfreetype6` packages and system
-fonts are required to generate PDF reports. If no system fonts are available,
-labels are not rendered correctly in the reports.
-
 Reporting is located in the share menu from the {kib} toolbar:
 
 [role="screenshot"]

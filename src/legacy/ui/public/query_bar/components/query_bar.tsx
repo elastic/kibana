@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
@@ -27,23 +28,33 @@ import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
+
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiOutsideClickDetector,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+
+// @ts-ignore
+import { EuiSuperUpdateButton } from '@elastic/eui';
+
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { documentationLinks } from 'ui/documentation_links';
+import { Toast, toastNotifications } from 'ui/notify';
+
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from '../../autocomplete_providers';
 import chrome from '../../chrome';
-import { fromUser, toUser } from '../../parse_query';
-import { matchPairs } from '../lib/match_pairs';
+import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-
-// @ts-ignore
-import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
-
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -75,6 +86,7 @@ interface Props {
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
@@ -85,7 +97,8 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  customSubmitButton?: any;
 }
 
 interface State {
@@ -368,16 +381,21 @@ export class QueryBarUI extends Component<Props, State> {
     start,
     end,
     isInvalid,
+    isQuickSelection,
   }: {
     start: string;
     end: string;
     isInvalid: boolean;
+    isQuickSelection: boolean;
   }) => {
-    this.setState({
-      dateRangeFrom: start,
-      dateRangeTo: end,
-      isDateRangeInvalid: isInvalid,
-    });
+    this.setState(
+      {
+        dateRangeFrom: start,
+        dateRangeTo: end,
+        isDateRangeInvalid: isInvalid,
+      },
+      () => isQuickSelection && this.onSubmit()
+    );
   };
 
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -461,6 +479,8 @@ export class QueryBarUI extends Component<Props, State> {
     if (preventDefault) {
       preventDefault();
     }
+
+    this.handleLuceneSyntaxWarning();
 
     if (this.persistedLog) {
       this.persistedLog.add(this.state.query.query);
@@ -558,14 +578,13 @@ export class QueryBarUI extends Component<Props, State> {
               aria-owns="kbnTypeahead__items"
               aria-controls="kbnTypeahead__items"
             >
-              <form role="form" name="queryBarForm">
+              <form name="queryBarForm">
                 <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
-                      className="kuiLocalSearchAssistedInput__input"
                       placeholder={this.props.intl.formatMessage({
                         id: 'common.ui.queryBar.searchInputPlaceholder',
-                        defaultMessage: 'Search… (e.g. status:200 AND extension:PHP)',
+                        defaultMessage: 'Search',
                       })}
                       value={this.state.query.query}
                       onKeyDown={this.onKeyDown}
@@ -581,11 +600,17 @@ export class QueryBarUI extends Component<Props, State> {
                       }}
                       autoComplete="off"
                       spellCheck={false}
-                      icon="console"
-                      aria-label={this.props.intl.formatMessage({
-                        id: 'common.ui.queryBar.searchInputAriaLabel',
-                        defaultMessage: 'Search input',
-                      })}
+                      aria-label={this.props.intl.formatMessage(
+                        {
+                          id: 'common.ui.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )}
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
@@ -595,13 +620,13 @@ export class QueryBarUI extends Component<Props, State> {
                       }
                       role="textbox"
                       prepend={this.props.prepend}
+                      append={
+                        <QueryLanguageSwitcher
+                          language={this.state.query.language}
+                          onSelectLanguage={this.onSelectLanguage}
+                        />
+                      }
                     />
-                    <div className="kuiLocalSearchAssistedInput__assistance">
-                      <QueryLanguageSwitcher
-                        language={this.state.query.language}
-                        onSelectLanguage={this.onSelectLanguage}
-                      />
-                    </div>
                   </div>
                 </div>
               </form>
@@ -623,7 +648,9 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderUpdateButton() {
-    const button = (
+    const button = this.props.customSubmitButton ? (
+      React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
+    ) : (
       <EuiSuperUpdateButton
         needsUpdate={this.isDirty()}
         isDisabled={this.state.isDateRangeInvalid}
@@ -631,16 +658,17 @@ export class QueryBarUI extends Component<Props, State> {
         data-test-subj="querySubmitButton"
       />
     );
-    if (this.props.showDatePicker) {
-      return (
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          {this.renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else {
+
+    if (!this.props.showDatePicker) {
       return button;
     }
+
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        {this.renderDatePicker()}
+        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   private renderDatePicker() {
@@ -684,6 +712,56 @@ export class QueryBarUI extends Component<Props, State> {
         />
       </EuiFlexItem>
     );
+  }
+
+  private handleLuceneSyntaxWarning() {
+    const { intl, store } = this.props;
+    const { query, language } = this.state.query;
+    if (
+      language === 'kuery' &&
+      !store.get('kibana.luceneSyntaxWarningOptOut') &&
+      doesKueryExpressionHaveLuceneSyntaxError(query)
+    ) {
+      const toast = toastNotifications.addWarning({
+        title: intl.formatMessage({
+          id: 'common.ui.queryBar.luceneSyntaxWarningTitle',
+          defaultMessage: 'Lucene syntax warning',
+        }),
+        text: (
+          <div>
+            <p>
+              <FormattedMessage
+                id="common.ui.queryBar.luceneSyntaxWarningMessage"
+                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
+               have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
+                values={{
+                  link: (
+                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                      <FormattedMessage
+                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                        defaultMessage="here"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={() => this.onLuceneSyntaxWarningOptOut(toast)}>
+                  Don't show again
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ),
+      });
+    }
+  }
+
+  private onLuceneSyntaxWarningOptOut(toast: Toast) {
+    this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    toastNotifications.remove(toast);
   }
 }
 

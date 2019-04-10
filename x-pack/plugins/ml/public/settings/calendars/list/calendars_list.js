@@ -19,6 +19,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table/';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
@@ -45,6 +46,8 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
   }
 
   loadCalendars = async () => {
+    this.setState({ loading: true });
+
     try {
       const calendars = await ml.calendars();
 
@@ -150,6 +153,10 @@ export const CalendarsList = injectI18n(class CalendarsList extends Component {
           verticalPosition="center"
           horizontalPosition="center"
         >
+          <CalendarsListHeader
+            totalCount={calendars.length}
+            refreshCalendars={this.loadCalendars}
+          />
           <CalendarsListTable
             loading={loading}
             calendarsList={this.addRequiredFieldsToList(calendars)}

@@ -52,7 +52,7 @@ export function NormalizeSortRequestProvider(config) {
       sortField = '_script';
       sortValue = {
         script: {
-          inline: indexField.script,
+          source: indexField.script,
           lang: indexField.lang
         },
         type: castSortType(indexField.type),

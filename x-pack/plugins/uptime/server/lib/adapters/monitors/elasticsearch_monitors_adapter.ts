@@ -10,20 +10,15 @@ import {
   ErrorListItem,
   FilterBar,
   LatestMonitor,
+  MonitorChart,
   MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
+import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-
-// the values for these charts are stored as μs, but should be displayed as ms
-const formatChartValue = (time: any, chartPoint: any) => ({
-  x: time,
-  y: chartPoint.value === null ? null : chartPoint.value / 1000,
-});
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -62,7 +57,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     monitorId: string,
     dateRangeStart: string,
     dateRangeEnd: string
-  ): Promise<any> {
+  ): Promise<MonitorChart> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -79,15 +74,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           timeseries: {
             auto_date_histogram: {
               field: '@timestamp',
-              buckets: 50,
+              buckets: 25,
             },
             aggs: {
-              max_content: { max: { field: 'http.rtt.content.us' } },
-              max_response: { max: { field: 'http.rtt.response_header.us' } },
-              max_validate: { max: { field: 'http.rtt.validate.us' } },
-              max_total: { max: { field: 'http.rtt.total.us' } },
-              max_write_request: { max: { field: 'http.rtt.write_request.us' } },
-              max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
               status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
               duration: { stats: { field: 'monitor.duration.us' } },
             },
@@ -97,33 +86,49 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets = get(result, 'aggregations.timeseries.buckets', []);
+    const buckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
 
-    return buckets.map(
-      ({
-        key,
-        max_content,
-        duration: { avg, max, min },
-        max_write_request,
-        max_validate,
-        max_tcp_rtt,
-        max_response,
-        max_total,
-        status,
-        doc_count,
-      }: any) => ({
-        maxContent: formatChartValue(key, max_content),
-        maxWriteRequest: formatChartValue(key, max_write_request),
-        maxValidate: formatChartValue(key, max_validate),
-        maxTcpRtt: formatChartValue(key, max_tcp_rtt),
-        maxResponse: formatChartValue(key, max_response),
-        maxTotal: formatChartValue(key, max_total),
-        avgDuration: formatChartValue(key, { value: avg }),
-        maxDuration: formatChartValue(key, { value: max }),
-        minDuration: formatChartValue(key, { value: min }),
-        status: formatStatusBuckets(key, status.buckets, doc_count),
-      })
-    );
+    /**
+     * The code below is responsible for formatting the aggregation data we fetched above in a way
+     * that the chart components used by the client understands.
+     * There are five required values. Two are lists of points that conform to a simple (x,y) structure.
+     *
+     * The third list is for an area chart expressing a range, and it requires an (x,y,y0) structure,
+     * where y0 is the min value for the point and y is the max.
+     *
+     * Additionally, we supply the maximum value for duration and status, so the corresponding charts know
+     * what the domain size should be.
+     */
+    const monitorChartsData: MonitorChart = {
+      durationArea: [],
+      durationLine: [],
+      status: [],
+      durationMaxValue: 0,
+      statusMaxCount: 0,
+    };
+
+    buckets.forEach(bucket => {
+      const x = get(bucket, 'key');
+      const docCount = get(bucket, 'doc_count', 0);
+      // update the maximum value for each point
+      monitorChartsData.statusMaxCount = Math.max(docCount, monitorChartsData.statusMaxCount);
+      monitorChartsData.durationMaxValue = Math.max(
+        monitorChartsData.durationMaxValue,
+        get(bucket, 'duration.max', 0)
+      );
+
+      // these points express a range that will be displayed as an area chart
+      monitorChartsData.durationArea.push({
+        x,
+        yMin: get(bucket, 'duration.min', null),
+        yMax: get(bucket, 'duration.max', null),
+      });
+      monitorChartsData.durationLine.push({ x, y: get(bucket, 'duration.avg', null) });
+      monitorChartsData.status.push(
+        formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount)
+      );
+    });
+    return monitorChartsData;
   }
 
   /**
@@ -478,6 +483,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
+          const name = get(source, 'monitor.name', null);
           errorsList.push({
             latestMessage: errorMessage,
             monitorId,
@@ -485,6 +491,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             count,
             statusCode,
             timestamp,
+            name: name === '' ? null : name,
           });
         });
       }

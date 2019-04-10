@@ -229,6 +229,7 @@ class ObjectsTableUI extends Component {
     const selectedSavedObjects = selection.map(item => ({
       id: item.id,
       type: item.type,
+      title: item.title,
     }));
     this.setState({ selectedSavedObjects });
   };
@@ -486,7 +487,14 @@ class ObjectsTableUI extends Component {
               {
                 field: 'id',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id/Name'
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id'
+                }),
+              },
+              {
+                field: 'title',
+                name: intl.formatMessage({
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  defaultMessage: 'Title',
                 }),
               },
             ]}

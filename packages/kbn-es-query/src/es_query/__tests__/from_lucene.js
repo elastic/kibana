@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { buildQueryFromLucene } from '../from_lucene';
 import { decorateQuery } from '../decorate_query';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';

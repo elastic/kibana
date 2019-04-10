@@ -6,7 +6,8 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -58,7 +59,7 @@ export const updateFormErrors = (errors, existingErrors) => ({
   }
 });
 
-export class AutoFollowPatternFormUI extends PureComponent {
+export class AutoFollowPatternForm extends PureComponent {
   static propTypes = {
     saveAutoFollowPattern: PropTypes.func.isRequired,
     autoFollowPattern: PropTypes.object,
@@ -154,11 +155,12 @@ export class AutoFollowPatternFormUI extends PureComponent {
     const { autoFollowPattern: { leaderIndexPatterns } } = this.state;
 
     if (leaderIndexPatterns.includes(leaderIndexPattern)) {
-      const { intl } = this.props;
-      const errorMsg = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
-        defaultMessage: `Duplicate leader index pattern aren't allowed.`,
-      });
+      const errorMsg = i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
+        {
+          defaultMessage: `Duplicate leader index pattern aren't allowed.`
+        }
+      );
 
       const errors = {
         leaderIndexPatterns: {
@@ -212,12 +214,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
    * Secctions Renders
    */
   renderApiErrors() {
-    const { apiError, intl } = this.props;
+    const { apiError } = this.props;
 
     if (apiError) {
-      const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.autoFollowPatternForm.savingErrorTitle',
-        defaultMessage: `Can't create auto-follow pattern`,
+      const title = i18n.translate('xpack.crossClusterReplication.autoFollowPatternForm.savingErrorTitle', {
+        defaultMessage: `Can't create auto-follow pattern`
       });
 
       return (
@@ -232,7 +233,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
   }
 
   renderForm = () => {
-    const { intl } = this.props;
     const {
       autoFollowPattern: {
         name,
@@ -289,6 +289,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               onChange={e => this.onFieldsChange({ name: e.target.value })}
               fullWidth
               disabled={!isNew}
+              data-test-subj="ccrAutoFollowPatternFormNameInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -436,15 +437,18 @@ export class AutoFollowPatternFormUI extends PureComponent {
           >
             <EuiComboBox
               noSuggestions
-              placeholder={intl.formatMessage({
-                id: 'xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsPlaceholder',
-                defaultMessage: 'Type and then hit ENTER',
-              })}
+              placeholder={i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsPlaceholder',
+                {
+                  defaultMessage: 'Type and then hit ENTER'
+                }
+              )}
               selectedOptions={formattedLeaderIndexPatterns}
               onCreateOption={this.onCreateLeaderIndexPattern}
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
               fullWidth
+              data-test-subj="ccrAutoFollowPatternFormIndexPatternInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -499,6 +503,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                   value={followIndexPatternPrefix}
                   onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
                   fullWidth
+                  data-test-subj="ccrAutoFollowPatternFormPrefixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -521,6 +526,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                   value={followIndexPatternSuffix}
                   onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
                   fullWidth
+                  data-test-subj="ccrAutoFollowPatternFormSuffixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -613,6 +619,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
+              data-test-subj="ccrAutoFollowPatternFormSubmitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -626,6 +633,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
                 defaultMessage="Cancel"
+                data-test-subj="ccrAutoFollowPatternFormCancelButton"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -641,6 +649,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {renderLeaderIndexPatterns()}
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
+        <EuiSpacer />
         {renderFormErrorWarning()}
         {this.renderApiErrors()}
         {renderActions()}
@@ -670,5 +679,3 @@ export class AutoFollowPatternFormUI extends PureComponent {
     );
   }
 }
-
-export const AutoFollowPatternForm = injectI18n(AutoFollowPatternFormUI);

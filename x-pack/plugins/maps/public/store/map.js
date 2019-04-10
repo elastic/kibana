@@ -6,6 +6,7 @@
 
 import {
   SET_SELECTED_LAYER,
+  SET_TRANSIENT_LAYER,
   UPDATE_LAYER_ORDER,
   LAYER_DATA_LOAD_STARTED,
   LAYER_DATA_LOAD_ENDED,
@@ -15,7 +16,6 @@ import {
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
-  PROMOTE_TEMPORARY_LAYERS,
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
@@ -34,10 +34,13 @@ import {
   CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
-  REMOVE_TRACKED_LAYER_STATE
-} from "../actions/store_actions";
+  REMOVE_TRACKED_LAYER_STATE,
+  UPDATE_SOURCE_DATA_REQUEST,
+  SET_TOOLTIP_STATE
+} from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
+import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -82,6 +85,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 const INITIAL_STATE = {
   ready: false,
   goto: null,
+  tooltipState: null,
   mapState: {
     zoom: 4,
     center: {
@@ -92,10 +96,12 @@ const INITIAL_STATE = {
     mouseCoordinates: null,
     timeFilters: null,
     query: null,
+    filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
+  __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
 };
@@ -110,6 +116,11 @@ export function map(state = INITIAL_STATE, action) {
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);
+    case SET_TOOLTIP_STATE:
+      return {
+        ...state,
+        tooltipState: action.tooltipState
+      };
     case SET_MOUSE_COORDINATES:
       return {
         ...state,
@@ -155,12 +166,14 @@ export function map(state = INITIAL_STATE, action) {
           ...layerList.slice(0, layerIdx),
           {
             ...layerList[layerIdx],
-            __isInErrorState: true,
+            __isInErrorState: action.isInErrorState,
             __errorMessage: action.errorMessage
           },
           ...layerList.slice(layerIdx + 1)
         ]
       };
+    case UPDATE_SOURCE_DATA_REQUEST:
+      return updateSourceDataRequest(state, action);
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
@@ -191,13 +204,14 @@ export function map(state = INITIAL_STATE, action) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters } = action;
+      const { query, timeFilters, filters } = action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          filters,
         }
       };
     case SET_REFRESH_CONFIG:
@@ -221,8 +235,11 @@ export function map(state = INITIAL_STATE, action) {
         }
       };
     case SET_SELECTED_LAYER:
-      const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
-      return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
+      const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
+      return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
+    case SET_TRANSIENT_LAYER:
+      const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
+      return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:
@@ -265,13 +282,6 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         waitingForMapReadyLayerList: []
       };
-    //TODO: Handle more than one
-    case PROMOTE_TEMPORARY_LAYERS:
-      const tempLayer = state.layerList.find(({ temporary }) => temporary);
-      return tempLayer
-        ? updateLayerInList(state, tempLayer.id, 'temporary', false)
-        : state;
-    // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
@@ -312,6 +322,24 @@ function updateWithDataRequest(state, action) {
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
+
+
+function updateSourceDataRequest(state, action) {
+  const layerDescriptor = findLayerById(state, action.layerId);
+  if (!layerDescriptor) {
+    return state;
+  }
+  const dataRequest =   layerDescriptor.__dataRequests.find(dataRequest => {
+    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
+  });
+  if (!dataRequest) {
+    return state;
+  }
+
+  dataRequest.data = action.newData;
+  return resetDataRequest(state, action, dataRequest);
+}
+
 
 function updateWithDataResponse(state, action) {
   const dataRequest = getValidDataRequest(state, action);

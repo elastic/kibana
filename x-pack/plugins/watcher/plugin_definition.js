@@ -22,7 +22,6 @@ export const pluginDefinition = {
   require: ['kibana', 'elasticsearch', 'xpack_main'],
   uiExports: {
     managementSections: [
-      'plugins/watcher/sections/testbed',
       'plugins/watcher/sections/watch_detail',
       'plugins/watcher/sections/watch_edit',
       'plugins/watcher/sections/watch_list',

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { copyPersistentState } from '../../../store/util';
+
 export class AbstractSource {
 
   static renderEditor() {
@@ -18,11 +20,20 @@ export class AbstractSource {
     throw new Error('Must implement Source.renderDropdownDisplayOption');
   }
 
-  constructor(descriptor) {
+  constructor(descriptor, inspectorAdapters) {
     this._descriptor = descriptor;
+    this._inspectorAdapters = inspectorAdapters;
   }
 
   destroy() {}
+
+  cloneDescriptor() {
+    return copyPersistentState(this._descriptor);
+  }
+
+  async supportsFitToBounds() {
+    return true;
+  }
 
   /**
    * return list of immutable source properties.
@@ -30,6 +41,10 @@ export class AbstractSource {
    */
   async getImmutableProperties() {
     return [];
+  }
+
+  getInspectorAdapters() {
+    return this._inspectorAdapters;
   }
 
   _createDefaultLayerDescriptor() {
@@ -91,6 +106,10 @@ export class AbstractSource {
   }
 
   isJoinable() {
+    return false;
+  }
+
+  supportsElasticsearchFilters() {
     return false;
   }
 }

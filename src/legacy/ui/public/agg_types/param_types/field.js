@@ -19,8 +19,11 @@
 
 import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
+import '../directives/scroll_bottom';
+import '../filter/comma_list';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
+import '../filters/sort_prefix_first';
 import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
@@ -132,7 +135,7 @@ FieldParamType.prototype.write = function (aggConfig, output) {
 
   if (field.scripted) {
     output.params.script = {
-      inline: field.script,
+      source: field.script,
       lang: field.lang,
     };
   } else {

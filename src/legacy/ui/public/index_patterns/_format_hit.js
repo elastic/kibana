@@ -20,9 +20,11 @@
 import _ from 'lodash';
 import chrome from '../chrome';
 
+const formattedCache = new WeakMap();
+const partialFormattedCache = new WeakMap();
+
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
-
 export function formatHit(indexPattern, defaultFormat) {
 
   function convert(hit, val, fieldName) {
@@ -37,12 +39,18 @@ export function formatHit(indexPattern, defaultFormat) {
   }
 
   function formatHit(hit) {
-    if (hit.$$_formatted) return hit.$$_formatted;
+    const cached = formattedCache.get(hit);
+    if (cached) {
+      return cached;
+    }
 
-    // use and update the partial cache, but don't rewrite it. _source is stored in partials
-    // but not $$_formatted
-    const partials = hit.$$_partialFormatted || (hit.$$_partialFormatted = {});
-    const cache = hit.$$_formatted = {};
+    // use and update the partial cache, but don't rewrite it.
+    // _source is stored in partialFormattedCache but not formattedCache
+    const partials = partialFormattedCache.get(hit) || {};
+    partialFormattedCache.set(hit, partials);
+
+    const cache = {};
+    formattedCache.set(hit, cache);
 
     _.forOwn(indexPattern.flattenHit(hit), function (val, fieldName) {
       // sync the formatted and partial cache
@@ -54,13 +62,14 @@ export function formatHit(indexPattern, defaultFormat) {
   }
 
   formatHit.formatField = function (hit, fieldName) {
-    let partials = hit.$$_partialFormatted;
+    let partials = partialFormattedCache.get(hit);
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];
     }
 
     if (!partials) {
-      partials = hit.$$_partialFormatted = {};
+      partials = {};
+      partialFormattedCache.set(hit, partials);
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
@@ -69,4 +78,3 @@ export function formatHit(indexPattern, defaultFormat) {
 
   return formatHit;
 }
-

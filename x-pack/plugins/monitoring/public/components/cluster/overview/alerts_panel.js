@@ -40,8 +40,8 @@ function AlertsPanelUi({ alerts, changeUrl, intl }) {
         defaultMessage: '{severityIconTitle} (resolved {time} ago)' },
       { severityIconTitle: severityIcon.title, time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)
       });
-      severityIcon.color = "success";
-      severityIcon.iconType = "check";
+      severityIcon.color = 'success';
+      severityIcon.iconType = 'check';
     }
 
     return (

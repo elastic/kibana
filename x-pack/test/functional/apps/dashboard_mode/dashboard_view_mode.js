@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the create dashboard button', async () => {
-        const createNewButtonExists = await testSubjects.exists('newDashboardLink');
+        const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
       });
 
@@ -143,6 +143,11 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.filterOnPieSlice();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
+      });
+
+      it('shows the full screen menu item', async () => {
+        const fullScreenMenuItemExists = await testSubjects.exists('dashboardFullScreenMode');
+        expect(fullScreenMenuItemExists).to.be(true);
       });
 
       it('does not show the edit menu item', async () => {

@@ -16,10 +16,11 @@ import {
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
-import styled, { withTheme } from 'styled-components';
 
+import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
 import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
+import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { InvalidNodeError } from '../../components/metrics/invalid_node';
@@ -39,17 +40,17 @@ import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
 
-const DetailPageContent = styled(PageContent)`
+const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
   background-color: ${props => props.theme.eui.euiColorLightestShade};
 `;
 
-const EuiPageContentWithRelative = styled(EuiPageContent)`
+const EuiPageContentWithRelative = euiStyled(EuiPageContent)`
   position: relative;
 `;
 
 interface Props {
-  theme: { eui: any };
+  theme: EuiTheme;
   match: {
     params: {
       type: string;
@@ -119,6 +120,17 @@ export const MetricDetail = withTheme(
                           <Header breadcrumbs={breadcrumbs} />
                           <SourceConfigurationFlyout />
                           <WithMetricsTimeUrlState />
+                          <DocumentTitle
+                            title={intl.formatMessage(
+                              {
+                                id: 'xpack.infra.metricDetailPage.documentTitle',
+                                defaultMessage: 'Infrastructure | Metrics | {name}',
+                              },
+                              {
+                                name,
+                              }
+                            )}
+                          />
                           <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
@@ -134,11 +146,28 @@ export const MetricDetail = withTheme(
                                       err.code === InfraMetricsErrorCodes.invalid_node
                                   );
 
-                                  if (invalidNodeError) {
-                                    return <InvalidNodeError nodeName={name} />;
-                                  }
-
-                                  return <ErrorPageBody message={error.message} />;
+                                  return (
+                                    <>
+                                      <DocumentTitle
+                                        title={(previousTitle: string) =>
+                                          intl.formatMessage(
+                                            {
+                                              id: 'xpack.infra.metricDetailPage.documentTitleError',
+                                              defaultMessage: '{previousTitle} | Uh oh',
+                                            },
+                                            {
+                                              previousTitle,
+                                            }
+                                          )
+                                        }
+                                      />
+                                      {invalidNodeError ? (
+                                        <InvalidNodeError nodeName={name} />
+                                      ) : (
+                                        <ErrorPageBody message={error.message} />
+                                      )}
+                                    </>
+                                  );
                                 }
                                 return (
                                   <EuiPage style={{ flex: '1 0 auto' }}>
@@ -221,13 +250,13 @@ export const MetricDetail = withTheme(
   )
 );
 
-const MetricsDetailsPageColumn = styled.div`
+const MetricsDetailsPageColumn = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: column;
 `;
 
-const MetricsTitleTimeRangeContainer = styled.div`
+const MetricsTitleTimeRangeContainer = euiStyled.div`
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;

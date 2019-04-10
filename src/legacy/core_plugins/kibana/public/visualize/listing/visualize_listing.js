@@ -18,8 +18,7 @@
  */
 
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/pager_control';
-import 'ui/pager';
+import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -28,7 +27,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
-import { VisualizeConstants } from '../visualize_constants';
+import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
 
 import { i18n } from '@kbn/i18n';
 
@@ -51,6 +50,15 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
+  };
+
+  this.editItem = ({ id }) => {
+    // for visualizations the edit and view URLs are the same
+    kbnUrl.change(createVisualizeEditUrl(id));
+  };
+
+  this.getViewUrl = ({ id }) => {
+    return chrome.addBasePath(`#${createVisualizeEditUrl(id)}`);
   };
 
   this.closeNewVisModal = () => {
@@ -78,7 +86,11 @@ export function VisualizeListingController($injector, createNewVis) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
+
+        return {
+          total: result.total,
+          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+        };
       });
   };
 

@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
 import '../../../persisted_state';
 import { VislibLibAxisProvider } from '../../lib/axis';
@@ -41,6 +41,18 @@ describe('Vislib xAxis Class Test Suite', function () {
       max: 1408734982458,
       min: 1408734082458
     },
+    xAxisOrderedValues: [
+      1408734060000,
+      1408734090000,
+      1408734120000,
+      1408734150000,
+      1408734180000,
+      1408734210000,
+      1408734240000,
+      1408734270000,
+      1408734300000,
+      1408734330000,
+    ],
     series: [
       {
         label: 'Count',

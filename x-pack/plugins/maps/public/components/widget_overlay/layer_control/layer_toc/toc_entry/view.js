@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,8 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 
@@ -48,6 +50,22 @@ export class TOCEntry extends React.Component {
 
   componentDidUpdate() {
     this._updateDisplayName();
+  }
+
+  _openLayerPanelWithCheck = () => {
+    const selectedLayer = this.props.getSelectedLayerSelector();
+    if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
+      return;
+    }
+
+    if (this.props.hasDirtyStateSelector()) {
+      this.setState({
+        shouldShowModal: true
+      });
+      return;
+    }
+
+    this.props.openLayerPanel(this.props.layer.getId());
   }
 
   _renderCancelModal() {
@@ -94,85 +112,119 @@ export class TOCEntry extends React.Component {
     );
   }
 
-
-  render() {
-
-    const { layer, openLayerPanel, zoom, toggleVisible, fitToBounds } = this.props;
-    const legendIcon = (
-      <LayerTocActions
-        layer={layer}
-        fitToBounds={() => {
-          fitToBounds(layer.getId());
-        }}
-        zoom={zoom}
-        toggleVisible={() => {
-          toggleVisible(layer.getId());
-        }}
-        displayName={this.state.displayName}
-      />
+  _renderLayerName() {
+    const displayName = (
+      <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
+        {this.state.displayName}
+      </div>
     );
-    let tocDetails = layer.getTOCDetails();
-    if (tocDetails) {
-      tocDetails = (
-        <EuiFlexItem>
-          <EuiSpacer size="s"/>
-          {tocDetails}
+
+    if (this.props.isReadOnly) {
+      return (
+        <EuiText>
+          {displayName}
+        </EuiText>
+      );
+    }
+
+    return (
+      <EuiLink
+        color="text"
+        onClick={this._openLayerPanelWithCheck}
+        data-test-subj={
+          `mapOpenLayerButton${this.state.displayName
+            ? this.state.displayName.replace(' ', '_')
+            : ''}`
+        }
+      >
+        {displayName}
+      </EuiLink>
+    );
+  }
+
+  _renderLayerHeader() {
+    const {
+      cloneLayer,
+      isReadOnly,
+      layer,
+      zoom,
+      toggleVisible,
+      fitToBounds
+    } = this.props;
+
+    let sortIcon;
+    if (!isReadOnly) {
+      sortIcon = (
+        <EuiFlexItem grow={false}>
+          <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
+            <EuiIcon type="grab"/>
+          </span>
         </EuiFlexItem>
       );
     }
 
-    const cancelModal = this._renderCancelModal();
-
-    const openLayerPanelWithCheck = () => {
-      const selectedLayer = this.props.getSelectedLayerSelector();
-      if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
-        return;
-      }
-      if (this.props.hasDirtyStateSelector()) {
-        this.setState({
-          shouldShowModal: true
-        });
-      } else {
-        openLayerPanel(layer.getId());
-      }
-    };
-
     return (
-      <div
-        className="mapTocEntry"
-        id={layer.getId()}
-        data-layerid={layer.getId()}
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        responsive={false}
+        className={
+          layer.isVisible() && layer.showAtZoomLevel(zoom)
+            && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
+        }
       >
-        {cancelModal}
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          responsive={false}
-          className={
-            layer.isVisible() && layer.showAtZoomLevel(zoom)
-              && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
-          }
-        >
-          <EuiFlexItem grow={false}>
-            { legendIcon }
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <button
-              onClick={openLayerPanelWithCheck}
-              data-test-subj={`mapOpenLayerButton${this.state.displayName}`}
-            >
-              <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
-                {this.state.displayName}
-              </div>
-            </button>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {tocDetails}
-      </div>
+        <EuiFlexItem grow={false}>
+          <LayerTocActions
+            layer={layer}
+            fitToBounds={() => {
+              fitToBounds(layer.getId());
+            }}
+            zoom={zoom}
+            toggleVisible={() => {
+              toggleVisible(layer.getId());
+            }}
+            displayName={this.state.displayName}
+            cloneLayer={() => {
+              cloneLayer(layer.getId());
+            }}
+            isReadOnly={this.props.isReadOnly}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {this._renderLayerName()}
+        </EuiFlexItem>
+        {sortIcon}
+      </EuiFlexGroup>
     );
   }
 
+  _renderLayerDetails() {
+    const tocDetails = this.props.layer.getTOCDetails();
+    if (!tocDetails) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="s"/>
+        {tocDetails}
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <div
+        className="mapTocEntry"
+        id={this.props.layer.getId()}
+        data-layerid={this.props.layer.getId()}
+      >
+        {this._renderCancelModal()}
+
+        {this._renderLayerHeader()}
+
+        {this._renderLayerDetails()}
+      </div>
+    );
+  }
 }

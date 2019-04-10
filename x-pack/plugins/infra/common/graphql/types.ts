@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 
 // ====================================================
 // START: Typescript template
@@ -60,6 +60,8 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
+  /** The fields to use as the log message */
+  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -586,6 +588,50 @@ export namespace FlyoutItemQuery {
   };
 }
 
+export namespace LogSummary {
+  export type Variables = {
+    sourceId?: string | null;
+    start: number;
+    end: number;
+    bucketSize: number;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logSummaryBetween: LogSummaryBetween;
+  };
+
+  export type LogSummaryBetween = {
+    __typename?: 'InfraLogSummaryInterval';
+
+    start?: number | null;
+
+    end?: number | null;
+
+    buckets: Buckets[];
+  };
+
+  export type Buckets = {
+    __typename?: 'InfraLogSummaryBucket';
+
+    start: number;
+
+    end: number;
+
+    entriesCount: number;
+  };
+}
+
 export namespace MetadataQuery {
   export type Variables = {
     sourceId: string;
@@ -864,50 +910,6 @@ export namespace LogEntries {
   };
 }
 
-export namespace LogSummary {
-  export type Variables = {
-    sourceId?: string | null;
-    start: number;
-    end: number;
-    bucketSize: number;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logSummaryBetween: LogSummaryBetween;
-  };
-
-  export type LogSummaryBetween = {
-    __typename?: 'InfraLogSummaryInterval';
-
-    start?: number | null;
-
-    end?: number | null;
-
-    buckets: Buckets[];
-  };
-
-  export type Buckets = {
-    __typename?: 'InfraLogSummaryBucket';
-
-    start: number;
-
-    end: number;
-
-    entriesCount: number;
-  };
-}
-
 export namespace SourceFields {
   export type Fragment = {
     __typename?: 'InfraSource';
@@ -943,6 +945,8 @@ export namespace SourceFields {
     container: string;
 
     host: string;
+
+    message: string[];
 
     pod: string;
 

@@ -2,10 +2,12 @@ node_modules
 bower_components
 /data
 /build
+/target
 /.es
 /plugins
 /optimize
 /built_assets
+/html_docs
 /src/fixtures/vislib/mock_data
 /src/legacy/ui/public/angular-bootstrap
 /src/legacy/ui/public/flot-charts
@@ -17,7 +19,6 @@ bower_components
 /src/core/lib/kbn_internal_native_observable
 /packages/*/target
 /packages/eslint-config-kibana
-/packages/eslint-plugin-kibana-custom
 /packages/kbn-es-query/src/kuery/ast/kuery.js
 /packages/kbn-es-query/src/kuery/ast/legacy_kuery.js
 /packages/kbn-pm/dist

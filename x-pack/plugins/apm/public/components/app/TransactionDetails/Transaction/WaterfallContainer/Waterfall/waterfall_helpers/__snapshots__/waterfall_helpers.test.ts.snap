@@ -485,8 +485,8 @@ Object {
     },
   ],
   "serviceColors": Object {
-    "opbeans-node": "rgb(49, 133, 252)",
-    "opbeans-ruby": "rgb(0, 179, 164)",
+    "opbeans-node": "#3185fc",
+    "opbeans-ruby": "#00b3a4",
   },
   "services": Array [
     "opbeans-node",
@@ -919,7 +919,7 @@ Object {
     },
   ],
   "serviceColors": Object {
-    "opbeans-ruby": "rgb(49, 133, 252)",
+    "opbeans-ruby": "#3185fc",
   },
   "services": Array [
     "opbeans-ruby",

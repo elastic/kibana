@@ -13,10 +13,10 @@ function formatHits(hits) {
       uuid: hit.uuid,
       primary: hit.pri,
       replica: hit.rep,
-      documents: hit["docs.count"],
-      documents_deleted: hit["docs.deleted"],
-      size: hit["store.size"],
-      primary_size: hit["pri.store.size"],
+      documents: hit['docs.count'],
+      documents_deleted: hit['docs.deleted'],
+      size: hit['store.size'],
+      primary_size: hit['pri.store.size'],
     };
   });
 }
