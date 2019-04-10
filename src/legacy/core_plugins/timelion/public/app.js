@@ -78,10 +78,10 @@ require('ui/routes')
       }
 
       return {
-        text: i18n('kbn.timelion.badge.readOnly.text', {
+        text: i18n('timelion.badge.readOnly.text', {
           defaultMessage: 'Read only',
         }),
-        tooltip: i18n('kbn.timelion.badge.readOnly.tooltip', {
+        tooltip: i18n('timelion.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save timelion sheets',
         }),
       };
