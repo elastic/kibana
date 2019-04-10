@@ -19,9 +19,11 @@ export function upgradeAssistant(kibana: any) {
       savedObjectSchemas: {
         'upgrade-assistant-reindex-operation': {
           isNamespaceAgnostic: true,
+          isImportExportable: false,
         },
         'upgrade-assistant-telemetry': {
           isNamespaceAgnostic: true,
+          isImportExportable: false,
         },
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

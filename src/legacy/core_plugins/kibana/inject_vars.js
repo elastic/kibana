@@ -26,11 +26,21 @@ export function injectVars(server) {
   // If url is set, old settings must be used for backward compatibility
   const isOverridden = typeof tilemap.url === 'string' && tilemap.url !== '';
 
+  const savedObjectSchemas = server.kibanaMigrator.kbnServer.uiExports.savedObjectSchemas;
+  const importExportableTypes = server.savedObjects.types.filter((type) => {
+    const schema = savedObjectSchemas[type];
+    if (!schema) {
+      return true;
+    }
+    return schema.isImportExportable !== false;
+  });
+
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
     regionmapsConfig: regionmap,
     mapConfig: mapConfig,
+    importExportableTypes,
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,

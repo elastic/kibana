@@ -60,6 +60,7 @@ export const spaces = (kibana: any) =>
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
+          isImportExportable: false,
         },
       },
       home: ['plugins/spaces/register_feature'],

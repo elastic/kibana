@@ -64,6 +64,11 @@ export default function (kibana) {
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
+      savedObjectSchemas: {
+        'timelion-sheet': {
+          isImportExportable: false,
+        },
+      },
 
       uiSettingDefaults: {
         'timelion:showTutorial': {

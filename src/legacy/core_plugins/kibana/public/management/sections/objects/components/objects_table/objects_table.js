@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
@@ -63,17 +64,7 @@ import {
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const INCLUDED_TYPES = [
-  'index-pattern',
-  'visualization',
-  'dashboard',
-  'search',
-  'map',
-  'canvas-workpad',
-  'graph-workspace',
-  'config',
-  'url',
-];
+export const INCLUDED_TYPES = chrome.getInjected('importExportableTypes');
 
 class ObjectsTableUI extends Component {
   static propTypes = {

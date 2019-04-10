@@ -56,7 +56,8 @@ export const ml = (kibana) => {
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
-          isNamespaceAgnostic: true
+          isNamespaceAgnostic: true,
+          isImportExportable: false,
         }
       },
       mappings,

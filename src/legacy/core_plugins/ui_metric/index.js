@@ -27,6 +27,11 @@ export default function (kibana) {
 
     uiExports: {
       mappings: require('./mappings.json'),
+      savedObjectSchemas: {
+        'ui-metric': {
+          isImportExportable: false,
+        },
+      },
     },
 
     init: function (server) {

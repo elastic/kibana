@@ -48,7 +48,8 @@ export function apm(kibana: any) {
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'apm-telemetry': {
-          isNamespaceAgnostic: true
+          isNamespaceAgnostic: true,
+          isImportExportable: false,
         }
       },
       mappings

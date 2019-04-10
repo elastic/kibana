@@ -63,6 +63,11 @@ export function infra(kibana: any) {
         },
       ],
       mappings: savedObjectMappings,
+      savedObjectSchemas: {
+        'infrastructure-ui-source': {
+          isImportExportable: false,
+        },
+      },
     },
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);

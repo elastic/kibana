@@ -61,7 +61,8 @@ export function maps(kibana) {
           },
         },
         'maps-telemetry': {
-          isNamespaceAgnostic: true
+          isNamespaceAgnostic: true,
+          isImportExportable: false,
         }
       },
       mappings,
