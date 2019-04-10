@@ -44,7 +44,7 @@ export const getAutoFollowPattern = (id) => (
 );
 
 export const loadRemoteClusters = () => (
-  httpClient.get(`${apiPrefixRemoteClusters}`).then(extractData)
+  httpClient.get(apiPrefixRemoteClusters).then(extractData)
 );
 
 export const createAutoFollowPattern = (autoFollowPattern) => (

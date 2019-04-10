@@ -7,10 +7,9 @@
 export {
   logFilterActions,
   logPositionActions,
-  metricTimeActions,
   waffleFilterActions,
   waffleTimeActions,
   waffleOptionsActions,
   flyoutOptionsActions,
 } from './local';
-export { logEntriesActions, logSummaryActions } from './remote';
+export { logEntriesActions } from './remote';

@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionMap, Container as ConstateContainer, OnMount, SelectorMap } from 'constate';
 import mergeAll from 'lodash/fp/mergeAll';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { memoizeLast } from 'ui/utils/memoize';
 import { convertChangeToUpdater } from '../../../common/source_configuration';
 import { UpdateSourceInput } from '../../graphql/types';
-import { RendererFunction } from '../../utils/typed_react';
 
 export interface InputFieldProps<
   Value extends string = string,
@@ -35,160 +32,159 @@ interface FormState {
   fields: {
     container: string;
     host: string;
+    message: string[];
     pod: string;
     tiebreaker: string;
     timestamp: string;
   };
 }
 
-interface State {
-  updates: UpdateSourceInput[];
-}
+export const useSourceConfigurationFormState = ({
+  initialFormState,
+}: {
+  initialFormState: FormState;
+}) => {
+  const [updates, setUpdates] = useState<UpdateSourceInput[]>([]);
 
-interface Actions {
-  resetForm: () => void;
-  updateName: (name: string) => void;
-  updateLogAlias: (value: string) => void;
-  updateMetricAlias: (value: string) => void;
-  updateField: (field: keyof FormState['fields'], value: string) => void;
-}
-
-interface Selectors {
-  getCurrentFormState: () => FormState;
-  getNameFieldValidationErrors: () => FieldErrorMessage[];
-  getLogAliasFieldValidationErrors: () => FieldErrorMessage[];
-  getMetricAliasFieldValidationErrors: () => FieldErrorMessage[];
-  getFieldFieldValidationErrors: (field: keyof FormState['fields']) => FieldErrorMessage[];
-  isFormValid: () => boolean;
-}
-
-const createContainerProps = memoizeLast((initialFormState: FormState) => {
-  const actions: ActionMap<State, Actions> = {
-    resetForm: () => state => ({
-      ...state,
-      updates: [],
-    }),
-    updateName: name => state => ({
-      ...state,
-      updates: addOrCombineLastUpdate(state.updates, { setName: { name } }),
-    }),
-    updateLogAlias: logAlias => state => ({
-      ...state,
-      updates: addOrCombineLastUpdate(state.updates, { setAliases: { logAlias } }),
-    }),
-    updateMetricAlias: metricAlias => state => ({
-      ...state,
-      updates: addOrCombineLastUpdate(state.updates, { setAliases: { metricAlias } }),
-    }),
-    updateField: (field, value) => state => ({
-      ...state,
-      updates: addOrCombineLastUpdate(state.updates, { setFields: { [field]: value } }),
-    }),
-  };
-
-  const getCurrentFormState = memoizeLast(
-    (previousFormState: FormState, updates: UpdateSourceInput[]) =>
-      updates
-        .map(convertChangeToUpdater)
-        .reduce((state, updater) => updater(state), previousFormState)
+  const addOrCombineLastUpdate = useCallback(
+    (newUpdate: UpdateSourceInput) =>
+      setUpdates(currentUpdates => [
+        ...currentUpdates.slice(0, -1),
+        ...maybeCombineUpdates(currentUpdates[currentUpdates.length - 1], newUpdate),
+      ]),
+    [setUpdates]
   );
 
-  const selectors: SelectorMap<State, Selectors> = {
-    getCurrentFormState: () => ({ updates }) => getCurrentFormState(initialFormState, updates),
-    getNameFieldValidationErrors: () => state =>
-      validateInputFieldNotEmpty(selectors.getCurrentFormState()(state).name),
-    getLogAliasFieldValidationErrors: () => state =>
-      validateInputFieldNotEmpty(selectors.getCurrentFormState()(state).logAlias),
-    getMetricAliasFieldValidationErrors: () => state =>
-      validateInputFieldNotEmpty(selectors.getCurrentFormState()(state).metricAlias),
-    getFieldFieldValidationErrors: field => state =>
-      validateInputFieldNotEmpty(selectors.getCurrentFormState()(state).fields[field]),
-    isFormValid: () => state =>
-      [
-        selectors.getNameFieldValidationErrors()(state),
-        selectors.getLogAliasFieldValidationErrors()(state),
-        selectors.getMetricAliasFieldValidationErrors()(state),
-        selectors.getFieldFieldValidationErrors('container')(state),
-        selectors.getFieldFieldValidationErrors('host')(state),
-        selectors.getFieldFieldValidationErrors('pod')(state),
-        selectors.getFieldFieldValidationErrors('tiebreaker')(state),
-        selectors.getFieldFieldValidationErrors('timestamp')(state),
-      ].every(errors => errors.length === 0),
-  };
+  const resetForm = useCallback(() => setUpdates([]), []);
+
+  const formState = useMemo(
+    () =>
+      updates
+        .map(convertChangeToUpdater)
+        .reduce((state, updater) => updater(state), initialFormState),
+    [updates, initialFormState]
+  );
+
+  const nameFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.name),
+        name: 'name',
+        onChange: name => addOrCombineLastUpdate({ setName: { name } }),
+        value: formState.name,
+      }),
+    [formState.name, addOrCombineLastUpdate]
+  );
+  const logAliasFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.logAlias),
+        name: 'logAlias',
+        onChange: logAlias => addOrCombineLastUpdate({ setAliases: { logAlias } }),
+        value: formState.logAlias,
+      }),
+    [formState.logAlias, addOrCombineLastUpdate]
+  );
+  const metricAliasFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.metricAlias),
+        name: 'metricAlias',
+        onChange: metricAlias => addOrCombineLastUpdate({ setAliases: { metricAlias } }),
+        value: formState.metricAlias,
+      }),
+    [formState.metricAlias, addOrCombineLastUpdate]
+  );
+  const containerFieldFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.fields.container),
+        name: `containerField`,
+        onChange: value => addOrCombineLastUpdate({ setFields: { container: value } }),
+        value: formState.fields.container,
+      }),
+    [formState.fields.container, addOrCombineLastUpdate]
+  );
+  const hostFieldFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.fields.host),
+        name: `hostField`,
+        onChange: value => addOrCombineLastUpdate({ setFields: { host: value } }),
+        value: formState.fields.host,
+      }),
+    [formState.fields.host, addOrCombineLastUpdate]
+  );
+  const podFieldFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.fields.pod),
+        name: `podField`,
+        onChange: value => addOrCombineLastUpdate({ setFields: { pod: value } }),
+        value: formState.fields.pod,
+      }),
+    [formState.fields.pod, addOrCombineLastUpdate]
+  );
+  const tiebreakerFieldFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.fields.tiebreaker),
+        name: `tiebreakerField`,
+        onChange: value => addOrCombineLastUpdate({ setFields: { tiebreaker: value } }),
+        value: formState.fields.tiebreaker,
+      }),
+    [formState.fields.tiebreaker, addOrCombineLastUpdate]
+  );
+  const timestampFieldFieldProps = useMemo(
+    () =>
+      createInputFieldProps({
+        errors: validateInputFieldNotEmpty(formState.fields.timestamp),
+        name: `timestampField`,
+        onChange: value => addOrCombineLastUpdate({ setFields: { timestamp: value } }),
+        value: formState.fields.timestamp,
+      }),
+    [formState.fields.timestamp, addOrCombineLastUpdate]
+  );
+
+  const fieldProps = useMemo(
+    () => ({
+      name: nameFieldProps,
+      logAlias: logAliasFieldProps,
+      metricAlias: metricAliasFieldProps,
+      containerField: containerFieldFieldProps,
+      hostField: hostFieldFieldProps,
+      podField: podFieldFieldProps,
+      tiebreakerField: tiebreakerFieldFieldProps,
+      timestampField: timestampFieldFieldProps,
+    }),
+    [
+      nameFieldProps,
+      logAliasFieldProps,
+      metricAliasFieldProps,
+      containerFieldFieldProps,
+      hostFieldFieldProps,
+      podFieldFieldProps,
+      tiebreakerFieldFieldProps,
+      timestampFieldFieldProps,
+    ]
+  );
+
+  const isFormValid = useMemo(
+    () => Object.values(fieldProps).every(({ error }) => error.length <= 0),
+    [fieldProps]
+  );
+
+  const isFormDirty = useMemo(() => updates.length > 0, [updates]);
 
   return {
-    actions,
-    initialState: { updates: [] } as State,
-    selectors,
+    fieldProps,
+    formState,
+    isFormDirty,
+    isFormValid,
+    resetForm,
+    updates,
   };
-});
-
-interface WithSourceConfigurationFormStateProps {
-  children: RendererFunction<
-    State &
-      Actions &
-      Selectors & {
-        getFieldFieldProps: (field: keyof FormState['fields']) => InputFieldProps;
-        getLogAliasFieldProps: () => InputFieldProps;
-        getMetricAliasFieldProps: () => InputFieldProps;
-        getNameFieldProps: () => InputFieldProps;
-      }
-  >;
-  initialFormState: FormState;
-  onMount?: OnMount<State>;
-}
-
-export const WithSourceConfigurationFormState: React.SFC<WithSourceConfigurationFormStateProps> = ({
-  children,
-  initialFormState,
-  onMount,
-}) => (
-  <ConstateContainer
-    {...createContainerProps(initialFormState)}
-    context="source-configuration-form"
-    onMount={onMount}
-  >
-    {args => {
-      const currentFormState = args.getCurrentFormState();
-      return children({
-        ...args,
-        getNameFieldProps: () =>
-          createInputFieldProps({
-            errors: args.getNameFieldValidationErrors(),
-            name: 'name',
-            onChange: args.updateName,
-            value: currentFormState.name,
-          }),
-        getLogAliasFieldProps: () =>
-          createInputFieldProps({
-            errors: args.getLogAliasFieldValidationErrors(),
-            name: 'logAlias',
-            onChange: args.updateLogAlias,
-            value: currentFormState.logAlias,
-          }),
-        getMetricAliasFieldProps: () =>
-          createInputFieldProps({
-            errors: args.getMetricAliasFieldValidationErrors(),
-            name: 'metricAlias',
-            onChange: args.updateMetricAlias,
-            value: currentFormState.metricAlias,
-          }),
-        getFieldFieldProps: field =>
-          createInputFieldProps({
-            errors: args.getFieldFieldValidationErrors(field),
-            name: `${field}Field`,
-            onChange: newValue => args.updateField(field, newValue),
-            value: currentFormState.fields[field],
-          }),
-      });
-    }}
-  </ConstateContainer>
-);
-
-const addOrCombineLastUpdate = (updates: UpdateSourceInput[], newUpdate: UpdateSourceInput) => [
-  ...updates.slice(0, -1),
-  ...maybeCombineUpdates(updates[updates.length - 1], newUpdate),
-];
+};
 
 const createInputFieldProps = <
   Value extends string = string,

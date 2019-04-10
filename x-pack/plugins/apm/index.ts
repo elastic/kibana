@@ -7,14 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import mappings from './mappings.json';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-import { initErrorsApi } from './server/routes/errors';
-import { initMetricsApi } from './server/routes/metrics';
-import { initServicesApi } from './server/routes/services';
-import { initStatusApi } from './server/routes/status_check';
-import { initTracesApi } from './server/routes/traces';
-import { initTransactionGroupsApi } from './server/routes/transaction_groups';
+import { plugin } from './server/new-platform/index';
 
 // TODO: get proper types
 export function apm(kibana: any) {
@@ -74,14 +69,14 @@ export function apm(kibana: any) {
     },
 
     // TODO: get proper types
-    init(server: any) {
-      initTransactionGroupsApi(server);
-      initTracesApi(server);
-      initServicesApi(server);
-      initErrorsApi(server);
-      initStatusApi(server);
-      initMetricsApi(server);
-      makeApmUsageCollector(server);
+    init(server: Server) {
+      const initializerContext = {} as PluginInitializerContext;
+      const core = {
+        http: {
+          server
+        }
+      } as CoreSetup;
+      plugin(initializerContext).setup(core);
     }
   });
 }

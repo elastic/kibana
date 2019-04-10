@@ -26,33 +26,51 @@ describe('includedFields', () => {
 
   it('includes type', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(4);
+    expect(fields).toHaveLength(7);
     expect(fields).toContain('type');
   });
 
   it('includes namespace', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(4);
+    expect(fields).toHaveLength(7);
     expect(fields).toContain('namespace');
+  });
+
+  it('includes references', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(7);
+    expect(fields).toContain('references');
+  });
+
+  it('includes migrationVersion', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(7);
+    expect(fields).toContain('migrationVersion');
+  });
+
+  it('includes updated_at', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(7);
+    expect(fields).toContain('updated_at');
   });
 
   it('accepts field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(4);
+    expect(fields).toHaveLength(7);
     expect(fields).toContain('config.foo');
   });
 
   it('accepts fields as an array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
 
-    expect(fields).toHaveLength(6);
+    expect(fields).toHaveLength(9);
     expect(fields).toContain('config.foo');
     expect(fields).toContain('config.bar');
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toHaveLength(4);
+    expect(fields).toHaveLength(7);
     expect(fields).toContain('*.foo');
   });
 
@@ -60,7 +78,7 @@ describe('includedFields', () => {
     it('includes legacy field path', () => {
       const fields = includedFields('config', ['foo', 'bar']);
 
-      expect(fields).toHaveLength(6);
+      expect(fields).toHaveLength(9);
       expect(fields).toContain('foo');
       expect(fields).toContain('bar');
     });

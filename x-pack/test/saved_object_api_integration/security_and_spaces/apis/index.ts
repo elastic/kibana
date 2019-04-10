@@ -7,7 +7,7 @@
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService, loadTestFile }: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -26,6 +26,8 @@ export default function({ getService, loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./export'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
   });
 }

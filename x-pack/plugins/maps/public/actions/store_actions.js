@@ -69,6 +69,12 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
   };
 }
 
+function getLayerById(layerId, state) {
+  return getLayerList(state).find(layer => {
+    return layerId === layer.getId();
+  });
+}
+
 async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
@@ -119,6 +125,18 @@ export function replaceLayerList(newLayerList) {
   };
 }
 
+export function cloneLayer(layerId) {
+  return async (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    const clonedDescriptor = await layer.cloneDescriptor();
+    dispatch(addLayer(clonedDescriptor));
+  };
+}
+
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
@@ -138,12 +156,13 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(layerId, errorMessage) {
+function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
+      isInErrorState: errorMessage !== null,
       layerId,
-      errorMessage,
+      errorMessage
     });
   };
 }
@@ -161,9 +180,7 @@ export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
     //e.g. if a layer was invisible at start-up, it won't have any data loaded
-    const layer = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
@@ -336,9 +353,7 @@ export function clearMouseCoordinates() {
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
@@ -389,18 +404,26 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return ({
-    type: LAYER_DATA_LOAD_ENDED,
-    layerId,
-    dataId,
-    data,
-    meta,
-    requestToken
-  });
+  return async (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
+    dispatch({
+      type: LAYER_DATA_LOAD_ENDED,
+      layerId,
+      dataId,
+      data,
+      meta,
+      requestToken
+    });
+    //Clear any data-load errors when there is a succesful data return.
+    //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
+    //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
+    dispatch(setLayerDataLoadErrorStatus(layerId, null));
+  };
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return async (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -408,7 +431,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
       requestToken,
     });
 
-    dispatch(setLayerErrorStatus(layerId, errorMessage));
+    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
@@ -427,9 +450,7 @@ export function updateSourceProp(layerId, propName, value) {
 
 export function syncDataForLayer(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
@@ -477,6 +498,19 @@ export function updateLayerAlpha(id, alpha) {
   };
 }
 
+export function setLayerQuery(id, query) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'query',
+      newValue: query,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
@@ -488,9 +522,7 @@ export function removeSelectedLayer() {
 
 export function removeLayer(layerId) {
   return (dispatch, getState) => {
-    const layerGettingRemoved = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
       return;
     }
@@ -542,9 +574,7 @@ export function triggerRefreshTimer() {
 
 export function clearMissingStyleProperties(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (!targetLayer) {
       return;
     }

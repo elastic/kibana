@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import { assign, get } from 'lodash';
 
 import timeseries from './vis_types/timeseries/series';
 import metric from './vis_types/metric/series';
@@ -36,42 +36,63 @@ const lookup = {
   metric,
   timeseries,
   gauge,
-  markdown
+  markdown,
 };
 
 class Series extends Component {
-
   constructor(props) {
     super(props);
+
     this.state = {
       visible: true,
-      selectedTab: 'metrics'
+      selectedTab: 'metrics',
+      uiRestrictions: undefined,
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.switchTab = this.switchTab.bind(this);
-    this.toggleVisible = this.toggleVisible.bind(this);
+
+    this.visDataSubscription = null;
   }
 
-  switchTab(selectedTab) {
+  switchTab = (selectedTab) => {
     this.setState({ selectedTab });
-  }
+  };
 
-  handleChange(part) {
+  handleChange = (part) => {
     if (this.props.onChange) {
       const { model } = this.props;
-      const doc = _.assign({}, model, part);
+      const doc = assign({}, model, part);
       this.props.onChange(doc);
     }
-  }
+  };
 
-  toggleVisible(e) {
+  togglePanelActivation = () => {
+    const { model } = this.props;
+
+    this.handleChange({
+      hidden: !model.hidden,
+    });
+  };
+
+  toggleVisible = (e) => {
     e.preventDefault();
-    this.setState({ visible: !this.state.visible });
+
+    this.setState({
+      visible: !this.state.visible
+    });
+  };
+
+  componentDidMount() {
+    if (this.props.visData$) {
+      this.visDataSubscription = this.props.visData$
+        .subscribe(visData =>  this.setState({
+          uiRestrictions: get(visData, 'uiRestrictions')
+        }));
+    }
   }
 
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
+
     if (Component) {
       const params = {
         className: this.props.className,
@@ -93,9 +114,11 @@ class Series extends Component {
         selectedTab: this.state.selectedTab,
         sortData: this.props.sortData,
         style: this.props.style,
+        uiRestrictions: this.state.uiRestrictions,
         switchTab: this.switchTab,
         toggleVisible: this.toggleVisible,
-        visible: this.state.visible
+        togglePanelActivation: this.togglePanelActivation,
+        visible: this.state.visible,
       };
       return (<Component {...params}/>);
     }
@@ -110,10 +133,15 @@ class Series extends Component {
     );
   }
 
+  componentWillUnmount() {
+    if (this.visDataSubscription) {
+      this.visDataSubscription.unsubscribe();
+    }
+  }
 }
 
 Series.defaultProps = {
-  name: 'metrics'
+  name: 'metrics',
 };
 
 Series.propTypes = {
@@ -133,6 +161,7 @@ Series.propTypes = {
   onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
+  visData$: PropTypes.object,
   sortData: PropTypes.string,
 };
 

@@ -21,7 +21,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
 import { SavedObjectsClient } from '../';
-import { getSortedObjectsForExport } from '../lib/export';
+import { getSortedObjectsForExport } from '../export';
 import { Prerequisites } from './types';
 
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
@@ -36,6 +36,7 @@ interface ExportRequest extends Hapi.Request {
       type: string;
       id: string;
     }>;
+    includeReferencesDeep: boolean;
   };
 }
 
@@ -60,6 +61,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
             .optional(),
+          includeReferencesDeep: Joi.boolean().default(false),
         })
         .xor('type', 'objects')
         .default(),
@@ -71,6 +73,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
         types: request.payload.type,
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
+        includeReferencesDeep: request.payload.includeReferencesDeep,
       });
       return h
         .response(docsToExport.map(doc => stringify(doc)).join('\n'))

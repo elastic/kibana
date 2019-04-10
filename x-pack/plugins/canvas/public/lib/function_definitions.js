@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 import uniqBy from 'lodash.uniqby';
 import { getServerFunctions } from '../state/selectors/app';
 

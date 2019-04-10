@@ -21,14 +21,14 @@ import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
 import '../../filters/field_type';
-import '../../validate_date_interval';
+import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 import { timefilter } from '../../timefilter';
-import dropPartialTemplate from '../controls/drop_partials.html';
+import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -165,7 +165,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editor: dropPartialTemplate,
+      editorComponent: DropPartialsParamEditor,
     },
 
     {

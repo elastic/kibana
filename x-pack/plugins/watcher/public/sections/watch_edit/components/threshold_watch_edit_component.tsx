@@ -7,6 +7,8 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiExpression,
@@ -25,13 +27,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
+import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { fetchFields, getMatchingIndices } from '../../../lib/api';
 import { aggTypes } from '../agg_types';
 import { comparators } from '../comparators';
 import { groupByTypes } from '../group_by_types';
 import { timeUnits } from '../time_units';
+import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
@@ -115,10 +118,14 @@ const ThresholdWatchEditUi = ({
   intl,
   savedObjectsClient,
   pageTitle,
+  urlService,
+  licenseService,
 }: {
   intl: InjectedIntl;
   savedObjectsClient: any;
   pageTitle: string;
+  urlService: any;
+  licenseService: any;
 }) => {
   // hooks
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -131,7 +138,8 @@ const ThresholdWatchEditUi = ({
   const [watchThresholdPopoverOpen, setWatchThresholdPopoverOpen] = useState(false);
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const { watch, setWatch } = useContext(WatchContext);
+  const [modal, setModal] = useState<{ message: string } | null>(null);
+  const { watch, setWatchProperty } = useContext(WatchContext);
   const getIndexPatterns = async () => {
     const { savedObjects } = await savedObjectsClient.find({
       type: 'index-pattern',
@@ -144,12 +152,15 @@ const ThresholdWatchEditUi = ({
   const loadData = async () => {
     const theFields = await getFields(watch.index);
     setFields(theFields);
-    setTimeFieldOptions(getTimeFieldOptions(fields));
+    setTimeFieldOptions(getTimeFieldOptions(theFields));
     getIndexPatterns();
   };
   useEffect(() => {
     loadData();
   }, []);
+  const { errors } = watch.validate();
+  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -164,6 +175,15 @@ const ThresholdWatchEditUi = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      <ConfirmWatchesModal
+        modalOptions={modal}
+        callback={async isConfirmed => {
+          if (isConfirmed) {
+            saveWatch(watch, urlService, licenseService);
+          }
+          setModal(null);
+        }}
+      />
       <EuiForm>
         <ErrableFormRow
           id="watchName"
@@ -173,15 +193,20 @@ const ThresholdWatchEditUi = ({
               defaultMessage="Name"
             />
           }
-          errorKey="watchName"
-          isShowingErrors={false}
-          errors={{}}
+          errorKey="name"
+          isShowingErrors={hasErrors && watch.name !== undefined}
+          errors={errors}
         >
           <EuiFieldText
             name="name"
             value={watch.name}
             onChange={e => {
-              setWatch(new ThresholdWatch({ ...watch, name: e.target.value }));
+              setWatchProperty('name', e.target.value);
+            }}
+            onBlur={() => {
+              if (!watch.name) {
+                setWatchProperty('name', '');
+              }
             }}
           />
         </ErrableFormRow>
@@ -195,9 +220,9 @@ const ThresholdWatchEditUi = ({
                   defaultMessage="Indices to query"
                 />
               }
-              errorKey="watchName"
-              isShowingErrors={false}
-              errors={{}}
+              errorKey="index"
+              isShowingErrors={hasErrors && watch.index !== undefined}
+              errors={errors}
               helpText={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.titlePanel.howToBroadenSearchQueryDescription"
@@ -208,24 +233,27 @@ const ThresholdWatchEditUi = ({
               <EuiComboBox
                 noSuggestions={!indexOptions.length}
                 options={indexOptions}
-                selectedOptions={watch.index.map((anIndex: string) => {
+                selectedOptions={(watch.index || []).map((anIndex: string) => {
                   return {
                     label: anIndex,
                     value: anIndex,
                   };
                 })}
                 onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                  watch.index = selected.map(aSelected => aSelected.value);
-                  setWatch(new ThresholdWatch(watch));
-                  setWatch(new ThresholdWatch(watch));
+                  setWatchProperty('index', selected.map(aSelected => aSelected.value));
                   const indices = selected.map(s => s.value as string);
                   const theFields = await getFields(indices);
                   setFields(theFields);
 
-                  setTimeFieldOptions(getTimeFieldOptions(fields));
+                  setTimeFieldOptions(getTimeFieldOptions(theFields));
                 }}
                 onSearchChange={async search => {
                   setIndexOptions(await getIndexOptions(search, indexPatterns));
+                }}
+                onBlur={() => {
+                  if (!watch.index) {
+                    setWatchProperty('index', []);
+                  }
                 }}
               />
             </ErrableFormRow>
@@ -239,17 +267,21 @@ const ThresholdWatchEditUi = ({
                   defaultMessage="Time field"
                 />
               }
-              errorKey="watchName"
-              isShowingErrors={false}
-              errors={{}}
+              errorKey="timeField"
+              isShowingErrors={hasErrors && watch.timeField !== undefined}
+              errors={errors}
             >
               <EuiSelect
                 options={timeFieldOptions}
-                name="indexSelectSearchBox"
+                name="watchTimeField"
                 value={watch.timeField}
                 onChange={e => {
-                  watch.timeField = e.target.value;
-                  setWatch(new ThresholdWatch(watch));
+                  setWatchProperty('timeField', e.target.value);
+                }}
+                onBlur={() => {
+                  if (watch.timeField === undefined) {
+                    setWatchProperty('timeField', '');
+                  }
                 }}
               />
             </ErrableFormRow>
@@ -261,9 +293,9 @@ const ThresholdWatchEditUi = ({
                 id: 'xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel',
                 defaultMessage: 'Run watch every',
               })}
-              errorKey="watchInterval"
-              isShowingErrors={false}
-              errors={{}}
+              errorKey="triggerIntervalSize"
+              isShowingErrors={hasErrors && watch.triggerIntervalSize !== undefined}
+              errors={errors}
             >
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -271,8 +303,14 @@ const ThresholdWatchEditUi = ({
                     min={1}
                     value={watch.triggerIntervalSize}
                     onChange={e => {
-                      watch.triggerIntervalSize = e.target.value;
-                      setWatch(new ThresholdWatch(watch));
+                      const { value } = e.target;
+                      const triggerIntervalSize = value !== '' ? parseInt(value, 10) : value;
+                      setWatchProperty('triggerIntervalSize', triggerIntervalSize);
+                    }}
+                    onBlur={e => {
+                      if (watch.triggerIntervalSize === undefined) {
+                        setWatchProperty('triggerIntervalSize', '');
+                      }
                     }}
                   />
                 </EuiFlexItem>
@@ -284,8 +322,7 @@ const ThresholdWatchEditUi = ({
                       defaultMessage: 'Duration time unit',
                     })}
                     onChange={e => {
-                      watch.triggerIntervalUnit = e.target.value;
-                      setWatch(new ThresholdWatch(watch));
+                      setWatchProperty('triggerIntervalUnit', e.target.value);
                     }}
                     options={[
                       {
@@ -351,8 +388,7 @@ const ThresholdWatchEditUi = ({
                 <EuiSelect
                   value={watch.aggType}
                   onChange={e => {
-                    watch.aggType = e.target.value;
-                    setWatch(new ThresholdWatch(watch));
+                    setWatchProperty('aggType', e.target.value);
                     setAggTypePopoverOpen(false);
                   }}
                   options={Object.values(aggTypes)}
@@ -388,8 +424,7 @@ const ThresholdWatchEditUi = ({
                       <EuiSelect
                         value={watch.aggField}
                         onChange={e => {
-                          watch.aggField = e.target.value;
-                          setWatch(new ThresholdWatch(watch));
+                          setWatchProperty('aggField', e.target.value);
                           setAggFieldPopoverOpen(false);
                         }}
                         options={fields.reduce(
@@ -448,8 +483,7 @@ const ThresholdWatchEditUi = ({
                     <EuiSelect
                       value={watch.groupBy}
                       onChange={e => {
-                        watch.groupBy = e.target.value;
-                        setWatch(new ThresholdWatch(watch));
+                        setWatchProperty('groupBy', e.target.value);
                       }}
                       options={Object.values(groupByTypes)}
                     />
@@ -464,8 +498,7 @@ const ThresholdWatchEditUi = ({
                         <EuiSelect
                           value={watch.aggField}
                           onChange={e => {
-                            watch.aggField = e.target.value;
-                            setWatch(new ThresholdWatch(watch));
+                            setWatchProperty('aggField', e.target.value);
                             setAggFieldPopoverOpen(false);
                           }}
                           options={fields.reduce(
@@ -520,8 +553,7 @@ const ThresholdWatchEditUi = ({
                     <EuiSelect
                       value={watch.thresholdComparator}
                       onChange={e => {
-                        watch.thresholdComparator = e.target.value;
-                        setWatch(new ThresholdWatch(watch));
+                        setWatchProperty('thresholdComparator', e.target.value);
                       }}
                       options={Object.values(comparators)}
                     />
@@ -531,8 +563,9 @@ const ThresholdWatchEditUi = ({
                       value={watch.threshold}
                       min={1}
                       onChange={e => {
-                        watch.threshold = parseInt(e.target.value, 10);
-                        setWatch(new ThresholdWatch(watch));
+                        const { value } = e.target;
+                        const threshold = value !== '' ? parseInt(value, 10) : value;
+                        setWatchProperty('threshold', threshold);
                       }}
                     />
                   </EuiFlexItem>
@@ -573,8 +606,9 @@ const ThresholdWatchEditUi = ({
                       min={1}
                       value={watch.timeWindowSize}
                       onChange={e => {
-                        watch.timeWindowSize = e.target.value;
-                        setWatch(new ThresholdWatch(watch));
+                        const { value } = e.target;
+                        const timeWindowSize = value !== '' ? parseInt(value, 10) : value;
+                        setWatchProperty('timeWindowSize', timeWindowSize);
                       }}
                     />
                   </EuiFlexItem>
@@ -582,8 +616,7 @@ const ThresholdWatchEditUi = ({
                     <EuiSelect
                       value={watch.timeWindowUnit}
                       onChange={e => {
-                        watch.timeWindowUnit = e.target.value;
-                        setWatch(new ThresholdWatch(watch));
+                        setWatchProperty('timeWindowUnit', e.target.value);
                       }}
                       options={Object.entries(timeUnits).map(([key, value]) => {
                         return {
@@ -599,6 +632,32 @@ const ThresholdWatchEditUi = ({
                 </EuiFlexGroup>
               </div>
             </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="submit"
+              isDisabled={hasErrors}
+              onClick={async () => {
+                const savedWatch = await onWatchSave(watch, urlService, licenseService);
+                if (savedWatch && savedWatch.error) {
+                  return setModal(savedWatch.error);
+                }
+              }}
+            >
+              {i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveButtonLabel', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty href={'#/management/elasticsearch/watcher/watches'}>
+              {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>

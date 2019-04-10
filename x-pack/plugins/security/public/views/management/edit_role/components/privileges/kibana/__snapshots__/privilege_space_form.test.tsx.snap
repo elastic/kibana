@@ -2,18 +2,9 @@
 
 exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiFormRow
       describedByIds={Array []}
       fullWidth={false}
@@ -49,10 +40,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiFlexItem>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiFormRow
       describedByIds={Array []}
       fullWidth={false}
@@ -81,7 +69,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
     </EuiFormRow>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFormRow

@@ -1,11 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
+exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
 [MockFunction MockUiSettingsApi] {
   "calls": Array [
     Array [
       Object {
-        "basePathStart": true,
+        "addToPath": [MockFunction],
+        "get": [MockFunction],
+        "removeFromPath": [MockFunction],
       },
       "kibanaVersion",
     ],
@@ -19,7 +21,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
 }
 `;
 
-exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
+exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
 [MockFunction MockUiSettingsClient] {
   "calls": Array [
     Array [
@@ -59,7 +61,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
 }
 `;
 
-exports[`#start passes the uiSettings loading count to the loading count api: http.addLoadingCount calls 1`] = `
+exports[`#setup passes the uiSettings loading count to the loading count api: http.addLoadingCount calls 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [

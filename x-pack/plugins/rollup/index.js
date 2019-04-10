@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { PLUGIN } from './common';
+import { PLUGIN, CONFIG_ROLLUPS } from './common';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { registerRollupSearchStrategy } from './server/lib/search_strategies';
@@ -16,6 +16,7 @@ import {
   registerJobsRoute,
 } from './server/routes/api';
 import { registerRollupUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 export function rollup(kibana) {
   return new kibana.Plugin({
@@ -28,6 +29,21 @@ export function rollup(kibana) {
       managementSections: [
         'plugins/rollup/crud_app',
       ],
+      uiSettingDefaults: {
+        [CONFIG_ROLLUPS]: {
+          name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
+            defaultMessage: 'Enable rollup index patterns',
+          }),
+          value: true,
+          description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
+            defaultMessage:
+              `Enable the creation of index patterns which capture rollup indices,
+              which in turn enable visualizations based on rollup data. Refresh
+              the page to apply the changes.`,
+          }),
+          category: ['rollups'],
+        },
+      },
       indexManagement: [
         'plugins/rollup/index_pattern_creation',
         'plugins/rollup/index_pattern_list',

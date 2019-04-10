@@ -19,10 +19,10 @@
 
 import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
-import { ViewActions, ViewActionTypeKeys } from '../actions';
 
 import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { QueryLanguageType } from 'ui/embeddable/types';
+import { ViewActions, ViewActionTypeKeys } from '../actions';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId, ViewState } from '../selectors';
 
@@ -102,7 +102,7 @@ export const viewReducer: Reducer<ViewState> = (
   switch ((action as ViewActions).type) {
     case ViewActionTypeKeys.MINIMIZE_PANEL:
       return minimizePanel(view);
-    case ViewActionTypeKeys.MAXIMIZE_PANEl:
+    case ViewActionTypeKeys.MAXIMIZE_PANEL:
       return maximizePanel(view, action.payload);
     case ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID:
       return setVisibleContextMenuPanelId(view, action.payload);

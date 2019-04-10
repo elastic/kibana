@@ -19,6 +19,9 @@
 
 import './core.css';
 
+import { Subject } from 'rxjs';
+
+import { CoreSetup } from '.';
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
@@ -27,6 +30,8 @@ import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
+import { OverlayService } from './overlays';
+import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -37,11 +42,17 @@ interface Params {
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
 
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CoreContext {}
+
 /**
- * The CoreSystem is the root of the new platform, and starts all parts
+ * The CoreSystem is the root of the new platform, and setups all parts
  * of Kibana in the UI, including the LegacyPlatform which is managed
  * by the LegacyPlatformService. As we migrate more things to the new
  * platform the CoreSystem will get many more Services.
+ *
+ * @internal
  */
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
@@ -53,10 +64,13 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly overlay: OverlayService;
+  private readonly plugins: PluginsService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly notificationsTargetDomElement: HTMLDivElement;
+  private readonly notificationsTargetDomElement$: Subject<HTMLDivElement>;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
+  private readonly overlayTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const {
@@ -83,14 +97,19 @@ export class CoreSystem {
       },
     });
 
-    this.notificationsTargetDomElement = document.createElement('div');
+    this.notificationsTargetDomElement$ = new Subject();
     this.notifications = new NotificationsService({
-      targetDomElement: this.notificationsTargetDomElement,
+      targetDomElement$: this.notificationsTargetDomElement$.asObservable(),
     });
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.overlayTargetDomElement = document.createElement('div');
+    this.overlay = new OverlayService(this.overlayTargetDomElement);
     this.chrome = new ChromeService({ browserSupportsCsp });
+
+    const core: CoreContext = {};
+    this.plugins = new PluginsService(core);
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -100,41 +119,54 @@ export class CoreSystem {
     });
   }
 
-  public start() {
+  public async setup() {
     try {
+      const i18n = this.i18n.setup();
+      const notifications = this.notifications.setup({ i18n });
+      const injectedMetadata = this.injectedMetadata.setup();
+      const fatalErrors = this.fatalErrors.setup({ i18n });
+      const http = this.http.setup({ fatalErrors });
+      const overlays = this.overlay.setup({ i18n });
+      const basePath = this.basePath.setup({ injectedMetadata });
+      const uiSettings = this.uiSettings.setup({
+        notifications,
+        http,
+        injectedMetadata,
+        basePath,
+      });
+      const chrome = this.chrome.setup({
+        injectedMetadata,
+        notifications,
+      });
+
+      const core: CoreSetup = {
+        basePath,
+        chrome,
+        fatalErrors,
+        http,
+        i18n,
+        injectedMetadata,
+        notifications,
+        uiSettings,
+        overlays,
+      };
+
+      await this.plugins.setup(core);
+
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
+
+      const notificationsTargetDomElement = document.createElement('div');
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement);
 
-      const i18n = this.i18n.start();
-      const notifications = this.notifications.start({ i18n });
-      const injectedMetadata = this.injectedMetadata.start();
-      const fatalErrors = this.fatalErrors.start({ i18n });
-      const http = this.http.start({ fatalErrors });
-      const basePath = this.basePath.start({ injectedMetadata });
-      const uiSettings = this.uiSettings.start({
-        notifications,
-        http,
-        injectedMetadata,
-        basePath,
-      });
-      const chrome = this.chrome.start({
-        injectedMetadata,
-        notifications,
-      });
+      // Only provide the DOM element to notifications once it's attached to the page.
+      // This prevents notifications from timing out before being displayed.
+      this.notificationsTargetDomElement$.next(notificationsTargetDomElement);
 
-      this.legacyPlatform.start({
-        i18n,
-        injectedMetadata,
-        fatalErrors,
-        notifications,
-        http,
-        basePath,
-        uiSettings,
-        chrome,
-      });
+      this.legacyPlatform.setup(core);
 
       return { fatalErrors };
     } catch (error) {
@@ -144,6 +176,7 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+    this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
     this.uiSettings.stop();

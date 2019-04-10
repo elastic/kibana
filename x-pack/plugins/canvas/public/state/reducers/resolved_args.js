@@ -90,9 +90,15 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.clear]: (transientState, { payload }) => {
+    [actions.clearValue]: (transientState, { payload }) => {
       const { path } = payload;
       return del(transientState, getFullPath(path));
+    },
+
+    [actions.clearValues]: (transientState, { payload }) => {
+      return payload.reduce((transientState, path) => {
+        return del(transientState, getFullPath(path));
+      }, transientState);
     },
 
     [actions.inFlightActive]: transientState => {

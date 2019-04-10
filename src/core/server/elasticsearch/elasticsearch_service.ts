@@ -19,19 +19,22 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
-import { CoreContext, CoreService } from '../../types';
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
+/** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
   adminClient: ClusterClient;
   dataClient: ClusterClient;
 }
 
-export interface ElasticsearchServiceStart {
+/** @public */
+export interface ElasticsearchServiceSetup {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
@@ -43,7 +46,7 @@ export interface ElasticsearchServiceStart {
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<ElasticsearchServiceStart> {
+export class ElasticsearchService implements CoreService<ElasticsearchServiceSetup> {
   private readonly log: Logger;
   private subscription?: Subscription;
 
@@ -51,8 +54,8 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
     this.log = coreContext.logger.get('elasticsearch-service');
   }
 
-  public async start(): Promise<ElasticsearchServiceStart> {
-    this.log.debug('Starting elasticsearch service');
+  public async setup(): Promise<ElasticsearchServiceSetup> {
+    this.log.debug('Setting up elasticsearch service');
 
     const clients$ = this.coreContext.configService
       .atPath('elasticsearch', ElasticsearchConfig)

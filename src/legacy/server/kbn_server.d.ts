@@ -19,6 +19,10 @@
 
 import { Server } from 'hapi';
 
+import { ConfigService } from '../../core/server/';
+import { ElasticsearchServiceSetup } from '../../core/server/';
+import { HttpServiceSetup } from '../../core/server/';
+import { PluginsServiceSetup } from '../../core/server/';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -55,9 +59,22 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-
+type Unpromise<T> = T extends Promise<infer U> ? U : T;
+// eslint-disable-next-line import/no-default-export
 export default class KbnServer {
-  public readonly core: any;
+  public readonly newPlatform: {
+    setup: {
+      core: {
+        elasticsearch: ElasticsearchServiceSetup;
+      };
+      plugins: PluginsServiceSetup;
+    };
+    stop: null;
+    params: {
+      serverOptions: ElasticsearchServiceSetup;
+      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+    };
+  };
   public server: Server;
   public inject: Server['inject'];
 

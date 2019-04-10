@@ -7,7 +7,6 @@
 
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
-import { filterPropertiesForTooltip } from '../util';
 
 export class LeftInnerJoin {
 
@@ -68,7 +67,7 @@ export class LeftInnerJoin {
     return { ...featureCollection };
   }
 
-  getJoinSource() {
+  getRightJoinSource() {
     return this._rightSource;
   }
 
@@ -80,10 +79,8 @@ export class LeftInnerJoin {
     return this._descriptor;
   }
 
-  filterAndFormatPropertiesForTooltip(properties) {
-    const metricFields = this._rightSource.getMetricFields();
-    return filterPropertiesForTooltip(metricFields, properties);
-
+  async filterAndFormatPropertiesForTooltip(properties) {
+    return await this._rightSource.filterAndFormatPropertiesToHtml(properties);
   }
 
   getIndexPatternIds() {

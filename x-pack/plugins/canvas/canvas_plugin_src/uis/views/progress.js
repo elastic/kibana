@@ -15,6 +15,8 @@ export const progress = () => ({
   args: [
     {
       name: 'shape',
+      displayName: 'Shape',
+      help: 'Shape of the progress indicator',
       argType: 'select',
       options: {
         choices: Object.keys(shapes).map(key => ({
@@ -34,7 +36,7 @@ export const progress = () => ({
     {
       name: 'valueColor',
       displayName: 'Progress color',
-      help: 'Color of the progress bar',
+      help: 'Accepts HEX, RGB or HTML Color names',
       argType: 'color',
       default: `#1785b0`,
     },
@@ -48,7 +50,7 @@ export const progress = () => ({
     {
       name: 'barColor',
       displayName: 'Background color',
-      help: 'Color of the background bar',
+      help: 'Accepts HEX, RGB or HTML Color names',
       argType: 'color',
       default: `#f0f0f0`,
     },

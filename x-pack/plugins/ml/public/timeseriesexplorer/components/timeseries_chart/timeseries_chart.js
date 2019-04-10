@@ -1397,7 +1397,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Highlights the anomaly marker in the focus chart corresponding to the specified record.
 
     const {
-      focusChartData
+      focusChartData,
+      focusAggregationInterval
     } = this.props;
 
     const focusXScale = this.focusXScale;
@@ -1408,7 +1409,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Depending on the way the chart is aggregated, there may not be
     // a point at exactly the same time as the record being highlighted.
     const anomalyTime = record.source.timestamp;
-    const markerToSelect = findChartPointForAnomalyTime(focusChartData, anomalyTime);
+    const markerToSelect = findChartPointForAnomalyTime(focusChartData, anomalyTime, focusAggregationInterval);
 
     // Render an additional highlighted anomaly marker on the focus chart.
     // TODO - plot anomaly markers for cases where there is an anomaly due

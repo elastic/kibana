@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable kibana-custom/no-default-export */
+/* eslint-disable import/no-default-export */
 
 import { resolve } from 'path';
 
@@ -19,12 +19,12 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
+  InfraLogsPageProvider,
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
   RollupPageProvider,
   UptimePageProvider,
-
 } from './page_objects';
 
 import {
@@ -56,7 +56,7 @@ import {
   GrokDebuggerProvider,
   UserMenuProvider,
   UptimeProvider,
-
+  InfraSourceConfigurationFlyoutProvider,
 } from './services';
 
 // the default export of config files must be a config provider
@@ -89,7 +89,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/uptime')
+      resolve(__dirname, './apps/uptime'),
     ],
 
     // define the name and providers for services that should be
@@ -127,6 +127,7 @@ export default async function ({ readConfigFile }) {
       userMenu: UserMenuProvider,
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
+      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -143,11 +144,12 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      infraLogs: InfraLogsPageProvider,
       maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
-      rollup: RollupPageProvider
+      rollup: RollupPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -206,6 +208,10 @@ export default async function ({ readConfigFile }) {
       infraOps: {
         pathname: '/app/infra',
       },
+      infraLogs: {
+        pathname: '/app/infra',
+        hash: '/logs',
+      },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
@@ -215,8 +221,8 @@ export default async function ({ readConfigFile }) {
       },
       rollupJob: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/'
-      }
+        hash: '/management/elasticsearch/rollup_jobs/',
+      },
     },
 
     // choose where esArchiver should load archives from
@@ -233,5 +239,4 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack Functional Tests',
     },
   };
-
 }

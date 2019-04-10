@@ -23,5 +23,8 @@ export { createCreateRoute } from './create';
 export { createDeleteRoute } from './delete';
 export { createFindRoute } from './find';
 export { createGetRoute } from './get';
+export { createImportRoute } from './import';
+export { createLogLegacyImportRoute } from './log_legacy_import';
+export { createResolveImportErrorsRoute } from './resolve_import_errors';
 export { createUpdateRoute } from './update';
 export { createExportRoute } from './export';
