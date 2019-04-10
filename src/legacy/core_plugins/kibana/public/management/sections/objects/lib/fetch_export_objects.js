@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { saveToFile } from './';
+import { kfetch } from 'ui/kfetch';
 
-export async function retrieveAndExportDocs(objs, savedObjectsClient) {
-  const response = await savedObjectsClient.bulkGet(objs);
-  const objects = response.savedObjects.map(obj => {
-    return {
-      _id: obj.id,
-      _type: obj.type,
-      _source: obj.attributes,
-      _migrationVersion: obj.migrationVersion,
-      _references: obj.references,
-    };
+export async function fetchExportObjects(objects, includeReferencesDeep = false) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      objects,
+      includeReferencesDeep,
+    }),
   });
-
-  saveToFile(JSON.stringify(objects, null, 2));
 }

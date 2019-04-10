@@ -38,6 +38,7 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
             href={autoFollowPatternUrl}
             target="_blank"
             iconType="help"
+            data-test-subj="autoFollowPatternDocsButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel"
