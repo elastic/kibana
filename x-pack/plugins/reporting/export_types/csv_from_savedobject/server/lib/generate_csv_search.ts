@@ -7,7 +7,6 @@
 // @ts-ignore
 import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
-import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
@@ -18,19 +17,17 @@ import {
   SearchRequest,
   SearchSource,
   SearchSourceQuery,
-  TimeRangeParams,
 } from '../../';
 import {
   CsvResultFromSearch,
   ESQueryConfig,
   GenerateCsvParams,
-  QueryFilter,
   Filter,
   ReqPayload,
-  SearchSourceFilter,
   IndexPatternField,
 } from './';
 import { getDataSource } from './get_data_source';
+import { getFilters } from './get_filters';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([
@@ -46,41 +43,6 @@ const getUiSettings = async (config: any) => {
   const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
-};
-
-const getFilters = (
-  indexPatternTimeField: string,
-  timerange: TimeRangeParams,
-  savedSearchObjectAttr: SavedSearchObjectAttributes,
-  searchSourceFilter: SearchSourceFilter,
-  queryFilter: QueryFilter
-) => {
-  let includes: string[];
-  let timeFilter: any | null;
-  let timezone: string | null;
-
-  if (indexPatternTimeField) {
-    const savedSearchCols = savedSearchObjectAttr.columns || [];
-    includes = [indexPatternTimeField, ...savedSearchCols];
-    timeFilter = {
-      range: {
-        [indexPatternTimeField]: {
-          format: 'epoch_millis',
-          gte: moment(timerange.min).valueOf(),
-          lte: moment(timerange.max).valueOf(),
-        },
-      },
-    };
-    timezone = timerange.timezone;
-  } else {
-    includes = savedSearchObjectAttr.columns || [];
-    timeFilter = null;
-    timezone = null;
-  }
-
-  const combinedFilter: Filter[] = [timeFilter, searchSourceFilter, queryFilter].filter(Boolean); // builds an array of defined filters
-
-  return { combinedFilter, includes, timezone };
 };
 
 export async function generateCsvSearch(
@@ -147,8 +109,6 @@ export async function generateCsvSearch(
     combinedFilter,
     esQueryConfig,
   ];
-
-  console.log(JSON.stringify(buildCsvParams));
 
   const searchRequest: SearchRequest = {
     index: esIndex,
