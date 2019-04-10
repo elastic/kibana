@@ -61,7 +61,7 @@ export const percentileRanksMetricAgg = new MetricAggType({
     {
       name: 'values',
       editorComponent: PercentileRanksEditor,
-      default: [1, 5, 25]
+      default: []
     },
     {
       write(agg, output) {

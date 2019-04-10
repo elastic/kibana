@@ -17,44 +17,62 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import { isUndefined } from 'lodash';
+import React from 'react';
+import { get } from 'lodash';
 
-import { EuiFieldNumber, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { parseRange, Range } from '../../utils/range';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Range } from '../../utils/range';
 
 interface NumberRowProps {
-  model: { id: string, value: number };
   disableDelete: boolean;
   labelledbyId: string;
-  onChange(): void;
-  onDelete(): void;
+  model: { index: number, value: number };
+  range: Range;
+  onChange(index: number, value: number): void;
+  onDelete(index: number): void;
 }
 
-function NumberRow({ model: { id, value }, labelledbyId, onDelete, onChange }: NumberRowProps) {
+function NumberRow({
+    disableDelete,
+    model: { index, value },
+    labelledbyId,
+    range,
+    onDelete,
+    onChange,
+}: NumberRowProps) {
   
+  const deleteBtnAriaLabel = i18n.translate('common.ui.numberList.removeUnitButtonAriaLabel', {
+      defaultMessage:  'Remove this rank value'
+    });
+
+  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = get(event, 'target.value');
+
+    parse(value);
+    onChange(index, value);
+  };
 
   return (
     <EuiFlexGroup key={index} responsive={false} alignItems="center">
       <EuiFlexItem>
-        <EuiFieldNumber key={number.toString()}
+        <EuiFieldNumber
           aria-labelledby={labelledbyId}
-          onChange={onChangeValue}
-          value={number}
+          onChange={onValueChanged}
+          value={value}
           fullWidth={true}
-          min={numberRange.min}
-          max={numberRange.max}
+          min={range.min}
+          max={range.max}
         />
       </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content="Remove this rank value">
+          <EuiToolTip content={deleteBtnAriaLabel}>
             <EuiButtonIcon
-              aria-label="Remove this rank value"
+              aria-label={deleteBtnAriaLabel}
               color="danger"
               iconType="trash"
               onClick={() => onDelete(index)}
-              disabled={numberList.length === 1}
+              disabled={disableDelete}
             />
           </EuiToolTip>
         </EuiFlexItem>

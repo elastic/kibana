@@ -26,9 +26,6 @@ import { NumberList } from '../number_list/new_number_list';
 
 function PercentileRanksEditor({ agg, aggParam, value, setValidity, setValue }: AggParamEditorProps<number[]>) {
   const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
-  const onChange = (list) => {
-    setValue(list);
-  };
 
   useEffect(
     () => {
@@ -40,8 +37,13 @@ function PercentileRanksEditor({ agg, aggParam, value, setValidity, setValue }: 
 
   return (
     <EuiFormRow label={label} fullWidth={true} id={`visEditorPercentileRanksLabel${agg.id}`} className="visEditorSidebar__aggParamFormRow">
-      <NumberList onChange={onChange} fullWidth={true} list={value} unitName="value" labelledbyId={`visEditorPercentileRanksLabel${agg.id}`} range="[-Infinity,Infinity]"/>
-      
+      <NumberList
+        labelledbyId={`visEditorPercentileRanksLabel${agg.id}`}
+        list={value}
+        range="[-Infinity,Infinity]"
+        unitName="value"
+        onChange={setValue}
+      />
     </EuiFormRow>
   );
 }

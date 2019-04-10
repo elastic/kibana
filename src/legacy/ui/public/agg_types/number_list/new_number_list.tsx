@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { isUndefined } from 'lodash';
 
-import { EuiFieldNumber, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiButton, EuiFlexItem, } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseRange, Range } from '../../utils/range';
+import { NumberRow } from './number_row';
 
 interface NumberListProps {
   list: any[];
   unitName: string;
-  validateAscendingOrder: boolean;
+  validateAscendingOrder?: boolean;
   labelledbyId: string;
   range?: string
-  onchange(index: number, action: 1 | -1): void;
+  onChange(list: any[]): void;
 }
 
 const defaultRange = parseRange('[0,Infinity)');
 
 function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId, range, onChange }: NumberListProps) {
-  const [numberList, setNumberList] = useState(list);
   let numberRange: Range;
 
   try {
@@ -47,7 +47,31 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
 
   const validateAscOrder = isUndefined(validateAscendingOrder) ? true : validateAscendingOrder;
 
-  const onChangeValue = () => {};
+  function parse(value: string) {
+    const parsedValue = parseFloat(value);
+  
+    if (isNaN(parsedValue)) {
+  
+    }
+  
+    if (!range.within(parsedValue)) {
+        return INVALID
+    };
+  
+    if (validateAscOrder && index > 0) {
+      const i = index - 1;
+      const list = numberListCntr.getList();
+      const prev = list[i];
+      if (num <= prev) return INVALID;
+    }
+  
+      return num;
+  }
+  
+  const onChangeValue = (index: number, newValue: number) => {
+    list[index] = newValue;
+    onChange(list);
+  };
 
   /**
    * Add an item to the end of the list
@@ -55,15 +79,14 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
    * @return {undefined}
    */
   const onAdd = () => {
-    if (!numberList) return;
 
     function getNext() {
-      if (numberList.length === 0) {
+      if (list.length === 0) {
         // returning NaN adds an empty input
         return NaN;
       }
 
-      const next = _.last(numberList) + 1;
+      const next = _.last(list) + 1;
       if (next < numberRange.max) {
         return next;
       }
@@ -71,7 +94,7 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
       return numberRange.max - 1;
     }
 
-    onChange(getNext(), 1);
+    onChange([...list, '']);
   };
   
   /**
@@ -81,49 +104,35 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
    * @return {undefined}
    */
   const onDelete = (index: number) => {
-    if (!numberList) return;
-
-    //list.splice(index, 1);
-    setNumberList(numberList.filter((item, currentIndex) => index !== currentIndex))
-    //onChange(index, -1);
+    onChange(list.filter((item, currentIndex) => index !== currentIndex))
   };
 
-  const listItems = numberList.map((number, index) =>
-    <EuiFlexGroup key={index} responsive={false} alignItems="center">
-      <EuiFlexItem>
-        <EuiFieldNumber key={number.toString()}
-          aria-labelledby={labelledbyId}
-          onChange={onChangeValue}
-          value={number}
-          fullWidth={true}
-          min={numberRange.min}
-          max={numberRange.max}
-        />
-      </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content="Remove this rank value">
-            <EuiButtonIcon
-              aria-label="Remove this rank value"
-              color="danger"
-              iconType="trash"
-              onClick={() => onDelete(index)}
-              disabled={numberList.length === 1}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-    </EuiFlexGroup>
+  const listItems = list.map((number, index) =>
+    <div key={`numberRow${number}${index}`}>
+      <NumberRow
+        disableDelete={list.length === 1}
+        model={{ index, value: number }}
+        labelledbyId={labelledbyId}
+        range={numberRange}
+        onDelete={onDelete}
+        onChange={onChangeValue}
+      />
+      <EuiSpacer size="s" />
+    </div>
   );
 
   return (
-    <div>
-      {numberList.length ? listItems : (
-        <FormattedMessage
-          id="common.ui.numberList.noUnitSelectedDescription"
-          defaultMessage="Please specify at least one {unitName}"
-          values={{ unitName }}
-        />
+    <>
+      {list.length ? listItems : (
+        <EuiText textAlign="center" size="s" >
+          <FormattedMessage
+            id="common.ui.numberList.noUnitSelectedDescription"
+            defaultMessage="Please specify at least one {unitName}"
+            values={{ unitName }}
+          />
+        </EuiText>
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButton
           iconType="plusInCircle"
@@ -139,8 +148,7 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
           />
         </EuiButton>
       </EuiFlexItem>
-    </div>
-    
+    </>
   );
 }
 
