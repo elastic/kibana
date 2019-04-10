@@ -173,8 +173,8 @@ function migrateGaugeVerticalSplitToAlignment(doc)  {
       const visState = JSON.parse(visStateJSON);
       if (visState && visState.type === 'gauge') {
 
-        visState.gauge.alignment = visState.gauge.verticalSplit ? 'vertical' : 'horizontal';
-        delete visState.gauge.verticalSplit;
+        visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
+        delete visState.params.gauge.verticalSplit;
         return {
           ...doc,
           attributes: {
