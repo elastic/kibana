@@ -202,6 +202,7 @@ TableSeries.propTypes = {
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
 
 export default injectI18n(TableSeries);

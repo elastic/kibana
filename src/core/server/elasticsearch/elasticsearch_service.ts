@@ -26,6 +26,7 @@ import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
+/** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
   adminClient: ClusterClient;

@@ -7,6 +7,7 @@
 |  Class | Description |
 |  --- | --- |
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
+|  [ConfigService](./kibana-plugin-server.configservice.md) |  |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) |  |
 |  [Router](./kibana-plugin-server.router.md) |  |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |

@@ -21,6 +21,7 @@ import { Authenticate, HttpServiceSetup, KibanaRequest, OnRequest, Router } from
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { ConfigService } from './config';
 export {
   CallAPIOptions,
   ClusterClient,
