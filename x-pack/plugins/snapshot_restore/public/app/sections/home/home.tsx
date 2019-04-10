@@ -100,7 +100,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
 
         <Switch>
           <Route exact path={`${BASE_PATH}/repositories/:name*`} component={RepositoryList} />
-          <Route exact path={`${BASE_PATH}/snapshots/:name*`} component={SnapshotList} />
+          <Route
+            exact
+            path={`${BASE_PATH}/snapshots/:repositoryName?/:snapshotId*`}
+            component={SnapshotList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

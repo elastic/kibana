@@ -8,15 +8,15 @@ import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { Snapshot } from '../../../../../../common/types';
+import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 
 const DATE_FORMAT = 'MMMM Do, YYYY h:mm:ss A';
 
 interface Props extends RouteComponentProps {
-  snapshots: Snapshot[];
+  snapshots: SnapshotDetails[];
   reload: () => Promise<void>;
-  openSnapshotDetails: (id: string) => void;
+  openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
 }
 
 const SnapshotTableUi: React.FunctionComponent<Props> = ({
@@ -33,70 +33,84 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
 
   const columns = [
     {
-      field: 'id',
-      name: translate('xpack.snapshotRestore.snapshotList.table.idColumnTitle', {
-        defaultMessage: 'ID',
+      field: 'repository',
+      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
+        defaultMessage: 'Repository',
       }),
       truncateText: true,
       sortable: true,
-      render: (id: string, snapshot: Snapshot) => (
-        <EuiLink onClick={() => openSnapshotDetails(id)}>{id}</EuiLink>
+      // We deliberately don't link to the repository from here because the API request for populating
+      // this table takes so long, and navigating away by accident is a really poor UX.
+      render: (repository: string) => repository,
+    },
+    {
+      field: 'snapshot',
+      name: translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
+        defaultMessage: 'Snapshot',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (snapshotId: string, snapshot: SnapshotDetails) => (
+        <EuiLink onClick={() => openSnapshotDetails(snapshot.repository, snapshotId)}>
+          {snapshotId}
+        </EuiLink>
       ),
     },
     {
-      field: 'summary.startEpoch',
+      field: 'startTimeInMillis',
       name: translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
       truncateText: true,
       sortable: true,
-      render: (startEpoch: string) => moment.unix(Number(startEpoch)).format(DATE_FORMAT),
+      render: (startTimeInMillis: number) =>
+        moment.unix(Number(startTimeInMillis)).format(DATE_FORMAT),
     },
     {
-      field: 'summary.duration',
+      field: 'durationInMillis',
       name: translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
         defaultMessage: 'Duration',
       }),
       truncateText: true,
       sortable: true,
-      width: '120px',
-      render: (duration: string) => duration,
+      width: '100px',
+      render: (durationInMillis: number) => Math.round(durationInMillis / 1000),
     },
     {
-      field: 'summary.indices',
+      field: 'indices',
       name: translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
         defaultMessage: 'Indices',
       }),
       truncateText: true,
       sortable: true,
-      width: '120px',
-      render: (indices: string) => indices,
+      width: '100px',
+      render: (indices: string[]) => indices.length,
     },
     {
-      field: 'summary.totalShards',
+      field: 'shards.total',
       name: translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
         defaultMessage: 'Shards',
       }),
       truncateText: true,
       sortable: true,
-      width: '120px',
-      render: (totalShards: string) => totalShards,
+      width: '100px',
+      render: (totalShards: number) => totalShards,
     },
     {
-      field: 'summary.failedShards',
+      field: 'shards.failed',
       name: translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
         defaultMessage: 'Failed shards',
       }),
       truncateText: true,
       sortable: true,
-      width: '120px',
-      render: (failedShards: string) => failedShards,
+      width: '100px',
+      render: (failedShards: number) => failedShards,
     },
   ];
 
   const sorting = {
     sort: {
-      field: 'id',
+      field: 'repository',
       direction: 'asc',
     },
   };

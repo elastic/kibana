@@ -14,9 +14,13 @@ export const loadSnapshots = () => {
   });
 };
 
-export const loadSnapshot = (id: string) => {
+export const loadSnapshot = (repositoryName: string, snapshotId: string) => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}snapshots/${encodeURIComponent(id)}`),
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
+        snapshotId
+      )}`
+    ),
     method: 'get',
   });
 };

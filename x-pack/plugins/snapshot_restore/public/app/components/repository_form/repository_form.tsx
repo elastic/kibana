@@ -61,15 +61,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     error: repositoryTypesError,
     loading: repositoryTypesLoading,
     data: repositoryTypes,
-    setIsMounted,
   } = loadRepositoryTypes();
-
-  // Set mounted to false when unmounting to avoid in-flight request setting state on unmounted component
-  useEffect(() => {
-    return () => {
-      setIsMounted(false);
-    };
-  }, []);
 
   // Repository state
   const [repository, setRepository] = useState<Repository>({

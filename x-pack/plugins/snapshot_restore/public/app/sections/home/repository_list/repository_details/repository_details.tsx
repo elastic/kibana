@@ -6,22 +6,6 @@
 import React, { Fragment } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { useAppDependencies } from '../../../../index';
-import { documentationLinksService } from '../../../../services/documentation';
-import { loadRepository } from '../../../../services/http';
-import { textService } from '../../../../services/text';
-
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository } from '../../../../../../common/types';
-import {
-  RepositoryDeleteProvider,
-  RepositoryVerificationBadge,
-  SectionError,
-  SectionLoading,
-} from '../../../../components';
-import { BASE_PATH } from '../../../../constants';
-import { TypeDetails } from './type_details';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -38,6 +22,22 @@ import {
 } from '@elastic/eui';
 
 import 'brace/theme/textmate';
+
+import { useAppDependencies } from '../../../../index';
+import { documentationLinksService } from '../../../../services/documentation';
+import { loadRepository } from '../../../../services/http';
+import { textService } from '../../../../services/text';
+
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { Repository } from '../../../../../../common/types';
+import {
+  RepositoryDeleteProvider,
+  RepositoryVerificationBadge,
+  SectionError,
+  SectionLoading,
+} from '../../../../components';
+import { BASE_PATH } from '../../../../constants';
+import { TypeDetails } from './type_details';
 
 interface Props extends RouteComponentProps {
   repositoryName: Repository['name'];

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { SectionError, SectionLoading } from '../../../components';
@@ -19,13 +19,15 @@ import { SnapshotTable } from './snapshot_table';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface MatchParams {
+  repositoryName?: string;
   snapshotId?: string;
 }
+
 interface Props extends RouteComponentProps<MatchParams> {}
 
 export const SnapshotList: React.FunctionComponent<Props> = ({
   match: {
-    params: { snapshotId },
+    params: { repositoryName: pathRepositoryName, snapshotId: pathSnapshotId },
   },
   history,
 }) => {
@@ -42,27 +44,18 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
     request: reload,
   } = loadSnapshots();
 
-  const [currentSnapshot, setCurrentSnapshot] = useState<string | undefined>(undefined);
-
-  const openSnapshotDetails = (id: string) => {
-    setCurrentSnapshot(id);
-    history.push(`${BASE_PATH}/snapshots/${id}`);
+  const openSnapshotDetails = (repositoryName: string, snapshotId: string) => {
+    history.push(`${BASE_PATH}/snapshots/${repositoryName}/${snapshotId}`);
   };
 
   const closeSnapshotDetails = () => {
-    setCurrentSnapshot(undefined);
     history.push(`${BASE_PATH}/snapshots`);
   };
 
-  useEffect(
-    () => {
-      setCurrentSnapshot(snapshotId);
-    },
-    [snapshotId]
-  );
+  let content;
 
   if (loading) {
-    return (
+    content = (
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotList.loadingSnapshots"
@@ -70,10 +63,8 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
         />
       </SectionLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <SectionError
         title={
           <FormattedMessage
@@ -84,10 +75,8 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
         error={error}
       />
     );
-  }
-
-  if (snapshots && snapshots.length === 0) {
-    return (
+  } else if (snapshots && snapshots.length === 0) {
+    content = (
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -124,18 +113,26 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
         }
       />
     );
-  }
-
-  return (
-    <Fragment>
-      {currentSnapshot ? (
-        <SnapshotDetails snapshotId={currentSnapshot} onClose={closeSnapshotDetails} />
-      ) : null}
+  } else {
+    content = (
       <SnapshotTable
         snapshots={snapshots || []}
         reload={reload}
         openSnapshotDetails={openSnapshotDetails}
       />
+    );
+  }
+
+  return (
+    <Fragment>
+      {pathRepositoryName && pathSnapshotId ? (
+        <SnapshotDetails
+          repositoryName={pathRepositoryName}
+          snapshotId={pathSnapshotId}
+          onClose={closeSnapshotDetails}
+        />
+      ) : null}
+      {content}
     </Fragment>
   );
 };

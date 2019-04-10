@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, { createContext, useContext, useReducer } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';

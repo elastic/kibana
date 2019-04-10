@@ -72,13 +72,21 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
 
   useEffect(
     () => {
+      function cleanup() {
+        isMounted.current = false;
+      }
+
       request();
+
       if (interval) {
         const intervalRequest = setInterval(request, interval);
         return () => {
+          cleanup();
           clearInterval(intervalRequest);
         };
       }
+
+      return cleanup;
     },
     [path]
   );
@@ -88,8 +96,5 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
     loading,
     data,
     request,
-    setIsMounted: (status: boolean) => {
-      isMounted.current = status;
-    },
   };
 };

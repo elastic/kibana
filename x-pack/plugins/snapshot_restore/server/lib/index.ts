@@ -5,4 +5,4 @@
  */
 
 export { booleanizeSettings } from './booleanize_settings';
-export { deserializeSnapshotSummary, deserializeSnapshotDetails } from './snapshot_serialization';
+export { deserializeSnapshotDetails } from './snapshot_serialization';
