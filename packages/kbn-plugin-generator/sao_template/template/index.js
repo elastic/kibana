@@ -4,7 +4,7 @@ import { existsSync } from 'fs';
 
 <% } -%>
 
-<% if (generateFeatureRegistration) { -%>
+<% if (generateApp) { -%>
 import { i18n } from '@kbn/i18n';
 <% } -%>
 
@@ -39,10 +39,10 @@ export default function (kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-    <%_ if (generateApi || generateFeatureRegistration) { -%>
+    <%_ if (generateApi || generateApp) { -%>
 
     init(server, options) { // eslint-disable-line no-unused-vars
-      <%_ if (generateFeatureRegistration) { -%>
+      <%_ if (generateApp) { -%>
         const xpackMainPlugin = server.plugins.xpack_main;
         if (xpackMainPlugin) {
           const featureId = '<%= snakeCase(name) %>';
@@ -54,12 +54,7 @@ export default function (kibana) {
             }),
             navLinkId: featureId,
             icon: 'discoverApp',
-            <%_ if (generateApp) { -%>
             app: [featureId, 'kibana'],
-            <%_ } -%>
-            <%_ if (!generateApp) { -%>
-            app: ['kibana'],
-            <%_ } -%>
             catalogue: [],
             privileges: {
               all: {
@@ -82,6 +77,7 @@ export default function (kibana) {
           });
         }
       <%_ } -%>
+
       <%_ if (generateApi) { -%>
       // Add server routes and initialize the plugin here
       exampleRoute(server);

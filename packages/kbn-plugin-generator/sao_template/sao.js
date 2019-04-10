@@ -68,11 +68,6 @@ module.exports = function({ name }) {
         when: answers => answers.generateApp,
         default: true,
       },
-      generateFeatureRegistration: {
-        type: 'confirm',
-        message: 'Should a feature be registered for Spaces/Security?',
-        default: true,
-      },
     },
     filters: {
       'public/**/*': 'generateApp',
