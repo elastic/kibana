@@ -49,6 +49,21 @@ export const buildGeneralQuery = ({
             field: 'system.audit.package.entity_id',
           },
         },
+        sockets: {
+          cardinality: {
+            field: 'socket.entity_id',
+          },
+        },
+        unique_source_ips: {
+          cardinality: {
+            field: 'source.ip',
+          },
+        },
+        unique_destination_ips: {
+          cardinality: {
+            field: 'destination.ip',
+          },
+        },
       },
       query: {
         bool: {

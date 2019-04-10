@@ -52,3 +52,18 @@ export const WINLOGBEAT_EVENTS = i18n.translate(
 export const FILEBEAT_EVENTS = i18n.translate('xpack.siem.kpiHosts.source.filebeatEventsTitle', {
   defaultMessage: 'Filebeat Events',
 });
+
+export const SOCKETS = i18n.translate('xpack.siem.kpiHosts.source.socketsTitle', {
+  defaultMessage: 'Sockets',
+});
+
+export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueSourceIpsTitle', {
+  defaultMessage: 'Unique Source Ips',
+});
+
+export const UNIQUE_DESTINATION_IPS = i18n.translate(
+  'xpack.siem.kpiHosts.source.uniqueDestinationIpsTitle',
+  {
+    defaultMessage: 'Unique Destination Ips',
+  }
+);

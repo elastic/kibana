@@ -20,6 +20,9 @@ export const kpiHostsQuery = gql`
         auditdEvents
         winlogbeatEvents
         filebeatEvents
+        sockets
+        uniqueSourceIps
+        uniqueDestinationIps
       }
     }
   }

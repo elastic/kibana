@@ -902,6 +902,12 @@ export interface KpiHostsData {
   winlogbeatEvents?: number | null;
 
   filebeatEvents?: number | null;
+
+  sockets?: number | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueDestinationIps?: number | null;
 }
 
 export interface NetworkTopNFlowData {

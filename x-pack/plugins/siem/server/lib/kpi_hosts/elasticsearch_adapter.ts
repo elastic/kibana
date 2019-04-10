@@ -61,7 +61,6 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       }
     );
 
-    console.log(JSON.stringify(getOr(null, 'responses.3', response)));
     return {
       hosts: getOr(null, 'responses.0.aggregations.host.value', response),
       installedPackages: getOr(null, 'responses.0.aggregations.installedPackages.value', response),
@@ -80,6 +79,13 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       auditdEvents: getOr(null, 'responses.4.hits.total.value', response),
       winlogbeatEvents: getOr(null, 'responses.5.hits.total.value', response),
       filebeatEvents: getOr(null, 'responses.6.hits.total.value', response),
+      sockets: getOr(null, 'responses.0.aggregations.sockets.value', response),
+      uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
+      uniqueDestinationIps: getOr(
+        null,
+        'responses.0.aggregations.unique_destination_ips.value',
+        response
+      ),
     };
   }
 }

@@ -101,6 +101,33 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
       },
     ],
   },
+  {
+    fields: [
+      {
+        key: 'sockets',
+        description: i18n.SOCKETS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'uniqueSourceIps',
+        description: i18n.UNIQUE_SOURCE_IPS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'uniqueDestinationIps',
+        description: i18n.UNIQUE_DESTINATION_IPS,
+        value: null,
+      },
+    ],
+  },
 ];
 
 export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {

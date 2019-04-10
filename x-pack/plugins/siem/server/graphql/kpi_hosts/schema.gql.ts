@@ -17,6 +17,9 @@ export const kpiHostsSchema = gql`
     auditdEvents: Float
     winlogbeatEvents: Float
     filebeatEvents: Float
+    sockets: Float
+    uniqueSourceIps: Float
+    uniqueDestinationIps: Float
   }
 
   extend type Source {
