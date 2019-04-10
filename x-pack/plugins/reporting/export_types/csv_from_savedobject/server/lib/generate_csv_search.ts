@@ -79,6 +79,7 @@ export async function generateCsvSearch(
   } = req.payload as ReqPayload;
 
   const { includes, timezone, combinedFilter } = getFilters(
+    indexPatternSavedObjectId,
     indexPatternTimeField,
     timerange,
     savedSearchObjectAttr,

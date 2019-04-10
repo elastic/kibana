@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { badRequest } from 'boom';
 import moment from 'moment';
 
-import {
-  SavedSearchObjectAttributes,
-  TimeRangeParams,
-} from '../../';
-import {
-  QueryFilter,
-  Filter,
-  SearchSourceFilter,
-} from './';
+import { SavedSearchObjectAttributes, TimeRangeParams } from '../../';
+import { QueryFilter, Filter, SearchSourceFilter } from './';
 
-export function getFilters (
+export function getFilters(
+  indexPatternId: string,
   indexPatternTimeField: string,
   timerange: TimeRangeParams,
   savedSearchObjectAttr: SavedSearchObjectAttributes,
@@ -28,6 +23,12 @@ export function getFilters (
   let timezone: string | null;
 
   if (indexPatternTimeField) {
+    if (!timerange) {
+      throw badRequest(
+        `Time range params are required for index pattern [${indexPatternId}], using time field [${indexPatternTimeField}]`
+      );
+    }
+
     const savedSearchCols = savedSearchObjectAttr.columns || [];
     includes = [indexPatternTimeField, ...savedSearchCols];
     timeFilter = {
