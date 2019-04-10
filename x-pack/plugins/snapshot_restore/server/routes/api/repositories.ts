@@ -40,14 +40,14 @@ export const getAllHandler: RouterRouteHandler = async (
       ...booleanizeSettings(repositoriesByName[name]),
     };
   });
-  const repositoryVerification = await Promise.all([
-    ...repositoryNames.map(name => {
+  const repositoryVerification = await Promise.all(
+    repositoryNames.map(name => {
       return callWithRequest('snapshot.verifyRepository', { repository: name }).catch(e => ({
         valid: false,
         error: e.response ? JSON.parse(e.response) : e,
       }));
-    }),
-  ]);
+    })
+  );
   return {
     repositories,
     verification: repositoryNames.reduce(
@@ -164,23 +164,23 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
 export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { names } = req.params;
   const repositoryNames = names.split(',');
-  const response: { success: string[]; error: any[] } = {
-    success: [],
-    error: [],
+  const response: { itemsDeleted: string[]; errors: any[] } = {
+    itemsDeleted: [],
+    errors: [],
   };
 
-  await Promise.all([
-    ...repositoryNames.map(name => {
+  await Promise.all(
+    repositoryNames.map(name => {
       return callWithRequest('snapshot.deleteRepository', { repository: name })
-        .then(() => response.success.push(name))
+        .then(() => response.itemsDeleted.push(name))
         .catch(e =>
-          response.error.push({
+          response.errors.push({
             name,
             error: wrapEsError(e),
           })
         );
-    }),
-  ]);
+    })
+  );
 
   return response;
 };

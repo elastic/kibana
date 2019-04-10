@@ -277,7 +277,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .fn()
         .mockResolvedValueOnce(mockEsResponse)
         .mockResolvedValueOnce(mockEsResponse);
-      const expectedResponse = { success: names, error: [] };
+      const expectedResponse = { itemsDeleted: names, errors: [] };
       await expect(
         deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
       ).resolves.toEqual(expectedResponse);
@@ -292,8 +292,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockRejectedValueOnce(mockEsError)
         .mockRejectedValueOnce(mockEsError);
       const expectedResponse = {
-        success: [],
-        error: names.map(name => ({
+        itemsDeleted: [],
+        errors: names.map(name => ({
           name,
           error: mockEsError,
         })),
@@ -313,8 +313,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockRejectedValueOnce(mockEsError)
         .mockResolvedValueOnce(mockEsResponse);
       const expectedResponse = {
-        success: [names[1]],
-        error: [
+        itemsDeleted: [names[1]],
+        errors: [
           {
             name: names[0],
             error: mockEsError,

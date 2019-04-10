@@ -15,7 +15,10 @@ interface Props {
   children: (deleteRepository: DeleteRepository) => React.ReactElement;
 }
 
-type DeleteRepository = (names: Array<Repository['name']>) => void;
+export type DeleteRepository = (
+  names: Array<Repository['name']>,
+  onSuccess?: OnSuccessCallback
+) => void;
 
 type OnSuccessCallback = (repositoriesDeleted: Array<Repository['name']>) => void;
 
@@ -31,17 +34,13 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 
-  const confirmDeleteRepository: DeleteRepository = (
-    names: Array<Repository['name']>,
-    onSuccess?: OnSuccessCallback
-  ): void => {
+  const deleteRepositoryPrompt: DeleteRepository = (names, onSuccess = () => undefined) => {
+    if (!names || !names.length) {
+      throw new Error('No repository names specified for deletion');
+    }
     setIsModalOpen(true);
     setRepositoryNames(names);
-    if (typeof onSuccess === 'function') {
-      onSuccessCallback.current = onSuccess;
-    } else {
-      onSuccessCallback.current = null;
-    }
+    onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
@@ -51,50 +50,50 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
 
   const deleteRepository = () => {
     const repositoriesToDelete = [...repositoryNames];
-    deleteRepositories(repositoriesToDelete).then(({ data, error }) => {
+    deleteRepositories(repositoriesToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
       // Surface success notifications
-      if (data.success && data.success.length) {
-        const hasMultipleSuccesses = data.success.length > 1;
+      if (itemsDeleted && itemsDeleted.length) {
+        const hasMultipleSuccesses = itemsDeleted.length > 1;
         const successMessage = hasMultipleSuccesses
           ? i18n.translate(
               'xpack.snapshotRestore.deleteRepository.successMultipleNotificationTitle',
               {
                 defaultMessage: 'Removed {count} repositories',
-                values: { count: data.success.length },
+                values: { count: itemsDeleted.length },
               }
             )
           : i18n.translate(
               'xpack.snapshotRestore.deleteRepository.successSingleNotificationTitle',
               {
                 defaultMessage: "Removed repository '{name}'",
-                values: { name: data.success[0] },
+                values: { name: itemsDeleted[0] },
               }
             );
         toastNotifications.addSuccess(successMessage);
         if (onSuccessCallback.current) {
-          onSuccessCallback.current([...data.success]);
+          onSuccessCallback.current([...itemsDeleted]);
         }
       }
 
       // Surface error notifications
       // `error` is generic server error
-      // `data.error` are specific errors with removing particular repository(ies)
-      if (error || (data.error && data.error.length)) {
+      // `data.errors` are specific errors with removing particular repository(ies)
+      if (error || (errors && errors.length)) {
         const hasMultipleErrors =
-          (data.error && data.error.length > 1) || (error && repositoriesToDelete.length > 1);
+          (errors && errors.length > 1) || (error && repositoriesToDelete.length > 1);
         const errorMessage = hasMultipleErrors
           ? i18n.translate(
               'xpack.snapshotRestore.deleteRepository.errorMultipleNotificationTitle',
               {
                 defaultMessage: 'Error removing {count} repositories',
                 values: {
-                  count: (data.errors && data.errors.length) || repositoriesToDelete.length,
+                  count: (errors && errors.length) || repositoriesToDelete.length,
                 },
               }
             )
           : i18n.translate('xpack.snapshotRestore.deleteRepository.errorSingleNotificationTitle', {
               defaultMessage: "Error removing repository '{name}'",
-              values: { name: (data.errors && data.errors[0].name) || repositoriesToDelete[0] },
+              values: { name: (errors && errors[0].name) || repositoriesToDelete[0] },
             });
         toastNotifications.addDanger(errorMessage);
       }
@@ -103,7 +102,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
   };
 
   const renderModal = () => {
-    if (!isModalOpen || !repositoryNames || !repositoryNames.length) {
+    if (!isModalOpen) {
       return null;
     }
 
@@ -173,7 +172,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
 
   return (
     <Fragment>
-      {children(confirmDeleteRepository)}
+      {children(deleteRepositoryPrompt)}
       {renderModal()}
     </Fragment>
   );

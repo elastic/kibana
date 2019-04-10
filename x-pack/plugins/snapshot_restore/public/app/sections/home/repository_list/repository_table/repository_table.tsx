@@ -26,7 +26,7 @@ interface Props extends RouteComponentProps {
   verification: { [key: string]: RepositoryVerification };
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
-  onRepositoryDelete: (repositoriesDeleted: Array<Repository['name']>) => void;
+  onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
@@ -34,7 +34,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
   verification,
   reload,
   openRepositoryDetails,
-  onRepositoryDelete,
+  onRepositoryDeleted,
   history,
 }) => {
   const {
@@ -107,12 +107,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           render: ({ name }: Repository) => {
             return (
               <RepositoryDeleteProvider>
-                {(
-                  confirmDeleteRepository: (
-                    names: Array<Repository['name']>,
-                    onSuccess?: (repositoriesDeleted: Array<Repository['name']>) => void
-                  ) => void
-                ) => {
+                {deleteRepositoryPrompt => {
                   return (
                     <EuiButtonIcon
                       aria-label={i18n.translate(
@@ -124,7 +119,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                       iconType="trash"
                       color="danger"
                       data-test-subj="srRepositoryListDeleteActionButton"
-                      onClick={() => confirmDeleteRepository([name], onRepositoryDelete)}
+                      onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
                     />
                   );
                 }}
@@ -157,7 +152,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     toolsLeft: selectedItems.length ? (
       <RepositoryDeleteProvider>
         {(
-          confirmDeleteRepository: (
+          deleteRepositoryPrompt: (
             names: Array<Repository['name']>,
             onSuccess?: (repositoriesDeleted: Array<Repository['name']>) => void
           ) => void
@@ -165,9 +160,9 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           return (
             <EuiButton
               onClick={() =>
-                confirmDeleteRepository(
+                deleteRepositoryPrompt(
                   selectedItems.map(repository => repository.name),
-                  onRepositoryDelete
+                  onRepositoryDeleted
                 )
               }
               color="danger"

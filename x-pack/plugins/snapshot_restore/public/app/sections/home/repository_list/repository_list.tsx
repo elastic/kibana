@@ -125,7 +125,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     );
   }
 
-  const onRepositoryDelete = (repositoriesDeleted: Array<Repository['name']>): void => {
+  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
     if (currentRepository && repositoriesDeleted.includes(currentRepository)) {
       closeRepositoryDetails();
     }
@@ -140,7 +140,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         <RepositoryDetails
           repositoryName={currentRepository}
           onClose={closeRepositoryDetails}
-          onRepositoryDelete={onRepositoryDelete}
+          onRepositoryDeleted={onRepositoryDeleted}
         />
       ) : null}
       <RepositoryTable
@@ -148,7 +148,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         verification={verification || {}}
         reload={reload}
         openRepositoryDetails={openRepositoryDetails}
-        onRepositoryDelete={onRepositoryDelete}
+        onRepositoryDeleted={onRepositoryDeleted}
       />
     </Fragment>
   );

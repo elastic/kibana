@@ -44,7 +44,7 @@ class TextService {
       [REPOSITORY_TYPES.source]: i18n.translate(
         'xpack.snapshotRestore.repositoryType.sourceTypeName',
         {
-          defaultMessage: 'Source',
+          defaultMessage: 'Source Only',
         }
       ),
     };
@@ -70,7 +70,7 @@ class TextService {
       return this.i18n.translate(
         'xpack.snapshotRestore.repositoryType.sourceTypeWithDelegateName',
         {
-          defaultMessage: 'Source ({delegateType})',
+          defaultMessage: 'Source Only ({delegateType})',
           values: {
             delegateType: getTypeName(delegateType),
           },
