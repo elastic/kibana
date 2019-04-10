@@ -38,6 +38,10 @@ export function timefilterControl(): NullContextFunction<
         default: true,
         options: [true, false],
       },
+      filterGroup: {
+        type: ['string', 'null'],
+        help: 'Group name for the filter',
+      },
     },
     fn: (_context, args) => {
       return {

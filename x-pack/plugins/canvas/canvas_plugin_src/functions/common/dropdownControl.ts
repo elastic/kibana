@@ -43,8 +43,12 @@ export function dropdownControl(): ContextFunction<
         types: ['string'],
         help: argHelp.valueColumn,
       },
+      filterGroup: {
+        type: ['string', 'null'],
+        help: 'Group name for the filter',
+      },
     },
-    fn: (context, { valueColumn, filterColumn }) => {
+    fn: (context, { valueColumn, filterColumn, filterGroup }) => {
       let choices = [];
 
       if (context.rows[0][valueColumn]) {
@@ -59,6 +63,7 @@ export function dropdownControl(): ContextFunction<
         value: {
           column,
           choices,
+          filterGroup,
         },
       };
     },

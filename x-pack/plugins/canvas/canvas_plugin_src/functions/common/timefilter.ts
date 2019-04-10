@@ -42,6 +42,11 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         aliases: ['t', 'end'],
         help: argHelp.to,
       },
+      filterGroup: {
+        type: ['string', 'null'],
+        aliases: ['group', 'g'],
+        help: 'Group name for the filter',
+      },
     },
     fn: (context, args) => {
       if (!args.from && !args.to) {

@@ -33,6 +33,11 @@ export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter>
         aliases: ['v', 'val'],
         help: argHelp.value,
       },
+      filterGroup: {
+        type: ['string', 'null'],
+        aliases: ['group', 'g'],
+        help: 'Group name for the filter',
+      },
     },
     fn: (context, args) => {
       const { value, column } = args;
