@@ -6,7 +6,13 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { CSV_RESULT_SCRIPTED, CSV_RESULT_TIMEBASED, CSV_RESULT_TIMELESS } from './fixtures';
+import {
+  CSV_RESULT_SCRIPTED,
+  CSV_RESULT_SCRIPTED_REQUERY,
+  CSV_RESULT_SCRIPTED_RESORTED,
+  CSV_RESULT_TIMEBASED,
+  CSV_RESULT_TIMELESS,
+} from './fixtures';
 
 interface GenerateOpts {
   timerange?: {
@@ -62,7 +68,6 @@ export default function({ getService }: { getService: any }) {
       // load test data that contains a saved search and documents
       await esArchiver.load('reporting/sales');
 
-      // TODO: check headers for inline filename
       const {
         status: resStatus,
         text: resText,
@@ -100,6 +105,81 @@ export default function({ getService }: { getService: any }) {
       expect(resText).to.eql(CSV_RESULT_SCRIPTED);
 
       await esArchiver.unload('reporting/scripted');
+    });
+
+    describe('With state overrides', () => {
+      it('for query', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/scripted');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          {
+            timerange: {
+              timezone: 'UTC',
+              min: '1979-01-01T10:00:00Z',
+              max: '1981-01-01T10:00:00Z',
+            },
+            state: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [{ query_string: { fields: ['name'], query: 'Fe*' } }],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(CSV_RESULT_SCRIPTED_REQUERY);
+
+        await esArchiver.unload('reporting/scripted');
+      });
+
+      it('for sort', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/scripted');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          {
+            timerange: {
+              timezone: 'UTC',
+              min: '1979-01-01T10:00:00Z',
+              max: '1981-01-01T10:00:00Z',
+            },
+            state: { sort: [{ name: { order: 'asc', unmapped_type: 'boolean' } }] },
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(CSV_RESULT_SCRIPTED_RESORTED);
+
+        await esArchiver.unload('reporting/scripted');
+      });
     });
 
     it('Return a 404', async () => {
