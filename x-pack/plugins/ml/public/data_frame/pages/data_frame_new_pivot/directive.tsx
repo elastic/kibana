@@ -16,6 +16,7 @@ import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
 
+import { IndexPatternContext } from '../../common';
 import { Page } from './page';
 
 module.directive('mlNewDataFrame', ($route: any, Private: any) => {
@@ -26,11 +27,13 @@ module.directive('mlNewDataFrame', ($route: any, Private: any) => {
       const createSearchItems = Private(SearchItemsProvider);
       const { indexPattern } = createSearchItems();
 
-      const props = {
-        indexPattern,
-      };
-
-      ReactDOM.render(<I18nContext>{React.createElement(Page, props)}</I18nContext>, element[0]);
+      ReactDOM.render(
+        <I18nContext>
+          <IndexPatternContext.Provider value={indexPattern}>
+            {React.createElement(Page)}
+          </IndexPatternContext.Provider>
+        </I18nContext>,
+      element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
-
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { SFC, useContext } from 'react';
 
 import {
   EuiComboBoxOptionProps,
@@ -25,6 +23,7 @@ import { Dictionary } from '../../../../common/types/common';
 import {
   DropDownLabel,
   DropDownOption,
+  IndexPatternContext,
   Label,
   OptionsDataElement,
   pivotSupportedAggs,
@@ -35,13 +34,18 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 interface Props {
-  indexPattern: StaticIndexPattern;
   search: string;
   groupBy: Label[];
   aggList: Label[];
 }
 
-export const DefinePivotSummary: SFC<Props> = ({ indexPattern, search, groupBy, aggList }) => {
+export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => {
+  const indexPattern = useContext(IndexPatternContext);
+
+  if (indexPattern === null) {
+    return null;
+  }
+
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
@@ -110,7 +114,6 @@ export const DefinePivotSummary: SFC<Props> = ({ indexPattern, search, groupBy, 
           <PivotPreview
             aggs={pivotAggs}
             groupBy={pivotGroupBy}
-            indexPattern={indexPattern}
             query={pivotQuery.query}
           />
         </EuiText>

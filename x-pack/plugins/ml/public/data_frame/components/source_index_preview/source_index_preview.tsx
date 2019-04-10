@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   EuiButtonEmpty,
@@ -28,7 +27,7 @@ import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { SimpleQuery } from '../../common';
+import { IndexPatternContext, SimpleQuery } from '../../common';
 
 import {
   EsDoc,
@@ -43,7 +42,6 @@ import { ExpandedRow } from './expanded_row';
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
 interface Props {
-  indexPattern: StaticIndexPattern;
   query: SimpleQuery;
   cellClick?(search: string): void;
 }
@@ -51,7 +49,13 @@ interface Props {
 const SEARCH_SIZE = 1000;
 
 export const SourceIndexPreview: React.SFC<Props> = React.memo(
-  ({ cellClick, indexPattern, query }) => {
+  ({ cellClick, query }) => {
+    const indexPattern = useContext(IndexPatternContext);
+
+    if (indexPattern === null) {
+      return null;
+    }
+
     const [loading, setLoading] = useState(false);
 
     const [tableItems, setTableItems] = useState([] as EsDoc[]);

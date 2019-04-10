@@ -6,9 +6,7 @@
 
 import { uniq } from 'lodash';
 
-import React, { ChangeEvent, Fragment, SFC, useEffect, useState } from 'react';
-
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import {
   EuiComboBoxOptionProps,
@@ -36,6 +34,8 @@ import {
   pivotSupportedAggs,
 } from '../../common';
 
+import { IndexPatternContext } from '../../common';
+
 export interface DefinePivotExposedState {
   aggList: Label[];
   aggs: OptionsDataElement[];
@@ -58,13 +58,18 @@ export function getDefaultPivotState() {
 
 interface Props {
   overrides?: DefinePivotExposedState;
-  indexPattern: StaticIndexPattern;
   onChange(s: DefinePivotExposedState): void;
 }
 
 export const DefinePivotForm: SFC<Props> = React.memo(
-  ({ overrides = {}, indexPattern, onChange }) => {
+  ({ overrides = {}, onChange }) => {
     const defaults = { ...getDefaultPivotState(), ...overrides };
+
+    const indexPattern = useContext(IndexPatternContext);
+
+    if (indexPattern === null) {
+      return null;
+    }
 
     const fields = indexPattern.fields
       .filter(field => field.aggregatable === true)
@@ -197,14 +202,12 @@ export const DefinePivotForm: SFC<Props> = React.memo(
           <EuiText>
             <SourceIndexPreview
               cellClick={addToSearch}
-              indexPattern={indexPattern}
               query={pivotQuery}
             />
 
             <PivotPreview
               aggs={pivotAggs}
               groupBy={pivotGroupBy}
-              indexPattern={indexPattern}
               query={pivotQuery.query}
             />
           </EuiText>

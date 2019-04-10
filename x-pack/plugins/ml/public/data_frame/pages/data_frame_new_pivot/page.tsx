@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { SFC } from 'react';
 
 import {
   EuiPage,
@@ -20,11 +18,7 @@ import {
 
 import { Wizard } from './wizard';
 
-interface Props {
-  indexPattern: StaticIndexPattern;
-}
-
-export const Page: React.SFC<Props> = ({ indexPattern }) => (
+export const Page: SFC = () => (
   <EuiPage>
     <EuiPageBody>
       <EuiPageContent>
@@ -36,7 +30,7 @@ export const Page: React.SFC<Props> = ({ indexPattern }) => (
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
-          <Wizard indexPattern={indexPattern} />
+          <Wizard />
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>

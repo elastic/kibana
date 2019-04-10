@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import { DefaultOperator } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -146,3 +148,6 @@ export function getDataFrameRequest(
 
   return request;
 }
+
+export type IndexPatternContextValue = StaticIndexPattern | null;
+export const IndexPatternContext = React.createContext(null as IndexPatternContextValue);

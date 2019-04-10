@@ -6,12 +6,6 @@
 
 import React, { SFC } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-
-interface Props {
-  indexPattern: StaticIndexPattern;
-}
-
-export const JobCreateSummary: SFC<Props> = React.memo(({ indexPattern }) => {
+export const JobCreateSummary: SFC = React.memo(() => {
   return null;
 });

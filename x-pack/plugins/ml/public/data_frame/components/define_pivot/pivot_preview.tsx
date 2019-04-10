@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
-
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { getDataFramePreviewRequest, OptionsDataElement, SimpleQuery } from '../../common';
+import { getDataFramePreviewRequest, IndexPatternContext, OptionsDataElement, SimpleQuery } from '../../common';
 
 interface Props {
   aggs: OptionsDataElement[];
-  indexPattern: StaticIndexPattern;
   groupBy: string[];
   query: SimpleQuery['query'];
 }
 
-export const PivotPreview: React.SFC<Props> = ({ aggs, indexPattern, groupBy, query }) => {
+export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
+  const indexPattern = useContext(IndexPatternContext);
+
+  if (indexPattern === null) {
+    return null;
+  }
+
   const [loading, setLoading] = useState(false);
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
 
