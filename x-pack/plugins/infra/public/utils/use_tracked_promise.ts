@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { DependencyList, useEffect, useMemo, useRef, useState } from 'react';
 
 interface UseTrackedPromiseArgs<Arguments extends any[], Result> {
@@ -253,7 +255,6 @@ class CanceledPromiseError extends Error {
   }
 }
 
-// tslint:disable-next-line:max-classes-per-file
 class SilentCanceledPromiseError extends CanceledPromiseError {}
 
 const noOp = () => undefined;
