@@ -84,44 +84,47 @@ export const getItems = (data: DetailItem[], id: string): Item[] =>
     description: `${item.description || ''} ${getExampleText(item)}`,
     field: item.field,
     type: item.type,
-    values: item.values.map((itemValue: string) => {
-      const itemDataProvider = {
-        enabled: true,
-        id: escapeDataProviderId(
-          `id-event-field-browser-value-for-${item.field}-${id}-${itemValue}`
-        ),
-        name: item.field,
-        queryMatch: {
-          field: item.field,
-          value: escapeQueryValue(itemValue),
-        },
-        excluded: false,
-        kqlQuery: '',
-        and: [],
-      };
-      return {
-        valueAsString: itemValue,
-        value: (
-          <DraggableWrapper
-            key={`event-field-browser-value-for-${item.field}-${id}-${itemValue}`}
-            dataProvider={itemDataProvider}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <FormattedFieldValue
-                  contextId="event-details"
-                  eventId={id}
-                  fieldName={item.field}
-                  fieldType={item.type}
-                  value={parseValue(itemValue)}
+    values:
+      item.values == null
+        ? []
+        : item.values.map((itemValue: string) => {
+            const itemDataProvider = {
+              enabled: true,
+              id: escapeDataProviderId(
+                `id-event-field-browser-value-for-${item.field}-${id}-${itemValue}`
+              ),
+              name: item.field,
+              queryMatch: {
+                field: item.field,
+                value: escapeQueryValue(itemValue),
+              },
+              excluded: false,
+              kqlQuery: '',
+              and: [],
+            };
+            return {
+              valueAsString: itemValue,
+              value: (
+                <DraggableWrapper
+                  key={`event-field-browser-value-for-${item.field}-${id}-${itemValue}`}
+                  dataProvider={itemDataProvider}
+                  render={(dataProvider, _, snapshot) =>
+                    snapshot.isDragging ? (
+                      <DragEffects>
+                        <Provider dataProvider={dataProvider} />
+                      </DragEffects>
+                    ) : (
+                      <FormattedFieldValue
+                        contextId="event-details"
+                        eventId={id}
+                        fieldName={item.field}
+                        fieldType={item.type}
+                        value={parseValue(itemValue)}
+                      />
+                    )
+                  }
                 />
-              )
-            }
-          />
-        ),
-      };
-    }),
+              ),
+            };
+          }),
   }));

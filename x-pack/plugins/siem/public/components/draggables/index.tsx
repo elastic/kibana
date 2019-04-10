@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { getEmptyStringTag } from '../empty_value';
 import { Provider } from '../timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
@@ -165,7 +166,7 @@ export const DraggableBadge = pure<BadgeDraggableType>(
         queryValue={queryValue}
       >
         <Badge iconType={iconType} color={color}>
-          {children ? children : value}
+          {children ? children : value !== '' ? value : getEmptyStringTag()}
         </Badge>
       </DefaultDraggable>
     ) : null

@@ -16,8 +16,7 @@ import { FormattedIp } from '../../../formatted_ip';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
 
-import { ColumnRenderer } from '.';
-import { FormattedFieldValue, IP_FIELD_TYPE } from './formatted_field';
+import { ColumnRenderer, FormattedFieldValue, IP_FIELD_TYPE } from '.';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
