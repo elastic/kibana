@@ -19,4 +19,3 @@
 
 export { UICapabilitiesProvider } from './ui_capabilities_provider';
 export { injectUICapabilities } from './inject_ui_capabilities';
-export { Capabilities } from '../../../../../core/public/capabilities';
