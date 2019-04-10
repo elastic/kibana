@@ -13,7 +13,7 @@ import { getTrace } from '../lib/traces/get_trace';
 
 const ROOT = '/api/apm/traces';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };

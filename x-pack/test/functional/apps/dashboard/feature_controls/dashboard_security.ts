@@ -12,11 +12,11 @@ import {
 import { SecurityService } from '../../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -118,6 +118,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.openContextMenu();
         await panelActions.expectMissingEditPanelAction();
+      });
+
+      it(`Permalinks shows create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
       });
     });
 
@@ -240,6 +245,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
     });
 

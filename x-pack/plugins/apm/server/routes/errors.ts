@@ -16,7 +16,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 
 const ROOT = '/api/apm/services/{serviceName}/errors';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };

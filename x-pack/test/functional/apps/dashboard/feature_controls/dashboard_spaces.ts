@@ -12,7 +12,7 @@ import {
 import { SpacesService } from '../../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');

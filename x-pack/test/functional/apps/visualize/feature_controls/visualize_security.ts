@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// tslint:disable no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
@@ -155,10 +155,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
-      it(`landing page doesn't show "Create new Visualization" button`, async () => {
+      it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizeLandingPage', 10000);
-        await testSubjects.missingOrFail('newItemButton');
+        await testSubjects.existOrFail('newItemButton');
       });
 
       it(`can view existing Visualization`, async () => {

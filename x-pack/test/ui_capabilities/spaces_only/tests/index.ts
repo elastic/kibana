@@ -9,7 +9,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { FeaturesService } from '../../common/services';
 import { SpaceScenarios } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function uiCapabilitesTests({
   loadTestFile,
   getService,

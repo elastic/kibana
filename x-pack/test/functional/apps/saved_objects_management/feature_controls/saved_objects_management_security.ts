@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// tslint:disable no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');

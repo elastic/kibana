@@ -6,37 +6,33 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { MonitorPageTitle as TitleType } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { MonitorPageTitle } from '../../functional';
-import { getMonitorPageTitle } from './get_monitor_page_title';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
+import { getMonitorPageTitleQuery } from './get_monitor_page_title';
+
+interface MonitorPageTitleQueryResult {
+  monitorPageTitle?: TitleType;
+}
 
 interface MonitorPageTitleProps {
   monitorId: string;
 }
 
-type Props = MonitorPageTitleProps & UptimeCommonProps;
+type Props = MonitorPageTitleProps &
+  UptimeCommonProps &
+  UptimeGraphQLQueryProps<MonitorPageTitleQueryResult>;
 
-export const MonitorPageTitleQuery = ({
-  autorefreshInterval,
-  autorefreshIsPaused,
-  monitorId,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getMonitorPageTitle}
-    variables={{ monitorId }}
-  >
-    {({ loading, error, data }) => {
-      if (loading) {
-        return <EuiLoadingSpinner size="xl" />;
-      }
-      if (error) {
-        return error;
-      }
-      const monitorPageTitle: TitleType = data.monitorPageTitle;
-      return <MonitorPageTitle pageTitle={monitorPageTitle} />;
-    }}
-  </Query>
-);
+export const makeMonitorPageTitleQuery = ({ data }: Props) => {
+  if (data && data.monitorPageTitle) {
+    const { monitorPageTitle } = data;
+    return <MonitorPageTitle pageTitle={monitorPageTitle} />;
+  }
+  return <EuiLoadingSpinner size="xl" />;
+};
+
+export const MonitorPageTitleQuery = withUptimeGraphQL<
+  MonitorPageTitleQueryResult,
+  MonitorPageTitleProps
+>(makeMonitorPageTitleQuery, getMonitorPageTitleQuery);

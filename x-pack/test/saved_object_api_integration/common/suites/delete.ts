@@ -43,7 +43,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to delete ${type}, missing saved_object:${type}/delete`,
+      message: `Unable to delete ${type}`,
     });
   };
 

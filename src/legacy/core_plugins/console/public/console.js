@@ -22,7 +22,6 @@ import template from './index.html';
 
 require('brace');
 
-require('ui/tooltip');
 require('ui/autoload/styles');
 require('ui/capabilities/route_setup');
 

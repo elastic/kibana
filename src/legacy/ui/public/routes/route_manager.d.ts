@@ -40,4 +40,5 @@ interface RouteManager {
   defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;
 }
 
+// eslint-disable-next-line import/no-default-export
 export default RouteManager;

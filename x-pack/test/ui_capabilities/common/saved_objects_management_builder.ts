@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// tslint:disable:max-classes-per-file
+/* eslint-disable max-classes-per-file */
 class SavedObjectsTypeUICapabilitiesGroup {
   public all = ['delete', 'edit', 'read'];
   public read = ['read'];

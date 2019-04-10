@@ -4,7 +4,10 @@
 
 ```ts
 
+import * as CSS from 'csstype';
 import { default } from 'react';
+import { Observable } from 'rxjs';
+import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -39,6 +42,12 @@ export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
 
+// Warning: (ae-internal-missing-underscore) The name CoreContext should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal (undocumented)
+export interface CoreContext {
+}
+
 // @public
 export interface CoreSetup {
     // (undocumented)
@@ -56,6 +65,8 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    overlays: OverlaySetup;
+    // (undocumented)
     uiSettings: UiSettingsSetup;
 }
 
@@ -68,7 +79,7 @@ export class CoreSystem {
     // (undocumented)
     constructor(params: Params);
     // (undocumented)
-    setup(): {
+    setup(): Promise<{
         fatalErrors: {
             add: (error: string | Error, source?: string | undefined) => never;
             get$: () => import("rxjs").Observable<{
@@ -76,7 +87,7 @@ export class CoreSystem {
                 stack: string | undefined;
             }>;
         };
-    } | undefined;
+    } | undefined>;
     // (undocumented)
     stop(): void;
     }
@@ -85,6 +96,14 @@ export class CoreSystem {
 // 
 // @public (undocumented)
 export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+
+// @public
+export class FlyoutRef {
+    // (undocumented)
+    constructor();
+    close(): Promise<void>;
+    readonly onClose: Promise<void>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 
@@ -144,6 +163,48 @@ export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>
 // 
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+
+// @public (undocumented)
+export interface OverlaySetup {
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => FlyoutRef;
+}
+
+// @public
+export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
+    // (undocumented)
+    setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    stop?: () => void;
+}
+
+// @public
+export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
+
+// @public
+export interface PluginInitializerContext {
+}
+
+// @public
+export interface PluginSetupContext {
+    // (undocumented)
+    basePath: BasePathSetup;
+    // (undocumented)
+    chrome: ChromeSetup;
+    // (undocumented)
+    fatalErrors: FatalErrorsSetup;
+    // (undocumented)
+    i18n: I18nSetup;
+    // (undocumented)
+    notifications: NotificationsSetup;
+    // (undocumented)
+    uiSettings: UiSettingsSetup;
+}
 
 export { Toast }
 
