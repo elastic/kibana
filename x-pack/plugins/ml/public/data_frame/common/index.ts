@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 import { DefaultOperator } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Dictionary } from 'x-pack/plugins/ml/common/types/common';
+import { Dictionary } from '../../../common/types/common';
 
-import { DefinePivotExposedState } from './components/define_pivot/define_pivot_form';
+import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
@@ -149,5 +147,4 @@ export function getDataFrameRequest(
   return request;
 }
 
-export type IndexPatternContextValue = StaticIndexPattern | null;
-export const IndexPatternContext = React.createContext(null as IndexPatternContextValue);
+export * from './index_pattern_context';

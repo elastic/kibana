@@ -74,7 +74,7 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
       </EuiButton>
       &nbsp;
       {!created && (
-        <EuiButton isDisabled={created && started} onClick={createAndStartDataFrame}>
+        <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
           Create and start data frame
         </EuiButton>
       )}
