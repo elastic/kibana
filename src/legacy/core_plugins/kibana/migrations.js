@@ -58,7 +58,6 @@ function migrateIndexPattern(doc) {
 }
 
 function removeDateHistogramTimeZones(doc) {
-  const newDoc = cloneDeep(doc);
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
     let visState;
@@ -79,10 +78,10 @@ function removeDateHistogramTimeZones(doc) {
           delete agg.params.customBucket.params.time_zone;
         }
       });
-      newDoc.attributes.visState = JSON.stringify(visState);
+      doc.attributes.visState = JSON.stringify(visState);
     }
   }
-  return newDoc;
+  return doc;
 }
 
 export const migrations = {
