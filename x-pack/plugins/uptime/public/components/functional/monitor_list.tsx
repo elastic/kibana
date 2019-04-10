@@ -77,7 +77,11 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
           render: (status: string, monitor: LatestMonitor) => (
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <MonitorListPopover monitor={monitor} />
+                <MonitorListPopover
+                  dateRangeStart="WARNINGDELETETHISAFTERMERGINGCONTEXT"
+                  dateRangeEnd="WARNINGDELETEHTISATTERMERINGEoife"
+                  monitor={monitor}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiHealth
