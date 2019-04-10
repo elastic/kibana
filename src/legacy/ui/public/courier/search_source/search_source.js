@@ -81,7 +81,7 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
+import { OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [
   'type',
@@ -587,7 +587,7 @@ export function SearchSourceProvider(Promise, Private, config) {
             if (e.message === 'OutdatedKuerySyntaxError') {
               throw new OutdatedKuerySyntaxError();
             }
-            throw new KbnError(e.message, KbnError);
+            throw e;
           }
 
           if (flatData.highlightAll != null) {

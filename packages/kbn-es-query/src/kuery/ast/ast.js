@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';
+import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -40,7 +41,10 @@ export function fromKueryExpression(expression, parseOptions) {
     fromExpression(expression, parseOptions, parseKuery);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      throw new Error([error.message, expression, _.repeat('-', error.location.start.offset) + '^'].join('\n'));
+      throw new KQLSyntaxError(
+        [error.message, expression, _.repeat('-', error.location.start.offset) + '^'].join('\n'),
+        error.message,
+      );
     } else {
       throw error;
     }

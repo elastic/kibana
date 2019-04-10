@@ -17,46 +17,52 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-const errors = [
-  {
-    defaultMessage: '"or" requires a left and right side',
-    key: 'kbnESQuery.kql.missingOrSubQuerySyntaxError',
-  },
-  {
-    defaultMessage: '"not" requires a sub-query',
-    key: 'kbnESQuery.kql.missingNotSubQuerySyntaxError',
-  },
-];
+// const errors = [
+//   {
+//     defaultMessage: '"or" requires a left and right side',
+//     key: 'kbnESQuery.kql.missingOrSubQuerySyntaxError',
+//   },
+//   {
+//     defaultMessage: '"not" requires a sub-query',
+//     key: 'kbnESQuery.kql.missingNotSubQuerySyntaxError',
+//   },
+// ];
+//
+// export class KQLSyntaxError extends Error {
+//   constructor(translationKey) {
+//     const kqlSyntaxErrorLabel = i18n.translate('kbnESQuery.kql.syntaxErrorLabel', {
+//       defaultMessage: 'KQL Syntax Error',
+//     });
+//
+//     const unknownError = i18n.translate('kbnESQuery.kql.unknownSyntaxError', {
+//       defaultMessage: '{kqlSyntaxError}: Unknown KQL syntax error',
+//       values: {
+//         kqlSyntaxError: kqlSyntaxErrorLabel,
+//       },
+//     });
+//
+//     const error = errors.find(info => info.key === translationKey);
+//
+//     if (!error) {
+//       super(unknownError);
+//     } else {
+//       const translatedError = i18n.translate(error.key, {
+//         defaultMessage: `{kqlSyntaxError}: ${error.defaultMessage}`,
+//         values: {
+//           kqlSyntaxError: kqlSyntaxErrorLabel,
+//         },
+//       });
+//       super(translatedError);
+//     }
+//
+//     this.name = 'KQLSyntaxError';
+//   }
+// }
 
 export class KQLSyntaxError extends Error {
-  constructor(translationKey) {
-    const kqlSyntaxErrorLabel = i18n.translate('kbnESQuery.kql.syntaxErrorLabel', {
-      defaultMessage: 'KQL Syntax Error',
-    });
-
-    const unknownError = i18n.translate('kbnESQuery.kql.unknownSyntaxError', {
-      defaultMessage: '{kqlSyntaxError}: Unknown KQL syntax error',
-      values: {
-        kqlSyntaxError: kqlSyntaxErrorLabel,
-      },
-    });
-
-    const error = errors.find(info => info.key === translationKey);
-
-    if (!error) {
-      super(unknownError);
-    } else {
-      const translatedError = i18n.translate(error.key, {
-        defaultMessage: `{kqlSyntaxError}: ${error.defaultMessage}`,
-        values: {
-          kqlSyntaxError: kqlSyntaxErrorLabel,
-        },
-      });
-      super(translatedError);
-    }
-
+  constructor(message, shortMessage) {
+    super(message);
     this.name = 'KQLSyntaxError';
+    this.shortMessage = shortMessage;
   }
 }
