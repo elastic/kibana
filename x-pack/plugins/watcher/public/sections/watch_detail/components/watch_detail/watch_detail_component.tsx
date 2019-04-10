@@ -80,7 +80,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
         <h1>
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.header"
-            defaultMessage="Current Status"
+            defaultMessage="Current status"
           />
         </h1>
       </EuiTitle>
@@ -95,7 +95,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-            defaultMessage="No current status to show"
+            defaultMessage="No current status"
           />
         }
       />

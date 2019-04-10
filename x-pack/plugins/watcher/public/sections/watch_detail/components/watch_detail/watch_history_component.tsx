@@ -28,7 +28,6 @@ import {
   EuiFlyoutHeader,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -205,7 +204,7 @@ const WatchHistoryUI = ({
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2>Watch History Detail</h2>
+            <h2>Watch history detail</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -232,7 +231,7 @@ const WatchHistoryUI = ({
       </EuiFlyout>
     );
   }
-  const activationButtonText = isActivated ? 'Deactivate Watch' : 'Activate Watch';
+  const activationButtonText = isActivated ? 'Deactivate watch' : 'Activate watch';
   return (
     <Fragment>
       <DeleteWatchesModal
@@ -250,7 +249,7 @@ const WatchHistoryUI = ({
             <h1>
               <FormattedMessage
                 id="xpack.watcher.sections.watchDetail.header"
-                defaultMessage="Watch History"
+                defaultMessage="Watch history"
               />
             </h1>
           </EuiTitle>
@@ -298,7 +297,7 @@ const WatchHistoryUI = ({
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-            defaultMessage="No current status to show"
+            defaultMessage="No current status"
           />
         }
       />
