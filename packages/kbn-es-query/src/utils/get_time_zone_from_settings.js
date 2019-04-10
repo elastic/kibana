@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { saveToFile } from './';
+import moment from 'moment-timezone';
+const detectedTimezone = moment.tz.guess();
 
-export async function retrieveAndExportDocs(objs, savedObjectsClient) {
-  const response = await savedObjectsClient.bulkGet(objs);
-  const objects = response.savedObjects.map(obj => {
-    return {
-      _id: obj.id,
-      _type: obj.type,
-      _source: obj.attributes,
-      _migrationVersion: obj.migrationVersion,
-      _references: obj.references,
-    };
-  });
-
-  saveToFile(JSON.stringify(objects, null, 2));
+export function getTimeZoneFromSettings(dateFormatTZ) {
+  if (dateFormatTZ === 'Browser') {
+    return detectedTimezone;
+  }
+  return dateFormatTZ;
 }
