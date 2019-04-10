@@ -46,7 +46,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async checkVisualBuilderIsPresent() {
-      await this.checkTabIsLoaded('tvbEditor', 'Time Series');
+      await this.checkTabIsLoaded('tvbVisEditor', 'Time Series');
     }
 
     public async checkMetricTabIsPresent() {
