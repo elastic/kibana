@@ -33,17 +33,6 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
 
   const columns = [
     {
-      field: 'repository',
-      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
-        defaultMessage: 'Repository',
-      }),
-      truncateText: true,
-      sortable: true,
-      // We deliberately don't link to the repository from here because the API request for populating
-      // this table takes so long, and navigating away by accident is a really poor UX.
-      render: (repository: string) => repository,
-    },
-    {
       field: 'snapshot',
       name: translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
@@ -55,6 +44,17 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
           {snapshotId}
         </EuiLink>
       ),
+    },
+    {
+      field: 'repository',
+      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
+        defaultMessage: 'Repository',
+      }),
+      truncateText: true,
+      sortable: true,
+      // We deliberately don't link to the repository from here because the API request for populating
+      // this table takes so long, and navigating away by accident is a really poor UX.
+      render: (repository: string) => repository,
     },
     {
       field: 'startTimeInMillis',
@@ -108,10 +108,11 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
     },
   ];
 
+  // By default, we'll display the most recent snapshots at the top of the table.
   const sorting = {
     sort: {
-      field: 'repository',
-      direction: 'asc',
+      field: 'startTimeInMillis',
+      direction: 'desc',
     },
   };
 
