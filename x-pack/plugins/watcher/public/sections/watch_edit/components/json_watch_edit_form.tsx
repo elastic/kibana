@@ -18,7 +18,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JsonWatch } from 'plugins/watcher/models/watch/json_watch';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';

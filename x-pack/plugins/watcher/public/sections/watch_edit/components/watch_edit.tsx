@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Watch } from 'plugins/watcher/models/watch';
 import React, { useEffect, useReducer } from 'react';
@@ -88,7 +88,7 @@ export const WatchEdit = ({
   let EditComponent = null;
   if (watch.type === WATCH_TYPES.THRESHOLD) {
     EditComponent = ThresholdWatchEdit;
-  } else if (watch.type === WATCH_TYPES.JSON) {
+  } else {
     EditComponent = JsonWatchEdit;
   }
   return (

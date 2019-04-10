@@ -138,7 +138,6 @@ const ThresholdWatchEditUi = ({
   const [watchThresholdPopoverOpen, setWatchThresholdPopoverOpen] = useState(false);
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const [hasAtttemptedSave, setHasAttemptedSave] = useState(false);
   const [modal, setModal] = useState<{ message: string } | null>(null);
   const { watch, setWatchProperty } = useContext(WatchContext);
   const getIndexPatterns = async () => {
@@ -642,7 +641,6 @@ const ThresholdWatchEditUi = ({
               type="submit"
               isDisabled={hasErrors}
               onClick={async () => {
-                setHasAttemptedSave(true);
                 const savedWatch = await onWatchSave(watch, urlService, licenseService);
                 if (savedWatch && savedWatch.error) {
                   return setModal(savedWatch.error);
