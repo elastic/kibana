@@ -140,7 +140,7 @@ export const RemoteClusterTable = injectI18n(
         }),
         sortable: true,
         render: (isConnected) => <ConnectionStatus isConnected={isConnected} />,
-        width: '160px',
+        width: '240px',
       }, {
         field: 'connectedNodesCount',
         name: intl.formatMessage({
