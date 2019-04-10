@@ -149,7 +149,9 @@ export default function({ getService }: { getService: any }) {
         expect(resStatus).to.eql(400);
         expect(resType).to.eql('application/json');
         const { message: errorMessage } = JSON.parse(resText);
-        expect(errorMessage).to.eql('Time range params are required for index pattern [logstash-*], using time field [@timestamp]');
+        expect(errorMessage).to.eql(
+          'Time range params are required for index pattern [logstash-*], using time field [@timestamp]'
+        );
 
         await esArchiver.unload('reporting/logs');
         await esArchiver.unload('logstash_functional');

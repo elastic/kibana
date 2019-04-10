@@ -64,7 +64,10 @@ export async function generateCsvSearch(
 
   const {
     kibanaSavedObjectMeta: {
-      searchSource: { filter: [ searchSourceFilter ], query: searchSourceQuery },
+      searchSource: {
+        filter: [searchSourceFilter],
+        query: searchSourceQuery,
+      },
     },
   } = savedSearchObjectAttr as { kibanaSavedObjectMeta: { searchSource: SearchSource } };
 

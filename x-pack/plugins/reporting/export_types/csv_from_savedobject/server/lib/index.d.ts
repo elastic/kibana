@@ -36,11 +36,11 @@ type FormatsMap = Map<
 
 interface ReqPayload {
   state: {
-    sort: {
+    sort: Array<{
       [sortKey: string]: {
         order: string;
       };
-    }[];
+    }>;
     docvalue_fields: any;
     query: any;
   };
@@ -63,7 +63,7 @@ export interface GenerateCsvParams {
   };
 }
 
-export type Filter = {};
+export interface Filter {}
 
 export interface TimeFilter extends Filter {
   isTimeFilter: true;
