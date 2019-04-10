@@ -49,7 +49,6 @@ export const CreatePackageJsonTask = {
     };
 
     if (build.isOss()) {
-      delete newPkg.dependencies['x-pack'];
       newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => !p.startsWith('x-pack'));
     }
 
