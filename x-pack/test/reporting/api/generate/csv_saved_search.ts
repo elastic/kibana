@@ -17,7 +17,7 @@ interface GenerateOpts {
   state: any;
 }
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
