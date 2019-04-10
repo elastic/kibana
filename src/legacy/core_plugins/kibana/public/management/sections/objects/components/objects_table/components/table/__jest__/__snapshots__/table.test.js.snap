@@ -141,7 +141,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "dataType": "string",
             "description": "Title of the saved object",
-            "field": "title",
+            "field": "meta.title",
             "name": "Title",
             "render": [Function],
             "sortable": false,
@@ -149,6 +149,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
+                "available": [Function],
                 "description": "View this saved object within Kibana",
                 "icon": "eye",
                 "name": "In app",
@@ -170,7 +171,16 @@ exports[`Table should render normally 1`] = `
       itemId="id"
       items={
         Array [
-          3,
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/index_patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": "/management/kibana/index_patterns/1",
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
         ]
       }
       loading={false}

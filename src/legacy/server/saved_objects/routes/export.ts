@@ -52,8 +52,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
             .optional(),
           objects: Joi.array()
             .items({
-              type: Joi.string()
-                .required(),
+              type: Joi.string().required(),
               id: Joi.string().required(),
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))

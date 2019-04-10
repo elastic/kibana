@@ -64,9 +64,16 @@ describe('Relationships', () => {
       ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
-      id: '1',
-      type: 'index-pattern',
-      title: 'MyIndexPattern*',
+      savedObject: {
+        id: '1',
+        type: 'index-pattern',
+        meta: {
+          title: 'MyIndexPattern*',
+          icon: 'indexPatternApp',
+          editUrl: '#/management/kibana/index_patterns/1',
+          inAppUrl: '/management/kibana/index_patterns/1',
+        },
+      },
       close: jest.fn(),
     };
 
@@ -102,9 +109,16 @@ describe('Relationships', () => {
       ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
-      id: '1',
-      type: 'search',
-      title: 'MySearch',
+      savedObject: {
+        id: '1',
+        type: 'search',
+        meta: {
+          title: 'MySearch',
+          icon: 'search',
+          editUrl: '#/management/kibana/objects/savedSearches/1',
+          inAppUrl: '/discover/1',
+        },
+      },
       close: jest.fn(),
     };
 
@@ -140,9 +154,16 @@ describe('Relationships', () => {
       ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
-      id: '1',
-      type: 'visualization',
-      title: 'MyViz',
+      savedObject: {
+        id: '1',
+        type: 'visualization',
+        meta: {
+          title: 'MyViz',
+          icon: 'visualizeApp',
+          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/visualize/edit/1',
+        },
+      },
       close: jest.fn(),
     };
 
@@ -178,9 +199,16 @@ describe('Relationships', () => {
       ])),
       getEditUrl: () => '',
       goInApp: jest.fn(),
-      id: '1',
-      type: 'dashboard',
-      title: 'MyDashboard',
+      savedObject: {
+        id: '1',
+        type: 'dashboard',
+        meta: {
+          title: 'MyDashboard',
+          icon: 'dashboardApp',
+          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          inAppUrl: '/dashboard/1',
+        },
+      },
       close: jest.fn(),
     };
 
@@ -209,9 +237,16 @@ describe('Relationships', () => {
       }),
       getEditUrl: () => '',
       goInApp: jest.fn(),
-      id: '1',
-      type: 'dashboard',
-      title: 'MyDashboard',
+      savedObject: {
+        id: '1',
+        type: 'dashboard',
+        meta: {
+          title: 'MyDashboard',
+          icon: 'dashboardApp',
+          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          inAppUrl: '/dashboard/1',
+        },
+      },
       close: jest.fn(),
     };
 

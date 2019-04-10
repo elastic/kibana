@@ -29,9 +29,13 @@ export default function ({ getService }) {
       id: Joi.string()
         .uuid()
         .required(),
-      title: Joi.string()
-        .required()
-        .min(1),
+      type: Joi.string().required(),
+      meta: Joi.object().keys({
+        title: Joi.string().required(),
+        icon: Joi.string().required(),
+        editUrl: Joi.string().required(),
+        inAppUrl: Joi.string().required(),
+      }).required(),
     })
   );
 
@@ -39,18 +43,13 @@ export default function ({ getService }) {
     before(() => esArchiver.load('management/saved_objects'));
     after(() => esArchiver.unload('management/saved_objects'));
 
-    const SEARCH_RESPONSE_SCHEMA = Joi.object().keys({
-      visualization: GENERIC_RESPONSE_SCHEMA,
-      'index-pattern': GENERIC_RESPONSE_SCHEMA,
-    });
-
     describe('searches', async () => {
       it('should validate search response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = Joi.validate(resp.body, SEARCH_RESPONSE_SCHEMA);
+            const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
       });
@@ -60,20 +59,28 @@ export default function ({ getService }) {
           .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              visualization: [
-                {
-                  id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-                  title: 'VisualizationFromSavedSearch',
-                },
-              ],
-              'index-pattern': [
-                {
-                  id: '8963ca30-3224-11e8-a572-ffca06da1357',
+            expect(resp.body).to.eql([
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                type: 'index-pattern',
+                meta: {
                   title: 'saved_objects*',
+                  icon: 'indexPatternApp',
+                  editUrl: '#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-            });
+              },
+              {
+                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  title: 'VisualizationFromSavedSearch',
+                  icon: 'visualizeApp',
+                  editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                },
+              },
+            ]);
           });
       });
 
@@ -84,16 +91,12 @@ export default function ({ getService }) {
     });
 
     describe('dashboards', async () => {
-      const DASHBOARD_RESPONSE_SCHEMA = Joi.object().keys({
-        visualization: GENERIC_RESPONSE_SCHEMA,
-      });
-
       it('should validate dashboard response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = Joi.validate(resp.body, DASHBOARD_RESPONSE_SCHEMA);
+            const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
       });
@@ -103,18 +106,28 @@ export default function ({ getService }) {
           .get(`/api/kibana/management/saved_objects/relationships/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              visualization: [
-                {
-                  id: 'add810b0-3224-11e8-a572-ffca06da1357',
+            expect(resp.body).to.eql([
+              {
+                id: 'add810b0-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
                   title: 'Visualization',
+                  editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 },
-                {
-                  id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+              },
+              {
+                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
+                  editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-            });
+              },
+            ]);
           });
       });
 
@@ -127,17 +140,12 @@ export default function ({ getService }) {
     });
 
     describe('visualizations', async () => {
-      const VISUALIZATIONS_RESPONSE_SCHEMA = Joi.object().keys({
-        dashboard: GENERIC_RESPONSE_SCHEMA,
-        search: GENERIC_RESPONSE_SCHEMA,
-      });
-
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/visualization/a42c0580-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = Joi.validate(resp.body, VISUALIZATIONS_RESPONSE_SCHEMA);
+            const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
       });
@@ -147,20 +155,28 @@ export default function ({ getService }) {
           .get(`/api/kibana/management/saved_objects/relationships/visualization/a42c0580-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              search: [
-                {
-                  id: '960372e0-3224-11e8-a572-ffca06da1357',
-                  title: 'OneRecord'
+            expect(resp.body).to.eql([
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                type: 'search',
+                meta: {
+                  icon: 'search',
+                  title: 'OneRecord',
+                  editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-              dashboard: [
-                {
-                  id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
+              },
+              {
+                id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
+                type: 'dashboard',
+                meta: {
+                  icon: 'dashboardApp',
                   title: 'Dashboard',
+                  editUrl: '#/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-            });
+              },
+            ]);
           });
       });
 
@@ -172,17 +188,12 @@ export default function ({ getService }) {
     });
 
     describe('index patterns', async () => {
-      const INDEX_PATTERN_RESPONSE_SCHEMA = Joi.object().keys({
-        search: GENERIC_RESPONSE_SCHEMA,
-        visualization: GENERIC_RESPONSE_SCHEMA,
-      });
-
       it('should validate visualization response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            const validationResult = Joi.validate(resp.body, INDEX_PATTERN_RESPONSE_SCHEMA);
+            const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
             expect(validationResult.error).to.be(null);
           });
       });
@@ -192,20 +203,28 @@ export default function ({ getService }) {
           .get(`/api/kibana/management/saved_objects/relationships/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              search: [
-                {
-                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+            expect(resp.body).to.eql([
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                type: 'search',
+                meta: {
+                  icon: 'search',
                   title: 'OneRecord',
+                  editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-              visualization: [
-                {
-                  id: 'add810b0-3224-11e8-a572-ffca06da1357',
+              },
+              {
+                id: 'add810b0-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
                   title: 'Visualization',
+                  editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 },
-              ],
-            });
+              },
+            ]);
           });
       });
 

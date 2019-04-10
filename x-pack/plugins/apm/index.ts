@@ -49,7 +49,7 @@ export function apm(kibana: any) {
       savedObjectSchemas: {
         'apm-telemetry': {
           isNamespaceAgnostic: true,
-          isImportExportable: false,
+          isImportExportable: false
         }
       },
       mappings

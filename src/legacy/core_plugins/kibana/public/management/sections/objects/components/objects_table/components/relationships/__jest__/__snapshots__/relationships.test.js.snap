@@ -60,7 +60,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "dataType": "string",
               "description": "Title of the saved object",
-              "field": "title",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
               "sortable": false,
@@ -68,6 +68,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -210,7 +211,7 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "dataType": "string",
               "description": "Title of the saved object",
-              "field": "title",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
               "sortable": false,
@@ -218,6 +219,7 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -311,7 +313,7 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "dataType": "string",
               "description": "Title of the saved object",
-              "field": "title",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
               "sortable": false,
@@ -319,6 +321,7 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -412,7 +415,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "dataType": "string",
               "description": "Title of the saved object",
-              "field": "title",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
               "sortable": false,
@@ -420,6 +423,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",

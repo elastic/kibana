@@ -47,6 +47,7 @@ jest.mock('../../../../../lib/resolve_import_errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
+  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
 }));
 
 jest.mock('../../../../../lib/import_legacy_file', () => ({
