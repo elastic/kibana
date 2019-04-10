@@ -50,5 +50,6 @@ export const sharedSchema = gql`
     FILEBEAT
     AUDITBEAT
     PACKETBEAT
+    WINLOGBEAT
   }
 `;

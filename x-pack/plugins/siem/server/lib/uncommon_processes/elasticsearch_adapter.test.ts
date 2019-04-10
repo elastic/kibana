@@ -145,8 +145,8 @@ describe('elasticsearch_adapter', () => {
       _source: {
         '@timestamp': 'time',
         process: {
-          name: 'process-1',
-          title: 'title-1',
+          name: ['process-1'],
+          title: ['title-1'],
         },
       },
       cursor: 'cursor-1',
@@ -165,7 +165,7 @@ describe('elasticsearch_adapter', () => {
             { id: 'host-id-1', name: 'host-name-1' },
           ],
           process: {
-            name: 'process-1',
+            name: ['process-1'],
           },
           instances: 100,
         },
@@ -186,8 +186,8 @@ describe('elasticsearch_adapter', () => {
           ],
           instances: 100,
           process: {
-            name: 'process-1',
-            title: 'title-1',
+            name: ['process-1'],
+            title: ['title-1'],
           },
         },
       };

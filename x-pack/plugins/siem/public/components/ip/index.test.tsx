@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock/test_providers';
 
@@ -14,10 +15,8 @@ import { Ip } from '.';
 
 describe('Port', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallowWithIntl(
-      <TestProviders>
-        <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
-      </TestProviders>
+    const wrapper = shallow(
+      <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

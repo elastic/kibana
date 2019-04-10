@@ -5,18 +5,19 @@
  */
 
 import {
-  // @ts-ignore
-  EuiStat,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { OverviewNetworkData } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-
-import * as i18n from '../translations';
 
 interface OverviewNetworkProps {
   data: OverviewNetworkData;
@@ -24,50 +25,76 @@ interface OverviewNetworkProps {
 
 const overviewNetworkStats = (data: OverviewNetworkData) => [
   {
-    title:
-      has('packetbeatFlow', data) && data.packetbeatFlow !== null
-        ? numeral(data.packetbeatFlow).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.PACKETBEAT_FLOW,
-  },
-  {
-    title:
-      has('packetbeatDNS', data) && data.packetbeatDNS !== null
-        ? numeral(data.packetbeatDNS).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.PACKETBEAT_DNS,
-  },
-  {
-    title:
-      has('filebeatSuricata', data) && data.filebeatSuricata !== null
-        ? numeral(data.filebeatSuricata).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.FILEBEAT_SURICATA,
-  },
-  {
-    title:
-      has('filebeatZeek', data) && data.filebeatZeek !== null
-        ? numeral(data.filebeatZeek).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.FILEBEAT_ZEEK,
-  },
-  {
-    title:
+    description:
       has('auditbeatSocket', data) && data.auditbeatSocket !== null
         ? numeral(data.auditbeatSocket).format('0,0')
         : getEmptyTagValue(),
-    description: i18n.AUDITBEAT_SOCKET,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.auditBeatSocketTitle"
+        defaultMessage="Auditbeat Socket"
+      />
+    ),
+  },
+  {
+    description:
+      has('filebeatSuricata', data) && data.filebeatSuricata !== null
+        ? numeral(data.filebeatSuricata).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.fileBeatSuricataTitle"
+        defaultMessage="Filebeat Suricata"
+      />
+    ),
+  },
+  {
+    description:
+      has('filebeatZeek', data) && data.filebeatZeek !== null
+        ? numeral(data.filebeatZeek).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Filebeat Zeek" />
+    ),
+  },
+  {
+    description:
+      has('packetbeatDNS', data) && data.packetbeatDNS !== null
+        ? numeral(data.packetbeatDNS).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.packetBeatDnsTitle"
+        defaultMessage="Packetbeat DNS"
+      />
+    ),
+  },
+  {
+    description:
+      has('packetbeatFlow', data) && data.packetbeatFlow !== null
+        ? numeral(data.packetbeatFlow).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.packetBeatFlowTitle"
+        defaultMessage="Packetbeat Flow"
+      />
+    ),
   },
 ];
+
+export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
+  text-align: right;
+`;
+
 export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data }) => (
-  <>
-    {overviewNetworkStats(data).map(item => (
-      <EuiStat
-        key={item.description}
-        textAlign="center"
-        title={item.title}
-        description={item.description}
-      />
+  <EuiDescriptionList type="column">
+    {overviewNetworkStats(data).map((item, index) => (
+      <React.Fragment key={index}>
+        <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
+
+        <DescriptionListDescription>{item.description}</DescriptionListDescription>
+      </React.Fragment>
     ))}
-  </>
+  </EuiDescriptionList>
 ));

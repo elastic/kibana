@@ -120,7 +120,7 @@ const getMappedNonEcsValue = ({
   fieldName: string;
 }): string[] | undefined => {
   const item = data.find(d => d.field === fieldName);
-  if (item != null) {
+  if (item != null && item.value != null) {
     return item.value;
   }
   return undefined;

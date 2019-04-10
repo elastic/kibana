@@ -11,6 +11,7 @@ export const mockOptions: RequestBasicOptions = {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
     packetbeatAlias: 'packetbeat-*',
+    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

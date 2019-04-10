@@ -26,11 +26,14 @@ export class IndexFields {
       indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.FILEBEAT);
     const includePacketBeatIndices =
       indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.PACKETBEAT);
+    const includeWinlogBeatIndices =
+      indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.WINLOGBEAT);
 
     const indices = [
       ...(includeAuditBeatIndices ? [sourceConfiguration.auditbeatAlias] : []),
       ...(includeFileBeatIndices ? [sourceConfiguration.logAlias] : []),
       ...(includePacketBeatIndices ? [sourceConfiguration.packetbeatAlias] : []),
+      ...(includeWinlogBeatIndices ? [sourceConfiguration.winlogbeatAlias] : []),
     ];
 
     return this.adapter.getIndexFields(request, indices);

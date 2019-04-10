@@ -10,12 +10,12 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { Args, Details, NetflowRenderer, ProcessDraggable, TokensFlexItem } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { AuditdNetflow } from '../auditd_netflow';
 
-import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
+import { SessionUserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
@@ -27,6 +27,8 @@ interface Props {
   contextId: string;
   text: string;
   secondary: string | null | undefined;
+  processName: string | null | undefined;
+  processPid: string | null | undefined;
   processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
@@ -41,9 +43,11 @@ export const AuditdGenericLine = pure<Props>(
     hostName,
     userName,
     primary,
-    secondary,
+    processName,
+    processPid,
     processExecutable,
     processTitle,
+    secondary,
     workingDirectory,
     args,
     result,
@@ -67,12 +71,12 @@ export const AuditdGenericLine = pure<Props>(
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
+        <ProcessDraggable
           contextId={contextId}
           eventId={id}
-          field="process.executable"
-          value={processExecutable}
-          iconType="console"
+          processPid={processPid}
+          processName={processName}
+          processExecutable={processExecutable}
         />
       </TokensFlexItem>
       <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
@@ -83,7 +87,7 @@ export const AuditdGenericLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-loggedin"
+          contextId={contextId}
           eventId={id}
           field="auditd.result"
           queryValue={result}
@@ -101,44 +105,46 @@ interface GenericDetailsProps {
   text: string;
 }
 
-export const AuditdGenericDetails = pure<GenericDetailsProps>(
-  ({ browserFields, data, contextId, text }) => {
-    const id = data._id;
-    const session: string | null | undefined = get('auditd.session', data);
-    const hostName: string | null | undefined = get('host.name', data);
-    const userName: string | null | undefined = get('user.name', data);
-    const result: string | null | undefined = get('auditd.result', data);
-    const processExecutable: string | null | undefined = get('process.executable', data);
-    const processTitle: string | null | undefined = get('process.title', data);
-    const workingDirectory: string | null | undefined = get('process.working_directory', data);
-    const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
-    const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
-    const rawArgs: string[] | null | undefined = get('process.args', data);
-    const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
-    if (data.process != null) {
-      return (
-        <Details>
-          <AuditdGenericLine
-            id={id}
-            contextId={contextId}
-            text={text}
-            hostName={hostName}
-            userName={userName}
-            processExecutable={processExecutable}
-            processTitle={processTitle}
-            workingDirectory={workingDirectory}
-            args={args}
-            session={session}
-            primary={primary}
-            result={result}
-            secondary={secondary}
-          />
-          <EuiSpacer size="s" />
-          <AuditdNetflow data={data} />
-        </Details>
-      );
-    } else {
-      return null;
-    }
+export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
+  const id = data._id;
+  const session: string | null | undefined = get('auditd.session[0]', data);
+  const hostName: string | null | undefined = get('host.name', data); // TODO: Array:host.name[0]
+  const userName: string | null | undefined = get('user.name', data); // TODO: Array:user.name[0]
+  const result: string | null | undefined = get('auditd.result[0]', data);
+  const processPid: string | null | undefined = get('process.pid[0]', data);
+  const processName: string | null | undefined = get('process.name[0]', data);
+  const processExecutable: string | null | undefined = get('process.executable[0]', data);
+  const processTitle: string | null | undefined = get('process.title[0]', data);
+  const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+  const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
+  const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
+  const rawArgs: string[] | null | undefined = get('process.args', data);
+  const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
+  if (data.process != null) {
+    return (
+      <Details>
+        <AuditdGenericLine
+          id={id}
+          contextId={contextId}
+          text={text}
+          hostName={hostName}
+          userName={userName}
+          processName={processName}
+          processPid={processPid}
+          processExecutable={processExecutable}
+          processTitle={processTitle}
+          workingDirectory={workingDirectory}
+          args={args}
+          session={session}
+          primary={primary}
+          result={result}
+          secondary={secondary}
+        />
+        <EuiSpacer size="s" />
+        <NetflowRenderer data={data} />
+      </Details>
+    );
+  } else {
+    return null;
   }
-);
+});

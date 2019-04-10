@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
 
 import { OverviewHostQuery } from '../../../../containers/overview/overview_host';
 import { OverviewHostStats } from '../overview_host_stats';
-
-import * as i18n from '../translations';
 
 export interface OwnProps {
   poll: number;
@@ -22,9 +28,27 @@ export interface OwnProps {
 export const OverviewHost = pure<OwnProps>(({ endDate, poll, startDate }) => (
   <EuiFlexItem>
     <EuiPanel>
-      <EuiTitle>
-        <h2>{i18n.HOSTS_HEADING}</h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.siem.overview.hostsTitle"
+                defaultMessage="Hosts Ingest Indices"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton href="#/link-to/hosts/">
+            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+
       <OverviewHostQuery endDate={endDate} poll={poll} sourceId="default" startDate={startDate}>
         {({ overviewHost }) => <OverviewHostStats data={overviewHost} />}
       </OverviewHostQuery>

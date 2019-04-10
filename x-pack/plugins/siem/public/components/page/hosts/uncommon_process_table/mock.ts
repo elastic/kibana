@@ -14,8 +14,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           process: {
-            title: 'Hello World',
-            name: 'elrond.elstc.co',
+            title: ['Hello World'],
+            name: ['elrond.elstc.co'],
           },
           host: [],
           instances: 93,
@@ -32,8 +32,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           process: {
-            title: 'Hello World',
-            name: 'elrond.elstc.co',
+            title: ['Hello World'],
+            name: ['elrond.elstc.co'],
           },
           host: [{ id: 'host-id-1', name: 'hello-world' }],
           instances: 93,
@@ -50,8 +50,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           process: {
-            title: 'Hello World',
-            name: 'siem-kibana',
+            title: ['Hello World'],
+            name: ['siem-kibana'],
           },
           host: [
             { id: 'host-id-1', name: 'hello-world' },
@@ -71,8 +71,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           process: {
-            title: 'Hello World',
-            name: 'siem-kibana',
+            title: ['Hello World'],
+            name: ['siem-kibana'],
           },
           host: [{ ip: ['127.0.0.1'] }],
           instances: 97,
@@ -89,8 +89,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           process: {
-            title: 'Hello World',
-            name: 'siem-kibana',
+            title: ['Hello World'],
+            name: ['siem-kibana'],
           },
           host: [
             { ip: ['127.0.0.1'] },

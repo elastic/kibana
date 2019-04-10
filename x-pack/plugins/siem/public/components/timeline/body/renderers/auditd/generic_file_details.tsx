@@ -11,19 +11,18 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { Args, Details, NetflowRenderer, ProcessDraggable, TokensFlexItem } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { AuditdNetflow } from '../auditd_netflow';
 
-import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
+import { SessionUserHostWorkingDir } from '.';
 import * as i18n from './translations';
 
 interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
-  processExecutable: string | null | undefined;
   result: string | null | undefined;
   primary: string | null | undefined;
   fileIcon: IconType;
@@ -31,6 +30,9 @@ interface Props {
   text: string;
   secondary: string | null | undefined;
   filePath: string | null | undefined;
+  processName: string | null | undefined;
+  processPid: string | null | undefined;
+  processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
@@ -47,8 +49,10 @@ export const AuditdGenericFileLine = pure<Props>(
     primary,
     secondary,
     filePath,
-    processTitle,
+    processName,
+    processPid,
     processExecutable,
+    processTitle,
     workingDirectory,
     args,
     session,
@@ -86,12 +90,12 @@ export const AuditdGenericFileLine = pure<Props>(
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
+        <ProcessDraggable
           contextId={contextId}
           eventId={id}
-          field="process.executable"
-          value={processExecutable}
-          iconType="console"
+          processPid={processPid}
+          processName={processName}
+          processExecutable={processExecutable}
         />
       </TokensFlexItem>
       <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
@@ -102,7 +106,7 @@ export const AuditdGenericFileLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-loggedin"
+          contextId={contextId}
           eventId={id}
           field="auditd.result"
           queryValue={result}
@@ -122,20 +126,22 @@ interface GenericDetailsProps {
 }
 
 export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
-  ({ browserFields, data, contextId, text, fileIcon = 'document' }) => {
+  ({ data, contextId, text, fileIcon = 'document' }) => {
     const id = data._id;
-    const session: string | null | undefined = get('auditd.session', data);
-    const hostName: string | null | undefined = get('host.name', data);
-    const userName: string | null | undefined = get('user.name', data);
-    const result: string | null | undefined = get('auditd.result', data);
-    const processExecutable: string | null | undefined = get('process.executable', data);
-    const processTitle: string | null | undefined = get('process.title', data);
-    const workingDirectory: string | null | undefined = get('process.working_directory', data);
-    const filePath: string | null | undefined = get('file.path', data);
-    const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
-    const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
+    const session: string | null | undefined = get('auditd.session[0]', data);
+    const hostName: string | null | undefined = get('host.name', data); // TODO: Array host.name[0]
+    const userName: string | null | undefined = get('user.name', data); // TODO: Array user.name[0]
+    const result: string | null | undefined = get('auditd.result[0]', data);
+    const processPid: string | null | undefined = get('process.pid[0]', data);
+    const processName: string | null | undefined = get('process.name[0]', data);
+    const processExecutable: string | null | undefined = get('process.executable[0]', data);
+    const processTitle: string | null | undefined = get('process.title[0]', data);
+    const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+    const filePath: string | null | undefined = get('file.path', data); // TODO: Array file.path[0]
+    const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
+    const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
-    const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
+    const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
 
     if (data.process != null) {
       return (
@@ -147,18 +153,20 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
             hostName={hostName}
             userName={userName}
             filePath={filePath}
+            processName={processName}
+            processPid={processPid}
+            processExecutable={processExecutable}
             processTitle={processTitle}
             workingDirectory={workingDirectory}
             args={args}
             session={session}
             primary={primary}
-            processExecutable={processExecutable}
             secondary={secondary}
             fileIcon={fileIcon}
             result={result}
           />
           <EuiSpacer size="s" />
-          <AuditdNetflow data={data} />
+          <NetflowRenderer data={data} />
         </Details>
       );
     } else {

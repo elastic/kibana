@@ -18,21 +18,21 @@ export const mockSourceData = {
   status: {
     auditbeatIndicesExist: true,
     auditbeatAliasExists: true,
-    auditbeatIndices: [
-      "auditbeat-7.0.0-alpha1-2018.10.03",
-      "auditbeat-7.0.0-alpha1-2018.10.04",
-    ],
+    auditbeatIndices: ['auditbeat-7.0.0-alpha1-2018.10.03', 'auditbeat-7.0.0-alpha1-2018.10.04'],
+    winlogbeatAliasExists: true,
+    winlogbeatIndicesExist: true,
+    winlogbeatIndices: ['winlogbeat-7.0.0-alpha1-2018.10.03', 'winlogbeat-7.0.0-alpha1-2018.10.04'],
     indexFields: [
       {
-        name: "@timestamp",
+        name: '@timestamp',
         searchable: true,
-        type: "date",
+        type: 'date',
         aggregatable: true,
       },
       {
-        name: "apache2.access.agent",
+        name: 'apache2.access.agent',
         searchable: true,
-        type: "string",
+        type: 'string',
         aggregatable: false,
       },
     ],
