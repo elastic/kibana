@@ -47,7 +47,7 @@ chrome.badge.set(
           defaultMessage: 'Read only',
         }),
         tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
+          defaultMessage: 'Unable to save canvas workpads',
         }),
       }
 );

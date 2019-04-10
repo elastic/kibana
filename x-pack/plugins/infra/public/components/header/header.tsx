@@ -32,7 +32,7 @@ export const Header = injectI18n(
                     id: 'xpack.infra.header.badge.readOnly.text',
                   }),
                   tooltip: intl.formatMessage({
-                    defaultMessage: 'You lack the authority',
+                    defaultMessage: 'Unable to change source configuration',
                     id: 'xpack.infra.header.badge.readOnly.tooltip',
                   }),
                 }

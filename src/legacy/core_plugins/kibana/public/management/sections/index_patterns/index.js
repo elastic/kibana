@@ -96,7 +96,7 @@ uiRoutes
           defaultMessage: 'Read only',
         }),
         tooltip: i18n('kbn.management.indexPatterns.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
+          defaultMessage: 'Unable to save index patterns',
         }),
       };
     }

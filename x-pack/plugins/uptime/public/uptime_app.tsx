@@ -157,7 +157,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
               defaultMessage: 'Read only',
             }),
             tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
-              defaultMessage: 'You lack the authority',
+              defaultMessage: 'Unable to save',
             }),
           }
         : undefined

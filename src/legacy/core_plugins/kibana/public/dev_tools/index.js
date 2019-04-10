@@ -44,7 +44,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
         defaultMessage: 'Read only',
       }),
       tooltip: i18n('kbn.devTools.badge.readOnly.tooltip', {
-        defaultMessage: 'You lack the authority',
+        defaultMessage: 'Unable to save',
       }),
     };
   },
