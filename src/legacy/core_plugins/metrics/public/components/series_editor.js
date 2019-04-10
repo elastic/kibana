@@ -72,6 +72,7 @@ class SeriesEditor extends Component {
         onClone={() => this.handleClone(row)}
         onDelete={handleDelete.bind(null, props, row)}
         onShouldSortItem={(direction) => this.sortSeries(index, direction, allSeries)}
+        visData$={this.props.visData$}
         model={row}
         panel={model}
         sortData={row.id}
@@ -115,7 +116,8 @@ SeriesEditor.propTypes = {
   limit: PropTypes.number,
   model: PropTypes.object,
   name: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
 
 export default SeriesEditor;

@@ -7,5 +7,5 @@ The `plugin` export at the root of a plugin's `public` directory should conform 
 <b>Signature:</b>
 
 ```typescript
-export declare type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
+export declare type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
 ```
