@@ -17,10 +17,18 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import Hapi from 'hapi';
 
-const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
-export async function scanAllTypes($http, typesToInclude) {
-  const results = await $http.post(`${apiBase}/export`, { typesToInclude });
-  return results.data;
-}
+export const createLogLegacyImportRoute = () => ({
+  path: '/api/saved_objects/_log_legacy_import',
+  method: 'POST',
+  options: {
+    handler(request: Hapi.Request) {
+      request.server.log(
+        ['warning'],
+        'Importing saved objects from a .json file has been deprecated'
+      );
+      return { success: true };
+    },
+  },
+});

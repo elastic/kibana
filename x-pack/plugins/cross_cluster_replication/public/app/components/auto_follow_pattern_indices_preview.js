@@ -29,6 +29,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
     <EuiCallOut
       title={title}
       iconType="indexMapping"
+      data-test-subj="ccrAutoFollowPatternIndicesPreview"
     >
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
