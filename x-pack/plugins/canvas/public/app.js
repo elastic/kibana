@@ -9,9 +9,7 @@ import './angular/config';
 import './angular/services';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { uiCapabilities } from 'ui/capabilities';
 import { CanvasRootController } from './angular/controllers';
 
 // Import the uiExports that the application uses
@@ -37,17 +35,3 @@ chrome.setRootController('canvas', CanvasRootController);
 chrome.helpExtension.set(domNode => {
   ReactDOM.render(<HelpMenu />, domNode);
 });
-
-// set the read-only badge when appropriate
-chrome.badge.set(
-  uiCapabilities.canvas.save
-    ? undefined
-    : {
-        text: i18n.translate('xpack.canvas.badge.readOnly.text', {
-          defaultMessage: 'Read only',
-        }),
-        tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
-          defaultMessage: 'Unable to save canvas workpads',
-        }),
-      }
-);
