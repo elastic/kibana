@@ -7,9 +7,9 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { LoadingPage } from '../../components/loading_page';
+import { LoadingPage } from './loading_page';
 
-export const SourceLoadingPage: React.SFC = () => (
+export const SourceLoadingPage: React.FunctionComponent = () => (
   <LoadingPage
     message={
       <FormattedMessage
