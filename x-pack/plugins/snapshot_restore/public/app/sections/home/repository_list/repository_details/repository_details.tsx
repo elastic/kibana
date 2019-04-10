@@ -42,11 +42,13 @@ import 'brace/theme/textmate';
 interface Props extends RouteComponentProps {
   repositoryName: Repository['name'];
   onClose: () => void;
+  onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
 const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   repositoryName,
   onClose,
+  onRepositoryDeleted,
   history,
 }) => {
   const {
@@ -227,12 +229,14 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <RepositoryDeleteProvider>
-                  {(deleteRepository: (names: Array<Repository['name']>) => void) => {
+                  {deleteRepositoryPrompt => {
                     return (
                       <EuiButtonEmpty
                         color="danger"
                         data-test-subj="srRepositoryDetailsDeleteActionButton"
-                        onClick={() => deleteRepository([repositoryName])}
+                        onClick={() =>
+                          deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
+                        }
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"

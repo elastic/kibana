@@ -26,6 +26,7 @@ interface Props extends RouteComponentProps {
   verification: { [key: string]: RepositoryVerification };
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
+  onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
@@ -33,6 +34,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
   verification,
   reload,
   openRepositoryDetails,
+  onRepositoryDeleted,
   history,
 }) => {
   const {
@@ -105,7 +107,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           render: ({ name }: Repository) => {
             return (
               <RepositoryDeleteProvider>
-                {(deleteRepository: (names: Array<Repository['name']>) => void) => {
+                {deleteRepositoryPrompt => {
                   return (
                     <EuiButtonIcon
                       aria-label={i18n.translate(
@@ -117,7 +119,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                       iconType="trash"
                       color="danger"
                       data-test-subj="srRepositoryListDeleteActionButton"
-                      onClick={() => deleteRepository([name])}
+                      onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
                     />
                   );
                 }}
@@ -149,10 +151,20 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
   const search = {
     toolsLeft: selectedItems.length ? (
       <RepositoryDeleteProvider>
-        {(deleteRepository: (names: Array<Repository['name']>) => void) => {
+        {(
+          deleteRepositoryPrompt: (
+            names: Array<Repository['name']>,
+            onSuccess?: (repositoriesDeleted: Array<Repository['name']>) => void
+          ) => void
+        ) => {
           return (
             <EuiButton
-              onClick={() => deleteRepository(selectedItems.map(repository => repository.name))}
+              onClick={() =>
+                deleteRepositoryPrompt(
+                  selectedItems.map(repository => repository.name),
+                  onRepositoryDeleted
+                )
+              }
               color="danger"
               data-test-subj="srRepositoryListBulkDeleteActionButton"
             >

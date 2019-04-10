@@ -10,7 +10,7 @@ import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 
 import { HashRouter } from 'react-router-dom';
@@ -23,6 +23,7 @@ export interface AppCore {
   };
   notification: {
     fatalError: typeof fatalError;
+    toastNotifications: typeof toastNotifications;
   };
 }
 
@@ -92,6 +93,7 @@ export function createShim(): { core: Core; plugins: Plugins } {
       chrome,
       notification: {
         fatalError,
+        toastNotifications,
       },
       documentation: {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,

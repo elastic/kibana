@@ -46,3 +46,12 @@ export const editRepository = async (editedRepository: Repository) => {
     body: editedRepository,
   });
 };
+
+export const deleteRepositories = async (names: Array<Repository['name']>) => {
+  return sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`
+    ),
+    method: 'delete',
+  });
+};

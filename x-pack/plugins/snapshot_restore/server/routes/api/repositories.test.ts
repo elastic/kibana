@@ -7,6 +7,7 @@ import { Request, ResponseToolkit } from 'hapi';
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import {
   createHandler,
+  deleteHandler,
   getAllHandler,
   getOneHandler,
   getTypesHandler,
@@ -259,6 +260,70 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       await expect(
         updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
+    });
+  });
+
+  describe('deleteHandler()', () => {
+    const names = ['fooRepository', 'barRepository'];
+    const mockCreateRequest = ({
+      params: {
+        names: names.join(','),
+      },
+    } as unknown) as Request;
+
+    it('should return successful ES responses', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValueOnce(mockEsResponse)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = { itemsDeleted: names, errors: [] };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return error ES responses', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockRejectedValueOnce(mockEsError);
+      const expectedResponse = {
+        itemsDeleted: [],
+        errors: names.map(name => ({
+          name,
+          error: mockEsError,
+        })),
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return combination of ES successes and errors', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        itemsDeleted: [names[1]],
+        errors: [
+          {
+            name: names[0],
+            error: mockEsError,
+          },
+        ],
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
     });
   });
 });

@@ -125,16 +125,30 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     );
   }
 
+  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
+    if (currentRepository && repositoriesDeleted.includes(currentRepository)) {
+      closeRepositoryDetails();
+    }
+    if (repositoriesDeleted.length) {
+      reload();
+    }
+  };
+
   return (
     <Fragment>
       {currentRepository ? (
-        <RepositoryDetails repositoryName={currentRepository} onClose={closeRepositoryDetails} />
+        <RepositoryDetails
+          repositoryName={currentRepository}
+          onClose={closeRepositoryDetails}
+          onRepositoryDeleted={onRepositoryDeleted}
+        />
       ) : null}
       <RepositoryTable
         repositories={repositories || []}
         verification={verification || {}}
         reload={reload}
         openRepositoryDetails={openRepositoryDetails}
+        onRepositoryDeleted={onRepositoryDeleted}
       />
     </Fragment>
   );

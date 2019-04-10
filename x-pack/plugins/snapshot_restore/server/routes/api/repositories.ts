@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
+import {
+  wrapCustomError,
+  wrapEsError,
+} from '../../../../../server/lib/create_router/error_wrappers';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
@@ -17,6 +20,7 @@ export function registerRepositoriesRoutes(router: Router) {
   router.get('repositories/{name}', getOneHandler);
   router.put('repositories', createHandler);
   router.put('repositories/{name}', updateHandler);
+  router.delete('repositories/{names}', deleteHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -36,14 +40,14 @@ export const getAllHandler: RouterRouteHandler = async (
       ...booleanizeSettings(repositoriesByName[name]),
     };
   });
-  const repositoryVerification = await Promise.all([
-    ...repositoryNames.map(name => {
+  const repositoryVerification = await Promise.all(
+    repositoryNames.map(name => {
       return callWithRequest('snapshot.verifyRepository', { repository: name }).catch(e => ({
         valid: false,
         error: e.response ? JSON.parse(e.response) : e,
       }));
-    }),
-  ]);
+    })
+  );
   return {
     repositories,
     verification: repositoryNames.reduce(
@@ -155,4 +159,28 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
     body: rest,
     verify: false,
   });
+};
+
+export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { names } = req.params;
+  const repositoryNames = names.split(',');
+  const response: { itemsDeleted: string[]; errors: any[] } = {
+    itemsDeleted: [],
+    errors: [],
+  };
+
+  await Promise.all(
+    repositoryNames.map(name => {
+      return callWithRequest('snapshot.deleteRepository', { repository: name })
+        .then(() => response.itemsDeleted.push(name))
+        .catch(e =>
+          response.errors.push({
+            name,
+            error: wrapEsError(e),
+          })
+        );
+    })
+  );
+
+  return response;
 };
