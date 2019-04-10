@@ -45,9 +45,15 @@ representation of the roles.
       "cluster": [ ],
       "run_as": [ ]
     },
-    "kibana": [ {
-        "privileges": [ "all" ]
-    } ],
+    "kibana": [{
+      "base": [
+        "all"
+      ],
+      "feature": {},
+      "spaces": [
+        "*"
+      ]
+    }]
   },
   {
     "name": "my_admin_role",
@@ -82,7 +88,7 @@ the `/api/security/role/<rolename>` endpoint:
 
 [source,js]
 --------------------------------------------------
-GET /api/security/role/my_kibana_role
+GET /api/security/role/my_restricted_kibana_role
 --------------------------------------------------
 // KIBANA
 
@@ -94,7 +100,7 @@ representation of the role.
 [source,js]
 --------------------------------------------------
 {
-  "name": "my_kibana_role",
+  "name": "my_restricted_kibana_role",
   "metadata" : {
     "version" : 1
   },
@@ -106,8 +112,67 @@ representation of the role.
     "indices": [ ],
     "run_as": [ ]
   },
-  "kibana": [ {
-      "privileges": [ "all" ]
-  } ],
+   "kibana": [
+    {
+      "base": [
+        "read"
+      ],
+      "feature": {},
+      "spaces": [
+        "marketing"
+      ]
+    },
+    {
+      "base": [],
+      "feature": {
+        "discover": [
+          "all"
+        ],
+        "visualize": [
+          "all"
+        ],
+        "dashboard": [
+          "all"
+        ],
+        "dev_tools": [
+          "read"
+        ],
+        "advancedSettings": [
+          "read"
+        ],
+        "indexPatterns": [
+          "read"
+        ],
+        "timelion": [
+          "all"
+        ],
+        "graph": [
+          "all"
+        ],
+        "apm": [
+          "read"
+        ],
+        "maps": [
+          "read"
+        ],
+        "canvas": [
+          "read"
+        ],
+        "infrastructure": [
+          "all"
+        ],
+        "logs": [
+          "all"
+        ],
+        "uptime": [
+          "all"
+        ]
+      },
+      "spaces": [
+        "sales",
+        "default"
+      ]
+    }
+  ]
 }
 --------------------------------------------------

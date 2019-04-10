@@ -32,9 +32,39 @@ that begin with `_` are reserved for system usage.
 `elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (object) An object that specifies the <<kibana-privileges>>. Valid keys are `global` and `space`. Privileges defined in the `global` key will apply to all spaces within Kibana, and will take precedent over any privileges defined in the `space` key. For example, specifying `global: ["all"]` will grant full access to all spaces within Kibana, even if the role indicates that a specific space should only have `read` privileges. 
+`kibana`:: (array) An array of objects which specify the <<kibana-privileges>> for this role:
+[source,js]
+--------------------------------------------------
+[{
+  // An optional base privilege. 
+  // If specified, must either be ["all"] or ["read"].
+  // Privileges granted here cannot be revoked or downgraded via the `feature` section.
+  // "all" grants read/write access to all features within Kibana for the specified spaces.
+  // "read" grants read-only access to all featuers within Kibana for the specified spaces.
+  "base": [],
 
-===== Example
+  // Object containing privileges for specific features.
+  // Privileges specified here will be added to the base privilege, if one was provided.
+  // For example, specifying `base: ["read"]` will grant read access to every feature,
+  // even if they aren't granted anything in this feature section.
+  // Use the Features API to retrieve a list of available features <1>
+  "feature": {
+    "advancedSettings": ["all"],
+    "discover": ["all"],
+    "visualize": ["all"],
+    "dashboard": ["read"]
+  },
+  
+  // The spaces these privileges should be applied to.
+  // To grant access to all spaces, set this to `["*"]`, or omit the value altogether.
+  "spaces": ["default", "marketing", "sales"]
+}]
+--------------------------------------------------
+
+<1> <<features-api>>
+
+===== Example 1
+Granting read access to all features in all spaces, with full access to Advanced Settings.
 
 [source,js]
 --------------------------------------------------
@@ -54,22 +84,25 @@ PUT /api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-  "kibana": {
-    "global": ["all"]
-  }
+  "kibana": [
+    {
+      "base": [
+        "read"
+      ],
+      "feature": {
+        "advancedSettings": ["all"]
+      },
+      "spaces": [
+        "*"
+      ]
+    }
+  ]
 }
 --------------------------------------------------
 // KIBANA
 
-==== Response
-
-A successful call returns a response code of `204` and no response body.
-
-
-==== Granting access to specific spaces
-To grant access to individual spaces within {kib}, specify the space identifier within the `kibana` object.
-
-Note: granting access 
+===== Example 2
+Granting "dashboard only" access to only the Marketing space.
 
 [source,js]
 --------------------------------------------------
@@ -89,12 +122,54 @@ PUT /api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-  "kibana": {
-    "global": [],
-    "space": {
-      "marketing": ["all"],
-      "engineering": ["read"] 
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": ["read"]
+      },
+      "spaces": [
+        "marketing"
+      ]
     }
-  }
+  ]
 }
 --------------------------------------------------
+
+===== Example 3
+Granting full access to all features in the Default space.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ "all" ],
+    "indices" : [ {
+      "names" : [ "index1", "index2" ],
+      "privileges" : [ "all" ],
+      "field_security" : {
+        "grant" : [ "title", "body" ]
+      },
+      "query" : "{\"match\": {\"title\": \"foo\"}}"
+    } ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {
+      },
+      "spaces": [
+        "default"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+
+==== Response
+
+A successful call returns a response code of `204` and no response body.
