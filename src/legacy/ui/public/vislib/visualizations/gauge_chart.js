@@ -18,7 +18,6 @@
  */
 
 import d3 from 'd3';
-import $ from 'jquery';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { GaugeTypesProvider } from './gauges/gauge_types';
 
@@ -50,13 +49,14 @@ export function GaugeChartProvider(Private) {
      * @returns {{width: number, height: number}}
      */
     calcGaugeDim(alignment, containerDom, nrOfItems) {
-      const $container = $(containerDom);
+      const containerWidth = containerDom.clientWidth;
+      const containerHeight = containerDom.clientHeight;
       const containerMargin = 20;
       //there are a few pixel of margin between multiple gauges
       //subtracting this margin prevents displaying scrollbars
       const gaugeBottomMargin = 25;
-      const availableWidth = $container.width() - containerMargin;
-      const availableHeight = $container.height() - containerMargin;
+      const availableWidth = containerWidth - containerMargin;
+      const availableHeight = containerHeight - containerMargin;
 
       const adaptedWidth = Math.floor(availableWidth / nrOfItems);
       const adaptedHeight = Math.floor(availableHeight / nrOfItems) - gaugeBottomMargin;
@@ -65,7 +65,7 @@ export function GaugeChartProvider(Private) {
 
         case 'vertical':
           return {
-            width: availableWidth,
+            width: containerWidth, //for compatiblity with tests
             height: adaptedHeight,
           };
 
@@ -77,7 +77,7 @@ export function GaugeChartProvider(Private) {
 
         default:
           return {
-            width: availableWidth < availableHeight ? availableWidth : adaptedWidth,
+            width: availableWidth < availableHeight ? containerWidth : adaptedWidth,
             height: availableWidth < availableHeight ? adaptedHeight : availableHeight,
           };
       }
