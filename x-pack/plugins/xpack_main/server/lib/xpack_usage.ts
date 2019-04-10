@@ -9,12 +9,14 @@ import { takeUntil } from 'rxjs/operators';
 import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { Poller } from '../../../../common/poller';
 
+type SecurityRealm = 'file' | 'ldap' | 'native' | 'saml' | 'kerberos' | 'oidc' | 'active_directory' | 'pki';
+
 export interface XPackUsageResponse {
   security: {
     available: boolean;
     enabled: boolean;
     realms: {
-      [realmId: string]: {
+      [key in SecurityRealm]: {
         available: boolean;
         enabled: boolean;
       };
@@ -80,6 +82,7 @@ export class XPackUsage implements XPackUsageContract {
         method: 'GET',
         path: '/_xpack/usage',
       });
+
       this.usage$.next(Object.freeze(response));
     } catch (error) {
       this.log(
