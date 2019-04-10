@@ -12,9 +12,7 @@ import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
 // @public
-export class BasePathSetup {
-    // @internal
-    constructor(basePath: string);
+export interface BasePathSetup {
     addToPath(path: string): string;
     get(): string;
     removeFromPath(path: string): string;

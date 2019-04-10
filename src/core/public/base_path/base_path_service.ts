@@ -21,6 +21,34 @@
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { modifyUrl } from '../utils';
 
+/**
+ * Provides access to the 'server.basePath' configuration option in kibana.yml
+ *
+ * @public
+ */
+export interface BasePathSetup {
+  /**
+   * Get the basePath as defined by the server
+   *
+   * @returns The basePath as defined by the server
+   */
+  get(): string
+
+  /**
+   * Add the current basePath to a path string.
+   *
+   * @param path - A relative url including the leading `/`, otherwise it will be returned without modification
+   */
+  addToPath(path: string): string
+
+  /**
+   * Remove the basePath from a path that starts with it
+   *
+   * @param path - A relative url that starts with the basePath, which will be stripped
+   */
+  removeFromPath(path: string): string
+}
+
 interface BasePathDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -28,66 +56,34 @@ interface BasePathDeps {
 /** @internal */
 export class BasePathService {
   public setup({ injectedMetadata }: BasePathDeps) {
-    return new BasePathSetup(injectedMetadata.getBasePath() || '');
-  }
-}
+    const basePath = injectedMetadata.getBasePath() || '';
 
-/**
- * Provides access the 'server.basePath' configuration option in kibana.yml
- *
- * @public
- */
-export class BasePathSetup {
-  /**
-   * Don't use this constructor directly, use an instance of this class
-   * provided by CoreSetup instead.
-   *
-   * @param basePath - The basePath as specificied by the server
-   *
-   * @internal
-   */
-  constructor(private readonly basePath: string) {}
+    const basePathSetup: BasePathSetup = {
+      get: () => basePath,
+      addToPath: (path) => {
+        return modifyUrl(path, parts => {
+          if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+            parts.pathname = `${basePath}${parts.pathname}`;
+          }
+        });
+      },
+      removeFromPath(path: string): string {
+        if (!basePath) {
+          return path;
+        }
 
-  /**
-   * Get the basePath as defined by the server
-   *
-   * @returns The basePath as defined by the server
-   */
-  public get(): string {
-    return this.basePath;
-  }
+        if (path === basePath) {
+          return '/';
+        }
 
-  /**
-   * Add the current basePath to a path string.
-   *
-   * @param path - A relative url including the leading `/`, otherwise it will be returned without modification
-   */
-  public addToPath(path: string): string {
-    return modifyUrl(path, parts => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.basePath}${parts.pathname}`;
+        if (path.startsWith(basePath + '/')) {
+          return path.slice(basePath.length);
+        }
+
+        return path;
       }
-    });
-  }
+    };
 
-  /**
-   * Remove the basePath from a path that starts with it
-   *
-   * @param path - A relative url that starts with the basePath, which will be stripped
-   */
-  public removeFromPath(path: string): string {
-    if (!this.basePath) {
-      return path;
-    }
-
-    if (path === this.basePath) {
-      return '/';
-    }
-
-    if (path.startsWith(this.basePath + '/')) {
-      return path.slice(this.basePath.length);
-    }
-
-    return path;
+    return basePathSetup;
   }
 }
