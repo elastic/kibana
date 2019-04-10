@@ -10,7 +10,7 @@ import {
   SavedSearchObjectAttributes,
   SearchPanel,
   TimeRangeParams,
-} from '../../types';
+} from '../../';
 
 interface SearchPanelData {
   title: string;

@@ -17,7 +17,7 @@ import {
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-} from '../../types';
+} from '../../';
 import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
 
