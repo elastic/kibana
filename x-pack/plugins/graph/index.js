@@ -30,6 +30,15 @@ export function graph(kibana) {
       home: ['plugins/graph/register_feature'],
       mappings,
       migrations,
+      savedObjectSchemas: {
+        'graph-workspace': {
+          icon: 'graphApp',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+        },
+      },
     },
 
     config(Joi) {

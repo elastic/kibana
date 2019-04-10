@@ -181,6 +181,12 @@ export default function (kibana) {
             return `/dashboard/${obj.id}`;
           },
         },
+        url: {
+          titleSearchField: 'url',
+          getTitle(obj) {
+            return obj.attributes.url;
+          },
+        },
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },

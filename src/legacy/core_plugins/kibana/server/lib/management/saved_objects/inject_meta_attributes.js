@@ -21,7 +21,10 @@ export function injectMetaAttributes(savedObjects, savedObjectSchemas) {
   return savedObjects.map((savedObject) => {
     const schema = savedObjectSchemas[savedObject.type];
     if (!schema) {
-      return savedObject;
+      return {
+        ...savedObject,
+        meta: savedObject.meta || {},
+      };
     }
     return {
       ...savedObject,

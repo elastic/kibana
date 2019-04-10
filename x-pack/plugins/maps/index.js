@@ -53,6 +53,13 @@ export function maps(kibana) {
       home: ['plugins/maps/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
+        'map': {
+          icon: 'gisApp',
+          titleSearchField: 'title',
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+        },
         'maps-telemetry': {
           isNamespaceAgnostic: true
         }

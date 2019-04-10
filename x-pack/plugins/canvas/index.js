@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP } from './common/lib';
+import { CANVAS_APP, CANVAS_TYPE } from './common/lib';
 import { migrations } from './migrations';
 
 export function canvas(kibana) {
@@ -33,6 +33,15 @@ export function canvas(kibana) {
       home: ['plugins/canvas/register_feature'],
       mappings,
       migrations,
+      savedObjectSchemas: {
+        [CANVAS_TYPE]: {
+          icon: 'canvasApp',
+          titleSearchField: 'name',
+          getTitle(obj) {
+            return obj.attributes.name;
+          },
+        },
+      },
     },
 
     config: Joi => {

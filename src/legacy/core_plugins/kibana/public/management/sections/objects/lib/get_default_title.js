@@ -17,16 +17,6 @@
  * under the License.
  */
 
-export * from './fetch_export_by_type';
-export * from './fetch_export_objects';
-export * from './get_relationships';
-export * from './get_saved_object_counts';
-export * from './get_saved_object_label';
-export * from './import_file';
-export * from './import_legacy_file';
-export * from './parse_query';
-export * from './resolve_import_errors';
-export * from './resolve_saved_objects';
-export * from './log_legacy_import';
-export * from './process_import_response';
-export * from './get_default_title';
+export function getDefaultTitle(object) {
+  return `${object.type} [id=${object.id}]`;
+}

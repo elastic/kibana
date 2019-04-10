@@ -31,9 +31,10 @@ import {
   EuiFormErrorText,
   EuiPopover,
   EuiSwitch,
-  EuiFormRow
+  EuiFormRow,
+  EuiText
 } from '@elastic/eui';
-import { getSavedObjectLabel } from '../../../../lib';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableUI extends PureComponent {
@@ -190,9 +191,17 @@ class TableUI extends PureComponent {
         }),
         dataType: 'string',
         sortable: false,
-        render: (title, object) => (
-          <EuiLink href={getEditUrl(object)}>{title}</EuiLink>
-        ),
+        render: (title, object) => {
+          const editUrl = getEditUrl(object);
+          if (!editUrl) {
+            return (
+              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
+            );
+          }
+          return (
+            <EuiLink href={editUrl}>{title || getDefaultTitle(object)}</EuiLink>
+          );
+        },
       },
       {
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnActionsName', defaultMessage: 'Actions' }),
@@ -209,6 +218,7 @@ class TableUI extends PureComponent {
             type: 'icon',
             icon: 'eye',
             onClick: object => goInApp(object),
+            available: object => !!object.meta.inAppUrl,
           },
           {
             name:
@@ -223,8 +233,7 @@ class TableUI extends PureComponent {
               }),
             type: 'icon',
             icon: 'kqlSelector',
-            onClick: object =>
-              onShowRelationships(object),
+            onClick: object => onShowRelationships(object),
           },
         ],
       },

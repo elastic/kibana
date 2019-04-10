@@ -31,9 +31,10 @@ import {
   EuiLoadingKibana,
   EuiInMemoryTable,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getSavedObjectLabel } from '../../../../lib';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 
 class RelationshipsUI extends Component {
   static propTypes = {
@@ -143,9 +144,17 @@ class RelationshipsUI extends Component {
         }),
         dataType: 'string',
         sortable: false,
-        render: (title, object) => (
-          <EuiLink href={getEditUrl(object)}>{title}</EuiLink>
-        ),
+        render: (title, object) => {
+          const editUrl = getEditUrl(object);
+          if (!editUrl) {
+            return (
+              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
+            );
+          }
+          return (
+            <EuiLink href={editUrl}>{title || getDefaultTitle(object)}</EuiLink>
+          );
+        },
       },
       {
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnActionsName', defaultMessage: 'Actions' }),
@@ -162,6 +171,7 @@ class RelationshipsUI extends Component {
             type: 'icon',
             icon: 'eye',
             onClick: object => goInApp(object),
+            available: object => !!object.meta.inAppUrl,
           },
         ],
       },
@@ -202,7 +212,7 @@ class RelationshipsUI extends Component {
                 />
               </EuiToolTip>
               &nbsp;&nbsp;
-              {savedObject.meta.title}
+              {savedObject.meta.title || getDefaultTitle(savedObject)}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

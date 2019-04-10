@@ -18,43 +18,7 @@
  */
 
 import Joi from 'joi';
-import path from 'path';
-import wreck from 'wreck';
-import { toArray } from 'rxjs/operators';
-import { collectUiExports } from '../../../../../../../ui/ui_exports';
 import { injectMetaAttributes } from '../../../../lib/management/saved_objects/inject_meta_attributes';
-import { findPluginSpecs } from '../../../../../../../plugin_discovery';
-
-async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
-  try {
-    const { payload } = await wreck.get('/api/status', {
-      baseUrl: kibanaUrl,
-      json: true
-    });
-
-    return payload.status.statuses
-      .some(({ id }) => id.includes(`plugin:${pluginId}@`));
-  } catch (error) {
-    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`);
-  }
-}
-
-async function getUiExports(kibanaUrl) {
-  const xpackEnabled = await getKibanaPluginEnabled({
-    kibanaUrl,
-    pluginId: 'xpack_main'
-  });
-
-  const { spec$ } = await findPluginSpecs({
-    plugins: {
-      scanDirs: [path.resolve(__dirname, '../../../../../../')],
-      paths: xpackEnabled ? [path.resolve(__dirname, '../../../../../../../../../x-pack')] : [],
-    }
-  });
-
-  const specs = await spec$.pipe(toArray()).toPromise();
-  return collectUiExports(specs);
-}
 
 export function registerFind(server) {
   server.route({

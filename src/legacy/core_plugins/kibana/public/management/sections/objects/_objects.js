@@ -64,7 +64,7 @@ function updateObjectsTable($scope, $injector) {
             }
           }}
           goInApp={object => {
-            const inAppUrl = object.meta.inAppUrl || `/${object.type.toLowerCase()}/${object.id}`;
+            const inAppUrl = object.meta.inAppUrl;
             kbnUrl.change(inAppUrl);
             $scope.$apply();
           }}

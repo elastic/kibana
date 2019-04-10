@@ -68,6 +68,11 @@ export const INCLUDED_TYPES = [
   'visualization',
   'dashboard',
   'search',
+  'map',
+  'canvas-workpad',
+  'graph-workspace',
+  'config',
+  'url',
 ];
 
 class ObjectsTableUI extends Component {
