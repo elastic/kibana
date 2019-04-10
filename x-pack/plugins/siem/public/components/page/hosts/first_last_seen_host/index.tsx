@@ -27,34 +27,19 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
             'default',
             client
           );
+          const valueSeen = type === 'first-seen' ? firstSeen : lastSeen;
           return (
             <>
               {loading && <EuiLoadingSpinner size="m" />}
-              {!loading &&
-              type === 'first-seen' &&
-              firstSeen != null &&
-              new Date(firstSeen).toString() === 'Invalid Date'
-                ? firstSeen
+              {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+                ? valueSeen
                 : !loading &&
-                  type === 'first-seen' &&
-                  firstSeen != null && (
-                    <LocalizedDateTooltip date={moment(new Date(firstSeen)).toDate()}>
-                      <PreferenceFormattedDate value={new Date(firstSeen)} />
+                  valueSeen != null && (
+                    <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
+                      <PreferenceFormattedDate value={new Date(valueSeen)} />
                     </LocalizedDateTooltip>
                   )}
-              {!loading &&
-              type === 'last-seen' &&
-              lastSeen != null &&
-              new Date(lastSeen).toString() === 'Invalid Date'
-                ? lastSeen
-                : !loading &&
-                  type === 'last-seen' &&
-                  lastSeen != null && (
-                    <LocalizedDateTooltip date={moment(new Date(lastSeen)).toDate()}>
-                      <PreferenceFormattedDate value={new Date(lastSeen)} />
-                    </LocalizedDateTooltip>
-                  )}
-              {!loading && firstSeen == null && getEmptyTagValue()}
+              {!loading && valueSeen == null && getEmptyTagValue()}
             </>
           );
         }}

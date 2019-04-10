@@ -6,27 +6,27 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS = i18n.translate('xpack.siem.hostsTable.hosts', {
+export const HOSTS = i18n.translate('xpack.siem.hostsTable.hostsTitle', {
   defaultMessage: 'Hosts',
 });
 
-export const NAME = i18n.translate('xpack.siem.hostsTable.name', {
+export const NAME = i18n.translate('xpack.siem.hostsTable.nameTitle', {
   defaultMessage: 'Name',
 });
 
-export const FIRST_SEEN = i18n.translate('xpack.siem.hostsTable.firstSeen', {
+export const FIRST_SEEN = i18n.translate('xpack.siem.hostsTable.firstSeenTitle', {
   defaultMessage: 'First Seen',
 });
 
-export const LAST_SEEN = i18n.translate('xpack.siem.hostsTable.lastSeen', {
+export const LAST_SEEN = i18n.translate('xpack.siem.hostsTable.lastSeenTitle', {
   defaultMessage: 'Last Seen',
 });
 
-export const OS = i18n.translate('xpack.siem.hostsTable.os', {
+export const OS = i18n.translate('xpack.siem.hostsTable.osTitle', {
   defaultMessage: 'OS',
 });
 
-export const VERSION = i18n.translate('xpack.siem.hostsTable.version', {
+export const VERSION = i18n.translate('xpack.siem.hostsTable.versionTitle', {
   defaultMessage: 'Version',
 });
 

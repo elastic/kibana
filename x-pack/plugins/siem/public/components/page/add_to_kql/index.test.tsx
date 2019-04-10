@@ -128,40 +128,38 @@ describe('AddToKql Component', async () => {
       .simulate('click');
     wrapper.update();
 
-    expect(JSON.stringify(store.getState().network.page)).toBe(
-      JSON.stringify({
-        queries: {
-          topNFlow: {
-            limit: 10,
-            topNFlowType: 'source',
-            topNFlowDirection: 'uniDirectional',
-            topNFlowSort: {
-              field: 'bytes',
-              direction: 'desc',
-            },
-          },
-          dns: {
-            limit: 10,
-            dnsSortField: {
-              field: 'queryCount',
-              direction: 'desc',
-            },
-            isPtrIncluded: false,
+    expect(store.getState().network.page).toEqual({
+      queries: {
+        topNFlow: {
+          limit: 10,
+          topNFlowType: 'source',
+          topNFlowDirection: 'uniDirectional',
+          topNFlowSort: {
+            field: 'bytes',
+            direction: 'desc',
           },
         },
-        filterQuery: {
-          query: {
-            kind: 'kuery',
-            expression: 'host.name: siem-kibana',
+        dns: {
+          limit: 10,
+          dnsSortField: {
+            field: 'queryCount',
+            direction: 'desc',
           },
-          serializedQuery:
-            '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+          isPtrIncluded: false,
         },
-        filterQueryDraft: {
+      },
+      filterQuery: {
+        query: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },
-      })
-    );
+        serializedQuery:
+          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+      },
+      filterQueryDraft: {
+        kind: 'kuery',
+        expression: 'host.name: siem-kibana',
+      },
+    });
   });
 });

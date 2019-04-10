@@ -80,6 +80,74 @@ describe('FirstLastSeen Component', async () => {
     );
   });
 
+  test('First Seen is empty but not Last Seen', async () => {
+    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
+    // tslint:disable-next-line:no-any
+    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.firstSeen = null;
+    const { container } = render(
+      <TestProviders>
+        <MockedProvider mocks={badDateTime} addTypename={false}>
+          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    await wait();
+
+    expect(container.innerHTML).toBe(
+      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span>'
+    );
+  });
+
+  test('Last Seen is empty but not First Seen', async () => {
+    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
+    // tslint:disable-next-line:no-any
+    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.lastSeen = null;
+    const { container } = render(
+      <TestProviders>
+        <MockedProvider mocks={badDateTime} addTypename={false}>
+          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    await wait();
+
+    expect(container.innerHTML).toBe(
+      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+    );
+  });
+
+  test('First Seen With a bad date time string', async () => {
+    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
+    // tslint:disable-next-line:no-any
+    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.firstSeen = 'something-invalid';
+    const { container } = render(
+      <TestProviders>
+        <MockedProvider mocks={badDateTime} addTypename={false}>
+          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+        </MockedProvider>
+      </TestProviders>
+    );
+    await wait();
+    expect(container.innerHTML).toBe('something-invalid');
+  });
+
+  test('Last Seen With a bad date time string', async () => {
+    const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
+    // tslint:disable-next-line:no-any
+    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.lastSeen = 'something-invalid';
+    const { container } = render(
+      <TestProviders>
+        <MockedProvider mocks={badDateTime} addTypename={false}>
+          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
+        </MockedProvider>
+      </TestProviders>
+    );
+    await wait();
+    expect(container.innerHTML).toBe('something-invalid');
+  });
+
   test('Show error message', async () => {
     const myErrorMock = cloneDeep(mockFirstLastSeenHostQuery);
     delete myErrorMock[0].result;

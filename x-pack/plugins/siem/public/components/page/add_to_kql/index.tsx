@@ -107,8 +107,12 @@ export const AddToKql = pure<AddToKqlProps>(
               </NetworkFilter>
             );
         }
-        throw new Error(`Unknown Filter Type in switch statement ${componentFilterType}`);
+        assertUnreachable(componentFilterType);
       }}
     </WithSource>
   )
 );
+
+const assertUnreachable = (x: never): never => {
+  throw new Error(`Unknown Filter Type in switch statement ${x}`);
+};

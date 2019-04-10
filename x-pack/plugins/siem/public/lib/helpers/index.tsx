@@ -21,6 +21,6 @@ export const asArrayIfExists: WrapArrayIfExitts = value =>
 
 export const wait = (): Promise<void> => {
   return new Promise(resolve => {
-    return setTimeout(resolve, 10);
+    return setTimeout(resolve, 0);
   });
 };

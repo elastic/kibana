@@ -6,54 +6,54 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUMMARY = i18n.translate('xpack.siem.hostDetails.summary', {
+export const SUMMARY = i18n.translate('xpack.siem.hostDetails.summaryLabel', {
   defaultMessage: 'Summary',
 });
 
-export const NAME = i18n.translate('xpack.siem.hostDetails.name', {
+export const NAME = i18n.translate('xpack.siem.hostDetails.nameLabel', {
   defaultMessage: 'Name',
 });
 
-export const FIRST_SEEN = i18n.translate('xpack.siem.hostDetails.firstSeen', {
+export const FIRST_SEEN = i18n.translate('xpack.siem.hostDetails.firstSeenLabel', {
   defaultMessage: 'First Seen',
 });
 
-export const LAST_SEEN = i18n.translate('xpack.siem.hostDetails.lastSeen', {
+export const LAST_SEEN = i18n.translate('xpack.siem.hostDetails.lastSeenLabel', {
   defaultMessage: 'Last Seen',
 });
 
-export const ID = i18n.translate('xpack.siem.hostDetails.id', {
+export const ID = i18n.translate('xpack.siem.hostDetails.idLabel', {
   defaultMessage: 'Id',
 });
 
-export const IP_ADDRESS = i18n.translate('xpack.siem.hostDetails.ipAddress', {
+export const IP_ADDRESS = i18n.translate('xpack.siem.hostDetails.ipAddressLabel', {
   defaultMessage: 'IP Address',
 });
 
-export const MAC_ADDRESS = i18n.translate('xpack.siem.hostDetails.macAddress', {
+export const MAC_ADDRESS = i18n.translate('xpack.siem.hostDetails.macAddressLabel', {
   defaultMessage: 'MAC Addr',
 });
 
-export const TYPE = i18n.translate('xpack.siem.authenticationsTable.type', {
+export const TYPE = i18n.translate('xpack.siem.authenticationsTable.typeLabel', {
   defaultMessage: 'Type',
 });
 
-export const PLATFORM = i18n.translate('xpack.siem.hostDetails.platform', {
+export const PLATFORM = i18n.translate('xpack.siem.hostDetails.platformLabel', {
   defaultMessage: 'Platform',
 });
 
-export const OS_NAME = i18n.translate('xpack.siem.hostDetails.osName', {
+export const OS_NAME = i18n.translate('xpack.siem.hostDetails.osNameLabel', {
   defaultMessage: 'OS Name',
 });
 
-export const FAMILY = i18n.translate('xpack.siem.hostDetails.family', {
+export const FAMILY = i18n.translate('xpack.siem.hostDetails.familyLabel', {
   defaultMessage: 'Family',
 });
 
-export const VERSION = i18n.translate('xpack.siem.hostDetails.version', {
+export const VERSION = i18n.translate('xpack.siem.hostDetails.versionLabel', {
   defaultMessage: 'Version',
 });
 
-export const ARCHITECTURE = i18n.translate('xpack.siem.hostDetails.architecture', {
+export const ARCHITECTURE = i18n.translate('xpack.siem.hostDetails.architectureLabel', {
   defaultMessage: 'Architecture',
 });
