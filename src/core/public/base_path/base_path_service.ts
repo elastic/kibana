@@ -42,7 +42,7 @@ export interface BasePathSetup {
   addToPath(path: string): string;
 
   /**
-   * Remove the basePath from a path that starts with it
+   * Removes basePath from the given path if the path starts with it
    *
    * @param path - A relative url that starts with the basePath, which will be stripped
    */
