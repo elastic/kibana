@@ -6,17 +6,17 @@
 import { Server } from 'hapi';
 import * as Rx from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Cluster, ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Poller } from '../../../../common/poller';
 
-type SecurityRealm = 'file' | 'ldap' | 'native' | 'saml' | 'kerberos' | 'oidc' | 'active_directory' | 'pki';
+export type SecurityRealm = 'file' | 'ldap' | 'native' | 'saml' | 'kerberos' | 'oidc' | 'active_directory' | 'pki';
 
 export interface XPackUsageResponse {
   security: {
     available: boolean;
     enabled: boolean;
     realms: {
-      [key in SecurityRealm]: {
+      [key in SecurityRealm]?: {
         available: boolean;
         enabled: boolean;
       };
@@ -39,37 +39,74 @@ interface XPackUsageOptions {
 
 export interface XPackUsageContract {
   getUsage$(): Rx.Observable<XPackUsageResponse | undefined>;
+  refreshNow(): void;
 }
 
-export class XPackUsage implements XPackUsageContract {
-  private readonly cluster: Cluster;
+export interface XPackUsageDeps {
+  elasticsearch: ElasticsearchPlugin;
+}
 
-  private readonly poller: Poller;
+export class XPackUsage {
+  private cluster: Cluster | null;
+  
+  private poller: Poller | null;
+  
+  private stop$ = new Rx.ReplaySubject(1);
+
+  private readonly pollFrequencyInMillis: number;
 
   private readonly log: (tags: string[], message: string) => void;
 
-  private readonly stop$ = new Rx.ReplaySubject(1);
 
   private readonly usage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>(undefined);
 
-  constructor(server: Server, { pollFrequencyInMillis }: XPackUsageOptions) {
-    this.cluster = server.plugins.elasticsearch.getCluster('data');
+  constructor(server: Server, { pollFrequencyInMillis = 30000 }: XPackUsageOptions) {
+    this.cluster = null;
+    this.pollFrequencyInMillis = pollFrequencyInMillis;
+    this.poller = null;
+    this.log = server.log.bind(server);
+  }
+
+  public setup(deps: XPackUsageDeps): XPackUsageContract {
+    this.cluster = deps.elasticsearch.getCluster('data');
 
     this.poller = new Poller({
       functionToPoll: () => this.refreshNow(),
       trailing: true,
-      pollFrequencyInMillis,
+      pollFrequencyInMillis: this.pollFrequencyInMillis,
       continuePollingOnError: true,
     });
 
-    this.log = server.log.bind(server);
+    this.stop$ = new Rx.ReplaySubject(1);
+
+    return {
+      getUsage$: () => {
+        return this.usage$.pipe(takeUntil(this.stop$));
+      },
+      refreshNow: this.refreshNow
+    }
   }
 
-  public getUsage$() {
-    return this.usage$.pipe(takeUntil(this.stop$));
+  public stop() {
+    if (this.poller) {
+      this.poller.stop();
+      this.poller = null;
+    }
+
+    this.usage$.complete();
+    this.stop$.next();
+    this.cluster = null;
   }
 
-  public async refreshNow() {
+  private async refreshNow() {
+    if (!this.poller || !this.cluster) {
+      this.log(
+        ['usage', 'error', 'xpack'],
+        `Refresh requested, but xpack_usage service has not been setup!`
+      );
+      return;
+    }
+
     this.log(
       ['usage', 'debug', 'xpack'],
       `Calling [data] Elasticsearch _xpack/usage API. Polling frequency: ${this.poller.getPollFrequency()}`

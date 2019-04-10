@@ -7,12 +7,13 @@
 import {
   XPackUsageContract,
   XPackUsageResponse,
+  SecurityRealm,
 } from 'x-pack/plugins/xpack_main/server/lib/xpack_usage';
 
 export class ClusterSecurityFeatures {
   private currentXPackUsage: XPackUsageResponse | undefined;
 
-  private enabledRealms: string[] | undefined;
+  private enabledRealms: SecurityRealm[] | undefined;
 
   constructor(xpackUsage: XPackUsageContract) {
     xpackUsage.getUsage$().subscribe({
@@ -44,8 +45,8 @@ export class ClusterSecurityFeatures {
     this.currentXPackUsage = incomingUsage;
 
     if (this.currentXPackUsage) {
-      const { realms = {} } = this.currentXPackUsage.security;
-      this.enabledRealms = Object.keys(realms).filter(realmId => realms[realmId].enabled);
+      const { realms } = this.currentXPackUsage.security;
+      this.enabledRealms = Object.keys(realms).filter<SecurityRealm>((realmId):realmId is SecurityRealm => realms[realmId as SecurityRealm]!.enabled);
     } else {
       this.enabledRealms = [];
     }

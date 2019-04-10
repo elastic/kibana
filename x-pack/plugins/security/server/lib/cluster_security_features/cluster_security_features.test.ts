@@ -18,6 +18,9 @@ function createMockXPackUsage(
     getUsage$() {
       return observable;
     },
+    refreshNow() {
+      throw new Error('this should not be called');
+    }
   };
 }
 

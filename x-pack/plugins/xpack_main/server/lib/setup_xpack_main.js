@@ -23,7 +23,7 @@ export function setupXPackMain(server) {
 
   const usage = new XPackUsage(server, {
     pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
-  });
+  }).setup({ elasticsearch: server.plugins.elasticsearch });
 
   server.expose('info', info);
   server.expose('usage', usage);
@@ -40,8 +40,7 @@ export function setupXPackMain(server) {
 
   // trigger an xpack info refresh whenever the elasticsearch plugin status changes
   server.plugins.elasticsearch.status.on('change', async () => {
-    await info.refreshNow();
-    await usage.refreshNow();
+    await Promise.all([info.refreshNow(), usage.refreshNow()]);
     setPluginStatus();
   });
 
