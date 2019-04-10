@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { OnRequest, CoreSetup } from '../../../../../..';
+import { CoreSetup } from '../../../../../..';
 
 export const url = {
   root: '/',
@@ -27,18 +27,18 @@ export const url = {
 
 export class DummyOnRequestPlugin {
   public setup(core: CoreSetup) {
-    const onRequest: OnRequest = (request, t) => {
+    core.http.registerOnRequest((request, t) => {
       if (request.path === url.redirect) {
         return t.redirected(url.redirectTo);
       }
+      return t.next();
+    });
+
+    core.http.registerOnRequest((request, t) => {
       if (request.path === url.failed) {
         return t.rejected(new Error('unexpected error'), { statusCode: 400 });
       }
-
       return t.next();
-    };
-
-    core.http.registerOnRequest(onRequest);
-    return {};
+    });
   }
 }
