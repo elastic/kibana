@@ -14,7 +14,6 @@ import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { APMLink } from '../../../shared/Links/APMLink';
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 const TransactionNameLink = styled(APMLink)`
@@ -37,10 +36,8 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       width: '50%',
       sortable: true,
       render: (transactionName: string, data) => {
-        const encodedType = legacyEncodeURIComponent(
-          data.sample.transaction.type
-        );
-        const encodedName = legacyEncodeURIComponent(transactionName);
+        const encodedType = encodeURIComponent(data.sample.transaction.type);
+        const encodedName = encodeURIComponent(transactionName);
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (

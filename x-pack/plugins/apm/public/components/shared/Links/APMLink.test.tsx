@@ -26,29 +26,27 @@ test('APMLink should retain current kuery value if it exists', async () => {
   const href = await getRenderedHref(
     () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
     {
-      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22'
+      search: '?kuery=host.hostname%20%3A%20%22fakehostname%22'
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"#/some/path?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=host.hostname~20~3A~20~22fakehostname~22&transactionId=blah"`
+    `"#/some/path?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=host.hostname%20%3A%20%22fakehostname%22&transactionId=blah"`
   );
 });
 
 test('APMLink should overwrite current kuery value if new kuery value is provided', async () => {
+  const kuery = 'host.os : "linux"';
   const href = await getRenderedHref(
-    () => (
-      <APMLink
-        path="/some/path"
-        query={{ kuery: 'host.os~20~3A~20~22linux~22' }}
-      />
-    ),
+    () => <APMLink path="/some/path" query={{ kuery }} />,
     {
-      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22'
+      search: '?kuery=host.hostname%20%3A%20%22fakehostname%22'
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"#/some/path?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=host.os~20~3A~20~22linux~22"`
+    `"#/some/path?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=${encodeURIComponent(
+      kuery
+    )}"`
   );
 });
