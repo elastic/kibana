@@ -82,7 +82,7 @@ require('ui/routes')
           defaultMessage: 'Read only',
         }),
         tooltip: i18n('kbn.timelion.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
+          defaultMessage: 'Unable to save timelion sheets',
         }),
       };
     },

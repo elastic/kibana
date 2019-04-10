@@ -54,7 +54,7 @@ routes
           defaultMessage: 'Read only',
         }),
         tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
+          defaultMessage: 'Unable to save maps',
         }),
       };
     }

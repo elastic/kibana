@@ -68,7 +68,7 @@ uiRoutes
           defaultMessage: 'Read only',
         }),
         tooltip: i18n('kbn.dashboard.badge.readOnly.tooltip', {
-          defaultMessage: 'You lack the authority',
+          defaultMessage: 'Unable to save dashboards',
         }),
       };
     }

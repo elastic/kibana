@@ -25,8 +25,8 @@ class UpdateBadgeComponent extends React.Component<Props> {
               id: 'xpack.apm.header.badge.readOnly.text'
             }),
             tooltip: intl.formatMessage({
-              defaultMessage: 'You lack the authority',
-              id: 'xpack.aapm.header.badge.readOnly.tooltip'
+              defaultMessage: 'Unable to save',
+              id: 'xpack.apm.header.badge.readOnly.tooltip'
             })
           }
         : undefined
