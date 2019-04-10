@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview Host Data rendering it renders the default OverviewHostStats 1`] = `
+exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
 <Component
   data={
     Object {
@@ -12,5 +12,6 @@ exports[`Overview Host Data rendering it renders the default OverviewHostStats 1
       "auditbeatUser": 1979,
     }
   }
+  loading={false}
 />
 `;
