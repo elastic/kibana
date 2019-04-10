@@ -27,18 +27,17 @@ const DEFAULT_VALUES = {
  */
 export class ThresholdWatch extends BaseWatch {
   constructor(props = {}) {
-    console.log('CONSTRUCT', props);
     props.id = props.id || uuid.v4();
     props.type = WATCH_TYPES.THRESHOLD;
     super(props);
 
     this.index = props.index;
     this.timeField = props.timeField;
-    this.triggerIntervalSize = props.triggerIntervalSize === null ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE : props.triggerIntervalSize;
+    this.triggerIntervalSize = props.triggerIntervalSize == null ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE : props.triggerIntervalSize;
     this.triggerIntervalUnit = props.triggerIntervalUnit || DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT;
     this.aggType = props.aggType || DEFAULT_VALUES.AGG_TYPE;
     this.aggField = props.aggField;
-    this.termSize = props.termSize === null ? DEFAULT_VALUES.TERM_SIZE : props.termSize;
+    this.termSize = props.termSize == null ? DEFAULT_VALUES.TERM_SIZE : props.termSize;
     this.termField = props.termField;
     this.thresholdComparator = props.thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR;
     this.timeWindowSize = props.timeWindowSize || DEFAULT_VALUES.TIME_WINDOW_SIZE;
@@ -48,7 +47,7 @@ export class ThresholdWatch extends BaseWatch {
     //NOTE: The threshold must be of the appropriate type, i.e.,number/date.
     //Conversion from string must occur by consumer when assigning a
     //value to this property.
-    this.threshold = props.threshold || DEFAULT_VALUES.THRESHOLD;
+    this.threshold = props.threshold == null ? DEFAULT_VALUES.THRESHOLD : props.threshold;
   }
 
   get hasTermsAgg() {
