@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 
-import { AuditdGenericFileDetails, AuditdGenericFileLine } from './generic_file_details';
+import { AuditdGenericFileDetails, AuditdGenericFileLine } from '.';
 
 describe('GenericFileDetails', () => {
   describe('rendering', () => {
     test('it renders the default GenericFileDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <TestProviders>
           <AuditdGenericFileDetails
             contextId="contextid-123"
@@ -46,7 +47,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/generic-text-123using/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/generic-text-123usinggpgconf--list-dirs agent-socket'
       );
     });
 
@@ -79,6 +80,8 @@ describe('GenericFileDetails', () => {
             session="session-1"
             primary="username-1"
             secondary="username-1"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -90,7 +93,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -106,6 +109,8 @@ describe('GenericFileDetails', () => {
             userName="username-1"
             primary="username-1"
             secondary="username-1"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -117,7 +122,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -133,6 +138,8 @@ describe('GenericFileDetails', () => {
             userName="username-1"
             primary="unset"
             secondary="unset"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -144,7 +151,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -160,6 +167,8 @@ describe('GenericFileDetails', () => {
             session="session-1"
             primary="Unset"
             secondary="uNseT"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -171,7 +180,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -187,6 +196,8 @@ describe('GenericFileDetails', () => {
             primary={undefined}
             secondary={undefined}
             userName="username-1"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -198,7 +209,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -214,6 +225,8 @@ describe('GenericFileDetails', () => {
             userName="[username-1]"
             primary="[username-2]"
             secondary="[username-3]"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -225,7 +238,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -241,6 +254,8 @@ describe('GenericFileDetails', () => {
             userName="[username-1]"
             primary="[username-1]"
             secondary="[username-2]"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -252,7 +267,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -268,6 +283,8 @@ describe('GenericFileDetails', () => {
             session="session-1"
             primary="[username-primary]"
             secondary="unset"
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -279,7 +296,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -295,6 +312,8 @@ describe('GenericFileDetails', () => {
             primary="[username-primary]"
             userName={undefined}
             secondary={undefined}
+            processPid="process-pid-1"
+            processName="process-name-1"
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -306,7 +325,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
       );
     });
 
@@ -323,6 +342,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             processTitle={undefined}
             workingDirectory={undefined}
@@ -348,6 +369,8 @@ describe('GenericFileDetails', () => {
             secondary={undefined}
             session={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             processTitle={undefined}
             workingDirectory={undefined}
@@ -373,6 +396,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             processTitle={undefined}
             workingDirectory={undefined}
@@ -399,6 +424,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processTitle={undefined}
             workingDirectory={undefined}
             args={undefined}
@@ -424,6 +451,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             workingDirectory={undefined}
             args={undefined}
@@ -449,6 +478,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             processTitle={undefined}
             args={undefined}
@@ -474,6 +505,8 @@ describe('GenericFileDetails', () => {
             session={undefined}
             hostName={undefined}
             primary={undefined}
+            processPid={undefined}
+            processName={undefined}
             processExecutable={undefined}
             processTitle={undefined}
             workingDirectory={undefined}

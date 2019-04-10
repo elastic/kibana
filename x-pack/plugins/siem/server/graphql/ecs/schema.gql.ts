@@ -10,16 +10,24 @@ export const ecsSchema = gql`
   scalar ToStringArray
 
   type EventEcsFields {
+    action: String
     category: String
+    created: Date
+    dataset: String
     duration: Float
-    id: Float
+    end: Date
+    hash: String
+    id: String
+    kind: String
     module: String
+    original: [String]
+    outcome: ToStringArray
+    risk_score: Float
+    risk_score_norm: Float
     severity: Float
     start: Date
-    end: Date
-    action: String
+    timezone: String
     type: String
-    dataset: String
   }
 
   type Location {
@@ -38,31 +46,31 @@ export const ecsSchema = gql`
   }
 
   type PrimarySecondary {
-    primary: String
-    secondary: String
-    type: String
+    primary: ToStringArray
+    secondary: ToStringArray
+    type: ToStringArray
   }
 
   type Summary {
     actor: PrimarySecondary
     object: PrimarySecondary
-    how: String
-    message_type: String
-    sequence: Float
+    how: ToStringArray
+    message_type: ToStringArray
+    sequence: ToStringArray
   }
 
   type AuditdData {
-    acct: String
-    terminal: String
-    op: String
+    acct: ToStringArray
+    terminal: ToStringArray
+    op: ToStringArray
   }
 
   type AuditdEcsFields {
-    result: String
-    session: String
+    result: ToStringArray
+    session: ToStringArray
     data: AuditdData
     summary: Summary
-    sequence: Float
+    sequence: ToStringArray
   }
 
   type OsEcsFields {
@@ -85,19 +93,19 @@ export const ecsSchema = gql`
   }
 
   type Thread {
-    id: Float
-    start: String
+    id: ToStringArray
+    start: ToStringArray
   }
 
   type ProcessEcsFields {
-    pid: Float
-    name: String
-    ppid: Float
-    args: [String]
-    executable: String
-    title: String
-    thread: Thread
-    working_directory: String
+    pid: ToStringArray
+    name: ToStringArray
+    ppid: ToStringArray
+    args: ToStringArray
+    executable: ToStringArray
+    title: ToStringArray
+    thread: ToStringArray
+    working_directory: ToStringArray
   }
 
   type SourceEcsFields {
@@ -119,14 +127,14 @@ export const ecsSchema = gql`
   }
 
   type SuricataAlertData {
-    signature: String
-    signature_id: Float
+    signature: ToStringArray
+    signature_id: ToStringArray
   }
 
   type SuricataEveData {
     alert: SuricataAlertData
-    flow_id: Float
-    proto: String
+    flow_id: ToStringArray
+    proto: ToStringArray
   }
 
   type SuricataEcsFields {
@@ -190,6 +198,7 @@ export const ecsSchema = gql`
     RA: Boolean
     TC: Boolean
   }
+
   type FileFields {
     path: String
     target_path: String
@@ -206,6 +215,7 @@ export const ecsSchema = gql`
     mtime: Date
     ctime: Date
   }
+
   type ZeekHttpData {
     resp_mime_types: [String!]
     trans_depth: String
@@ -301,6 +311,33 @@ export const ecsSchema = gql`
     transport: String
   }
 
+  type PackageEcsFields {
+    arch: ToStringArray
+    entity_id: ToStringArray
+    name: ToStringArray
+    size: ToStringArray
+    summary: ToStringArray
+    version: ToStringArray
+  }
+
+  type AuditEcsFields {
+    package: PackageEcsFields
+  }
+
+  type SshEcsFields {
+    method: ToStringArray
+    signature: ToStringArray
+  }
+
+  type AuthEcsFields {
+    ssh: SshEcsFields
+  }
+
+  type SystemEcsField {
+    audit: AuditEcsFields
+    auth: AuthEcsFields
+  }
+
   type ECS {
     _id: String!
     _index: String
@@ -317,10 +354,11 @@ export const ecsSchema = gql`
     http: HttpEcsFields
     url: UrlEcsFields
     timestamp: Date
-    message: [String!]
+    message: ToStringArray
     user: UserEcsFields
     process: ProcessEcsFields
     file: FileFields
+    system: SystemEcsField
   }
 
   type EcsEdges {

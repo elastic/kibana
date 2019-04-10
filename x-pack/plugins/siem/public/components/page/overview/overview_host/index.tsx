@@ -15,17 +15,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 
+import { manageQuery } from '../../../../components/page/manage_query';
 import { OverviewHostQuery } from '../../../../containers/overview/overview_host';
+import { inputsModel } from '../../../../store/inputs';
 import { OverviewHostStats } from '../overview_host_stats';
 
 export interface OwnProps {
   poll: number;
   startDate: number;
   endDate: number;
+  setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
 }
 
-export const OverviewHost = pure<OwnProps>(({ endDate, poll, startDate }) => (
+const OverviewHostStatsManage = manageQuery(OverviewHostStats);
+type OverviewHostProps = OwnProps;
+export const OverviewHost = pure<OverviewHostProps>(({ endDate, poll, startDate, setQuery }) => (
   <EuiFlexItem>
     <EuiPanel>
       <EuiFlexGroup alignItems="center">
@@ -50,7 +56,15 @@ export const OverviewHost = pure<OwnProps>(({ endDate, poll, startDate }) => (
       <EuiHorizontalRule />
 
       <OverviewHostQuery endDate={endDate} poll={poll} sourceId="default" startDate={startDate}>
-        {({ overviewHost }) => <OverviewHostStats data={overviewHost} />}
+        {({ overviewHost, loading, id, refetch }) => (
+          <OverviewHostStatsManage
+            loading={loading}
+            data={overviewHost}
+            setQuery={setQuery}
+            id={id}
+            refetch={refetch}
+          />
+        )}
       </OverviewHostQuery>
     </EuiPanel>
   </EuiFlexItem>

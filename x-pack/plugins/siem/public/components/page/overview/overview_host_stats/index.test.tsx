@@ -11,11 +11,31 @@ import * as React from 'react';
 import { OverviewHostStats } from '.';
 import { mockData } from './mock';
 
-describe('Overview Host Data', () => {
+describe('Overview Host Stat Data', () => {
   describe('rendering', () => {
     test('it renders the default OverviewHostStats', () => {
-      const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} />);
+      const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={false} />);
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+  describe('loading', () => {
+    test('it does not show loading indicator when not loading', () => {
+      const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={false} />);
+      const loadingWrapper = wrapper
+        .dive()
+        .find('[data-test-subj="stat-loader-description"]')
+        .first()
+        .childAt(0);
+      expect(loadingWrapper.prop('isLoading')).toBe(false);
+    });
+    test('it does show loading indicator when not loading', () => {
+      const wrapper = shallow(<OverviewHostStats data={mockData.OverviewHost} loading={true} />);
+      const loadingWrapper = wrapper
+        .dive()
+        .find('[data-test-subj="stat-loader-description"]')
+        .first()
+        .childAt(0);
+      expect(loadingWrapper.prop('isLoading')).toBe(true);
     });
   });
 });

@@ -39,7 +39,7 @@ export const getMockNetflowData = (): Ecs => ({
     transport: 'tcp',
   },
   process: {
-    name: 'rat',
+    name: ['rat'],
   },
   source: {
     bytes: 60,

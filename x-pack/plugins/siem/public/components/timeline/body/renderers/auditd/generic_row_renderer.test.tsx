@@ -15,10 +15,7 @@ import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
 
-import {
-  createGenericAuditRowRenderer,
-  createGenericFileRowRenderer,
-} from './generic_row_renderer';
+import { createGenericAuditRowRenderer, createGenericFileRowRenderer } from '.';
 
 describe('GenericRowRenderer', () => {
   describe('#createGenericAuditRowRenderer', () => {
@@ -90,7 +87,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome text/usr/bin/wgetwith resultsuccessDestination93.184.216.34:80'
+        'some children Session246alice@zeek-londonsome textwgetwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
@@ -166,7 +163,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusing/lib/systemd/systemd-journaldwith resultsuccess'
+        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journalwith resultsuccess'
       );
     });
   });

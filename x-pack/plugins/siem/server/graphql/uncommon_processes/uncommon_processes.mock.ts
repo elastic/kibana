@@ -24,8 +24,8 @@ export const mockUncommonProcessesData: MockData = {
           host: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 93,
           process: {
-            name: 'galadriel.elstc.co',
-            title: 'Hello World',
+            name: ['galadriel.elstc.co'],
+            title: ['Hello World'],
           },
           user: {
             id: 0,
@@ -42,8 +42,8 @@ export const mockUncommonProcessesData: MockData = {
           host: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 97,
           process: {
-            name: 'elrond.elstc.co',
-            title: 'Hello World',
+            name: ['elrond.elstc.co'],
+            title: ['Hello World'],
           },
           user: {
             id: 1,

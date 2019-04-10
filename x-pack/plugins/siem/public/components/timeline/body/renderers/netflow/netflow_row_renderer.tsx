@@ -8,7 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRenderer, RowRendererContainer } from '../';
+import { Row, RowRenderer, RowRendererContainer } from '../';
 
 import { asArrayIfExists } from '../../../../../lib/helpers';
 import {
@@ -56,14 +56,6 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../source_destination/source_destination_arrows';
 
-const NetflowRow = styled.div`
-  &:hover {
-    background-color: ${props => props.theme.eui.euiTableHoverColor};
-  }
-  overflow: hidden;
-  width: 100%;
-`;
-
 const Details = styled.div`
   margin: 10px 0;
 `;
@@ -73,7 +65,6 @@ const EVENT_ACTION_FIELD = 'event.action';
 const NETWORK_TRAFFIC = 'network_traffic';
 const NETWORK_FLOW = 'network_flow';
 const NETFLOW_FLOW = 'netflow_flow';
-const SOCKET_OPENED = 'socket_opened';
 
 export const eventCategoryMatches = (eventCategory: string | object | undefined | null): boolean =>
   `${eventCategory}`.toLowerCase() === NETWORK_TRAFFIC;
@@ -81,7 +72,7 @@ export const eventCategoryMatches = (eventCategory: string | object | undefined 
 export const eventActionMatches = (eventAction: string | object | undefined | null): boolean => {
   const action = `${eventAction}`.toLowerCase();
 
-  return action === NETWORK_FLOW || action === NETFLOW_FLOW || action === SOCKET_OPENED;
+  return action === NETWORK_FLOW || action === NETFLOW_FLOW;
 };
 
 export const netflowRowRenderer: RowRenderer = {
@@ -92,12 +83,12 @@ export const netflowRowRenderer: RowRenderer = {
     );
   },
   renderRow: ({ data, width, children }) => (
-    <NetflowRow>
+    <Row>
       {children}
       <RowRendererContainer width={width}>
         <Details>
           <Netflow
-            contextId="auditd-acquired-creds"
+            contextId={NETWORK_FLOW}
             destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
             destinationGeoContinentName={asArrayIfExists(
               get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
@@ -152,6 +143,6 @@ export const netflowRowRenderer: RowRenderer = {
           />
         </Details>
       </RowRendererContainer>
-    </NetflowRow>
+    </Row>
   ),
 };

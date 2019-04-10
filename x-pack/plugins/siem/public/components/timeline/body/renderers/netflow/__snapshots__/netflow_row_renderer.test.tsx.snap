@@ -11,7 +11,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
     >
       <styled.div>
         <pure(Component)
-          contextId="auditd-acquired-creds"
+          contextId="network_flow"
           destinationBytes={
             Array [
               40,

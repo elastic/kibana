@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EcsEdges, TimelineDetailsData, TimelineEdges } from '../../graphql/types';
+import { EcsEdges, TimelineDetailsData } from '../../graphql/types';
 import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
@@ -29,7 +29,7 @@ describe('events elasticsearch_adapter', () => {
     _score: 10,
     aggregations: {},
     _source: {
-      '@timestamp': 'time-1',
+      '@timestamp': ['time-1'],
       host: {
         name: 'hostname-1',
         ip: ['hostip-1'],
@@ -38,12 +38,12 @@ describe('events elasticsearch_adapter', () => {
         eve: {
           alert: {
             category: 'suricata-category-1',
-            signature: 'suricata-signature-1',
-            signature_id: 5000,
+            signature: ['suricata-signature-1'],
+            signature_id: ['5000'],
             severity: 1,
           },
-          flow_id: 100,
-          proto: 'suricata-proto-1',
+          flow_id: ['100'],
+          proto: ['suricata-proto-1'],
         },
       },
       source: {
@@ -64,6 +64,7 @@ describe('events elasticsearch_adapter', () => {
         type: 'event-type-1',
         category: 'event-category-1',
         severity: 1,
+        id: '100',
       },
     },
     sort: ['123567890', '1234'],
@@ -140,7 +141,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            id: 100,
+            id: '100',
           },
         },
       };
@@ -219,7 +220,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              flow_id: 100,
+              flow_id: ['100'],
             },
           },
         },
@@ -241,7 +242,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              proto: 'suricata-proto-1',
+              proto: ['suricata-proto-1'],
             },
           },
         },
@@ -264,7 +265,7 @@ describe('events elasticsearch_adapter', () => {
           suricata: {
             eve: {
               alert: {
-                signature: 'suricata-signature-1',
+                signature: ['suricata-signature-1'],
               },
             },
           },
@@ -288,7 +289,7 @@ describe('events elasticsearch_adapter', () => {
           suricata: {
             eve: {
               alert: {
-                signature_id: 5000,
+                signature_id: ['5000'],
               },
             },
           },
@@ -444,9 +445,9 @@ describe('events elasticsearch_adapter', () => {
           },
           suricata: {
             eve: {
-              proto: 'suricata-proto-1',
+              proto: ['suricata-proto-1'],
               alert: {
-                signature_id: 5000,
+                signature_id: ['5000'],
               },
             },
           },
@@ -474,21 +475,25 @@ describe('events elasticsearch_adapter', () => {
       ];
       const ecsfields: ReadonlyArray<string> = ['host.name', 'suricata.eve.alert.signature_id'];
       const data = formatTimelineData(datafields, ecsfields, hit, eventFieldsMap);
-      const expected: TimelineEdges = {
+      // TODO:
+      // This should turn back into expected: TimelineEdges = {
+      // once we have all the types converted correctly to ToStringArray
+      // For now, this test _must_ return the data as is with an any for expected
+      const expected = {
         cursor: { tiebreaker: '1234', value: '123567890' },
         node: {
           _id: 'id-123',
           _index: 'index-123',
           data: [
             { field: 'host.name', value: 'hostname-1' },
-            { field: 'suricata.eve.alert.signature_id', value: 5000 },
-            { field: '@timestamp', value: 'time-1' },
+            { field: 'suricata.eve.alert.signature_id', value: ['5000'] },
+            { field: '@timestamp', value: ['time-1'] },
           ],
           ecs: {
             _id: 'id-123',
             _index: 'index-123',
             host: { name: 'hostname-1' },
-            suricata: { eve: { alert: { signature_id: 5000 } } },
+            suricata: { eve: { alert: { signature_id: ['5000'] } } },
           },
         },
       };
