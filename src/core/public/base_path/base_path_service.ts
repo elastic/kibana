@@ -32,21 +32,21 @@ export interface BasePathSetup {
    *
    * @returns The basePath as defined by the server
    */
-  get(): string
+  get(): string;
 
   /**
    * Add the current basePath to a path string.
    *
    * @param path - A relative url including the leading `/`, otherwise it will be returned without modification
    */
-  addToPath(path: string): string
+  addToPath(path: string): string;
 
   /**
    * Remove the basePath from a path that starts with it
    *
    * @param path - A relative url that starts with the basePath, which will be stripped
    */
-  removeFromPath(path: string): string
+  removeFromPath(path: string): string;
 }
 
 interface BasePathDeps {
@@ -60,7 +60,7 @@ export class BasePathService {
 
     const basePathSetup: BasePathSetup = {
       get: () => basePath,
-      addToPath: (path) => {
+      addToPath: path => {
         return modifyUrl(path, parts => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
@@ -81,7 +81,7 @@ export class BasePathService {
         }
 
         return path;
-      }
+      },
     };
 
     return basePathSetup;
