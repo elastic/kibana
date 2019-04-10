@@ -130,7 +130,7 @@ export const security = (kibana) => new kibana.Plugin({
       }
     });
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
+    const auditLogger = new SecurityAuditLogger(new AuditLogger(server, 'security', server.config(), xpackInfo));
 
     const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({

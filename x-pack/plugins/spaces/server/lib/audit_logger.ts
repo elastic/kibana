@@ -5,19 +5,12 @@
  */
 
 export class SpacesAuditLogger {
-  private readonly enabled: boolean;
   private readonly auditLogger: any;
 
-  constructor(config: any, auditLogger: any) {
-    this.enabled =
-      config.get('xpack.security.enabled') && config.get('xpack.security.audit.enabled');
+  constructor(auditLogger: any) {
     this.auditLogger = auditLogger;
   }
   public spacesAuthorizationFailure(username: string, action: string, spaceIds?: string[]) {
-    if (!this.enabled) {
-      return;
-    }
-
     this.auditLogger.log(
       'spaces_authorization_failure',
       `${username} unauthorized to ${action}${spaceIds ? ' ' + spaceIds.join(',') : ''} spaces`,
@@ -30,10 +23,6 @@ export class SpacesAuditLogger {
   }
 
   public spacesAuthorizationSuccess(username: string, action: string, spaceIds?: string[]) {
-    if (!this.enabled) {
-      return;
-    }
-
     this.auditLogger.log(
       'spaces_authorization_success',
       `${username} authorized to ${action}${spaceIds ? ' ' + spaceIds.join(',') : ''} spaces`,
