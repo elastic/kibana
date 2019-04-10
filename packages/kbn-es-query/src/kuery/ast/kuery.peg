@@ -14,7 +14,7 @@
 }
 
 start
-  = Space* query:OrQuery? trailing:OptionalSpace {
+  = query:OrQuery? trailing:OptionalSpace {
     if (trailing.type === 'cursor') {
       return {
         ...trailing,
@@ -27,16 +27,10 @@ start
 
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
-  / 'or'i Space+ OrQuery {
-    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
-  }
   / left:AndQuery Or right:OrQuery {
     const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
-  }
-  / AndQuery Or {
-    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
   }
   / AndQuery
 
@@ -52,9 +46,6 @@ NotQuery
   = Not query:SubQuery {
     if (query.type === 'cursor') return query;
     return buildFunctionNode('not', [query]);
-  }
-  / Not {
-    error('kbnESQuery.kql.missingNotSubQuerySyntaxError');
   }
   / SubQuery
 
@@ -75,8 +66,11 @@ Expression
   / FieldValueExpression
   / ValueExpression
 
+Field "field name"
+  = Literal
+
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:Literal {
+  = field:Field Space* operator:RangeOperator Space* value:Literal {
     if (value.type === 'cursor') {
       return {
         ...value,
@@ -88,7 +82,7 @@ FieldRangeExpression
   }
 
 FieldValueExpression
-  = field:Literal Space* ':' Space* partial:ListOfValues {
+  = field:Field Space* ':' Space* partial:ListOfValues {
     if (partial.type === 'cursor') {
       return {
         ...partial,
@@ -126,10 +120,7 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = 'or'i Space+ OrListOfValues {
-    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
-  }
-  / partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
     const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
     if (cursor) {
       return {
@@ -139,9 +130,6 @@ OrListOfValues
     }
     return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
   }
-  / AndListOfValues Or {
-    error('kbnESQuery.kql.missingOrSubQuerySyntaxError');
-   }
   / AndListOfValues
 
 AndListOfValues
@@ -167,12 +155,9 @@ NotListOfValues
     }
     return (field) => buildFunctionNode('not', [partial(field)]);
   }
-  / Not {
-    error('kbnESQuery.kql.missingNotSubQuerySyntaxError');
-  }
   / ListOfValues
 
-Value
+Value "value"
   = value:QuotedString {
     if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
@@ -189,19 +174,19 @@ Value
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
 
-Or
+Or "OR"
   = Space+ 'or'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneOr
 
-And
+And "AND"
   = Space+ 'and'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneAnd
 
-Not
+Not "NOT"
   = 'not'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneNot
 
-Literal
+Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
@@ -248,7 +233,7 @@ UnquotedLiteral
     return buildLiteralNode(value);
   }
 
-UnquotedCharacter
+UnquotedCharacter "unquoted character"
   = EscapedWhitespace
   / EscapedSpecialCharacter
   / EscapedKeyword
@@ -295,7 +280,7 @@ RangeOperator
   / '<' { return 'lt'; }
   / '>' { return 'gt'; }
 
-Space
+Space "whitespace"
   = [\ \t\r\n]
 
 Cursor

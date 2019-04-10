@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';
-import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -38,13 +37,11 @@ export function fromLegacyKueryExpression(expression, parseOptions) {
 
 export function fromKueryExpression(expression, parseOptions) {
   try {
-    return fromExpression(expression, parseOptions, parseKuery);
-  }
-  catch (error) {
-    if (error.message.startsWith('kbnESQuery')) {
-      throw new KQLSyntaxError(error.message);
-    }
-    else {
+    fromExpression(expression, parseOptions, parseKuery);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      throw new Error([error.message, expression, _.repeat('-', error.location.start.offset) + '^'].join('\n'));
+    } else {
       throw error;
     }
   }
@@ -57,11 +54,12 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
 
   parseOptions = {
     ...parseOptions,
-    helpers: { nodeTypes }
+    helpers: { nodeTypes },
   };
 
   return parse(expression, parseOptions);
 }
+
 /**
  * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ
