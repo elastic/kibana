@@ -23,11 +23,11 @@ import { WatchContext } from './watch_context';
 
 const JsonWatchEditUi = ({
   pageTitle,
-  kbnUrl,
+  urlService,
   licenseService,
 }: {
   pageTitle: string;
-  kbnUrl: any;
+  urlService: any;
   licenseService: any;
 }) => {
   const { watch } = useContext(WatchContext);
@@ -85,7 +85,7 @@ const JsonWatchEditUi = ({
       )}
       {selectedTab === WATCH_TAB_ID_EDIT && (
         <JsonWatchEditForm
-          kbnUrl={kbnUrl}
+          urlService={urlService}
           licenseService={licenseService}
           watchJsonString={watchJsonString}
           setWatchJsonString={(json: string) => setWatchJsonString(json)}

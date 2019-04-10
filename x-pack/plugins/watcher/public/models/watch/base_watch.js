@@ -29,7 +29,7 @@ export class BaseWatch {
     this.type = get(props, 'type');
     this.isNew = get(props, 'isNew', true);
 
-    this.name = get(props, 'name', '');
+    this.name = get(props, 'name');
     this.isSystemWatch = Boolean(get(props, 'isSystemWatch'));
     this.watchStatus = WatchStatus.fromUpstreamJson(get(props, 'watchStatus'));
     this.watchErrors = WatchErrors.fromUpstreamJson(get(props, 'watchErrors'));

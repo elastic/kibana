@@ -54,7 +54,7 @@ function createActionsForWatch(watchInstance: BaseWatch) {
   return watchInstance;
 }
 
-export async function saveWatch(watch: BaseWatch, kbnUrl: any, licenseService: any) {
+export async function saveWatch(watch: BaseWatch, urlService: any, licenseService: any) {
   try {
     await createWatch(watch);
     toastNotifications.addSuccess(
@@ -66,7 +66,7 @@ export async function saveWatch(watch: BaseWatch, kbnUrl: any, licenseService: a
       })
     );
     // TODO: Not correctly redirecting back to /watches route
-    kbnUrl.change('/management/elasticsearch/watcher/watches', {});
+    urlService.change('/management/elasticsearch/watcher/watches', {});
   } catch (error) {
     return licenseService
       .checkValidity()
@@ -76,7 +76,7 @@ export async function saveWatch(watch: BaseWatch, kbnUrl: any, licenseService: a
 
 export async function validateActionsAndSaveWatch(
   watch: BaseWatch,
-  kbnUrl: any,
+  urlService: any,
   licenseService: any
 ) {
   const { warning } = watch.validate();
@@ -88,21 +88,19 @@ export async function validateActionsAndSaveWatch(
     };
   }
   // client validation passed, make request to create watch
-  saveWatch(watch, kbnUrl, licenseService);
+  saveWatch(watch, urlService, licenseService);
 }
 
 export async function onWatchSave(
   watch: BaseWatch,
-  kbnUrl: any,
+  urlService: any,
   licenseService: any
 ): Promise<any> {
   const watchActions = watch.watch && watch.watch.actions;
   const watchData = watchActions ? createActionsForWatch(watch) : watch;
-
   if (!watchData.isNew) {
-    return validateActionsAndSaveWatch(watch, kbnUrl, licenseService);
+    return validateActionsAndSaveWatch(watch, urlService, licenseService);
   }
-
   try {
     const existingWatch = await loadWatch(watchData.id);
     if (existingWatch) {
@@ -136,7 +134,7 @@ export async function onWatchSave(
     // Confirms watcher does not already exist
     return licenseService.checkValidity().then(() => {
       if (error.status === 404) {
-        return validateActionsAndSaveWatch(watchData, kbnUrl, licenseService);
+        return validateActionsAndSaveWatch(watchData, urlService, licenseService);
       }
       return toastNotifications.addDanger(error.data.message);
     });

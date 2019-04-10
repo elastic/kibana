@@ -26,13 +26,7 @@ export const ErrableFormRow = ({
       error={errors[errorKey]}
       {...rest}
     >
-      <Fragment>
-        {Children.map(children, child =>
-          cloneElement(child, {
-            isInvalid: isShowingErrors && errors[errorKey].length > 0,
-          })
-        )}
-      </Fragment>
+      <Fragment>{Children.map(children, child => cloneElement(child))}</Fragment>
     </EuiFormRow>
   );
 };
