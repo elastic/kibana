@@ -177,6 +177,10 @@ describe('getCollectionStatus', () => {
   it('should detect products based on other indices', async () => {
     const req = mockReq({}, {
       responses: [
+        { hits: { total: { value: 1 } } },
+        { hits: { total: { value: 1 } } },
+        { hits: { total: { value: 1 } } },
+        { hits: { total: { value: 1 } } },
         { hits: { total: { value: 1 } } }
       ]
     });
@@ -186,6 +190,6 @@ describe('getCollectionStatus', () => {
     expect(result.kibana.detected.doesExist).to.be(true);
     expect(result.elasticsearch.detected.doesExist).to.be(true);
     expect(result.beats.detected.mightExist).to.be(true);
-    expect(result.logstash.detected.mightExist).to.be(false);
+    expect(result.logstash.detected.mightExist).to.be(true);
   });
 });

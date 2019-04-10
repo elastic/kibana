@@ -133,18 +133,38 @@ async function detectProducts(req) {
 
     { index: '.management-beats*' },
     { size: 0, terminate_after: 0 },
+
+    { index: 'logstash-*' },
+    { size: 0, terminate_after: 0 },
+
+    { index: '.logstash*' },
+    { size: 0, terminate_after: 0 },
+
+    { index: 'apm*' },
+    { size: 0, terminate_after: 0 },
   ];
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const {
     responses: [
       beatsDetectionResponse1,
-      beatsDetectionResponse2
+      beatsDetectionResponse2,
+      logstashDetectionResponse1,
+      logstashDetectionResponse2,
+      apmDetectionResponse
     ]
   } = await callWithRequest(req, 'msearch', { body: msearch });
 
   if (get(beatsDetectionResponse1, 'hits.total.value', 0) > 0 || get(beatsDetectionResponse2, 'hits.total.value', 0) > 0) {
     result[BEATS_SYSTEM_ID].mightExist = true;
+  }
+
+  if (get(logstashDetectionResponse1, 'hits.total.value', 0) > 0 || get(logstashDetectionResponse2, 'hits.total.value', 0) > 0) {
+    result[LOGSTASH_SYSTEM_ID].mightExist = true;
+  }
+
+  if (get(apmDetectionResponse, 'hits.total.value', 0) > 0) {
+    result[APM_SYSTEM_ID].mightExist = true;
   }
 
   return result;
