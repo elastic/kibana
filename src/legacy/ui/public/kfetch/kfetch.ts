@@ -19,8 +19,8 @@
 
 import { merge } from 'lodash';
 // @ts-ignore not really worth typing
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
+import chrome from '../chrome';
+import { metadata } from '../metadata';
 import url from 'url';
 import { KFetchError } from './kfetch_error';
 
