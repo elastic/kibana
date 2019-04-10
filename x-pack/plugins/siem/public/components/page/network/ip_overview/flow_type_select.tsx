@@ -3,53 +3,65 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { IpOverviewType } from '../../../../graphql/types';
-import { networkActions } from '../../../../store/network';
+import { IPDetailsDispatchProps } from '../../../../pages/network/ip_details';
 
 import { IpOverviewId } from '.';
-import { SelectType } from './select_type';
+import * as i18n from './translations';
+
+const toggleTypeOptions = (id: string) => [
+  {
+    id: `${id}-${IpOverviewType.source}`,
+    value: IpOverviewType.source,
+    inputDisplay: i18n.AS_SOURCE,
+  },
+  {
+    id: `${id}-${IpOverviewType.destination}`,
+    value: IpOverviewType.destination,
+    inputDisplay: i18n.AS_DESTINATION,
+  },
+];
+
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
+
 interface OwnProps {
   loading: boolean;
   flowType: IpOverviewType;
 }
-interface FlowTypeSelectDispatchProps {
+export type FlowTypeSelectProps = OwnProps & IPDetailsDispatchProps;
+
+const onChangeType = (
+  flowType: IpOverviewType,
   updateIpOverviewFlowType: ActionCreator<{
     flowType: IpOverviewType;
-  }>;
-}
-export type FlowTypeSelectProps = OwnProps & FlowTypeSelectDispatchProps;
-export class FlowTypeSelectComponent extends React.PureComponent<FlowTypeSelectProps> {
-  public render() {
-    const { loading, flowType } = this.props;
+  }>
+) => {
+  updateIpOverviewFlowType({ flowType });
+};
+
+export const FlowTypeSelectComponent = pure<FlowTypeSelectProps>(
+  ({ loading = false, flowType, updateIpOverviewFlowType }) => {
+    const id = `${IpOverviewId}-select-type`;
+    const selectedType = flowType;
     return (
       <SelectTypeItem grow={false}>
-        <SelectType
-          id={`${IpOverviewId}-select-type`}
-          selectedType={flowType}
-          onChangeType={this.onChangeType}
+        <EuiSuperSelect
+          options={toggleTypeOptions(id)}
+          valueOfSelected={selectedType}
+          onChange={newFlowType => onChangeType(newFlowType, updateIpOverviewFlowType)}
           isLoading={loading}
         />
       </SelectTypeItem>
     );
   }
+);
 
-  private onChangeType = (flowType: IpOverviewType) => {
-    this.props.updateIpOverviewFlowType({ flowType });
-  };
-}
-
-export const FlowTypeSelect = connect(
-  null,
-  {
-    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
-  }
-)(FlowTypeSelectComponent);
+export const FlowTypeSelect = FlowTypeSelectComponent;

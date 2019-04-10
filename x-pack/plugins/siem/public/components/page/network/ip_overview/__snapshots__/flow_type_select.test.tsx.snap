@@ -1,14 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Flow Type Select Connected Component changing selected type selecting destination from the type drop down 1`] = `
-<Styled(EuiFlexItem)
-  grow={false}
->
-  <pure(Component)
-    id="ip-overview-select-type"
-    isLoading={false}
-    onChangeType={[Function]}
-    selectedType="source"
-  />
-</Styled(EuiFlexItem)>
+exports[`Flow Type Select Connected Component changing selected type renders pretty 1`] = `
+<Component
+  flowType="source"
+  loading={false}
+  updateIpOverviewFlowType={[MockFunction]}
+/>
 `;

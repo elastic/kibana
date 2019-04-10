@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
@@ -24,7 +25,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { IpOverviewType, Overview } from '../../graphql/types';
 import { IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
-import { networkModel, networkSelectors, State } from '../../store';
+import { networkActions, networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -35,8 +36,15 @@ interface IPDetailsComponentReduxProps {
   filterQuery: string;
   flowType: IpOverviewType;
 }
+export interface IPDetailsDispatchProps {
+  updateIpOverviewFlowType: ActionCreator<{
+    flowType: IpOverviewType;
+  }>;
+}
 
-type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+type IPDetailsComponentProps = IPDetailsComponentReduxProps &
+  IPDetailsDispatchProps &
+  NetworkComponentProps;
 
 const getQuickBeatStat = (data: Overview) =>
   data && data.lastSeen != null ? (
@@ -60,6 +68,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     },
     filterQuery,
     flowType,
+    updateIpOverviewFlowType,
   }) => {
     return (
       <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
@@ -84,7 +93,11 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           />
 
                           <HeaderPage subtitle={getQuickBeatStat(typeData)} title={decodeIpv6(ip)}>
-                            <FlowTypeSelect loading={loading} flowType={flowType} />
+                            <FlowTypeSelect
+                              loading={loading}
+                              flowType={flowType}
+                              updateIpOverviewFlowType={updateIpOverviewFlowType}
+                            />
                             {/* DEV NOTE: SelectTypeItem component from components/page/network/ip_overview/index.tsx to be moved here */}
                             {/* DEV NOTE: Date picker to be moved here */}
                           </HeaderPage>
@@ -128,7 +141,12 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
+export const IPDetails = connect(
+  makeMapStateToProps,
+  {
+    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
+  }
+)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {
