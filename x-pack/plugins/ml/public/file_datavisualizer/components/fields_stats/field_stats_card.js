@@ -6,7 +6,6 @@
 
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -14,6 +13,7 @@ import {
 } from '@elastic/eui';
 
 import { FieldTypeIcon } from '../../../components/field_type_icon';
+import { getFieldTypeAssociatedAriaLabel } from '../../../util/field_types_utils';
 
 export function FieldStatsCard({ field }) {
 
@@ -21,6 +21,9 @@ export function FieldStatsCard({ field }) {
   if (type === 'double' || type === 'long') {
     type = 'number';
   }
+
+  const typeAriaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', type);
+
 
   return (
     <React.Fragment>
@@ -34,13 +37,7 @@ export function FieldStatsCard({ field }) {
             <div
               className="field-name"
               tabIndex="0"
-              aria-label={i18n.translate('xpack.ml.fileDatavisualizer.fieldStatsCard.cardTitle', {
-                defaultMessage: '{typeOfData} type, {cardTitle}',
-                values: {
-                  typeOfData: type,
-                  cardTitle: field.name
-                }
-              })}
+              aria-label={`${typeAriaLabel}, ${field.name}`}
             >
               {field.name}
             </div>

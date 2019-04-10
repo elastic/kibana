@@ -11,85 +11,57 @@ import { EuiToolTip } from '@elastic/eui';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { isKeywordFieldType, getFieldTypeAssociatedAriaLabel } from '../../util/field_types_utils';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl, needsAria = true }) {
-  let ariaLabel = '';
-  let iconClass = '';
+export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {
+  let ariaLabel = null;
+
+  if (isKeywordFieldType('ML_JOB_FIELD_TYPES', type)) {
+    ariaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', type);
+  } else {
+    // if type doesn't match one of ML_JOB_FIELD_TYPES
+    // don't render the component at all
+    return null;
+  }
+
+  const iconClass = ['field-type-icon'];
   let iconChar = '';
 
   switch (type) {
-    case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.booleanTypeAriaLabel',
-        defaultMessage: 'boolean type'
-      });
-      iconClass = 'fa-adjust';
+
+    // icon class names
+    case 'boolean':
+      iconClass.push('kuiIcon', 'fa-adjust');
       break;
-    case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.dateTypeAriaLabel',
-        defaultMessage: 'date type'
-      });
-      iconClass = 'fa-clock-o';
+    case 'date':
+      iconClass.push('kuiIcon', 'fa-clock-o');
       break;
-    case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.numberTypeAriaLabel',
-        defaultMessage: 'number type'
-      });
-      iconChar = '#';
+    case 'geo_point':
+      iconClass.push('kuiIcon', 'fa-globe');
       break;
-    case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel',
-        defaultMessage: '{geoPointParam} type'
-      }, { geoPointParam: 'geo_point' });
-      iconClass = 'fa-globe';
+    case 'text':
+      iconClass.push('kuiIcon', 'fa-file-text-o');
       break;
-    case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.keywordTypeAriaLabel',
-        defaultMessage: 'keyword type'
-      });
+    case 'IP':
+      iconClass.push('kuiIcon', 'fa-laptop');
+      break;
+
+    // icon chars
+    case 'keyword':
       iconChar = 't';
       break;
-    case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.textTypeAriaLabel',
-        defaultMessage: 'text type'
-      });
-      iconClass = 'fa-file-text-o';
+    case 'number':
+      iconChar = '#';
       break;
-    case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.ipTypeAriaLabel',
-        defaultMessage: 'IP type'
-      });
-      iconClass = 'fa-laptop';
-      break;
-    case ML_JOB_FIELD_TYPES.UNKNOWN:
-      ariaLabel = intl.formatMessage({
-        id: 'xpack.ml.fieldTypeIcon.unknownTypeAriaLabel',
-        defaultMessage: 'Unknown type'
-      });
+    case 'Unknown':
       iconChar = '?';
       break;
-    default:
-      // if type doesn't match one of ML_JOB_FIELD_TYPES
-      // don't render the component at all
-      return null;
-  }
-
-  let className = 'field-type-icon';
-  if (iconClass !== '') {
-    className += ' kuiIcon ' + iconClass;
   }
 
   const containerProps = {
     ariaLabel,
-    className,
+    className: iconClass.join(' '),
     iconChar,
     needsAria
   };
@@ -113,8 +85,9 @@ export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled 
   }
 
   return <FieldTypeIconContainer {...containerProps} />;
-});
-FieldTypeIcon.WrappedComponent.propTypes = {
+};
+
+FieldTypeIcon.propTypes = {
   tooltipEnabled: PropTypes.bool,
   type: PropTypes.string
 };
@@ -130,7 +103,7 @@ function FieldTypeIconContainer({
 }) {
 
   const wrapperProps = { className };
-  if (needsAria) {
+  if (needsAria && ariaLabel) {
     wrapperProps['aria-label'] = ariaLabel;
   }
 

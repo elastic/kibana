@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
 import { FieldTypeIcon } from '../field_type_icon';
+import { getFieldTypeAssociatedAriaLabel } from '../../util/field_types_utils';
 import { i18n } from '@kbn/i18n';
 
 export function FieldTitleBar({ card }) {
@@ -31,11 +32,17 @@ export function FieldTitleBar({ card }) {
     defaultMessage: 'document count'
   });
 
+  const typeAriaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', card.type);
+
   return (
     <EuiText className={classNames.join(' ')}>
-      <FieldTypeIcon type={card.type} tooltipEnabled={true} ariaSuffix={fieldName} />
+      <FieldTypeIcon type={card.type} tooltipEnabled={true} needsAria={false} />
       <EuiToolTip position="left" content={fieldName}>
-        <div className="field-name">
+        <div
+          className="field-name"
+          tabIndex="0"
+          aria-label={`${typeAriaLabel}, ${fieldName}`}
+        >
           {fieldName}
         </div>
       </EuiToolTip>
