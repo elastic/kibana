@@ -26,9 +26,9 @@ const $q = { defer: () => ({ resolve() {} }) };
 // axios has a $http like interface so using it to simulate $http
 setHttpClient(axios.create(), $q);
 
-const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
+const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) => {
   const userActions = {
-    // Follower indices user actions
+    // Follower indices LIST
     followerIndicesList() {
       const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
 
@@ -70,7 +70,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickFollowerIndexAt,
       };
     },
-    // Auto-follow patterns user actions
+    // Auto-follow patterns LIST
     autoFollowPatternList() {
       const { rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable');
 
@@ -119,6 +119,31 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickRowActionButtonAt,
         clickAutoFollowPatternAt
       };
+    },
+    // Auto-follow pattern FORM
+    autoFollowPatternForm() {
+      const clickSaveForm = () => {
+        find('ccrAutoFollowPatternFormSubmitButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
+      };
+    },
+    // Follower index FORM
+    followerIndexForm() {
+      const clickSaveForm = () => {
+        find('ccrFollowerIndexFormSubmitButton').simulate('click');
+      };
+
+      const toggleAdvancedSettings = () => {
+        form.selectCheckBox('ccrFollowerIndexFormCustomAdvancedSettingsToggle');
+      };
+
+      return {
+        clickSaveForm,
+        toggleAdvancedSettings,
+      };
     }
   };
 
@@ -131,9 +156,25 @@ export const initTestBed = (component, props = {}, options) => {
   const testBed = registerTestBed(component, {}, ccrStore)(props, options);
   const getUserActions = initUserActions(testBed);
 
+  // Cutsom Form helpers
+  const setIndexPatternValue = (value) => {
+    const comboBox = testBed.find('ccrAutoFollowPatternFormIndexPatternInput');
+    const indexPatternsInput = findTestSubject(comboBox, 'comboBoxSearchInput');
+    testBed.form.setInputValue(indexPatternsInput, value);
+
+    // We need to press the ENTER key in order for the EuiComboBox to register
+    // the value. (keyCode 13 === ENTER)
+    comboBox.simulate('keydown', { keyCode: 13 });
+    testBed.component.update();
+  };
+
   return {
     ...testBed,
     getUserActions,
+    form: {
+      ...testBed.form,
+      setIndexPatternValue,
+    }
   };
 };
 
@@ -185,10 +226,47 @@ export const registerHttpRequestMockHelpers = server => {
     );
   };
 
+  const setLoadRemoteClustersResponse = (response = [], error) => {
+    if (error) {
+      server.respondWith('GET', '/api/remote_clusters',
+        [error.status || 400, { 'Content-Type': 'application/json' }, JSON.stringify(error.body)]
+      );
+    } else {
+      server.respondWith('GET', '/api/remote_clusters',
+        [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]
+      );
+    }
+  };
+
+  const setGetAutoFollowPatternResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
+  const setGetClusterIndicesResponse = (response = []) => {
+    server.respondWith('GET', '/api/index_management/indices',
+      [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]);
+  };
+
+  const setGetFollowerIndexResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/follower_indices\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadFollowerIndicesResponse,
     setLoadAutoFollowPatternsResponse,
     setDeleteAutoFollowPatternResponse,
     setAutoFollowStatsResponse,
+    setLoadRemoteClustersResponse,
+    setGetAutoFollowPatternResponse,
+    setGetClusterIndicesResponse,
+    setGetFollowerIndexResponse,
   };
 };
