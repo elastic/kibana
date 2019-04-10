@@ -40,18 +40,17 @@ describe('adoptToHapiOnRequestFormat', () => {
   it('Should allow to redirect to specified url', async () => {
     const redirectUrl = '/docs';
     const onRequest = adoptToHapiOnRequestFormat((req, t) => t.redirected(redirectUrl));
-    const takeoverMock = jest.fn();
-    const redirectMock = jest.fn().mockImplementation(() => ({ takeover: takeoverMock }));
-    await onRequest(
+    const takeoverSymbol = {};
+    const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
+    const result = await onRequest(
       requestMock,
       createResponseToolkit({
         redirect: redirectMock,
       })
     );
 
-    expect(redirectMock).toBeCalledTimes(1);
     expect(redirectMock).toBeCalledWith(redirectUrl);
-    expect(takeoverMock).toBeCalledTimes(1);
+    expect(result).toBe(takeoverSymbol);
   });
 
   it('Should allow to specify statusCode and message for Boom error', async () => {

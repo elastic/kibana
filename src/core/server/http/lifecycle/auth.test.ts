@@ -51,18 +51,17 @@ describe('adoptToHapiAuthFormat', () => {
       async (req, sessionStorage, t) => t.redirected(redirectUrl),
       SessionStorageMock
     );
-    const takeoverMock = jest.fn();
-    const redirectMock = jest.fn().mockImplementation(() => ({ takeover: takeoverMock }));
-    await onAuth(
+    const takeoverSymbol = {};
+    const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
+    const result = await onAuth(
       requestMock,
       createResponseToolkit({
         redirect: redirectMock,
       })
     );
 
-    expect(redirectMock).toBeCalledTimes(1);
     expect(redirectMock).toBeCalledWith(redirectUrl);
-    expect(takeoverMock).toBeCalledTimes(1);
+    expect(result).toBe(takeoverSymbol);
   });
 
   it('Should allow to specify statusCode and message for Boom error', async () => {
