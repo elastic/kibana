@@ -5,41 +5,41 @@
  */
 
 import React from 'react';
-import { removeColumn, selectColumn, updateColumn, VisModel } from '../..';
+import { removeOperation, selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function SeriesAxisEditor({
-  col,
+  operationId,
   visModel,
   onChangeVisModel,
 }: {
-  col: string;
+  operationId: string;
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const column = selectColumn(col, visModel);
+  const operation = selectOperation(operationId, visModel);
 
-  if (!column) {
+  if (!operation) {
     // TODO...
     return <span>N/A</span>;
   }
 
   return (
     <OperationEditor
-      column={column}
+      operation={operation}
       visModel={visModel}
-      onColumnChange={newColumn => {
-        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      onOperationChange={newOperation => {
+        onChangeVisModel(updateOperation(operationId, newOperation, visModel));
       }}
       allowedScale="ordinal"
       allowedCardinality="multi"
       defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
       removable
-      onColumnRemove={() => {
+      onOperationRemove={() => {
         // TODO there should be a helper function for that
         const updatedModel: VisModel = {
-          ...removeColumn(col, visModel),
+          ...removeOperation(operationId, visModel),
           private: {
             ...visModel.private,
             xyChart: {
@@ -47,7 +47,7 @@ export function SeriesAxisEditor({
               seriesAxis: {
                 ...visModel.private.xyChart.seriesAxis,
                 columns: visModel.private.xyChart.seriesAxis.columns.filter(
-                  (currentCol: any) => currentCol !== col
+                  (currentOperation: any) => currentOperation !== operationId
                 ),
               },
             },
@@ -57,7 +57,7 @@ export function SeriesAxisEditor({
       }}
       canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
     >
-      {getOperationSummary(column)}
+      {getOperationSummary(operation)}
     </OperationEditor>
   );
 }

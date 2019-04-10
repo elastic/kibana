@@ -9,19 +9,31 @@ import { EuiSideNav } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
-import { DatasourceField, fieldToOperation, SelectOperation } from '../../../../common';
+import {
+  DatasourceField,
+  FieldOperation,
+  fieldToOperation,
+  SelectOperation,
+  SelectOperator,
+} from '../../../../common';
 import { isApplicableForCardinality, isApplicableForScale } from '../../lib';
 import { Draggable } from '../draggable';
 import { getOperationDefinition, OperationEditorProps, operations } from './operation_definitions';
 
-export function OperationEditor(props: OperationEditorProps) {
+function isFieldOperation(
+  operation: SelectOperation
+): operation is SelectOperation & FieldOperation {
+  return Boolean('argument' in operation && operation.argument.field);
+}
+
+export function OperationEditor<T extends SelectOperation>(props: OperationEditorProps<T>) {
   const {
     children,
     visModel,
-    column,
-    onColumnChange,
+    operation,
+    onOperationChange,
     removable,
-    onColumnRemove,
+    onOperationRemove,
     allowedScale,
     allowedCardinality,
     defaultOperator,
@@ -31,17 +43,19 @@ export function OperationEditor(props: OperationEditorProps) {
     isOpen: false,
   });
   const onDropField = (field: DatasourceField) => {
-    const updatedColumn =
-      'argument' in column &&
-      column.argument.field &&
-      getOperationDefinition(column.operator).applicableFields([field], props).length === 1
-        ? ({ ...column, argument: { ...column.argument, field: field.name } } as SelectOperation)
-        : fieldToOperation(field, defaultOperator(field));
+    const updatedOperation =
+      isFieldOperation(operation) &&
+      getOperationDefinition(operation.operator).applicableFields([field], props).length === 1
+        ? {
+            ...operation,
+            argument: { ...operation.argument, field: field.name },
+          }
+        : fieldToOperation(operation.id, field, defaultOperator(field));
 
     // keep alias to avoid updating references
-    updatedColumn.alias = column.alias;
+    updatedOperation.id = operation.id;
 
-    onColumnChange(updatedColumn);
+    onOperationChange(updatedOperation);
   };
   const close = () => setState({ isOpen: false });
 
@@ -53,9 +67,9 @@ export function OperationEditor(props: OperationEditorProps) {
       <EuiLink onClick={() => setState({ ...state, isOpen: !state.isOpen })}>{children}</EuiLink>
     </Draggable>
   );
-  const changeOperation = (operationType: string) => {
+  const changeOperation = (operationType: SelectOperator) => {
     const opDefinition = getOperationDefinition(operationType);
-    onColumnChange(opDefinition.toSelectClause(column, visModel.datasource!.fields));
+    onOperationChange(opDefinition.toSelectOperation(operation, visModel.datasource!.fields));
   };
 
   const sideNavItems = [
@@ -71,7 +85,7 @@ export function OperationEditor(props: OperationEditorProps) {
         .map(op => ({
           name: op.name,
           id: op.operator,
-          isSelected: op.operator === column.operator,
+          isSelected: op.operator === operation.operator,
           onClick() {
             changeOperation(op.operator);
           },
@@ -79,7 +93,9 @@ export function OperationEditor(props: OperationEditorProps) {
     },
   ];
 
-  const SubEditor = getOperationDefinition(column.operator).editor;
+  const SubEditor = getOperationDefinition(operation.operator).editor as
+    | React.ComponentType<OperationEditorProps<T>>
+    | undefined;
 
   const subEditor = SubEditor ? (
     <EuiFlexItem>
@@ -110,7 +126,7 @@ export function OperationEditor(props: OperationEditorProps) {
           label="Remove"
           isIconOnly
           isEmpty
-          onChange={onColumnRemove}
+          onChange={onOperationRemove}
         />
       )}
     </>

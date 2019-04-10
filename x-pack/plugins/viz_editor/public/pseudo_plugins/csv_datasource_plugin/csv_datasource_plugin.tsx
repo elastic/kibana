@@ -72,7 +72,7 @@ function toExpression(viewState: VisModel) {
         )
       : '[]'
   }' columnNames='${
-    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
+    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.id)) : '[]'
   }' lines='${
     viewState.datasource ? JSON.stringify(viewState.datasource.meta.text.split('\n')) : '[]'
   }'`;

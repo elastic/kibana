@@ -43,17 +43,15 @@ export function getOperationTemplate(operator: SelectOperator) {
   return template;
 }
 
-export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
+export function fieldToOperation(id: string, field: DatasourceField, operator: SelectOperator) {
   const template = {
     ...getOperationTemplate(operator),
-    alias: field.name,
+    id,
   } as SelectOperation;
 
   if ('argument' in template) {
     template.argument.field = field.name;
   }
-
-  template.alias = operator === 'count' ? 'count' : field.name;
 
   return template;
 }

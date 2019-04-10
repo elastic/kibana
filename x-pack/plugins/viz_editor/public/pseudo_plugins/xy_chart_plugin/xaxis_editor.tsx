@@ -6,38 +6,38 @@
 
 import React from 'react';
 import { DatasourceField } from '../../../common';
-import { selectColumn, updateColumn, VisModel } from '../../../public';
+import { selectOperation, updateOperation, VisModel } from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function XAxisEditor({
-  col,
+  operationId,
   visModel,
   onChangeVisModel,
 }: {
-  col: string;
+  operationId: string;
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const column = selectColumn(col, visModel);
+  const operation = selectOperation(operationId, visModel);
 
-  if (!column) {
+  if (!operation) {
     // TODO...
     return <span>N/A</span>;
   }
 
   return (
     <OperationEditor
-      column={column}
+      operation={operation}
       visModel={visModel}
-      onColumnChange={newColumn => {
-        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      onOperationChange={newOperation => {
+        onChangeVisModel(updateOperation(operationId, newOperation, visModel));
       }}
       allowedScale="ordinal"
       allowedCardinality="multi"
       defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
       canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
     >
-      {getOperationSummary(column)}
+      {getOperationSummary(operation)}
     </OperationEditor>
   );
 }

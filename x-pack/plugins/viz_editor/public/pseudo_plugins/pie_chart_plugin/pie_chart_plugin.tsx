@@ -50,7 +50,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
         {sliceAxis.columns.map(col => (
           <SliceAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -61,7 +61,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
         {angleAxis.columns.map(col => (
           <AngleAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -165,7 +165,7 @@ function getSuggestionsForField(
   }
 
   return operationNames.map(operationName => {
-    const firstOperation = fieldToOperation(field, operationName);
+    const firstOperation = fieldToOperation('slice', field, operationName);
     const formattedNameSlice = operationToName(operationName);
     const formattedNameSize = operationToName('count');
 
@@ -176,7 +176,7 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef,
-          select: [{ operator: 'count', alias: 'count' }, { ...firstOperation, alias: field.name }],
+          select: [{ operator: 'count', id: 'count' }, { ...firstOperation, id: field.name }],
         },
       },
       private: {

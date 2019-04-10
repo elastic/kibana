@@ -5,39 +5,39 @@
  */
 
 import React from 'react';
-import { selectColumn, updateColumn, VisModel } from '../..';
+import { selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function SliceAxisEditor({
-  col,
+  operationId,
   visModel,
   onChangeVisModel,
 }: {
-  col: string;
+  operationId: string;
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const column = selectColumn(col, visModel);
+  const operation = selectOperation(operationId, visModel);
 
-  if (!column) {
+  if (!operation) {
     // TODO...
     return <span>N/A</span>;
   }
 
   return (
     <OperationEditor
-      column={column}
+      operation={operation}
       visModel={visModel}
-      onColumnChange={newColumn => {
-        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      onOperationChange={newOperation => {
+        onChangeVisModel(updateOperation(operationId, newOperation, visModel));
       }}
       allowedScale="ordinal"
       allowedCardinality="multi"
       defaultOperator={() => 'terms'}
       canDrop={(f: DatasourceField) => f.type === 'string'}
     >
-      {getOperationSummary(column)}
+      {getOperationSummary(operation)}
     </OperationEditor>
   );
 }

@@ -11,7 +11,7 @@ import {
   EditorPlugin,
   getColumnIdByIndex,
   getTypes,
-  selectColumn,
+  selectOperation,
   Suggestion,
   UnknownVisModel,
   updatePrivateState,
@@ -51,13 +51,23 @@ function configPanel({
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <AxisEditor key={col} col={col} visModel={visModel} onChangeVisModel={onChangeVisModel} />
+          <AxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <AxisEditor key={col} col={col} visModel={visModel} onChangeVisModel={onChangeVisModel} />
+          <AxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
     </>
@@ -79,8 +89,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
     },
   } = visModel;
 
-  const xColumn = selectColumn(xAxis.columns[0], visModel);
-  const yColumn = selectColumn(yAxis.columns[0], visModel);
+  const xColumn = selectOperation(xAxis.columns[0], visModel);
+  const yColumn = selectOperation(yAxis.columns[0], visModel);
 
   const xScaleType = hasDate ? 'time' : 'linear';
 
@@ -99,7 +109,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${xColumn && xColumn.alias}"},
+        "domain": {"data": "table", "field": "${xColumn && xColumn.id}"},
         "range": "width"
       },
       {
@@ -108,7 +118,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${yColumn && yColumn.alias}"},
+        "domain": {"data": "table", "field": "${yColumn && yColumn.id}"},
         "range": "height"
       }
     ],
@@ -143,8 +153,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "from": {"data": "table"},
         "encode": {
           "update": {
-            "x": {"scale": "x", "field": "${xColumn && xColumn.alias}"},
-            "y": {"scale": "y", "field": "${yColumn && yColumn.alias}"},
+            "x": {"scale": "x", "field": "${xColumn && xColumn.id}"},
+            "y": {"scale": "y", "field": "${yColumn && yColumn.id}"},
             "shape": {"value": "circle"},
             "strokeWidth": {"value": 2},
             "opacity": {"value": 0.5},
@@ -229,8 +239,8 @@ function getSuggestionsForField(
   const { datasource } = visModel;
 
   const select: ColumnOperation[] = [
-    { ...(fieldToOperation(field, 'column') as ColumnOperation), alias: '0' },
-    { ...(fieldToOperation(field, 'column') as ColumnOperation), alias: '1' },
+    { ...(fieldToOperation('y', field, 'column') as ColumnOperation), id: '0' },
+    { ...(fieldToOperation('x', field, 'column') as ColumnOperation), id: '1' },
   ];
 
   let hasDate = false;
@@ -239,10 +249,11 @@ function getSuggestionsForField(
     hasDate = true;
     select[1] = {
       ...(fieldToOperation(
+        'x',
         datasource.fields.find(f => f.name === datasource.timeFieldName)!,
         'column'
       ) as ColumnOperation),
-      alias: '1',
+      id: '1',
     };
   }
 

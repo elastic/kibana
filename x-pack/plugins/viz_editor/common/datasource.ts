@@ -6,7 +6,7 @@
 
 import { Scale } from '../public/common/components/operation_editor';
 
-export type FieldType = 'number' | 'string' | 'date';
+export type FieldType = 'number' | 'string' | 'date' | 'boolean';
 
 export interface DatasourceField {
   name: string;

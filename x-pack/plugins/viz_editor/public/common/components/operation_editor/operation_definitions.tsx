@@ -8,8 +8,8 @@ import { EuiFieldNumber, EuiForm, EuiFormRow, EuiIcon, EuiRange, EuiSelect } fro
 import React from 'react';
 import {
   AvgOperation,
+  BasicOperation,
   CardinalityOperation,
-  ColumnOperation,
   CountOperation,
   DatasourceField,
   DateHistogramOperation,
@@ -29,11 +29,11 @@ const FixedEuiRange = EuiRange as React.ComponentType<any>;
 export type Scale = 'ordinal' | 'interval';
 export type Cardinality = 'single' | 'multi';
 
-export interface OperationEditorProps {
+export interface OperationEditorProps<T extends BasicOperation = BasicOperation> {
   children: any;
-  column: SelectOperation;
-  onColumnChange: (newColumn: SelectOperation) => void;
-  onColumnRemove?: () => void;
+  operation: T;
+  onOperationChange: (newOperation: SelectOperation) => void;
+  onOperationRemove?: () => void;
   removable?: boolean;
   visModel: VisModel;
   allowedScale: Scale;
@@ -42,12 +42,12 @@ export interface OperationEditorProps {
   canDrop?: (field: DatasourceField) => boolean;
 }
 
-export interface OperationDefinition {
+export interface OperationDefinition<T extends BasicOperation> {
   // The human-friendly name of the operation
   name: string;
 
   // The type of the operation (e.g. 'sum', 'avg', etc)
-  operator: SelectOperation['operator'];
+  operator: T['operator'];
 
   // Filter the fields list down to only those supported by this
   // operation (e.g. numbers for sum operations, dates for histograms)
@@ -55,24 +55,23 @@ export interface OperationDefinition {
 
   // Provide a textual summary of the operation, maybe should return
   // a React component instead of a string?
-  summarize?: (operation: any) => React.ReactNode;
+  summarize?: (operation: T) => React.ReactNode;
 
   // Convert the specified current operation into a different operation
   // e.g. from count to sum, etc.
-  toSelectClause: (
+  toSelectOperation: (
     currentOperation: SelectOperation | undefined,
     fields: DatasourceField[]
   ) => SelectOperation;
 
   // The editor panel
-  editor?: (props: OperationEditorProps) => React.ReactElement;
+  editor?: (props: OperationEditorProps<T>) => React.ReactElement;
 }
 
-function fieldOperationEditor(props: OperationEditorProps) {
-  const { column, visModel, onColumnChange } = props;
-  const operation = column as FieldOperation;
+function fieldOperationEditor(props: OperationEditorProps<FieldOperation>) {
+  const { operation: operation, visModel, onOperationChange: onOperationChange } = props;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operator);
+  const opDefinition = getOperationDefinition(operation.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
@@ -85,9 +84,9 @@ function fieldOperationEditor(props: OperationEditorProps) {
       options={options}
       value={argument && argument.field}
       onChange={e =>
-        onColumnChange({
+        onOperationChange({
           ...operation,
-          alias: column.alias || e.target.value,
+          id: operation.id || e.target.value,
           argument: {
             ...argument,
             field: e.target.value,
@@ -99,11 +98,10 @@ function fieldOperationEditor(props: OperationEditorProps) {
   );
 }
 
-function termsOperationEditor(props: OperationEditorProps) {
-  const { column, visModel, onColumnChange } = props;
-  const operation = column as TermsOperation;
+function termsOperationEditor(props: OperationEditorProps<TermsOperation>) {
+  const { operation: operation, visModel, onOperationChange: onOperationChange } = props;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operator);
+  const opDefinition = getOperationDefinition(operation.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
@@ -111,31 +109,30 @@ function termsOperationEditor(props: OperationEditorProps) {
       text: f.name,
     }));
 
-  function toValue(orderBy: number, orderByDirection: 'asc' | 'desc') {
+  function toValue(orderBy: string, orderByDirection: 'asc' | 'desc') {
     return `${orderBy}-${orderByDirection}`;
   }
 
   function fromValue(value: string) {
     const parts = value.split('-');
-    return { orderBy: Number(parts[0]), orderByDirection: parts[1] as 'asc' | 'desc' };
+    return { orderBy: parts[0], orderByDirection: parts[1] as 'asc' | 'desc' };
   }
 
-  const orderOptions = Object.values(visModel.queries)[0]!.select.flatMap(
-    (currentColumn, index) => [
-      {
-        value: toValue(index, 'asc'),
-        text: `${
-          currentColumn === column ? 'Alphabetical' : operationToName(currentColumn.operator)
-        } asc.`,
-      },
-      {
-        value: toValue(index, 'desc'),
-        text: `${
-          currentColumn === column ? 'Alphabetical' : operationToName(currentColumn.operator)
-        } desc.`,
-      },
-    ]
-  );
+  const select = Object.values(visModel.queries)[0]!.select;
+  const orderOptions = select.flatMap(currentOperation => [
+    {
+      value: toValue(currentOperation.id, 'asc'),
+      text: `${
+        currentOperation === operation ? 'Alphabetical' : operationToName(currentOperation.operator)
+      } asc.`,
+    },
+    {
+      value: toValue(currentOperation.id, 'desc'),
+      text: `${
+        currentOperation === operation ? 'Alphabetical' : operationToName(currentOperation.operator)
+      } desc.`,
+    },
+  ]);
 
   return (
     <EuiForm>
@@ -144,7 +141,7 @@ function termsOperationEditor(props: OperationEditorProps) {
           options={options}
           value={argument && argument.field}
           onChange={e =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -163,7 +160,7 @@ function termsOperationEditor(props: OperationEditorProps) {
           value={argument && argument.size}
           showInput
           onChange={(e: any) =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -177,9 +174,15 @@ function termsOperationEditor(props: OperationEditorProps) {
       <EuiFormRow label="Order by">
         <EuiSelect
           options={orderOptions}
-          value={argument && toValue(argument.orderBy || 0, argument.orderByDirection || 'desc')}
+          value={
+            argument &&
+            toValue(
+              argument.orderBy || select[select.length - 1].id,
+              argument.orderByDirection || 'desc'
+            )
+          }
           onChange={(e: any) =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -193,11 +196,10 @@ function termsOperationEditor(props: OperationEditorProps) {
   );
 }
 
-function dateHistogramOperationEditor(props: OperationEditorProps) {
-  const { column, visModel, onColumnChange } = props;
-  const operation = column as DateHistogramOperation;
+function dateHistogramOperationEditor(props: OperationEditorProps<DateHistogramOperation>) {
+  const { operation: operation, visModel, onOperationChange: onOperationChange } = props;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operator);
+  const opDefinition = getOperationDefinition(operation.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
@@ -222,7 +224,7 @@ function dateHistogramOperationEditor(props: OperationEditorProps) {
           options={options}
           value={argument && argument.field}
           onChange={e =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -242,7 +244,7 @@ function dateHistogramOperationEditor(props: OperationEditorProps) {
           showTicks
           ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
           onChange={(e: any) =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -257,11 +259,10 @@ function dateHistogramOperationEditor(props: OperationEditorProps) {
   );
 }
 
-function windowOperationEditor(props: OperationEditorProps) {
-  const { column, visModel, onColumnChange } = props;
-  const operation = column as WindowOperation;
+function windowOperationEditor(props: OperationEditorProps<WindowOperation>) {
+  const { operation: operation, visModel, onOperationChange: onOperationChange } = props;
   const { argument } = operation;
-  const opDefinition = getOperationDefinition(column.operator);
+  const opDefinition = getOperationDefinition(operation.operator);
   const options = opDefinition
     .applicableFields(visModel.datasource!.fields, props)
     .map((f: DatasourceField) => ({
@@ -287,7 +288,7 @@ function windowOperationEditor(props: OperationEditorProps) {
           options={options}
           value={argument && argument.field}
           onChange={e =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -303,7 +304,7 @@ function windowOperationEditor(props: OperationEditorProps) {
           options={calculations}
           value={argument && argument.windowFunction}
           onChange={e =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -318,7 +319,7 @@ function windowOperationEditor(props: OperationEditorProps) {
         <EuiFieldNumber
           value={argument && argument.windowSize}
           onChange={e =>
-            onColumnChange({
+            onOperationChange({
               ...operation,
               argument: {
                 ...argument,
@@ -333,25 +334,25 @@ function windowOperationEditor(props: OperationEditorProps) {
   );
 }
 
-export const operations: OperationDefinition[] = [
+type PossibleOperationDefinitions<U extends BasicOperation = SelectOperation> = U extends any
+  ? OperationDefinition<U>
+  : never;
+
+export const operations: PossibleOperationDefinitions[] = [
   {
     name: operationToName('column'),
     operator: 'column',
     applicableFields: (fields, { allowedScale }) =>
       fields.filter(isFieldApplicableForScale.bind(null, allowedScale)),
     editor: fieldOperationEditor,
-    toSelectClause(
-      currentOperation: SelectOperation | undefined,
-      fields: DatasourceField[]
-    ): ColumnOperation {
+    toSelectOperation(currentOperation: SelectOperation | undefined, fields: DatasourceField[]) {
       return {
         operator: 'column',
-        alias:
-          (currentOperation && currentOperation.alias) || getFieldName(currentOperation, fields),
+        id: (currentOperation && currentOperation.id) || getFieldName(currentOperation, fields),
         argument: { field: getFieldName(currentOperation, fields) },
       };
     },
-    summarize(op: ColumnOperation) {
+    summarize(op) {
       return (
         <span>
           <EuiIcon type="string" className="configPanel-summary-icon" />
@@ -365,10 +366,10 @@ export const operations: OperationDefinition[] = [
     name: operationToName('count'),
     operator: 'count',
     applicableFields: () => [],
-    toSelectClause(currentOperation): CountOperation {
+    toSelectOperation(currentOperation): CountOperation {
       return {
         operator: 'count',
-        alias: (currentOperation && currentOperation.alias) || 'count',
+        id: (currentOperation && currentOperation.id) || 'count',
       };
     },
     summarize(op: CountOperation) {
@@ -386,7 +387,7 @@ export const operations: OperationDefinition[] = [
     operator: 'avg',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): AvgOperation {
@@ -395,8 +396,8 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
@@ -415,7 +416,7 @@ export const operations: OperationDefinition[] = [
     operator: 'date_histogram',
     applicableFields: dateAggFields,
     editor: dateHistogramOperationEditor,
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): DateHistogramOperation {
@@ -425,8 +426,8 @@ export const operations: OperationDefinition[] = [
           interval: 'd',
           field: getFieldName(currentOperation, dateAggFields(fields)),
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, dateAggFields(fields)),
       };
     },
@@ -445,7 +446,7 @@ export const operations: OperationDefinition[] = [
     operator: 'cardinality',
     applicableFields: aggregatableFields,
     editor: fieldOperationEditor,
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): CardinalityOperation {
@@ -454,8 +455,8 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, aggregatableFields(fields)),
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
@@ -477,7 +478,7 @@ export const operations: OperationDefinition[] = [
     operator: 'terms',
     applicableFields: aggregatableFields,
     editor: termsOperationEditor,
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): TermsOperation {
@@ -487,12 +488,12 @@ export const operations: OperationDefinition[] = [
           field: getFieldName(currentOperation, aggregatableFields(fields)),
           size: 5,
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, aggregatableFields(fields)),
       };
     },
-    summarize(op: CardinalityOperation) {
+    summarize(op) {
       return (
         <div className="configPanel-summary">
           <EuiIcon type="string" className="configPanel-summary-icon" />
@@ -510,7 +511,7 @@ export const operations: OperationDefinition[] = [
     operator: 'sum',
     applicableFields: numericAggFields,
     editor: fieldOperationEditor,
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): SumOperation {
@@ -519,8 +520,8 @@ export const operations: OperationDefinition[] = [
         argument: {
           field: getFieldName(currentOperation, numericAggFields(fields)),
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
@@ -543,7 +544,7 @@ export const operations: OperationDefinition[] = [
       const { windowFunction, windowSize, field } = (operation as WindowOperation).argument;
       return `${windowFunction} ${field} in window size ${windowSize}`;
     },
-    toSelectClause(
+    toSelectOperation(
       currentOperation: SelectOperation | undefined,
       fields: DatasourceField[]
     ): WindowOperation {
@@ -554,8 +555,8 @@ export const operations: OperationDefinition[] = [
           windowFunction: 'max',
           windowSize: 10,
         },
-        alias:
-          (currentOperation && currentOperation.alias) ||
+        id:
+          (currentOperation && currentOperation.id) ||
           getFieldName(currentOperation, numericAggFields(fields)),
       };
     },
@@ -585,24 +586,26 @@ export function getFieldName(
   return (argument && argument.field) || (field && field.name) || 'N/A';
 }
 
-export const getOperationName = (opType: string) => {
-  const operation = operations.find(({ operator: type }) => type === opType);
+export const getOperationName = (operator: SelectOperator) => {
+  const operation = operations.find(({ operator: type }) => type === operator);
   return operation && operation.name;
 };
 
-export const tryGetOperationDefinition = (opType: string) =>
-  operations.find(({ operator: type }) => type === opType);
+export const tryGetOperationDefinition = (operator: SelectOperator) =>
+  operations.find(({ operator: type }) => type === operator);
 
-export const getOperationDefinition = (opType: string) => {
-  const operation = tryGetOperationDefinition(opType);
+export const getOperationDefinition = (operator: SelectOperator) => {
+  const operation = tryGetOperationDefinition(operator);
   if (!operation) {
-    throw new Error(`Could not find operation of type ${opType}`);
+    throw new Error(`Could not find operation of type ${operator}`);
   }
   return operation;
 };
 
 export const getOperationSummary = (operation?: SelectOperation) => {
-  const opDefinition = operation && tryGetOperationDefinition(operation.operator);
+  const opDefinition =
+    operation &&
+    (tryGetOperationDefinition(operation.operator) as OperationDefinition<BasicOperation>);
 
   // TODO: What should we do in this case?
   if (!operation || !opDefinition) {

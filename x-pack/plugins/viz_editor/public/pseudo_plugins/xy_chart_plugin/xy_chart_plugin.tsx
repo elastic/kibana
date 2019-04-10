@@ -100,7 +100,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
         {yAxis.columns.map(col => (
           <YAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -111,7 +111,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
         {seriesAxis.columns.map(col => (
           <SeriesAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -122,7 +122,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
         {xAxis.columns.map(col => (
           <XAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -252,15 +252,15 @@ function buildViewModel(
         ...visModel.private.xyChart,
         xAxis: {
           title: formattedNameX,
-          columns: xAxis.map(column => `xyChartQuery_${column.alias}`),
+          columns: xAxis.map(column => `xyChartQuery_${column.id}`),
         },
         seriesAxis: {
           title: formattedSplitName,
-          columns: seriesAxis.map(column => `xyChartQuery_${column.alias}`),
+          columns: seriesAxis.map(column => `xyChartQuery_${column.id}`),
         },
         yAxis: {
           title: formattedNameY,
-          columns: yAxis.map(column => `xyChartQuery_${column.alias}`),
+          columns: yAxis.map(column => `xyChartQuery_${column.id}`),
         },
       },
     },
@@ -287,8 +287,8 @@ function _getSuggestionsForFieldAsReplacement(
       return null;
     }
 
-    xAxis = [fieldToOperation(field, op)];
-    yAxis = [fieldToOperation(field, 'count')];
+    xAxis = [fieldToOperation('x', field, op)];
+    yAxis = [fieldToOperation('y', field, 'count')];
 
     const newVisModel = buildViewModel(visModel, xAxis, yAxis, []);
 
@@ -305,14 +305,16 @@ function _getSuggestionsForFieldAsReplacement(
     if (op === 'column') {
       xAxis = [
         fieldToOperation(
+          'x',
           datasource.fields.find(f => f.name === datasource.timeFieldName)!,
           'column'
         ),
       ];
-      yAxis = [fieldToOperation(field, op)];
+      yAxis = [fieldToOperation('y', field, op)];
     } else {
       xAxis = [
         fieldToOperation(
+          'x',
           datasource.fields.find(f => f.name === datasource.timeFieldName)!,
           'date_histogram'
         ),
@@ -321,8 +323,8 @@ function _getSuggestionsForFieldAsReplacement(
       if (op === 'count') {
         return null;
       } else {
-        seriesAxis = [fieldToOperation(field, op)];
-        yAxis = [fieldToOperation(field, 'count')];
+        seriesAxis = [fieldToOperation('series', field, op)];
+        yAxis = [fieldToOperation('y', field, 'count')];
       }
     }
 

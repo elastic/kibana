@@ -42,12 +42,14 @@ function queryToEsAggsConfigs(query: Query): any {
         };
       case 'terms':
         const { field, size, orderBy, orderByDirection } = selectOperation.argument;
-        const orderByTerms = orderBy === index;
+        const orderByTerms = orderBy === selectOperation.id;
         const orderSettings =
           typeof orderBy !== 'undefined'
             ? {
                 order: orderByDirection || 'desc',
-                orderBy: orderByTerms ? '_key' : String(orderBy),
+                orderBy: orderByTerms
+                  ? '_key'
+                  : String(query.select.findIndex(({ id }) => id === orderBy)),
               }
             : {};
         return {
@@ -95,7 +97,7 @@ export function toExpression(viewState: VisModel) {
         operation.operator === 'column' ? operation.argument.field : ''
       )
     )}' fieldNames='${JSON.stringify(
-      firstQuery.select.map(operation => (operation.operator === 'column' ? operation.alias : ''))
+      firstQuery.select.map(operation => (operation.operator === 'column' ? operation.id : ''))
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }
   return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${

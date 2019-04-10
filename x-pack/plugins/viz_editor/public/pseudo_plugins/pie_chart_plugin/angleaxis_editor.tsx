@@ -5,39 +5,39 @@
  */
 
 import React from 'react';
-import { selectColumn, updateColumn, VisModel } from '../..';
+import { selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function AngleAxisEditor({
-  col,
+  operationId: col,
   visModel,
   onChangeVisModel,
 }: {
-  col: string;
+  operationId: string;
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const column = selectColumn(col, visModel);
+  const operation = selectOperation(col, visModel);
 
-  if (!column) {
+  if (!operation) {
     // TODO...
     return <span>N/A</span>;
   }
 
   return (
     <OperationEditor
-      column={column}
+      operation={operation}
       visModel={visModel}
-      onColumnChange={newColumn => {
-        onChangeVisModel(updateColumn(col, newColumn, visModel));
+      onOperationChange={newColumn => {
+        onChangeVisModel(updateOperation(col, newColumn, visModel));
       }}
       allowedScale="interval"
       allowedCardinality="single"
       defaultOperator={() => 'sum'}
       canDrop={(f: DatasourceField) => f && f.type === 'number'}
     >
-      {getOperationSummary(column)}
+      {getOperationSummary(operation)}
     </OperationEditor>
   );
 }

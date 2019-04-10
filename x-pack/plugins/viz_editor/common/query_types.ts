@@ -8,28 +8,20 @@
 // Select clause
 // ----------------------------------------
 
-export type SelectOperator =
-  | 'column'
-  | 'count'
-  | 'cardinality'
-  | 'date_histogram'
-  | 'sum'
-  | 'avg'
-  | 'terms'
-  | 'window';
+export type SelectOperator = SelectOperation['operator'];
 
-export interface Aliasable {
+export interface BasicOperation {
   operator: SelectOperator;
-  alias: string;
+  id: string;
 }
 
 export interface Field {
   field: string;
 }
 
-export type FieldOperation = Aliasable & {
+export interface FieldOperation extends BasicOperation {
   argument: Field;
-};
+}
 
 export interface ColumnOperation extends FieldOperation {
   operator: 'column';
@@ -78,7 +70,7 @@ export interface CardinalityOperation extends FieldOperation {
   operator: 'cardinality';
 }
 
-export interface CountOperation extends Aliasable {
+export interface CountOperation extends BasicOperation {
   operator: 'count';
 }
 
@@ -86,7 +78,7 @@ export interface TermsOperation extends FieldOperation {
   operator: 'terms';
   argument: Field & {
     size: number;
-    orderBy?: number;
+    orderBy?: string;
     orderByDirection?: 'asc' | 'desc';
   };
 }
