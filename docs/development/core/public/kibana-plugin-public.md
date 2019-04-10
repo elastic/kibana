@@ -7,6 +7,7 @@
 |  Class | Description |
 |  --- | --- |
 |  [BasePathSetup](./kibana-plugin-public.basepathsetup.md) | Provides access the 'server.basePath' configuration option in kibana.yml |
+|  [FlyoutRef](./kibana-plugin-public.flyoutref.md) | A FlyoutRef is a reference to an opened flyout panel. It offers methods to close the flyout panel again. If you open a flyout panel you should make sure you call <code>close()</code> when it should be closed. Since a flyout could also be closed by a user or from another flyout being opened, you must bind to the <code>onClose</code> Promise on the FlyoutRef instance. The Promise will resolve whenever the flyout was closed at which point you should discard the FlyoutRef. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) |  |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
@@ -20,6 +21,7 @@
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) | Provides access to the metadata injected by the server into the page |
+|  [OverlaySetup](./kibana-plugin-public.overlaysetup.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) | The available core services passed to a plugin's <code>Plugin#setup</code> method. |

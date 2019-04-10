@@ -68,6 +68,7 @@
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "tsc --p tsconfig.types.json",
+    "core:acceptApiChanges": "yarn build:types && node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook"
   },
   "repository": {
@@ -99,7 +100,7 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/register": "^7.0.0",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.8.0",
+    "@elastic/eui": "9.9.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",

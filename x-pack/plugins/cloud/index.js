@@ -14,9 +14,10 @@ export const cloud = kibana => {
 
     uiExports: {
       injectDefaultVars(server, options) {
+        options.id = 'test-cloud-id';
         return {
           isCloudEnabled: !!options.id,
-          cloudId: options.id
+          cloudId: options.id,
         };
       },
     },
@@ -38,9 +39,9 @@ export const cloud = kibana => {
     init(server) {
       const config = server.config().get(`xpack.cloud`);
       server.expose('config', {
-        isCloudEnabled: !!config.id
+        isCloudEnabled: !!config.id,
       });
       server.usage.collectorSet.register(getCloudUsageCollector(server));
-    }
+    },
   });
 };
