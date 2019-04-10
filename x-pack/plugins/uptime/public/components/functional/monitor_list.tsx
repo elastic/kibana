@@ -5,6 +5,8 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
@@ -31,6 +33,7 @@ import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
+import { MonitorListPopover } from './monitor_list_popover';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -72,23 +75,28 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
             defaultMessage: 'Status',
           }),
           render: (status: string, monitor: LatestMonitor) => (
-            <div>
-              <EuiHealth
-                color={status === 'up' ? 'success' : 'danger'}
-                style={{ display: 'block' }}
-              >
-                {status === 'up'
-                  ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
-                      defaultMessage: 'Up',
-                    })
-                  : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
-                      defaultMessage: 'Down',
-                    })}
-              </EuiHealth>
-              <EuiText size="xs" color="subdued">
-                {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
-              </EuiText>
-            </div>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <MonitorListPopover monitor={monitor} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiHealth
+                  color={status === 'up' ? 'success' : 'danger'}
+                  style={{ display: 'block' }}
+                >
+                  {status === 'up'
+                    ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+                        defaultMessage: 'Up',
+                      })
+                    : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+                        defaultMessage: 'Down',
+                      })}
+                </EuiHealth>
+                <EuiText size="xs" color="subdued">
+                  {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
         },
         {
