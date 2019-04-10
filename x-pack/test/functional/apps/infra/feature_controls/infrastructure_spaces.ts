@@ -6,7 +6,9 @@
 import expect from '@kbn/expect';
 import { SpacesService } from '../../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
-import { DATE_WITH_DATA } from '../constants';
+import { DATES } from '../constants';
+
+const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
