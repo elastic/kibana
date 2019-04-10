@@ -90,6 +90,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
   public render() {
     const {
       data,
+      domainsSortField,
       hasNextPage,
       ip,
       limit,
@@ -115,6 +116,10 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
+        sorting={{
+          field: `node.${domainsSortField.field}`,
+          direction: domainsSortField.direction,
+        }}
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
@@ -146,14 +151,13 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
-      const field = last(splitField) === 'count' ? DomainsFields.uniqueIpCount : last(splitField);
       const newDomainsSort: DomainsSortField = {
-        field: field as DomainsFields,
+        field: last(splitField) as DomainsFields,
         direction: criteria.sort.direction,
       };
       if (!isEqual(newDomainsSort, this.props.domainsSortField)) {
         this.props.updateDomainsSort({
-          domainsSort: newDomainsSort,
+          domainsSortField: newDomainsSort,
           networkType: this.props.type,
         });
       }

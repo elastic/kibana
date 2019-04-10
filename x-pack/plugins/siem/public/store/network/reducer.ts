@@ -66,7 +66,7 @@ export const initialNetworkState: NetworkState = {
         flowDirection: FlowDirection.uniDirectional,
         limit: DEFAULT_TABLE_LIMIT,
         domainsSortField: {
-          field: DomainsFields.domainName,
+          field: DomainsFields.bytes,
           direction: Direction.desc,
         },
       },

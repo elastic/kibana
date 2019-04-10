@@ -22,7 +22,7 @@ import { SearchHit, TermAggregation } from '../types';
 import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
 import { buildFirstLastSeenDomainQuery } from './query_last_first_seen_domain.dsl';
-import { buildQuery } from './query_overview.dsl';
+import { buildOverviewQuery } from './query_overview.dsl';
 import {
   DomainFirstLastSeenItem,
   DomainFirstLastSeenRequestOptions,
@@ -42,7 +42,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const response = await this.framework.callWithRequest<IpOverviewHit, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      buildOverviewQuery(options)
     );
 
     return {

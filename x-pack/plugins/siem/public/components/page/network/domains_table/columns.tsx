@@ -42,6 +42,7 @@ export const getDomainsColumns = (
     name: i18n.DOMAIN_NAME,
     truncateText: false,
     hideForMobile: false,
+    sortable: true,
     render: (domainName: string | null) => {
       const domainNameAttr = `${flowTarget}.domainName`;
       if (domainName != null) {
@@ -82,6 +83,7 @@ export const getDomainsColumns = (
     name: i18n.BYTES,
     truncateText: false,
     hideForMobile: false,
+    sortable: true,
     render: (bytes: number | null | undefined) => {
       if (bytes != null) {
         return numeral(bytes).format('0.000b');

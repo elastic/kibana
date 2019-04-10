@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsSortField, FlowDirection, FlowTarget } from '../../graphql/types';
+import {
+  Direction,
+  DomainsFields,
+  DomainsSortField,
+  FlowDirection,
+  FlowTarget,
+} from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { DomainsRequestOptions } from './index';
-
-// TODO: Extract as helper -- shared with query_top_n_flow
-const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
-  switch (flowTarget) {
-    case FlowTarget.source:
-      return FlowTarget.destination;
-    case FlowTarget.destination:
-      return FlowTarget.source;
-    case FlowTarget.server:
-      return FlowTarget.client;
-    case FlowTarget.client:
-      return FlowTarget.server;
-    default:
-      return flowTarget;
-  }
-};
 
 const getAggs = (
   ip: string,
@@ -35,13 +25,16 @@ const getAggs = (
   return {
     domain_count: {
       cardinality: {
-        field: `${getOppositeField(flowTarget)}.domain`,
+        field: `${flowTarget}.domain`,
       },
     },
     [`${flowTarget}_domains`]: {
       terms: {
-        field: `${getOppositeField(flowTarget)}.domain`,
+        field: `${flowTarget}.domain`,
         size: limit + 1,
+        order: {
+          ...getQueryOrder(domainsSortField),
+        },
       },
       aggs: {
         firstSeen: {
@@ -56,7 +49,10 @@ const getAggs = (
         },
         bytes: {
           sum: {
-            field: 'network.bytes',
+            field:
+              flowDirection === FlowDirection.uniDirectional
+                ? 'network.bytes'
+                : `${flowTarget}.bytes`,
           },
         },
         direction: {
@@ -66,44 +62,15 @@ const getAggs = (
         },
         uniqueIpCount: {
           cardinality: {
-            field: `${flowTarget}.ip`,
+            field: `${getOppositeField(flowTarget)}.ip`,
           },
         },
         packets: {
           sum: {
-            field: 'network.packets',
-          },
-        },
-      },
-    },
-    all: {
-      global: {},
-      aggs: {
-        all: {
-          filter: {
-            term: {
-              [`${flowTarget}.ip`]: ip,
-            },
-          },
-          aggs: {
-            domains: {
-              terms: {
-                field: `${getOppositeField(flowTarget)}.domain`,
-                size: limit + 1,
-              },
-              aggs: {
-                firstSeen: {
-                  min: {
-                    field: '@timestamp',
-                  },
-                },
-                lastSeen: {
-                  max: {
-                    field: '@timestamp',
-                  },
-                },
-              },
-            },
+            field:
+              flowDirection === FlowDirection.uniDirectional
+                ? 'network.packets'
+                : `${flowTarget}.packets`,
           },
         },
       },
@@ -174,20 +141,22 @@ export const buildDomainsQuery = ({
   pagination: { limit },
   sourceConfiguration: {
     fields: { timestamp },
+    auditbeatAlias,
     logAlias,
     packetbeatAlias,
+    winlogbeatAlias,
   },
   timerange: { from, to },
 }: DomainsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
-    { term: { [`${getOppositeField(flowTarget)}.ip`]: ip } },
+    { term: { [`${flowTarget}.ip`]: ip } },
   ];
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, packetbeatAlias],
+    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggs: {
@@ -206,4 +175,43 @@ export const buildDomainsQuery = ({
   };
 
   return dslQuery;
+};
+
+const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return FlowTarget.destination;
+    case FlowTarget.destination:
+      return FlowTarget.source;
+    case FlowTarget.server:
+      return FlowTarget.client;
+    case FlowTarget.client:
+      return FlowTarget.server;
+  }
+  assertUnreachable(flowTarget);
+};
+
+const assertUnreachable = (x: never): never => {
+  throw new Error(`Unknown Field in switch statement ${x}`);
+};
+
+type QueryOrder =
+  | { _key: Direction }
+  | { bytes: Direction }
+  | { packets: Direction }
+  | { uniqueIpCount: Direction };
+
+const getQueryOrder = (domainsSortField: DomainsSortField): QueryOrder => {
+  switch (domainsSortField.field) {
+    case DomainsFields.bytes:
+      return { bytes: domainsSortField.direction };
+    case DomainsFields.packets:
+      return { packets: domainsSortField.direction };
+    case DomainsFields.uniqueIpCount:
+      return { uniqueIpCount: domainsSortField.direction };
+    case DomainsFields.domainName:
+      return { _key: domainsSortField.direction };
+    default:
+      return { bytes: Direction.desc };
+  }
 };

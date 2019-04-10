@@ -90,7 +90,7 @@ const getAggs = (type: string, ip: string) => {
   };
 };
 
-export const buildQuery = ({
+export const buildOverviewQuery = ({
   filterQuery,
   sourceConfiguration: {
     fields: { timestamp },
