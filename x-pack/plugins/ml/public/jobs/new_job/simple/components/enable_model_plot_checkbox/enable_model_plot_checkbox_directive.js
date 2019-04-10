@@ -61,7 +61,7 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
             if (validationResult.success === true) {
               $scope.formConfig.enableModelPlot = true;
               $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
-
+            } else {
               $scope.ui.cardinalityValidator.message = i18n('xpack.ml.newJob.simple.enableModelPlot.enableModelPlotDescription', {
                 defaultMessage: 'Creating model plots is resource intensive and not recommended' +
                   'where the cardinality of the selected fields is greater than 100. Estimated cardinality' +
