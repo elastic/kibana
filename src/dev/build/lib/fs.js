@@ -83,6 +83,9 @@ export async function copy(source, destination) {
 
   // do a stat call to make sure the source exists before creating the destination directory
   await statAsync(source);
+  // Delete `destination` since `fs.copyFile` with the copy-on-write reflink/COPYFILE_FICLONE
+  // flag fails if the destination already exists
+  await fs.unlinkSync(destination);
   await mkdirp(dirname(destination));
   await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
 }
