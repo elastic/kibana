@@ -53,7 +53,7 @@ export default function (kibana) {
               defaultMessage: '<%= name %>',
             }),
             navLinkId: featureId,
-            icon: 'discoverApp',
+            icon: 'questionInCircle',
             app: [featureId, 'kibana'],
             catalogue: [],
             privileges: {
