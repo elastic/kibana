@@ -64,18 +64,9 @@ export interface GenerateCsvParams {
 }
 
 export interface Filter {}
-
-export interface TimeFilter extends Filter {
-  isTimeFilter: true;
-}
-
-export interface QueryFilter extends Filter {
-  isQueryFilter: true;
-}
-
-export interface SearchSourceFilter {
-  isSearchSourceFilter: true;
-}
+export type TimeFilter = Filter;
+export type QueryFilter = Filter;
+export type SearchSourceFilter = Filter;
 
 export interface ESQueryConfig {
   allowLeadingWildcards: boolean;
