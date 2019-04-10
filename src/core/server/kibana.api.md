@@ -138,6 +138,8 @@ export class KibanaRequest<Params, Query, Body> {
     // (undocumented)
     readonly params: Params;
     // (undocumented)
+    readonly path: string;
+    // (undocumented)
     readonly query: Query;
     }
 

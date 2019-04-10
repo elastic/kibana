@@ -16,6 +16,7 @@ export declare class KibanaRequest<Params, Query, Body>
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
 |  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> |  |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
+|  [path](./kibana-plugin-server.kibanarequest.path.md) |  | <code>string</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
 
 ## Methods
