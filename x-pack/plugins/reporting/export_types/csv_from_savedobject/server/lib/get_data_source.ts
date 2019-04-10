@@ -9,7 +9,7 @@ import {
   SavedObjectReference,
   SavedSearchObjectAttributesJSON,
   SearchSource,
-} from '../../types';
+} from '../../';
 
 export async function getDataSource(
   savedObjectsClient: any,

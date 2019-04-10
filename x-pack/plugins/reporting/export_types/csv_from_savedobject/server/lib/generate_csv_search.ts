@@ -18,7 +18,7 @@ import {
   SearchRequest,
   SearchSource,
   TimeRangeParams,
-} from '../../types';
+} from '../../';
 import { getDataSource } from './get_data_source';
 
 interface SavedSearchGeneratorResult {
