@@ -24,7 +24,7 @@ const requestMock = {} as any;
 const createResponseToolkit = (customization = {}): any => ({ ...customization });
 
 describe('adoptToHapiOnRequestFormat', () => {
-  it('Should allow to continue request', async () => {
+  it('Should allow passing request to the next handler', async () => {
     const continueSymbol = {};
     const onRequest = adoptToHapiOnRequestFormat((req, t) => t.next());
     const result = await onRequest(
@@ -37,7 +37,7 @@ describe('adoptToHapiOnRequestFormat', () => {
     expect(result).toBe(continueSymbol);
   });
 
-  it('Should allow to redirect to specified url', async () => {
+  it('Should support redirecting to specified url', async () => {
     const redirectUrl = '/docs';
     const onRequest = adoptToHapiOnRequestFormat((req, t) => t.redirected(redirectUrl));
     const takeoverSymbol = {};
@@ -53,7 +53,7 @@ describe('adoptToHapiOnRequestFormat', () => {
     expect(result).toBe(takeoverSymbol);
   });
 
-  it('Should allow to specify statusCode and message for Boom error', async () => {
+  it('Should support specifying statusCode and message for Boom error', async () => {
     const onRequest = adoptToHapiOnRequestFormat((req, t) => {
       return t.rejected(new Error('unexpected result'), { statusCode: 501 });
     });

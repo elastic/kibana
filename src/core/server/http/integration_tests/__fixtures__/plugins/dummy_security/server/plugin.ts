@@ -32,6 +32,7 @@ interface Storage {
 export const url = {
   auth: '/auth',
   authRedirect: '/auth/redirect',
+  redirectTo: '/login',
 };
 
 export const sessionDurationMs = 30;
@@ -39,7 +40,7 @@ export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
     const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
       if (request.path === url.authRedirect) {
-        return t.redirected('/login');
+        return t.redirected(url.redirectTo);
       }
 
       if (request.headers.authorization) {

@@ -582,3 +582,11 @@ test('registers auth request interceptor only once', async () => {
   await doRegister();
   expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
 });
+
+test('registers onRequest interceptor several times', async () => {
+  const { registerOnRequest } = await server.start(config);
+  const doRegister = () => registerOnRequest(() => null as any);
+
+  doRegister();
+  expect(doRegister).not.toThrowError();
+});

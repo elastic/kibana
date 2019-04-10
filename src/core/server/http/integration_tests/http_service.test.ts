@@ -21,7 +21,8 @@ import path from 'path';
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
-import { url } from './__fixtures__/plugins/dummy_security/server/plugin';
+import { url as authUrl } from './__fixtures__/plugins/dummy_security/server/plugin';
+import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/plugin';
 
 describe('http service', () => {
   describe('setup contract', () => {
@@ -39,7 +40,7 @@ describe('http service', () => {
         );
 
         const router = new Router('');
-        router.get({ path: url.auth, validate: false }, async (req, res) =>
+        router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
           res.ok({ content: 'ok' })
         );
         // TODO fix me when registerRouter is available before HTTP server is run
@@ -52,7 +53,7 @@ describe('http service', () => {
 
       it('Should support implementing custom authentication logic', async () => {
         const response = await kbnTestServer.request
-          .get(root, url.auth)
+          .get(root, authUrl.auth)
           .expect(200, { content: 'ok' });
 
         expect(response.header['set-cookie']).toBeDefined();
@@ -72,13 +73,14 @@ describe('http service', () => {
 
       it('Should support rejecting a request from an unauthenticated user', async () => {
         await kbnTestServer.request
-          .get(root, url.auth)
+          .get(root, authUrl.auth)
           .unset('Authorization')
           .expect(401);
       });
 
       it('Should support redirecting', async () => {
-        await kbnTestServer.request.get(root, url.authRedirect).expect(302);
+        const response = await kbnTestServer.request.get(root, authUrl.authRedirect).expect(302);
+        expect(response.header.location).toBe(authUrl.redirectTo);
       });
 
       it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {
@@ -95,6 +97,47 @@ describe('http service', () => {
           .expect(200, 'ok from legacy server');
 
         expect(response.header['set-cookie']).toBe(undefined);
+      });
+    });
+
+    describe('#registerOnRequest()', () => {
+      const dummyOnRequestPlugin = path.resolve(
+        __dirname,
+        './__fixtures__/plugins/dummy_on_request'
+      );
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeAll(async () => {
+        root = kbnTestServer.createRoot(
+          {
+            plugins: { paths: [dummyOnRequestPlugin] },
+          },
+          {
+            dev: true,
+          }
+        );
+
+        const router = new Router('');
+        router.get({ path: onReqUrl.root, validate: false }, async (req, res) =>
+          res.ok({ content: 'ok' })
+        );
+        // TODO fix me when registerRouter is available before HTTP server is run
+        (root as any).server.http.registerRouter(router);
+
+        await root.setup();
+      }, 30000);
+
+      afterAll(async () => await root.shutdown());
+      it('Should support passing request through to the route handler', async () => {
+        await kbnTestServer.request.get(root, onReqUrl.root).expect(200, { content: 'ok' });
+      });
+      it('Should support redirecting to configured url', async () => {
+        const response = await kbnTestServer.request.get(root, onReqUrl.redirect).expect(302);
+        expect(response.header.location).toBe(onReqUrl.redirectTo);
+      });
+      it('Should failing a request with configured error and status code', async () => {
+        await kbnTestServer.request
+          .get(root, onReqUrl.failed)
+          .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
       });
     });
   });
