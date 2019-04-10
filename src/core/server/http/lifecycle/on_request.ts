@@ -61,12 +61,14 @@ const toolkit = {
   rejected: OnRequestResult.rejected,
 };
 
+/** @public */
 export type OnRequest<Params = any, Query = any, Body = any> = (
   req: KibanaRequest<Params, Query, Body>,
   t: typeof toolkit
 ) => OnRequestResult;
 
 /**
+ * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests. Should finish with one of the following commands:

@@ -23,6 +23,7 @@ import { Request } from 'hapi';
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
+/** @public */
 export class KibanaRequest<Params, Query, Body> {
   /**
    * Factory for creating requests. Validates the request before creating an

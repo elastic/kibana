@@ -32,6 +32,7 @@ interface CoreClusterClients {
   dataClient: ClusterClient;
 }
 
+/** @public */
 export interface ElasticsearchServiceSetup {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {

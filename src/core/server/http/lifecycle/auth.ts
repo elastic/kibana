@@ -59,12 +59,14 @@ const toolkit = {
   rejected: AuthResult.rejected,
 };
 
+/** @public */
 export type Authenticate<T> = (
   request: Request,
   sessionStorage: SessionStorage<T>,
   t: typeof toolkit
 ) => Promise<AuthResult>;
 
+/** @public */
 export function adoptToHapiAuthFormat<T = any>(
   fn: Authenticate<T>,
   sessionStorage: SessionStorageFactory<T>

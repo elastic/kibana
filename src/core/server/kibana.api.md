@@ -6,7 +6,12 @@
 
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { Request } from 'hapi';
+import { ResponseObject } from 'hapi';
+import { ResponseToolkit } from 'hapi';
+import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
@@ -14,6 +19,13 @@ import { TypeOf } from '@kbn/config-schema';
 
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
+
+// Warning: (ae-forgotten-export) The symbol "SessionStorage" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "toolkit" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type Authenticate<T> = (request: Request, sessionStorage: SessionStorage<T>, t: typeof toolkit) => Promise<AuthResult>;
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 // Warning: (ae-internal-missing-underscore) The name bootstrap should be prefixed with an underscore because the declaration is marked as "@internal"
@@ -39,15 +51,11 @@ export class ClusterClient {
 
 // @public (undocumented)
 export interface CoreSetup {
-    // Warning: (ae-forgotten-export) The symbol "ElasticsearchServiceSetup" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    // Warning: (ae-forgotten-export) The symbol "HttpServiceSetup" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     http: HttpServiceSetup;
-    // Warning: (ae-forgotten-export) The symbol "PluginsServiceSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceSetup" which is marked as @internal
     // 
     // (undocumented)
     plugins: PluginsServiceSetup;
@@ -75,7 +83,44 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
 };
 
 // @public (undocumented)
+export interface ElasticsearchServiceSetup {
+    // (undocumented)
+    readonly adminClient$: Observable<ClusterClient>;
+    // (undocumented)
+    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    // (undocumented)
+    readonly dataClient$: Observable<ClusterClient>;
+    // (undocumented)
+    readonly legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
+    };
+}
+
+// @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
+
+// Warning: (ae-forgotten-export) The symbol "HttpServerInfo" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type HttpServiceSetup = HttpServerInfo;
+
+// @public (undocumented)
+export class KibanaRequest<Params, Query, Body> {
+    // (undocumented)
+    constructor(req: Request, params: Params, query: Query, body: Body);
+    // (undocumented)
+    readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    // (undocumented)
+    getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
+    // (undocumented)
+    readonly headers: Headers;
+    // (undocumented)
+    readonly params: Params;
+    // (undocumented)
+    readonly query: Query;
+    }
 
 // @public
 export interface Logger {
@@ -150,6 +195,12 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// Warning: (ae-forgotten-export) The symbol "toolkit" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "OnRequestResult" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: typeof toolkit_2) => OnRequestResult;
+
 // @public
 export interface PluginInitializerContext {
     // (undocumented)
@@ -175,7 +226,44 @@ export interface PluginSetupContext {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
     };
+    // (undocumented)
+    http?: {
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    };
 }
+
+// Warning: (ae-internal-missing-underscore) The name PluginsServiceSetup should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal (undocumented)
+export interface PluginsServiceSetup {
+    // (undocumented)
+    contracts: Map<PluginName, unknown>;
+    // (undocumented)
+    uiPlugins: {
+        public: Map<PluginName, DiscoveredPlugin>;
+        internal: Map<PluginName, DiscoveredPluginInternal>;
+    };
+}
+
+// @public (undocumented)
+export class Router {
+    // (undocumented)
+    constructor(path: string);
+    delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouteConfig" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RequestHandler" needs to be exported by the entry point index.d.ts
+    get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    getRoutes(): Readonly<RouterRoute>[];
+    // (undocumented)
+    readonly path: string;
+    post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    routes: Array<Readonly<RouterRoute>>;
+    }
 
 // @public
 export class ScopedClusterClient {
@@ -188,8 +276,9 @@ export class ScopedClusterClient {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/plugins/plugin_context.ts:35:9 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugin_context.ts:39:9 - (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugin_context.ts:36:9 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugin_context.ts:40:9 - (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:34:17 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
