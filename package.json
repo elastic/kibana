@@ -262,7 +262,7 @@
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
-    "@microsoft/api-documenter": "7.0.41",
+    "@microsoft/api-documenter": "7.0.49",
     "@microsoft/api-extractor": "7.0.31",
     "@octokit/rest": "^15.10.0",
     "@types/angular": "1.6.50",
