@@ -23,33 +23,23 @@ import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
-function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  if (agg.params.field.name !== agg.getIndexPattern().timeFieldName) {
-    return null;
-  }
-
-  const content = i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
-    defaultMessage:
-      "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
+function MinDocCountParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
+  const label = i18n.translate('common.ui.aggTypes.showEmptyBucketsLabel', {
+    defaultMessage: 'Show empty buckets',
   });
 
-  const label = i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
-    defaultMessage: 'Drop partial buckets',
+  const content = i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
+    defaultMessage: 'Show all buckets, not only the buckets with results',
   });
 
   return (
-    <>
+    <div className="visEditorSidebar__aggParamFormRow">
       <EuiToolTip content={content} delay="long" position="right">
-        <EuiSwitch
-          label={label}
-          checked={value}
-          data-test-subj="dropPartialBucketsCheckbox"
-          onChange={ev => setValue(ev.target.checked)}
-        />
+        <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
       </EuiToolTip>
       <EuiSpacer size="s" />
-    </>
+    </div>
   );
 }
 
-export { DropPartialsParamEditor };
+export { MinDocCountParamEditor };
