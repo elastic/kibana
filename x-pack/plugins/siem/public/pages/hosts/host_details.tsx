@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -16,6 +15,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
+import { LastBeatStat } from '../../components/last_beat_stat';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
@@ -62,22 +62,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
           <>
             <HostsKql indexPattern={indexPattern} type={type} />
 
-            {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available */}
-            <HeaderPage
-              subtitle={
-                <FormattedMessage
-                  id="xpack.siem.hostDetails.pageSubtitle"
-                  defaultMessage="Last Beat: TODO from {beat}"
-                  values={{
-                    beat: <EuiLink href="#">TODO</EuiLink>,
-                  }}
-                />
-              }
-              title={hostId}
-            >
-              {/* DEV NOTE: Date picker to be moved here */}
-            </HeaderPage>
-
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
                 <>
@@ -89,17 +73,30 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
                     type={type}
                   >
-                    {({ hosts, loading, id, refetch, startDate, endDate }) => (
-                      <HostSummaryManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        startDate={startDate}
-                        endDate={endDate}
-                        data={hosts}
-                        loading={loading}
-                      />
-                    )}
+                    {({ hosts, loading, id, refetch, startDate, endDate }) => {
+                      return (
+                        <>
+                          {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available */}
+                          <HeaderPage
+                            subtitle={
+                              <LastBeatStat lastSeen={getOr(null, 'node.lastBeat', hosts[0])} />
+                            }
+                            title={getOr(hostId, 'node.host.name', hosts[0])}
+                          >
+                            {/* DEV NOTE: Date picker to be moved here */}
+                          </HeaderPage>
+                          <HostSummaryManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            startDate={startDate}
+                            endDate={endDate}
+                            data={hosts}
+                            loading={loading}
+                          />
+                        </>
+                      );
+                    }}
                   </HostsQuery>
 
                   <EuiSpacer />

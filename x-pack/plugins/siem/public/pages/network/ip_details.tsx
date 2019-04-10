@@ -8,6 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
+import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
@@ -15,6 +16,7 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { getEmptyTagValue } from '../../components/empty_value';
 import { HeaderPage } from '../../components/header_page';
+import { LastBeatStat } from '../../components/last_beat_stat';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { IpOverview } from '../../components/page/network/ip_overview';
@@ -85,6 +87,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   >
                     {({ ipOverviewData, loading }) => {
                       const typeData: Overview = ipOverviewData[flowType]!;
+                      console.log('typeData', typeData)
                       return (
                         <>
                           <NetworkKql
@@ -92,7 +95,10 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             type={networkModel.NetworkType.page}
                           />
 
-                          <HeaderPage subtitle={getQuickBeatStat(typeData)} title={decodeIpv6(ip)}>
+                          <HeaderPage
+                            subtitle={<LastBeatStat lastSeen={getOr(null, 'lastSeen', typeData)} />}
+                            title={decodeIpv6(ip)}
+                          >
                             <FlowTypeSelect
                               loading={loading}
                               flowType={flowType}

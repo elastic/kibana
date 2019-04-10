@@ -14,6 +14,7 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
+import { LastBeatStat } from '../../components/last_beat_stat';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
@@ -55,6 +56,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                 }}
               />
             }
+            sub={<LastBeatStat lastSeen={'2019-04-10T17:10:13.414Z'} />}
             title={<FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />}
           >
             {/* DEV NOTE: Date picker to be moved here */}
@@ -70,15 +72,18 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   sourceId="default"
                   startDate={from}
                 >
-                  {({ kpiNetwork, loading, id, refetch }) => (
-                    <KpiNetworkComponentManage
-                      id={id}
-                      setQuery={setQuery}
-                      refetch={refetch}
-                      data={kpiNetwork}
-                      loading={loading}
-                    />
-                  )}
+                  {({ kpiNetwork, loading, id, refetch }) => {
+                    console.log('kpiNetwork', kpiNetwork);
+                    return (
+                      <KpiNetworkComponentManage
+                        id={id}
+                        setQuery={setQuery}
+                        refetch={refetch}
+                        data={kpiNetwork}
+                        loading={loading}
+                      />
+                    );
+                  }}
                 </KpiNetworkQuery>
 
                 <EuiSpacer />
@@ -91,21 +96,32 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   startDate={from}
                   type={networkModel.NetworkType.page}
                 >
-                  {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
-                    <NetworkTopNFlowTableManage
-                      data={networkTopNFlow}
-                      id={id}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      loading={loading}
-                      loadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      startDate={from}
-                      totalCount={totalCount}
-                      type={networkModel.NetworkType.page}
-                    />
-                  )}
+                  {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => {
+                    console.log('NetworkTopNFlowTableManage', {
+                      totalCount,
+                      loading,
+                      networkTopNFlow,
+                      pageInfo,
+                      loadMore,
+                      id,
+                      refetch,
+                    });
+                    return (
+                      <NetworkTopNFlowTableManage
+                        data={networkTopNFlow}
+                        id={id}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        startDate={from}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.page}
+                      />
+                    );
+                  }}
                 </NetworkTopNFlowQuery>
 
                 <EuiSpacer />
