@@ -6,9 +6,9 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
@@ -87,7 +87,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   >
                     {({ ipOverviewData, loading }) => {
                       const typeData: Overview = ipOverviewData[flowType]!;
-                      console.log('typeData', typeData)
+                      console.log('typeData', typeData);
                       return (
                         <>
                           <NetworkKql
