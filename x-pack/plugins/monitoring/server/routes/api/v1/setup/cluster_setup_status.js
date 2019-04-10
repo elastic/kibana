@@ -23,8 +23,11 @@ export function clusterSetupStatusRoute(server) {
           clusterUuid: Joi.string().required()
         }),
         payload: Joi.object({
-          ccs: Joi.string().optional()
-        })
+          timeRange: Joi.object({
+            min: Joi.date().required(),
+            max: Joi.date().required()
+          }).optional()
+        }).allow(null)
       }
     },
     handler: async (req) => {
