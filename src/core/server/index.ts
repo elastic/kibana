@@ -21,6 +21,7 @@ import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { ConfigService } from './config';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -43,3 +44,5 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   plugins: PluginsServiceSetup;
 }
+
+export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };

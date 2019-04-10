@@ -61,6 +61,7 @@ declare module '@elastic/eui/lib/experimental' {
     value: any;
   }
   type EuiCrosshairXProps = CommonProps & {
+    marginLeft?: number;
     seriesNames: string[];
     marginLeft?: number;
     titleFormat?: (dataPoints: EuiDataPoint[]) => EuiFormattedValue | undefined;
