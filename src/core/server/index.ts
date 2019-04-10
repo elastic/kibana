@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ConfigService } from './config';
 import { ElasticsearchServiceSetup } from './elasticsearch';
 import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { ConfigService } from './config';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -45,4 +45,4 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
-export { ConfigService, ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
+export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
