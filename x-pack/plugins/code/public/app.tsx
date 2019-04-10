@@ -46,7 +46,7 @@ function RootController($scope: any, $element: any, $http: any) {
 chrome.setRootController('code', RootController);
 chrome.breadcrumbs.set([
   {
-    text: 'Code',
+    text: 'Code (Beta)',
     href: '#/',
   },
 ]);
