@@ -29,10 +29,15 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
   const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
   const requestsMap = new Map();
 
-  const handleError = (error, callback) => {
+  const handleError = (error, callback, requestId) => {
     if (error) {
       notify.error(error);
     }
+
+    if (requestsMap.has(requestId)) {
+      requestsMap.delete(requestId);
+    }
+
     callback({});
   };
 
@@ -40,6 +45,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
     name: 'metrics',
     handler: function ({ uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
+
       return new Promise(resolve => {
         const panel = visParams;
         const uiStateObj = uiState.get(panel.type, {});
@@ -69,13 +75,13 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
               body: JSON.stringify({
                 timerange: {
                   timezone,
-                  ...parsedTimeRange
+                  ...parsedTimeRange,
                 },
                 query,
                 filters,
                 panels: [panel],
-                state: uiStateObj
-              })
+                state: uiStateObj,
+              }),
             });
 
             requestsMap.set(requestId, abort);
@@ -88,26 +94,26 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
                   dateFormat,
                   scaledDataFormat,
                   timezone,
-                  ...resp
+                  ...resp,
                 });
               })
               .catch(resp => {
-                let  err;
+                let err;
 
                 if (resp.code !== ABORT_REQUEST_CODE) {
                   err = new Error(resp.message);
                   err.stack = resp.stack;
                 }
 
-                handleError(err, resolve);
+                handleError(err, resolve, abort, requestId);
               });
 
           } catch (error) {
-            handleError(error, resolve);
+            handleError(error, resolve, requestId);
           }
         }
       });
-    }
+    },
   };
 };
 
