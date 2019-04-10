@@ -114,15 +114,12 @@ async function detectProducts(req) {
       doesExist: true,
     },
     [BEATS_SYSTEM_ID]: {
-      doesExist: false,
       mightExist: false,
     },
     [APM_SYSTEM_ID]: {
-      doesExist: false,
       mightExist: false,
     },
     [LOGSTASH_SYSTEM_ID]: {
-      doesExist: false,
       mightExist: false,
     }
   };
