@@ -24,4 +24,4 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 
 . Set `map.includeElasticMapsService` to `false` to turn off the EMS connection.
 . Set `map.tilemap.url` to the URL of your tile server. This configures the **Maps** default tile layer.
-. Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.
+. (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.
