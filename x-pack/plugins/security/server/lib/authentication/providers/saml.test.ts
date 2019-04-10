@@ -11,7 +11,7 @@ import { requestFixture } from '../../__tests__/__fixtures__/request';
 
 import { SAMLAuthenticationProvider } from './saml';
 import { ClusterSecurityFeatures } from '../../cluster_security_features';
-import { XPackUsageResponse } from 'x-pack/plugins/xpack_main/server/lib/xpack_usage';
+import { XPackUsageResponse } from '../../../../../xpack_main/server/lib/xpack_usage';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
@@ -21,7 +21,9 @@ describe('SAMLAuthenticationProvider', () => {
   beforeEach(() => {
     callWithRequest = sinon.stub();
     callWithInternalUser = sinon.stub();
-    xpackUsage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>({ security: { realms: { saml: { enabled: true } } } } as XPackUsageResponse);
+    xpackUsage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>({
+      security: { realms: { saml: { enabled: true } } },
+    } as XPackUsageResponse);
 
     provider = new SAMLAuthenticationProvider({
       client: { callWithRequest, callWithInternalUser } as any,
@@ -34,8 +36,10 @@ describe('SAMLAuthenticationProvider', () => {
       basePath: '/test-base-path',
       clusterSecurityFeatures: new ClusterSecurityFeatures({
         getUsage$: () => xpackUsage$,
-        refreshNow: () => { throw new Error("should not be called via this test"); }
-      })
+        refreshNow: () => {
+          throw new Error('should not be called via this test');
+        },
+      }),
     });
   });
 
@@ -49,7 +53,9 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('does not handle requests when the SAML realm is disabled in elasticsearch.', async () => {
-      xpackUsage$.next({ security: { realms: { saml: { enabled: false } } } } as XPackUsageResponse);
+      xpackUsage$.next({
+        security: { realms: { saml: { enabled: false } } },
+      } as XPackUsageResponse);
 
       const request = requestFixture();
 

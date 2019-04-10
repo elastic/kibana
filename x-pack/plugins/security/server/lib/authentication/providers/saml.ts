@@ -125,7 +125,10 @@ export class SAMLAuthenticationProvider {
     );
 
     if (!this.options.clusterSecurityFeatures.isSAMLRealmEnabled()) {
-      this.options.log(['warning', 'security', 'saml'], `SAML realm is not enabled in Elasticsearch.`);
+      this.options.log(
+        ['warning', 'security', 'saml'],
+        `SAML realm is not enabled in Elasticsearch.`
+      );
       return AuthenticationResult.notHandled();
     }
 

@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import {
   XPackUsageContract,
   XPackUsageResponse,
-} from 'x-pack/plugins/xpack_main/server/lib/xpack_usage';
+} from '../../../../xpack_main/server/lib/xpack_usage';
 import { ClusterSecurityFeatures } from './cluster_security_features';
 
 function createMockXPackUsage(
@@ -20,7 +20,7 @@ function createMockXPackUsage(
     },
     refreshNow() {
       throw new Error('this should not be called');
-    }
+    },
   };
 }
 

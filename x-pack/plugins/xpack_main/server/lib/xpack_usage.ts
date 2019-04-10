@@ -9,7 +9,15 @@ import { takeUntil } from 'rxjs/operators';
 import { Cluster, ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Poller } from '../../../../common/poller';
 
-export type SecurityRealm = 'file' | 'ldap' | 'native' | 'saml' | 'kerberos' | 'oidc' | 'active_directory' | 'pki';
+export type SecurityRealm =
+  | 'file'
+  | 'ldap'
+  | 'native'
+  | 'saml'
+  | 'kerberos'
+  | 'oidc'
+  | 'active_directory'
+  | 'pki';
 
 export interface XPackUsageResponse {
   security: {
@@ -19,7 +27,7 @@ export interface XPackUsageResponse {
       [key in SecurityRealm]?: {
         available: boolean;
         enabled: boolean;
-      };
+      }
     };
     token_service: {
       enabled: boolean;
@@ -48,15 +56,14 @@ export interface XPackUsageDeps {
 
 export class XPackUsage {
   private cluster: Cluster | null;
-  
+
   private poller: Poller | null;
-  
+
   private stop$ = new Rx.ReplaySubject(1);
 
   private readonly pollFrequencyInMillis: number;
 
   private readonly log: (tags: string[], message: string) => void;
-
 
   private readonly usage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>(undefined);
 
@@ -83,8 +90,8 @@ export class XPackUsage {
       getUsage$: () => {
         return this.usage$.pipe(takeUntil(this.stop$));
       },
-      refreshNow: this.refreshNow
-    }
+      refreshNow: this.refreshNow,
+    };
   }
 
   public stop() {
