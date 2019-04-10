@@ -894,6 +894,14 @@ export interface KpiHostsData {
   authenticationSuccess?: number | null;
 
   authenticationFailure?: number | null;
+
+  fimEvents?: number | null;
+
+  auditdEvents?: number | null;
+
+  winlogbeatEvents?: number | null;
+
+  filebeatEvents?: number | null;
 }
 
 export interface NetworkTopNFlowData {

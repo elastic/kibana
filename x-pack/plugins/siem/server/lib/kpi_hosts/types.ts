@@ -39,3 +39,8 @@ export interface KpiHostsBody {
 }
 
 export type KpiHostsESMSearchBody = KpiHostsBody | MSearchHeader;
+
+export interface EventModuleAttributeQuery {
+  agentType: 'auditbeat' | 'winlogbeat' | 'filebeat';
+  eventModule?: 'file_integrity' | 'auditd';
+}

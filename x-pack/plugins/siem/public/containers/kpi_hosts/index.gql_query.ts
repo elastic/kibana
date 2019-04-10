@@ -16,6 +16,10 @@ export const kpiHostsQuery = gql`
         processCount
         authenticationSuccess
         authenticationFailure
+        fimEvents
+        auditdEvents
+        winlogbeatEvents
+        filebeatEvents
       }
     }
   }

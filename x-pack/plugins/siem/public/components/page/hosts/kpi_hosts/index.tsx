@@ -65,6 +65,42 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
       },
     ],
   },
+  {
+    fields: [
+      {
+        key: 'fimEvents',
+        description: i18n.FIM_EVENTS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'auditdEvents',
+        description: i18n.AUDITD_EVENTS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'winlogbeatEvents',
+        description: i18n.WINLOGBEAT_EVENTS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'filebeatEvents',
+        description: i18n.FILEBEAT_EVENTS,
+        value: null,
+      },
+    ],
+  },
 ];
 
 export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {

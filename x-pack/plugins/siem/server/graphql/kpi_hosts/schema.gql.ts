@@ -13,6 +13,10 @@ export const kpiHostsSchema = gql`
     processCount: Float
     authenticationSuccess: Float
     authenticationFailure: Float
+    fimEvents: Float
+    auditdEvents: Float
+    winlogbeatEvents: Float
+    filebeatEvents: Float
   }
 
   extend type Source {
