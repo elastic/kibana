@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiCode, EuiTitle } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByFilter = props => {
-  const { onChange, uiRestrictions } = props;
-  const defaults = { filter: '' };
-  const model = { ...defaults, ...props.model };
+export const SplitUnsupported = (props) => {
+  const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   return (
     <EuiFlexGroup alignItems="center">
@@ -38,7 +35,7 @@ export const SplitByFilter = props => {
         <EuiFormRow
           id={htmlId('group')}
           label={(<FormattedMessage
-            id="tsvb.splits.filter.groupByLabel"
+            id="tsvb.splits.everything.groupByLabel"
             defaultMessage="Group by"
           />)}
         >
@@ -50,25 +47,24 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow
-          id={htmlId('query')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.queryStringLabel"
-            defaultMessage="Query string"
-          />)}
-        >
-          <EuiFieldText
-            value={model.filter}
-            onChange={handleTextChange('filter')}
-          />
-        </EuiFormRow>
+        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+          <span>
+            <FormattedMessage
+              id="tsvb.unsupportedSplit.splitIsUnsupportedDescription"
+              defaultMessage="Split by {modelType} is unsupported."
+              values={{ modelType: (<EuiCode>{model.split_mode}</EuiCode>) }}
+            />
+          </span>
+        </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-SplitByFilter.propTypes = {
+SplitUnsupported.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
 };
+
+
