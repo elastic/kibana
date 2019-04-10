@@ -18,10 +18,7 @@
  */
 
 module.exports = {
-  presets: [
-    require.resolve('@babel/preset-typescript'),
-    require.resolve('@babel/preset-react')
-  ],
+  presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
   plugins: [
     require.resolve('babel-plugin-add-module-exports'),
 
@@ -32,6 +29,12 @@ module.exports = {
     //
     // See https://github.com/babel/proposals/issues/12 for progress
     require.resolve('@babel/plugin-proposal-class-properties'),
+    [
+      require.resolve('@kbn/babel-plugin-apm-idx'),
+      {
+        importName: /\/common\/idx$/,
+      },
+    ],
   ],
   overrides: [
     {
@@ -41,11 +44,7 @@ module.exports = {
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
       test: /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-      plugins: [
-        [
-          require.resolve('babel-plugin-typescript-strip-namespaces'),
-        ],
-      ]
-    }
-  ]
+      plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
+    },
+  ],
 };

@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/babel-plugin-apm-idx",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Babel plugin to transpile calls to APM's idx implementation to plain JS for optimized deep object nesting.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-babel-plugin-apm-idx"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
