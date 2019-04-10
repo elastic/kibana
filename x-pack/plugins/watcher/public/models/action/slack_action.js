@@ -28,7 +28,8 @@ export class SlackAction extends BaseAction {
       errors.push({
         message: <FormattedMessage
           id="xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description"
-          defaultMessage="Set {ymlValue} in your elasticsearch.yml file to make this watch valid. {docsLink}"
+          // eslint-disable-next-line max-len
+          defaultMessage="If the “to” property for {ymlValue} is already set in your elasticsearch.yml file, you're all set. Otherwise, you can include it here in the watch JSON. {docsLink}"
           values={{
             ymlValue: (
               <EuiCode>message_defaults.to</EuiCode>

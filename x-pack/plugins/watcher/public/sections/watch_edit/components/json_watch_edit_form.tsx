@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -18,77 +18,38 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ACTION_TYPES } from 'x-pack/plugins/watcher/common/constants';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
 
-const JSON_WATCH_IDS = {
-  ID: 'watchId',
-  NAME: 'watchName',
-  JSON: 'watchJson',
-};
-
-function validateId(id: string) {
-  const regex = /^[A-Za-z0-9\-\_]+$/;
-  if (!id) {
-    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.requiredIdText', {
-      defaultMessage: 'ID is required',
-    });
-  } else if (!regex.test(id)) {
-    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
-      defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
-    });
-  }
-  return false;
-}
-
-function validateActions(actions: { [key: string]: any }) {
-  const invalidActions = Object.keys(actions).find((actionKey: string) => {
-    const actionKeys = Object.keys(actions[actionKey]);
-    let type;
-    Object.keys(ACTION_TYPES).forEach((k: string) => {
-      if (actionKeys.includes(ACTION_TYPES[k]) && !actionKeys.includes(ACTION_TYPES.UNKNOWN)) {
-        type = ACTION_TYPES[k];
-      }
-    });
-    return !type;
-  });
-  if (invalidActions) {
-    return i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidActionType', {
-      defaultMessage: 'Unknown action type provided for action "{action}".',
-      values: {
-        action: invalidActions,
-      },
-    });
-  }
-  return false;
-}
-
 export const JsonWatchEditForm = ({
   urlService,
   licenseService,
-  watchJsonString,
-  setWatchJsonString,
-  errors,
-  setErrors,
-  isShowingErrors,
-  setIsShowingErrors,
 }: {
   urlService: any;
   licenseService: any;
-  watchJsonString: string;
-  setWatchJsonString: (json: string) => void;
-  errors: { [key: string]: string[] };
-  setErrors: (errors: { [key: string]: string[] }) => void;
-  isShowingErrors: boolean;
-  setIsShowingErrors: (isShowingErrors: boolean) => void;
 }) => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   // hooks
   const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
+  const { errors } = watch.validate();
+  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const prevWatchString = usePrevious(watch.watchString);
+
+  function usePrevious(value: any) {
+    const ref = useRef(null);
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+  if (prevWatchString !== watch.watchString && errors.json.length === 0) {
+    setWatchProperty('watch', JSON.parse(watch.watchString));
+  }
+
   return (
     <Fragment>
       <ConfirmWatchesModal
@@ -102,12 +63,12 @@ export const JsonWatchEditForm = ({
       />
       <EuiForm>
         <ErrableFormRow
-          id={JSON_WATCH_IDS.ID}
+          id="watchId"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
             defaultMessage: 'ID',
           })}
-          errorKey={JSON_WATCH_IDS.ID}
-          isShowingErrors={isShowingErrors}
+          errorKey="id"
+          isShowingErrors={hasErrors && watch.id !== undefined}
           errors={errors}
           fullWidth
         >
@@ -117,20 +78,17 @@ export const JsonWatchEditForm = ({
             value={watch.id}
             readOnly={!watch.isNew}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const id = e.target.value;
-              const error = validateId(id);
-              const newErrors = { ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] };
-              const isInvalidForm = !!Object.keys(newErrors).find(
-                errorKey => newErrors[errorKey].length >= 1
-              );
-              setErrors(newErrors);
-              setIsShowingErrors(isInvalidForm);
-              setWatchProperty('id', id);
+              setWatchProperty('id', e.target.value);
+            }}
+            onBlur={() => {
+              if (!watch.id) {
+                setWatchProperty('id', '');
+              }
             }}
           />
         </ErrableFormRow>
         <EuiFormRow
-          id={JSON_WATCH_IDS.NAME}
+          id="watchName"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
             defaultMessage: 'Name',
           })}
@@ -143,10 +101,15 @@ export const JsonWatchEditForm = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setWatchProperty('name', e.target.value);
             }}
+            onBlur={() => {
+              if (!watch.name) {
+                setWatchProperty('name', '');
+              }
+            }}
           />
         </EuiFormRow>
         <ErrableFormRow
-          id={JSON_WATCH_IDS.JSON}
+          id="watchJson"
           label={
             <Fragment>
               {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonLabel', {
@@ -161,8 +124,8 @@ export const JsonWatchEditForm = ({
               )
             </Fragment>
           }
-          errorKey={JSON_WATCH_IDS.JSON}
-          isShowingErrors={isShowingErrors}
+          errorKey="json"
+          isShowingErrors={hasErrors}
           fullWidth
           errors={errors}
         >
@@ -177,42 +140,9 @@ export const JsonWatchEditForm = ({
                 defaultMessage: 'Code editor',
               }
             )}
-            value={watchJsonString}
+            value={watch.watchString}
             onChange={(json: string) => {
-              setWatchJsonString(json);
-              try {
-                const watchJson = JSON.parse(json);
-                if (watchJson && typeof watchJson === 'object') {
-                  if (watchJson.actions) {
-                    const actionsError = validateActions(watchJson.actions);
-                    if (actionsError) {
-                      setErrors({
-                        ...errors,
-                        [JSON_WATCH_IDS.JSON]: [actionsError],
-                      });
-                      setIsShowingErrors(true);
-                      return;
-                    }
-                  }
-                  setWatchProperty('watch', watchJson);
-                  const newErrors = { ...errors, [JSON_WATCH_IDS.JSON]: [] };
-                  const isInvalidForm = !!Object.keys(newErrors).find(
-                    errorKey => newErrors[errorKey].length >= 1
-                  );
-                  setErrors(newErrors);
-                  setIsShowingErrors(isInvalidForm);
-                }
-              } catch (e) {
-                setErrors({
-                  ...errors,
-                  [JSON_WATCH_IDS.JSON]: [
-                    i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidJsonText', {
-                      defaultMessage: 'Invalid JSON',
-                    }),
-                  ],
-                });
-                setIsShowingErrors(true);
-              }
+              setWatchProperty('watchString', json);
             }}
           />
         </ErrableFormRow>
@@ -221,16 +151,11 @@ export const JsonWatchEditForm = ({
             <EuiButton
               fill
               type="submit"
-              isDisabled={isShowingErrors}
+              isDisabled={hasErrors}
               onClick={async () => {
-                const error = validateId(watch.id);
-                setErrors({ ...errors, [JSON_WATCH_IDS.ID]: error ? [error] : [] });
-                setIsShowingErrors(!!error);
-                if (!error) {
-                  const savedWatch = await onWatchSave(watch, urlService, licenseService);
-                  if (savedWatch && savedWatch.error) {
-                    return setModal(savedWatch.error);
-                  }
+                const savedWatch = await onWatchSave(watch, urlService, licenseService);
+                if (savedWatch && savedWatch.error) {
+                  return setModal(savedWatch.error);
                 }
               }}
             >

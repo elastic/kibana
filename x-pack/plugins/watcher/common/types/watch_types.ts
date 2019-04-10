@@ -42,7 +42,7 @@ export interface BaseWatch {
   upstreamJson: any;
   resetActions: () => void;
   createAction: (type: string, actionProps: {}) => void;
-  validate: () => { warning: { message: string } };
+  validate: () => { warning: { message: string; title?: string } };
   actions: [
     {
       id: string;

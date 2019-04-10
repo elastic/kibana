@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { WATCH_STATES } from '../../../../common/constants';
 import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
-import { getTypeFromAction } from '../json_watch_edit_actions';
+import { getTypeFromAction } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
 
 const WATCH_ICON_COLORS = {

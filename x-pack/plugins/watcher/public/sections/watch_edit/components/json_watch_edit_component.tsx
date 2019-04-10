@@ -15,17 +15,12 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
-import { getActionType } from 'x-pack/plugins/watcher/common/lib/get_action_type';
-import { BaseWatch, ExecutedWatchDetails } from 'x-pack/plugins/watcher/common/types/watch_types';
-import {
-  ACTION_MODES,
-  TIME_UNITS,
-  WATCH_TAB_ID_EDIT,
-  WATCH_TAB_ID_SIMULATE,
-  WATCH_TABS,
-} from '../../../../common/constants';
+import { getActionType } from '../../../../common/lib/get_action_type';
+import { BaseWatch, ExecutedWatchDetails } from '../../../../common/types/watch_types';
+import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
 import { WatchContext } from './watch_context';
@@ -35,7 +30,28 @@ interface WatchAction {
   type: string;
 }
 
-interface WatchActions extends Array<WatchAction> {}
+interface WatchTab {
+  id: string;
+  name: string;
+}
+
+const WATCH_EDIT_TAB = 'watchEditTab';
+const WATCH_SIMULATE_TAB = 'watchSimulateTab';
+
+const WATCH_TABS: WatchTab[] = [
+  {
+    id: WATCH_EDIT_TAB,
+    name: i18n.translate('xpack.watcher.sections.watchEdit.json.editTabLabel', {
+      defaultMessage: 'Edit',
+    }),
+  },
+  {
+    id: WATCH_SIMULATE_TAB,
+    name: i18n.translate('xpack.watcher.sections.watchEdit.json.simulateTabLabel', {
+      defaultMessage: 'Simulate',
+    }),
+  },
+];
 
 const EXECUTE_DETAILS_INITIAL_STATE = {
   triggeredTimeValue: 0,
@@ -54,7 +70,7 @@ function getActions(watch: BaseWatch) {
   }));
 }
 
-function getActionModes(items: WatchActions) {
+function getActionModes(items: WatchAction[]) {
   const result = items.reduce((itemsAccum: any, item) => {
     if (item.actionId) {
       itemsAccum[item && item.actionId] = item.actionMode;
@@ -76,26 +92,16 @@ const JsonWatchEditUi = ({
   const { watch } = useContext(WatchContext);
   const watchActions = getActions(watch);
   // hooks
-  const [selectedTab, setSelectedTab] = useState<string>(WATCH_TAB_ID_EDIT);
-  const [watchErrors, setWatchErrors] = useState<{ [key: string]: string[] }>({
-    watchId: [],
-    watchJson: [],
-  });
-  const [isShowingWatchErrors, setIsShowingWatchErrors] = useState<boolean>(false);
-  const [executeWatchJsonString, setExecuteWatchJsonString] = useState<string>('');
-  const [isShowingExecuteWatchErrors, setIsShowingExecuteWatchErrors] = useState<boolean>(false);
-  const [executeWatchErrors, setExecuteWatchErrors] = useState<{ [key: string]: string[] }>({
-    simulateExecutionInputOverride: [],
-  });
+  const [selectedTab, setSelectedTab] = useState<string>(WATCH_EDIT_TAB);
   const [executeDetails, setExecuteDetails] = useState(
     new ExecuteDetails({
       ...EXECUTE_DETAILS_INITIAL_STATE,
       actionModes: getActionModes(watchActions),
     })
   );
-  // ace editor requires json to be in string format
-  const [watchJsonString, setWatchJsonString] = useState<string>(
-    JSON.stringify(watch.watch, null, 2)
+  const executeWatchErrors = executeDetails.validate();
+  const hasExecuteWatchErrors = !!Object.keys(executeWatchErrors).find(
+    errorKey => executeWatchErrors[errorKey].length >= 1
   );
   return (
     <EuiPageContent>
@@ -123,35 +129,17 @@ const JsonWatchEditUi = ({
         ))}
       </EuiTabs>
       <EuiSpacer size="l" />
-      {selectedTab === WATCH_TAB_ID_SIMULATE && (
+      {selectedTab === WATCH_SIMULATE_TAB && (
         <JsonWatchEditSimulate
           executeDetails={executeDetails}
           setExecuteDetails={(details: ExecutedWatchDetails) => setExecuteDetails(details)}
-          executeWatchJsonString={executeWatchJsonString}
-          setExecuteWatchJsonString={(json: string) => setExecuteWatchJsonString(json)}
-          errors={executeWatchErrors}
-          setErrors={(errors: { [key: string]: string[] }) => setExecuteWatchErrors(errors)}
-          isShowingErrors={isShowingExecuteWatchErrors}
-          setIsShowingErrors={(isShowingErrors: boolean) =>
-            setIsShowingExecuteWatchErrors(isShowingErrors)
-          }
-          isDisabled={isShowingExecuteWatchErrors || isShowingWatchErrors}
+          executeWatchErrors={executeWatchErrors}
+          hasExecuteWatchErrors={hasExecuteWatchErrors}
           watchActions={watchActions}
         />
       )}
-      {selectedTab === WATCH_TAB_ID_EDIT && (
-        <JsonWatchEditForm
-          urlService={urlService}
-          licenseService={licenseService}
-          watchJsonString={watchJsonString}
-          setWatchJsonString={(json: string) => setWatchJsonString(json)}
-          errors={watchErrors}
-          setErrors={(errors: { [key: string]: string[] }) => setWatchErrors(errors)}
-          isShowingErrors={isShowingWatchErrors}
-          setIsShowingErrors={(isShowingErrors: boolean) =>
-            setIsShowingWatchErrors(isShowingErrors)
-          }
-        />
+      {selectedTab === WATCH_EDIT_TAB && (
+        <JsonWatchEditForm urlService={urlService} licenseService={licenseService} />
       )}
     </EuiPageContent>
   );

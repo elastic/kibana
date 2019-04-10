@@ -36,27 +36,15 @@ import { WatchContext } from '../../../sections/watch_edit/components/watch_cont
 import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
-const INPUT_OVERRIDE_ID = 'simulateExecutionInputOverride';
-
 export const JsonWatchEditSimulate = ({
-  executeWatchJsonString,
-  setExecuteWatchJsonString,
-  errors,
-  setErrors,
-  isShowingErrors,
-  setIsShowingErrors,
-  isDisabled,
+  executeWatchErrors,
+  hasExecuteWatchErrors,
   executeDetails,
   setExecuteDetails,
   watchActions,
 }: {
-  executeWatchJsonString: string;
-  setExecuteWatchJsonString: (json: string) => void;
-  errors: { [key: string]: string[] };
-  setErrors: (errors: { [key: string]: string[] }) => void;
-  isShowingErrors: boolean;
-  setIsShowingErrors: (isShowingErrors: boolean) => void;
-  isDisabled: boolean;
+  executeWatchErrors: { [key: string]: string[] };
+  hasExecuteWatchErrors: boolean;
   executeDetails: ExecutedWatchDetails;
   setExecuteDetails: (details: ExecutedWatchDetails) => void;
   watchActions: Array<{
@@ -66,9 +54,10 @@ export const JsonWatchEditSimulate = ({
   }>;
 }) => {
   const { watch } = useContext(WatchContext);
-
   // hooks
   const [executeResults, setExecuteResults] = useState<ExecutedWatchResults | null>(null);
+  const { errors: watchErrors } = watch.validate();
+  const hasWatchJsonError = watchErrors.json.length >= 1;
 
   const columns = [
     {
@@ -294,7 +283,7 @@ export const JsonWatchEditSimulate = ({
           )}
         >
           <ErrableFormRow
-            id={INPUT_OVERRIDE_ID}
+            id="executeWatchJson"
             describedByIds={['simulateExecutionInputOverridesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
@@ -302,10 +291,10 @@ export const JsonWatchEditSimulate = ({
                 defaultMessage: 'Alternative input',
               }
             )}
-            errorKey={INPUT_OVERRIDE_ID}
-            isShowingErrors={isShowingErrors}
+            errorKey="json"
+            isShowingErrors={hasExecuteWatchErrors}
             fullWidth
-            errors={errors}
+            errors={executeWatchErrors}
           >
             <EuiCodeEditor
               fullWidth
@@ -318,38 +307,14 @@ export const JsonWatchEditSimulate = ({
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={executeWatchJsonString}
+              value={executeDetails.alternativeInput}
               onChange={(json: string) => {
-                setExecuteWatchJsonString(json);
-                try {
-                  const alternativeInput = json === '' ? undefined : JSON.parse(json);
-                  if (
-                    typeof alternativeInput === 'undefined' ||
-                    (alternativeInput && typeof alternativeInput === 'object')
-                  ) {
-                    setExecuteDetails(
-                      new ExecuteDetails({
-                        ...executeDetails,
-                        alternativeInput,
-                      })
-                    );
-                    setIsShowingErrors(false);
-                    setErrors({ ...errors, [INPUT_OVERRIDE_ID]: [] });
-                  }
-                } catch (e) {
-                  setErrors({
-                    ...errors,
-                    [INPUT_OVERRIDE_ID]: [
-                      i18n.translate(
-                        'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
-                        {
-                          defaultMessage: 'Invalid JSON',
-                        }
-                      ),
-                    ],
-                  });
-                  setIsShowingErrors(true);
-                }
+                setExecuteDetails(
+                  new ExecuteDetails({
+                    ...executeDetails,
+                    alternativeInput: json,
+                  })
+                );
               }}
             />
           </ErrableFormRow>
@@ -367,7 +332,8 @@ export const JsonWatchEditSimulate = ({
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesDescription',
             {
-              defaultMessage: 'When enabled, the watch execution uses the Always Condition.',
+              defaultMessage:
+                'Execute the watch when the condition is met. Otherwise, ignore the condition and run the watch on a fixed schedule.',
             }
           )}
         >
@@ -437,7 +403,7 @@ export const JsonWatchEditSimulate = ({
           iconType="play"
           fill
           type="submit"
-          isDisabled={isDisabled}
+          isDisabled={hasExecuteWatchErrors || hasWatchJsonError}
           onClick={async () => {
             try {
               const executedWatch = await executeWatch(executeDetails, watch);

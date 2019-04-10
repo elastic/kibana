@@ -6,6 +6,7 @@
 
 import { TIME_UNITS } from '../../../common/constants';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 export class ExecuteDetails {
   constructor(props = {}) {
@@ -13,11 +14,37 @@ export class ExecuteDetails {
     this.triggeredTimeUnit = props.triggeredTimeUnit;
     this.scheduledTimeValue = props.scheduledTimeValue;
     this.scheduledTimeUnit = props.scheduledTimeUnit;
-    this.scheduledTime = props.scheduledTime;
     this.ignoreCondition = props.ignoreCondition;
-    this.alternativeInput = props.alternativeInput;
+    this.alternativeInput = props.alternativeInput || '';
     this.actionModes = props.actionModes;
     this.recordExecution = props.recordExecution;
+  }
+
+  validate() {
+    const errors = {
+      json: [],
+    };
+    if (this.alternativeInput || this.alternativeInput !== '') {
+      try {
+        const parsedJson = JSON.parse(this.alternativeInput);
+        if (parsedJson && typeof parsedJson !== 'object') {
+          errors.json.push(i18n.translate(
+            'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
+            {
+              defaultMessage: 'Invalid JSON',
+            }
+          ));
+        }
+      } catch (e) {
+        errors.json.push(i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
+          {
+            defaultMessage: 'Invalid JSON',
+          }
+        ));
+      }
+    }
+    return errors;
   }
 
   formatTime(timeUnit, value) {
@@ -50,7 +77,7 @@ export class ExecuteDetails {
         scheduledTime,
       },
       ignoreCondition: this.ignoreCondition,
-      alternativeInput: this.alternativeInput,
+      alternativeInput: this.alternativeInput !== '' ? JSON.parse(this.alternativeInput) : undefined,
       actionModes: this.actionModes,
       recordExecution: this.recordExecution,
     };

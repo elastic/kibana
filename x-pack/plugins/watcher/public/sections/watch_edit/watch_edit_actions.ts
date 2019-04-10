@@ -83,12 +83,6 @@ export async function validateActionsAndSaveWatch(
   if (warning) {
     return {
       error: {
-        title: i18n.translate(
-          'xpack.watcher.sections.watchEdit.json.saveConfirmModal.validationTitleText',
-          {
-            defaultMessage: 'This watch has an invalid action',
-          }
-        ),
         message: warning.message,
       },
     };
