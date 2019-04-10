@@ -26,7 +26,7 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, Authenticate } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequest } from './lifecycle/on_request';
 import { Router } from './router';
-import { CookieOptions, createCookieSessionStorageFor } from './session_storage';
+import { CookieOptions, createCookieSessionStorageFactory } from './cookie_session_storage';
 
 export interface HttpServerInfo {
   server: Server;
@@ -156,7 +156,7 @@ export class HttpServer {
     }
     this.authRegistered = true;
 
-    const sessionStorage = await createCookieSessionStorageFor<T>(this.server, cookieOptions);
+    const sessionStorage = await createCookieSessionStorageFactory<T>(this.server, cookieOptions);
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, sessionStorage),

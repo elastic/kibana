@@ -31,8 +31,6 @@ interface Storage {
 
 export const url = {
   auth: '/auth',
-  authHasSession: '/auth/has_session',
-  authClearSession: '/auth/clear_session',
   authRedirect: '/auth/redirect',
 };
 
@@ -40,22 +38,6 @@ export const sessionDurationMs = 30;
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
     const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
-      if (request.path === url.authHasSession) {
-        const prevSession = await sessionStorage.get();
-        if (!prevSession) return t.rejected(new Error('invalid session'), { statusCode: 401 });
-
-        const userData = prevSession.value;
-        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-
-        return t.authenticated({ credentials: userData });
-      }
-
-      if (request.path === url.authClearSession) {
-        sessionStorage.clear();
-
-        return t.rejected(Boom.unauthorized());
-      }
-
       if (request.path === url.authRedirect) {
         return t.redirected('/login');
       }
@@ -72,7 +54,7 @@ export class DummySecurityPlugin {
     const cookieOptions = {
       name: 'sid',
       password: 'something_at_least_32_characters',
-      validate: (session: Storage) => session.expires > Date.now(),
+      validate: (session: Storage) => true,
       isSecure: false,
       path: '/',
     };

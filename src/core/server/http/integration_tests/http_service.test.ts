@@ -21,9 +21,7 @@ import path from 'path';
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
-import { url, sessionDurationMs } from './__fixtures__/plugins/dummy_security/server/plugin';
-
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+import { url } from './__fixtures__/plugins/dummy_security/server/plugin';
 
 describe('http service', () => {
   describe('setup contract', () => {
@@ -44,9 +42,6 @@ describe('http service', () => {
         router.get({ path: url.auth, validate: false }, async (req, res) =>
           res.ok({ content: 'ok' })
         );
-        router.get({ path: url.authHasSession, validate: false }, async (req, res) =>
-          res.ok({ content: 'ok' })
-        );
         // TODO fix me when registerRouter is available before HTTP server is run
         (root as any).server.http.registerRouter(router);
 
@@ -55,7 +50,7 @@ describe('http service', () => {
 
       afterAll(async () => await root.shutdown());
 
-      it('Should support implementing custom authentication logic and set the cookie', async () => {
+      it('Should support implementing custom authentication logic', async () => {
         const response = await kbnTestServer.request
           .get(root, url.auth)
           .expect(200, { content: 'ok' });
@@ -75,50 +70,6 @@ describe('http service', () => {
         expect(sessionCookie.httpOnly).toBe(true);
       });
 
-      it('Should support reading already set cookie', async () => {
-        const response = await kbnTestServer.request
-          .get(root, url.auth)
-          .expect(200, { content: 'ok' });
-
-        const cookies = response.header['set-cookie'];
-        const sessionCookie = request.cookie(cookies[0]);
-        if (!sessionCookie) {
-          throw new Error('session cookie expected to be defined');
-        }
-        const response2 = await kbnTestServer.request
-          .get(root, url.authHasSession)
-          .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
-          .expect(200, { content: 'ok' });
-
-        expect(response2.header['set-cookie']).toBeDefined();
-
-        const cookies2 = response2.header['set-cookie'];
-        expect(cookies).not.toBe(cookies2);
-      });
-
-      it('Should support session validation', async () => {
-        const response = await kbnTestServer.request
-          .get(root, url.auth)
-          .expect(200, { content: 'ok' });
-
-        const cookies = response.header['set-cookie'];
-        const sessionCookie = request.cookie(cookies[0]);
-        if (!sessionCookie) {
-          throw new Error('session cookie expected to be defined');
-        }
-
-        await delay(sessionDurationMs);
-
-        const response2 = await kbnTestServer.request
-          .get(root, url.authHasSession)
-          .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
-          .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'invalid session' });
-
-        expect(response2.header['set-cookie']).toEqual([
-          'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
-        ]);
-      });
-
       it('Should support rejecting a request from an unauthenticated user', async () => {
         await kbnTestServer.request
           .get(root, url.auth)
@@ -128,27 +79,6 @@ describe('http service', () => {
 
       it('Should support redirecting', async () => {
         await kbnTestServer.request.get(root, url.authRedirect).expect(302);
-      });
-
-      it('Should support clearing cookie session storage', async () => {
-        const response = await kbnTestServer.request
-          .get(root, url.auth)
-          .expect(200, { content: 'ok' });
-
-        const sessionCookie = request.cookie(response.header['set-cookie'][0]);
-
-        if (!sessionCookie) {
-          throw new Error('session cookie expected to be defined');
-        }
-
-        const response2 = await kbnTestServer.request
-          .get(root, url.authClearSession)
-          .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
-          .expect(401);
-
-        expect(response2.header['set-cookie']).toEqual([
-          'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
-        ]);
       });
 
       it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {

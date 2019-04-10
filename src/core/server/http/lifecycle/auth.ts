@@ -18,7 +18,7 @@
  */
 import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { ScopedSessionStorage, SessionStorage } from '../session_storage';
+import { SessionStorage, SessionStorageFactory } from '../session_storage';
 
 enum ResultType {
   authenticated = 'authenticated',
@@ -61,13 +61,13 @@ const toolkit = {
 
 export type Authenticate<T> = (
   request: Request,
-  sessionStorage: ScopedSessionStorage<T>,
+  sessionStorage: SessionStorage<T>,
   t: typeof toolkit
 ) => Promise<AuthResult>;
 
 export function adoptToHapiAuthFormat<T = any>(
   fn: Authenticate<T>,
-  sessionStorage: SessionStorage<T>
+  sessionStorage: SessionStorageFactory<T>
 ) {
   return async function interceptAuth(
     req: Request,

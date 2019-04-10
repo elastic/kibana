@@ -17,81 +17,26 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
-
-export interface CookieOptions<T> {
-  name: string;
-  password: string;
-  validate: (sessionValue: T) => boolean | Promise<boolean>;
-  isSecure: boolean;
-  path?: string;
-}
-
-export class ScopedSessionStorage<T extends Record<string, any>> {
-  constructor(
-    private readonly sessionGetter: () => Promise<T>,
-    private readonly request: Request
-  ) {}
+import { Request } from 'hapi';
+/**
+ * Provides an interface to store and retrieve data across requests.
+ */
+export interface SessionStorage<T> {
   /**
    * Retrieves session value from the session storage.
    */
-  public async get(): Promise<T | null> {
-    try {
-      return await this.sessionGetter();
-    } catch (error) {
-      return null;
-    }
-  }
+  get(): Promise<T | null>;
   /**
    * Puts current session value into the session storage.
-   * @param sessionValue - value to put store into
+   * @param sessionValue - value to put
    */
-  public set(sessionValue: T) {
-    return this.request.cookieAuth.set(sessionValue);
-  }
+  set(sessionValue: T): void;
   /**
    * Clears current session.
    */
-  public clear() {
-    return this.request.cookieAuth.clear();
-  }
+  clear(): void;
 }
 
-export interface SessionStorage<T> {
-  asScoped: (request: Request) => ScopedSessionStorage<T>;
-}
-
-/**
- * Creates object with SessionStorage interface, which abstract the way of
- * session storage implementation.
- *
- * @param server - hapi server to create SessionStorage for
- * @param cookieOptions - cookies configuration
- */
-export async function createCookieSessionStorageFor<T>(
-  server: Server,
-  cookieOptions: CookieOptions<T>
-): Promise<SessionStorage<T>> {
-  await server.register({ plugin: hapiAuthCookie });
-
-  server.auth.strategy('security-cookie', 'cookie', {
-    cookie: cookieOptions.name,
-    password: cookieOptions.password,
-    validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
-    isSecure: cookieOptions.isSecure,
-    path: cookieOptions.path,
-    clearInvalid: true,
-    isHttpOnly: true,
-    isSameSite: false,
-  });
-
-  return {
-    asScoped(request: Request) {
-      return new ScopedSessionStorage<T>(
-        () => server.auth.test('security-cookie', request),
-        request
-      );
-    },
-  };
+export interface SessionStorageFactory<T> {
+  asScoped: (request: Request) => SessionStorage<T>;
 }
