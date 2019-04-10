@@ -71,7 +71,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('logsChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('configureSourceButton');
         });
       });
     });
@@ -132,7 +132,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('logsChangeSourceConfigurationButton');
+          await testSubjects.missingOrFail('configureSourceButton');
         });
       });
     });

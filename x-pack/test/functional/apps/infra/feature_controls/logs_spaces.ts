@@ -53,7 +53,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('logsChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('configureSourceButton');
         });
       });
     });

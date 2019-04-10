@@ -110,9 +110,9 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Routes', () => {
-    it('should create 10 routes', () => {
+    it('should create 11 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(10);
+      expect(mockServer.route).toHaveBeenCalledTimes(11);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -175,6 +175,12 @@ describe('Saved Objects Mixin', () => {
           path: '/api/saved_objects/_resolve_import_errors',
           method: 'POST',
         })
+      );
+    });
+    it('should add POST /api/saved_objects/_log_legacy_import', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/api/saved_objects/_log_legacy_import', method: 'POST' })
       );
     });
   });

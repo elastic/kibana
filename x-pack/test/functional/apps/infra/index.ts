@@ -13,5 +13,7 @@ export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
 
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./logs_source_configuration'));
+    loadTestFile(require.resolve('./metrics_source_configuration'));
   });
 };

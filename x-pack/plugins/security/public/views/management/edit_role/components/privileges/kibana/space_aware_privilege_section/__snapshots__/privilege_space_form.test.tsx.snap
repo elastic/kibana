@@ -172,6 +172,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             disabled={true}
             fullWidth={true}
             hasDividers={true}
+            isInvalid={false}
             onChange={[Function]}
             options={
               Array [

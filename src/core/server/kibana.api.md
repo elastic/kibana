@@ -38,16 +38,34 @@ export class ClusterClient {
     }
 
 // @public (undocumented)
-export interface CoreSetup {
-    // Warning: (ae-forgotten-export) The symbol "ElasticsearchServiceSetup" needs to be exported by the entry point index.d.ts
+export class ConfigService {
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
+    constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
+    atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+    getConfig$(): Observable<Config>;
+    // (undocumented)
+    getUnusedPaths(): Promise<string[]>;
+    // (undocumented)
+    getUsedPaths(): Promise<string[]>;
+    // (undocumented)
+    isEnabledAtPath(path: ConfigPath): Promise<boolean>;
+    optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
+}
+
+// @public (undocumented)
+export interface CoreSetup {
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    // Warning: (ae-forgotten-export) The symbol "HttpServiceSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "http" is marked as @public, but its signature references "HttpServiceSetup" which is marked as @internal
     // 
     // (undocumented)
     http: HttpServiceSetup;
-    // Warning: (ae-forgotten-export) The symbol "PluginsServiceSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceSetup" which is marked as @internal
     // 
     // (undocumented)
     plugins: PluginsServiceSetup;
@@ -57,7 +75,6 @@ export interface CoreSetup {
 // 
 // @internal
 export interface DiscoveredPlugin {
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
     readonly configPath: ConfigPath;
     readonly id: PluginName;
     readonly optionalPlugins: ReadonlyArray<PluginName>;
@@ -75,7 +92,27 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
 };
 
 // @public (undocumented)
+export interface ElasticsearchServiceSetup {
+    // (undocumented)
+    readonly adminClient$: Observable<ClusterClient>;
+    // (undocumented)
+    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    // (undocumented)
+    readonly dataClient$: Observable<ClusterClient>;
+    // (undocumented)
+    readonly legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
+    };
+}
+
+// @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
+
+// Warning: (ae-forgotten-export) The symbol "HttpServerInfo" needs to be exported by the entry point index.d.ts
+// Warning: (ae-internal-missing-underscore) The name HttpServiceSetup should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal (undocumented)
+export type HttpServiceSetup = HttpServerInfo;
 
 // @public
 export interface Logger {
@@ -151,6 +188,17 @@ export interface LogRecord {
 }
 
 // @public
+export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
+    // (undocumented)
+    setup: (pluginSetupContext: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    stop?: () => void;
+}
+
+// @public
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (coreContext: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+
+// @public
 export interface PluginInitializerContext {
     // (undocumented)
     config: {
@@ -177,6 +225,19 @@ export interface PluginSetupContext {
     };
 }
 
+// Warning: (ae-internal-missing-underscore) The name PluginsServiceSetup should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal (undocumented)
+export interface PluginsServiceSetup {
+    // (undocumented)
+    contracts: Map<PluginName, unknown>;
+    // (undocumented)
+    uiPlugins: {
+        public: Map<PluginName, DiscoveredPlugin>;
+        internal: Map<PluginName, DiscoveredPluginInternal>;
+    };
+}
+
 // @public
 export class ScopedClusterClient {
     // (undocumented)
@@ -189,7 +250,7 @@ export class ScopedClusterClient {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/plugins/plugin_context.ts:35:9 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugin_context.ts:39:9 - (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:33:17 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

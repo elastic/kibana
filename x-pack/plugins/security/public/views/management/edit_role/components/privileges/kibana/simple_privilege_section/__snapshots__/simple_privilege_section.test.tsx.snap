@@ -36,6 +36,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
         disabled={false}
         fullWidth={false}
         hasDividers={true}
+        isInvalid={false}
         onChange={[Function]}
         options={
           Array [
