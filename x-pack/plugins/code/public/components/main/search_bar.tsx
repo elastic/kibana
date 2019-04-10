@@ -7,7 +7,6 @@
 import { ParsedUrlQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import url from 'url';
 
 import { unique } from 'lodash';
@@ -22,10 +21,6 @@ import {
 } from '../query_bar';
 import { Shortcut } from '../shortcuts';
 import { SearchOptions } from '../../actions';
-
-const SearchBarContainer = styled.div`
-  width: 100%;
-`;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -77,7 +72,7 @@ export class CodeSearchBar extends React.Component<Props> {
 
   public render() {
     return (
-      <SearchBarContainer>
+      <div className="codeContainer__searchBar">
         <Shortcut
           keyCode="p"
           help={SearchScopeText[SearchScope.REPOSITORY]}
@@ -124,7 +119,7 @@ export class CodeSearchBar extends React.Component<Props> {
             }
           }}
         />
-      </SearchBarContainer>
+      </div>
     );
   }
 }
