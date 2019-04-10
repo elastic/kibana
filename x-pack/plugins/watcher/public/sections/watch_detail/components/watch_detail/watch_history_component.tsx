@@ -57,20 +57,48 @@ const WatchHistoryUI = ({
   }>({});
   const [executionDetail, setExecutionDetail] = useState<string>('');
 
-  const kbnUrlService = urlService;
-
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
   };
 
   const watchHistoryTimeSpanOptions = [
-    { value: 'now-1h', text: 'Last one hour' },
-    { value: 'now-24h', text: 'Last 24 hours' },
-    { value: 'now-7d', text: 'Last 7 days' },
-    { value: 'now-30d', text: 'Last 30 days' },
-    { value: 'now-6M', text: 'Last 6 months' },
-    { value: 'now-1y', text: 'Last 1 year' },
+    {
+      value: 'now-1h',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1h', {
+        defaultMessage: 'Last one hour',
+      }),
+    },
+    {
+      value: 'now-24h',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.24h', {
+        defaultMessage: 'Last 24 hours',
+      }),
+    },
+    {
+      value: 'now-7d',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.7d', {
+        defaultMessage: 'Last 7 days',
+      }),
+    },
+    {
+      value: 'now-30d',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.30d', {
+        defaultMessage: 'Last 30 days',
+      }),
+    },
+    {
+      value: 'now-6M',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.6M', {
+        defaultMessage: 'Last 6 months',
+      }),
+    },
+    {
+      value: 'now-1y',
+      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1y', {
+        defaultMessage: 'Last 1 year',
+      }),
+    },
   ];
   const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
     watchHistoryTimeSpanOptions[0].value
@@ -237,7 +265,7 @@ const WatchHistoryUI = ({
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {
-            kbnUrlService.redirect('/management/elasticsearch/watcher/watches');
+            urlService.redirect('/management/elasticsearch/watcher/watches');
           }
           setWatchesToDelete([]);
         }}
