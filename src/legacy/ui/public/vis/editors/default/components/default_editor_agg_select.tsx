@@ -88,7 +88,7 @@ function DefaultEditorAggSelect({
     errors.push(
       i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
         defaultMessage:
-          'The {indexPatternTitle} index pattern does not contain any of aggregations.',
+          'The index pattern {indexPatternTitle} does not contain any of aggregations.',
         values: {
           indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
         },
@@ -116,7 +116,7 @@ function DefaultEditorAggSelect({
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
-          defaultMessage: 'Select an aggregation…',
+          defaultMessage: 'Select an aggregation',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
         isDisabled={!aggTypeOptions.length}

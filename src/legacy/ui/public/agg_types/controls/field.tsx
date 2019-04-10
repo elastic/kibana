@@ -60,7 +60,7 @@ function FieldParamEditor({
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
         defaultMessage:
-          'The {indexPatternTitle} index pattern does not contain any of the following compatible field types: {fieldTypes}',
+          'The index pattern {indexPatternTitle} does not contain any of the following compatible field types: {fieldTypes}',
         values: {
           indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
           fieldTypes: getFieldTypesString(agg),
@@ -87,7 +87,7 @@ function FieldParamEditor({
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
-          defaultMessage: 'Select a field…',
+          defaultMessage: 'Select a field',
         })}
         options={indexedFields}
         isDisabled={!indexedFields.length}
