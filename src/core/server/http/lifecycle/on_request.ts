@@ -37,7 +37,7 @@ class OnRequestResult {
   public static redirected(url: string) {
     return new OnRequestResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error, { statusCode }: ErrorParams) {
+  public static rejected(error: Error, { statusCode }: ErrorParams = {}) {
     return new OnRequestResult(ResultType.rejected, { error, statusCode });
   }
   public static isValidResult(candidate: any) {

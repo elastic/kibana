@@ -53,7 +53,7 @@ describe('http service', () => {
 
       afterAll(async () => await root.shutdown());
 
-      it('Should allow to implement custom authentication logic and set the cookie', async () => {
+      it('Should support implementing custom authentication logic and set the cookie', async () => {
         const response = await kbnTestServer.request
           .get(root, url.auth)
           .expect(200, { content: 'ok' });
@@ -73,7 +73,7 @@ describe('http service', () => {
         expect(sessionCookie.httpOnly).toBe(true);
       });
 
-      it('Should allow to read already set cookie', async () => {
+      it('Should support reading already set cookie', async () => {
         const response = await kbnTestServer.request
           .get(root, url.auth)
           .expect(200, { content: 'ok' });
@@ -94,18 +94,18 @@ describe('http service', () => {
         expect(cookies).not.toBe(cookies2);
       });
 
-      it('Should allow to reject a request from an unauthenticated user', async () => {
+      it('Should support rejecting a request from an unauthenticated user', async () => {
         await kbnTestServer.request
           .get(root, url.auth)
           .unset('Authorization')
           .expect(401);
       });
 
-      it('Should allow to redirect', async () => {
+      it('Should support redirecting', async () => {
         await kbnTestServer.request.get(root, url.authRedirect).expect(302);
       });
 
-      it('Should allow to clear cookie session storage', async () => {
+      it('Should support clearing cookie session storage', async () => {
         const response = await kbnTestServer.request
           .get(root, url.auth)
           .expect(200, { content: 'ok' });

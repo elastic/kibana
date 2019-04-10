@@ -152,7 +152,7 @@ export class HttpServer {
       throw new Error('Server is not created yet');
     }
     if (this.authRegistered) {
-      throw new Error('Auth hook was already registered');
+      throw new Error('Auth interceptor was already registered');
     }
     this.authRegistered = true;
 

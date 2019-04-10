@@ -576,9 +576,9 @@ test('registers auth request interceptor only once', async () => {
   const { registerAuth } = await server.start(config);
   const doRegister = () =>
     registerAuth(() => null as any, {
-      password: 'asdasdasdasdadakdaksdjhasjdasdh',
+      password: 'any_password',
     } as any);
 
   await doRegister();
-  expect(doRegister()).rejects.toThrowError('Auth hook was already registered');
+  expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
 });

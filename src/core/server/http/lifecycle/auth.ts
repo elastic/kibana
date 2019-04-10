@@ -35,7 +35,7 @@ class AuthResult {
   public static redirected(url: string) {
     return new AuthResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error, { statusCode }: ErrorParams) {
+  public static rejected(error: Error, { statusCode }: ErrorParams = {}) {
     return new AuthResult(ResultType.rejected, { error, statusCode });
   }
   public static isValidResult(candidate: any) {
