@@ -238,12 +238,19 @@ describe('workpad selectors', () => {
     });
   });
 
-  describe('getGlobalFilterExpression', () => {
+  describe('getGlobalFilters', () => {
     it('gets filters from all elements', () => {
-      const filters = selector.getGlobalFilterExpression(state);
-      expect(filters).to.equal(
-        'exactly value="beats" column="project" | timefilter column=@timestamp from=now-24h to=now'
-      );
+      const filters = selector.getGlobalFilters(state);
+      expect(filters).to.eql([
+        'exactly value="beats" column="project"',
+        'timefilter column=@timestamp from=now-24h to=now',
+      ]);
+    });
+
+    it('gets returns empty array with no elements', () => {
+      const filters = selector.getGlobalFilters({});
+      expect(filters).to.be.an(Array);
+      expect(filters).to.have.length(0);
     });
   });
 

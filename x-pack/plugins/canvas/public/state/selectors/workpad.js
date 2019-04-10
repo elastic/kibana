@@ -114,17 +114,15 @@ export function getElementStats(state) {
   return get(state, 'transient.elementStats');
 }
 
-export function getGlobalFilterExpression(state) {
-  return getAllElements(state)
-    .reduce((acc, el) => {
-      // check that a filter is defined
-      if (el.filter != null && el.filter.length) {
-        return acc.concat(el.filter);
-      }
+export function getGlobalFilters(state) {
+  return getAllElements(state).reduce((acc, el) => {
+    // check that a filter is defined
+    if (el.filter != null && el.filter.length) {
+      return acc.concat(el.filter);
+    }
 
-      return acc;
-    }, [])
-    .join(' | ');
+    return acc;
+  }, []);
 }
 
 // element getters
