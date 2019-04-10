@@ -26,6 +26,7 @@ import {
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
@@ -142,7 +143,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     if (savedMap.uiStateJSON) {
       const uiState = JSON.parse(savedMap.uiStateJSON);
-      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', true)));
+      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON);

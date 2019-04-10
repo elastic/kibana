@@ -22,7 +22,13 @@ import {
   setQuery,
   setRefreshConfig
 } from '../actions/store_actions';
-import { getIsLayerTOCOpen, setReadOnly, setFilterable, setIsLayerTOCOpen } from '../store/ui';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  getIsLayerTOCOpen,
+  setReadOnly,
+  setFilterable,
+  setIsLayerTOCOpen
+} from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 
@@ -88,7 +94,7 @@ export class MapEmbeddable extends Embeddable {
       this._store.dispatch(setIsLayerTOCOpen(this._embeddableConfig.isLayerTOCOpen));
     } else if (this._savedMap.uiStateJSON) {
       const uiState = JSON.parse(this._savedMap.uiStateJSON);
-      this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', true)));
+      this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
     }
 
     if (this._embeddableConfig.mapCenter) {

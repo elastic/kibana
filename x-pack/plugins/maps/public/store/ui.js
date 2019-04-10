@@ -16,11 +16,13 @@ export const FLYOUT_STATE = {
   ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
 };
 
+export const DEFAULT_IS_LAYER_TOC_OPEN = true;
+
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
   isReadOnly: false,
-  isLayerTOCOpen: true,
+  isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isFilterable: false
 };
 
