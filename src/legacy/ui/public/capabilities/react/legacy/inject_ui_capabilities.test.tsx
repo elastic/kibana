@@ -32,7 +32,7 @@ jest.mock('ui/chrome', () => ({
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { UICapabilities } from '..';
+import { UICapabilities } from '../..';
 import { injectUICapabilities } from './inject_ui_capabilities';
 import { UICapabilitiesProvider } from './ui_capabilities_provider';
 

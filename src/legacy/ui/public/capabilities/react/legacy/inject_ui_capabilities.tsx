@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, ComponentClass, ComponentType } from 'react';
-import { UICapabilities } from '../../ui_capabilities';
+import { UICapabilities } from '../..';
 
 function getDisplayName(component: ComponentType<any>) {
   return component.displayName || component.name || 'Component';
