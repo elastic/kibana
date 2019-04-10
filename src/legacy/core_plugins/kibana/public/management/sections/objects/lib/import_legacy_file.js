@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { saveAs } from '@elastic/filesaver';
-
-export function saveToFile(resultsJson) {
-  const blob = new Blob([resultsJson], { type: 'application/json' });
-  saveAs(blob, 'export.json');
+export async function importLegacyFile(file, FileReader = window.FileReader) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = ({ target: { result } }) => {
+      try {
+        resolve(JSON.parse(result));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    fr.readAsText(file);
+  });
 }

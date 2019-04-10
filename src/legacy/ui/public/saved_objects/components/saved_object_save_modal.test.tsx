@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import React from 'react';
-
-import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { shallow } from 'enzyme';
+import React from 'react';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
+
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
     const wrapper = shallow(
       <SavedObjectSaveModal
-        onSave={() => {}}
-        onClose={() => {}}
+        onSave={() => void 0}
+        onClose={() => void 0}
         title={'Saved Object title'}
         showCopyOnSave={false}
         objectType="visualization"
@@ -40,14 +39,16 @@ describe('SavedObjectSaveModal', () => {
   it('allows specifying custom save button label', () => {
     const wrapper = mountWithIntl(
       <SavedObjectSaveModal
-        onSave={() => {}}
-        onClose={() => {}}
+        onSave={() => void 0}
+        onClose={() => void 0}
         title={'Saved Object title'}
         showCopyOnSave={false}
         objectType="visualization"
         confirmButtonLabel="Save and done"
       />
     );
-    expect(wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').text()).toBe('Save and done');
+    expect(wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').text()).toBe(
+      'Save and done'
+    );
   });
 });
