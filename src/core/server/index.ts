@@ -31,8 +31,11 @@ export {
   APICaller,
 } from './elasticsearch';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+
 export {
   DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,

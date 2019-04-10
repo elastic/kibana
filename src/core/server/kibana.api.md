@@ -188,6 +188,17 @@ export interface LogRecord {
 }
 
 // @public
+export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
+    // (undocumented)
+    setup: (pluginSetupContext: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    stop?: () => void;
+}
+
+// @public
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (coreContext: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+
+// @public
 export interface PluginInitializerContext {
     // (undocumented)
     config: {
