@@ -7,30 +7,21 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { TestProviders } from '../../../../mock';
+import { networkModel } from '../../../../store';
 
-import { IpOverview, IpOverviewId } from './index';
+import { IpOverview } from './index';
 import { mockData } from './mock';
 
 describe('IP Overview Component', () => {
-  const state: State = mockGlobalState;
-
-  let store = createStore(state);
-
-  beforeEach(() => {
-    store = createStore(state);
-  });
-
   describe('rendering', () => {
     test('it renders the default IP Overview', () => {
       const wrapper = shallow(
         <TestProviders>
           <IpOverview
             loading={false}
+            flowType={networkModel.IpOverviewType}
             ip="10.10.10.10"
             data={mockData.IpOverview}
             type={networkModel.NetworkType.details}
@@ -39,43 +30,6 @@ describe('IP Overview Component', () => {
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
-    });
-  });
-
-  describe('changing selected type', () => {
-    test('selecting destination from the type drop down', () => {
-      const wrapper = mountWithIntl(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <IpOverview
-              loading={false}
-              ip="10.10.10.10"
-              data={mockData.complete}
-              type={networkModel.NetworkType.details}
-            />
-          </TestProviders>
-        </MockedProvider>
-      );
-
-      wrapper
-        .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
-        .first()
-        .simulate('click');
-
-      wrapper.update();
-
-      wrapper
-        .find(`button#${IpOverviewId}-select-type-destination`)
-        .first()
-        .simulate('click');
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
-          .first()
-          .text()
-          .toLocaleLowerCase()
-      ).toEqual('as destination');
     });
   });
 });
