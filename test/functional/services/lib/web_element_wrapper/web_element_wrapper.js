@@ -116,7 +116,9 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async clearValue() {
-    await this._webElement.clear();
+    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+    // await this._webElement.clear();
+    await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
   }
 
   /**
