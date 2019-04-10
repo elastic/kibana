@@ -18,10 +18,9 @@
  */
 
 import { merge } from 'lodash';
-// @ts-ignore not really worth typing
+import url from 'url';
 import chrome from '../chrome';
 import { metadata } from '../metadata';
-import url from 'url';
 import { KFetchError } from './kfetch_error';
 
 export interface KFetchQuery {
