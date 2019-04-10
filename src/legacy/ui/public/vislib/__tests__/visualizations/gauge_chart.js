@@ -122,6 +122,15 @@ describe('Vislib Gauge Chart Test Suite', function () {
     expect($(chartEl).find('svg > g > g > text').text()).to.equal('94%77%61%24%45%');
   });
 
+  it('creates gauge with automatic mode', function () {
+    generateVis({
+      gauge: {
+        alignment: 'automatic'
+      }
+    });
+    expect($(chartEl).find('svg').width()).to.equal(Math.floor($(chartEl).width() / 5));
+  });
+
   it('creates gauge with vertical mode', function () {
     generateVis({
       gauge: {
