@@ -20,7 +20,7 @@
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-import { SubUrlRouteFilterProvider } from '../sub_url_route_filter';
+import { SubUrlRouteFilterProvider } from '../sub_url_hooks';
 
 describe('kbn-chrome subUrlRouteFilter()', () => {
   describe('no ngRoute', () => {
