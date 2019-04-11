@@ -25,7 +25,7 @@ import { first, map, toArray } from 'rxjs/operators';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
-import { Plugin } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { PluginsConfig } from '../plugins_config';
 import { discover } from './plugins_discovery';
 
@@ -142,10 +142,10 @@ test('properly iterates through plugin search locations', async () => {
     TEST_EXTRA_PLUGIN_PATH,
   ]) {
     const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
-    expect(discoveredPlugin).toBeInstanceOf(Plugin);
+    expect(discoveredPlugin).toBeInstanceOf(PluginWrapper);
     expect(discoveredPlugin.configPath).toEqual(['core', 'config']);
-    expect(discoveredPlugin.requiredDependencies).toEqual(['a', 'b']);
-    expect(discoveredPlugin.optionalDependencies).toEqual(['c', 'd']);
+    expect(discoveredPlugin.requiredPlugins).toEqual(['a', 'b']);
+    expect(discoveredPlugin.optionalPlugins).toEqual(['c', 'd']);
   }
 
   await expect(

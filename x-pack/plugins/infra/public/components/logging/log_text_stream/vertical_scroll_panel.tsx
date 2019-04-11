@@ -29,6 +29,7 @@ interface VerticalScrollPanelProps<Child> {
   height: number;
   width: number;
   hideScrollbar?: boolean;
+  'data-test-subj'?: string;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -208,11 +209,12 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 
   public render() {
-    const { children, height, width, hideScrollbar } = this.props;
+    const { children, height, width, hideScrollbar, 'data-test-subj': dataTestSubj } = this.props;
     const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
 
     return (
       <ScrollPanelWrapper
+        data-test-subj={dataTestSubj}
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}

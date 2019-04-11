@@ -110,6 +110,7 @@ class MarkdownPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
+          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -315,7 +316,8 @@ MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  visData$: PropTypes.object,
 };
 
 const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

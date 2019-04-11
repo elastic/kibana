@@ -36,3 +36,6 @@
 /x-pack/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+
+# Kibana TSVB external contractors
+/src/legacy/core_plugins/metrics/  @elastic/kibana-tsvb-external
