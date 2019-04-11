@@ -195,7 +195,16 @@ class TableUI extends PureComponent {
           const editUrl = getEditUrl(object);
           if (!editUrl) {
             return (
-              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
+              <EuiToolTip
+                content={
+                  intl.formatMessage({
+                    id: 'kbn.management.objects.objectsTable.table.columnTitleNoEditTooltip',
+                    defaultMessage: 'This object type doesn\'t support editing',
+                  })
+                }
+              >
+                <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
+              </EuiToolTip>
             );
           }
           return (
