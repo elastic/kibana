@@ -1,7 +1,7 @@
 <div class="visEditorSidebar__container">
   <form
     class="visEditorSidebar__form"
-    ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
+    ng-submit="visualizeEditor.$valid && stageEditableVis()"
     name="visualizeEditor"
     novalidate
     ng-keydown="submitEditorWithKeyboard($event)"
@@ -69,7 +69,7 @@
         <!-- controls -->
         <ul class="nav navbar-nav navbar-right">
           <li
-            ng-if="visualizeEditor.softErrorCount() > 0"
+            ng-if="visualizeEditor.errorCount() > 0 && visualizeEditor.errorCount() === visualizeEditor.softErrorCount()"
             disabled
             tooltip="{{ visualizeEditor.describeErrors() }}"
             tooltip-placement="bottom"
@@ -115,13 +115,13 @@
             tooltip="{{::'common.ui.vis.editors.sidebar.applyChangesTooltip' | i18n: { defaultMessage: 'Apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
-            ng-hide="autoApplyEnabled || visualizeEditor.softErrorCount() > 0"
+            ng-hide="autoApplyEnabled || (visualizeEditor.errorCount() > 0 && visualizeEditor.errorCount() === visualizeEditor.softErrorCount())"
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
               class="kuiButton kuiButton--primary navbar-btn-link visEditorSidebar__navButtonLink"
               type="submit"
-              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0 || autoApplyEnabled"
+              ng-disabled="!vis.dirty || autoApplyEnabled"
               aria-label="{{::'common.ui.vis.editors.sidebar.applyChangesAriaLabel' | i18n: { defaultMessage: 'Update the visualization with your changes' } }}"
             >
               <icon aria-hidden="true" type="'play'"></icon>
