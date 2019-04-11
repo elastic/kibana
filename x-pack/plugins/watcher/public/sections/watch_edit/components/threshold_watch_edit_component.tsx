@@ -168,7 +168,7 @@ const ThresholdWatchEditUi = ({
       defaultMessage: 'Please fix the errors in the expression below.',
     }
   );
-  const expressionFields = ['termSize', 'termField', 'threshold', 'timeWindowSize'];
+  const expressionFields = ['aggField', 'termSize', 'termField', 'threshold', 'timeWindowSize'];
   const hasExpressionErrors = !!Object.keys(errors).find(
     errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
   );
@@ -210,7 +210,7 @@ const ThresholdWatchEditUi = ({
         >
           <EuiFieldText
             name="name"
-            value={watch.name}
+            value={watch.name || ''}
             onChange={e => {
               setWatchProperty('name', e.target.value);
             }}
@@ -408,7 +408,12 @@ const ThresholdWatchEditUi = ({
                     setWatchProperty('aggType', e.target.value);
                     setAggTypePopoverOpen(false);
                   }}
-                  options={Object.values(aggTypes)}
+                  options={Object.values(aggTypes).map(({ text, value }) => {
+                    return {
+                      text,
+                      value,
+                    };
+                  })}
                 />
               </div>
             </EuiPopover>
@@ -419,7 +424,12 @@ const ThresholdWatchEditUi = ({
                 id="aggFieldPopover"
                 button={
                   <EuiExpression
-                    description={`OF`}
+                    description={i18n.translate(
+                      'xpack.watcher.sections.watchEdit.threshold.ofLabel',
+                      {
+                        defaultMessage: 'of',
+                      }
+                    )}
                     value={watch.aggField || firstFieldOption.text}
                     isActive={aggFieldPopoverOpen || !watch.aggField}
                     onClick={() => {
@@ -436,7 +446,11 @@ const ThresholdWatchEditUi = ({
                 anchorPosition="downLeft"
               >
                 <div>
-                  <EuiPopoverTitle>of</EuiPopoverTitle>
+                  <EuiPopoverTitle>
+                    {i18n.translate('xpack.watcher.sections.watchEdit.threshold.ofButtonLabel', {
+                      defaultMessage: 'of',
+                    })}
+                  </EuiPopoverTitle>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false} style={{ width: 150 }}>
                       <ErrableFormRow
@@ -483,13 +497,22 @@ const ThresholdWatchEditUi = ({
               id="groupByPopover"
               button={
                 <EuiExpression
-                  description={`${watch.groupBy === 'all' ? 'over' : 'grouped over'}`}
+                  description={`${
+                    groupByTypes[watch.groupBy].sizeRequired
+                      ? i18n.translate(
+                          'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                          {
+                            defaultMessage: 'grouped over',
+                          }
+                        )
+                      : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
+                          defaultMessage: 'over',
+                        })
+                  }`}
                   value={`${groupByTypes[watch.groupBy].text} ${
-                    watch.groupBy === 'all'
-                      ? ''
-                      : (watch.termSize || '') +
-                        ' ' +
-                        (watch.termField ? "'" + watch.termField + "'" : '')
+                    groupByTypes[watch.groupBy].sizeRequired
+                      ? `${watch.termSize || ''} ${watch.termField ? `'${watch.termField}'` : ''}`
+                      : ''
                   }`}
                   isActive={
                     groupByPopoverOpen ||
@@ -524,7 +547,12 @@ const ThresholdWatchEditUi = ({
                         setWatchProperty('termField', null);
                         setWatchProperty('groupBy', e.target.value);
                       }}
-                      options={Object.values(groupByTypes)}
+                      options={Object.values(groupByTypes).map(({ text, value }) => {
+                        return {
+                          text,
+                          value,
+                        };
+                      })}
                     />
                   </EuiFlexItem>
 
@@ -673,7 +701,7 @@ const ThresholdWatchEditUi = ({
                     >
                       <EuiFieldNumber
                         min={1}
-                        value={watch.timeWindowSize}
+                        value={watch.timeWindowSize || ''}
                         onChange={e => {
                           const { value } = e.target;
                           const timeWindowSize = value !== '' ? parseInt(value, 10) : value;
