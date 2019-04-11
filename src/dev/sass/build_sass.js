@@ -33,10 +33,7 @@ export async function buildSass({ log, kibanaDir }) {
     resolve(kibanaDir, 'src/legacy/core_plugins')
   ];
 
-  const paths = [
-    resolve(kibanaDir, 'x-pack'),
-    resolve(kibanaDir, 'node_modules/x-pack')
-  ];
+  const paths = [ resolve(kibanaDir, 'x-pack') ];
 
   const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
   const enabledPlugins = await spec$.pipe(toArray()).toPromise();

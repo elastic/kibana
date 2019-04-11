@@ -90,17 +90,17 @@ module.exports = function (grunt) {
       ]
     },
 
-    // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    tslint: {
+    // used by the test tasks
+    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    checkCoreApiChanges: {
       cmd: process.execPath,
       args: [
-        require.resolve('../../scripts/tslint')
+        require.resolve('../../scripts/check_core_api_changes')
       ]
     },
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
+    //    runs the typecheck script to check for Typescript type errors
     typeCheck: {
       cmd: process.execPath,
       args: [

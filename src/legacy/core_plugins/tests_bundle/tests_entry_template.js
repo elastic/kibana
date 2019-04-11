@@ -50,6 +50,7 @@ new CoreSystem({
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
+      devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
@@ -58,6 +59,7 @@ new CoreSystem({
     csp: {
       warnLegacyBrowsers: false,
     },
+    uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,
