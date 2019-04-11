@@ -17,16 +17,12 @@
  * under the License.
  */
 
-jest.mock('ui/chrome', () => ({
-  getInjected(key: string) {
-    if (key === 'uiCapabilities') {
-      return {
-        uiCapability1: true,
-        uiCapability2: {
-          nestedProp: 'nestedValue',
-        },
-      };
-    }
+jest.mock('ui/capabilities', () => ({
+  uiCapabilities: {
+    uiCapability1: true,
+    uiCapability2: {
+      nestedProp: 'nestedValue',
+    },
   },
 }));
 
