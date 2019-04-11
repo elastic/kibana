@@ -165,7 +165,7 @@ export function getChartType(config) {
         checkFields.push(config.metricFieldName);
       }
       const usesScriptFields =
-        checkFields.find(fieldName => scriptFields.includes(fieldName)) !== undefined;
+        (checkFields.find(fieldName => scriptFields.includes(fieldName)) !== undefined);
       if (usesScriptFields === true) {
         // Only single metric chart type supports query of model plot data.
         chartType = CHART_TYPE.SINGLE_METRIC;
