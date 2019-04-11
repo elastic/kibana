@@ -168,35 +168,35 @@ export const ecsSchema = gql`
   }
 
   type ZeekConnectionData {
-    local_resp: String
-    local_orig: String
-    missed_bytes: Float
-    state: String
-    history: String
+    local_resp: ToStringArray
+    local_orig: ToStringArray
+    missed_bytes: ToStringArray
+    state: ToStringArray
+    history: ToStringArray
   }
 
   type ZeekNoticeData {
-    suppress_for: Float
-    msg: String
-    note: String
-    sub: String
-    dst: String
-    dropped: Boolean
-    peer_descr: String
+    suppress_for: ToStringArray
+    msg: ToStringArray
+    note: ToStringArray
+    sub: ToStringArray
+    dst: ToStringArray
+    dropped: ToStringArray
+    peer_descr: ToStringArray
   }
 
   type ZeekDnsData {
-    AA: Boolean
-    qclass_name: String
-    RD: Boolean
-    qtype_name: String
-    rejected: Boolean
-    qtype: Float
-    query: String
-    trans_id: Float
-    qclass: Float
-    RA: Boolean
-    TC: Boolean
+    AA: ToStringArray
+    qclass_name: ToStringArray
+    RD: ToStringArray
+    qtype_name: ToStringArray
+    rejected: ToStringArray
+    qtype: ToStringArray
+    query: ToStringArray
+    trans_id: ToStringArray
+    qclass: ToStringArray
+    RA: ToStringArray
+    TC: ToStringArray
   }
 
   type FileFields {
@@ -256,35 +256,35 @@ export const ecsSchema = gql`
   }
 
   type ZeekFileData {
-    session_ids: [String!]
-    timedout: Boolean
-    local_orig: Boolean
-    tx_host: String
-    source: String
-    is_orig: Boolean
-    overflow_bytes: Float
-    sha1: String
-    duration: Float
-    depth: Float
-    analyzers: [String!]
-    mime_type: String
-    rx_host: String
-    total_bytes: Float
-    fuid: String
-    seen_bytes: Float
-    missing_bytes: Float
-    md5: String
+    session_ids: ToStringArray
+    timedout: ToStringArray
+    local_orig: ToStringArray
+    tx_host: ToStringArray
+    source: ToStringArray
+    is_orig: ToStringArray
+    overflow_bytes: ToStringArray
+    sha1: ToStringArray
+    duration: ToStringArray
+    depth: ToStringArray
+    analyzers: ToStringArray
+    mime_type: ToStringArray
+    rx_host: ToStringArray
+    total_bytes: ToStringArray
+    fuid: ToStringArray
+    seen_bytes: ToStringArray
+    missing_bytes: ToStringArray
+    md5: ToStringArray
   }
 
   type ZeekSslData {
-    cipher: String
-    established: Boolean
-    resumed: Boolean
-    version: String
+    cipher: ToStringArray
+    established: ToStringArray
+    resumed: ToStringArray
+    version: ToStringArray
   }
 
   type ZeekEcsFields {
-    session_id: String
+    session_id: ToStringArray
     connection: ZeekConnectionData
     notice: ZeekNoticeData
     dns: ZeekDnsData

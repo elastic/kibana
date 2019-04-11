@@ -519,7 +519,7 @@ export interface TlsServerCertificateData {
 }
 
 export interface ZeekEcsFields {
-  session_id?: string | null;
+  session_id?: ToStringArray | null;
 
   connection?: ZeekConnectionData | null;
 
@@ -535,55 +535,55 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: string | null;
+  local_resp?: ToStringArray | null;
 
-  local_orig?: string | null;
+  local_orig?: ToStringArray | null;
 
-  missed_bytes?: number | null;
+  missed_bytes?: ToStringArray | null;
 
-  state?: string | null;
+  state?: ToStringArray | null;
 
-  history?: string | null;
+  history?: ToStringArray | null;
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: number | null;
+  suppress_for?: ToStringArray | null;
 
-  msg?: string | null;
+  msg?: ToStringArray | null;
 
-  note?: string | null;
+  note?: ToStringArray | null;
 
-  sub?: string | null;
+  sub?: ToStringArray | null;
 
-  dst?: string | null;
+  dst?: ToStringArray | null;
 
-  dropped?: boolean | null;
+  dropped?: ToStringArray | null;
 
-  peer_descr?: string | null;
+  peer_descr?: ToStringArray | null;
 }
 
 export interface ZeekDnsData {
-  AA?: boolean | null;
+  AA?: ToStringArray | null;
 
-  qclass_name?: string | null;
+  qclass_name?: ToStringArray | null;
 
-  RD?: boolean | null;
+  RD?: ToStringArray | null;
 
-  qtype_name?: string | null;
+  qtype_name?: ToStringArray | null;
 
-  rejected?: boolean | null;
+  rejected?: ToStringArray | null;
 
-  qtype?: number | null;
+  qtype?: ToStringArray | null;
 
-  query?: string | null;
+  query?: ToStringArray | null;
 
-  trans_id?: number | null;
+  trans_id?: ToStringArray | null;
 
-  qclass?: number | null;
+  qclass?: ToStringArray | null;
 
-  RA?: boolean | null;
+  RA?: ToStringArray | null;
 
-  TC?: boolean | null;
+  TC?: ToStringArray | null;
 }
 
 export interface ZeekHttpData {
@@ -599,51 +599,51 @@ export interface ZeekHttpData {
 }
 
 export interface ZeekFileData {
-  session_ids?: string[] | null;
+  session_ids?: ToStringArray | null;
 
-  timedout?: boolean | null;
+  timedout?: ToStringArray | null;
 
-  local_orig?: boolean | null;
+  local_orig?: ToStringArray | null;
 
-  tx_host?: string | null;
+  tx_host?: ToStringArray | null;
 
-  source?: string | null;
+  source?: ToStringArray | null;
 
-  is_orig?: boolean | null;
+  is_orig?: ToStringArray | null;
 
-  overflow_bytes?: number | null;
+  overflow_bytes?: ToStringArray | null;
 
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToStringArray | null;
 
-  depth?: number | null;
+  depth?: ToStringArray | null;
 
-  analyzers?: string[] | null;
+  analyzers?: ToStringArray | null;
 
-  mime_type?: string | null;
+  mime_type?: ToStringArray | null;
 
-  rx_host?: string | null;
+  rx_host?: ToStringArray | null;
 
-  total_bytes?: number | null;
+  total_bytes?: ToStringArray | null;
 
-  fuid?: string | null;
+  fuid?: ToStringArray | null;
 
-  seen_bytes?: number | null;
+  seen_bytes?: ToStringArray | null;
 
-  missing_bytes?: number | null;
+  missing_bytes?: ToStringArray | null;
 
-  md5?: string | null;
+  md5?: ToStringArray | null;
 }
 
 export interface ZeekSslData {
-  cipher?: string | null;
+  cipher?: ToStringArray | null;
 
-  established?: boolean | null;
+  established?: ToStringArray | null;
 
-  resumed?: boolean | null;
+  resumed?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface HttpEcsFields {
@@ -2957,7 +2957,7 @@ export namespace TlsServerCertificateDataResolvers {
 
 export namespace ZeekEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekEcsFields> {
-    session_id?: SessionIdResolver<string | null, TypeParent, Context>;
+    session_id?: SessionIdResolver<ToStringArray | null, TypeParent, Context>;
 
     connection?: ConnectionResolver<ZeekConnectionData | null, TypeParent, Context>;
 
@@ -2973,7 +2973,7 @@ export namespace ZeekEcsFieldsResolvers {
   }
 
   export type SessionIdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3011,39 +3011,39 @@ export namespace ZeekEcsFieldsResolvers {
 
 export namespace ZeekConnectionDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekConnectionData> {
-    local_resp?: LocalRespResolver<string | null, TypeParent, Context>;
+    local_resp?: LocalRespResolver<ToStringArray | null, TypeParent, Context>;
 
-    local_orig?: LocalOrigResolver<string | null, TypeParent, Context>;
+    local_orig?: LocalOrigResolver<ToStringArray | null, TypeParent, Context>;
 
-    missed_bytes?: MissedBytesResolver<number | null, TypeParent, Context>;
+    missed_bytes?: MissedBytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    state?: StateResolver<string | null, TypeParent, Context>;
+    state?: StateResolver<ToStringArray | null, TypeParent, Context>;
 
-    history?: HistoryResolver<string | null, TypeParent, Context>;
+    history?: HistoryResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type LocalRespResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LocalOrigResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissedBytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StateResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HistoryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3051,53 +3051,53 @@ export namespace ZeekConnectionDataResolvers {
 
 export namespace ZeekNoticeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekNoticeData> {
-    suppress_for?: SuppressForResolver<number | null, TypeParent, Context>;
+    suppress_for?: SuppressForResolver<ToStringArray | null, TypeParent, Context>;
 
-    msg?: MsgResolver<string | null, TypeParent, Context>;
+    msg?: MsgResolver<ToStringArray | null, TypeParent, Context>;
 
-    note?: NoteResolver<string | null, TypeParent, Context>;
+    note?: NoteResolver<ToStringArray | null, TypeParent, Context>;
 
-    sub?: SubResolver<string | null, TypeParent, Context>;
+    sub?: SubResolver<ToStringArray | null, TypeParent, Context>;
 
-    dst?: DstResolver<string | null, TypeParent, Context>;
+    dst?: DstResolver<ToStringArray | null, TypeParent, Context>;
 
-    dropped?: DroppedResolver<boolean | null, TypeParent, Context>;
+    dropped?: DroppedResolver<ToStringArray | null, TypeParent, Context>;
 
-    peer_descr?: PeerDescrResolver<string | null, TypeParent, Context>;
+    peer_descr?: PeerDescrResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type SuppressForResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MsgResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NoteResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SubResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DstResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DroppedResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PeerDescrResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3105,81 +3105,81 @@ export namespace ZeekNoticeDataResolvers {
 
 export namespace ZeekDnsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekDnsData> {
-    AA?: AaResolver<boolean | null, TypeParent, Context>;
+    AA?: AaResolver<ToStringArray | null, TypeParent, Context>;
 
-    qclass_name?: QclassNameResolver<string | null, TypeParent, Context>;
+    qclass_name?: QclassNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    RD?: RdResolver<boolean | null, TypeParent, Context>;
+    RD?: RdResolver<ToStringArray | null, TypeParent, Context>;
 
-    qtype_name?: QtypeNameResolver<string | null, TypeParent, Context>;
+    qtype_name?: QtypeNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    rejected?: RejectedResolver<boolean | null, TypeParent, Context>;
+    rejected?: RejectedResolver<ToStringArray | null, TypeParent, Context>;
 
-    qtype?: QtypeResolver<number | null, TypeParent, Context>;
+    qtype?: QtypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    query?: QueryResolver<string | null, TypeParent, Context>;
+    query?: QueryResolver<ToStringArray | null, TypeParent, Context>;
 
-    trans_id?: TransIdResolver<number | null, TypeParent, Context>;
+    trans_id?: TransIdResolver<ToStringArray | null, TypeParent, Context>;
 
-    qclass?: QclassResolver<number | null, TypeParent, Context>;
+    qclass?: QclassResolver<ToStringArray | null, TypeParent, Context>;
 
-    RA?: RaResolver<boolean | null, TypeParent, Context>;
+    RA?: RaResolver<ToStringArray | null, TypeParent, Context>;
 
-    TC?: TcResolver<boolean | null, TypeParent, Context>;
+    TC?: TcResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type AaResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QclassNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RdResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QtypeNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RejectedResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QtypeResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QueryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransIdResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QclassResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RaResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TcResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3227,130 +3227,130 @@ export namespace ZeekHttpDataResolvers {
 
 export namespace ZeekFileDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekFileData> {
-    session_ids?: SessionIdsResolver<string[] | null, TypeParent, Context>;
+    session_ids?: SessionIdsResolver<ToStringArray | null, TypeParent, Context>;
 
-    timedout?: TimedoutResolver<boolean | null, TypeParent, Context>;
+    timedout?: TimedoutResolver<ToStringArray | null, TypeParent, Context>;
 
-    local_orig?: LocalOrigResolver<boolean | null, TypeParent, Context>;
+    local_orig?: LocalOrigResolver<ToStringArray | null, TypeParent, Context>;
 
-    tx_host?: TxHostResolver<string | null, TypeParent, Context>;
+    tx_host?: TxHostResolver<ToStringArray | null, TypeParent, Context>;
 
-    source?: SourceResolver<string | null, TypeParent, Context>;
+    source?: SourceResolver<ToStringArray | null, TypeParent, Context>;
 
-    is_orig?: IsOrigResolver<boolean | null, TypeParent, Context>;
+    is_orig?: IsOrigResolver<ToStringArray | null, TypeParent, Context>;
 
-    overflow_bytes?: OverflowBytesResolver<number | null, TypeParent, Context>;
+    overflow_bytes?: OverflowBytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+    sha1?: Sha1Resolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<number | null, TypeParent, Context>;
+    duration?: DurationResolver<ToStringArray | null, TypeParent, Context>;
 
-    depth?: DepthResolver<number | null, TypeParent, Context>;
+    depth?: DepthResolver<ToStringArray | null, TypeParent, Context>;
 
-    analyzers?: AnalyzersResolver<string[] | null, TypeParent, Context>;
+    analyzers?: AnalyzersResolver<ToStringArray | null, TypeParent, Context>;
 
-    mime_type?: MimeTypeResolver<string | null, TypeParent, Context>;
+    mime_type?: MimeTypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    rx_host?: RxHostResolver<string | null, TypeParent, Context>;
+    rx_host?: RxHostResolver<ToStringArray | null, TypeParent, Context>;
 
-    total_bytes?: TotalBytesResolver<number | null, TypeParent, Context>;
+    total_bytes?: TotalBytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    fuid?: FuidResolver<string | null, TypeParent, Context>;
+    fuid?: FuidResolver<ToStringArray | null, TypeParent, Context>;
 
-    seen_bytes?: SeenBytesResolver<number | null, TypeParent, Context>;
+    seen_bytes?: SeenBytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    missing_bytes?: MissingBytesResolver<number | null, TypeParent, Context>;
+    missing_bytes?: MissingBytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    md5?: Md5Resolver<string | null, TypeParent, Context>;
+    md5?: Md5Resolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type SessionIdsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TimedoutResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LocalOrigResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TxHostResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IsOrigResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OverflowBytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type Sha1Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DurationResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DepthResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AnalyzersResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MimeTypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RxHostResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TotalBytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FuidResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SeenBytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissingBytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type Md5Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3358,32 +3358,32 @@ export namespace ZeekFileDataResolvers {
 
 export namespace ZeekSslDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekSslData> {
-    cipher?: CipherResolver<string | null, TypeParent, Context>;
+    cipher?: CipherResolver<ToStringArray | null, TypeParent, Context>;
 
-    established?: EstablishedResolver<boolean | null, TypeParent, Context>;
+    established?: EstablishedResolver<ToStringArray | null, TypeParent, Context>;
 
-    resumed?: ResumedResolver<boolean | null, TypeParent, Context>;
+    resumed?: ResumedResolver<ToStringArray | null, TypeParent, Context>;
 
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type CipherResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EstablishedResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ResumedResolver<
-    R = boolean | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

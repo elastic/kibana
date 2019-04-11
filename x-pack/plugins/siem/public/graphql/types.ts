@@ -490,7 +490,7 @@ export interface TlsServerCertificateData {
 }
 
 export interface ZeekEcsFields {
-  session_id?: string | null;
+  session_id?: ToStringArray | null;
 
   connection?: ZeekConnectionData | null;
 
@@ -506,55 +506,55 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: string | null;
+  local_resp?: ToStringArray | null;
 
-  local_orig?: string | null;
+  local_orig?: ToStringArray | null;
 
-  missed_bytes?: number | null;
+  missed_bytes?: ToStringArray | null;
 
-  state?: string | null;
+  state?: ToStringArray | null;
 
-  history?: string | null;
+  history?: ToStringArray | null;
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: number | null;
+  suppress_for?: ToStringArray | null;
 
-  msg?: string | null;
+  msg?: ToStringArray | null;
 
-  note?: string | null;
+  note?: ToStringArray | null;
 
-  sub?: string | null;
+  sub?: ToStringArray | null;
 
-  dst?: string | null;
+  dst?: ToStringArray | null;
 
-  dropped?: boolean | null;
+  dropped?: ToStringArray | null;
 
-  peer_descr?: string | null;
+  peer_descr?: ToStringArray | null;
 }
 
 export interface ZeekDnsData {
-  AA?: boolean | null;
+  AA?: ToStringArray | null;
 
-  qclass_name?: string | null;
+  qclass_name?: ToStringArray | null;
 
-  RD?: boolean | null;
+  RD?: ToStringArray | null;
 
-  qtype_name?: string | null;
+  qtype_name?: ToStringArray | null;
 
-  rejected?: boolean | null;
+  rejected?: ToStringArray | null;
 
-  qtype?: number | null;
+  qtype?: ToStringArray | null;
 
-  query?: string | null;
+  query?: ToStringArray | null;
 
-  trans_id?: number | null;
+  trans_id?: ToStringArray | null;
 
-  qclass?: number | null;
+  qclass?: ToStringArray | null;
 
-  RA?: boolean | null;
+  RA?: ToStringArray | null;
 
-  TC?: boolean | null;
+  TC?: ToStringArray | null;
 }
 
 export interface ZeekHttpData {
@@ -570,51 +570,51 @@ export interface ZeekHttpData {
 }
 
 export interface ZeekFileData {
-  session_ids?: string[] | null;
+  session_ids?: ToStringArray | null;
 
-  timedout?: boolean | null;
+  timedout?: ToStringArray | null;
 
-  local_orig?: boolean | null;
+  local_orig?: ToStringArray | null;
 
-  tx_host?: string | null;
+  tx_host?: ToStringArray | null;
 
-  source?: string | null;
+  source?: ToStringArray | null;
 
-  is_orig?: boolean | null;
+  is_orig?: ToStringArray | null;
 
-  overflow_bytes?: number | null;
+  overflow_bytes?: ToStringArray | null;
 
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToStringArray | null;
 
-  depth?: number | null;
+  depth?: ToStringArray | null;
 
-  analyzers?: string[] | null;
+  analyzers?: ToStringArray | null;
 
-  mime_type?: string | null;
+  mime_type?: ToStringArray | null;
 
-  rx_host?: string | null;
+  rx_host?: ToStringArray | null;
 
-  total_bytes?: number | null;
+  total_bytes?: ToStringArray | null;
 
-  fuid?: string | null;
+  fuid?: ToStringArray | null;
 
-  seen_bytes?: number | null;
+  seen_bytes?: ToStringArray | null;
 
-  missing_bytes?: number | null;
+  missing_bytes?: ToStringArray | null;
 
-  md5?: string | null;
+  md5?: ToStringArray | null;
 }
 
 export interface ZeekSslData {
-  cipher?: string | null;
+  cipher?: ToStringArray | null;
 
-  established?: boolean | null;
+  established?: ToStringArray | null;
 
-  resumed?: boolean | null;
+  resumed?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface HttpEcsFields {
@@ -1520,7 +1520,7 @@ export namespace GetEventsQuery {
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
-    session_id?: string | null;
+    session_id?: ToStringArray | null;
   };
 }
 
@@ -2910,7 +2910,7 @@ export namespace GetTimelineQuery {
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
-    session_id?: string | null;
+    session_id?: ToStringArray | null;
 
     connection?: Connection | null;
 
@@ -2928,59 +2928,59 @@ export namespace GetTimelineQuery {
   export type Connection = {
     __typename?: 'ZeekConnectionData';
 
-    local_resp?: string | null;
+    local_resp?: ToStringArray | null;
 
-    local_orig?: string | null;
+    local_orig?: ToStringArray | null;
 
-    missed_bytes?: number | null;
+    missed_bytes?: ToStringArray | null;
 
-    state?: string | null;
+    state?: ToStringArray | null;
 
-    history?: string | null;
+    history?: ToStringArray | null;
   };
 
   export type Notice = {
     __typename?: 'ZeekNoticeData';
 
-    suppress_for?: number | null;
+    suppress_for?: ToStringArray | null;
 
-    msg?: string | null;
+    msg?: ToStringArray | null;
 
-    note?: string | null;
+    note?: ToStringArray | null;
 
-    sub?: string | null;
+    sub?: ToStringArray | null;
 
-    dst?: string | null;
+    dst?: ToStringArray | null;
 
-    dropped?: boolean | null;
+    dropped?: ToStringArray | null;
 
-    peer_descr?: string | null;
+    peer_descr?: ToStringArray | null;
   };
 
   export type Dns = {
     __typename?: 'ZeekDnsData';
 
-    AA?: boolean | null;
+    AA?: ToStringArray | null;
 
-    qclass_name?: string | null;
+    qclass_name?: ToStringArray | null;
 
-    RD?: boolean | null;
+    RD?: ToStringArray | null;
 
-    qtype_name?: string | null;
+    qtype_name?: ToStringArray | null;
 
-    rejected?: boolean | null;
+    rejected?: ToStringArray | null;
 
-    qtype?: number | null;
+    qtype?: ToStringArray | null;
 
-    query?: string | null;
+    query?: ToStringArray | null;
 
-    trans_id?: number | null;
+    trans_id?: ToStringArray | null;
 
-    qclass?: number | null;
+    qclass?: ToStringArray | null;
 
-    RA?: boolean | null;
+    RA?: ToStringArray | null;
 
-    TC?: boolean | null;
+    TC?: ToStringArray | null;
   };
 
   export type _Http = {
@@ -3000,53 +3000,53 @@ export namespace GetTimelineQuery {
   export type Files = {
     __typename?: 'ZeekFileData';
 
-    session_ids?: string[] | null;
+    session_ids?: ToStringArray | null;
 
-    timedout?: boolean | null;
+    timedout?: ToStringArray | null;
 
-    local_orig?: boolean | null;
+    local_orig?: ToStringArray | null;
 
-    tx_host?: string | null;
+    tx_host?: ToStringArray | null;
 
-    source?: string | null;
+    source?: ToStringArray | null;
 
-    is_orig?: boolean | null;
+    is_orig?: ToStringArray | null;
 
-    overflow_bytes?: number | null;
+    overflow_bytes?: ToStringArray | null;
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
 
-    duration?: number | null;
+    duration?: ToStringArray | null;
 
-    depth?: number | null;
+    depth?: ToStringArray | null;
 
-    analyzers?: string[] | null;
+    analyzers?: ToStringArray | null;
 
-    mime_type?: string | null;
+    mime_type?: ToStringArray | null;
 
-    rx_host?: string | null;
+    rx_host?: ToStringArray | null;
 
-    total_bytes?: number | null;
+    total_bytes?: ToStringArray | null;
 
-    fuid?: string | null;
+    fuid?: ToStringArray | null;
 
-    seen_bytes?: number | null;
+    seen_bytes?: ToStringArray | null;
 
-    missing_bytes?: number | null;
+    missing_bytes?: ToStringArray | null;
 
-    md5?: string | null;
+    md5?: ToStringArray | null;
   };
 
   export type Ssl = {
     __typename?: 'ZeekSslData';
 
-    cipher?: string | null;
+    cipher?: ToStringArray | null;
 
-    established?: boolean | null;
+    established?: ToStringArray | null;
 
-    resumed?: boolean | null;
+    resumed?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 

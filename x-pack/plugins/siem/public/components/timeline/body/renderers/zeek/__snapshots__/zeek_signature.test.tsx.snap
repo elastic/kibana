@@ -43,17 +43,29 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
       "url": null,
       "zeek": Object {
         "connection": Object {
-          "history": "Sr",
-          "local_orig": "false",
-          "local_resp": "false",
-          "missed_bytes": 0,
-          "state": "REJ",
+          "history": Array [
+            "Sr",
+          ],
+          "local_orig": Array [
+            "false",
+          ],
+          "local_resp": Array [
+            "false",
+          ],
+          "missed_bytes": Array [
+            "0",
+          ],
+          "state": Array [
+            "REJ",
+          ],
         },
         "dns": null,
         "files": null,
         "http": null,
         "notice": null,
-        "session_id": "C8DRTq362Fios6hw16",
+        "session_id": Array [
+          "C8DRTq362Fios6hw16",
+        ],
         "ssl": null,
       },
     }
