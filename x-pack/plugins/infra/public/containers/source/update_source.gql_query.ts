@@ -6,16 +6,28 @@
 
 import gql from 'graphql-tag';
 
-import { sourceFieldsFragment } from './source_fields_fragment.gql_query';
+import { sharedFragments } from '../../../common/graphql/shared';
+import {
+  sourceConfigurationFieldsFragment,
+  sourceStatusFieldsFragment,
+} from './source_fields_fragment.gql_query';
 
 export const updateSourceMutation = gql`
   mutation UpdateSourceMutation($sourceId: ID = "default", $changes: [UpdateSourceInput!]!) {
     updateSource(id: $sourceId, changes: $changes) {
       source {
-        ...SourceFields
+        ...InfraSourceFields
+        configuration {
+          ...SourceConfigurationFields
+        }
+        status {
+          ...SourceStatusFields
+        }
       }
     }
   }
 
-  ${sourceFieldsFragment}
+  ${sharedFragments.InfraSourceFields}
+  ${sourceConfigurationFieldsFragment}
+  ${sourceStatusFieldsFragment}
 `;

@@ -7,14 +7,17 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { ErrorPage } from '../../components/error_page';
+import { ErrorPage } from './error_page';
 
 interface SourceErrorPageProps {
   errorMessage: string;
   retry: () => void;
 }
 
-export const SourceErrorPage: React.SFC<SourceErrorPageProps> = ({ errorMessage, retry }) => (
+export const SourceErrorPage: React.FunctionComponent<SourceErrorPageProps> = ({
+  errorMessage,
+  retry,
+}) => (
   <ErrorPage
     shortMessage={
       <FormattedMessage
