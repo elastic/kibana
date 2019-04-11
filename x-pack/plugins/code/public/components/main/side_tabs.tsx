@@ -22,6 +22,7 @@ enum Tabs {
 interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
+  hasStructure: boolean;
 }
 
 class CodeSideTabs extends React.PureComponent<Props> {
@@ -73,7 +74,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
         name: 'Structure',
         content: structureTabContent,
         isSelected: Tabs.structure === this.sideTab,
-        disabled: this.props.match.params.pathType === PathTypes.tree,
+        disabled: this.props.match.params.pathType === PathTypes.tree || !this.props.hasStructure,
         'data-test-subj': 'codeStructureTreeTab',
       },
     ];
@@ -95,6 +96,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
           initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
           onTabClick={tab => this.switchTab(tab.id as Tabs)}
           expand={true}
+          selectedTab={this.tabs.find(t => t.id === this.sideTab)}
         />
         <Shortcut
           keyCode="t"

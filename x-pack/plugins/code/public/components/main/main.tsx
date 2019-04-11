@@ -11,10 +11,11 @@ import styled from 'styled-components';
 
 import chrome from 'ui/chrome';
 import { MainRouteParams } from '../../common/types';
-import { RootState } from '../../reducers';
 import { ShortcutsProvider } from '../shortcuts';
 import { Content } from './content';
 import { SideTabs } from './side_tabs';
+import { structureSelector } from '../../selectors';
+import { RootState } from '../../reducers';
 
 const Root = styled.div`
   position: absolute;
@@ -34,6 +35,7 @@ const Container = styled.div`
 interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
+  hasStructure: boolean;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -56,7 +58,7 @@ class CodeMain extends React.Component<Props> {
   }
 
   public render() {
-    const { loadingFileTree, loadingStructureTree } = this.props;
+    const { loadingFileTree, loadingStructureTree, hasStructure } = this.props;
     return (
       <Root>
         <Container>
@@ -64,6 +66,7 @@ class CodeMain extends React.Component<Props> {
             <SideTabs
               loadingFileTree={loadingFileTree}
               loadingStructureTree={loadingStructureTree}
+              hasStructure={hasStructure}
             />
             <Content />
           </React.Fragment>
@@ -77,9 +80,7 @@ class CodeMain extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   loadingFileTree: state.file.loading,
   loadingStructureTree: state.symbol.loading,
+  hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
 });
 
-export const Main = connect(
-  mapStateToProps
-  // @ts-ignore
-)(CodeMain);
+export const Main = connect(mapStateToProps)(CodeMain);
