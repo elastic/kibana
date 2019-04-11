@@ -25,7 +25,6 @@ import {
   ExtractorConfig,
   ExtractorResult,
   ExtractorMessage,
-  ConsoleMessageId,
 } from '@microsoft/api-extractor';
 import chalk from 'chalk';
 import dedent from 'dedent';
@@ -110,6 +109,7 @@ const runApiExtractor = (
     localBuild: acceptChanges,
     messageCallback: (message: ExtractorMessage) => {
       if (message.messageId === 'console-api-report-not-copied') {
+        // ConsoleMessageId.ApiReportNotCopied
         log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
           'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
@@ -120,6 +120,7 @@ const runApiExtractor = (
         );
         message.handled = true;
       } else if (message.messageId === 'console-api-report-copied') {
+        // ConsoleMessageId.ApiReportCopied
         log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
           "Please commit the updated API documentation and the review file in '" +
@@ -127,6 +128,7 @@ const runApiExtractor = (
         );
         message.handled = true;
       } else if (message.messageId === 'console-api-report-unchanged') {
+        // ConsoleMessageId.ApiReportUnchanged
         log.info(`Core ${folder} API: no changes detected ✔`);
         message.handled = true;
       }
