@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { ColumnOperation, DatasourceField, fieldToOperation } from '../../../common';
+import {
+  BasicFieldType,
+  ColumnOperation,
+  DatasourceField,
+  fieldToOperation,
+} from '../../../common';
 import {
   Axis,
   EditorPlugin,
@@ -26,7 +31,7 @@ interface ScatterChartPrivateState {
   hasDate: boolean;
 }
 
-type ScatterChartVisModel = VisModel<'scatterChart', ScatterChartPrivateState>;
+type ScatterChartVisModel = VisModel<'scatterChart', ScatterChartPrivateState, BasicFieldType>;
 
 const updateScatterState = updatePrivateState<'scatterChart', ScatterChartPrivateState>(
   'scatterChart'

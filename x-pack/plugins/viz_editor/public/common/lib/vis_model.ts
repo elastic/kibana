@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourceField, Query, SelectOperation } from '../../../common';
+import { BasicFieldType, DatasourceField, Query, SelectOperation } from '../../../common';
 
-export interface Datasource<M = any> {
+export interface Datasource<M = any, T extends string = BasicFieldType> {
   id: string;
   title: string;
   timeFieldName?: string;
-  fields: DatasourceField[];
+  fields: Array<DatasourceField<T>>;
   fieldFormatMap?: string;
   meta?: M;
 }
@@ -32,13 +32,13 @@ export interface Axis {
  * The basic properties which are shared over all editor plugins
  * are defined here, anything else is in the private property and scoped by plugin
  */
-export interface VisModel<K extends string = any, T = any> {
-  datasource: Datasource | null;
+export interface VisModel<K extends string = any, P = any, T extends string = any> {
+  datasource: Datasource<any, T> | null;
   queries: { [id: string]: Query };
   datasourcePlugin: string;
   editorPlugin: string;
   title: string;
-  private: { [key in K]: T };
+  private: { [key in K]: P };
 }
 
 // This type should be used if it is not known which private states exist on a VisModel

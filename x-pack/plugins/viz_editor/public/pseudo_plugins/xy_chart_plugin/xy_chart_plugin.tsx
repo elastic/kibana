@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import {
+  BasicFieldType,
   DatasourceField,
   fieldToOperation,
   SelectOperation,
@@ -45,7 +46,7 @@ interface XyChartPrivateState {
   stacked: boolean;
 }
 
-type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
+type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState, BasicFieldType>;
 
 const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
 

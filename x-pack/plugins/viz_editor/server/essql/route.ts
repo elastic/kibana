@@ -9,7 +9,7 @@
 // ------------------------------------------------------------------------------------------
 
 import { Legacy } from 'kibana';
-import { API_PREFIX, FieldType } from '../../common';
+import { API_PREFIX, BasicFieldType } from '../../common';
 
 export function normalizeType(type: string) {
   const normalTypes = {
@@ -28,10 +28,10 @@ export function normalizeType(type: string) {
     ],
     date: ['date', 'datetime'],
     boolean: ['boolean'],
-  } as { [key in FieldType]: string[] };
+  } as { [key in BasicFieldType]: string[] };
 
   const normalizedType = Object.keys(normalTypes).find(t =>
-    normalTypes[t as FieldType].includes(type)
+    normalTypes[t as BasicFieldType].includes(type)
   );
 
   if (normalizedType) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, WhereOperation } from '../../../common';
+import { BasicFieldType, Query, WhereOperation } from '../../../common';
 import { getTypes, VisModel } from '../../../public';
 
 function isRawDocumentQuery(query: Query) {
@@ -83,7 +83,7 @@ function whereClauseToFilter(where?: WhereOperation) {
   return {};
 }
 
-export function toExpression(viewState: VisModel) {
+export function toExpression(viewState: VisModel<string, any, BasicFieldType>) {
   if (Object.keys(viewState.queries).length === 0) {
     return '';
   }

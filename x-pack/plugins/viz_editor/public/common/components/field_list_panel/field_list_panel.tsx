@@ -29,7 +29,7 @@ function initialState(): State {
   };
 }
 
-function sortFields(fieldA: DatasourceField, fieldB: DatasourceField) {
+function sortFields(fieldA: DatasourceField<string>, fieldB: DatasourceField<string>) {
   return fieldA.name.toLowerCase() < fieldB.name.toLowerCase() ? -1 : 1;
 }
 
@@ -37,7 +37,7 @@ export function FieldListPanel({ visModel }: VisualizationPanelProps) {
   const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
-  function filterFields(field: DatasourceField) {
+  function filterFields(field: DatasourceField<string>) {
     return field.name.toLowerCase().includes(state.fieldsFilter.toLowerCase());
   }
   if (datasource === null) {

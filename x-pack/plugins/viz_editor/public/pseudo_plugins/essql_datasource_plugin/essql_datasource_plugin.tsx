@@ -7,13 +7,13 @@
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
-import { FieldType } from '../../../common';
+import { BasicFieldType } from '../../../common';
 import { Datasource, DatasourcePanelProps, DatasourcePlugin, VisModel } from '../../../public';
 import { FieldListPanel } from '../../common/components/field_list_panel';
 
 interface ESSQLColumn {
   name: string;
-  type: FieldType;
+  type: BasicFieldType;
 }
 
 function DataPanel(props: DatasourcePanelProps<VisModel>) {

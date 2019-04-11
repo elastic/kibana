@@ -6,16 +6,19 @@
 
 import { Scale } from '../public/common/components/operation_editor';
 
-export type FieldType = 'number' | 'string' | 'date' | 'boolean';
+export type BasicFieldType = 'number' | 'string' | 'date' | 'boolean' | 'unknown';
 
-export interface DatasourceField {
+export interface DatasourceField<T extends string = BasicFieldType> {
   name: string;
-  type: FieldType;
+  type: T;
   aggregatable: boolean;
   searchable: boolean;
 }
 
-export function isFieldApplicableForScale(scale: Scale, field: DatasourceField) {
+export function isFieldApplicableForScale<T extends string = BasicFieldType>(
+  scale: Scale,
+  field: DatasourceField<T>
+) {
   if (scale === 'ordinal') {
     return true;
   }

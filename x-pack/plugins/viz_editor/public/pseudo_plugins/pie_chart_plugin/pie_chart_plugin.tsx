@@ -10,7 +10,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { DatasourceField, fieldToOperation } from '../../../common';
+import { BasicFieldType, DatasourceField, fieldToOperation } from '../../../common';
 import {
   Axis,
   EditorPlugin,
@@ -33,7 +33,7 @@ interface PieChartPrivateState {
   angleAxis: Axis;
 }
 
-type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
+type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState, BasicFieldType>;
 
 const updatePieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
 
@@ -152,7 +152,7 @@ function getSuggestion(visModel: PieChartVisModel): Suggestion {
 
 function getSuggestionsForField(
   datasourceRef: string,
-  field: DatasourceField,
+  field: DatasourceField<BasicFieldType>,
   visModel: PieChartVisModel
 ): Suggestion[] {
   if (!field.aggregatable) {

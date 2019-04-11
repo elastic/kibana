@@ -6,6 +6,7 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { BasicFieldType } from '../../../common';
 import { Datasource, DatasourcePanelProps, DatasourcePlugin, VisModel } from '../../../public';
 import { FieldListPanel } from '../../common/components/field_list_panel';
 import { getIndexPatterns } from './index_patterns';
@@ -15,7 +16,7 @@ interface DataPanelState {
   indexPatterns: Datasource[];
 }
 
-function DataPanel(props: DatasourcePanelProps<VisModel>) {
+function DataPanel(props: DatasourcePanelProps<VisModel<string, any, BasicFieldType>>) {
   const { visModel, onChangeVisModel } = props;
 
   const [state, setState] = useState({ indexPatterns: [] } as DataPanelState);
@@ -61,7 +62,7 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
   );
 }
 
-export const config: DatasourcePlugin<VisModel> = {
+export const config: DatasourcePlugin<VisModel<string, any, BasicFieldType>> = {
   name: 'index_pattern',
   toExpression,
   DataPanel,
