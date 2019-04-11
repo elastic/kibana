@@ -45,7 +45,7 @@ export class ClusterSecurityFeatures {
     this.currentXPackUsage = incomingUsage;
 
     if (this.currentXPackUsage) {
-      const { realms } = this.currentXPackUsage.security;
+      const { realms = {} } = this.currentXPackUsage.security;
       this.enabledRealms = Object.keys(realms).filter<SecurityRealm>(
         (realmId): realmId is SecurityRealm => realms[realmId as SecurityRealm]!.enabled
       );

@@ -57,7 +57,7 @@ describe('ClusterSecurityFeatures', () => {
 
     it('returns false when saml is not enabled', () => {
       const response = buildUsageResponse();
-      response.security.realms.saml.enabled = false;
+      response.security.realms.saml!.enabled = false;
 
       const instance = new ClusterSecurityFeatures(createMockXPackUsage(Rx.of(response)));
       expect(instance.isSAMLRealmEnabled()).toEqual(false);
