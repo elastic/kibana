@@ -127,60 +127,62 @@ function LogstashPanelUi(props) {
           </EuiPanel>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiPanel paddingSize="m">
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>
-                    <EuiLink
-                      onClick={goToPipelines}
-                      data-test-subj="lsPipelines"
-                      aria-label={props.intl.formatMessage({
-                        id: 'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
-                        defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}' },
-                      { pipelineCount: props.pipeline_count }
-                      )}
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel"
-                        defaultMessage="Pipelines: {pipelineCount}"
-                        values={{ pipelineCount: (<span data-test-subj="number_of_logstash_pipelines">{ props.pipeline_count }</span>) }}
-                      />
-                    </EuiLink>
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
-                    defaultMessage: 'Beta feature' })}
-                  position="bottom"
-                  type="beaker"
-                  aria-label="Beta feature"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin="m" />
-            <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel"
-                  defaultMessage="With Memory Queues"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.MEMORY] }</EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
-                  defaultMessage="With Persistent Queues"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.PERSISTED] }</EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiPanel>
-        </EuiFlexItem>
+        {props.pipeline_count > 0 && (
+          <EuiFlexItem>
+            <EuiPanel paddingSize="m">
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>
+                      <EuiLink
+                        onClick={goToPipelines}
+                        data-test-subj="lsPipelines"
+                        aria-label={props.intl.formatMessage({
+                          id: 'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
+                          defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}' },
+                        { pipelineCount: props.pipeline_count }
+                        )}
+                      >
+                        <FormattedMessage
+                          id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel"
+                          defaultMessage="Pipelines: {pipelineCount}"
+                          values={{ pipelineCount: (<span data-test-subj="number_of_logstash_pipelines">{ props.pipeline_count }</span>) }}
+                        />
+                      </EuiLink>
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={props.intl.formatMessage({
+                      id: 'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
+                      defaultMessage: 'Beta feature' })}
+                    position="bottom"
+                    type="beaker"
+                    aria-label="Beta feature"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="m" />
+              <EuiDescriptionList type="column">
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel"
+                    defaultMessage="With Memory Queues"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.MEMORY] }</EuiDescriptionListDescription>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
+                    defaultMessage="With Persistent Queues"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{ props.queue_types[LOGSTASH.QUEUE_TYPES.PERSISTED] }</EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGrid>
     </ClusterItemContainer>
   );
