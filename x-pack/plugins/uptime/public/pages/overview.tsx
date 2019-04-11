@@ -11,7 +11,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeContext } from '../uptime_context';
+import { UptimeSettingsContext } from '../contexts';
 
 interface OverviewPageProps {
   basePath: string;
@@ -27,10 +27,9 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
     colors,
     dateRangeStart,
     dateRangeEnd,
-    lastRefresh,
     refreshApp,
     setHeadingText,
-  } = useContext(UptimeContext);
+  } = useContext(UptimeSettingsContext);
   const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
   const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
 
@@ -70,25 +69,22 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
       <EmptyState
         basePath={basePath}
         implementsCustomErrorState={true}
-        lastRefresh={lastRefresh}
         variables={sharedProps}
       >
         <FilterBar
           currentQuery={currentFilterQueryObj}
-          lastRefresh={lastRefresh}
           updateQuery={updateQuery}
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <Snapshot colors={colors} lastRefresh={lastRefresh} variables={sharedProps} />
+        <Snapshot colors={colors} variables={sharedProps} />
         <EuiSpacer size="s" />
         <MonitorList
           dangerColor={colors.danger}
-          lastRefresh={lastRefresh}
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <ErrorList lastRefresh={lastRefresh} variables={sharedProps} />
+        <ErrorList variables={sharedProps} />
       </EmptyState>
     </Fragment>
   );

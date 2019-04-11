@@ -6,25 +6,24 @@
 
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { createContext } from 'react';
-import { UptimeAppColors } from './uptime_app';
+import { UptimeAppColors } from '../uptime_app';
 
-interface UMContext {
+interface UMSettingsContext {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
   basePath: string;
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
-  lastRefresh: number;
   refreshApp: () => void;
-  setHeadingText?: (text: string) => void;
+  setHeadingText: (text: string) => void;
 }
 
 /**
  * These are default values for the context. These defaults are typically
  * overwritten by the Uptime App upon its invocation.
  */
-const defaultContext: UMContext = {
+const defaultContext: UMSettingsContext = {
   autorefreshIsPaused: true,
   autorefreshInterval: 10000,
   basePath: '',
@@ -36,10 +35,12 @@ const defaultContext: UMContext = {
   },
   dateRangeStart: 'now-15m',
   dateRangeEnd: 'now',
-  lastRefresh: 0,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },
+  setHeadingText: () => {
+    throw new Error('setHeadingText was not initialized on UMSettingsContext.');
+  },
 };
 
-export const UptimeContext = createContext(defaultContext);
+export const UptimeSettingsContext = createContext(defaultContext);
