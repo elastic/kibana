@@ -20,18 +20,20 @@ interface UMContext {
   setHeadingText?: (text: string) => void;
 }
 
-const colors: UptimeAppColors = {
-  success: euiLightVars.euiColorSuccess,
-  range: euiLightVars.euiFocusBackgroundColor,
-  mean: euiLightVars.euiColorPrimary,
-  danger: euiLightVars.euiColorDanger,
-};
-
+/**
+ * These are default values for the context. These defaults are typically
+ * overwritten by the Uptime App upon its invocation.
+ */
 const defaultContext: UMContext = {
   autorefreshIsPaused: true,
   autorefreshInterval: 10000,
   basePath: '',
-  colors,
+  colors: {
+    success: euiLightVars.euiColorSuccess,
+    range: euiLightVars.euiFocusBackgroundColor,
+    mean: euiLightVars.euiColorPrimary,
+    danger: euiLightVars.euiColorDanger,
+  },
   dateRangeStart: 'now-15m',
   dateRangeEnd: 'now',
   lastRefresh: 0,
