@@ -52,6 +52,7 @@ export const IndicesConfigurationPanel = ({
       }
     >
       <EuiFieldText
+        data-test-subj="metricIndicesInput"
         fullWidth
         disabled={isLoading}
         isLoading={isLoading}
@@ -78,7 +79,13 @@ export const IndicesConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...logAliasFieldProps} />
+      <EuiFieldText
+        data-test-subj="logIndicesInput"
+        fullWidth
+        disabled={isLoading}
+        isLoading={isLoading}
+        {...logAliasFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );
