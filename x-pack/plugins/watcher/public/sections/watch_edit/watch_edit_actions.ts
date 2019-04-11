@@ -59,7 +59,7 @@ export async function saveWatch(watch: BaseWatch, urlService: any, licenseServic
     await createWatch(watch);
     toastNotifications.addSuccess(
       i18n.translate('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
-        defaultMessage: "Saved '{watchDisplayName}'",
+        defaultMessage: `Saved "{watchDisplayName}"`,
         values: {
           watchDisplayName: watch.displayName,
         },
@@ -83,6 +83,12 @@ export async function validateActionsAndSaveWatch(
   if (warning) {
     return {
       error: {
+        title: i18n.translate(
+          'xpack.watcher.sections.watchEdit.json.saveConfirmModal.errorValidationTitleText',
+          {
+            defaultMessage: 'Save watch?',
+          }
+        ),
         message: warning.message,
       },
     };
@@ -109,22 +115,7 @@ export async function onWatchSave(
           title: i18n.translate(
             'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchTitleText',
             {
-              defaultMessage:
-                'A watch with ID "{watchId}" {watchNameMessageFragment} already exists',
-              values: {
-                watchId: existingWatch.id,
-                watchNameMessageFragment: existingWatch.name
-                  ? i18n.translate(
-                      'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText',
-                      {
-                        defaultMessage: '(name: "{existingWatchName}")',
-                        values: {
-                          existingWatchName: existingWatch.name,
-                        },
-                      }
-                    )
-                  : '',
-              },
+              defaultMessage: 'A watch with this ID already exists',
             }
           ),
           message: i18n.translate(
