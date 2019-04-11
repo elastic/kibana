@@ -32,7 +32,7 @@ export function initPutRolesApi(
                   privilege => PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
                 )
               )
-            ) : [],
+            ) : []
           ],
           application,
           resources: [GLOBAL_RESOURCE]
@@ -93,7 +93,7 @@ export function initPutRolesApi(
         spaces: Joi.alternatives(
           allSpacesSchema,
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
-        ).default([GLOBAL_RESOURCE])
+        ).default([GLOBAL_RESOURCE]),
       })
     ).unique((a, b) => {
       return intersection(a.spaces, b.spaces).length !== 0;

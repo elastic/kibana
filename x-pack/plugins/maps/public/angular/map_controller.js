@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import chrome from 'ui/chrome';
 import 'ui/listen';
 import React from 'react';
@@ -26,11 +27,13 @@ import {
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
   FLYOUT_STATE,
   setReadOnly,
+  setIsLayerTOCOpen
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -139,6 +142,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
+    }
+
+    if (savedMap.uiStateJSON) {
+      const uiState = JSON.parse(savedMap.uiStateJSON);
+      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON);

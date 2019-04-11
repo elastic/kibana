@@ -71,7 +71,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.existOrFail('infrastructureChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('configureSourceButton');
         });
       });
 
@@ -176,7 +176,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('infrastructureChangeSourceConfigurationButton');
+          await testSubjects.missingOrFail('configureSourceButton');
         });
       });
 

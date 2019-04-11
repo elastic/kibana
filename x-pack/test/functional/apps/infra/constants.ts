@@ -4,5 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DATE_WITH_DATA = new Date(1539806283000);
-export const DATE_WITHOUT_DATA = new Date(1539122400000);
+export const DATES = {
+  '7.0.0': {
+    hosts: {
+      min: 1547571261002,
+      max: 1547571831033,
+    },
+  },
+  '6.6.0': {
+    docker: {
+      min: 1547578132289,
+      max: 1547579090048,
+    },
+  },
+  metricsAndLogs: {
+    hosts: {
+      withData: 1539806283000,
+      withoutData: 1539122400000,
+    },
+  },
+};

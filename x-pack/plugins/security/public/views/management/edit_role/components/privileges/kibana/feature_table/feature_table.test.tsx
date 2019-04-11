@@ -36,6 +36,7 @@ const defaultPrivilegeDefinition = new KibanaPrivileges({
       all: ['somethingObsecure:/foo'],
     },
   },
+  reserved: {},
 });
 
 interface BuildRoleOpts {

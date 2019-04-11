@@ -511,7 +511,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const featureEntries = Object.values(allowedPrivileges.feature);
     return featureEntries.some(entry => {
-      return entry.canUnassign || entry.privileges.length > 1;
+      return entry != null && (entry.canUnassign || entry.privileges.length > 1);
     });
   };
 
@@ -541,9 +541,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       form.feature = {};
     } else {
       this.props.features.forEach(feature => {
-        const canAssign = allowedPrivs[this.state.editingIndex].feature[
-          feature.id
-        ].privileges.includes(privileges[0]);
+        const allowedPrivilegesFeature = allowedPrivs[this.state.editingIndex].feature[feature.id];
+        const canAssign =
+          allowedPrivilegesFeature && allowedPrivilegesFeature.privileges.includes(privileges[0]);
 
         if (canAssign) {
           form.feature[feature.id] = [...privileges];

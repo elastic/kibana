@@ -254,7 +254,7 @@ describe('features', () => {
     });
   });
 
-  test(`features with no privileges are specified with an empty object`, () => {
+  test(`features with no privileges aren't listed`, () => {
     const features: Feature[] = [
       {
         id: 'foo',
@@ -272,7 +272,7 @@ describe('features', () => {
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
-    expect(actual).toHaveProperty('features.foo', {});
+    expect(actual).not.toHaveProperty('features.foo');
   });
 });
 
@@ -708,5 +708,234 @@ describe('features', () => {
         actions.ui.get('foo', 'read-ui-2'),
       ]);
     });
+
+    test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
+      const features: Feature[] = [
+        {
+          id: 'foo',
+          name: 'Foo Feature',
+          icon: 'arrowDown',
+          navLinkId: 'kibana:foo',
+          app: [],
+          catalogue: ['ignore-me-1', 'ignore-me-2'],
+          management: {
+            foo: ['ignore-me-1', 'ignore-me-2'],
+          },
+          privileges: {},
+          reserved: {
+            privilege: {
+              savedObject: {
+                all: ['ignore-me-1', 'ignore-me-2'],
+                read: ['ignore-me-1', 'ignore-me-2'],
+              },
+              ui: ['ignore-me-1'],
+            },
+            description: '',
+          },
+        },
+      ];
+
+      const mockXPackMainPlugin = {
+        getFeatures: jest.fn().mockReturnValue(features),
+      };
+
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+      const actual = privileges.get();
+      expect(actual).toHaveProperty(`${group}.all`, [
+        actions.login,
+        actions.version,
+        ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        actions.allHack,
+      ]);
+      expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
+    });
+  });
+});
+
+describe('reserved', () => {
+  test('actions defined at the feature cascade to the privileges', () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        navLinkId: 'kibana:foo',
+        app: ['app-1', 'app-2'],
+        catalogue: ['catalogue-1', 'catalogue-2'],
+        management: {
+          foo: ['management-1', 'management-2'],
+        },
+        privileges: {},
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          description: '',
+        },
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('reserved.foo', [
+      actions.version,
+      actions.app.get('app-1'),
+      actions.app.get('app-2'),
+      actions.ui.get('catalogue', 'catalogue-1'),
+      actions.ui.get('catalogue', 'catalogue-2'),
+      actions.ui.get('management', 'foo', 'management-1'),
+      actions.ui.get('management', 'foo', 'management-2'),
+      actions.ui.get('navLinks', 'kibana:foo'),
+    ]);
+  });
+
+  test('actions defined at the reservedPrivilege take precedence', () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        app: ['ignore-me-1', 'ignore-me-2'],
+        catalogue: ['ignore-me-1', 'ignore-me-2'],
+        management: {
+          foo: ['ignore-me-1', 'ignore-me-2'],
+        },
+        privileges: {},
+        reserved: {
+          privilege: {
+            app: ['app-1', 'app-2'],
+            catalogue: ['catalogue-1', 'catalogue-2'],
+            management: {
+              bar: ['management-1', 'management-2'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          description: '',
+        },
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('reserved.foo', [
+      actions.version,
+      actions.app.get('app-1'),
+      actions.app.get('app-2'),
+      actions.ui.get('catalogue', 'catalogue-1'),
+      actions.ui.get('catalogue', 'catalogue-2'),
+      actions.ui.get('management', 'bar', 'management-1'),
+      actions.ui.get('management', 'bar', 'management-2'),
+    ]);
+  });
+
+  test(`actions only specified at the privilege are alright too`, () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        app: [],
+        privileges: {},
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: ['savedObject-all-1', 'savedObject-all-2'],
+              read: ['savedObject-read-1', 'savedObject-read-2'],
+            },
+            ui: ['ui-1', 'ui-2'],
+          },
+          description: '',
+        },
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('reserved.foo', [
+      actions.version,
+      actions.savedObject.get('savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('savedObject-all-1', 'get'),
+      actions.savedObject.get('savedObject-all-1', 'find'),
+      actions.savedObject.get('savedObject-all-1', 'create'),
+      actions.savedObject.get('savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('savedObject-all-1', 'update'),
+      actions.savedObject.get('savedObject-all-1', 'delete'),
+      actions.savedObject.get('savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('savedObject-all-2', 'get'),
+      actions.savedObject.get('savedObject-all-2', 'find'),
+      actions.savedObject.get('savedObject-all-2', 'create'),
+      actions.savedObject.get('savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('savedObject-all-2', 'update'),
+      actions.savedObject.get('savedObject-all-2', 'delete'),
+      actions.savedObject.get('savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('savedObject-read-1', 'get'),
+      actions.savedObject.get('savedObject-read-1', 'find'),
+      actions.savedObject.get('savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('savedObject-read-2', 'get'),
+      actions.savedObject.get('savedObject-read-2', 'find'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'delete'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'edit'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'read'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'delete'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'edit'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'read'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-read-1', 'read'),
+      actions.ui.get('savedObjectsManagement', 'savedObject-read-2', 'read'),
+      actions.ui.get('foo', 'ui-1'),
+      actions.ui.get('foo', 'ui-2'),
+    ]);
+  });
+
+  test(`features with no reservedPrivileges aren't listed`, () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        app: [],
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['foo'],
+          },
+        },
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).not.toHaveProperty('reserved.foo');
   });
 });

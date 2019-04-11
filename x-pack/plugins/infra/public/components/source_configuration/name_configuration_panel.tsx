@@ -40,6 +40,7 @@ export const NameConfigurationPanel = ({
       }
     >
       <EuiFieldText
+        data-test-subj="nameInput"
         fullWidth
         disabled={isLoading}
         readOnly={readOnly}

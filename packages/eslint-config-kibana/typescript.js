@@ -23,6 +23,11 @@ module.exports = {
       ],
 
       settings: {
+        'import/resolver': {
+          node: {
+            extensions: ['.mjs', '.js', '.json', '.ts', '.tsx'],
+          },
+        },
         react: {
           version: semver.valid(semver.coerce(PKG.dependencies.react)),
         },

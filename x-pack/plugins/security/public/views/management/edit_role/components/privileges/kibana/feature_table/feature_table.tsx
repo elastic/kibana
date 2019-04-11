@@ -61,14 +61,32 @@ export class FeatureTable extends Component<Props, {}> {
   public render() {
     const { role, features, calculatedPrivileges, rankedFeaturePrivileges } = this.props;
 
-    const items: TableRow[] = features.map(feature => ({
-      feature: {
-        ...feature,
-        hasAnyPrivilegeAssigned:
-          calculatedPrivileges.feature[feature.id].actualPrivilege !== NO_PRIVILEGE_VALUE,
-      },
-      role,
-    }));
+    const items: TableRow[] = features
+      .sort((feature1, feature2) => {
+        if (feature1.reserved && !feature2.reserved) {
+          return 1;
+        }
+
+        if (feature2.reserved && !feature1.reserved) {
+          return -1;
+        }
+
+        return 0;
+      })
+      .map(feature => {
+        const calculatedFeaturePrivileges = calculatedPrivileges.feature[feature.id];
+        const hasAnyPrivilegeAssigned = Boolean(
+          calculatedFeaturePrivileges &&
+            calculatedFeaturePrivileges.actualPrivilege !== NO_PRIVILEGE_VALUE
+        );
+        return {
+          feature: {
+            ...feature,
+            hasAnyPrivilegeAssigned,
+          },
+          role,
+        };
+      });
 
     // TODO: This simply grabs the available privileges from the first feature we encounter.
     // As of now, features can have 'all' and 'read' as available privileges. Once that assumption breaks,
@@ -147,13 +165,17 @@ export class FeatureTable extends Component<Props, {}> {
         </span>
       ),
       render: (roleEntry: Role, record: TableRow) => {
-        const featureId = record.feature.id;
+        const { id: featureId, reserved } = record.feature;
+
+        if (reserved) {
+          return <EuiText size={'s'}>{reserved.description}</EuiText>;
+        }
 
         const featurePrivileges = this.props.kibanaPrivileges
           .getFeaturePrivileges()
           .getPrivileges(featureId);
 
-        if (!featurePrivileges) {
+        if (featurePrivileges.length === 0) {
           return null;
         }
 
@@ -213,18 +235,32 @@ export class FeatureTable extends Component<Props, {}> {
       return featurePrivileges;
     }
 
-    return allowedPrivileges.feature[featureId].privileges;
+    const allowedFeaturePrivileges = allowedPrivileges.feature[featureId];
+    if (allowedFeaturePrivileges == null) {
+      throw new Error('Unable to get enabled feature privileges for a feature without privileges');
+    }
+
+    return allowedFeaturePrivileges.privileges;
   };
 
   private getPrivilegeExplanation = (featureId: string): PrivilegeExplanation => {
     const { calculatedPrivileges } = this.props;
+    const calculatedFeaturePrivileges = calculatedPrivileges.feature[featureId];
+    if (calculatedFeaturePrivileges == null) {
+      throw new Error('Unable to get privilege explanation for a feature without privileges');
+    }
 
-    return calculatedPrivileges.feature[featureId];
+    return calculatedFeaturePrivileges;
   };
 
   private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
     const { allowedPrivileges } = this.props;
-    return allowedPrivileges.feature[featureId].canUnassign;
+    const allowedFeaturePrivileges = allowedPrivileges.feature[featureId];
+    if (allowedFeaturePrivileges == null) {
+      throw new Error('Unable to determine if none is allowed for a feature without privileges');
+    }
+
+    return allowedFeaturePrivileges.canUnassign;
   };
 
   private onChangeAllFeaturePrivileges = (privilege: string) => {

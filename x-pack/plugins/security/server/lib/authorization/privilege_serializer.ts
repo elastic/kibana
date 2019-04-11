@@ -6,6 +6,7 @@
 
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
+const reservedPrefix = 'reserved_';
 const basePrivilegeNames = ['all', 'read'];
 const globalBasePrivileges = [...basePrivilegeNames];
 const spaceBasePrivileges = basePrivilegeNames.map(
@@ -29,8 +30,16 @@ export class PrivilegeSerializer {
     return spaceBasePrivileges.includes(privilegeName);
   }
 
+  public static isSerializedReservedPrivilege(privilegeName: string) {
+    return privilegeName.startsWith(reservedPrefix);
+  }
+
+  public static isSerializedFeaturePrivilege(privilegeName: string) {
+    return privilegeName.startsWith(featurePrefix);
+  }
+
   public static serializeGlobalBasePrivilege(privilegeName: string) {
-    if (!basePrivilegeNames.includes(privilegeName)) {
+    if (!globalBasePrivileges.includes(privilegeName)) {
       throw new Error('Unrecognized global base privilege');
     }
 
@@ -47,6 +56,10 @@ export class PrivilegeSerializer {
 
   public static serializeFeaturePrivilege(featureId: string, privilegeName: string) {
     return `${featurePrefix}${featureId}.${privilegeName}`;
+  }
+
+  public static serializeReservedPrivilege(privilegeName: string) {
+    return `${reservedPrefix}${privilegeName}`;
   }
 
   public static deserializeFeaturePrivilege(privilege: string): FeaturePrivilege {
@@ -75,5 +88,13 @@ export class PrivilegeSerializer {
     }
 
     return privilege.slice(spacePrefix.length);
+  }
+
+  public static deserializeReservedPrivilege(privilege: string) {
+    if (!PrivilegeSerializer.isSerializedReservedPrivilege(privilege)) {
+      throw new Error('Unrecognized reserved privilege');
+    }
+
+    return privilege.slice(reservedPrefix.length);
   }
 }

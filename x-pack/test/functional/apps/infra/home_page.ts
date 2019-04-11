@@ -5,7 +5,10 @@
  */
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { DATE_WITH_DATA, DATE_WITHOUT_DATA } from './constants';
+import { DATES } from './constants';
+
+const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
+const DATE_WITHOUT_DATA = new Date(DATES.metricsAndLogs.hosts.withoutData);
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {

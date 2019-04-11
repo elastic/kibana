@@ -14,7 +14,7 @@ import {
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props extends EuiTextProps {
-  privilege: string | string[];
+  privilege: string | string[] | undefined;
   explanation?: PrivilegeExplanation;
   iconType?: IconType;
   tooltipContent?: ReactNode;
@@ -90,7 +90,7 @@ PrivilegeDisplay.defaultProps = {
   privilege: [],
 };
 
-function getDisplayValue(privilege: string | string[]) {
+function getDisplayValue(privilege: string | string[] | undefined) {
   const privileges = coerceToArray(privilege);
 
   let displayValue: string | ReactNode;
@@ -125,7 +125,10 @@ function getIconTip(iconType?: IconType, tooltipContent?: ReactNode) {
   );
 }
 
-function coerceToArray(privilege: string | string[]): string[] {
+function coerceToArray(privilege: string | string[] | undefined): string[] {
+  if (privilege === undefined) {
+    return [];
+  }
   if (Array.isArray(privilege)) {
     return privilege;
   }

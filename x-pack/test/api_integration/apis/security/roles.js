@@ -227,6 +227,100 @@ export default function ({ getService }) {
       });
     });
 
+    describe('Get Role', async () => {
+      it('should get roles', async () => {
+        await es.shield.putRole({
+          name: 'role_to_get',
+          body: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
+                field_security: {
+                  grant: ['*'],
+                  except: ['geo.*']
+                },
+                query: `{ "match": { "geo.src": "CN" } }`,
+              },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
+                resources: ['*'],
+              },
+              {
+                application: 'kibana-.kibana',
+                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application: 'logstash-default',
+                privileges: ['logstash-privilege'],
+                resources: ['*'],
+              },
+            ],
+            run_as: ['watcher_user'],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          }
+        });
+
+        await supertest.get('/api/security/role/role_to_get')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200, {
+            name: 'role_to_get',
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: { enabled: true },
+            elasticsearch: {
+              cluster: ['manage'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['*'],
+                    except: ['geo.*']
+                  },
+                  names: ['logstash-*'],
+                  privileges: ['read', 'view_index_metadata'],
+                  query: `{ "match": { "geo.src": "CN" } }`,
+                  allow_restricted_indices: false
+                },
+              ],
+              run_as: ['watcher_user'],
+            },
+            kibana: [
+              {
+                base: ['read'],
+                feature: {
+                  dashboard: ['read'],
+                  dev_tools: ['all'],
+                },
+                spaces: ['*']
+              },
+              {
+                base: ['all'],
+                feature: {
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
+                },
+                spaces: ['marketing', 'sales']
+              }
+            ],
+
+            _transform_error: [],
+            _unrecognized_applications: [ 'logstash-default' ]
+          });
+      });
+    });
     describe('Delete Role', () => {
       it('should delete the three roles we created', async () => {
         await supertest.delete('/api/security/role/empty_role').set('kbn-xsrf', 'xxx').expect(204);

@@ -88,20 +88,19 @@ export const ml = (kibana) => {
         navLinkId: 'ml',
         app: ['ml', 'kibana'],
         catalogue: ['ml'],
-        privileges: {
-          all: {
-            catalogue: ['ml'],
-            grantWithBaseRead: true,
+        privileges: {},
+        reserved: {
+          privilege: {
             savedObject: {
               all: [],
               read: ['config']
             },
             ui: [],
           },
-        },
-        privilegesTooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-          defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
-        })
+          description: i18n.translate('xpack.ml.feature.reserved.description', {
+            defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
+          })
+        }
       });
 
       // Add server routes and initialize the plugin here

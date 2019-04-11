@@ -25,15 +25,25 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           password: scenario.password,
         });
         switch (scenario.username) {
-          case 'superuser':
+          case 'superuser': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
           case 'all':
           case 'read':
           case 'dual_privileges_all':
           case 'dual_privileges_read': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is enabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            // everything except ml and monitoring is enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+            );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }

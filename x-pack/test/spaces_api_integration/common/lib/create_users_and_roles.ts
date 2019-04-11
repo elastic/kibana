@@ -320,4 +320,44 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
       email: 'a_kibana_rbac_space_1_2_readonly_user@elastic.co',
     },
   });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.APM_USER.username,
+    body: {
+      password: AUTHENTICATION.APM_USER.password,
+      roles: ['apm_user'],
+      full_name: 'a apm user',
+      email: 'a_apm_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MACHINE_LEARING_ADMIN.username,
+    body: {
+      password: AUTHENTICATION.MACHINE_LEARING_ADMIN.password,
+      roles: ['machine_learning_admin'],
+      full_name: 'a machine learning admin',
+      email: 'a_machine_learning_admin@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MACHINE_LEARNING_USER.username,
+    body: {
+      password: AUTHENTICATION.MACHINE_LEARNING_USER.password,
+      roles: ['machine_learning_user'],
+      full_name: 'a machine learning user',
+      email: 'a_machine_learning_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MONITORING_USER.username,
+    body: {
+      password: AUTHENTICATION.MONITORING_USER.password,
+      roles: ['monitoring_user'],
+      full_name: 'a monitoring user',
+      email: 'a_monitoring_user@elastic.co',
+    },
+  });
 };

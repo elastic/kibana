@@ -93,6 +93,10 @@ export class KibanaAllowedPrivilegesCalculator {
     candidateFeaturePrivileges: string[]
   ): { privileges: string[]; canUnassign: boolean } {
     const effectiveFeaturePrivilegeExplanation = effectivePrivileges.feature[featureId];
+    if (effectiveFeaturePrivilegeExplanation == null) {
+      throw new Error('To calculate allowed feature privileges, we need the effective privileges');
+    }
+
     const effectiveFeatureActions = this.getFeatureActions(
       featureId,
       effectiveFeaturePrivilegeExplanation.actualPrivilege

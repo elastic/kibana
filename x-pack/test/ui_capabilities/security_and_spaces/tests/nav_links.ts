@@ -36,6 +36,10 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         );
         switch (scenario.id) {
           case 'superuser at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            break;
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'dual_privileges_read at everything_space':
@@ -44,7 +48,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('ml', 'monitoring')
+            );
             break;
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':

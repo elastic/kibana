@@ -12,6 +12,8 @@ exports[`#deserializeFeaturePrivilege throws error when deserializing foo_featur
 
 exports[`#deserializeGlobalBasePrivilege throws Error if isn't a base privilege 1`] = `"Unrecognized global base privilege"`;
 
+exports[`#deserializeReservedPrivilege throws Error if doesn't start with reserved_ 1`] = `"Unrecognized reserved privilege"`;
+
 exports[`#deserializeSpaceBasePrivilege throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized space base privilege"`;
 
 exports[`#deserializeSpaceBasePrivilege throws Error if provided 'all' 1`] = `"Unrecognized space base privilege"`;

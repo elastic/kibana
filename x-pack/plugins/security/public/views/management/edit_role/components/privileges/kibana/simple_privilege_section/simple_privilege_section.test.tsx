@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { EuiButtonGroup, EuiButtonGroupProps, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Feature } from '../../../../../../../../../xpack_main/types';
@@ -23,6 +23,7 @@ const buildProps = (customProps: any = {}) => {
     },
     global: {},
     space: {},
+    reserved: {},
   });
 
   const role = {
@@ -126,6 +127,29 @@ describe('<SimplePrivilegeForm>', () => {
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'read',
+    });
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
+  });
+
+  it('displays the reserved privilege', () => {
+    const props = buildProps({
+      role: {
+        elasticsearch: {},
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {},
+            _reserved: ['foo'],
+          },
+        ],
+      },
+    });
+    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
+    const selector = wrapper.find(EuiComboBox);
+    expect(selector.props()).toMatchObject({
+      isDisabled: true,
+      selectedOptions: [{ label: 'foo' }],
     });
     expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
   });

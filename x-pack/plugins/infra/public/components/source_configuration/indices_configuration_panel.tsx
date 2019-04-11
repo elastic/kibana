@@ -54,6 +54,7 @@ export const IndicesConfigurationPanel = ({
       }
     >
       <EuiFieldText
+        data-test-subj="metricIndicesInput"
         fullWidth
         disabled={isLoading}
         readOnly={readOnly}
@@ -82,10 +83,11 @@ export const IndicesConfigurationPanel = ({
       }
     >
       <EuiFieldText
+        data-test-subj="logIndicesInput"
         fullWidth
         disabled={isLoading}
-        readOnly={readOnly}
         isLoading={isLoading}
+        readOnly={readOnly}
         {...logAliasFieldProps}
       />
     </EuiFormRow>

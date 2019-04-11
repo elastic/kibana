@@ -112,7 +112,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
           .auth(user.username, user.password)
-          .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+          .attach(
+            'file',
+            Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+            'export.ndjson'
+          )
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
@@ -131,7 +135,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
             .query({ overwrite: true })
             .auth(user.username, user.password)
-            .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
             .expect(tests.unknownType.statusCode)
             .then(tests.unknownType.response);
         });
