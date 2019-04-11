@@ -202,7 +202,7 @@ const WatchHistoryUI = ({
     const detailColumns = [
       {
         field: 'id',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchActionStatusTable.id', {
+        name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.id', {
           defaultMessage: 'Name',
         }),
         sortable: true,
@@ -213,7 +213,7 @@ const WatchHistoryUI = ({
       },
       {
         field: 'state',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchActionStatusTable.id', {
+        name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.state', {
           defaultMessage: 'State',
         }),
         sortable: true,
@@ -243,7 +243,7 @@ const WatchHistoryUI = ({
               columns={detailColumns}
               message={
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
+                  id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
                   defaultMessage="No current status to show"
                 />
               }
@@ -276,7 +276,7 @@ const WatchHistoryUI = ({
           <EuiTitle size="m">
             <h1>
               <FormattedMessage
-                id="xpack.watcher.sections.watchDetail.header"
+                id="xpack.watcher.sections.watchHistory.header"
                 defaultMessage="Watch history"
               />
             </h1>
@@ -305,7 +305,7 @@ const WatchHistoryUI = ({
                 disabled={false}
               >
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchList.deleteWatchButtonLabel"
+                  id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
                   defaultMessage="Delete"
                 />
               </EuiButton>
@@ -324,7 +324,7 @@ const WatchHistoryUI = ({
         loading={isLoading}
         message={
           <FormattedMessage
-            id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
+            id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"
             defaultMessage="No current status"
           />
         }

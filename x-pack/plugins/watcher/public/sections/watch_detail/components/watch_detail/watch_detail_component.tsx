@@ -45,7 +45,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
     },
     {
       field: 'state',
-      name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.actionHeader', {
+      name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
         defaultMessage: 'State',
       }),
       sortable: true,
