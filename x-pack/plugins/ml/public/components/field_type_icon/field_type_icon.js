@@ -67,7 +67,7 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
   if (tooltipEnabled === true) {
     // wrap the inner component inside <span> because EuiToolTip doesn't seem
     // to support having another component directly inside the tooltip anchor
-    // see https://github.com/elastic/eui/issues/839;
+    // see https://github.com/elastic/eui/issues/839
     return (
       <EuiToolTip
         position="left"
