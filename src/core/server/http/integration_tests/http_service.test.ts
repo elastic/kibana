@@ -98,6 +98,14 @@ describe('http service', () => {
 
         expect(response.header['set-cookie']).toBe(undefined);
       });
+
+      it(`Shouldn't expose internal error details`, async () => {
+        await kbnTestServer.request.get(root, authUrl.exception).expect({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred',
+        });
+      });
     });
 
     describe('#registerOnRequest()', () => {
@@ -138,6 +146,13 @@ describe('http service', () => {
         await kbnTestServer.request
           .get(root, onReqUrl.failed)
           .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
+      });
+      it(`Shouldn't expose internal error details`, async () => {
+        await kbnTestServer.request.get(root, onReqUrl.exception).expect({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred',
+        });
       });
     });
   });

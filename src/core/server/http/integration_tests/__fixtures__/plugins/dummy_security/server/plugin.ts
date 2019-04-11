@@ -32,6 +32,7 @@ interface Storage {
 export const url = {
   auth: '/auth',
   authRedirect: '/auth/redirect',
+  exception: '/exception',
   redirectTo: '/login',
 };
 
@@ -41,6 +42,10 @@ export class DummySecurityPlugin {
     const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
       if (request.path === url.authRedirect) {
         return t.redirected(url.redirectTo);
+      }
+
+      if (request.path === url.exception) {
+        throw new Error('sensitive info');
       }
 
       if (request.headers.authorization) {

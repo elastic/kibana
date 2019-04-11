@@ -19,10 +19,11 @@
 import { CoreSetup } from '../../../../../..';
 
 export const url = {
+  exception: '/exception',
+  failed: '/failed',
   root: '/',
   redirect: '/redirect',
   redirectTo: '/redirect-to',
-  failed: '/failed',
 };
 
 export class DummyOnRequestPlugin {
@@ -37,6 +38,13 @@ export class DummyOnRequestPlugin {
     core.http.registerOnRequest((request, t) => {
       if (request.path === url.failed) {
         return t.rejected(new Error('unexpected error'), { statusCode: 400 });
+      }
+      return t.next();
+    });
+
+    core.http.registerOnRequest((request, t) => {
+      if (request.path === url.exception) {
+        throw new Error('sensitive info');
       }
       return t.next();
     });
