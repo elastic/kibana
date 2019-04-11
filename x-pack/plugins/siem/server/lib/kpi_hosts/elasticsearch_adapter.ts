@@ -60,7 +60,6 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
         ],
       }
     );
-
     return {
       hosts: getOr(null, 'responses.0.aggregations.host.value', response),
       installedPackages: getOr(null, 'responses.0.aggregations.installedPackages.value', response),

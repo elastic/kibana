@@ -31,5 +31,6 @@ export const getFields = (
       fields as string[]
     );
   }
+
   return fields;
 };
