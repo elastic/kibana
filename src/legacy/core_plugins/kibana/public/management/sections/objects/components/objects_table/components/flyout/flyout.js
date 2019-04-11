@@ -109,6 +109,10 @@ class FlyoutUI extends Component {
   };
 
   setImportFile = ([file]) => {
+    if (!file) {
+      this.setState({ file: undefined, isLegacyFile: false });
+      return;
+    }
     this.setState({
       file,
       isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',

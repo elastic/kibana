@@ -47,7 +47,7 @@ const FOLLOWER_INDEX = {
 const testBedOptions = {
   memoryRouter: {
     onRouter: (router) => routing.reactRouter = router,
-    // The auto-follow pattern id to fetch is read from the router ":id" param
+    // The follower index id to fetch is read from the router ":id" param
     // so we first set it in our initial entries
     initialEntries: [`/${FOLLOWER_INDEX_NAME}`],
     // and then we declarae the :id param on the component route path

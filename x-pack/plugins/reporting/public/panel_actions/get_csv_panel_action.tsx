@@ -10,9 +10,10 @@ import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embedd
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import chrome from 'ui/chrome';
 import { API_BASE_URL_V1 } from '../../common/constants';
 
-const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object/`;
+const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
 
 class GetCsvReportPanelAction extends ContextMenuAction {
   constructor() {
@@ -54,8 +55,6 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     );
   };
 
-  // TODO: Need to expose some of the interface here from SavedSearch
-  // as well as pass things like columns into the API call
   public onClick = async (panelActionAPI: PanelActionAPI) => {
     const { embeddable } = panelActionAPI as any;
     const {
@@ -70,8 +69,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     const state = await this.generateJobParams({ searchEmbeddable });
 
     const id = `search:${embeddable.savedSearch.id}`;
-    const filename = embeddable.savedSearch.title;
-    const timezone = embeddable.$rootScope.chrome.getUiSettingsClient().get('dateFormat:tz');
+    const filename = embeddable.getPanelTitle();
+    const timezone = chrome.getUiSettingsClient().get('dateFormat:tz');
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to);
 
@@ -83,14 +82,14 @@ class GetCsvReportPanelAction extends ContextMenuAction {
 
     const body = JSON.stringify({
       timerange: {
-        min: fromTime.valueOf(),
-        max: toTime.valueOf(),
+        min: fromTime.format(),
+        max: toTime.format(),
         timezone,
       },
       state,
     });
 
-    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}${id}`, body }, { parseJson: false })
+    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body }, { parseJson: false })
       .then(r => r.text())
       .then(csv => {
         const blob = new Blob([csv], { type: 'text/csv' });
