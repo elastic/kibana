@@ -4197,6 +4197,20 @@ export namespace KpiHostsDataResolvers {
     authenticationSuccess?: AuthenticationSuccessResolver<number | null, TypeParent, Context>;
 
     authenticationFailure?: AuthenticationFailureResolver<number | null, TypeParent, Context>;
+
+    fimEvents?: FimEventsResolver<number | null, TypeParent, Context>;
+
+    auditdEvents?: AuditdEventsResolver<number | null, TypeParent, Context>;
+
+    winlogbeatEvents?: WinlogbeatEventsResolver<number | null, TypeParent, Context>;
+
+    filebeatEvents?: FilebeatEventsResolver<number | null, TypeParent, Context>;
+
+    sockets?: SocketsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
   }
 
   export type HostsResolver<
@@ -4220,6 +4234,41 @@ export namespace KpiHostsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuthenticationFailureResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FimEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditdEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinlogbeatEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FilebeatEventsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SocketsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsResolver<
     R = number | null,
     Parent = KpiHostsData,
     Context = SiemContext
