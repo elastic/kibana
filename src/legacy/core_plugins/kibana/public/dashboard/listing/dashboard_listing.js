@@ -54,6 +54,7 @@ class DashboardListingUi extends React.Component {
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}
         hideWriteControls={this.props.hideWriteControls}
+        hideActionsOnMobile={true}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
           i18n.translate('kbn.dashboard.listing.table.entityName', {

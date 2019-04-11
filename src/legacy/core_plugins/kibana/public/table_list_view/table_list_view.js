@@ -363,9 +363,12 @@ class TableListViewUi extends React.Component {
       />
     );
 
+    const className = this.props.hideActionsOnMobile ? 'tableListView__table--hideActionsOnMobile' : '';
+
     return (
       <EuiInMemoryTable
         itemId="id"
+        className={className}
         items={this.state.items}
         columns={columns}
         pagination={pagination}
@@ -472,6 +475,7 @@ TableListViewUi.propTypes = {
   editItem: PropTypes.func.isRequired,
 
   listingLimit: PropTypes.number,
+  hideActionsOnMobile: PropTypes.bool,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
 
