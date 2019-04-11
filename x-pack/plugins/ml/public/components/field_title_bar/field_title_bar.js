@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
 import { FieldTypeIcon } from '../field_type_icon';
-import { getFieldTypeAssociatedAriaLabel } from '../../util/field_types_utils';
+import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { i18n } from '@kbn/i18n';
 
 export function FieldTitleBar({ card }) {
@@ -32,7 +32,12 @@ export function FieldTitleBar({ card }) {
     defaultMessage: 'document count'
   });
 
-  const typeAriaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', card.type);
+  const cardTitleAriaLabel = [fieldName];
+  if (!card.isUnsupportedType) {
+    cardTitleAriaLabel.unshift(
+      getMLJobTypeAriaLabel(card.type)
+    );
+  }
 
   return (
     <EuiText className={classNames.join(' ')}>
@@ -41,7 +46,7 @@ export function FieldTitleBar({ card }) {
         <div
           className="field-name"
           tabIndex="0"
-          aria-label={`${typeAriaLabel}, ${fieldName}`}
+          aria-label={`${cardTitleAriaLabel.join(', ')}`}
         >
           {fieldName}
         </div>

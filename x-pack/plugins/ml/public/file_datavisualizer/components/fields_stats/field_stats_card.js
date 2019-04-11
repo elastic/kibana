@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-
 import {
-  EuiSpacer,
+  EuiSpacer
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldTypeIcon } from '../../../components/field_type_icon';
-import { getFieldTypeAssociatedAriaLabel } from '../../../util/field_types_utils';
+import { getMLJobTypeAriaLabel } from '../../../util/field_types_utils';
 
 export function FieldStatsCard({ field }) {
 
@@ -22,8 +20,11 @@ export function FieldStatsCard({ field }) {
     type = 'number';
   }
 
-  const typeAriaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', type);
-
+  const typeAriaLabel = getMLJobTypeAriaLabel(type);
+  const cardTitleAriaLabel = [field.name];
+  if (typeAriaLabel) {
+    cardTitleAriaLabel.unshift(typeAriaLabel);
+  }
 
   return (
     <React.Fragment>
@@ -33,11 +34,10 @@ export function FieldStatsCard({ field }) {
             className={`ml-field-title-bar ${type}`}
           >
             <FieldTypeIcon type={type} needsAria={false} />
-
             <div
               className="field-name"
               tabIndex="0"
-              aria-label={`${typeAriaLabel}, ${field.name}`}
+              aria-label={`${cardTitleAriaLabel.join(', ')}`}
             >
               {field.name}
             </div>

@@ -11,15 +11,13 @@ import { EuiToolTip } from '@elastic/eui';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { isKeywordFieldType, getFieldTypeAssociatedAriaLabel } from '../../util/field_types_utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
+import { i18n } from '@kbn/i18n';
 
 export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {
-  let ariaLabel = null;
+  const ariaLabel = getMLJobTypeAriaLabel(type);
 
-  if (isKeywordFieldType('ML_JOB_FIELD_TYPES', type)) {
-    ariaLabel = getFieldTypeAssociatedAriaLabel('ML_JOB_FIELD_TYPES', type);
-  } else {
+  if (!ariaLabel) {
     // if type doesn't match one of ML_JOB_FIELD_TYPES
     // don't render the component at all
     return null;
@@ -43,7 +41,7 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
     case 'text':
       iconClass.push('kuiIcon', 'fa-file-text-o');
       break;
-    case 'IP':
+    case 'ip':
       iconClass.push('kuiIcon', 'fa-laptop');
       break;
 
@@ -69,15 +67,14 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
   if (tooltipEnabled === true) {
     // wrap the inner component inside <span> because EuiToolTip doesn't seem
     // to support having another component directly inside the tooltip anchor
-    // see https://github.com/elastic/eui/issues/839
+    // see https://github.com/elastic/eui/issues/839;
     return (
       <EuiToolTip
         position="left"
-        content={<FormattedMessage
-          id="xpack.ml.fieldTypeIcon.fieldTypeTooltip"
-          defaultMessage="{type} type"
-          values={{ type }}
-        />}
+        content={i18n.translate('xpack.ml.fieldTypeIcon.fieldTypeTooltip', {
+          defaultMessage: '{type} type',
+          values: { type }
+        })}
       >
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
