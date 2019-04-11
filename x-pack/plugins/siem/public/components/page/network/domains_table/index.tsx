@@ -19,7 +19,7 @@ import {
   FlowTarget,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { SelectFlowDirection } from '../../../flow_controls/select_flow_direction';
+import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getDomainsColumns } from './columns';
@@ -27,6 +27,7 @@ import * as i18n from './translations';
 
 interface OwnProps {
   data: DomainsEdges[];
+  flowTarget: FlowTarget;
   loading: boolean;
   hasNextPage: boolean;
   ip: string;
@@ -40,7 +41,6 @@ interface OwnProps {
 interface DomainsTableReduxProps {
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
-  flowTarget: FlowTarget;
   limit: number;
 }
 
@@ -136,7 +136,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SelectFlowDirection
+              <FlowDirectionSelect
                 id={DomainsTableId}
                 selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeDomainsDirection}
@@ -170,10 +170,8 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
 const makeMapStateToProps = () => {
   const getDomainsSelector = networkSelectors.domainsSelector();
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   const mapStateToProps = (state: State) => ({
     ...getDomainsSelector(state),
-    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
   return mapStateToProps;
 };

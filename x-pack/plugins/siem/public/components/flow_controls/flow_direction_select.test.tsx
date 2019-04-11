@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import { FlowDirection } from '../../graphql/types';
 
-import { SelectFlowDirection } from './select_flow_direction';
+import { FlowDirectionSelect } from './flow_direction_select';
 
 describe('Select Flow Direction', () => {
   const TestFlowDirectionId = 'TestFlowDirectionId';
@@ -19,7 +19,7 @@ describe('Select Flow Direction', () => {
   describe('rendering', () => {
     test('it renders the basic group button for uni-direction and bi-direction', () => {
       const wrapper = shallow(
-        <SelectFlowDirection
+        <FlowDirectionSelect
           id={TestFlowDirectionId}
           selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
@@ -39,7 +39,7 @@ describe('Select Flow Direction', () => {
         },
       };
       const wrapper = mount(
-        <SelectFlowDirection
+        <FlowDirectionSelect
           id={TestFlowDirectionId}
           selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}

@@ -15,14 +15,13 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowDirection, FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
-import { SelectFlowTarget } from '../../../flow_controls/select_flow_target';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 
 import {
   autonomousSystemRenderer,
@@ -48,26 +47,18 @@ interface DescriptionList {
 
 interface OwnProps {
   data: IpOverviewData;
+  flowTarget: FlowTarget;
   ip: string;
   loading: boolean;
   type: networkModel.NetworkType;
+  updateFlowTargetAction: ActionCreator<{ flowTarget: FlowTarget }>;
 }
 
-interface IpOverviewReduxProps {
-  flowTarget: FlowTarget;
-}
+type IpOverviewProps = OwnProps;
 
-interface IpOverviewDispatchProps {
-  updateIpDetailsFlowType: ActionCreator<{
-    flowTarget: FlowTarget;
-  }>;
-}
-
-type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverviewDispatchProps;
-
-class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
+export class IpOverview extends React.PureComponent<IpOverviewProps> {
   public render() {
-    const { ip, data, loading, flowTarget } = this.props;
+    const { ip, data, loading, flowTarget, updateFlowTargetAction } = this.props;
     const typeData: Overview = data[flowTarget]!;
 
     const descriptionLists: Readonly<DescriptionList[][]> = [
@@ -115,13 +106,13 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
             </EuiText>
           </EuiFlexItem>
           <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
-            <SelectFlowTarget
+            <FlowTargetSelect
               id={IpOverviewId}
               isLoading={loading}
-              onChangeTarget={this.onChangeTarget}
               selectedDirection={FlowDirection.uniDirectional}
               selectedTarget={flowTarget}
               displayTextOverride={[i18n.AS_SOURCE, i18n.AS_DESTINATION]}
+              updateFlowTargetAction={updateFlowTargetAction}
             />
           </SelectTypeItem>
         </EuiFlexGroup>
@@ -159,23 +150,4 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
       </EuiFlexItem>
     );
   };
-
-  private onChangeTarget = (flowTarget: FlowTarget) => {
-    this.props.updateIpDetailsFlowType({ flowTarget });
-  };
 }
-
-const makeMapStateToProps = () => {
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
-  const mapStateToProps = (state: State) => ({
-    flowTarget: getIpDetailsFlowTargetSelector(state),
-  });
-  return mapStateToProps;
-};
-
-export const IpOverview = connect(
-  makeMapStateToProps,
-  {
-    updateIpDetailsFlowType: networkActions.updateIpDetailsFlowTarget,
-  }
-)(IpOverviewComponent);

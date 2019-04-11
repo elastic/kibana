@@ -46,7 +46,6 @@ export const updateTopNFlowSort = actionCreator<{
 
 export const updateTopNFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
-  networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_TARGET');
 
 export const updateTopNFlowDirection = actionCreator<{

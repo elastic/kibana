@@ -19,8 +19,8 @@ import {
   NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { SelectFlowDirection } from '../../../flow_controls/select_flow_direction';
-import { SelectFlowTarget } from '../../../flow_controls/select_flow_target';
+import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkTopNFlowColumns } from './columns';
@@ -59,7 +59,6 @@ interface NetworkTopNFlowTableDispatchProps {
   }>;
   updateTopNFlowTarget: ActionCreator<{
     flowTarget: FlowTarget;
-    networkType: networkModel.NetworkType;
   }>;
 }
 
@@ -108,6 +107,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       topNFlowSort,
       flowTarget,
       type,
+      updateTopNFlowTarget,
     } = this.props;
 
     const field =
@@ -150,10 +150,9 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                   grow={false}
                   data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
                 >
-                  <SelectFlowTarget
+                  <FlowTargetSelect
                     id={NetworkTopNFlowTableId}
                     isLoading={loading}
-                    onChangeTarget={this.onChangeTopNFlowTarget}
                     selectedDirection={flowDirection}
                     selectedTarget={flowTarget}
                     displayTextOverride={[
@@ -162,12 +161,13 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                       i18n.BY_CLIENT_IP,
                       i18n.BY_SERVER_IP,
                     ]}
+                    updateFlowTargetAction={updateTopNFlowTarget}
                   />
                 </SelectTypeItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SelectFlowDirection
+              <FlowDirectionSelect
                 id={NetworkTopNFlowTableId}
                 selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
@@ -195,9 +195,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       }
     }
   };
-
-  private onChangeTopNFlowTarget = (flowTarget: FlowTarget) =>
-    this.props.updateTopNFlowTarget({ flowTarget, networkType: this.props.type });
 
   private onChangeTopNFlowDirection = (_: string, flowDirection: FlowDirection) =>
     this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });

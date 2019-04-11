@@ -9,6 +9,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
@@ -21,9 +22,9 @@ import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { IndexType } from '../../graphql/types';
+import { FlowTarget, IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
-import { networkModel, networkSelectors, State } from '../../store';
+import { networkActions, networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 
 import { NetworkKql } from './kql';
@@ -35,15 +36,27 @@ const DomainsTableManage = manageQuery(DomainsTable);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
+  flowTarget: FlowTarget;
 }
 
-type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
+export interface IpDetailsComponentDispatchProps {
+  updateIpDetailsFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget;
+  }>;
+}
+
+type IPDetailsComponentProps = IPDetailsComponentReduxProps &
+  IpDetailsComponentDispatchProps &
+  NetworkComponentProps;
+
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
       params: { ip },
     },
     filterQuery,
+    flowTarget,
+    updateIpDetailsFlowTarget,
   }) => (
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
@@ -67,6 +80,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             data={ipOverviewData}
                             loading={loading}
                             type={networkModel.NetworkType.details}
+                            flowTarget={flowTarget}
+                            updateFlowTargetAction={updateIpDetailsFlowTarget}
                           />
                         )}
                       </IpOverviewQuery>
@@ -78,6 +93,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       <DomainsQuery
                         endDate={to}
                         filterQuery={filterQuery}
+                        flowTarget={flowTarget}
                         ip={decodeIpv6(ip)}
                         poll={poll}
                         sourceId="default"
@@ -88,6 +104,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           <DomainsTableManage
                             data={domains}
                             id={id}
+                            flowTarget={flowTarget}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             ip={ip}
                             loading={loading}
@@ -122,12 +139,19 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQuery = networkSelectors.networkFilterQueryExpression();
+  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => ({
     filterQueryExpression: getNetworkFilterQuery(state) || '',
+    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 };
 
-export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
+export const IPDetails = connect(
+  makeMapStateToProps,
+  {
+    updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
+  }
+)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {

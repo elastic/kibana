@@ -130,10 +130,8 @@ class DomainsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getDomainsSelector = networkSelectors.domainsSelector();
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   const mapStateToProps = (state: State) => ({
     ...getDomainsSelector(state),
-    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 
   return mapStateToProps;

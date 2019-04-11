@@ -159,12 +159,12 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowTarget, (state, { flowTarget, networkType }) => ({
+  .case(updateTopNFlowTarget, (state, { flowTarget }) => ({
     ...state,
-    [networkType]: {
-      ...state[networkType],
+    [NetworkType.page]: {
+      ...state[NetworkType.page],
       queries: {
-        ...state[networkType].queries,
+        ...state[NetworkType.page].queries,
         topNFlow: {
           ...state[NetworkType.page].queries.topNFlow,
           flowTarget,
