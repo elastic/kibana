@@ -16,16 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
-import { deepFreeze } from '../../../../core/public/utils/deep_freeze';
 
-export interface UICapabilities {
-  navLinks: Record<string, boolean>;
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-  catalogue: Record<string, boolean>;
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
-
-export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));
+export { Capabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
