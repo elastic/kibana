@@ -19,6 +19,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { documentationLinks } from '../../lib/documentation_links';
 import { RootState } from '../../reducers';
 
 const Root = styled.div`
@@ -76,7 +77,7 @@ const steps = [
           You can add a repo to Code by simply putting in the git address of the repo. Usually this
           is the same git address you use to run the git clone command, you can find more details
           about the formats of git addresses that Code accepts&nbsp;
-          <Link to="">here</Link>.
+          <a href={documentationLinks.gitFormat}>here</a>.
         </p>
       </EuiText>
     ),
@@ -88,7 +89,8 @@ const steps = [
         <p>
           Once the repo is added and indexed successfully, you can verify that the repo is
           searchable and the code intelligence is available. You can find more details of how the
-          search and code intelligence work in <Link to="">our docs</Link>.
+          search and code intelligence work in{' '}
+          <a href={documentationLinks.codeIntelligence}>our docs</a>.
         </p>
       </EuiText>
     ),
