@@ -416,6 +416,13 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
         );
       });
 
+      /**
+       * In older versions of Logstash (pre-6.4.0) Logstash did not support multiple pipielines per instance,
+       * so there was no `pipelines` field for the nested aggs above to tally.
+       *
+       * To accommodate this, we add 1 to the count for each Logstash instance writing docs to the index
+       * without a `pipelines` field, because we know there is exactly a 1:1 instance-to-pipeline ratio.
+       */
       const oldNodesCount = _.get(bucket, 'no_pipelines.node_count.value', 0);
       if (oldNodesCount > 0) {
         if (!pipelineNodesCounts.hasOwnProperty(DEFAULT_PIPELINE_ID)) {
