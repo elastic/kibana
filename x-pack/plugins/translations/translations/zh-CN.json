@@ -7018,7 +7018,6 @@
     "xpack.remoteClusters.editAction.errorTitle": "编辑集群时出错",
     "xpack.remoteClusters.editAction.failedDefaultErrorMessage": "请求失败，显示 {statusCode} 错误。{message}",
     "xpack.remoteClusters.editBreadcrumbTitle": "编辑",
-    "xpack.remoteClusters.form.errors.illegalCharacters": "名称包含无效字符。",
     "xpack.remoteClusters.form.errors.nameMissing": "“名称”必填",
     "xpack.remoteClusters.form.errors.seedMissing": "至少需要一个种子节点。",
     "xpack.remoteClusters.listBreadcrumbTitle": "远程集群",
