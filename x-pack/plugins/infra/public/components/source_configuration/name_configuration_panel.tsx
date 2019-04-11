@@ -37,7 +37,13 @@ export const NameConfigurationPanel = ({
         <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...nameFieldProps} />
+      <EuiFieldText
+        data-test-subj="nameInput"
+        fullWidth
+        disabled={isLoading}
+        isLoading={isLoading}
+        {...nameFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

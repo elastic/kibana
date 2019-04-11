@@ -31,7 +31,6 @@ import { SourceConfigurationFlyout } from '../../components/source_configuration
 import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
-  MetricsTimeContainer,
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
@@ -40,6 +39,7 @@ import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
+import { MetricDetailPageProviders } from './page_providers';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -89,7 +89,7 @@ export const MetricDetail = withTheme(
         const layouts = layoutCreator(this.props.theme);
 
         return (
-          <MetricsTimeContainer.Provider>
+          <MetricDetailPageProviders>
             <WithSource>
               {({ sourceId }) => (
                 <WithMetricsTime>
@@ -241,7 +241,7 @@ export const MetricDetail = withTheme(
                 </WithMetricsTime>
               )}
             </WithSource>
-          </MetricsTimeContainer.Provider>
+          </MetricDetailPageProviders>
         );
       }
 

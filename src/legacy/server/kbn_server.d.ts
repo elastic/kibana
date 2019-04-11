@@ -19,10 +19,10 @@
 
 import { Server } from 'hapi';
 
-import { ConfigService } from '../../core/server/config';
-import { ElasticsearchServiceSetup } from '../../core/server/elasticsearch';
-import { HttpServerInfo } from '../../core/server/http/';
-import { PluginsServiceSetup } from '../../core/server/plugins/plugins_service';
+import { ConfigService } from '../../core/server/';
+import { ElasticsearchServiceSetup } from '../../core/server/';
+import { HttpServiceSetup } from '../../core/server/';
+import { PluginsServiceSetup } from '../../core/server/';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -71,7 +71,7 @@ export default class KbnServer {
     };
     stop: null;
     params: {
-      serverOptions: HttpServerInfo;
+      serverOptions: ElasticsearchServiceSetup;
       handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };

@@ -25,7 +25,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 
-/** @internal */
+/** @public */
 export class ConfigService {
   private readonly log: Logger;
 
@@ -37,7 +37,7 @@ export class ConfigService {
 
   constructor(
     private readonly config$: Observable<Config>,
-    readonly env: Env,
+    private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
@@ -55,8 +55,8 @@ export class ConfigService {
    * Reads the subset of the config at the specified `path` and validates it
    * against the static `schema` on the given `ConfigClass`.
    *
-   * @param path The path to the desired subset of the config.
-   * @param ConfigClass A class (not an instance of a class) that contains a
+   * @param path - The path to the desired subset of the config.
+   * @param ConfigClass - A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
   public atPath<TSchema extends Type<any>, TConfig>(
@@ -72,7 +72,7 @@ export class ConfigService {
    * Same as `atPath`, but returns `undefined` if there is no config at the
    * specified path.
    *
-   * @see atPath
+   * {@link ConfigService.atPath}
    */
   public optionalAtPath<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,

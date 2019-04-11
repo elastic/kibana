@@ -162,7 +162,8 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()]
+      options: ['Browser', ...moment.tz.names()],
+      requiresPageReload: true,
     },
     'dateFormat:scaled': {
       name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
@@ -863,6 +864,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
+      requiresPageReload: true,
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
@@ -1042,6 +1044,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
+      requiresPageReload: true,
     },
   };
 }
