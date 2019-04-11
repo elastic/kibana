@@ -19,12 +19,12 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { NumberList } from '../number_list/new_number_list';
 
-function PercentileRanksEditor({ agg, aggParam, value, setValidity, setValue }: AggParamEditorProps<number[]>) {
+function PercentileRanksEditor({ agg, value, setValidity, setValue }: AggParamEditorProps<number[]>) {
   const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
 
   useEffect(
@@ -39,10 +39,11 @@ function PercentileRanksEditor({ agg, aggParam, value, setValidity, setValue }: 
     <EuiFormRow label={label} fullWidth={true} id={`visEditorPercentileRanksLabel${agg.id}`} className="visEditorSidebar__aggParamFormRow">
       <NumberList
         labelledbyId={`visEditorPercentileRanksLabel${agg.id}`}
-        list={value}
+        initArray={value}
         range="[-Infinity,Infinity]"
         unitName="value"
         onChange={setValue}
+        setValidity={setValidity}
       />
     </EuiFormRow>
   );

@@ -27,15 +27,20 @@ import { Range } from '../../utils/range';
 interface NumberRowProps {
   disableDelete: boolean;
   labelledbyId: string;
-  model: { index: number, value: number };
+  model: NumberRowModel;
   range: Range;
-  onChange(index: number, value: number): void;
-  onDelete(index: number): void;
+  onChange(model: NumberRowModel): void;
+  onDelete(index: string): void;
+}
+
+export interface NumberRowModel {
+  id: string;
+  value: number | '';
 }
 
 function NumberRow({
     disableDelete,
-    model: { index, value },
+    model,
     labelledbyId,
     range,
     onDelete,
@@ -46,20 +51,18 @@ function NumberRow({
       defaultMessage:  'Remove this rank value'
     });
 
-  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = get(event, 'target.value');
-
-    parse(value);
-    onChange(index, value);
-  };
+  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) => onChange({
+    ...model,
+    value: get(event, 'target.value'),
+  });
 
   return (
-    <EuiFlexGroup key={index} responsive={false} alignItems="center">
+    <EuiFlexGroup responsive={false} alignItems="center">
       <EuiFlexItem>
         <EuiFieldNumber
           aria-labelledby={labelledbyId}
           onChange={onValueChanged}
-          value={value}
+          value={model.value}
           fullWidth={true}
           min={range.min}
           max={range.max}
@@ -71,7 +74,7 @@ function NumberRow({
               aria-label={deleteBtnAriaLabel}
               color="danger"
               iconType="trash"
-              onClick={() => onDelete(index)}
+              onClick={() => onDelete(model.id)}
               disabled={disableDelete}
             />
           </EuiToolTip>

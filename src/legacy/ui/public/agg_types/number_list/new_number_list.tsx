@@ -17,113 +17,89 @@
  * under the License.
  */
 
-import React from 'react';
-import { isUndefined } from 'lodash';
+import React, { Fragment, useState } from 'react';
+import { isUndefined, last } from 'lodash';
 
-import { EuiText, EuiSpacer, EuiButton, EuiFlexItem, } from '@elastic/eui';
+import { htmlIdGenerator, EuiText, EuiSpacer, EuiButton, EuiFlexItem, } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseRange, Range } from '../../utils/range';
-import { NumberRow } from './number_row';
+import { NumberRow, NumberRowModel } from './number_row';
+import { isNumber } from 'util';
 
 interface NumberListProps {
-  list: any[];
+  initArray?: (number | '')[];
   unitName: string;
   validateAscendingOrder?: boolean;
   labelledbyId: string;
   range?: string
   onChange(list: any[]): void;
+  setValidity(isValid: boolean): void;
 }
 
 const defaultRange = parseRange('[0,Infinity)');
+const generateId = htmlIdGenerator();
 
-function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId, range, onChange }: NumberListProps) {
-  let numberRange: Range;
-
-  try {
-    numberRange = range ? parseRange(range) : defaultRange;
-  } catch (e) {
-    throw new TypeError('Unable to parse range: ' + e.message);
-  }
-
+function NumberList({
+  initArray = [],
+  labelledbyId,
+  range,
+  unitName,
+  validateAscendingOrder,
+  onChange,
+  setValidity,
+}: NumberListProps) {
+  const numberRange = getRange(range);
   const validateAscOrder = isUndefined(validateAscendingOrder) ? true : validateAscendingOrder;
+  const [numberList, setNumberList] = useState(initArray.map(num => ({ value: num, id: generateId() })))
 
-  function parse(value: string) {
-    const parsedValue = parseFloat(value);
-  
-    if (isNaN(parsedValue)) {
-  
-    }
-  
-    if (!range.within(parsedValue)) {
-        return INVALID
-    };
-  
-    if (validateAscOrder && index > 0) {
-      const i = index - 1;
-      const list = numberListCntr.getList();
-      const prev = list[i];
-      if (num <= prev) return INVALID;
-    }
-  
-      return num;
-  }
-  
-  const onChangeValue = (index: number, newValue: number) => {
-    list[index] = newValue;
-    onChange(list);
+  const onChangeValue = ({ id, value }: { id: string, value: string}) => {
+    const parsedValue = parse(value, numberRange);
+    const isInputValid = isValid(parsedValue, numberRange);
+    setValidity(isInputValid)
+
+    const currentModel = numberList.find(model => model.id === id);
+    currentModel && (currentModel.value = parsedValue);
+
+    setNumberList([...numberList]);
+    isInputValid && onChange(numberList.map(model => model.value));
   };
 
-  /**
-   * Add an item to the end of the list
-   * 
-   * @return {undefined}
-   */
   const onAdd = () => {
-
-    function getNext() {
-      if (list.length === 0) {
-        // returning NaN adds an empty input
-        return NaN;
+    const newArray = [
+      ...numberList,
+      {
+        id: generateId(),
+        value: getNext(numberList, numberRange),
       }
-
-      const next = _.last(list) + 1;
-      if (next < numberRange.max) {
-        return next;
-      }
-
-      return numberRange.max - 1;
-    }
-
-    onChange([...list, '']);
-  };
-  
-  /**
-   * Remove an item from list by index
-   * 
-   * @param  {number} index
-   * @return {undefined}
-   */
-  const onDelete = (index: number) => {
-    onChange(list.filter((item, currentIndex) => index !== currentIndex))
+    ];
+    setNumberList(newArray);
+    onChange(newArray.map(model => model.value));
   };
 
-  const listItems = list.map((number, index) =>
-    <div key={`numberRow${number}${index}`}>
-      <NumberRow
-        disableDelete={list.length === 1}
-        model={{ index, value: number }}
-        labelledbyId={labelledbyId}
-        range={numberRange}
-        onDelete={onDelete}
-        onChange={onChangeValue}
-      />
-      <EuiSpacer size="s" />
-    </div>
-  );
+  const onDelete = (id: string) => {
+    const newArray = numberList.filter(model => model.id !== id)
+    setNumberList(newArray);
+    onChange(newArray.map(model => model.value))
+  };
 
   return (
     <>
-      {list.length ? listItems : (
+      {numberList.length
+      ?
+        numberList.map(model =>
+          <Fragment key={model.id}>
+            <NumberRow
+              disableDelete={numberList.length === 1}
+              model={model}
+              labelledbyId={labelledbyId}
+              range={numberRange}
+              onDelete={onDelete}
+              onChange={onChangeValue}
+            />
+            <EuiSpacer size="s" />
+          </Fragment>
+        )
+      : (
         <EuiText textAlign="center" size="s" >
           <FormattedMessage
             id="common.ui.numberList.noUnitSelectedDescription"
@@ -150,6 +126,59 @@ function NumberList({ list = [], unitName, validateAscendingOrder, labelledbyId,
       </EuiFlexItem>
     </>
   );
+}
+
+function parse(value: string, range: Range) {
+  const parsedValue = parseFloat(value);
+
+  if (isNaN(parsedValue)) {
+    return '';
+  }
+
+  if (!range.within(parsedValue)) {
+      //return INVALID
+      return parsedValue;
+  };
+
+  // if (validateAscOrder && index > 0) {
+  //   const i = index - 1;
+  //   const prev = list[i];
+  //   if (parsedValue <= prev) {
+  //     //return INVALID
+  //     return parsedValue;
+  //   };
+  // }
+
+    return parsedValue;
+}
+
+function isValid(value: number | '', range: Range) {
+  if (value === '' || !range.within(value)) {
+    return false;
+  };
+  return true;
+}
+
+function getRange(range?: string) {
+  try {
+    return range ? parseRange(range) : defaultRange;
+  } catch (e) {
+    throw new TypeError('Unable to parse range: ' + e.message);
+  }
+}
+
+function getNext(list: NumberRowModel[], range: Range): number | '' {
+  if (list.length === 0) return '';
+
+  const lastValue = last(list).value
+  const next = isNumber(lastValue) ? lastValue + 1 : 1;
+
+  if (next < range.max) {
+    return next;
+  }
+
+  
+  return range.max - 1;
 }
 
 export { NumberList };
