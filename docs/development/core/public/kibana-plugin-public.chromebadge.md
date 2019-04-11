@@ -13,6 +13,7 @@ export interface ChromeBadge
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [iconType](./kibana-plugin-public.chromebadge.icontype.md) | <code>IconType</code> |  |
 |  [text](./kibana-plugin-public.chromebadge.text.md) | <code>string</code> |  |
 |  [tooltip](./kibana-plugin-public.chromebadge.tooltip.md) | <code>string</code> |  |
 

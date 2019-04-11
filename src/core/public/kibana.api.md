@@ -6,6 +6,7 @@
 
 import * as CSS from 'csstype';
 import { default } from 'react';
+import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
@@ -18,6 +19,8 @@ export type BasePathSetup = ReturnType<BasePathService['setup']>;
 
 // @public (undocumented)
 export interface ChromeBadge {
+    // (undocumented)
+    iconType?: IconType;
     // (undocumented)
     text: string;
     // (undocumented)
