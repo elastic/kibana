@@ -88,6 +88,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoScope: string[];
   fetchMoreCommits(repoUri: string): void;
 }
+const LANG_MD = 'markdown';
 
 enum ButtonOption {
   Code = 'Code',
@@ -96,28 +97,18 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
+enum ButtonLabel {
+  Code = 'Code',
+  Content = 'Content',
+  Download = 'Download',
+  Raw = 'Raw',
+}
+
 const Title = styled(EuiTitle)`
   margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {
-  public buttonOptions = [
-    {
-      id: ButtonOption.Code,
-      label: ButtonOption.Code,
-    },
-    {
-      id: ButtonOption.Blame,
-      label: ButtonOption.Blame,
-    },
-    {
-      id: ButtonOption.History,
-      label: ButtonOption.History,
-    },
-  ];
-
-  public rawButtonOptions = [{ id: 'Raw', label: 'Raw' }];
-
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
       return undefined;
@@ -194,12 +185,35 @@ class CodeContent extends React.PureComponent<Props> {
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
+      const { isUnsupported, isOversize, isImage, lang } = this.props.file!;
+      const isMarkdown = lang === LANG_MD;
+      const isText = !isUnsupported && !isOversize && !isImage;
+
+      const buttonOptions = [
+        {
+          id: ButtonOption.Code,
+          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
+        },
+        {
+          id: ButtonOption.Blame,
+          label: ButtonOption.Blame,
+          isDisabled: isUnsupported || isImage || isOversize,
+        },
+        {
+          id: ButtonOption.History,
+          label: ButtonOption.History,
+        },
+      ];
+      const rawButtonOptions = [
+        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
+      ];
+
       return (
         <ButtonsContainer>
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.buttonOptions}
+            options={buttonOptions}
             type="single"
             idSelected={buttonId}
             onChange={this.switchButton}
@@ -207,7 +221,7 @@ class CodeContent extends React.PureComponent<Props> {
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.rawButtonOptions}
+            options={rawButtonOptions}
             type="single"
             idSelected={''}
             onChange={this.openRawFile}
@@ -323,7 +337,13 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url, isUnsupported, isOversize } = file;
+        const {
+          lang: fileLanguage,
+          content: fileContent,
+          isUnsupported,
+          isOversize,
+          isImage,
+        } = file;
         if (isUnsupported) {
           return (
             <ErrorPanel
@@ -340,16 +360,17 @@ class CodeContent extends React.PureComponent<Props> {
             />
           );
         }
-        if (fileLanguage === 'markdown') {
+        if (fileLanguage === LANG_MD) {
           return (
             <div className="markdown-body code-markdown-container">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
-        } else if (this.props.file!.isImage) {
+        } else if (isImage) {
+          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
           return (
             <div className="code-auto-margin">
-              <img src={url} alt={url} />
+              <img src={rawUrl} alt={rawUrl} />
             </div>
           );
         }

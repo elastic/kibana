@@ -203,7 +203,7 @@ export async function requestFile(
       return {
         payload,
         isImage: true,
-        content: await response.text(),
+        content: '',
         url,
         isUnsupported: false,
       };
@@ -211,7 +211,7 @@ export async function requestFile(
       return {
         payload,
         isImage: false,
-        content: await response.text(),
+        content: '',
         url,
         isUnsupported: true,
       };
