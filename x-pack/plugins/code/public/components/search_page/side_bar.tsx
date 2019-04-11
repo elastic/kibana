@@ -13,25 +13,11 @@ import {
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { SearchScope } from '../../../model';
 import { ScopeTabs } from './scope_tabs';
-
-const FacetContainer = styled.div`
-  padding: 0 1rem;
-`;
-
-const FacetTitle = styled(EuiFlexGroup)`
-  margin-top: ${theme.euiSizeS};
-`;
-
-const FacetItem = styled(EuiFacetButton)`
-  height: calc(32rem / 14);
-`;
 
 interface Props {
   query: string;
@@ -50,7 +36,8 @@ export class SideBar extends React.PureComponent<Props> {
     const repoStatsComp = repoFacets.map((item, index) => {
       if (!!repositories && repositories.has(item.name)) {
         return (
-          <FacetItem
+          <EuiFacetButton
+            className="codeFilter__item"
             key={`repostats${index}`}
             onClick={this.props.onRepositoryFilterToggled(item.name)}
             quantity={item.value}
@@ -60,11 +47,12 @@ export class SideBar extends React.PureComponent<Props> {
             }}
           >
             {RepositoryUtils.repoNameFromUri(item.name)}
-          </FacetItem>
+          </EuiFacetButton>
         );
       } else {
         return (
-          <FacetItem
+          <EuiFacetButton
+            className="codeFilter__item"
             key={`repostats${index}`}
             onClick={this.props.onRepositoryFilterToggled(item.name)}
             quantity={item.value}
@@ -73,7 +61,7 @@ export class SideBar extends React.PureComponent<Props> {
             }}
           >
             {RepositoryUtils.repoNameFromUri(item.name)}
-          </FacetItem>
+          </EuiFacetButton>
         );
       }
     });
@@ -81,7 +69,8 @@ export class SideBar extends React.PureComponent<Props> {
     const langStatsComp = langFacets.map((item, index) => {
       if (languages && languages.has(item.name)) {
         return (
-          <FacetItem
+          <EuiFacetButton
+            className="codeFilter__item"
             key={`langstats${index}`}
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
@@ -92,11 +81,12 @@ export class SideBar extends React.PureComponent<Props> {
             }}
           >
             {item.name}
-          </FacetItem>
+          </EuiFacetButton>
         );
       } else {
         return (
-          <FacetItem
+          <EuiFacetButton
+            className="codeFilter__item"
             key={`langstats${index}`}
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
@@ -106,7 +96,7 @@ export class SideBar extends React.PureComponent<Props> {
             }}
           >
             {item.name}
-          </FacetItem>
+          </EuiFacetButton>
         );
       }
     });
@@ -114,8 +104,8 @@ export class SideBar extends React.PureComponent<Props> {
     return (
       <div className="codeSidebar__container">
         <ScopeTabs query={this.props.query} scope={this.props.scope} />
-        <FacetContainer>
-          <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+        <div className="codeFilter__group">
+          <EuiFlexGroup className="codeFilter__title" gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
             <EuiFlexItem grow={false}>
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
@@ -124,10 +114,10 @@ export class SideBar extends React.PureComponent<Props> {
                 <h3>Repositories</h3>
               </EuiTitle>
             </EuiFlexItem>
-          </FacetTitle>
+          </EuiFlexGroup>
           <EuiFacetGroup>{repoStatsComp}</EuiFacetGroup>
           <EuiSpacer />
-          <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+          <EuiFlexGroup className="codeFilter__title" gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
             <EuiFlexItem grow={false}>
               <EuiToken
                 iconType="tokenElement"
@@ -139,11 +129,11 @@ export class SideBar extends React.PureComponent<Props> {
                 <h3>Languages</h3>
               </EuiTitle>
             </EuiFlexItem>
-          </FacetTitle>
+          </EuiFlexGroup>
           <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
             {langStatsComp}
           </EuiFacetGroup>
-        </FacetContainer>
+        </div>
       </div>
     );
   }
