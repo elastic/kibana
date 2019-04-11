@@ -95,6 +95,25 @@ exports[`Relationships should render dashboards normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
     </div>
@@ -246,6 +265,30 @@ exports[`Relationships should render index patterns normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "search",
+                    "value": "search",
+                    "view": "search",
+                  },
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
     </div>
@@ -348,6 +391,30 @@ exports[`Relationships should render searches normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "index-pattern",
+                    "value": "index-pattern",
+                    "view": "index-pattern",
+                  },
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
     </div>
@@ -450,6 +517,25 @@ exports[`Relationships should render visualizations normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "dashboard",
+                    "value": "dashboard",
+                    "view": "dashboard",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
     </div>
