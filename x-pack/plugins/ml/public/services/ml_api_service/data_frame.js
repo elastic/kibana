@@ -19,11 +19,23 @@ export const dataFrame = {
       method: 'GET'
     });
   },
+  getDataFrameTransformsStats() {
+    return http({
+      url: `${basePath}/_data_frame/transforms/_stats`,
+      method: 'GET'
+    });
+  },
   createDataFrameTransformsJob(jobId, jobConfig) {
     return http({
       url: `${basePath}/_data_frame/transforms/${jobId}`,
       method: 'PUT',
       data: jobConfig
+    });
+  },
+  deleteDataFrameTransformsJob(jobId) {
+    return http({
+      url: `${basePath}/_data_frame/transforms/${jobId}`,
+      method: 'DELETE',
     });
   },
   getDataFrameTransformsPreview(obj) {

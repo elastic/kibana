@@ -114,6 +114,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  ml.getDataFrameTransformsStats = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/_stats',
+      }
+    ],
+    method: 'GET'
+  });
+
   ml.createDataFrameTransformsJob = ca({
     urls: [
       {
@@ -127,6 +136,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'PUT'
+  });
+
+  ml.deleteDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'DELETE'
   });
 
   ml.getDataFrameTransformsPreview = ca({
@@ -153,10 +176,10 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.stopDataFrameTransforms = ca({
+  ml.stopDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop',
         req: {
           jobId: {
             type: 'string'

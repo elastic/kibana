@@ -18,7 +18,9 @@ declare interface Ml {
 
   dataFrame: {
     getDataFrameTransforms(): Promise<any>;
+    getDataFrameTransformsStats(): Promise<any>;
     createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
+    deleteDataFrameTransformsJob(jobId: string): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
     startDataFrameTransformsJob(jobId: string): Promise<any>;
     stopDataFrameTransformsJob(jobId: string): Promise<any>;

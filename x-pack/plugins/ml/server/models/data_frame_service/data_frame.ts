@@ -18,9 +18,25 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
     }
   }
 
+  async function getDataFrameTransformsStats() {
+    try {
+      return await callWithRequest('ml.getDataFrameTransformsStats');
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
   async function createDataFrameTransformsJob(jobId: string, jobConfig: any) {
     try {
       return await callWithRequest('ml.createDataFrameTransformsJob', { body: jobConfig, jobId });
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
+  async function deleteDataFrameTransformsJob(jobId: string) {
+    try {
+      return await callWithRequest('ml.deleteDataFrameTransformsJob', { jobId });
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -52,6 +68,8 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
 
   return {
     getDataFrameTransforms,
+    getDataFrameTransformsStats,
+    deleteDataFrameTransformsJob,
     createDataFrameTransformsJob,
     getDataFrameTransformsPreview,
     startDataFrameTransformsJob,

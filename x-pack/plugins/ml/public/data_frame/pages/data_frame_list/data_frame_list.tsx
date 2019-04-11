@@ -8,44 +8,71 @@ import React, { SFC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon, EuiEmptyPrompt, EuiInMemoryTable, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiInMemoryTable,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
 
-interface GetDataFrameTransformsResponse {
-  count: number;
-  transforms: [];
-}
+type jobId = string;
 
 interface DataFrameJob {
   dest: string;
-  id: string;
+  id: jobId;
   source: string;
 }
 
+interface DataFrameJobStats {
+  id: jobId;
+  state: Dictionary<any>;
+  stats: Dictionary<any>;
+}
+
+interface DataFrameJobListRow {
+  state: Dictionary<any>;
+  stats: Dictionary<any>;
+  config: DataFrameJob;
+}
+
+interface GetDataFrameTransformsResponse {
+  count: number;
+  transforms: DataFrameJob[];
+}
+
+interface GetDataFrameTransformsStatsResponse {
+  count: number;
+  transforms: DataFrameJobStats[];
+}
+
 // Used to pass on attribute names to table columns
-enum DataFrameJobAttribute {
-  dest = 'dest',
-  id = 'id',
-  source = 'source',
+enum DataFrameJobListColumn {
+  dest = 'config.dest',
+  id = 'config.id',
+  source = 'config.source',
 }
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
 export const DataFrameList: SFC = () => {
-  const [dataFrameJobs, setDataFrameJobs] = useState([] as DataFrameJob[]);
+  const [dataFrameJobs, setDataFrameJobs] = useState([] as DataFrameJobListRow[]);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState(
     {} as ItemIdToExpandedRowMap
   );
 
-  function toggleDetails(item: DataFrameJob) {
-    if (itemIdToExpandedRowMap[item.id]) {
-      delete itemIdToExpandedRowMap[item.id];
+  function toggleDetails(item: DataFrameJobListRow) {
+    if (itemIdToExpandedRowMap[item.config.id]) {
+      delete itemIdToExpandedRowMap[item.config.id];
     } else {
-      itemIdToExpandedRowMap[item.id] = <div>EXPAND {item.id}</div>;
+      itemIdToExpandedRowMap[item.config.id] = <div>EXPAND {item.config.id}</div>;
     }
     // spread to a new object otherwise the component wouldn't re-render
     setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
@@ -53,10 +80,27 @@ export const DataFrameList: SFC = () => {
 
   const getJobs = async () => {
     try {
-      const jobs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
-      setDataFrameJobs(jobs.transforms);
+      const jobConfigs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
+      const jobStats: GetDataFrameTransformsStatsResponse = await ml.dataFrame.getDataFrameTransformsStats();
+
+      const tableRows = jobConfigs.transforms.map(config => {
+        const stats = jobStats.transforms.find(d => config.id === d.id);
+
+        if (stats === undefined) {
+          return { config, state: {}, stats: {} };
+        }
+
+        return { config, state: stats.state, stats: stats.stats };
+      });
+
+      setDataFrameJobs(tableRows);
     } catch (e) {
-      console.log('error loading data frame jobs', e);
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList', {
+          defaultMessage: 'An error occurred getting the data frame jobs list: {error}',
+          values: { error: JSON.stringify(e) },
+        })
+      );
     }
   };
 
@@ -69,16 +113,117 @@ export const DataFrameList: SFC = () => {
     return <EuiEmptyPrompt title={<h2>Here be Data Frame dragons!</h2>} iconType="editorStrike" />;
   }
 
+  const startDataFrameJob = async (d: DataFrameJobListRow) => {
+    try {
+      await ml.dataFrame.startDataFrameTransformsJob(d.config.id);
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.jobsList.startJobSuccessMessage', {
+          defaultMessage: 'Data frame job {jobId} started successfully.',
+          values: { jobId: d.config.id },
+        })
+      );
+      getJobs();
+    } catch (e) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobsList.startJobErrorMessage', {
+          defaultMessage: 'An error occurred starting the data frame job {jobId}: {error}',
+          values: { jobId: d.config.id, error: JSON.stringify(e) },
+        })
+      );
+    }
+  };
+
+  const stopDataFrameJob = async (d: DataFrameJobListRow) => {
+    try {
+      await ml.dataFrame.stopDataFrameTransformsJob(d.config.id);
+      getJobs();
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.jobsList.stopJobSuccessMessage', {
+          defaultMessage: 'Data frame job {jobId} stopped successfully.',
+          values: { jobId: d.config.id },
+        })
+      );
+    } catch (e) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobsList.stopJobErrorMessage', {
+          defaultMessage: 'An error occurred stopping the data frame job {jobId}: {error}',
+          values: { jobId: d.config.id, error: JSON.stringify(e) },
+        })
+      );
+    }
+  };
+
+  const deleteDataFrameJob = async (d: DataFrameJobListRow) => {
+    try {
+      await ml.dataFrame.deleteDataFrameTransformsJob(d.config.id);
+      getJobs();
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.jobsList.deleteJobSuccessMessage', {
+          defaultMessage: 'Data frame job {jobId} deleted successfully.',
+          values: { jobId: d.config.id },
+        })
+      );
+    } catch (e) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobsList.deleteJobErrorMessage', {
+          defaultMessage: 'An error occurred deleting the data frame job {jobId}: {error}',
+          values: { jobId: d.config.id, error: JSON.stringify(e) },
+        })
+      );
+    }
+  };
+
+  const actions = [
+    {
+      isPrimary: true,
+      render: (item: DataFrameJobListRow) => {
+        if (item.state.transform_state !== 'started') {
+          return (
+            <EuiButtonEmpty iconType="play" onClick={() => startDataFrameJob(item)}>
+              {i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
+                defaultMessage: 'Start',
+              })}
+            </EuiButtonEmpty>
+          );
+        }
+
+        return (
+          <EuiButtonEmpty color="danger" iconType="stop" onClick={() => stopDataFrameJob(item)}>
+            {i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
+              defaultMessage: 'Stop',
+            })}
+          </EuiButtonEmpty>
+        );
+      },
+    },
+    {
+      render: (item: DataFrameJobListRow) => {
+        return (
+          <EuiButtonEmpty
+            color="danger"
+            disabled={item.state.transform_state === 'started'}
+            iconType="trash"
+            onClick={() => deleteDataFrameJob(item)}
+          >
+            {i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
+              defaultMessage: 'Delete',
+            })}
+          </EuiButtonEmpty>
+        );
+      },
+    },
+  ];
+
   const columns = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (item: DataFrameJob) => (
+      render: (item: DataFrameJobListRow) => (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={
-            itemIdToExpandedRowMap[item.id]
+            itemIdToExpandedRowMap[item.config.id]
               ? i18n.translate('xpack.ml.dataframe.jobsList.rowCollapse', {
                   defaultMessage: 'Collapse',
                 })
@@ -86,27 +231,31 @@ export const DataFrameList: SFC = () => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.config.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
     },
     {
-      field: DataFrameJobAttribute.id,
+      field: DataFrameJobListColumn.id,
       name: 'ID',
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameJobAttribute.source,
+      field: DataFrameJobListColumn.source,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameJobAttribute.dest,
+      field: DataFrameJobListColumn.dest,
       name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),
+      actions,
     },
   ];
 
@@ -117,7 +266,7 @@ export const DataFrameList: SFC = () => {
       pagination={true}
       hasActions={false}
       isSelectable={false}
-      itemId={DataFrameJobAttribute.id}
+      itemId={DataFrameJobListColumn.id}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
     />

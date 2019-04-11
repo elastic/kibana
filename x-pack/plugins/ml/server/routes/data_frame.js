@@ -25,6 +25,20 @@ export function dataFrameRoutes(server, commonRouteConfig) {
   });
 
   server.route({
+    method: 'GET',
+    path: '/api/ml/_data_frame/transforms/_stats',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { getDataFrameTransformsStats } = dataFrameServiceProvider(callWithRequest);
+      return getDataFrameTransformsStats()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
     method: 'PUT',
     path: '/api/ml/_data_frame/transforms/{jobId}',
     handler(request) {
@@ -32,6 +46,21 @@ export function dataFrameRoutes(server, commonRouteConfig) {
       const { createDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
       const { jobId } = request.params;
       return createDataFrameTransformsJob(jobId, request.payload)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'DELETE',
+    path: '/api/ml/_data_frame/transforms/{jobId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { deleteDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
+      const { jobId } = request.params;
+      return deleteDataFrameTransformsJob(jobId)
         .catch(resp => wrapError(resp));
     },
     config: {
