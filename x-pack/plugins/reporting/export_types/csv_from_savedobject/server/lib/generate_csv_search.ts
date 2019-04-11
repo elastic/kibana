@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
 import { KbnServer, Logger } from '../../../../types';
-// @ts-ignore
+// @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   IndexPatternSavedObject,
@@ -107,6 +107,8 @@ export async function generateCsvSearch(
       };
     }, {});
   const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
+
+  // this array helps ensure the params are passed to buildEsQuery (non-Typescript) in the right order
   const buildCsvParams: [IndexPatternSavedObject, SearchSourceQuery, Filter[], ESQueryConfig] = [
     indexPatternSavedObject,
     searchSourceQuery,

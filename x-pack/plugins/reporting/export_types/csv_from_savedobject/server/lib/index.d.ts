@@ -63,10 +63,24 @@ export interface GenerateCsvParams {
   };
 }
 
-export interface Filter {}
-export type TimeFilter = Filter;
-export type QueryFilter = Filter;
-export type SearchSourceFilter = Filter;
+/*
+ * These filter types are stub types to help ensure things get passed to
+ * non-Typescript functions in the right order. An actual structure is not
+ * needed because the code doesn't look into the properties; just combines them
+ * and passes them through to other non-TS modules.
+ */
+export interface Filter {
+  isFilter: true;
+}
+export interface TimeFilter extends Filter {
+  isTimeFilter: true;
+}
+export interface QueryFilter extends Filter {
+  isQueryFilter: true;
+}
+export interface SearchSourceFilter extends Filter {
+  isSearchSourceFilter: true;
+}
 
 export interface ESQueryConfig {
   allowLeadingWildcards: boolean;
