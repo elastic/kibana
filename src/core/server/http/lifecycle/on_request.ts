@@ -82,10 +82,7 @@ export type OnRequest<Params = any, Query = any, Body = any> = (
  * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
- * incoming HTTP requests. Should finish with one of the following commands:
- * - t.next(). to pass a request to the next handler.
- * - t.redirected(url). to interrupt request handling and redirect to configured url.
- * - t.rejected(error). to fail the request with specified error.
+ * incoming HTTP requests.
  */
 export function adoptToHapiOnRequestFormat(fn: OnRequest) {
   return async function interceptRequest(
@@ -111,7 +108,7 @@ export function adoptToHapiOnRequestFormat(fn: OnRequest) {
         `Unexpected result from OnRequest. Expected OnRequestResult, but given: ${result}.`
       );
     } catch (error) {
-      return new Boom(error.message, { statusCode: 500 });
+      return Boom.internal(error.message, { statusCode: 500 });
     }
   };
 }

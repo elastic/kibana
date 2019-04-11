@@ -76,7 +76,7 @@ describe('adoptToHapiAuthFormat', () => {
     expect(result.output.statusCode).toBe(404);
   });
 
-  it('Should return Boom error if interceptor throws', async () => {
+  it('Should return Boom.internal error error if interceptor throws', async () => {
     const onAuth = adoptToHapiAuthFormat(async (req, sessionStorage, t) => {
       throw new Error('unknown error');
     }, SessionStorageMock);
@@ -87,7 +87,7 @@ describe('adoptToHapiAuthFormat', () => {
     expect(result.output.statusCode).toBe(500);
   });
 
-  it('Should return Boom error if interceptor returns unexpected result', async () => {
+  it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
     const onAuth = adoptToHapiAuthFormat(
       async (req, sessionStorage, t) => undefined as any,
       SessionStorageMock

@@ -106,7 +106,7 @@ export function adoptToHapiAuthFormat<T = any>(
         `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
       );
     } catch (error) {
-      return new Boom(error.message, { statusCode: 500 });
+      return Boom.internal(error.message, { statusCode: 500 });
     }
   };
 }

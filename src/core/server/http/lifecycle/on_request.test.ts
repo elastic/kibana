@@ -64,7 +64,7 @@ describe('adoptToHapiOnRequestFormat', () => {
     expect(result.output.statusCode).toBe(501);
   });
 
-  it('Should return Boom error if interceptor throws', async () => {
+  it('Should return Boom.internal error if interceptor throws', async () => {
     const onRequest = adoptToHapiOnRequestFormat((req, t) => {
       throw new Error('unknown error');
     });
@@ -75,7 +75,7 @@ describe('adoptToHapiOnRequestFormat', () => {
     expect(result.output.statusCode).toBe(500);
   });
 
-  it('Should return Boom error if interceptor returns unexpected result', async () => {
+  it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
     const onRequest = adoptToHapiOnRequestFormat((req, toolkit) => undefined as any);
     const result = (await onRequest(requestMock, createResponseToolkit())) as Boom;
 
