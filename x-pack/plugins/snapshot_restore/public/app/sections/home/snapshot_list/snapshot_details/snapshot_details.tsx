@@ -41,7 +41,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 
   const { error, loading, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
-  const includeGlobalStateToHumanizedMap = {
+  const includeGlobalStateToHumanizedMap: Record<string, any> = {
     0: (
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
@@ -82,7 +82,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 
     const indicesList = indices.length ? (
       <ul>
-        {indices.map(index => (
+        {indices.map((index: string) => (
           <li key={index}>{index}</li>
         ))}
       </ul>
@@ -98,7 +98,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 
     const failuresList = failures.length ? (
       <ul>
-        {failures.map(failure => (
+        {failures.map((failure: any) => (
           <li key={failure}>{failure}</li>
         ))}
       </ul>

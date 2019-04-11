@@ -7,6 +7,24 @@
 import { Request, ResponseToolkit } from 'hapi';
 import { getAllHandler, getOneHandler } from './snapshots';
 
+const defaultSnapshot = {
+  repository: undefined,
+  snapshot: undefined,
+  uuid: undefined,
+  versionId: undefined,
+  version: undefined,
+  indices: undefined,
+  includeGlobalState: 0,
+  state: undefined,
+  startTime: undefined,
+  startTimeInMillis: undefined,
+  endTime: undefined,
+  endTimeInMillis: undefined,
+  durationInMillis: undefined,
+  failures: undefined,
+  shards: undefined,
+};
+
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
   const mockResponseToolkit = {} as ResponseToolkit;
 
@@ -44,8 +62,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const expectedResponse = {
         errors: [],
         snapshots: [
-          { repository: 'fooRepository', snapshot: 'snapshot1' },
-          { repository: 'barRepository', snapshot: 'snapshot2' },
+          { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
+          { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
         ],
       };
 
@@ -90,6 +108,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       };
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
       const expectedResponse = {
+        ...defaultSnapshot,
         snapshot,
         repository,
       };

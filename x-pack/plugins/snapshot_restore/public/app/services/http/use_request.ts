@@ -41,6 +41,7 @@ export const sendRequest = async ({
 
 interface UseRequest extends SendRequest {
   interval?: number;
+  initialData?: any;
 }
 
 export const useRequest = ({ path, method, body, interval, initialData }: UseRequest) => {
