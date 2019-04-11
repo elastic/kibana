@@ -103,6 +103,10 @@ export class SearchEmbeddable extends Embeddable {
     return this.inspectorAdaptors;
   }
 
+  public getPanelTitle() {
+    return this.panelTitle;
+  }
+
   public onContainerStateChanged(containerState: ContainerState) {
     this.customization = containerState.embeddableCustomization || {};
     this.filters = containerState.filters;
