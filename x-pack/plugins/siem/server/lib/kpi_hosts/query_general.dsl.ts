@@ -33,7 +33,7 @@ export const buildGeneralQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, packetbeatAlias, packetbeatAlias, winlogbeatAlias],
+      index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
       allowNoIndices: true,
       ignoreUnavailable: true,
     },
@@ -62,6 +62,20 @@ export const buildGeneralQuery = ({
         unique_destination_ips: {
           cardinality: {
             field: 'destination.ip',
+          },
+        },
+        auditd_count: {
+          filter: {
+            term: {
+              'event.module': 'auditd',
+            },
+          },
+        },
+        fim_count: {
+          filter: {
+            term: {
+              'event.module': 'file_integrity',
+            },
           },
         },
       },

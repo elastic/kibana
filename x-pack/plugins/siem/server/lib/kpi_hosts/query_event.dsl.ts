@@ -77,7 +77,7 @@ export const buildEventQuery = (
 
   const dslQuery = [
     {
-      index: [logAlias, packetbeatAlias, packetbeatAlias, winlogbeatAlias],
+      index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
       allowNoIndices: true,
       ignoreUnavailable: true,
     },
