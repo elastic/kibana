@@ -37,9 +37,12 @@ export class DomPreview extends React.Component {
       return;
     }
 
-    if (!this.observer) {
-      this.original = this.original || document.querySelector(`#${this.props.elementId}`);
-      if (this.original) {
+    const currentOriginal = document.querySelector(`#${this.props.elementId}`);
+    const originalChanged = currentOriginal !== this.original;
+    if (originalChanged) {
+      this.observer && this.observer.disconnect();
+      this.original = currentOriginal;
+      if (currentOriginal) {
         const slowUpdate = debounce(this.update, 100);
         this.observer = new MutationObserver(slowUpdate);
         // configuration of the observer
