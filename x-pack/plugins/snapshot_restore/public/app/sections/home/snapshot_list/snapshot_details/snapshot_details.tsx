@@ -124,13 +124,11 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         ))}
       </ul>
     ) : (
-      <em>
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
-          data-test-subj="srSnapshotDetailsIndicesNoneTitle"
-          defaultMessage="-"
-        />
-      </em>
+      <FormattedMessage
+        id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
+        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
+        defaultMessage="-"
+      />
     );
 
     const failuresList = failures.length ? (
@@ -144,13 +142,11 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         ))}
       </ul>
     ) : (
-      <em>
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotDetails.itemfFailuresNoneLabel"
-          data-test-subj="srSnapshotDetailsFailuressNoneTitle"
-          defaultMessage="-"
-        />
-      </em>
+      <FormattedMessage
+        id="xpack.snapshotRestore.snapshotDetails.itemfFailuresNoneLabel"
+        data-test-subj="srSnapshotDetailsFailuressNoneTitle"
+        defaultMessage="-"
+      />
     );
 
     content = (

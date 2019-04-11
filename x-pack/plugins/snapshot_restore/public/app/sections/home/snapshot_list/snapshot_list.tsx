@@ -27,7 +27,7 @@ interface Props extends RouteComponentProps<MatchParams> {}
 
 export const SnapshotList: React.FunctionComponent<Props> = ({
   match: {
-    params: { repositoryName: pathRepositoryName, snapshotId: pathSnapshotId },
+    params: { repositoryName, snapshotId },
   },
   history,
 }) => {
@@ -44,8 +44,8 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
     request: reload,
   } = loadSnapshots();
 
-  const openSnapshotDetails = (repositoryName: string, snapshotId: string) => {
-    history.push(`${BASE_PATH}/snapshots/${repositoryName}/${snapshotId}`);
+  const openSnapshotDetails = (repositoryNameToOpen: string, snapshotIdToOpen: string) => {
+    history.push(`${BASE_PATH}/snapshots/${repositoryNameToOpen}/${snapshotIdToOpen}`);
   };
 
   const closeSnapshotDetails = () => {
@@ -127,8 +127,8 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
     <Fragment>
       {pathRepositoryName && pathSnapshotId ? (
         <SnapshotDetails
-          repositoryName={pathRepositoryName}
-          snapshotId={pathSnapshotId}
+          repositoryName={repositoryName}
+          snapshotId={snapshotId}
           onClose={closeSnapshotDetails}
         />
       ) : null}
