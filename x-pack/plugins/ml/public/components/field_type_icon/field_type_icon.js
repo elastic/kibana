@@ -12,12 +12,15 @@ import { EuiToolTip } from '@elastic/eui';
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { i18n } from '@kbn/i18n';
 
 export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {
   const ariaLabel = getMLJobTypeAriaLabel(type);
 
-  if (!ariaLabel) {
+  if (ariaLabel === null) {
+    // All ml job field types should have associated aria labels.
+    // Once it is missing, it means that the passed *type* is not a valid field type.
     // if type doesn't match one of ML_JOB_FIELD_TYPES
     // don't render the component at all
     return null;
@@ -29,30 +32,30 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
   switch (type) {
 
     // icon class names
-    case 'boolean':
+    case ML_JOB_FIELD_TYPES.BOOLEAN:
       iconClass.push('kuiIcon', 'fa-adjust');
       break;
-    case 'date':
+    case ML_JOB_FIELD_TYPES.DATE:
       iconClass.push('kuiIcon', 'fa-clock-o');
       break;
-    case 'geo_point':
+    case ML_JOB_FIELD_TYPES.GEO_POINT:
       iconClass.push('kuiIcon', 'fa-globe');
       break;
-    case 'text':
+    case ML_JOB_FIELD_TYPES.TEXT:
       iconClass.push('kuiIcon', 'fa-file-text-o');
       break;
-    case 'ip':
+    case ML_JOB_FIELD_TYPES.IP:
       iconClass.push('kuiIcon', 'fa-laptop');
       break;
 
     // icon chars
-    case 'keyword':
+    case ML_JOB_FIELD_TYPES.KEYWORD:
       iconChar = 't';
       break;
-    case 'number':
+    case ML_JOB_FIELD_TYPES.NUMBER:
       iconChar = '#';
       break;
-    case 'Unknown':
+    case ML_JOB_FIELD_TYPES.UNKNOWN:
       iconChar = '?';
       break;
   }

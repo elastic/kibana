@@ -19,24 +19,21 @@ export function FieldTitleBar({ card }) {
     return null;
   }
 
+  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
+    defaultMessage: 'document count'
+  });
+  const cardTitleAriaLabel = [fieldName];
+
   const classNames = ['ml-field-title-bar'];
   if (card.fieldName === undefined) {
     classNames.push('document_count');
   } else if (card.isUnsupportedType === true) {
     classNames.push('type-other');
-  } else {
-    classNames.push(card.type);
-  }
-
-  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
-    defaultMessage: 'document count'
-  });
-
-  const cardTitleAriaLabel = [fieldName];
-  if (!card.isUnsupportedType) {
     cardTitleAriaLabel.unshift(
       getMLJobTypeAriaLabel(card.type)
     );
+  } else {
+    classNames.push(card.type);
   }
 
   return (

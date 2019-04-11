@@ -49,7 +49,7 @@ export const mlJobTypeAriaLabels = {
   DATE: i18n.translate('xpack.ml.fieldTypeIcon.dateTypeAriaLabel', {
     defaultMessage: 'date type',
   }),
-  GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geo_pointTypeAriaLabel', {
+  GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel', {
     defaultMessage: 'geo point type',
   }),
   IP: i18n.translate('xpack.ml.fieldTypeIcon.ipTypeAriaLabel', {
@@ -69,20 +69,7 @@ export const mlJobTypeAriaLabels = {
   }),
 };
 
-export const getMLJobTypeAriaLabel = (keyword) => {
-
-  let requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES)
-    .map(constantName => ({
-      constantName,
-      matched: !!(ML_JOB_FIELD_TYPES[constantName] === keyword),
-    }))
-    .filter(item => item.matched);
-
-  if (!requestedFieldType.length) {
-    return null;
-  } else {
-    requestedFieldType = requestedFieldType[0];
-  }
-
-  return mlJobTypeAriaLabels[requestedFieldType.constantName] || null;
+export const getMLJobTypeAriaLabel = (type) => {
+  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(k => (ML_JOB_FIELD_TYPES[k] === type));
+  return mlJobTypeAriaLabels[requestedFieldType] || null;
 };
