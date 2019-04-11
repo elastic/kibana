@@ -5,67 +5,67 @@
  */
 
 import { darken, transparentize } from 'polished';
-import * as React from 'react';
+import React, { useMemo } from 'react';
 
-import euiStyled, { css } from '../../../../../../common/eui_styled_components';
+// import euiStyled, { css } from '../../../../../../common/eui_styled_components';
+import { css } from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { tintOrShade } from '../../../utils/styles';
 import { LogTextStreamItemField } from './item_field';
+import {
+  isConstantSegment,
+  isFieldSegment,
+  LogEntryMessageSegment,
+} from '../../../utils/log_entry';
 
 interface LogTextStreamItemMessageFieldProps {
-  children: string;
-  highlights: string[];
+  segments: LogEntryMessageSegment[];
   isHovered: boolean;
   isWrapped: boolean;
   scale: TextScale;
 }
 
-export class LogTextStreamItemMessageField extends React.PureComponent<
-  LogTextStreamItemMessageFieldProps,
-  {}
-> {
-  public render() {
-    const { children, highlights, isHovered, isWrapped, scale } = this.props;
+export const LogTextStreamItemMessageField: React.FunctionComponent<
+  LogTextStreamItemMessageFieldProps
+> = ({ isHovered, isWrapped, scale, segments }) => {
+  const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
 
-    const hasHighlights = highlights.length > 0;
-    const content = hasHighlights ? renderHighlightFragments(children, highlights) : children;
-    return (
-      <LogTextStreamItemMessageFieldWrapper
-        hasHighlights={hasHighlights}
-        isHovered={isHovered}
-        isWrapped={isWrapped}
-        scale={scale}
-      >
-        {content}
-      </LogTextStreamItemMessageFieldWrapper>
-    );
-  }
-}
-
-const renderHighlightFragments = (text: string, highlights: string[]): React.ReactNode[] => {
-  const renderedHighlights = highlights.reduce(
-    ({ lastFragmentEnd, renderedFragments }, highlight) => {
-      const fragmentStart = text.indexOf(highlight, lastFragmentEnd);
-      return {
-        lastFragmentEnd: fragmentStart + highlight.length,
-        renderedFragments: [
-          ...renderedFragments,
-          text.slice(lastFragmentEnd, fragmentStart),
-          <HighlightSpan key={fragmentStart}>{highlight}</HighlightSpan>,
-        ],
-      };
-    },
-    {
-      lastFragmentEnd: 0,
-      renderedFragments: [],
-    } as {
-      lastFragmentEnd: number;
-      renderedFragments: React.ReactNode[];
-    }
+  return (
+    <LogTextStreamItemMessageFieldWrapper
+      hasHighlights={false}
+      isHovered={isHovered}
+      isWrapped={isWrapped}
+      scale={scale}
+    >
+      {message}
+    </LogTextStreamItemMessageFieldWrapper>
   );
-
-  return [...renderedHighlights.renderedFragments, text.slice(renderedHighlights.lastFragmentEnd)];
 };
+
+// const renderHighlightFragments = (text: string, highlights: string[]): React.ReactNode[] => {
+//   const renderedHighlights = highlights.reduce(
+//     ({ lastFragmentEnd, renderedFragments }, highlight) => {
+//       const fragmentStart = text.indexOf(highlight, lastFragmentEnd);
+//       return {
+//         lastFragmentEnd: fragmentStart + highlight.length,
+//         renderedFragments: [
+//           ...renderedFragments,
+//           text.slice(lastFragmentEnd, fragmentStart),
+//           <HighlightSpan key={fragmentStart}>{highlight}</HighlightSpan>,
+//         ],
+//       };
+//     },
+//     {
+//       lastFragmentEnd: 0,
+//       renderedFragments: [],
+//     } as {
+//       lastFragmentEnd: number;
+//       renderedFragments: React.ReactNode[];
+//     }
+//   );
+//
+//   return [...renderedHighlights.renderedFragments, text.slice(renderedHighlights.lastFragmentEnd)];
+// };
 
 const highlightedFieldStyle = css`
   background-color: ${props =>
@@ -108,9 +108,19 @@ const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs
   ${props => (props.isWrapped ? wrappedFieldStyle : unwrappedFieldStyle)};
 `;
 
-const HighlightSpan = euiStyled.span`
-  display: inline-block;
-  background-color: ${props => props.theme.eui.euiColorSecondary};
-  color: ${props => props.theme.eui.euiColorGhost};
-  font-weight: ${props => props.theme.eui.euiFontWeightMedium};
-`;
+// const HighlightSpan = euiStyled.span`
+//   display: inline-block;
+//   background-color: ${props => props.theme.eui.euiColorSecondary};
+//   color: ${props => props.theme.eui.euiColorGhost};
+//   font-weight: ${props => props.theme.eui.euiFontWeightMedium};
+// `;
+
+const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
+  if (isFieldSegment(messageSegment)) {
+    return messageSegment.value;
+  } else if (isConstantSegment(messageSegment)) {
+    return messageSegment.constant;
+  }
+
+  return 'failed to format message';
+};

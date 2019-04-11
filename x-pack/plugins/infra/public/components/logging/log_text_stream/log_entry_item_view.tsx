@@ -10,14 +10,7 @@ import React, { useState, useCallback, Fragment } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
-import {
-  LogEntry,
-  LogEntryMessageSegment,
-  isConstantSegment,
-  isFieldSegment,
-  isMessageColumn,
-  isTimestampColumn,
-} from '../../../utils/log_entry';
+import { LogEntry, isMessageColumn, isTimestampColumn } from '../../../utils/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
 import { FormattedTime } from '../../formatted_time';
 import { LogTextStreamItemDateField } from './item_date_field';
@@ -98,13 +91,11 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                   )}
                 </LogTextStreamIconDiv>
                 <LogTextStreamItemMessageField
-                  highlights={[]}
                   isHovered={isHovered}
                   isWrapped={wrap}
                   scale={scale}
-                >
-                  {column.message.map(formatMessageSegment).join('')}
-                </LogTextStreamItemMessageField>{' '}
+                  segments={column.message}
+                />
               </Fragment>
             );
           }
@@ -147,13 +138,3 @@ const LogTextStreamLogEntryItemDiv = euiStyled.div`
   justify-content: flex-start;
   align-items: stretch;
 `;
-
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
-  if (isFieldSegment(messageSegment)) {
-    return messageSegment.value;
-  } else if (isConstantSegment(messageSegment)) {
-    return messageSegment.constant;
-  }
-
-  return 'failed to format message';
-};
