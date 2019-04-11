@@ -38,7 +38,7 @@ export function fromLegacyKueryExpression(expression, parseOptions) {
 
 export function fromKueryExpression(expression, parseOptions) {
   try {
-    fromExpression(expression, parseOptions, parseKuery);
+    return fromExpression(expression, parseOptions, parseKuery);
   } catch (error) {
     if (error.name === 'SyntaxError') {
       throw new KQLSyntaxError(error, expression);

@@ -14,7 +14,7 @@
 }
 
 start
-  = query:OrQuery? trailing:OptionalSpace {
+  = Space* query:OrQuery? trailing:OptionalSpace {
     if (trailing.type === 'cursor') {
       return {
         ...trailing,

@@ -495,19 +495,30 @@ module.exports = (function() {
     }
 
     function peg$parsestart() {
-      var s0, s1, s2;
+      var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      s1 = peg$parseOrQuery();
-      if (s1 === peg$FAILED) {
-        s1 = null;
+      s1 = [];
+      s2 = peg$parseSpace();
+      while (s2 !== peg$FAILED) {
+        s1.push(s2);
+        s2 = peg$parseSpace();
       }
       if (s1 !== peg$FAILED) {
-        s2 = peg$parseOptionalSpace();
+        s2 = peg$parseOrQuery();
+        if (s2 === peg$FAILED) {
+          s2 = null;
+        }
         if (s2 !== peg$FAILED) {
-          peg$savedPos = s0;
-          s1 = peg$c0(s1, s2);
-          s0 = s1;
+          s3 = peg$parseOptionalSpace();
+          if (s3 !== peg$FAILED) {
+            peg$savedPos = s0;
+            s1 = peg$c0(s2, s3);
+            s0 = s1;
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
