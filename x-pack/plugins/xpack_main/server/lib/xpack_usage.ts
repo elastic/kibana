@@ -90,7 +90,7 @@ export class XPackUsage {
       getUsage$: () => {
         return this.usage$.pipe(takeUntil(this.stop$));
       },
-      refreshNow: this.refreshNow,
+      refreshNow: this.refreshNow.bind(this),
     };
   }
 
