@@ -26,7 +26,7 @@ import {
   UIM_AUTO_FOLLOW_PATTERN_DELETE,
   UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY,
 } from '../constants';
-import { trackUserRequest, trackUiMetric } from './track_ui_metric';
+import { trackUserRequest } from './track_ui_metric';
 import { areAllSettingsDefault } from './follower_index_default_settings';
 
 const apiPrefix = chrome.addBasePath(API_BASE_PATH);
@@ -70,24 +70,22 @@ export const loadRemoteClusters = () => (
   httpClient.get(apiPrefixRemoteClusters).then(extractData)
 );
 
-export const createAutoFollowPattern = async (autoFollowPattern) => {
+export const createAutoFollowPattern = (autoFollowPattern) => {
   const request = httpClient.post(`${apiPrefix}/auto_follow_patterns`, autoFollowPattern);
-  return await trackUserRequest(request, UIM_FOLLOWER_INDEX_CREATE).then(extractData);
+  return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_CREATE).then(extractData);
 };
 
-export const updateAutoFollowPattern = async (id, autoFollowPattern) => {
+export const updateAutoFollowPattern = (id, autoFollowPattern) => {
   const request = httpClient.put(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`, autoFollowPattern);
-  return await trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_UPDATE).then(extractData);
+  return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_UPDATE).then(extractData);
 };
 
-export const deleteAutoFollowPattern = async (id) => {
+export const deleteAutoFollowPattern = (id) => {
   const ids = arrify(id);
   const idString = ids.map(_id => encodeURIComponent(_id)).join(',');
-  const response = await httpClient.delete(`${apiPrefix}/auto_follow_patterns/${idString}`);
-  // Only track successful requests.
-  const actionType = ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
-  trackUiMetric(actionType);
-  return extractData(response);
+  const request = httpClient.delete(`${apiPrefix}/auto_follow_patterns/${idString}`);
+  const uiMetric = ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
+  return trackUserRequest(request, uiMetric).then(extractData);
 };
 
 /* Follower Index */
@@ -99,54 +97,48 @@ export const getFollowerIndex = (id) => (
   httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
 );
 
-export const createFollowerIndex = async (followerIndex) => {
-  const uiMetrics = [UIM_AUTO_FOLLOW_PATTERN_CREATE];
+export const createFollowerIndex = (followerIndex) => {
+  const uiMetrics = [UIM_FOLLOWER_INDEX_CREATE];
   const isUsingAdvancedSettings = !areAllSettingsDefault(followerIndex);
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
   const request = httpClient.post(`${apiPrefix}/follower_indices`, followerIndex);
-  return await trackUserRequest(request, uiMetrics.join(',')).then(extractData);
+  return trackUserRequest(request, uiMetrics.join(',')).then(extractData);
 };
 
-export const pauseFollowerIndex = async (id) => {
+export const pauseFollowerIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
-  const response = await httpClient.put(`${apiPrefix}/follower_indices/${idString}/pause`);
-  // Only track successful requests.
-  const actionType = ids.length > 1 ? UIM_FOLLOWER_INDEX_PAUSE_MANY : UIM_FOLLOWER_INDEX_PAUSE;
-  trackUiMetric(actionType);
-  return extractData(response);
+  const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/pause`);
+  const uiMetric = ids.length > 1 ? UIM_FOLLOWER_INDEX_PAUSE_MANY : UIM_FOLLOWER_INDEX_PAUSE;
+  return trackUserRequest(request, uiMetric).then(extractData);
 };
 
-export const resumeFollowerIndex = async (id) => {
+export const resumeFollowerIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
-  const response = await httpClient.put(`${apiPrefix}/follower_indices/${idString}/resume`);
-  // Only track successful requests.
-  const actionType = ids.length > 1 ? UIM_FOLLOWER_INDEX_RESUME_MANY : UIM_FOLLOWER_INDEX_RESUME;
-  trackUiMetric(actionType);
-  return extractData(response);
+  const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/resume`);
+  const uiMetric = ids.length > 1 ? UIM_FOLLOWER_INDEX_RESUME_MANY : UIM_FOLLOWER_INDEX_RESUME;
+  return trackUserRequest(request, uiMetric).then(extractData);
 };
 
-export const unfollowLeaderIndex = async (id) => {
+export const unfollowLeaderIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
-  const response = await httpClient.put(`${apiPrefix}/follower_indices/${idString}/unfollow`);
-  // Only track successful requests.
-  const actionType = ids.length > 1 ? UIM_FOLLOWER_INDEX_UNFOLLOW_MANY : UIM_FOLLOWER_INDEX_UNFOLLOW;
-  trackUiMetric(actionType);
-  return extractData(response);
+  const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/unfollow`);
+  const uiMetric = ids.length > 1 ? UIM_FOLLOWER_INDEX_UNFOLLOW_MANY : UIM_FOLLOWER_INDEX_UNFOLLOW;
+  return trackUserRequest(request, uiMetric).then(extractData);
 };
 
-export const updateFollowerIndex = async (id, followerIndex) => {
+export const updateFollowerIndex = (id, followerIndex) => {
   const uiMetrics = [UIM_FOLLOWER_INDEX_UPDATE];
   const isUsingAdvancedSettings = !areAllSettingsDefault(followerIndex);
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
   const request = httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex);
-  return await trackUserRequest(request, uiMetrics.join(',')).then(extractData);
+  return trackUserRequest(request, uiMetrics.join(',')).then(extractData);
 };
 
 /* Stats */
