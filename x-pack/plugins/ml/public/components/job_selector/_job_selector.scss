@@ -2,3 +2,8 @@
   padding: 10px;
   background-color: $euiColorLightShade
 }
+
+.mlJobSelectorFlyoutHeader, .mlJobSelectorFlyoutFooter {
+  padding-bottom: $euiSizeS;
+  padding-top: $euiSizeS;
+}

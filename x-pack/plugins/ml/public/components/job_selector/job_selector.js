@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 
 import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
 import { JobSelectorContent } from './job_selector_content';
 
 import {
@@ -22,7 +23,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiButton,
-  EuiText,
+  EuiLoadingSpinner,
   EuiTitle
 } from '@elastic/eui';
 
@@ -33,7 +34,9 @@ export function JobSelector({
   singleSelection,
   timeseriesOnly
 }) {
-  const [jobIds, setJobIds] = useState(selectedJobIds);
+  const [selectedIds, setSelectedIds] = useState(selectedJobIds);
+  const [newSelection, setNewSelection] = useState(selectedJobIds);
+  const [jobs, setJobs] = useState([]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   function closeFlyout() {
@@ -44,21 +47,56 @@ export function JobSelector({
     setIsFlyoutVisible(true);
   }
 
-  // TODO: ensure this only runs once
+  function handleJobSelectionClick() {
+    showFlyout();
+
+    ml.jobs.jobsWithTimerange()
+      .then((resp) => {
+        setJobs(resp);
+      })
+      .catch((err) => {
+        // TODO: show error toast
+        console.log('ERROR', err);
+      });
+  }
+
+  function onNewSelection(selection) {
+    // add selection to jobIds - should we sort these?
+    setNewSelection(selection);
+  }
+
+
+  function applySelection() {
+    // add selection to jobIds - should we sort these?
+    closeFlyout();
+    setSelectedIds(newSelection);
+    jobSelectService.next(newSelection);
+  }
+
   useEffect(() => {
-    if (jobIds.length === 0) {
+    if (selectedIds.length === 0) {
       let selected = [];
       mlJobService.loadJobs()
         .then((resp) => {
           if (resp.jobs.length) {
             selected = [resp.jobs[0].job_id];
-            setJobIds(selected);
+            setSelectedIds(selected);
             jobSelectService.next(selected);
           }
           // TODO: broadcast that there are no jobs. Explorer updates with noJobsSelected
         });
     }
   }, []); // eslint-disable-line
+
+  function renderIdBadges() {
+    return selectedIds.map(id => (
+      <EuiFlexItem grow={false} key={id}>
+        <EuiBadge color={'hollow'}>
+          {id}
+        </EuiBadge>
+      </EuiFlexItem>
+    ));
+  }
 
   function renderJobSelectionBar() {
     return (
@@ -67,26 +105,16 @@ export function JobSelector({
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={showFlyout}
+                onClick={handleJobSelectionClick}
               >
                 Job Selection
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {jobIds.map(jobId => (
-          <EuiFlexItem grow={false} key={jobId}>
-            <EuiBadge color={'hollow'}>
-              {jobId}
-            </EuiBadge>
-          </EuiFlexItem>
-        ))}
+        {renderIdBadges()}
       </EuiFlexGroup>
     );
-  }
-
-  function renderLoadingIndicator() {
-    return (<p>Loading...</p>);
   }
 
   function renderFlyout() {
@@ -94,10 +122,13 @@ export function JobSelector({
       return (
         <EuiFlyout
           onClose={closeFlyout}
-          aria-labelledby="flyoutTitle"
+          aria-labelledby="Job Selection"
           size="l"
         >
-          <EuiFlyoutHeader hasBorder>
+          <EuiFlyoutHeader
+            hasBorder
+            className="mlJobSelectorFlyoutHeader"
+          >
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 Job Selection
@@ -105,19 +136,21 @@ export function JobSelector({
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiText>
-              <JobSelectorContent
-                singleSelection={singleSelection}
-                timeseriesOnly={timeseriesOnly}
-              />
-            </EuiText>
+            <JobSelectorContent
+              jobs={jobs}
+              onSelection={onNewSelection}
+              selectedIds={newSelection}
+              singleSelection={singleSelection}
+              timeseriesOnly={timeseriesOnly}
+            />
           </EuiFlyoutBody>
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter className="mlJobSelectorFlyoutFooter">
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={closeFlyout}
+                  onClick={applySelection}
                   fill
+                  isDisabled={newSelection.length === 0}
                 >
                   Apply
                 </EuiButton>
@@ -139,8 +172,8 @@ export function JobSelector({
 
   return (
     <div className="mlJobSelectorBar">
-      {jobIds.length > 0 && renderJobSelectionBar()}
-      {jobIds.length === 0 && renderLoadingIndicator()}
+      {selectedIds.length === 0 && <EuiLoadingSpinner size="s" />}
+      {selectedIds.length > 0 && renderJobSelectionBar()}
       {renderFlyout()}
     </div>
   );
