@@ -94,7 +94,7 @@ export const migrations = {
   },
   visualization: {
     /**
-     * We need to have this mirgation twice, once with a version prior to 7.0.0 once with a version
+     * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
      * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
      * released. Thus a user who already had 7.0.0 installed already got the 7.0.0 migrations below running,
      * so we need a version higher than that. But this fix was backported to the 6.7 release, meaning if we
