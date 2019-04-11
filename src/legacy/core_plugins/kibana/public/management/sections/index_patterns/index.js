@@ -98,6 +98,7 @@ uiRoutes
         tooltip: i18n('kbn.management.indexPatterns.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save index patterns',
         }),
+        iconType: 'glasses'
       };
     }
   });

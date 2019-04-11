@@ -46,6 +46,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
       tooltip: i18n('kbn.devTools.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save',
       }),
+      iconType: 'glasses'
     };
   },
   k7Breadcrumbs: (i18n) => [

@@ -35,6 +35,7 @@ export const Header = injectI18n(
                     defaultMessage: 'Unable to change source configuration',
                     id: 'xpack.infra.header.badge.readOnly.tooltip',
                   }),
+                  iconType: 'glasses',
                 }
               : undefined
           }

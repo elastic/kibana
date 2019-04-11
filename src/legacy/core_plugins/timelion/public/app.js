@@ -84,6 +84,7 @@ require('ui/routes')
         tooltip: i18n('timelion.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save timelion sheets',
         }),
+        iconType: 'glasses'
       };
     },
     resolve: {

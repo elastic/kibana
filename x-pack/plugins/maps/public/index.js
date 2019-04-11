@@ -56,6 +56,7 @@ routes
         tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save maps',
         }),
+        iconType: 'glasses'
       };
     }
   })

@@ -22,6 +22,7 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { IconType } from '@elastic/eui';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
 
@@ -36,6 +37,7 @@ function isEmbedParamInHash() {
 export interface ChromeBadge {
   text: string;
   tooltip: string;
+  iconType?: IconType;
 }
 
 /** @public */

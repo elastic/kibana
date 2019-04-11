@@ -130,6 +130,7 @@ const Application = (props: UptimeAppProps) => {
             tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
+            iconType: 'glasses',
           }
         : undefined
     );

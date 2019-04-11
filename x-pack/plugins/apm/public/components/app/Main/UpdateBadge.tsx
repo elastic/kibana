@@ -27,7 +27,8 @@ class UpdateBadgeComponent extends React.Component<Props> {
             tooltip: intl.formatMessage({
               defaultMessage: 'Unable to save',
               id: 'xpack.apm.header.badge.readOnly.tooltip'
-            })
+            }),
+            iconType: 'glasses'
           }
         : undefined
     );

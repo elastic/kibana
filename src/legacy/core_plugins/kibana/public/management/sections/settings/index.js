@@ -75,6 +75,7 @@ uiRoutes
         tooltip: i18n('kbn.management.advancedSettings.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save advanced settings',
         }),
+        iconType: 'glasses'
       };
     }
   });

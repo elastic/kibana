@@ -206,6 +206,45 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
 /**
  * internal angular run function that will be called when angular bootstraps and
  * lets us integrate with the angular router so that we can automatically clear
+ * the badge if we switch to a Kibana app that does not use the badge correctly
+ */
+const $setupBadgeAutoClear = (newPlatform: CoreSetup) => (
+  $rootScope: IRootScopeService,
+  $injector: any
+) => {
+  // A flag used to determine if we should automatically
+  // clear the badge between angular route changes.
+  let badgeSetSinceRouteChange = false;
+  const $route = $injector.has('$route') ? $injector.get('$route') : {};
+
+  $rootScope.$on('$routeChangeStart', () => {
+    badgeSetSinceRouteChange = false;
+  });
+
+  $rootScope.$on('$routeChangeSuccess', () => {
+    const current = $route.current || {};
+
+    if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+      return;
+    }
+
+    const badgeProvider = current.badge;
+    if (!badgeProvider) {
+      newPlatform.chrome.setBadge(undefined);
+      return;
+    }
+
+    try {
+      newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
+    } catch (error) {
+      fatalError(error);
+    }
+  });
+};
+
+/**
+ * internal angular run function that will be called when angular bootstraps and
+ * lets us integrate with the angular router so that we can automatically clear
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
