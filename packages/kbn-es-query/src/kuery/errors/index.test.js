@@ -22,6 +22,14 @@ import { fromKueryExpression } from '../ast';
 
 describe('kql syntax errors', () => {
 
+  it('should throw an error for a field query missing a value', () => {
+    expect(() => {
+      fromKueryExpression('response:');
+    }).toThrow('Expected "(", value, whitespace but end of input found.\n' +
+      'response:\n' +
+      '---------^');
+  });
+
   it('should throw an error for an OR query missing a right side sub-query', () => {
     expect(() => {
       fromKueryExpression('response:200 or ');
@@ -76,6 +84,22 @@ describe('kql syntax errors', () => {
     }).toThrow('Expected AND, OR, end of input, whitespace but ":" found.\n' +
       'foo:ba:r\n' +
       '------^');
+  });
+
+  it('should throw an error for range queries missing a value', () => {
+    expect(() => {
+      fromKueryExpression('foo > ');
+    }).toThrow('Expected literal, whitespace but end of input found.\n' +
+      'foo > \n' +
+      '------^');
+  });
+
+  it('should throw an error for range queries missing a field', () => {
+    expect(() => {
+      fromKueryExpression('< 1000');
+    }).toThrow('Expected "(", NOT, end of input, field name, value, whitespace but "<" found.\n' +
+      '< 1000\n' +
+      '^');
   });
 
 });

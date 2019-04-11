@@ -66,8 +66,6 @@ export class KQLSyntaxError extends Error {
       }
     });
 
-    console.log(message);
-    console.log(JSON.stringify(error, null, 2));
     const fullMessage = [
       message,
       expression,
