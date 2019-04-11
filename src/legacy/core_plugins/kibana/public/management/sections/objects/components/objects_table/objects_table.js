@@ -18,7 +18,6 @@
  */
 
 import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
 import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -28,7 +27,6 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 import { toastNotifications } from 'ui/notify';
-import { keysToCamelCaseShallow } from 'ui/utils/case_conversion';
 
 import {
   EuiSpacer,
@@ -61,6 +59,7 @@ import {
   getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByType,
+  findObjects,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -187,12 +186,7 @@ class ObjectsTableUI extends Component {
 
     let resp;
     try {
-      resp = await kfetch({
-        method: 'GET',
-        pathname: '/api/kibana/management/saved_objects/_find',
-        query: findOptions,
-      });
-      resp = keysToCamelCaseShallow(resp);
+      resp = await findObjects(findOptions);
     } catch (error) {
       if (this._isMounted) {
         this.setState({

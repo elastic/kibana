@@ -23,9 +23,13 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
-import { kfetch } from 'ui/kfetch';
+import { findObjects } from '../../../lib';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../../../lib/find_objects', () => ({
+  findObjects: jest.fn(),
+}));
 
 jest.mock('../components/header', () => ({
   Header: () => 'Header',
@@ -131,9 +135,9 @@ const defaultProps = {
 };
 
 beforeEach(() => {
-  kfetch.mockImplementation(() => ({
+  findObjects.mockImplementation(() => ({
     total: 4,
-    saved_objects: [
+    savedObjects: [
       {
         id: '1',
         type: 'index-pattern',
@@ -216,7 +220,7 @@ describe('ObjectsTable', () => {
   });
 
   it('should add danger toast when find fails', async () => {
-    kfetch.mockImplementation(() => {
+    findObjects.mockImplementation(() => {
       throw new Error('Simulated find error');
     });
     const component = shallowWithIntl(
