@@ -45,6 +45,7 @@ uiRoutes
         tooltip: i18n('kbn.visualize.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save visualizations',
         }),
+        iconType: 'glasses'
       };
     }
   })

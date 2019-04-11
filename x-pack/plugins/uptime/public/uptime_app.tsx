@@ -159,6 +159,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
+            iconType: 'glasses',
           }
         : undefined
     );

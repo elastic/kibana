@@ -43,11 +43,11 @@ export function GlobalNavProvider({ getService }) {
       return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
     }
 
-    async badgeExistsOrFail(expectedText) {
+    async badgeExistsOrFail(expectedLabel) {
       await testSubjects.existOrFail('headerBadge');
       const element = await testSubjects.find('headerBadge');
-      const actualText = await element.getVisibleText();
-      expect(actualText.toUpperCase()).to.equal(expectedText.toUpperCase());
+      const actualLabel = await element.getAttribute('aria-label');
+      expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
     }
 
     async badgeMissingOrFail() {

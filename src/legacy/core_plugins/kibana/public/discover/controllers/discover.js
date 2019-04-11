@@ -105,6 +105,7 @@ uiRoutes
         tooltip: i18n('kbn.discover.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save saved searches',
         }),
+        iconType: 'glasses'
       };
     }
   })

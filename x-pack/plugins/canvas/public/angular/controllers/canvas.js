@@ -24,6 +24,7 @@ export function CanvasRootController(canvasStore, $scope, $element, uiCapabiliti
           tooltip: i18n.translate('xpack.canvas.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save canvas workpads',
           }),
+          iconType: 'glasses',
         }
   );
 

@@ -209,8 +209,10 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the badge if we switch to a Kibana app that does not use the badge correctly
  */
-const $setupBadgeAutoClear = (newPlatform: CoreSetup) =>
-  ($rootScope: IRootScopeService, $injector: any) => {
+const $setupBadgeAutoClear = (newPlatform: CoreSetup) => (
+  $rootScope: IRootScopeService,
+  $injector: any
+) => {
   // A flag used to determine if we should automatically
   // clear the badge between angular route changes.
   let badgeSetSinceRouteChange = false;

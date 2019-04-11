@@ -70,6 +70,7 @@ uiRoutes
         tooltip: i18n('kbn.dashboard.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save dashboards',
         }),
+        iconType: 'glasses'
       };
     }
   })
