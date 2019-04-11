@@ -74,7 +74,7 @@ function renderLogs(props) {
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.monitoring.cluster.overview.logsPanel.logTypeTitle"
-              defaultMessage="{type}:"
+              defaultMessage="{type}"
               values={{
                 type: capitalize(log.type),
               }}
@@ -98,6 +98,24 @@ function renderLogs(props) {
   );
 }
 
+const logLevelText = {
+  info: i18n.translate('xpack.monitoring.cluster.overview.esPanel.infoLogsTooltipText', {
+    defaultMessage: 'The number of information logs'
+  }),
+  warn: i18n.translate('xpack.monitoring.cluster.overview.esPanel.warnLogsTooltipText', {
+    defaultMessage: 'The number of warning logs'
+  }),
+  debug: i18n.translate('xpack.monitoring.cluster.overview.esPanel.debugLogsTooltipText', {
+    defaultMessage: 'The number of debug logs'
+  }),
+  error: i18n.translate('xpack.monitoring.cluster.overview.esPanel.errorLogsTooltipText', {
+    defaultMessage: 'The number of error logs'
+  }),
+  fatal: i18n.translate('xpack.monitoring.cluster.overview.esPanel.fatalLogsTooltipText', {
+    defaultMessage: 'The number of fatal logs'
+  }),
+};
+
 function renderLog(log) {
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
@@ -105,12 +123,7 @@ function renderLog(log) {
         <EuiFlexItem grow={false} key={index}>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.logsTooltipText', {
-              defaultMessage: 'The number of {type} logs',
-              values: {
-                type: capitalize(level.level),
-              }
-            })}
+            content={logLevelText[level.level]}
           >
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
               {formatNumber(level.count, 'int_commas')}

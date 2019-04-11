@@ -5,13 +5,23 @@ exports[`Logs should render with a no cluster found reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="We did not find any logs for this cluster."
+  title="No logs for this cluster"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Ensure you have a filebeat instance reading from this cluster."
+      defaultMessage="Check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noClusterMessage"
-      values={Object {}}
+      values={
+        Object {
+          "link": <EuiLink
+            color="primary"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            type="button"
+          >
+            setup
+          </EuiLink>,
+        }
+      }
     />
   </p>
 </EuiCallOut>
@@ -22,13 +32,23 @@ exports[`Logs should render with a no index found reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="We did not find any logs for this index."
+  title="No logs for this index"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Ensure you have a filebeat instance reading from all nodes in your cluster, or perhaps there are no logs for this index."
+      defaultMessage="We found logs, but none for this index. If this problem continues, check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noIndexMessage"
-      values={Object {}}
+      values={
+        Object {
+          "link": <EuiLink
+            color="primary"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            type="button"
+          >
+            setup
+          </EuiLink>,
+        }
+      }
     />
   </p>
 </EuiCallOut>
@@ -39,11 +59,11 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="No filebeat indices found."
+  title="No log data found"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Follow {link} to set it up. Please be sure to configure your Elasticsearch output to your monitoring cluster."
+      defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
       id="xpack.monitoring.logs.reason.noIndexPatternMessage"
       values={
         Object {
@@ -52,7 +72,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
             type="button"
           >
-            these directions
+            Filebeat
           </EuiLink>,
         }
       }
@@ -66,13 +86,23 @@ exports[`Logs should render with a no node found reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="We did not find any logs for this node."
+  title="No logs for this Elasticsearch node"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Ensure you have a filebeat instance reading from this node."
+      defaultMessage="Check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noNodeMessage"
-      values={Object {}}
+      values={
+        Object {
+          "link": <EuiLink
+            color="primary"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            type="button"
+          >
+            setup
+          </EuiLink>,
+        }
+      }
     />
   </p>
 </EuiCallOut>
@@ -83,11 +113,11 @@ exports[`Logs should render with a no type found reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="We found filebeat indices but none for elasticsearch."
+  title="No logs for Elasticsearch"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Follow {link} to set up the elasticsearch module."
+      defaultMessage="Follow {link} to set up Elasticsearch."
       id="xpack.monitoring.logs.reason.noTypeMessage"
       values={
         Object {
@@ -110,11 +140,11 @@ exports[`Logs should render with a time period reason 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="No filebeat indices found in the selected time period."
+  title="No logs for the selected time"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Please adjust your time period as necessary"
+      defaultMessage="Use the time filter to adjust your timeframe."
       id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
       values={Object {}}
     />
@@ -127,11 +157,11 @@ exports[`Logs should render with a time period reason for both scenarios 1`] = `
   color="warning"
   iconType="help"
   size="m"
-  title="No filebeat indices found in the selected time period."
+  title="No logs for the selected time"
 >
   <p>
     <FormattedMessage
-      defaultMessage="Please adjust your time period as necessary"
+      defaultMessage="Use the time filter to adjust your timeframe."
       id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
       values={Object {}}
     />

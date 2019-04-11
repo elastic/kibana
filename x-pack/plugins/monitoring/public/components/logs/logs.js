@@ -171,12 +171,12 @@ export class Logs extends PureComponent {
         <p>
           <FormattedMessage
             id="xpack.monitoring.logs.listing.linkText"
-            defaultMessage="Visit the {link} to dive deeper."
+            defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
                 <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}>
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
-                    defaultMessage: 'Logs UI'
+                    defaultMessage: 'Logs'
                   })}
                 </EuiLink>
               )
@@ -222,7 +222,7 @@ export class Logs extends PureComponent {
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
-              defaultMessage: 'Logs'
+              defaultMessage: 'Recent Logs'
             })}
           </h1>
         </EuiTitle>
