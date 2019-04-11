@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { ClusterMetric, Metric } from '../classes';
 import { LARGE_FLOAT } from '../../../../common/formatting';
-import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { DEFAULT_PIPELINE_ID, NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
@@ -416,7 +416,6 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
         );
       });
 
-      const DEFAULT_PIPELINE_ID = 'main'; // FIXME: Move to common constants
       const oldNodesCount = _.get(bucket, 'no_pipelines.node_count.value', 0);
       if (oldNodesCount > 0) {
         if (!pipelineNodesCounts.hasOwnProperty(DEFAULT_PIPELINE_ID)) {

@@ -47,6 +47,11 @@ export const STORAGE_KEY = 'xpack.monitoring.data';
  */
 export const NORMALIZED_DERIVATIVE_UNIT = '1s';
 
+/**
+ * The pipeline ID assigned to unnamed Logstash pipelines.
+ */
+export const DEFAULT_PIPELINE_ID = 'main';
+
 /*
  * Values for column sorting in table options
  * @type {number} 1 or -1
