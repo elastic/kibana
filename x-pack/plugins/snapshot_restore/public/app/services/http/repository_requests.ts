@@ -20,6 +20,7 @@ export const loadRepository = (name: Repository['name']) => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
     method: 'get',
+    initialData: {},
   });
 };
 
