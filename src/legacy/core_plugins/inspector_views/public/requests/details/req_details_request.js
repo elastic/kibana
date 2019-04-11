@@ -27,6 +27,7 @@ function RequestDetailsRequest(props) {
     <EuiCodeBlock
       language="json"
       paddingSize="s"
+      isCopyable
       data-test-subj="inspectorRequestBody"
     >
       { JSON.stringify(props.request.json, null, 2) }

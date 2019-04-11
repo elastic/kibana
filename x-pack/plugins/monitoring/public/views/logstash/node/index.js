@@ -14,9 +14,9 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
@@ -83,28 +83,30 @@ uiRoutes.when('/logstash/node/:uuid', {
         ];
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <DetailStatus stats={data.nodeSummary}/>
-                  <EuiSpacer size="m"/>
-                  <EuiFlexGrid columns={2} gutterSize="none">
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (
-                      <EuiFlexItem key={index} style={{ width: '50%' }}>
+                      <EuiFlexItem key={index}>
                         <MonitoringTimeseriesContainer
                           series={metric}
                           onBrush={this.onBrush}
                           {...data}
                         />
-                        <EuiSpacer size="m"/>
+                        <EuiSpacer />
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGrid>
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import moment from 'moment';
 
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
@@ -35,6 +34,7 @@ import {
   updateDescription,
   updateHidePanelTitles,
   updateTimeRange,
+  updateRefreshConfig,
   clearStagedFilters,
   updateFilters,
   updateQuery,
@@ -144,13 +144,18 @@ export class DashboardStateManager {
    * or a relative time (now-15m), or a moment object
    * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
    * moment object
-   * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
     store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
-      mode: newTimeFilter.mode,
+    }));
+  }
+
+  handleRefreshConfigChange({ pause, value }) {
+    store.dispatch(updateRefreshConfig({
+      isPaused: pause,
+      interval: value,
     }));
   }
 
@@ -241,9 +246,9 @@ export class DashboardStateManager {
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
-        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
-        if (indexPattern) {
-          this.panelIndexPatternMapping[panelId] = indexPattern;
+        const embeddableMetadata = getEmbeddableMetadata(store.getState(), panelId);
+        if (embeddableMetadata.indexPatterns) {
+          this.panelIndexPatternMapping[panelId] = _.compact(embeddableMetadata.indexPatterns);
           this.dirty = true;
         }
       }
@@ -277,14 +282,15 @@ export class DashboardStateManager {
   }
 
   getPanelIndexPatterns() {
-    return _.uniq(Object.values(this.panelIndexPatternMapping));
+    const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
+    return _.uniq(indexPatterns, 'id');
   }
 
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
   resetState() {
-    // In order to show the correct warning for the saved-object-save-as-check-box we have to store the unsaved
+    // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
     this.savedDashboard.title = this.savedDashboard.lastSavedTitle;
@@ -335,9 +341,6 @@ export class DashboardStateManager {
 
   setTitle(title) {
     this.appState.title = title;
-    // The saved-object-save-as-check-box shows a warning if the current object title is different then
-    // the existing object title. It calculates this difference by comparing this.dashboard.title to
-    // this.dashboard.lastSavedTitle, so we need to push the temporary, unsaved title, onto the dashboard.
     this.savedDashboard.title = title;
     this.saveState();
   }
@@ -366,15 +369,6 @@ export class DashboardStateManager {
 
   setHidePanelTitles(hidePanelTitles) {
     this.appState.options.hidePanelTitles = hidePanelTitles;
-    this.saveState();
-  }
-
-  getDarkTheme() {
-    return this.appState.options.darkTheme;
-  }
-
-  setDarkTheme(darkTheme) {
-    this.appState.options.darkTheme = darkTheme;
     this.saveState();
   }
 
@@ -482,7 +476,7 @@ export class DashboardStateManager {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
-    return this.isDirty || hasTimeFilterChanged;
+    return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
   getPanels() {
@@ -552,30 +546,17 @@ export class DashboardStateManager {
    * @param {Object} timeFilter
    * @param {func} timeFilter.setTime
    * @param {func} timeFilter.setRefreshInterval
-   * @param quickTimeRanges
    */
-  syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
+  syncTimefilterWithDashboard(timeFilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
         defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
       }));
     }
 
-    let mode;
-    const isMoment = moment(this.savedDashboard.timeTo).isValid();
-    if (isMoment) {
-      mode = 'absolute';
-    } else {
-      const quickTime = _.find(
-        quickTimeRanges,
-        (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
-
-      mode = quickTime ? 'quick' : 'relative';
-    }
     timeFilter.setTime({
       from: this.savedDashboard.timeFrom,
       to: this.savedDashboard.timeTo,
-      mode
     });
 
     if (this.savedDashboard.refreshInterval) {

@@ -24,22 +24,25 @@ import { filter, map } from 'rxjs/operators';
 import { UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
-interface Params {
+/** @public */
+interface UiSettingsClientParams {
   api: UiSettingsApi;
   onUpdateError: UiSettingsClient['onUpdateError'];
   defaults: UiSettingsState;
   initialSettings?: UiSettingsState;
 }
 
+/** @public */
 export class UiSettingsClient {
   private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly saved$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
 
   private readonly api: UiSettingsApi;
   private readonly onUpdateError: (error: Error) => void;
   private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
-  constructor(readonly params: Params) {
+  constructor(readonly params: UiSettingsClientParams) {
     this.api = params.api;
     this.onUpdateError = params.onUpdateError;
     this.defaults = cloneDeep(params.defaults);
@@ -182,11 +185,8 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
 
     // don't broadcast change if userValue was already overriding the default
     if (this.cache[key].userValue == null) {
-      this.update$.next({
-        key,
-        newValue: newDefault,
-        oldValue: prevDefault,
-      });
+      this.update$.next({ key, newValue: newDefault, oldValue: prevDefault });
+      this.saved$.next({ key, newValue: newDefault, oldValue: prevDefault });
     }
   }
 
@@ -199,11 +199,20 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   /**
+   * Returns an Observable that notifies subscribers of each update to the uiSettings,
+   * including the key, newValue, and oldValue of the setting that changed.
+   */
+  public getSaved$() {
+    return this.saved$.asObservable();
+  }
+
+  /**
    * Prepares the uiSettingsClient to be discarded, completing any update$ observables
    * that have been created.
    */
   public stop() {
     this.update$.complete();
+    this.saved$.complete();
   }
 
   private assertUpdateAllowed(key: string) {
@@ -233,6 +242,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     try {
       const { settings } = await this.api.batchSet(key, newVal);
       this.cache = defaultsDeep({}, defaults, settings);
+      this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {
       this.setLocally(key, initialVal);

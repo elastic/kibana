@@ -48,8 +48,8 @@ class MarkdownEditor extends Component {
 
   componentDidMount() {
     if(this.props.visData$) {
-      this.subscription = this.props.visData$.subscribe((data) => {
-        this.setState({ visData: data });
+      this.subscription = this.props.visData$.subscribe(visData => {
+        this.setState({ visData });
       });
     }
   }
@@ -169,7 +169,7 @@ class MarkdownEditor extends Component {
               />
             </p>
           </EuiText>
-          <table className="table">
+          <table className="table" data-test-subj="tsvbMarkdownVariablesTable">
             <thead>
               <tr>
                 <th scope="col">
@@ -190,7 +190,7 @@ class MarkdownEditor extends Component {
           </table>
 
           {rows.length === 0 && (
-            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
+            <EuiTitle size="xxs" className="tsvbMarkdownVariablesTable__noVariables" data-test-subj="tvbMarkdownEditor__noVariables">
               <span>
                 <FormattedMessage
                   id="tsvb.markdownEditor.noVariablesAvailableDescription"
@@ -207,7 +207,7 @@ class MarkdownEditor extends Component {
               <FormattedMessage
                 id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by…"
+                creating lists with data from a group by:"
                 values={{ all: (<code>_all</code>) }}
               />
             </p>

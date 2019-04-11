@@ -9,10 +9,10 @@ import gql from 'graphql-tag';
 export const rootSchema = gql`
   schema {
     query: Query
-    #mutation: Mutation
+    mutation: Mutation
   }
 
   type Query
 
-  #type Mutation
+  type Mutation
 `;

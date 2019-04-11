@@ -5,30 +5,20 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { first, get } from 'lodash';
+import { Location } from 'history';
+import { get } from 'lodash';
 import React from 'react';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
+import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
-  getPropertyTabNames,
-  PropertiesTable,
-  Tab
-} from '../../../shared/PropertiesTable';
-
-// Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
-  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
-  return selectedTab ? selectedTab : first(tabs) || {};
-}
-
-function getTabs(transactionData: Transaction) {
-  const dynamicProps = Object.keys(transactionData.context || {});
-  return getPropertyTabNames(dynamicProps);
-}
+  getCurrentTab,
+  getTabsFromObject
+} from '../../../shared/PropertiesTable/tabConfig';
 
 interface Props {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
 }
@@ -38,9 +28,9 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   transaction,
   urlParams
 }) => {
-  const tabs = getTabs(transaction);
+  const tabs = getTabsFromObject(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
-  const agentName = transaction.context.service.agent.name;
+  const agentName = transaction.agent.name;
 
   return (
     <div>
@@ -67,7 +57,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
       </EuiTabs>
       <EuiSpacer />
       <PropertiesTable
-        propData={get(transaction.context, currentTab.key)}
+        propData={get(transaction, currentTab.key)}
         propKey={currentTab.key}
         agentName={agentName}
       />

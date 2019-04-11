@@ -4,9 +4,11 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T14:17:04.040Z",
     "version": 1,
+    "migrationVersion": {
+      "canvas-workpad": "7.0.0"
+    },
     "attributes": {
       "name": "[Flights] Overview",
-      "id": "workpad-a474e74b-aedc-47c3-894a-db77e62c41e0",
       "width": 1280,
       "height": 720,
       "page": 0,
@@ -226,9 +228,9 @@
             {
               "id": "element-60733afe-abce-4449-b0dd-5310d8ffffce",
               "position": {
-                "left": 173.25,
+                "left": 163.75,
                 "top": 416.9379542305451,
-                "width": 81,
+                "width": 100,
                 "height": 39,
                 "angle": 0
               },

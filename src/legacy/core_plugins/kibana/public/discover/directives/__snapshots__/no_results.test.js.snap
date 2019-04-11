@@ -425,20 +425,13 @@ Array [
       <div
         class="euiText euiText--medium"
       >
-        <h3>
+        <h3
+          data-test-subj="discoverNoResultsTimefilter"
+        >
           Expand your time range
         </h3>
         <p>
-          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try 
-          <button
-            aria-expanded="false"
-            class="euiLink euiLink--primary"
-            data-test-subj="discoverNoResultsTimefilter"
-            type="button"
-          >
-            opening the time picker
-          </button>
-           and changing the time range to one which contains data.
+          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try changing the time range to one which contains data.
         </p>
       </div>
     </div>

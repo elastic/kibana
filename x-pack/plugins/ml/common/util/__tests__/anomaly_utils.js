@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   getSeverity,
   getSeverityWithLow,
@@ -14,6 +14,7 @@ import {
   getMultiBucketImpactLabel,
   getEntityFieldName,
   getEntityFieldValue,
+  getEntityFieldList,
   showActualForFunction,
   showTypicalForFunction,
   isRuleSupported,
@@ -182,30 +183,30 @@ describe('ML - anomaly utils', () => {
   describe('getSeverity', () => {
 
     it('returns warning for 0 <= score < 25', () => {
-      expect(getSeverity(0)).to.be('warning');
-      expect(getSeverity(0.001)).to.be('warning');
-      expect(getSeverity(24.99)).to.be('warning');
+      expect(getSeverity(0).id).to.be('warning');
+      expect(getSeverity(0.001).id).to.be('warning');
+      expect(getSeverity(24.99).id).to.be('warning');
     });
 
     it('returns minor for 25 <= score < 50', () => {
-      expect(getSeverity(25)).to.be('minor');
-      expect(getSeverity(49.99)).to.be('minor');
+      expect(getSeverity(25).id).to.be('minor');
+      expect(getSeverity(49.99).id).to.be('minor');
     });
 
     it('returns minor for 50 <= score < 75', () => {
-      expect(getSeverity(50)).to.be('major');
-      expect(getSeverity(74.99)).to.be('major');
+      expect(getSeverity(50).id).to.be('major');
+      expect(getSeverity(74.99).id).to.be('major');
     });
 
     it('returns critical for score >= 75', () => {
-      expect(getSeverity(75)).to.be('critical');
-      expect(getSeverity(100)).to.be('critical');
-      expect(getSeverity(1000)).to.be('critical');
+      expect(getSeverity(75).id).to.be('critical');
+      expect(getSeverity(100).id).to.be('critical');
+      expect(getSeverity(1000).id).to.be('critical');
     });
 
     it('returns unknown for scores less than 0 or string input', () => {
-      expect(getSeverity(-10)).to.be('unknown');
-      expect(getSeverity('value')).to.be('unknown');
+      expect(getSeverity(-10).id).to.be('unknown');
+      expect(getSeverity('value').id).to.be('unknown');
     });
 
   });
@@ -213,35 +214,35 @@ describe('ML - anomaly utils', () => {
   describe('getSeverityWithLow', () => {
 
     it('returns low for 0 <= score < 3', () => {
-      expect(getSeverityWithLow(0)).to.be('low');
-      expect(getSeverityWithLow(0.001)).to.be('low');
-      expect(getSeverityWithLow(2.99)).to.be('low');
+      expect(getSeverityWithLow(0).id).to.be('low');
+      expect(getSeverityWithLow(0.001).id).to.be('low');
+      expect(getSeverityWithLow(2.99).id).to.be('low');
     });
 
     it('returns warning for 3 <= score < 25', () => {
-      expect(getSeverityWithLow(3)).to.be('warning');
-      expect(getSeverityWithLow(24.99)).to.be('warning');
+      expect(getSeverityWithLow(3).id).to.be('warning');
+      expect(getSeverityWithLow(24.99).id).to.be('warning');
     });
 
     it('returns minor for 25 <= score < 50', () => {
-      expect(getSeverityWithLow(25)).to.be('minor');
-      expect(getSeverityWithLow(49.99)).to.be('minor');
+      expect(getSeverityWithLow(25).id).to.be('minor');
+      expect(getSeverityWithLow(49.99).id).to.be('minor');
     });
 
     it('returns minor for 50 <= score < 75', () => {
-      expect(getSeverityWithLow(50)).to.be('major');
-      expect(getSeverityWithLow(74.99)).to.be('major');
+      expect(getSeverityWithLow(50).id).to.be('major');
+      expect(getSeverityWithLow(74.99).id).to.be('major');
     });
 
     it('returns critical for score >= 75', () => {
-      expect(getSeverityWithLow(75)).to.be('critical');
-      expect(getSeverityWithLow(100)).to.be('critical');
-      expect(getSeverityWithLow(1000)).to.be('critical');
+      expect(getSeverityWithLow(75).id).to.be('critical');
+      expect(getSeverityWithLow(100).id).to.be('critical');
+      expect(getSeverityWithLow(1000).id).to.be('critical');
     });
 
     it('returns unknown for scores less than 0 or string input', () => {
-      expect(getSeverityWithLow(-10)).to.be('unknown');
-      expect(getSeverityWithLow('value')).to.be('unknown');
+      expect(getSeverityWithLow(-10).id).to.be('unknown');
+      expect(getSeverityWithLow('value').id).to.be('unknown');
     });
 
   });
@@ -347,6 +348,52 @@ describe('ML - anomaly utils', () => {
       expect(getEntityFieldValue(noEntityRecord)).to.be(undefined);
     });
 
+  });
+
+  describe('getEntityFieldList', () => {
+    it('returns an empty list for a record with no by, over or partition fields', () => {
+      expect(getEntityFieldList(noEntityRecord)).to.be.empty();
+    });
+
+    it('returns correct list for a record with a by field', () => {
+      expect(getEntityFieldList(byEntityRecord)).to.eql([
+        {
+          fieldName: 'airline',
+          fieldValue: 'JZA',
+          fieldType: 'by'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with a partition field', () => {
+      expect(getEntityFieldList(partitionEntityRecord)).to.eql([
+        {
+          fieldName: 'airline',
+          fieldValue: 'AAL',
+          fieldType: 'partition'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with an over field', () => {
+      expect(getEntityFieldList(overEntityRecord)).to.eql([
+        {
+          fieldName: 'clientip',
+          fieldValue: '37.157.32.164',
+          fieldType: 'over'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with a by and over field', () => {
+      expect(getEntityFieldList(rareEntityRecord)).to.eql([
+        {
+          fieldName: 'clientip',
+          fieldValue: '173.252.74.112',
+          fieldType: 'over'
+        }
+      ]);
+    });
   });
 
   describe('showActualForFunction', () => {

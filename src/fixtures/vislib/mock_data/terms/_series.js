@@ -3,6 +3,7 @@ import _ from 'lodash';
 export default {
   'label': '',
   'xAxisLabel': 'Top 5 extension',
+  'xAxisOrderedValues': ['jpg', 'css', 'png', 'gif', 'php'],
   'yAxisLabel': 'Count of documents',
   'series': [
     {

@@ -18,8 +18,8 @@
  */
 
 import angular from 'angular';
+import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
-import * as columnActions from 'ui/doc_table/actions/columns';
 import {
   ContainerState,
   Embeddable,
@@ -31,6 +31,7 @@ import { Filters, Query } from 'ui/embeddable/types';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { getTime } from 'ui/timefilter/get_time';
+import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 
@@ -86,7 +87,7 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
-      indexPattern: savedSearch.searchSource.getField('index'),
+      indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;

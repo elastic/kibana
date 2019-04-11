@@ -19,36 +19,60 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
+import chrome from 'ui/chrome';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;
-      this.savedObj = savedObj;
-      this.vis = savedObj.vis;
+
+      this.state = {
+        savedObj: savedObj,
+        vis: savedObj.vis,
+        isLoaded: false,
+      };
     }
 
+    fetchDefaultIndexPattern = async () => {
+      const savedObjectsClient = chrome.getSavedObjectsClient();
+      const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+
+      return indexPattern.attributes.title;
+    };
+
+    fetchDefaultParams = async () => {
+      this.state.vis.params.default_index_pattern = await this.fetchDefaultIndexPattern();
+      this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
+
+      this.state.isLoaded = true;
+    };
+
+    getComponent = () => {
+      return this.state.vis.type.editorConfig.component;
+    };
+
     async render(params) {
-      const Component = this.vis.type.editorConfig.component;
+      const Component = this.getComponent();
+
+      !this.state.isLoaded && await this.fetchDefaultParams();
+
       render(
-        <I18nProvider>
+        <I18nContext>
           <Component
             config={config}
-            vis={this.vis}
-            savedObj={this.savedObj}
+            vis={this.state.vis}
+            visFields={this.state.vis.fields}
+            visParams={this.state.vis.params}
+            savedObj={this.state.savedObj}
             timeRange={params.timeRange}
             renderComplete={() => {}}
             isEditorMode={true}
             appState={params.appState}
           />
-        </I18nProvider>, this.el);
-    }
-
-    resize() {
-      if (this.visData) {
-        this.render(this.visData);
-      }
+        </I18nContext>,
+        this.el);
     }
 
     destroy() {
@@ -58,7 +82,7 @@ function ReactEditorControllerProvider(Private, config) {
 
   return {
     name: 'react_editor',
-    handler: ReactEditorController
+    handler: ReactEditorController,
   };
 }
 

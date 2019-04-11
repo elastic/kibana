@@ -9,18 +9,17 @@ import { Query } from 'react-apollo';
 
 import {
   InfraMetricInput,
+  InfraNode,
   InfraNodeType,
   InfraPathInput,
   InfraPathType,
   InfraTimerangeInput,
   WaffleNodesQuery,
 } from '../../graphql/types';
-import { InfraWaffleMapGroup } from '../../lib/lib';
-import { nodesToWaffleMap } from './nodes_to_wafflemap';
 import { waffleNodesQuery } from './waffle_nodes.gql_query';
 
 interface WithWaffleNodesArgs {
-  nodes: InfraWaffleMapGroup[];
+  nodes: InfraNode[];
   loading: boolean;
   refetch: () => void;
 }
@@ -67,7 +66,7 @@ export const WithWaffleNodes = ({
         loading,
         nodes:
           data && data.source && data.source.map && data.source.map.nodes
-            ? nodesToWaffleMap(data.source.map.nodes)
+            ? data.source.map.nodes
             : [],
         refetch,
       })

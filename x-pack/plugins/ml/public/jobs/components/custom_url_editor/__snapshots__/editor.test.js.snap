@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlEditor renders the editor for a dashboard type URL with a label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -35,6 +35,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -57,6 +58,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -92,6 +94,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiSelect
         compressed={true}
@@ -125,6 +128,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -143,17 +147,8 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         singleSelection={false}
       />
     </EuiFormRow>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
+    <EuiFlexGroup>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFormRow
@@ -169,6 +164,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiSelect
             compressed={true}
@@ -194,11 +190,11 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with an entity and empty time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -232,6 +228,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -254,6 +251,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -289,6 +287,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiSelect
         compressed={true}
@@ -322,6 +321,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -346,17 +346,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         singleSelection={false}
       />
     </EuiFormRow>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
+    <EuiFlexGroup>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFormRow
@@ -372,6 +363,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiSelect
             compressed={true}
@@ -395,10 +387,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiFormRow
           className="url-time-range"
           compressed={true}
@@ -418,6 +407,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={true}
@@ -431,11 +421,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with valid time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -469,6 +459,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -491,6 +482,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -526,6 +518,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiSelect
         compressed={true}
@@ -559,6 +552,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -583,17 +577,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         singleSelection={false}
       />
     </EuiFormRow>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
+    <EuiFlexGroup>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFormRow
@@ -609,6 +594,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiSelect
             compressed={true}
@@ -632,10 +618,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiFormRow
           className="url-time-range"
           compressed={true}
@@ -651,6 +634,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={true}
@@ -664,11 +648,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -706,6 +690,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -728,6 +713,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -763,6 +749,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiSelect
         compressed={true}
@@ -796,6 +783,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -814,17 +802,8 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         singleSelection={false}
       />
     </EuiFormRow>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
+    <EuiFlexGroup>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFormRow
@@ -840,6 +819,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiSelect
             compressed={true}
@@ -865,11 +845,11 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with duplicate label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -907,6 +887,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -929,6 +910,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -964,6 +946,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiTextArea
         compressed={true}
@@ -975,11 +958,11 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with unique label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -1013,6 +996,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiFieldText
         compressed={true}
@@ -1035,6 +1019,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -1070,6 +1055,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <EuiTextArea
         compressed={true}
@@ -1081,5 +1067,5 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;

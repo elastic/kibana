@@ -41,7 +41,7 @@ export function importDataProvider(callWithRequest) {
       }
 
       let failures = [];
-      if (data.length && indexExits(index)) {
+      if (data.length) {
         const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
           if (resp.ingestError) {
@@ -78,38 +78,31 @@ export function importDataProvider(callWithRequest) {
   }
 
   async function createIndex(index, settings, mappings) {
-    if (await indexExits(index) === false) {
-      const body = {
-        mappings: {
-          _doc: {
-            _meta: {
-              created_by: INDEX_META_DATA_CREATED_BY
-            },
-            properties: mappings
-          },
-        }
-      };
-
-      if (settings && Object.keys(settings).length) {
-        body.settings = settings;
+    const body = {
+      mappings: {
+        _meta: {
+          created_by: INDEX_META_DATA_CREATED_BY
+        },
+        properties: mappings
       }
+    };
 
-      await callWithRequest('indices.create', { index, body });
-    } else {
-      throw `${index} already exists.`;
+    if (settings && Object.keys(settings).length) {
+      body.settings = settings;
     }
+
+    await callWithRequest('indices.create', { index, body });
   }
 
   async function indexData(index, pipelineId, data) {
     try {
-      const type = '_doc';
       const body = [];
       for (let i = 0; i < data.length; i++) {
         body.push({ index: {} });
         body.push(data[i]);
       }
 
-      const settings = { index, type, body };
+      const settings = { index, body };
       if (pipelineId !== undefined) {
         settings.pipeline = pipelineId;
       }
@@ -146,10 +139,6 @@ export function importDataProvider(callWithRequest) {
       };
     }
 
-  }
-
-  async function indexExits(index) {
-    return await callWithRequest('indices.exists', { index });
   }
 
   async function createPipeline(id, pipeline) {

@@ -9,7 +9,14 @@ declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
 }
 
-import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCopy as EuiCopyTyped,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
@@ -19,6 +26,7 @@ import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
+  layoutId: string | undefined;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
@@ -31,9 +39,27 @@ interface Props {
 interface State {
   isStale: boolean;
   absoluteUrl: string;
+  layoutId: string;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
+  public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (nextProps.layoutId !== prevState.layoutId) {
+      return {
+        ...prevState,
+        absoluteUrl: ReportingPanelContentUi.getAbsoluteReportGenerationUrl(nextProps),
+      };
+    }
+    return prevState;
+  }
+
+  private static getAbsoluteReportGenerationUrl = (props: Props) => {
+    const relativePath = reportingClient.getReportingJobPath(
+      props.reportType,
+      props.getJobParams()
+    );
+    return url.resolve(window.location.href, relativePath);
+  };
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -42,6 +68,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.state = {
       isStale: false,
       absoluteUrl: '',
+      layoutId: '',
     };
   }
 
@@ -54,7 +81,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    this.setAbsoluteReportGenerationUrl();
 
     window.addEventListener('hashchange', this.markAsStale, false);
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
@@ -63,7 +89,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   public render() {
     if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
-        <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow
             helpText={
               <FormattedMessage
@@ -91,7 +117,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     );
 
     return (
-      <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
+      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
         <EuiText size="s">
           <p>{reportMsg}</p>
         </EuiText>
@@ -112,16 +138,19 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="sharePanel__copyAnchor">
+        <EuiCopyTyped
+          textToCopy={this.state.absoluteUrl}
+          anchorClassName="kbnShareContextMenu__copyAnchor"
+        >
           {(copy: () => void) => (
-            <EuiButton className="sharePanel__button" onClick={copy} size="s">
+            <EuiButton className="kbnShareContextMenu__copyButton" onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
               />
             </EuiButton>
           )}
-        </EuiCopy>
+        </EuiCopyTyped>
       </EuiForm>
     );
   }
@@ -129,7 +158,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        className="sharePanel__button"
+        className="kbnShareContextMenu__copyButton"
         disabled={isDisabled}
         fill
         onClick={this.createReportingJob}
@@ -174,12 +203,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     if (!this.mounted) {
       return;
     }
-
-    const relativePath = reportingClient.getReportingJobPath(
-      this.props.reportType,
-      this.props.getJobParams()
-    );
-    const absoluteUrl = url.resolve(window.location.href, relativePath);
+    const absoluteUrl = ReportingPanelContentUi.getAbsoluteReportGenerationUrl(this.props);
     this.setState({ absoluteUrl });
   };
 

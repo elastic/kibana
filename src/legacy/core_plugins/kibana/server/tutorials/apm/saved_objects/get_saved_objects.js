@@ -18,7 +18,6 @@
  */
 
 import indexPattern from './index_pattern.json';
-import staticSavedObjects from './saved_objects.json';
 
 function getIndexPatternWithTitle(indexPatternTitle) {
   indexPattern.attributes.title = indexPatternTitle;
@@ -26,5 +25,5 @@ function getIndexPatternWithTitle(indexPatternTitle) {
 }
 
 export function getSavedObjects(indexPatternTitle) {
-  return [getIndexPatternWithTitle(indexPatternTitle), ...staticSavedObjects];
+  return [getIndexPatternWithTitle(indexPatternTitle)];
 }

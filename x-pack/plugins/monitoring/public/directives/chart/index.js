@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringTimeseriesContainer } from '../../components/chart/monitoring_timeseries_container';
 import { EuiSpacer } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
 uiModule.directive('monitoringChart', () => {
@@ -31,7 +31,7 @@ uiModule.directive('monitoringChart', () => {
 
       scope.$watch('series', series => {
         render(
-          <I18nProvider>
+          <I18nContext>
             <Fragment>
               <MonitoringTimeseriesContainer
                 series={series}
@@ -39,7 +39,7 @@ uiModule.directive('monitoringChart', () => {
               />
               <EuiSpacer size="m"/>
             </Fragment>
-          </I18nProvider>,
+          </I18nContext>,
           $elem[0]
         );
       });

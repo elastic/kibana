@@ -22,6 +22,7 @@ import {
 
 import chrome from 'ui/chrome';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function Settings({
   canGetFilters,
@@ -36,7 +37,12 @@ export function Settings({
         >
           <EuiPageContentHeader>
             <EuiTitle>
-              <h2>Job Management</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.settings.jobManagementTitle"
+                  defaultMessage="Job Management"
+                />
+              </h2>
             </EuiTitle>
           </EuiPageContentHeader>
 
@@ -49,7 +55,10 @@ export function Settings({
                 href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
                 isDisabled={canGetCalendars === false}
               >
-                Calendar management
+                <FormattedMessage
+                  id="xpack.ml.settings.calendarManagementButtonLabel"
+                  defaultMessage="Calendar management"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
 
@@ -61,7 +70,10 @@ export function Settings({
                 href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}
                 isDisabled={canGetFilters === false}
               >
-                Filter Lists
+                <FormattedMessage
+                  id="xpack.ml.settings.filterListsButtonLabel"
+                  defaultMessage="Filter Lists"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>

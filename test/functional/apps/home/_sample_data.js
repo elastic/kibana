@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
 
@@ -84,14 +85,14 @@ export default function ({ getService, getPageObjects }) {
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(19);
       });
 
 
       it.skip('pie charts rendered', async () => {
-        await dashboardExpect.pieSliceCount(4);
+        await pieChart.expectPieSliceCount(4);
       });
 
       it.skip('area, bar and heatmap charts rendered', async () => {
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(11);
       });
@@ -134,7 +135,7 @@ export default function ({ getService, getPageObjects }) {
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(12);
       });

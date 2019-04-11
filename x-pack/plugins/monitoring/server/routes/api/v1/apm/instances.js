@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getStats, getApms } from '../../../../lib/apm';
 import { handleError } from '../../../../lib/errors';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function apmInstancesRoute(server) {
   server.route({
@@ -31,7 +32,7 @@ export function apmInstancesRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
 

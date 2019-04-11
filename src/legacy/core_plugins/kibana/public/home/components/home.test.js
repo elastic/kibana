@@ -37,7 +37,6 @@ describe('home', () => {
 
   beforeEach(() => {
     defaultProps = {
-      recentlyAccessed: [],
       directories: [],
       apmUiEnabled: true,
       mlEnabled: true,
@@ -80,23 +79,7 @@ describe('home', () => {
   }
 
   test('should render home component', async () => {
-    const component = await renderHome({
-      recentlyAccessed: [
-        {
-          label: 'my vis',
-          link: 'link_to_my_vis',
-          id: '1'
-        }
-      ],
-    });
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('should not contain RecentlyAccessed panel when there is no recentlyAccessed history', async () => {
-    const component = await renderHome({
-      recentlyAccessed: [],
-    });
+    const component = await renderHome();
 
     expect(component).toMatchSnapshot();
   });

@@ -32,9 +32,9 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IUrlParams } from '../../../../store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
-import { UnconnectedKibanaLink } from '../../../../utils/url';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;
@@ -58,7 +58,6 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: any;
   isOpen: boolean;
 }
 
@@ -204,7 +203,7 @@ export class WatcherFlyout extends Component<
         this.addSuccessToast(id);
       })
       .catch(e => {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.error(e);
         this.addErrorToast();
       });
@@ -248,14 +247,12 @@ export class WatcherFlyout extends Component<
               defaultMessage:
                 'The watch is now ready and will send error reports for {serviceName}.',
               values: {
-                serviceName: this.props.urlParams.serviceName as string
+                serviceName: this.props.urlParams.serviceName
               }
             }
           )}{' '}
-          <UnconnectedKibanaLink
-            location={this.props.location}
-            pathname={'/app/kibana'}
-            hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
+          <KibanaLink
+            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
@@ -263,7 +260,7 @@ export class WatcherFlyout extends Component<
                 defaultMessage: 'View watch'
               }
             )}
-          </UnconnectedKibanaLink>
+          </KibanaLink>
         </p>
       )
     });
@@ -314,14 +311,14 @@ export class WatcherFlyout extends Component<
         </p>
 
         <EuiForm>
-          <h3>
+          <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.conditionTitle',
               {
                 defaultMessage: 'Condition'
               }
             )}
-          </h3>
+          </h4>
           <EuiFormRow
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.occurrencesThresholdLabel',
@@ -345,17 +342,15 @@ export class WatcherFlyout extends Component<
               onChange={this.onChangeThreshold}
             />
           </EuiFormRow>
-
-          <h3>
+          <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
               {
                 defaultMessage: 'Trigger schedule'
               }
             )}
-          </h3>
-
-          <p>
+          </h4>
+          <EuiText size="xs" color="subdued">
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleDescription',
               {
@@ -363,8 +358,8 @@ export class WatcherFlyout extends Component<
                   'Choose the time interval for the report, when the threshold is exceeded.'
               }
             )}
-          </p>
-
+          </EuiText>
+          <EuiSpacer size="m" />
           <EuiRadio
             id="daily"
             label={i18n.translate(
@@ -376,9 +371,7 @@ export class WatcherFlyout extends Component<
             onChange={() => this.onChangeSchedule('daily')}
             checked={this.state.schedule === 'daily'}
           />
-
           <EuiSpacer size="m" />
-
           <EuiFormRow
             helpText={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportHelpText',
@@ -397,7 +390,6 @@ export class WatcherFlyout extends Component<
               disabled={this.state.schedule !== 'daily'}
             />
           </EuiFormRow>
-
           <EuiRadio
             id="interval"
             label={i18n.translate(
@@ -409,9 +401,7 @@ export class WatcherFlyout extends Component<
             onChange={() => this.onChangeSchedule('interval')}
             checked={this.state.schedule === 'interval'}
           />
-
           <EuiSpacer size="m" />
-
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <SmallInput>
@@ -464,16 +454,15 @@ export class WatcherFlyout extends Component<
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          <h3>
+          <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsTitle',
               {
                 defaultMessage: 'Actions'
               }
             )}
-          </h3>
-          <p>
+          </h4>
+          <EuiText size="xs" color="subdued">
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsDescription',
               {
@@ -481,7 +470,8 @@ export class WatcherFlyout extends Component<
                   'Reports can be sent by email or posted to a Slack channel. Each report will include the top 10 errors sorted by occurrence.'
               }
             )}
-          </p>
+          </EuiText>
+          <EuiSpacer size="m" />
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendEmailLabel',
@@ -492,7 +482,6 @@ export class WatcherFlyout extends Component<
             checked={this.state.actions.email}
             onChange={() => this.onChangeAction('email')}
           />
-
           <EuiSpacer size="m" />
           {this.state.actions.email && (
             <EuiFormRow
@@ -531,7 +520,6 @@ export class WatcherFlyout extends Component<
               />
             </EuiFormRow>
           )}
-
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
@@ -543,7 +531,6 @@ export class WatcherFlyout extends Component<
             onChange={() => this.onChangeAction('slack')}
           />
           <EuiSpacer size="m" />
-
           {this.state.actions.slack && (
             <EuiFormRow
               label={i18n.translate(

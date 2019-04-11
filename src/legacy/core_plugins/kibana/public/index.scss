@@ -1,7 +1,7 @@
-@import 'ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 // Public UI styles
-@import 'ui/public/index';
+@import 'src/legacy/ui/public/index';
 
 // Context styles
 @import './context/index';
@@ -19,10 +19,13 @@
 @import './visualize/index';
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
-@import 'ui/public/vis/index';
+@import 'src/legacy/ui/public/vis/index';
 
 // Management styles
 @import './management/index';
+
+// Doc Viewer
+@import './doc_viewer/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS

@@ -17,6 +17,8 @@ import { jobRoutes } from './server/routes/anomaly_detectors';
 import { dataFeedRoutes } from './server/routes/datafeeds';
 import { indicesRoutes } from './server/routes/indices';
 import { jobValidationRoutes } from './server/routes/job_validation';
+import mappings from './mappings';
+import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
 import { dataRecognizer } from './server/routes/modules';
@@ -29,6 +31,7 @@ import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
 import { i18n } from '@kbn/i18n';
+import { initMlServerLog } from './server/client/log';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -51,6 +54,12 @@ export const ml = (kibana) => {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'ml-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings,
       home: ['plugins/ml/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
@@ -108,6 +117,9 @@ export const ml = (kibana) => {
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
       fileDataVisualizerRoutes(server, commonRouteConfig);
+
+      initMlServerLog(server);
+      makeMlUsageCollector(server);
     }
 
   });

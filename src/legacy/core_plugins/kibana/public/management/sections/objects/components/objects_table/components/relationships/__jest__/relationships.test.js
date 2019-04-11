@@ -20,6 +20,8 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -35,6 +37,14 @@ jest.mock('ui/errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
+}));
+
+jest.mock('../../../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
 }));
 
 import { Relationships } from '../relationships';
@@ -83,12 +93,12 @@ describe('Relationships', () => {
   it('should render searches normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        indexPatterns: [
+        'index-pattern': [
           {
             id: '1',
           }
         ],
-        visualizations: [
+        visualization: [
           {
             id: '2',
           }
@@ -123,7 +133,7 @@ describe('Relationships', () => {
   it('should render visualizations normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        dashboards: [
+        dashboard: [
           {
             id: '1',
           },
@@ -161,7 +171,7 @@ describe('Relationships', () => {
   it('should render dashboards normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
-        visualizations: [
+        visualization: [
           {
             id: '1',
           },

@@ -7,51 +7,73 @@
 import _ from 'lodash';
 
 import { Request } from 'hapi';
-import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+import {
+  CallClusterWithRequest,
+  DeprecationAPIResponse,
+  DeprecationInfo,
+} from 'src/legacy/core_plugins/elasticsearch';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
+  reindex?: boolean;
 }
 
 export interface UpgradeAssistantStatus {
+  readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
-
-  [checkupType: string]: EnrichedDeprecationInfo[];
 }
 
 export async function getUpgradeAssistantStatus(
-  callWithRequest: any,
+  callWithRequest: CallClusterWithRequest,
   req: Request,
-  basePath: string
+  isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = (await callWithRequest(req, 'transport.request', {
-    path: '/_xpack/migration/deprecations',
+  const deprecations = await callWithRequest(req, 'transport.request', {
+    path: '/_migration/deprecations',
     method: 'GET',
-  })) as DeprecationAPIResponse;
+  });
+
+  const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
+  const indices = getCombinedIndexInfos(deprecations);
+
+  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
   return {
-    cluster: deprecations.cluster_settings.concat(deprecations.node_settings),
-    indices: getCombinedIndexInfos(deprecations, basePath),
+    readyForUpgrade: criticalWarnings.length === 0,
+    cluster,
+    indices,
   };
 }
 
-// Combines the information from the migration assistance api and the deprecation api into a single array.
-// Enhances with information about which index the deprecation applies to and adds buttons for accessing the
-// reindex UI.
-const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: string) =>
+// Reformats the index deprecations to an array of deprecation warnings extended with an index field.
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce(
     (indexDeprecations, indexName) => {
       return indexDeprecations.concat(
         deprecations.index_settings[indexName].map(
-          d => ({ ...d, index: indexName } as EnrichedDeprecationInfo)
+          d =>
+            ({
+              ...d,
+              index: indexName,
+              reindex: /Index created before/.test(d.message),
+            } as EnrichedDeprecationInfo)
         )
       );
     },
     [] as EnrichedDeprecationInfo[]
   );
+
+const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
+  const combined = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
+
+  if (isCloudEnabled) {
+    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
+    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+  } else {
+    return combined;
+  }
+};

@@ -66,7 +66,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       testSubj: `createRollupIndexPatternButton`,
       isBeta: this.isBeta,
       onClick: () => {
-        urlHandler('/management/kibana/index?type=rollup');
+        urlHandler('/management/kibana/index_pattern?type=rollup');
       },
     } : null;
   }

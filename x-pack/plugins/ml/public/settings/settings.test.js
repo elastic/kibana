@@ -10,7 +10,7 @@ jest.mock('ui/chrome', () => ({
   getBasePath: jest.fn()
 }));
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { Settings } from './settings';
@@ -19,7 +19,7 @@ import { Settings } from './settings';
 describe('Settings', () => {
 
   test('Renders settings page', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <Settings canGetFilters={true} canGetCalendars={true}/>
     );
 
@@ -27,7 +27,7 @@ describe('Settings', () => {
   });
 
   test('Filter Lists button disabled if canGetFilters is false', () => {
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <Settings canGetFilters={false} canGetCalendars={true}/>
     );
 
@@ -37,7 +37,7 @@ describe('Settings', () => {
   });
 
   test('Calendar management button disabled if canGetCalendars is false', () => {
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <Settings canGetFilters={true} canGetCalendars={false} />
     );
 

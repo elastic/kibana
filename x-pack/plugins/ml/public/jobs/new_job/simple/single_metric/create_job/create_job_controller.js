@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -119,8 +120,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
-      filters,
       combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
@@ -242,8 +241,6 @@ module
       timeField: indexPattern.timeFieldName,
       indexPattern: undefined,
       usesSavedSearch: (savedSearch.id !== undefined),
-      query,
-      filters,
       combinedQuery,
       jobId: '',
       description: '',
@@ -475,6 +472,7 @@ module
             msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveDatafeedFailedErrorMessage', {
               defaultMessage: 'Save datafeed failed: '
             }), resp);
+            $scope.$applyAsync();
           });
       }
     };
@@ -568,7 +566,7 @@ module
       // any jitters in the chart caused by previously loading the model mid job.
         $scope.chartData.model = [];
         reloadModelChart()
-          .catch()
+          .catch(() => {})
           .then(() => {
             $scope.chartData.percentComplete = 100;
             $scope.$broadcast('render-results');

@@ -10,7 +10,7 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_NAME,
   SERVICE_NAME
-} from '../../../../common/constants';
+} from '../../../../common/elasticsearch_fieldnames';
 
 export function getBoolFilter(urlParams) {
   const boolFilter = [
@@ -39,7 +39,7 @@ export function getBoolFilter(urlParams) {
 
       if (urlParams.transactionName) {
         boolFilter.push({
-          term: { [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName }
+          term: { [TRANSACTION_NAME]: urlParams.transactionName }
         });
       }
 

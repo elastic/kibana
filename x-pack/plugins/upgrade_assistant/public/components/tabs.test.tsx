@@ -9,6 +9,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('axios', () => ({
   get: jest.fn(),
+  create: jest.fn(),
 }));
 
 import { UpgradeAssistantTabs } from './tabs';
@@ -57,5 +58,15 @@ describe('UpgradeAssistantTabs', () => {
     wrapper.update();
     // Should pass down error status to child component
     expect(wrapper.find(OverviewTab).prop('loadingState')).toEqual(LoadingState.Error);
+  });
+
+  it('upgrade error', async () => {
+    // @ts-ignore
+    axios.get.mockRejectedValue({ response: { status: 426 } });
+    const wrapper = mountWithIntl(<UpgradeAssistantTabs />);
+    await promisesToResolve();
+    wrapper.update();
+    // Should display an informative message if the cluster is currently mid-upgrade
+    expect(wrapper.find('EuiEmptyPrompt').exists()).toBe(true);
   });
 });

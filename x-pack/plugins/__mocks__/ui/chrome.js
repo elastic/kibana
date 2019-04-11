@@ -15,8 +15,12 @@ function getUiSettingsClient() {
         default:
           throw new Error(`Unexpected config key: ${key}`);
       }
-    }
+    },
   };
+}
+
+function getBasePath() {
+  return '/some/base/path';
 }
 
 function addBasePath(path) {
@@ -36,8 +40,14 @@ function getInjected(key) {
   }
 }
 
+function getXsrfToken() {
+  return 'kbn';
+}
+
 export default {
   getInjected,
   addBasePath,
-  getUiSettingsClient
+  getBasePath,
+  getUiSettingsClient,
+  getXsrfToken,
 };

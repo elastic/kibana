@@ -6,23 +6,23 @@
 
 import gql from 'graphql-tag';
 
-export const getPingsQuery = gql`
-  query PingList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $monitorId: String
-    $status: String
-    $sort: String
-    $size: Int
+export const getPingsQueryString = `
+query PingList(
+  $dateRangeStart: String!
+  $dateRangeEnd: String!
+  $monitorId: String
+  $status: String
+  $sort: String
+  $size: Int
+) {
+  allPings(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    monitorId: $monitorId
+    status: $status
+    sort: $sort
+    size: $size
   ) {
-    allPings(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      monitorId: $monitorId
-      status: $status
-      sort: $sort
-      size: $size
-    ) {
       total
       pings {
         timestamp
@@ -49,4 +49,8 @@ export const getPingsQuery = gql`
       }
     }
   }
+`;
+
+export const getPingsQuery = gql`
+  ${getPingsQueryString}
 `;

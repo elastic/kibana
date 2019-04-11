@@ -19,38 +19,62 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Observable, Subscription } from 'rxjs';
 
 import { Toast } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nSetup } from '../../i18n';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsStartContract } from './toasts_start_contract';
+import { ToastsSetup } from './toasts_start';
 
 interface Params {
-  targetDomElement: HTMLElement;
+  targetDomElement$: Observable<HTMLElement>;
+}
+
+interface Deps {
+  i18n: I18nSetup;
 }
 
 export class ToastsService {
+  private domElemSubscription?: Subscription;
+  private targetDomElement?: HTMLElement;
+
   constructor(private readonly params: Params) {}
 
-  public start() {
-    const toasts = new ToastsStartContract();
+  public setup({ i18n }: Deps) {
+    const toasts = new ToastsSetup();
 
-    render(
-      <I18nProvider>
-        <GlobalToastList
-          dismissToast={(toast: Toast) => toasts.remove(toast)}
-          toasts$={toasts.get$()}
-        />
-      </I18nProvider>,
-      this.params.targetDomElement
-    );
+    this.domElemSubscription = this.params.targetDomElement$.subscribe({
+      next: targetDomElement => {
+        this.cleanupTargetDomElement();
+        this.targetDomElement = targetDomElement;
+
+        render(
+          <i18n.Context>
+            <GlobalToastList
+              dismissToast={(toast: Toast) => toasts.remove(toast)}
+              toasts$={toasts.get$()}
+            />
+          </i18n.Context>,
+          targetDomElement
+        );
+      },
+    });
 
     return toasts;
   }
 
   public stop() {
-    unmountComponentAtNode(this.params.targetDomElement);
+    this.cleanupTargetDomElement();
 
-    this.params.targetDomElement.textContent = '';
+    if (this.domElemSubscription) {
+      this.domElemSubscription.unsubscribe();
+    }
+  }
+
+  private cleanupTargetDomElement() {
+    if (this.targetDomElement) {
+      unmountComponentAtNode(this.targetDomElement);
+      this.targetDomElement.textContent = '';
+    }
   }
 }

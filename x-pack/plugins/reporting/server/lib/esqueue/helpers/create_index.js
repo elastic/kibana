@@ -66,27 +66,23 @@ const schema = {
   }
 };
 
-export function createIndex(client, indexName,
-  doctype = constants.DEFAULT_SETTING_DOCTYPE,
-  indexSettings = { }) {
+export function createIndex(client, indexName, indexSettings = {}) {
   const body = {
     settings: {
       ...constants.DEFAULT_SETTING_INDEX_SETTINGS,
       ...indexSettings
     },
     mappings: {
-      [doctype]: {
-        properties: schema
-      }
+      properties: schema
     }
   };
 
-  return client.indices.exists({
+  return client.callWithInternalUser('indices.exists', {
     index: indexName,
   })
     .then((exists) => {
       if (!exists) {
-        return client.indices.create({
+        return client.callWithInternalUser('indices.create', {
           index: indexName,
           body: body
         })
@@ -99,7 +95,12 @@ export function createIndex(client, indexName,
              * This catch block is in place to not fail a job if the job runner hits this race condition.
              * Unfortunately we don't have a logger in scope to log a warning.
              */
-            err; // no-op
+            const isIndexExistsError = err && err.body && err.body.error && err.body.error.type === 'resource_already_exists_exception';
+            if (isIndexExistsError) {
+              return true;
+            }
+
+            throw err;
           });
       }
       return exists;

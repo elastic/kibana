@@ -26,7 +26,7 @@ import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
 
-uiRoutes.when('/management/kibana/index', {
+uiRoutes.when('/management/kibana/index_pattern', {
   template: angularTemplate,
   k7Breadcrumbs: getCreateBreadcrumbs,
   controller: function ($scope, $injector) {

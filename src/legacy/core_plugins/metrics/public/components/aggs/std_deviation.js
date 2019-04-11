@@ -51,7 +51,7 @@ const StandardDeviationAggUi = props => {
       value: 'upper'
     },
     {
-      дabel: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
       value: 'lower'
     },
   ];

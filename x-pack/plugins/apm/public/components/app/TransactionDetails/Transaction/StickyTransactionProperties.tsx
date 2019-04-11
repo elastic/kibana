@@ -4,71 +4,118 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
-  REQUEST_URL_FULL,
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
+  URL_FULL,
   USER_ID
-} from '../../../../../common/constants';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { idx } from '../../../../../common/idx';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
+import { ErrorCountBadge } from './ErrorCountBadge';
 
 interface Props {
   transaction: Transaction;
   totalDuration?: number;
+  errorCount?: number;
 }
 
 export function StickyTransactionProperties({
   transaction,
-  totalDuration
+  totalDuration,
+  errorCount
 }: Props) {
   const timestamp = transaction['@timestamp'];
-  const url = get(transaction, REQUEST_URL_FULL, 'N/A');
+  const url =
+    idx(transaction, _ => _.context.page.url) ||
+    idx(transaction, _ => _.url.full) ||
+    NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
+
+  const noErrorsText = i18n.translate(
+    'xpack.apm.transactionDetails.errorsNone',
+    {
+      defaultMessage: 'None'
+    }
+  );
+
   const stickyProperties: IStickyProperty[] = [
     {
-      label: 'Timestamp',
+      label: i18n.translate('xpack.apm.transactionDetails.timestampLabel', {
+        defaultMessage: 'Timestamp'
+      }),
       fieldName: '@timestamp',
       val: timestamp,
       truncated: true,
       width: '50%'
     },
     {
-      fieldName: REQUEST_URL_FULL,
+      fieldName: URL_FULL,
       label: 'URL',
       val: url,
       truncated: true,
       width: '50%'
     },
     {
-      label: 'Duration',
+      label: i18n.translate('xpack.apm.transactionDetails.durationLabel', {
+        defaultMessage: 'Duration'
+      }),
       fieldName: TRANSACTION_DURATION,
       val: asTime(duration),
       width: '25%'
     },
     {
-      label: '% of trace',
-      val: asPercent(duration, totalDuration, 'N/A'),
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.percentOfTraceLabel',
+        {
+          defaultMessage: '% of trace'
+        }
+      ),
+      val: asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
-      label: 'Result',
+      label: i18n.translate('xpack.apm.transactionDetails.resultLabel', {
+        defaultMessage: 'Result'
+      }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, 'N/A'),
-      width: '25%'
+      val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
+      width: '14%'
     },
     {
-      label: 'User ID',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.errorsOverviewLabel',
+        {
+          defaultMessage: 'Errors'
+        }
+      ),
+      val: errorCount ? (
+        <ErrorCountBadge
+          errorCount={errorCount}
+          transaction={transaction}
+          verbose
+        />
+      ) : (
+        noErrorsText
+      ),
+      width: '18%'
+    },
+    {
+      label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, 'N/A'),
+      val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
-      width: '25%'
+      width: '18%'
     }
   ];
 

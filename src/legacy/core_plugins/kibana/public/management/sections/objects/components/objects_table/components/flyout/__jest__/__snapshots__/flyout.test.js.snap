@@ -9,9 +9,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -24,7 +22,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
-    <React.Fragment>
+    <span>
       <EuiSpacer
         size="s"
       />
@@ -62,7 +60,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           />
         </p>
       </EuiCallOut>
-    </React.Fragment>
+    </span>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiInMemoryTable
@@ -93,15 +91,16 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
             "existingIndexPatternId": "MyIndexPattern*",
             "list": Array [
               Object {
-                "id": "MyIndexPattern*",
-                "name": "MyIndexPattern*",
-                "type": "index-pattern",
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
               },
             ],
             "newIndexPatternId": undefined,
@@ -123,16 +122,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -150,7 +142,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -175,7 +166,304 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
+exports[`Flyout conflicts should allow conflict resolution 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "getConflictResolutions": [Function],
+        "state": Object {
+          "conflictedIndexPatterns": undefined,
+          "conflictedSavedObjectsLinkedToSavedSearches": undefined,
+          "conflictedSearchDocs": undefined,
+          "conflictingRecord": undefined,
+          "error": undefined,
+          "failedImports": Array [
+            Object {
+              "error": Object {
+                "references": Array [
+                  Object {
+                    "id": "MyIndexPattern*",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "missing_references",
+              },
+              "obj": Object {
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
+              },
+            },
+          ],
+          "file": Object {
+            "name": "foo.ndjson",
+            "path": "/home/foo.ndjson",
+          },
+          "importCount": 0,
+          "indexPatterns": Array [
+            Object {
+              "id": "1",
+            },
+            Object {
+              "id": "2",
+            },
+          ],
+          "isLegacyFile": false,
+          "isOverwriteAllChecked": true,
+          "loadingMessage": undefined,
+          "status": "loading",
+          "unmatchedReferences": Array [
+            Object {
+              "existingIndexPatternId": "MyIndexPattern*",
+              "list": Array [
+                Object {
+                  "id": "1",
+                  "title": "My Visualization",
+                  "type": "visualization",
+                },
+              ],
+              "newIndexPatternId": "2",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Object {
+        "failedImports": Array [],
+        "importCount": 1,
+        "status": "success",
+      },
+    },
+  ],
+}
+`;
+
 exports[`Flyout conflicts should handle errors 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title={
+    <FormattedMessage
+      defaultMessage="Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+      values={Object {}}
+    />
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+      values={
+        Object {
+          "failedImportCount": 1,
+          "totalImportCount": 1,
+        }
+      }
+    />
+  </p>
+  <p />
+</EuiCallOut>
+`;
+
+exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiTitle
+      size="m"
+      textTransform="none"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="Import saved objects"
+          id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title={
+          <FormattedMessage
+            defaultMessage="Support for JSON files is going away"
+            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+            values={Object {}}
+          />
+        </p>
+      </EuiCallOut>
+    </span>
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        size="m"
+        title={
+          <FormattedMessage
+            defaultMessage="Index Pattern Conflicts"
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+            values={
+              Object {
+                "indexPatternLink": <EuiLink
+                  color="primary"
+                  href=""
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="create a new index pattern"
+                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </EuiCallOut>
+    </span>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "description": "ID of the index pattern",
+            "field": "existingIndexPatternId",
+            "name": "ID",
+            "sortable": true,
+          },
+          Object {
+            "description": "How many affected objects",
+            "field": "list",
+            "name": "Count",
+            "render": [Function],
+          },
+          Object {
+            "description": "Sample of affected objects",
+            "field": "list",
+            "name": "Sample of affected objects",
+            "render": [Function],
+          },
+          Object {
+            "field": "existingIndexPatternId",
+            "name": "New index pattern",
+            "render": [Function],
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      items={
+        Array [
+          Object {
+            "existingIndexPatternId": "MyIndexPattern*",
+            "list": Array [
+              Object {
+                "id": "MyIndexPattern*",
+                "title": "MyIndexPattern*",
+                "type": "index-pattern",
+              },
+            ],
+            "newIndexPatternId": undefined,
+          },
+        ]
+      }
+      pagination={
+        Object {
+          "pageSizeOptions": Array [
+            5,
+            10,
+            25,
+          ],
+        }
+      }
+      responsive={true}
+      sorting={false}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="primary"
+          iconSide="left"
+          onClick={[MockFunction]}
+          size="s"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="importSavedObjectsConfirmBtn"
+          fill={true}
+          iconSide="left"
+          isLoading={false}
+          onClick={[Function]}
+          size="s"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Confirm all changes"
+            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout legacy conflicts should handle errors 1`] = `
 <EuiCallOut
   color="danger"
   iconType="cross"
@@ -203,9 +491,7 @@ exports[`Flyout should render import step 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -227,11 +513,12 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Please select a JSON file to import"
+            defaultMessage="Please select a file to import"
             id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFilePicker
           compressed={false}
@@ -249,6 +536,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
+        labelType="label"
       >
         <EuiSwitch
           checked={true}
@@ -268,16 +556,9 @@ exports[`Flyout should render import step 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -295,7 +576,6 @@ exports[`Flyout should render import step 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton

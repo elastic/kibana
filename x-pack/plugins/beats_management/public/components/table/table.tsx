@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore
-  EuiInMemoryTable,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
@@ -49,12 +43,14 @@ interface TableProps {
   hideTableControls?: boolean;
   kueryBarProps?: KueryBarProps;
   items: any[];
+  onTableChange?: (index: number, size: number) => void;
   type: TableType;
   actionHandler?(action: AssignmentActionType, payload?: any): void;
 }
 
 interface TableState {
   selection: any[];
+  pageIndex: number;
 }
 
 const TableContainer = styled.div`
@@ -67,6 +63,7 @@ export class Table extends React.Component<TableProps, TableState> {
 
     this.state = {
       selection: [],
+      pageIndex: 0,
     };
   }
 
@@ -90,7 +87,8 @@ export class Table extends React.Component<TableProps, TableState> {
     const { actionData, actions, hideTableControls, items, kueryBarProps, type } = this.props;
 
     const pagination = {
-      initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
+      pageIndex: this.state.pageIndex,
+      pageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
       pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
     };
 
@@ -136,16 +134,26 @@ export class Table extends React.Component<TableProps, TableState> {
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable
-          columns={type.columnDefinitions}
+
+        <EuiBasicTable
           items={items}
           itemId="id"
           isSelectable={true}
-          pagination={pagination}
           selection={selectionOptions}
-          sorting={true}
+          columns={type.columnDefinitions}
+          pagination={{ ...pagination, totalItemCount: items.length }}
+          onChange={this.onTableChange}
         />
       </TableContainer>
     );
   }
+
+  private onTableChange = (page: { index: number; size: number } = { index: 0, size: 50 }) => {
+    if (this.props.onTableChange) {
+      this.props.onTableChange(page.index, page.size);
+    }
+    this.setState({
+      pageIndex: page.index,
+    });
+  };
 }

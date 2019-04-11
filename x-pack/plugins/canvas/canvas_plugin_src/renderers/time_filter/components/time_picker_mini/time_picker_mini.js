@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { Popover } from '../../../../../public/components/popover';
 import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
-import './time_picker_mini.scss';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {
   const button = handleClick => (

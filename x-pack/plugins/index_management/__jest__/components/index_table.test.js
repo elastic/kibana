@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { App } from '../../public/app';
+import { AppWithoutRouter } from '../../public/app';
 import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/store/actions';
 import { indexManagementStore } from '../../public/store';
@@ -24,12 +24,12 @@ jest.mock('react-ace', () => {
     editor = {
       textInput: {
         getElement() {
-          return { addEventListener() {} };
+          return { removeAttribute() {}, addEventListener() {} };
         }
       }
     };
     render() {
-      return null;
+      return <div />;
     }
   };
 });
@@ -67,6 +67,7 @@ const status = (rendered, row = 0) => {
   rendered.update();
   return findTestSubject(rendered, 'indexTableCell-status')
     .at(row)
+    .find('.euiTableCellContent')
     .text();
 };
 
@@ -122,7 +123,7 @@ describe('index table', () => {
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <App />
+          <AppWithoutRouter />
         </MemoryRouter>
       </Provider>
     );
@@ -159,10 +160,10 @@ describe('index table', () => {
   });
   test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('span[children="Rows per page: 10"]');
+    const perPageButton = rendered.find('#customizablePagination').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const fiftyButton = rendered.find('span[children="50 rows"]');
+    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);

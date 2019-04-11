@@ -45,7 +45,7 @@ export class SecurityNavControl extends Component {
   };
 
   render() {
-    const { user, route } = this.props;
+    const { user, editProfileUrl, logoutUrl } = this.props;
     const name = user.full_name || user.username || '';
     const button = (
       <EuiHeaderSectionItemButton
@@ -59,6 +59,7 @@ export class SecurityNavControl extends Component {
           />
         }
         onClick={this.onMenuButtonClick}
+        data-test-subj="userMenuButton"
       >
         <EuiAvatar name={name} size="s" />
       </EuiHeaderSectionItemButton>
@@ -75,7 +76,7 @@ export class SecurityNavControl extends Component {
         closePopover={this.closeMenu}
         panelPaddingSize="none"
       >
-        <div style={{ width: 320 }}>
+        <div style={{ width: 320 }} data-test-subj="userMenu">
           <EuiFlexGroup gutterSize="m" className="euiHeaderProfile" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiAvatar name={name} size="xl" />
@@ -92,7 +93,7 @@ export class SecurityNavControl extends Component {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={route}>
+                      <EuiLink href={editProfileUrl} data-test-subj="profileLink">
                         <FormattedMessage
                           id="xpack.security.navControlComponent.editProfileLinkText"
                           defaultMessage="Edit profile"
@@ -101,7 +102,7 @@ export class SecurityNavControl extends Component {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiLink href="/logout">
+                      <EuiLink href={logoutUrl} data-test-subj="logoutLink">
                         <FormattedMessage
                           id="xpack.security.navControlComponent.logoutLinkText"
                           defaultMessage="Log out"

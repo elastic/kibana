@@ -21,6 +21,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class DatafeedPreviewPane extends Component {
 
@@ -40,12 +41,18 @@ export class DatafeedPreviewPane extends Component {
     if (canPreviewDatafeed === false) {
       return (
         <EuiCallOut
-          title="You do not have permission to view the datafeed preview"
+          title={<FormattedMessage
+            id="xpack.ml.jobsList.jobDetails.noPermissionToViewDatafeedPreviewTitle"
+            defaultMessage="You do not have permission to view the datafeed preview"
+          />}
           color="warning"
           iconType="alert"
         >
           <p>
-            Please contact your administrator
+            <FormattedMessage
+              id="xpack.ml.jobsList.jobDetails.pleaseContactYourAdministratorLabel"
+              defaultMessage="Please contact your administrator"
+            />
           </p>
         </EuiCallOut>);
     } else if (loading === true) {

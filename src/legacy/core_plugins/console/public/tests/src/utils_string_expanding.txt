@@ -2,7 +2,7 @@
 Scripts in requests
 -------------------------------------
 {
-  "f": { "script" : { "inline": "test\ntest\\2" } },
+  "f": { "script" : { "source": "test\ntest\\2" } },
   "g": { "script" : "second + \"\\\";" },
   "f": "short with \\",
   "h": 1,
@@ -10,7 +10,7 @@ Scripts in requests
 }
 -------------------------------------
 {
-  "f": { "script" : { "inline": """
+  "f": { "script" : { "source": """
 test
 test\2
 """ } },

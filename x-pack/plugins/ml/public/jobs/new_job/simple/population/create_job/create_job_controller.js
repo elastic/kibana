@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types/index';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -113,8 +114,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
-      filters,
       combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
@@ -235,8 +234,6 @@ module
       influencerFields: [],
       firstSplitFieldName: undefined,
       indexPattern: indexPattern,
-      query,
-      filters,
       combinedQuery,
       usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
@@ -727,7 +724,7 @@ module
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
       mlPopulationJobService.stopDatafeed($scope.formConfig)
-        .catch()
+        .catch(() => {})
         .then(() => {
           $scope.$applyAsync();
         });

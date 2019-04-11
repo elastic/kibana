@@ -1,0 +1,30 @@
+[[breaking-changes-8.0]]
+== Breaking changes in 8.0
+++++
+<titleabbrev>8.0</titleabbrev>
+++++
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 8.0.
+
+coming[8.0.0]
+
+See also <<release-highlights>> and <<release-notes>>.
+
+* <<breaking_80_setting_changes>>
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+[float]
+[[breaking_80_setting_changes]]
+=== Settings changes
+
+// tag::notable-breaking-changes[]
+[float]
+==== Default logging timezone is now the system's timezone
+*Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
+
+*Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
+
+// end::notable-breaking-changes[]

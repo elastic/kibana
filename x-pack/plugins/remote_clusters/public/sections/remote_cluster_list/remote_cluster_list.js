@@ -18,7 +18,6 @@ import {
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
@@ -57,7 +56,7 @@ export const RemoteClusterList = injectI18n(
       isRemovingCluster: PropTypes.bool,
     }
 
-    static getDerivedStateFromProps(props) {
+    componentDidUpdate() {
       const {
         openDetailPanel,
         closeDetailPanel,
@@ -67,7 +66,7 @@ export const RemoteClusterList = injectI18n(
             search,
           },
         },
-      } = props;
+      } = this.props;
 
       const { cluster: clusterName } = extractQueryParams(search);
 
@@ -77,11 +76,7 @@ export const RemoteClusterList = injectI18n(
       } else if (isDetailPanelOpen) {
         closeDetailPanel();
       }
-
-      return null;
     }
-
-    state = {};
 
     componentDidMount() {
       this.props.loadClusters();
@@ -93,18 +88,38 @@ export const RemoteClusterList = injectI18n(
       clearInterval(this.interval);
     }
 
-    getHeaderSection() {
+    getHeaderSection(isAuthorized) {
       return (
-        <EuiPageContentHeaderSection>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterListTitle"
-                defaultMessage="Remote clusters"
-              />
-            </h1>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
+        <Fragment>
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle size="l">
+                <h1>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterListTitle"
+                    defaultMessage="Remote Clusters"
+                  />
+                </h1>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+
+            { isAuthorized && (
+              <EuiPageContentHeaderSection>
+                <EuiButton
+                  {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
+                  fill
+                  data-test-subj="remoteClusterCreateButton"
+                >
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
+                    defaultMessage="Add a remote cluster"
+                  />
+                </EuiButton>
+              </EuiPageContentHeaderSection>
+            )}
+          </EuiPageContentHeader>
+          <EuiSpacer size="m" />
+        </Fragment>
       );
     }
 
@@ -129,20 +144,16 @@ export const RemoteClusterList = injectI18n(
         defaultMessage: 'Permission error',
       });
       return (
-        <Fragment>
-          {this.getHeaderSection()}
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={title}
-            color="warning"
-            iconType="help"
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterList.noPermissionText"
-              defaultMessage="You do not have permission to view or add remote clusters."
-            />
-          </EuiCallOut>
-        </Fragment>
+        <EuiCallOut
+          title={title}
+          color="warning"
+          iconType="help"
+        >
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterList.noPermissionText"
+            defaultMessage="You do not have permission to view or add remote clusters."
+          />
+        </EuiCallOut>
       );
     }
 
@@ -160,23 +171,20 @@ export const RemoteClusterList = injectI18n(
         defaultMessage: 'Error loading remote clusters',
       });
       return (
-        <Fragment>
-          {this.getHeaderSection()}
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={title}
-            color="danger"
-            iconType="alert"
-          >
-            {statusCode} {errorString}
-          </EuiCallOut>
-        </Fragment>
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="alert"
+        >
+          {statusCode} {errorString}
+        </EuiCallOut>
       );
     }
 
     renderEmpty() {
       return (
         <EuiEmptyPrompt
+          data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
           title={(
             <h1>
@@ -202,6 +210,7 @@ export const RemoteClusterList = injectI18n(
               {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
               fill
               iconType="plusInCircle"
+              data-test-subj="remoteClusterEmptyPromptCreateButton"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
@@ -213,58 +222,38 @@ export const RemoteClusterList = injectI18n(
       );
     }
 
+    renderLoading() {
+      return (
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          alignItems="center"
+          gutterSize="s"
+          data-test-subj="remoteClustersTableLoading"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterList.loadingTitle"
+                  defaultMessage="Loading remote clusters..."
+                />
+              </EuiTextColor>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     renderList() {
-      const { isLoading, clusters } = this.props;
-
-      let table;
-
-      if (isLoading) {
-        table = (
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.remoteClusterList.loadingTitle"
-                    defaultMessage="Loading remote clusters..."
-                  />
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      } else {
-        table = <RemoteClusterTable clusters={clusters} />;
-      }
+      const { clusters } = this.props;
 
       return (
         <Fragment>
-          <EuiPageContentHeader>
-            {this.getHeaderSection()}
-
-            <EuiPageContentHeaderSection>
-              <EuiButton
-                {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
-                  defaultMessage="Add a remote cluster"
-                />
-              </EuiButton>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-
-          {table}
-
+          <RemoteClusterTable clusters={clusters} />
           <DetailPanel />
         </Fragment>
       );
@@ -272,31 +261,34 @@ export const RemoteClusterList = injectI18n(
 
     render() {
       const { isLoading, clusters, clusterLoadError } = this.props;
+      const isEmpty = !isLoading && !clusters.length;
+      const isAuthorized = !clusterLoadError || clusterLoadError.status !== 403;
+      const isHeaderVisible = clusterLoadError || !isEmpty;
 
       let content;
 
       if (clusterLoadError) {
-        if (clusterLoadError.status === 403) {
+        if (!isAuthorized) {
           content = this.renderNoPermission();
         } else {
           content = this.renderError(clusterLoadError);
         }
-      } else if (!isLoading && !clusters.length) {
+      } else if (isEmpty) {
         content = this.renderEmpty();
+      } else if (isLoading) {
+        content = this.renderLoading();
       } else {
         content = this.renderList();
       }
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {content}
-
-              {this.renderBlockingAction()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            {(isHeaderVisible) && this.getHeaderSection(isAuthorized)}
+            {content}
+            {this.renderBlockingAction()}
+          </EuiPageContent>
+        </EuiPageBody>
       );
     }
   }

@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { debounce, flattenDeep } from 'lodash';
+import { debounce } from 'lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
@@ -38,16 +39,26 @@ import {
   EuiCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
+  EuiSwitch,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiModalHeaderTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import {
-  retrieveAndExportDocs,
-  scanAllTypes,
-  saveToFile,
   parseQuery,
   getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
+  fetchExportObjects,
+  fetchExportByType,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -97,6 +108,7 @@ class ObjectsTableUI extends Component {
       isDeleting: false,
       exportAllOptions: [],
       exportAllSelectedOptions: {},
+      isIncludeReferencesDeepChecked: true,
     };
   }
 
@@ -229,6 +241,7 @@ class ObjectsTableUI extends Component {
     const selectedSavedObjects = selection.map(item => ({
       id: item.id,
       type: item.type,
+      title: item.title,
     }));
     this.setState({ selectedSavedObjects });
   };
@@ -277,17 +290,23 @@ class ObjectsTableUI extends Component {
     });
   };
 
-  onExport = async () => {
-    const { savedObjectsClient } = this.props;
+  onExport = async (includeReferencesDeep) => {
+    const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
+    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+    const blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+    saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.export.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
   };
 
   onExportAll = async () => {
-    const { $http } = this.props;
-    const { exportAllSelectedOptions } = this.state;
-
+    const { intl } = this.props;
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -297,8 +316,15 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const results = await scanAllTypes($http, exportTypes);
-    saveToFile(JSON.stringify(flattenDeep(results), null, 2));
+    const blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+    saveAs(blob, 'export.ndjson');
+    toastNotifications.addSuccess({
+      title: intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.exportAll.successNotification',
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
+    this.setState({ isShowingExportAllOptionsModal: false });
   };
 
   finishImport = () => {
@@ -486,7 +512,14 @@ class ObjectsTableUI extends Component {
               {
                 field: 'id',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id/Name'
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id'
+                }),
+              },
+              {
+                field: 'title',
+                name: intl.formatMessage({
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  defaultMessage: 'Title',
                 }),
               },
             ]}
@@ -504,12 +537,23 @@ class ObjectsTableUI extends Component {
     );
   }
 
+  changeIncludeReferencesDeep = () => {
+    this.setState(state => ({
+      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
+    }));
+  }
+
+  closeExportAllModal = () => {
+    this.setState({ isShowingExportAllOptionsModal: false });
+  }
+
   renderExportAllOptionsModal() {
     const {
       isShowingExportAllOptionsModal,
       filteredItemCount,
       exportAllOptions,
       exportAllSelectedOptions,
+      isIncludeReferencesDeepChecked,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
@@ -518,53 +562,84 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiOverlayMask>
-        <EuiConfirmModal
-          title={(<FormattedMessage
-            id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
-            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-            values={{
-              filteredItemCount
-            }}
-          />)}
-          onCancel={() =>
-            this.setState({ isShowingExportAllOptionsModal: false })
-          }
-          onConfirm={this.onExportAll}
-          cancelButtonText={(
-            <FormattedMessage id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
-          )}
-          confirmButtonText={(
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-              defaultMessage="Export All"
-            />
-          )}
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        <EuiModal
+          onClose={this.closeExportAllModal}
         >
-          <p>
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-              defaultMessage="Select which types to export. The number in parentheses indicates
-              how many of this type are available to export."
-            />
-          </p>
-          <EuiCheckboxGroup
-            options={exportAllOptions}
-            idToSelectedMap={exportAllSelectedOptions}
-            onChange={optionId => {
-              const newExportAllSelectedOptions = {
-                ...exportAllSelectedOptions,
-                ...{
-                  [optionId]: !exportAllSelectedOptions[optionId],
-                },
-              };
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+                defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                values={{
+                  filteredItemCount
+                }}
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                  defaultMessage="Select which types to export."
+                />
+              </p>
+              <EuiCheckboxGroup
+                options={exportAllOptions}
+                idToSelectedMap={exportAllSelectedOptions}
+                onChange={optionId => {
+                  const newExportAllSelectedOptions = {
+                    ...exportAllSelectedOptions,
+                    ...{
+                      [optionId]: !exportAllSelectedOptions[optionId],
+                    },
+                  };
 
-              this.setState({
-                exportAllSelectedOptions: newExportAllSelectedOptions,
-              });
-            }}
-          />
-        </EuiConfirmModal>
+                  this.setState({
+                    exportAllSelectedOptions: newExportAllSelectedOptions,
+                  });
+                }}
+              />
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={(
+                    <FormattedMessage
+                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include related objects"
+                    />
+                  )}
+                  checked={isIncludeReferencesDeepChecked}
+                  onChange={this.changeIncludeReferencesDeep}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={this.onExportAll}>
+                      <FormattedMessage
+                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                        defaultMessage="Export all"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalFooter>
+        </EuiModal>
       </EuiOverlayMask>
     );
   }
@@ -592,9 +667,7 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiPageContent
-        verticalPosition="center"
         horizontalPosition="center"
-        style={{ maxWidth: 1000 }}
       >
         {this.renderFlyout()}
         {this.renderRelationships()}

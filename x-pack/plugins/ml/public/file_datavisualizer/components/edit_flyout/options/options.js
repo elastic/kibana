@@ -5,7 +5,6 @@
  */
 
 
-import React from 'react';
 import {
   FORMAT_OPTIONS,
   TIMESTAMP_OPTIONS,
@@ -15,12 +14,7 @@ import {
 } from './option_lists';
 
 function getOptions(list) {
-  return list.map(o => (
-    {
-      value: o,
-      inputDisplay: (<span>{o}</span>),
-    }
-  ));
+  return list.map(o => ({ label: o }));
 }
 
 export function getFormatOptions() {

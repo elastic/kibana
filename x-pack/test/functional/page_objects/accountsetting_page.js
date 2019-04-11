@@ -5,17 +5,20 @@
  */
 
 //import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function AccountSettingProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const userMenu = getService('userMenu');
 
   class AccountSettingsPage {
     async verifyAccountSettings(expectedEmail, expectedUserName) {
-      await testSubjects.click('loggedInUser');
+      await userMenu.clickProvileLink();
+
       const usernameField = await testSubjects.find('usernameField');
       const userName = await usernameField.getVisibleText();
       expect(userName).to.be(expectedUserName);
+
       const emailIdField = await testSubjects.find('emailIdField');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);

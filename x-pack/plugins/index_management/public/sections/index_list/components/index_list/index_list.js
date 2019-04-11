@@ -21,7 +21,7 @@ export class IndexList extends React.PureComponent {
       },
     } = this.props;
     return (
-      <div className="indTable__horizontalScroll im-snapshotTestSubject">
+      <div className="im-snapshotTestSubject">
         <IndexTable filterFromURI={filter}/>
         <DetailPanel />
       </div>

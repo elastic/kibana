@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
@@ -42,13 +42,13 @@ routes.when('/management/spaces/list', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <SpacesGridPage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             userProfile={userProfile}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 
@@ -81,13 +81,13 @@ routes.when('/management/spaces/create', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <ManageSpacePage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             userProfile={userProfile}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 
@@ -127,7 +127,7 @@ routes.when('/management/spaces/edit/:spaceId', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={spacesManager}
@@ -137,7 +137,7 @@ routes.when('/management/spaces/edit/:spaceId', {
               chrome.breadcrumbs.set(breadcrumbs);
             }}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 

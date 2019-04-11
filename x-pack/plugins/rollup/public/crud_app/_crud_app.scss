@@ -2,12 +2,17 @@
  * 1. Override EUI styles.
  */
 .rollupJobWizardStepActions {
-  align-items: flex-end;
+  align-items: flex-end; /* 1 */
 }
 
-// Needed because this sits in between some EuiPage elements that require it
-// sass-lint:disable no-ids
-#rollupJobsReactRoot {
+.rollupJobsRoot {
   display: flex;
-  flex-grow: 1;
+}
+
+/**
+ * 1. Ensure panel fills width of parent when search input yields no matching rollup jobs.
+ */
+.rollupJobsListPanel {
+  // sass-lint:disable-block no-important
+  flex-grow: 1 !important; /* 1 */
 }

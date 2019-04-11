@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function traefikLogsSpecProvider(server, context) {
   const moduleName = 'traefik';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'traefikLogs',
@@ -46,7 +44,7 @@ export function traefikLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Traefik-Dashboard',
+          id: 'Filebeat-Traefik-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Traefik logs dashboard',
           }),
@@ -59,7 +57,7 @@ export function traefikLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

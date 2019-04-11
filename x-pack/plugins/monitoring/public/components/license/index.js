@@ -44,7 +44,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
       </p>
       <EuiSpacer />
       <EuiCodeBlock>
-        {`curl -XPUT -u <user> 'https://<host>:<port>/_xpack/license' -H 'Content-Type: application/json' -d @license.json`}
+        {`curl -XPUT -u <user> 'https://<host>:<port>/_license' -H 'Content-Type: application/json' -d @license.json`}
       </EuiCodeBlock>
     </EuiPanel>
   );
@@ -63,7 +63,7 @@ export function License(props) {
             expiryDate={expiryDate}
           />
 
-          <EuiSpacer size="l" />
+          <EuiSpacer />
 
           <LicenseUpdateInfoForPrimary {...props} />
           <LicenseUpdateInfoForRemote {...props} />

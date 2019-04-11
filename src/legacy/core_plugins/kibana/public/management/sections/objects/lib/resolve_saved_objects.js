@@ -82,7 +82,10 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll) {
 }
 
 async function importDocument(obj, doc, overwriteAll) {
-  await obj.applyESResp(doc);
+  await obj.applyESResp({
+    references: doc._references || [],
+    ...doc,
+  });
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
 
@@ -233,17 +236,12 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-      if (error instanceof SavedObjectNotFound) {
-        if (error.savedObjectType === 'search') {
-          failedImports.push({ obj, error });
-        }
-        if (error.savedObjectType === 'index-pattern') {
-          if (obj.savedSearchId) {
-            conflictedSavedObjectsLinkedToSavedSearches.push(obj);
-          } else {
-            conflictedIndexPatterns.push({ obj, doc: otherDoc });
-          }
-        }
+      const isIndexPatternNotFound = error instanceof SavedObjectNotFound &&
+        error.savedObjectType === 'index-pattern';
+      if (isIndexPatternNotFound && obj.savedSearchId) {
+        conflictedSavedObjectsLinkedToSavedSearches.push(obj);
+      } else if (isIndexPatternNotFound) {
+        conflictedIndexPatterns.push({ obj, doc: otherDoc });
       } else {
         failedImports.push({ obj, error });
       }

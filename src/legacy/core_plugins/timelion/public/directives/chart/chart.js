@@ -26,43 +26,44 @@ require('ui/modules')
       scope: {
         seriesList: '=chart', // The flot object, data, config and all
         search: '=', // The function to execute to kick off a search
-        interval: '=' // Required for formatting x-axis ticks
+        interval: '=', // Required for formatting x-axis ticks
+        rerenderTrigger: '=',
       },
       link: function ($scope, $elem) {
 
         const panelRegistry = Private(panelRegistryProvider);
         let panelScope = $scope.$new(true);
 
-        function render(seriesList) {
+        function render() {
           panelScope.$destroy();
 
-          if (!seriesList) return;
+          if (!$scope.seriesList) return;
 
-          seriesList.render = seriesList.render || {
+          $scope.seriesList.render = $scope.seriesList.render || {
             type: 'timechart'
           };
 
-          const panelSchema = panelRegistry.byName[seriesList.render.type];
+          const panelSchema = panelRegistry.byName[$scope.seriesList.render.type];
 
           if (!panelSchema) {
             $elem.text(
               i18n('timelion.chart.seriesList.noSchemaWarning', {
                 defaultMessage: 'No such panel type: {renderType}',
-                values: { renderType: seriesList.render.type },
+                values: { renderType: $scope.seriesList.render.type },
               })
             );
             return;
           }
 
           panelScope = $scope.$new(true);
-          panelScope.seriesList = seriesList;
+          panelScope.seriesList = $scope.seriesList;
           panelScope.interval = $scope.interval;
           panelScope.search = $scope.search;
 
           panelSchema.render(panelScope, $elem);
         }
 
-        $scope.$watch('seriesList', render);
+        $scope.$watchGroup(['seriesList', 'rerenderTrigger'], render);
       }
     };
   });

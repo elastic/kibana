@@ -5,15 +5,10 @@
  */
 
 import React, { Fragment } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
 
 import { EuiCallOut } from '@elastic/eui';
 
-export function SectionUnauthorizedUI({ intl, children }) {
-  const title = intl.formatMessage({
-    id: 'xpack.crossClusterReplication.remoteClusterList.noPermissionTitle',
-    defaultMessage: 'Permission error',
-  });
+export function SectionUnauthorized({ title, children }) {
   return (
     <Fragment>
       <EuiCallOut
@@ -26,5 +21,3 @@ export function SectionUnauthorizedUI({ intl, children }) {
     </Fragment>
   );
 }
-
-export const SectionUnauthorized = injectI18n(SectionUnauthorizedUI);

@@ -296,11 +296,13 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 ## Testing
 
-- `node scripts/jest --testPathPattern=task_manager --watch`
-
-Integration tests can be run like so:
-
-```
-node scripts/functional_tests_server.js --config test/plugin_functional/config.js
-node scripts/functional_test_runner --config test/plugin_functional/config.js --grep task_manager
-```
+- Unit tests:
+   ```
+   cd x-pack
+   node scripts/jest --testPathPattern=task_manager --watch
+   ```
+- Integration tests:
+   ```
+   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.js
+   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.js
+   ```

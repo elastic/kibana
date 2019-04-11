@@ -20,13 +20,13 @@
 import Stream, { PassThrough, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   createConcatStream,
   createListStream,
   createPromiseFromStreams,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createParseArchiveStreams } from '../parse';
 

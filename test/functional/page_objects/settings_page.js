@@ -18,7 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -47,9 +47,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('objects');
     }
 
-    async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
-      await testSubjects.click('indices');
+    async clickKibanaIndexPatterns() {
+      log.debug('clickKibanaIndexPatterns link');
+      await testSubjects.click('index_patterns');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // check for the index pattern info flyout that covers the
+      // create index pattern button on smaller screens
+      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
+      }
     }
 
     async getAdvancedSettings(propertyName) {
@@ -128,7 +136,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getCreateIndexPatternButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
+      return await testSubjects.find('createIndexPatternButton');
     }
 
     async getCreateButton() {
@@ -267,16 +275,20 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickIndexPatternLogstash() {
+      await find.clickByPartialLinkText('logstash-*');
+    }
+
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndices();
+        await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField(indexPatternName);
+          await this.setIndexPatternField({ indexPatternName });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -284,13 +296,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        if (!currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -316,26 +328,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      await field.type(indexPatternName, { charByChar: true });
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}*`);
+      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
-    }
-
-    async getCreateIndexPatternCreateButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
-    }
-
-    async clickOnOnlyIndexPattern() {
-      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {
@@ -354,7 +358,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
-        if (currentUrl.match(/indices\/.+\?/)) {
+        if (currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
       });
@@ -374,6 +378,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickSourceFiltersTab() {
       log.debug('click Source Filters tab');
       await testSubjects.click('tab-sourceFilters');
+    }
+
+    async editScriptedField(name) {
+      await this.filterField(name);
+      await find.clickByCssSelector('.euiTableRowCell--hasActions button:first-child');
     }
 
     async addScriptedField(name, language, type, format, popularity, script) {
@@ -517,17 +526,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async closeScriptedFieldHelp() {
-      log.debug('close Scripted Fields help');
-      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('scriptedFieldsHelpFlyout');
-          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-          if (isOpen) {
-            throw new Error('Failed to close scripted fields help');
-          }
-        });
-      }
+      await flyout.ensureClosed('scriptedFieldsHelpFlyout');
     }
 
     async executeScriptedField(script, additionalField) {
@@ -561,6 +560,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickImportDone() {

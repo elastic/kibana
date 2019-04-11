@@ -6,32 +6,15 @@
 
 import { Server } from 'hapi';
 import { countBy } from 'lodash';
-
-// Support telemetry for additional agent types by appending definitions in
-// mappings.json and the AgentName enum.
-
-export enum AgentName {
-  Python = 'python',
-  Java = 'java',
-  NodeJs = 'nodejs',
-  JsBase = 'js-base',
-  Ruby = 'ruby',
-  GoLang = 'go'
-}
-
-export interface ApmTelemetry {
-  has_any_services: boolean;
-  services_per_agent: { [agentName in AgentName]?: number };
-}
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { isAgentName } from '../../../common/agent_name';
 
 export const APM_TELEMETRY_DOC_ID = 'apm-telemetry';
 
 export function createApmTelementry(
-  agentNames: AgentName[] = []
-): ApmTelemetry {
-  const validAgentNames = agentNames.filter(agentName =>
-    Object.values(AgentName).includes(agentName)
-  );
+  agentNames: string[] = []
+): SavedObjectAttributes {
+  const validAgentNames = agentNames.filter(isAgentName);
   return {
     has_any_services: validAgentNames.length > 0,
     services_per_agent: countBy(validAgentNames)
@@ -40,7 +23,7 @@ export function createApmTelementry(
 
 export function storeApmTelemetry(
   server: Server,
-  apmTelemetry: ApmTelemetry
+  apmTelemetry: SavedObjectAttributes
 ): void {
   const savedObjectsClient = getSavedObjectsClient(server);
   savedObjectsClient.create('apm-telemetry', apmTelemetry, {
@@ -49,7 +32,7 @@ export function storeApmTelemetry(
   });
 }
 
-export function getSavedObjectsClient(server: Server): any {
+export function getSavedObjectsClient(server: Server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'

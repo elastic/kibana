@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'timelion', 'settings', 'timePicker']);
 
   describe('expression typeahead', () => {
     before(async () => {
@@ -28,9 +28,7 @@ export default function ({ getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       await PageObjects.timelion.initTests();
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     it('should display function suggestions filtered by function name', async () => {

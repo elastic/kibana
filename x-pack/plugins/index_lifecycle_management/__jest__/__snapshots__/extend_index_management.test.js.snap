@@ -25,6 +25,7 @@ Object {
             },
           ],
         },
+        "group": Array [],
         "is": Object {},
         "term": Array [],
       },
@@ -32,6 +33,7 @@ Object {
     "syntax": Object {
       "parse": [Function],
       "print": [Function],
+      "printClause": [Function],
     },
     "text": "ilm.step:ERROR",
   },
@@ -248,7 +250,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
@@ -269,7 +271,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     title={
       <FormattedMessage
         defaultMessage="Index lifecycle error"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
         values={Object {}}
       />
     }
@@ -317,7 +319,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         >
           <FormattedMessage
             defaultMessage="Index lifecycle error"
-            id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
             values={Object {}}
           >
             Index lifecycle error
@@ -352,29 +354,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -455,17 +443,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -521,7 +503,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   >
                     <FormattedMessage
                       defaultMessage="Show phase definition"
-                      id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                       values={Object {}}
                     />
                   </EuiLink>
@@ -536,13 +518,17 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 withTitle={true}
               >
                 <EuiOutsideClickDetector
+                  isDisabled={true}
                   onOutsideClick={[Function]}
                 >
                   <div
                     className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
                     id="phaseExecutionPopover"
-                    onClick={[Function]}
                     onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"
@@ -559,7 +545,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                         >
                           <FormattedMessage
                             defaultMessage="Show phase definition"
-                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                             values={Object {}}
                           >
                             Show phase definition
@@ -720,7 +706,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
@@ -734,29 +720,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -837,17 +809,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl

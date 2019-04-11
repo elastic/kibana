@@ -1,30 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PropertiesTable AgentFeatureTipMessage component should render null empty string when no docs are returned 1`] = `""`;
-
-exports[`PropertiesTable AgentFeatureTipMessage component should render when docs are returned 1`] = `
-<styled.div>
-  <Styled(EuiIcon)
-    type="iInCircle"
-  />
-  You can configure your agent to add contextual information about your users.
-   
-  <ExternalLink
-    href="mock-url"
-  >
-    Learn more in the documentation.
-  </ExternalLink>
-</styled.div>
-`;
-
 exports[`PropertiesTable PropertiesTable component should render empty when data isn't present 1`] = `
 <styled.div>
   <Styled(styled.div)>
     No data available
   </Styled(styled.div)>
-  <AgentFeatureTipMessage
-    agentName="testAgentName"
-    featureName="testPropKey"
+  <TabHelpMessage
+    agentName="java"
+    tabKey="kubernetes"
   />
 </styled.div>
 `;
@@ -39,12 +22,11 @@ exports[`PropertiesTable PropertiesTable component should render with data 1`] =
       }
     }
     depth={1}
-    keySorter={[Function]}
-    parentKey="testPropKey"
+    parentKey="kubernetes"
   />
-  <AgentFeatureTipMessage
-    agentName="testAgentName"
-    featureName="testPropKey"
+  <TabHelpMessage
+    agentName="java"
+    tabKey="kubernetes"
   />
 </styled.div>
 `;
@@ -54,12 +36,32 @@ exports[`PropertiesTable PropertiesTable component should still render NestedKey
   <NestedKeyValueTable
     data={Object {}}
     depth={1}
-    keySorter={[Function]}
-    parentKey="testPropKey"
+    parentKey="kubernetes"
   />
-  <AgentFeatureTipMessage
-    agentName="testAgentName"
-    featureName="testPropKey"
+  <TabHelpMessage
+    agentName="java"
+    tabKey="kubernetes"
   />
+</styled.div>
+`;
+
+exports[`PropertiesTable TabHelpMessage component should render null empty string when no docs are returned 1`] = `""`;
+
+exports[`PropertiesTable TabHelpMessage component should render when docs are returned 1`] = `
+<styled.div>
+  <Styled(EuiIcon)
+    type="iInCircle"
+  />
+  You can configure your agent to add contextual information about your users.
+   
+  <EuiLink
+    color="primary"
+    href="mock-url"
+    rel="noopener"
+    target="_blank"
+    type="button"
+  >
+    Learn more in the documentation.
+  </EuiLink>
 </styled.div>
 `;

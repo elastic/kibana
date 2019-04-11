@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
+import { ESFilter, SearchParams } from 'elasticsearch';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
+import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
 
 interface ResponseTimeBucket {
@@ -62,8 +65,7 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
+export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
   serviceName,
   transactionType,
@@ -74,22 +76,19 @@ export function timeseriesFetcher({
   transactionType?: string;
   transactionName?: string;
   setup: Setup;
-}): Promise<ESResponse> {
+}) {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
+
+  if (transactionName) {
+    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
+  }
 
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
@@ -99,56 +98,36 @@ export function timeseriesFetcher({
     filter.push(esFilterQuery);
   }
 
-  const params: any = {
+  const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter
-        }
-      },
+      query: { bool: { filter } },
       aggs: {
         response_times: {
           date_histogram: {
             field: '@timestamp',
             interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: {
-              min: start,
-              max: end
-            }
+            extended_bounds: { min: start, max: end }
           },
           aggs: {
-            avg: {
-              avg: { field: TRANSACTION_DURATION }
-            },
+            avg: { avg: { field: TRANSACTION_DURATION } },
             pct: {
-              percentiles: {
-                field: TRANSACTION_DURATION,
-                percents: [95, 99]
-              }
+              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
             }
           }
         },
-        overall_avg_duration: {
-          avg: { field: TRANSACTION_DURATION }
-        },
+        overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
         transaction_results: {
-          terms: {
-            field: TRANSACTION_RESULT,
-            missing: 'transaction_result_missing'
-          },
+          terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
                 interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end
-                }
+                extended_bounds: { min: start, max: end }
               }
             }
           }
@@ -156,12 +135,6 @@ export function timeseriesFetcher({
       }
     }
   };
-
-  if (transactionName) {
-    params.body.query.bool.must = [
-      { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
-    ];
-  }
 
   return client<void, Aggs>('search', params);
 }

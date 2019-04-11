@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { recentlyAccessed } from 'ui/persisted_log';
 import { handleActions } from 'redux-actions';
+import { recentlyAccessed } from 'ui/persisted_log';
 import {
   setWorkpad,
   sizeWorkpad,

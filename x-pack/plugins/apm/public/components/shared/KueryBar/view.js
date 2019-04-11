@@ -12,9 +12,9 @@ import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent,
-  KibanaLink
-} from '../../../utils/url';
+  legacyEncodeURIComponent
+} from '../Links/url_helpers';
+import { KibanaLink } from '../Links/KibanaLink';
 import { Typeahead } from './Typeahead';
 import chrome from 'ui/chrome';
 import {
@@ -23,7 +23,6 @@ import {
   getAPMIndexPatternForKuery
 } from '../../../services/kuery';
 import styled from 'styled-components';
-
 import { getBoolFilter } from './get_bool_filter';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -40,9 +39,17 @@ class KueryBarView extends Component {
     isLoadingSuggestions: false
   };
 
+  willUnmount = false;
+
+  componentWillUnmount() {
+    this.willUnmount = true;
+  }
+
   async componentDidMount() {
     const indexPattern = await getAPMIndexPatternForKuery();
-    this.setState({ indexPattern, isLoadingIndexPattern: false });
+    if (!this.willUnmount) {
+      this.setState({ indexPattern, isLoadingIndexPattern: false });
+    }
   }
 
   onChange = async (inputValue, selectionStart) => {
@@ -60,7 +67,9 @@ class KueryBarView extends Component {
         selectionStart,
         indexPattern,
         boolFilter
-      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+      ))
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .slice(0, 15);
 
       if (currentRequest !== this.currentRequest) {
         return;
@@ -120,10 +129,7 @@ class KueryBarView extends Component {
                   values={{
                     apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
                     setupInstructionsLink: (
-                      <KibanaLink
-                        pathname={'/app/kibana'}
-                        hash={`/home/tutorial/apm`}
-                      >
+                      <KibanaLink path={`/home/tutorial/apm`}>
                         {i18n.translate(
                           'xpack.apm.kueryBar.setupInstructionsLinkLabel',
                           { defaultMessage: 'Setup Instructions' }

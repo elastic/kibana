@@ -21,17 +21,17 @@ import React from 'react';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 
-export default props => (row) => {
+export default props => (row, index = 0) => {
 
   function tickFormatter(value) {
     if (_.isFunction(props.tickFormatter)) return props.tickFormatter(value);
     return value;
   }
-
+  const key = `tvbLegend__item${row.id}${index}`;
   const formatter = row.tickFormatter || tickFormatter;
   const value = formatter(props.seriesValues[row.id]);
   const classes = ['tvbLegend__item'];
-  const key = row.id;
+
   if (!_.includes(props.seriesFilter, row.id)) classes.push('disabled');
   if (row.label == null || row.legend === false) return (<div key={key} style={{ display: 'none' }}/>);
   return (
@@ -44,11 +44,11 @@ export default props => (row) => {
         onClick={event => props.onToggle(event, row.id)}
         className="tvbLegend__button"
       >
-        <div className="tvbLegend__itemLabel" title={`${row.label}: ${value}`}>
-          <EuiIcon type="dot" color={row.color} />
+        <span className="tvbLegend__itemLabel" title={`${row.label}: ${value}`}>
+          <EuiIcon size="m" type="dot" color={row.color} />
           <span>{ row.label }</span>
-        </div>
-        <div className="tvbLegend__itemValue">{ value }</div>
+        </span>
+        <span className="tvbLegend__itemValue">{ value }</span>
       </button>
     </div>
   );

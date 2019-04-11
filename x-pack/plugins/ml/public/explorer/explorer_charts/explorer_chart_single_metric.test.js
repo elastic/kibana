@@ -135,8 +135,8 @@ describe('ExplorerChart', () => {
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
     const chartMarkers = wrapper.getDOMNode().querySelector('.chart-markers').querySelectorAll('circle');
-    expect([...chartMarkers]).toHaveLength(3);
-    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7]);
+    expect([...chartMarkers]).toHaveLength(4);
+    expect([...chartMarkers].map(d => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
   });
 
   it('Anomaly Explorer Chart with single data point', () => {

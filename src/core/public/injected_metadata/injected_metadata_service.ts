@@ -18,17 +18,26 @@
  */
 
 import { get } from 'lodash';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
+/** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
     basePath: string;
+    csp: {
+      warnLegacyBrowsers: boolean;
+    };
     vars: {
       [key: string]: unknown;
     };
+    uiPlugins: Array<{
+      id: PluginName;
+      plugin: DiscoveredPlugin;
+    }>;
     legacyMetadata: {
       app: unknown;
       translations: unknown;
@@ -54,13 +63,17 @@ export interface InjectedMetadataParams {
  * server into the page. The metadata is actually defined
  * in the entry file for the bundle containing the new platform
  * and is read from the DOM in most cases.
+ *
+ * @internal
  */
 export class InjectedMetadataService {
-  private state = deepFreeze(this.params.injectedMetadata);
+  private state = deepFreeze(
+    this.params.injectedMetadata
+  ) as InjectedMetadataParams['injectedMetadata'];
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
-  public start() {
+  public setup() {
     return {
       getBasePath: () => {
         return this.state.basePath;
@@ -68,6 +81,17 @@ export class InjectedMetadataService {
 
       getKibanaVersion: () => {
         return this.getKibanaVersion();
+      },
+
+      getCspConfig: () => {
+        return this.state.csp;
+      },
+
+      /**
+       * An array of frontend plugins in topological order.
+       */
+      getPlugins: () => {
+        return this.state.uiPlugins;
       },
 
       getLegacyMetadata: () => {
@@ -93,4 +117,5 @@ export class InjectedMetadataService {
   }
 }
 
-export type InjectedMetadataStartContract = ReturnType<InjectedMetadataService['start']>;
+/** @public */
+export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;

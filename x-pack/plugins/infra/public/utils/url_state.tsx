@@ -6,10 +6,11 @@
 
 import { History, Location } from 'history';
 import throttle from 'lodash/fp/throttle';
-import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
-import { Route, RouteProps } from 'react-router';
+import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
+
+import { QueryString } from 'ui/utils/query_string';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -52,7 +53,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     this.handleInitialize(location);
   }
 
-  // tslint:disable-next-line:member-ordering this is really a method despite what tslint thinks
+  // eslint-disable-next-line @typescript-eslint/member-ordering this is really a method despite what eslint thinks
   private replaceStateInLocation = throttle(1000, (urlState: UrlState | undefined) => {
     const { history, location, urlStateKey } = this.props;
 
@@ -135,7 +136,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = parseQueryString(queryString)[key];
+  const queryParam = QueryString.decode(queryString)[key];
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
@@ -143,10 +144,10 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = parseQueryString(queryString);
+  const previousQueryValues = QueryString.decode(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return stringifyQueryString({
+  return QueryString.encode({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,
   });

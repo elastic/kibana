@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public';
-import { fromExpression, typesRegistry } from '@kbn/interpreter/common';
+import { interpretAst } from 'plugins/interpreter/interpreter';
+import { registries } from 'plugins/interpreter/registries';
+import { fromExpression } from '@kbn/interpreter/common';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
 
@@ -23,7 +24,7 @@ export const filters = () => ({
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
-      const filterType = typesRegistry.get('filter');
+      const filterType = registries.types.get('filter');
       return filterType.from(null);
     }
   },

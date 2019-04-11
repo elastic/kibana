@@ -5,53 +5,97 @@
  */
 
 import {
-  EuiButton,
-  EuiComboBox,
-  EuiDatePicker,
-  EuiDatePickerRange,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHeader,
-  EuiHeaderBreadcrumbs,
   // @ts-ignore missing typings for EuiHeaderLink
   EuiHeaderLink,
   // @ts-ignore missing typings for EuiHeaderLinks
-  EuiHeaderLinks,
-  // @ts-ignore missing typings for EuiHeaderLogo
   EuiHeaderLogo,
-  EuiHeaderSection,
-  // @ts-ignore missing typings for EuiHeaderSectionItem
+  // @ts-ignore missing typings for EuiHeaderLogo
   EuiHeaderSectionItem,
+  // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiPage,
-  EuiPageContent,
-  EuiPopover,
-  EuiSwitch,
+  EuiSpacer,
+  // @ts-ignore missing typings for EuiSuperDatePicker
+  EuiSuperDatePicker,
+  EuiTitle,
 } from '@elastic/eui';
-import moment, { Moment } from 'moment';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
-import { UMUpdateBreadcrumbs, UptimeAppProps } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
-export interface UptimePersistedState {
-  autorefreshEnabled: boolean;
+interface UptimeAppColors {
+  danger: string;
+  success: string;
+  range: string;
+  mean: string;
+}
+
+// TODO: these props are global to this app, we should put them in a context
+export interface UptimeCommonProps {
+  autorefreshIsPaused: boolean;
   autorefreshInterval: number;
-  dateRangeStart: number;
-  dateRangeEnd: number;
+  client: ApolloClient<NormalizedCacheObject>;
+  colors: UptimeAppColors;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  lastRefresh?: number;
+  refreshApp: () => void;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+  setHeadingText: (text: string) => void;
+}
+
+export interface UptimePersistedState {
+  autorefreshIsPaused: boolean;
+  autorefreshInterval: number;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+}
+
+export interface UptimeAppProps {
+  // TODO: if we add a context to the Uptime UI, this should be included in it
+  basePath: string;
+  darkMode: boolean;
+  client: UMGraphQLClient;
+  initialDateRangeStart: string;
+  initialDateRangeEnd: string;
+  initialAutorefreshInterval: number;
+  initialAutorefreshIsPaused: boolean;
+  kibanaBreadcrumbs: UMBreadcrumb[];
+  routerBasename: string;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+  persistState(state: UptimePersistedState): void;
+  renderGlobalHelpControls(): void;
 }
 
 interface UptimeAppState {
+  autorefreshIsPaused: boolean;
+  autorefreshInterval: number;
   breadcrumbs: UMBreadcrumb[];
-  autorefreshEnabled: boolean;
-  popoverIsOpen: boolean;
-  // TODO: these get passed as props to most components in this plugin,
-  // they can probably be globalized in a context
-  selectedAutorefresh: any;
-  autorefreshOptions: any[];
-  dateRangeStart: number;
-  dateRangeEnd: number;
+  colors: UptimeAppColors;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  headingText?: string;
+  lastRefresh?: number;
+}
+
+// TODO: when EUI exports types for this, this should be replaced
+interface SuperDateRangePickerRangeChangedEvent {
+  start: string;
+  end: string;
+}
+
+interface SuperDateRangePickerRefreshChangedEvent {
+  isPaused: boolean;
+  refreshInterval?: number;
 }
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
@@ -60,57 +104,39 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     super(props);
 
     const {
-      isUsingK7Design,
+      darkMode,
+      initialAutorefreshIsPaused: autorefreshIsPaused,
+      initialAutorefreshInterval: autorefreshInterval,
+      initialDateRangeStart: dateRangeStart,
+      initialDateRangeEnd: dateRangeEnd,
       kibanaBreadcrumbs,
-      updateBreadcrumbs,
-      initialAutorefreshEnabled,
-      initialAutorefreshInterval,
-      initialDateRangeStart,
-      initialDateRangeEnd,
+      setBreadcrumbs,
     } = props;
 
-    let initialBreadcrumbs: UMBreadcrumb[];
-    const dateRangeStart =
-      initialDateRangeStart ||
-      moment()
-        .subtract(1, 'day')
-        .valueOf();
-    // TODO: this will cause the date range to default to being greater than "now"
-    // when we start using the SuperDatePicker, we'll likely revise this.
-    const dateRangeEnd =
-      initialDateRangeEnd && initialDateRangeEnd > moment().valueOf()
-        ? initialDateRangeEnd
-        : moment()
-            .add(1, 'hours')
-            .valueOf();
+    this.setBreadcrumbs = setBreadcrumbs;
 
-    if (isUsingK7Design) {
-      this.setBreadcrumbs = updateBreadcrumbs;
-      initialBreadcrumbs = kibanaBreadcrumbs;
+    let colors: UptimeAppColors;
+    if (darkMode) {
+      colors = {
+        success: euiDarkVars.euiColorSuccess,
+        range: euiDarkVars.euiFocusBackgroundColor,
+        mean: euiDarkVars.euiColorPrimary,
+        danger: euiDarkVars.euiColorDanger,
+      };
     } else {
-      this.setBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => this.setState({ breadcrumbs });
-      initialBreadcrumbs = [overviewBreadcrumb];
+      colors = {
+        success: euiLightVars.euiColorSuccess,
+        range: euiLightVars.euiFocusBackgroundColor,
+        mean: euiLightVars.euiColorPrimary,
+        danger: euiLightVars.euiColorDanger,
+      };
     }
 
-    const minsToMillis = (mins: number) => mins * 60 * 1000;
-    const autorefreshOptions = [
-      { label: '5s', value: 5000 },
-      { label: '15s', value: 15000 },
-      { label: '30s', value: 30000 },
-      { label: '1m', value: minsToMillis(1) },
-      { label: '5m', value: minsToMillis(5) },
-      { label: '10m', value: minsToMillis(10) },
-      { label: '30m', value: minsToMillis(30) },
-    ];
-
     this.state = {
-      autorefreshEnabled: initialAutorefreshEnabled || false,
-      breadcrumbs: initialBreadcrumbs,
-      popoverIsOpen: false,
-      autorefreshOptions,
-      selectedAutorefresh:
-        autorefreshOptions.find(opt => opt.value === initialAutorefreshInterval) ||
-        autorefreshOptions[0],
+      autorefreshIsPaused,
+      autorefreshInterval,
+      breadcrumbs: kibanaBreadcrumbs,
+      colors,
       dateRangeStart,
       dateRangeEnd,
     };
@@ -120,183 +146,115 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.setBreadcrumbs([overviewBreadcrumb]);
   }
 
+  public componentDidMount() {
+    this.props.renderGlobalHelpControls();
+  }
+
   public render() {
-    const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
-    const dateRangeIsInvalid = () => this.state.dateRangeStart > this.state.dateRangeEnd;
+    const { basePath, routerBasename, client } = this.props;
     return (
-      <Router basename={routerBasename}>
-        <ApolloProvider client={graphQLClient}>
-          <EuiPage className="app-wrapper-panel">
-            <EuiHeader>
-              {/*
-              // @ts-ignore TODO no typings for grow prop */}
-              <EuiHeaderSection grow={true}>
-                <EuiHeaderSectionItem border="right">
-                  <EuiHeaderLogo
-                    aria-label="Go to Uptime home page"
-                    href="#/"
-                    iconType="heartbeatApp"
-                    iconTitle="Uptime"
-                  >
-                    Uptime
-                  </EuiHeaderLogo>
-                </EuiHeaderSectionItem>
-                {!isUsingK7Design && (
-                  <EuiHeaderSectionItem>
-                    <div style={{ paddingTop: '20px', paddingRight: '8px' }}>
-                      <EuiHeaderBreadcrumbs breadcrumbs={this.state.breadcrumbs} />
-                    </div>
-                  </EuiHeaderSectionItem>
-                )}
-              </EuiHeaderSection>
-              <EuiHeaderSection side="right">
-                <EuiHeaderSectionItem border="none">
-                  <div style={{ marginTop: '10px', marginLeft: '8px' }}>
-                    <EuiDatePickerRange
-                      startDateControl={
-                        <EuiDatePicker
-                          selected={moment(this.state.dateRangeStart)}
-                          isInvalid={dateRangeIsInvalid()}
-                          aria-label="Start Date"
-                          onChange={(e: Moment | null) => {
-                            if (e && e.valueOf() < this.state.dateRangeEnd) {
-                              this.setState({ dateRangeStart: e.valueOf() }, this.persistState);
-                            }
-                          }}
-                          showTimeSelect
-                        />
-                      }
-                      endDateControl={
-                        <EuiDatePicker
-                          selected={moment(this.state.dateRangeEnd)}
-                          isInvalid={dateRangeIsInvalid()}
-                          aria-label="End Date"
-                          onChange={(e: Moment | null) => {
-                            if (e && this.state.dateRangeStart < e.valueOf()) {
-                              this.setState({ dateRangeEnd: e.valueOf() }, this.persistState);
-                            }
-                          }}
-                          showTimeSelect
-                        />
-                      }
-                    />
-                  </div>
-                </EuiHeaderSectionItem>
-                <EuiHeaderSectionItem border="none">
-                  <EuiPopover
-                    id="autorefresPopover"
-                    button={
-                      <EuiButton
-                        iconType="arrowDown"
-                        iconSide="right"
-                        onClick={() => this.setState({ popoverIsOpen: true })}
-                      >
-                        {this.state.autorefreshEnabled
-                          ? 'Autorefresh every ' + this.state.selectedAutorefresh.label
-                          : 'Autorefresh Disabled'}
-                      </EuiButton>
+      <I18nContext>
+        <Router basename={routerBasename}>
+          <ApolloProvider client={client}>
+            <EuiPage className="app-wrapper-panel ">
+              <div>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle>
+                      <h2>{this.state.headingText}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {
+                      // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
+                      <EuiSuperDatePicker
+                        start={this.state.dateRangeStart}
+                        end={this.state.dateRangeEnd}
+                        isPaused={this.state.autorefreshIsPaused}
+                        refreshInterval={this.state.autorefreshInterval}
+                        onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
+                          this.setState(
+                            { dateRangeStart: start, dateRangeEnd: end },
+                            this.persistState
+                          );
+                          this.refreshApp();
+                        }}
+                        // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
+                        onRefresh={() => this.refreshApp()}
+                        onRefreshChange={({
+                          isPaused,
+                          refreshInterval,
+                        }: SuperDateRangePickerRefreshChangedEvent) => {
+                          const autorefreshInterval =
+                            refreshInterval === undefined
+                              ? this.state.autorefreshInterval
+                              : refreshInterval;
+                          this.setState(
+                            { autorefreshIsPaused: isPaused, autorefreshInterval },
+                            this.persistState
+                          );
+                        }}
+                      />
                     }
-                    closePopover={() => this.setState({ popoverIsOpen: false })}
-                    isOpen={this.state.popoverIsOpen}
-                    style={{ paddingLeft: '8px', paddingTop: '10px', paddingRight: '8px' }}
-                  >
-                    <EuiFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <EuiSwitch
-                          label="Auto-refresh"
-                          checked={this.state.autorefreshEnabled}
-                          onChange={e => {
-                            this.setState(
-                              { autorefreshEnabled: e.target.checked },
-                              this.persistState
-                            );
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiComboBox
-                          onChange={selectedOptions => {
-                            this.setState(
-                              { selectedAutorefresh: selectedOptions[0] },
-                              this.persistState
-                            );
-                          }}
-                          options={this.state.autorefreshOptions}
-                          isClearable={false}
-                          singleSelection={{ asPlainText: true }}
-                          selectedOptions={[this.state.selectedAutorefresh]}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPopover>
-                </EuiHeaderSectionItem>
-              </EuiHeaderSection>
-              <EuiHeaderSection side="right">
-                <EuiHeaderSection>
-                  <EuiHeaderLinks>
-                    <EuiHeaderLink
-                      iconType="help"
-                      href="https://discuss.elastic.co/c/beats/heartbeat"
-                      target="_blank"
-                    >
-                      Discuss
-                    </EuiHeaderLink>
-                  </EuiHeaderLinks>
-                </EuiHeaderSection>
-              </EuiHeaderSection>
-            </EuiHeader>
-            <EuiPageContent>
-              <Switch>
-                <Route
-                  exact
-                  path="/"
-                  render={props => (
-                    <OverviewPage
-                      {...props}
-                      autorefreshEnabled={this.state.autorefreshEnabled}
-                      autorefreshInterval={this.state.selectedAutorefresh.value}
-                      dateRangeStart={this.state.dateRangeStart}
-                      dateRangeEnd={this.state.dateRangeEnd}
-                      setBreadcrumbs={this.setBreadcrumbs}
-                    />
-                  )}
-                />
-                <Route
-                  path="/monitor/:id"
-                  render={props => (
-                    <MonitorPage
-                      {...props}
-                      dateRangeStart={this.state.dateRangeStart}
-                      dateRangeEnd={this.state.dateRangeEnd}
-                      updateBreadcrumbs={this.setBreadcrumbs}
-                      autorefreshEnabled={this.state.autorefreshEnabled}
-                      autorefreshInterval={this.state.selectedAutorefresh.value}
-                    />
-                  )}
-                />
-              </Switch>
-            </EuiPageContent>
-          </EuiPage>
-        </ApolloProvider>
-      </Router>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <Switch>
+                  <Route
+                    exact
+                    path="/"
+                    render={props => (
+                      <OverviewPage
+                        basePath={basePath}
+                        {...props}
+                        {...this.props}
+                        {...this.state}
+                        refreshApp={this.refreshApp}
+                        setHeadingText={this.setHeadingText}
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/monitor/:id"
+                    render={props => (
+                      <MonitorPage
+                        {...props}
+                        {...this.props}
+                        {...this.state}
+                        refreshApp={this.refreshApp}
+                        setHeadingText={this.setHeadingText}
+                        query={this.props.client.query}
+                      />
+                    )}
+                  />
+                </Switch>
+              </div>
+            </EuiPage>
+          </ApolloProvider>
+        </Router>
+      </I18nContext>
     );
   }
 
+  private setHeadingText = (headingText: string): void => {
+    this.setState({ headingText });
+  };
+
   private persistState = (): void => {
-    const {
-      autorefreshEnabled,
-      selectedAutorefresh: { value },
+    const { autorefreshIsPaused, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.state;
+    this.props.persistState({
+      autorefreshIsPaused,
+      autorefreshInterval,
       dateRangeStart,
       dateRangeEnd,
-    } = this.state;
-    if (dateRangeEnd > dateRangeStart) {
-      this.props.persistState({
-        autorefreshEnabled,
-        autorefreshInterval: value,
-        dateRangeStart,
-        dateRangeEnd,
-      });
-    }
+    });
+  };
+
+  private refreshApp = () => {
+    this.setState(state => ({
+      ...state,
+      lastRefresh: Date.now(),
+    }));
   };
 }
 

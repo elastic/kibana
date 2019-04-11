@@ -75,9 +75,6 @@ export class InnerCustomPlot extends PureComponent {
   };
 
   onMouseLeave = (...args) => {
-    if (this.state.isDrawing) {
-      this.setState({ isDrawing: false });
-    }
     this.props.onMouseLeave(...args);
   };
 
@@ -89,7 +86,7 @@ export class InnerCustomPlot extends PureComponent {
     });
 
   onMouseUp = () => {
-    if (this.state.selectionEnd !== null) {
+    if (this.state.isDrawing && this.state.selectionEnd !== null) {
       const [start, end] = [
         this.state.selectionStart,
         this.state.selectionEnd
@@ -106,6 +103,14 @@ export class InnerCustomPlot extends PureComponent {
       this.setState({ selectionEnd: node.x });
     }
   };
+
+  componentDidMount() {
+    document.body.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  componentWillUnmount() {
+    document.body.removeEventListener('mouseup', this.onMouseUp);
+  }
 
   render() {
     const { series, truncateLegends, noHits, width } = this.props;
@@ -163,7 +168,6 @@ export class InnerCustomPlot extends PureComponent {
             onHover={this.onHover}
             onMouseLeave={this.onMouseLeave}
             onMouseDown={this.onMouseDown}
-            onMouseUp={this.onMouseUp}
           />
         </div>
         <Legends

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSearchBar
     box={
       Object {
@@ -33,6 +33,7 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -41,21 +42,81 @@ exports[`Table should render normally 1`] = `
             values={Object {}}
           />
         </EuiButton>,
-        <EuiButton
-          color="primary"
-          fill={false}
-          iconSide="left"
-          iconType="exportAction"
-          isDisabled={false}
-          onClick={[Function]}
-          type="button"
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButton
+              color="primary"
+              fill={false}
+              iconSide="right"
+              iconType="arrowDown"
+              isDisabled={false}
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          closePopover={[Function]}
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="m"
         >
-          <FormattedMessage
-            defaultMessage="Export"
-            id="kbn.management.objects.objectsTable.table.exportButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>,
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Options"
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include related objects"
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  values={Object {}}
+                />
+              }
+              name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiButton
+              color="primary"
+              fill={true}
+              iconSide="left"
+              iconType="exportAction"
+              onClick={[Function]}
+              size="m"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFormRow>
+        </EuiPopover>,
       ]
     }
   />
@@ -136,5 +197,5 @@ exports[`Table should render normally 1`] = `
       }
     />
   </div>
-</React.Fragment>
+</Fragment>
 `;

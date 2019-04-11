@@ -15,9 +15,9 @@ import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../../components/chart';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -82,28 +82,30 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         ];
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <DetailStatus stats={data.nodeSummary}/>
-                  <EuiSpacer size="m"/>
-                  <EuiFlexGrid columns={2} gutterSize="none">
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (
-                      <EuiFlexItem key={index} style={{ width: '50%' }}>
+                      <EuiFlexItem key={index}>
                         <MonitoringTimeseriesContainer
                           series={metric}
                           onBrush={this.onBrush}
                           {...data}
                         />
-                        <EuiSpacer size="m"/>
+                        <EuiSpacer />
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGrid>
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

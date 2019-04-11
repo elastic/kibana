@@ -1,0 +1,10 @@
+{
+  "ml.delete_expired_data": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/_delete_expired_data"
+    ]
+  }
+}

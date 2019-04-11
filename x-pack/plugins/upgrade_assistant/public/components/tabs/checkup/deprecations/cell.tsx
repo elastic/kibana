@@ -7,7 +7,6 @@
 import React, { ReactNode, StatelessComponent } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,16 +16,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ReindexButton } from './reindex';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
+  reindexIndexName?: string;
   docUrl?: string;
   headline?: string;
   healthColor?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
   children?: ReactNode;
 }
 
@@ -36,7 +33,7 @@ interface DeprecationCellProps {
 export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  actions,
+  reindexIndexName,
   docUrl,
   items = [],
   children,
@@ -78,14 +75,11 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
         ))}
       </EuiFlexItem>
 
-      {actions &&
-        actions.map(button => (
-          <EuiFlexItem key={button.url} grow={false}>
-            <EuiButton size="s" href={button.url} target="_blank">
-              {button.label}
-            </EuiButton>
-          </EuiFlexItem>
-        ))}
+      {reindexIndexName && (
+        <EuiFlexItem grow={false}>
+          <ReindexButton indexName={reindexIndexName} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
 
     <EuiSpacer size="s" />

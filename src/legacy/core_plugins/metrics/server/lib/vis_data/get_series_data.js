@@ -16,41 +16,57 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import getRequestParams from './series/get_request_params';
+import { getSeriesRequestParams } from './series/get_request_params';
 import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
-import getAnnotations from './get_annotations';
-export async function getSeriesData(req, panel) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
-  const bodies = panel.series.map(series => getRequestParams(req, panel, series));
-  const params = {
-    rest_total_hits_as_int: true,
-    ignore_throttled: !includeFrozen,
-    body: bodies.reduce((acc, items) => acc.concat(items), [])
-  };
-  return callWithRequest(req, 'msearch', params)
-    .then(resp => {
-      const series = resp.responses.map(handleResponseBody(panel));
-      return {
-        [panel.id]: {
-          id: panel.id,
-          series: series.reduce((acc, series) => acc.concat(series), [])
-        }
-      };
-    })
-    .then(resp => {
-      if (!panel.annotations || panel.annotations.length === 0) return resp;
-      return getAnnotations(req, panel).then(annotations => {
-        resp[panel.id].annotations = annotations;
-        return resp;
-      });
-    })
-    .then(resp => {
-      resp.type = panel.type;
-      return resp;
-    })
-    .catch(handleErrorResponse(panel));
-}
+import { getAnnotations } from './get_annotations';
+import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getActiveSeries } from './helpers/get_active_series';
 
+export async function getSeriesData(req, panel) {
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const esQueryConfig = await getEsQueryConfig(req);
+
+  const bodiesPromises = getActiveSeries(panel)
+    .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+
+  const body = (await Promise.all(bodiesPromises))
+    .reduce((acc, items) => acc.concat(items), []);
+
+  const meta = {
+    type: panel.type,
+    uiRestrictions: capabilities.uiRestrictions,
+  };
+
+  try {
+    const data = await searchRequest.search({ body });
+    const series = data.map(handleResponseBody(panel));
+    let annotations = null;
+
+    if (panel.annotations && panel.annotations.length) {
+      annotations = await getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities);
+    }
+
+    return {
+      ...meta,
+      [panel.id]: {
+        annotations,
+        id: panel.id,
+        series: series.reduce((acc, series) => acc.concat(series), []),
+      },
+    };
+
+  } catch (err) {
+    if (err.body) {
+      err.response = err.body;
+
+      return {
+        ...meta,
+        ...handleErrorResponse(panel)(err),
+      };
+    }
+  }
+}

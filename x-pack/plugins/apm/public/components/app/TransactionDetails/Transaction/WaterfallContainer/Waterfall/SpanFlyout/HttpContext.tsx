@@ -6,33 +6,37 @@
 
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   borderRadius,
-  colors,
   fontFamilyCode,
+  fontSize,
   px,
   unit,
   units
 } from '../../../../../../../style/variables';
+import { idx } from '../../../../../../../../common/idx';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 
-import { EuiTitle } from '@elastic/eui';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
-
-const DatabaseStatement = styled.div`
-  margin-top: ${px(unit)};
+const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${colors.gray5};
+  background: ${theme.euiColorLightestShade};
   border-radius: ${borderRadius};
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 
 interface Props {
-  httpContext: Span['context']['http'];
+  httpContext: NonNullable<Span['span']>['http'];
 }
 
 export function HttpContext({ httpContext }: Props) {
-  if (!httpContext || !httpContext.url) {
+  const url = idx(httpContext, _ => _.url.original);
+
+  if (!url) {
     return null;
   }
 
@@ -41,7 +45,9 @@ export function HttpContext({ httpContext }: Props) {
       <EuiTitle size="xs">
         <h3>HTTP URL</h3>
       </EuiTitle>
-      <DatabaseStatement>{httpContext.url}</DatabaseStatement>
+      <EuiSpacer size="m" />
+      <ContextUrl>{url}</ContextUrl>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 }

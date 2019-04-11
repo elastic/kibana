@@ -30,23 +30,14 @@ export const config = (Joi) => {
         }).default()
       }).default()
     }).default(),
-    index_pattern: Joi.string().default('.monitoring-*-6-*'),
     kibana: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-kibana-6-*'),
       collection: Joi.object({
         enabled: Joi.boolean().default(true),
         interval: Joi.number().default(10000) // op status metrics get buffered at `ops.interval` and flushed to the bulk endpoint at this interval
       }).default()
     }).default(),
-    logstash: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-logstash-6-*')
-    }).default(),
-    beats: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-beats-6-*')
-    }).default(),
     cluster_alerts: Joi.object({
       enabled: Joi.boolean().default(true),
-      index: Joi.string().default('.monitoring-alerts-6'),
       email_notifications: Joi.object({
         enabled: Joi.boolean().default(true),
         email_address: Joi.string().email(),
@@ -56,13 +47,11 @@ export const config = (Joi) => {
     max_bucket_size: Joi.number().default(10000),
     min_interval_seconds: Joi.number().default(10),
     show_license_expiration: Joi.boolean().default(true),
-    report_stats: Joi.boolean().default(true),
     agent: Joi.object({
       interval: Joi.string().regex(/[\d\.]+[yMwdhms]/).default('10s')
     }).default(),
     elasticsearch: Joi.object({
       customHeaders: Joi.object().default({}),
-      index_pattern: Joi.string().default('.monitoring-es-6-*'),
       logQueries: Joi.boolean().default(false),
       requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
       sniffOnStart: Joi.boolean().default(false),

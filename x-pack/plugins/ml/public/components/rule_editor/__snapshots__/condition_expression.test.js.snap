@@ -2,27 +2,24 @@
 
 exports[`ConditionExpression renders with appliesTo, operator and value supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiExpression
-          color="secondary"
-          description="when"
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
           isActive={false}
           onClick={[Function]}
-          uppercase={true}
           value="diff from typical"
         />
       }
@@ -42,7 +39,11 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         }
       >
         <EuiPopoverTitle>
-          When
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -81,18 +82,25 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiExpression
-          color="secondary"
-          description="is greater than"
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "greater than",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
-          uppercase={true}
           value="123"
         />
       }
@@ -112,27 +120,23 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -170,7 +174,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -192,11 +195,10 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButtonIcon
-      aria-label="Next"
+      aria-label="Delete condition"
       color="danger"
       iconSize="m"
       iconType="trash"
@@ -210,27 +212,24 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
 
 exports[`ConditionExpression renders with only value supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiExpression
-          color="secondary"
-          description="when"
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
           isActive={false}
           onClick={[Function]}
-          uppercase={true}
           value=""
         />
       }
@@ -250,7 +249,11 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          When
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -288,18 +291,25 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiExpression
-          color="secondary"
-          description="is "
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
-          uppercase={true}
           value="123"
         />
       }
@@ -319,27 +329,23 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -376,7 +382,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -398,11 +403,10 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButtonIcon
-      aria-label="Next"
+      aria-label="Delete condition"
       color="danger"
       iconSize="m"
       iconType="trash"

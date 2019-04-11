@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -24,14 +24,6 @@ interface GetAllTestDefinition {
 }
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectResults = (...spaceIds: string[]) => (resp: { [key: string]: any }) => {
     const expectedBody = [
       {
@@ -58,6 +50,14 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql('');
   };
 
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      error: 'Forbidden',
+      message: 'Forbidden',
+      statusCode: 403,
+    });
+  };
+
   const makeGetAllTest = (describeFn: DescribeFn) => (
     description: string,
     { user = {}, spaceId, tests }: GetAllTestDefinition
@@ -82,7 +82,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectResults,
-    createExpectLegacyForbidden,
+    expectRbacForbidden,
     getAllTest,
     expectEmptyResult,
   };

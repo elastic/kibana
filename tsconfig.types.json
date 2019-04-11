@@ -3,11 +3,12 @@
   "compilerOptions": {
     "declaration": true,
     "declarationDir": "./target/types",
-    "stripInternal": true,
+    "stripInternal": false,
     "emitDeclarationOnly": true,
     "declarationMap": true
   },
   "include": [
-    "./src/type_exports.ts"
+    "src/core/server/index.ts",
+    "src/core/public/index.ts"
   ]
 }

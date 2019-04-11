@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { listBreadcrumb, addBreadcrumb } from '../../services';
+import { listBreadcrumb, addBreadcrumb, getRouter, redirect, extractQueryParams } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 export const RemoteClusterAdd = injectI18n(
-  class extends Component {
+  class extends PureComponent {
     static propTypes = {
       addCluster: PropTypes.func,
       isAddingCluster: PropTypes.bool,
@@ -29,8 +27,7 @@ export const RemoteClusterAdd = injectI18n(
       clearAddClusterErrors: PropTypes.func,
     }
 
-    constructor(props) {
-      super(props);
+    componentDidMount() {
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
     }
 
@@ -44,40 +41,41 @@ export const RemoteClusterAdd = injectI18n(
     };
 
     cancel = () => {
-      const { history } = this.props;
-      history.push(CRUD_APP_BASE_PATH);
+      const { history, route: { location: { search } } } = getRouter();
+      const { redirect: redirectUrl } = extractQueryParams(search);
+
+      if (redirectUrl) {
+        const decodedRedirect = decodeURIComponent(redirectUrl);
+        redirect(decodedRedirect);
+      } else {
+        history.push(CRUD_APP_BASE_PATH);
+      }
     };
 
     render() {
       const { isAddingCluster, addClusterError } = this.props;
 
       return (
-        <Fragment>
-          <EuiPage>
-            <EuiPageBody>
-              <EuiPageContent
-                horizontalPosition="center"
-                className="remoteClusterAddPage"
-              >
-                <RemoteClusterPageTitle
-                  title={(
-                    <FormattedMessage
-                      id="xpack.remoteClusters.addTitle"
-                      defaultMessage="Add remote cluster"
-                    />
-                  )}
-                />
+        <EuiPageContent
+          horizontalPosition="center"
+          className="remoteClusterAddPage"
+        >
+          <RemoteClusterPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.remoteClusters.addTitle"
+                defaultMessage="Add remote cluster"
+              />
+            )}
+          />
 
-                <RemoteClusterForm
-                  isSaving={isAddingCluster}
-                  saveError={addClusterError}
-                  save={this.save}
-                  cancel={this.cancel}
-                />
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </Fragment>
+          <RemoteClusterForm
+            isSaving={isAddingCluster}
+            saveError={addClusterError}
+            save={this.save}
+            cancel={this.cancel}
+          />
+        </EuiPageContent>
       );
     }
   }

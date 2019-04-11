@@ -6,6 +6,7 @@
 
 
 import { ML_BREADCRUMB } from '../breadcrumbs';
+import { i18n } from '@kbn/i18n';
 
 
 export function getSettingsBreadcrumbs() {
@@ -20,7 +21,9 @@ export function getCalendarManagementBreadcrumbs() {
   return [
     ...getSettingsBreadcrumbs(),
     {
-      text: 'Calendar management',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+        defaultMessage: 'Calendar management'
+      }),
       href: '#/settings/calendars_list'
     }
   ];
@@ -30,7 +33,9 @@ export function getCreateCalendarBreadcrumbs() {
   return [
     ...getCalendarManagementBreadcrumbs(),
     {
-      text: 'Create',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
+        defaultMessage: 'Create'
+      }),
       href: '#/settings/calendars_list/new_calendar'
     }
   ];
@@ -40,7 +45,9 @@ export function getEditCalendarBreadcrumbs() {
   return [
     ...getCalendarManagementBreadcrumbs(),
     {
-      text: 'Edit',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
+        defaultMessage: 'Edit'
+      }),
       href: '#/settings/calendars_list/edit_calendar'
     }
   ];
@@ -50,7 +57,9 @@ export function getFilterListsBreadcrumbs() {
   return [
     ...getSettingsBreadcrumbs(),
     {
-      text: 'Filter lists',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
+        defaultMessage: 'Filter lists'
+      }),
       href: '#/settings/filter_lists'
     }
   ];
@@ -60,7 +69,9 @@ export function getCreateFilterListBreadcrumbs() {
   return [
     ...getFilterListsBreadcrumbs(),
     {
-      text: 'Create',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
+        defaultMessage: 'Create'
+      }),
       href: '#/settings/filter_lists/new'
     }
   ];
@@ -70,7 +81,9 @@ export function getEditFilterListBreadcrumbs() {
   return [
     ...getFilterListsBreadcrumbs(),
     {
-      text: 'Edit',
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
+        defaultMessage: 'Edit'
+      }),
       href: '#/settings/filter_lists/edit'
     }
   ];

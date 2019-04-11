@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { UMGqlRange } from '../../../../common/domain_types';
-import { Ping } from '../../../../common/graphql/types';
+import { MonitorPageTitle, Ping } from '../../../../common/graphql/types';
 import { UMMonitorsAdapter } from './adapter_types';
 
 export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
@@ -16,31 +14,32 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     this.monitorsDB = monitorsDB;
   }
 
-  public async getLatestMonitors(
+  public async getMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any> {
     return this.monitorsDB.filter(ping => {
-      const timestamp = moment(ping.timestamp).valueOf();
-      return dateRangeStart <= timestamp && timestamp <= dateRangeEnd;
+      // const timestamp = moment(ping.timestamp).valueOf();
+      throw new Error('Method not implemented.');
+      // return dateRangeStart <= timestamp && timestamp <= dateRangeEnd;
     });
   }
   public async getMonitorChartsData(
     req: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     throw new Error('Method not implemented.');
   }
 
   public async getSnapshotCount(
     request: any,
-    range: UMGqlRange,
-    downCount: number,
-    windowSize: number
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any> {
     throw new Error('Method not implemented.');
   }
@@ -50,10 +49,17 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters?: string | undefined
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async getMonitorPageTitle(
+    request: any,
+    monitorId: string
+  ): Promise<MonitorPageTitle | null> {
     throw new Error('Method not implemented.');
   }
 }

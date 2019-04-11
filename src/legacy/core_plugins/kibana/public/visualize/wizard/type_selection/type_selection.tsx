@@ -30,15 +30,15 @@ import {
   EuiKeyPadMenuItemButton,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { memoizeLast } from 'ui/utils/memoize';
+import { VisType } from 'ui/vis';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-
-import { memoizeLast } from 'ui/utils/memoize';
-import { VisType } from 'ui/vis';
 
 interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -91,9 +91,30 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     value={query}
                     onChange={this.onQueryChange}
                     fullWidth
+                    data-test-subj="filterVisType"
+                    aria-label={i18n.translate(
+                      'kbn.visualize.newVisWizard.filterVisTypeAriaLabel',
+                      {
+                        defaultMessage: 'Filter for a visualization type',
+                      }
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
+                  <EuiScreenReaderOnly>
+                    <span aria-live="polite">
+                      {query && (
+                        <FormattedMessage
+                          id="kbn.visualize.newVisWizard.resultsFound"
+                          defaultMessage="{resultCount} {resultCount, plural,
+                            one {type}
+                            other {types}
+                          } found"
+                          values={{ resultCount: visTypes.filter(type => type.highlighted).length }}
+                        />
+                      )}
+                    </span>
+                  </EuiScreenReaderOnly>
                   <EuiKeyPadMenu
                     className="visNewVisDialog__types"
                     data-test-subj="visNewDialogTypes"
@@ -167,7 +188,8 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           defaultMessage: 'Experimental',
         }),
         betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.experimentalTooltip', {
-          defaultMessage: 'This visualization is experimental.',
+          defaultMessage:
+            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
       };
     }
@@ -186,6 +208,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-vis-stage={visType.stage}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
+        role="menuitem"
         {...stage}
       >
         <VisTypeIcon visType={visType} />

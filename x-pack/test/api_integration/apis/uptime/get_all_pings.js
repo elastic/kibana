@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -16,8 +16,8 @@ export default function ({ getService }) {
   describe('get_all_pings', () => {
     const archive = 'uptime/pings';
 
-    beforeEach('put pings in index', () => esArchiver.load(archive));
-    afterEach('delete pings from index', () => esArchiver.unload(archive));
+    before('load heartbeat data', async () => await esArchiver.load(archive));
+    after('unload heartbeat data', async () => await esArchiver.unload(archive));
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest

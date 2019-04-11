@@ -32,13 +32,13 @@ describe('getInAppUrl', () => {
 
   it('should handle index patterns', () => {
     expect(getInAppUrl(1, 'index-pattern')).toEqual(
-      '/management/kibana/indices/1'
+      '/management/kibana/index_patterns/1'
     );
     expect(getInAppUrl(1, 'index-patterns')).toEqual(
-      '/management/kibana/indices/1'
+      '/management/kibana/index_patterns/1'
     );
     expect(getInAppUrl(1, 'indexPatterns')).toEqual(
-      '/management/kibana/indices/1'
+      '/management/kibana/index_patterns/1'
     );
   });
 

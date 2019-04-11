@@ -6,35 +6,31 @@
 
 import gql from 'graphql-tag';
 
-export const getSnapshotQuery = gql`
-  query Snapshot(
-    $dateRangeStart: UnsignedInteger
-    $dateRangeEnd: UnsignedInteger
-    $downCount: Int
-    $windowSize: Int
-    $filters: String
-  ) {
-    snapshot: getSnapshot(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      downCount: $downCount
-      windowSize: $windowSize
-      filters: $filters
-    ) {
-      up
-      down
-      trouble
-      total
-      histogram {
-        monitorId
-        data {
-          upCount
-          downCount
-          x
-          x0
-          y
-        }
-      }
+export const getSnapshotQueryString = `
+query Snapshot(
+  $dateRangeStart: String!
+  $dateRangeEnd: String!
+  $filters: String
+) {
+snapshot: getSnapshot(
+  dateRangeStart: $dateRangeStart
+  dateRangeEnd: $dateRangeEnd
+  filters: $filters
+) {
+  up
+  down
+  total
+  histogram {
+      upCount
+      downCount
+      x
+      x0
+      y
     }
   }
+}
+`;
+
+export const getSnapshotQuery = gql`
+  ${getSnapshotQueryString}
 `;

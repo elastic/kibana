@@ -31,6 +31,8 @@ import { RequestStatus } from 'ui/inspector/adapters';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class RequestsViewComponent extends Component {
 
@@ -69,13 +71,28 @@ class RequestsViewComponent extends Component {
       <InspectorView useFlex={true}>
         <EuiEmptyPrompt
           data-test-subj="inspectorNoRequestsMessage"
-          title={<h2>No requests logged</h2>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="inspectorViews.requests.noRequestsLoggedTitle"
+                defaultMessage="No requests logged"
+              />
+            </h2>
+          }
           body={
             <React.Fragment>
-              <p>The element hasn&apos;t logged any requests (yet).</p>
               <p>
-                This usually means that there was no need to fetch any data or
-                that the element has not yet started fetching data.
+                <FormattedMessage
+                  id="inspectorViews.requests.noRequestsLoggedDescription.elementHasNotLoggedAnyRequestsText"
+                  defaultMessage="The element hasn't logged any requests (yet)."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="inspectorViews.requests.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
+                  defaultMessage="This usually means that there was no need to fetch any data or
+                    that the element has not yet started fetching data."
+                />
               </p>
             </React.Fragment>
           }
@@ -97,18 +114,24 @@ class RequestsViewComponent extends Component {
       <InspectorView>
         <EuiText size="xs">
           <p role="status" aria-live="polite" aria-atomic="true">
-            {this.state.requests.length}
-            {this.state.requests.length !== 1 ? ' requests were' : ' request was'} made
-            {failedCount > 0 &&
-              <React.Fragment>
-                , {' '}
-                <EuiTextColor
-                  color="danger"
-                >
-                  {failedCount} had a failure
-                </EuiTextColor>
-              </React.Fragment>
-            }
+            <FormattedMessage
+              id="inspectorViews.requests.requestWasMadeDescription"
+              defaultMessage="{requestsCount, plural, one {# request was} other {# requests were} } made{failedRequests}"
+              values={{
+                requestsCount: this.state.requests.length,
+                failedRequests: (
+                  failedCount > 0 ? (
+                    <EuiTextColor color="danger">
+                      <FormattedMessage
+                        id="inspectorViews.requests.requestWasMadeDescription.requestHadFailureText"
+                        defaultMessage=", {failedCount} had a failure"
+                        values={{ failedCount }}
+                      />
+                    </EuiTextColor>
+                  ) : ''
+                )
+              }}
+            />
           </p>
         </EuiText>
         <EuiSpacer size="xs"/>
@@ -139,9 +162,13 @@ RequestsViewComponent.propTypes = {
 };
 
 const RequestsView = {
-  title: 'Requests',
+  title: i18n.translate('inspectorViews.requests.requestsTitle', {
+    defaultMessage: 'Requests'
+  }),
   order: 20,
-  help: `View the requests that collected the data`,
+  help: i18n.translate('inspectorViews.requests.requestsDescriptionTooltip', {
+    defaultMessage: 'View the requests that collected the data'
+  }),
   shouldShow(adapters) {
     return Boolean(adapters.requests);
   },

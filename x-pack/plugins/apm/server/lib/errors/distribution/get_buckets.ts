@@ -5,7 +5,12 @@
  */
 
 import { BucketAgg, ESFilter } from 'elasticsearch';
-import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/constants';
+import {
+  ERROR_GROUP_ID,
+  PROCESSOR_EVENT,
+  SERVICE_NAME
+} from '../../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getBuckets({
@@ -15,22 +20,15 @@ export async function getBuckets({
   setup
 }: {
   serviceName: string;
-  groupId: string;
+  groupId?: string;
   bucketSize: number;
   setup: Setup;
 }) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
 
   if (groupId) {

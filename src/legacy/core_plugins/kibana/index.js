@@ -21,6 +21,7 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import { resolve } from 'path';
 
+import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
 import { searchApi } from './server/routes/api/search';
 import { scrollSearchApi } from './server/routes/api/scroll_search';
@@ -51,7 +52,8 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
-        index: Joi.string().default('.kibana')
+        index: Joi.string().default('.kibana'),
+        disableWelcomeScreen: Joi.boolean().default(false),
       }).default();
     },
 
@@ -67,9 +69,6 @@ export default function (kibana) {
         id: 'kibana',
         title: 'Kibana',
         listed: false,
-        description: i18n.translate('kbn.kibanaDescription', {
-          defaultMessage: 'the kibana you know and love'
-        }),
         main: 'plugins/kibana/kibana',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -81,9 +80,6 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          description: i18n.translate('kbn.discoverDescription', {
-            defaultMessage: 'interactively explore your data'
-          }),
           icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
         }, {
@@ -93,9 +89,6 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          description: i18n.translate('kbn.visualizeDescription', {
-            defaultMessage: 'design data visualizations'
-          }),
           icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         }, {
@@ -111,9 +104,6 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          description: i18n.translate('kbn.dashboardDescription', {
-            defaultMessage: 'compose visualizations for much win'
-          }),
           icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         }, {
@@ -123,9 +113,6 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          description: i18n.translate('kbn.devToolsDescription', {
-            defaultMessage: 'development tools'
-          }),
           icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         }, {
@@ -135,9 +122,6 @@ export default function (kibana) {
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          description: i18n.translate('kbn.managementDescription', {
-            defaultMessage: 'define index patterns, change config, and more'
-          }),
           icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false
@@ -146,6 +130,9 @@ export default function (kibana) {
 
       savedObjectSchemas: {
         'kql-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+        'sample-data-telemetry': {
           isNamespaceAgnostic: true,
         },
       },
@@ -159,6 +146,8 @@ export default function (kibana) {
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
+
+      migrations,
     },
 
     preInit: async function (server) {

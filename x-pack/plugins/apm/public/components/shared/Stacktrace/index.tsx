@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-// @ts-ignore
-import { Ellipsis } from '../../shared/Icons';
 import { LibraryStackFrames } from './LibraryStackFrames';
 import { Stackframe } from './Stackframe';
 
@@ -40,26 +39,28 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
       {groups.map((group, i) => {
         // library frame
         if (group.isLibraryFrame) {
-          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
           return (
-            <LibraryStackFrames
-              key={i}
-              initialVisiblity={initialVisiblity}
-              stackframes={group.stackframes}
-              codeLanguage={codeLanguage}
-            />
+            <Fragment key={i}>
+              <EuiSpacer size="m" />
+              <LibraryStackFrames
+                initialVisiblity={false}
+                stackframes={group.stackframes}
+                codeLanguage={codeLanguage}
+              />
+              <EuiSpacer size="m" />
+            </Fragment>
           );
         }
 
         // non-library frame
         return group.stackframes.map((stackframe, idx) => (
-          <Stackframe
-            key={`${i}-${idx}`}
-            codeLanguage={codeLanguage}
-            stackframe={stackframe}
-          />
+          <Fragment key={`${i}-${idx}`}>
+            {idx > 0 && <EuiSpacer size="m" />}
+            <Stackframe codeLanguage={codeLanguage} stackframe={stackframe} />
+          </Fragment>
         ));
       })}
+      <EuiSpacer size="m" />
     </Fragment>
   );
 }

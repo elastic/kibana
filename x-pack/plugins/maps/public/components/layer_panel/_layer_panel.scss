@@ -1,0 +1,37 @@
+/**
+ * 1. Firefox and IE don't respect bottom padding of overflow scrolling flex items.
+ *    So we instead strip out the bottom padding and add the same amount as a margin
+ *    to the last child element.
+ */
+
+.mapLayerPanel__header,
+.mapLayerPanel__body,
+.mapLayerPanel__footer {
+  padding: $euiSize;
+}
+
+.mapLayerPanel__body {
+  flex-basis: 1px; /* Fixes scrolling for Firefox */
+  padding-bottom: 0; /* 1 */
+
+  > *:last-child {
+    margin-bottom: $euiSize; /* 1 */
+  }
+}
+
+.mapLayerPanel__header {
+  @include euiOverflowShadowBottom;
+}
+
+.mapLayerPanel__sourceDetails {
+  margin-left: $euiSizeXL;
+}
+
+.mapLayerPanel__sourceDetail {
+  margin-bottom: 0px !important;
+}
+
+.mapLayerPanel__footer {
+  @include euiOverflowShadowTop;
+  border-top: $euiBorderThin;
+}

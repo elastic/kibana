@@ -4,36 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
-import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
+import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
+import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
+import { MissingArgumentsError } from '../../../hooks/useFetcher';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
-import { addVersion, getEncodedEsQuery } from './apm';
+import { getEncodedEsQuery } from './apm';
 
 export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  const hits = await callApi<TraceAPIResponse>({
+  if (!(traceId && start && end)) {
+    throw new MissingArgumentsError();
+  }
+
+  return callApi<TraceAPIResponse>({
     pathname: `/api/apm/traces/${traceId}`,
     query: {
       start,
       end
     }
   });
-
-  return hits.map(addVersion);
 }
 
 export async function loadTraceList({ start, end, kuery }: IUrlParams) {
-  const groups = await callApi<TraceListAPIResponse>({
+  if (!(start && end)) {
+    throw new MissingArgumentsError();
+  }
+
+  return callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {
       start,
       end,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
-  });
-
-  return groups.map(group => {
-    group.sample = addVersion(group.sample);
-    return group;
   });
 }

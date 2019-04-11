@@ -19,13 +19,13 @@
 
 import 'ui/notify';
 import 'ui/courier';
-import 'ui/doc_viewer';
 import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { getRootBreadcrumbs } from '../../discover/breadcrumbs';
+import 'plugins/kibana/doc_viewer';
+import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
   'kibana/notify',
@@ -59,9 +59,7 @@ uiRoutes
     k7Breadcrumbs
   });
 
-app.controller('doc', function ($scope, $route, es, config) {
-
-  config.bindToScope($scope, 'k7design');
+app.controller('doc', function ($scope, $route, es) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 

@@ -115,18 +115,18 @@ function createDisplayItems(results) {
     });
   }
 
-  if (results.joda_timestamp_formats !== undefined) {
+  if (results.java_timestamp_formats !== undefined) {
     items.push({
       title: (
         <FormattedMessage
           id="xpack.ml.fileDatavisualizer.analysisSummary.timeFormatTitle"
           defaultMessage="Time {timestampFormats, plural, zero {format} one {format} other {formats}}"
           values={{
-            timestampFormats: results.joda_timestamp_formats.length,
+            timestampFormats: results.java_timestamp_formats.length,
           }}
         />
       ),
-      description: results.joda_timestamp_formats.join(', '),
+      description: results.java_timestamp_formats.join(', '),
     });
   }
 

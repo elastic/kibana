@@ -211,7 +211,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
-        defaultMessage={`Add lifecycle policy to "{indexName}"`}
+        defaultMessage="Add lifecycle policy to &quot;{indexName}&quot;"
         values={{
           indexName,
         }}
@@ -224,11 +224,11 @@ export class AddLifecyclePolicyConfirmModal extends Component {
             onClose={closeModal}
           >
             <EuiModalHeader>
-              <EuiModalHeaderTitle >
+              <EuiModalHeaderTitle>
                 {title}
-              </EuiModalHeaderTitle >
-
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
+
             <EuiModalBody>
               <EuiCallOut
                 style={{ maxWidth: 400 }}

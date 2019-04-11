@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oc } from 'ts-optchain';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { SearchParams } from 'elasticsearch';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -14,19 +13,16 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../common/idx';
+import { PromiseReturnType } from '../../../typings/common';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-interface ErrorResponseItems {
-  message?: string;
-  occurrenceCount: number;
-  culprit?: string;
-  groupId?: string;
-  latestOccurrenceAt: string;
-  handled?: boolean;
-}
-
-export type ErrorGroupListAPIResponse = ErrorResponseItems[];
+export type ErrorGroupListAPIResponse = PromiseReturnType<
+  typeof getErrorGroups
+>;
 
 export async function getErrorGroups({
   serviceName,
@@ -36,12 +32,12 @@ export async function getErrorGroups({
 }: {
   serviceName: string;
   sortField: string;
-  sortDirection: 'desc' | 'asc';
+  sortDirection: string;
   setup: Setup;
-}): Promise<ErrorGroupListAPIResponse> {
+}) {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params: any = {
+  const params: SearchParams = {
     index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 0,
@@ -50,15 +46,7 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
+            { range: rangeFilter(start, end) }
           ]
         }
       },
@@ -111,10 +99,10 @@ export async function getErrorGroups({
       log?: {
         message: string;
       };
-      exception?: {
+      exception?: Array<{
         handled?: boolean;
         message?: string;
-      };
+      }>;
       culprit: APMError['error']['culprit'];
       grouping_key: APMError['error']['grouping_key'];
     };
@@ -141,22 +129,23 @@ export async function getErrorGroups({
   }
 
   const resp = await client<void, Aggs>('search', params);
-  const hits = oc(resp)
-    .aggregations.error_groups.buckets([])
-    .map(bucket => {
-      const source = bucket.sample.hits.hits[0]._source;
-      const message =
-        oc(source).error.log.message() || oc(source).error.exception.message();
+  const buckets = idx(resp, _ => _.aggregations.error_groups.buckets) || [];
 
-      return {
-        message,
-        occurrenceCount: bucket.doc_count,
-        culprit: oc(source).error.culprit(),
-        groupId: oc(source).error.grouping_key(),
-        latestOccurrenceAt: source['@timestamp'],
-        handled: oc(source).error.exception.handled()
-      };
-    });
+  const hits = buckets.map(bucket => {
+    const source = bucket.sample.hits.hits[0]._source;
+    const message =
+      idx(source, _ => _.error.log.message) ||
+      idx(source, _ => _.error.exception[0].message);
+
+    return {
+      message,
+      occurrenceCount: bucket.doc_count,
+      culprit: idx(source, _ => _.error.culprit),
+      groupId: idx(source, _ => _.error.grouping_key),
+      latestOccurrenceAt: source['@timestamp'],
+      handled: idx(source, _ => _.error.exception[0].handled)
+    };
+  });
 
   return hits;
 }

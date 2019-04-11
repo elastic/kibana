@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './register_ccr_section';
 import './register_routes';
+import './extend_index_management';

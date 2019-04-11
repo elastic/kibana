@@ -9,11 +9,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { setTelemetryOptInService, setTelemetryEnabled, setHttpClient, TelemetryOptInProvider } from './lib/telemetry';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
 import App from './app';
-import { BASE_PATH } from "../common/constants/base_path";
+import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
 import { XPackInfoProvider as xpackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
@@ -24,13 +24,13 @@ import { getDashboardBreadcrumbs, getUploadBreadcrumbs } from './breadcrumbs';
 
 const renderReact = (elem, store) => {
   render(
-    <I18nProvider>
+    <I18nContext>
       <Provider store={store}>
         <HashRouter>
           <App />
         </HashRouter>
       </Provider>
-    </I18nProvider>,
+    </I18nContext>,
     elem
   );
 };

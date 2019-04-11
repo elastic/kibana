@@ -32,11 +32,10 @@ export class WatchesService {
     // $http.delete does not take the request body as the 2nd argument. Instead it expects the 2nd
     // argument to be a request options object, one of which can be the request body (data). We also
     // need to explicitly define the content type of the data.
-    const requestOpts = {
-      data: { watchIds },
-      headers: { 'Content-Type': 'application/json' }
+    const body = {
+      watchIds
     };
-    return this.$http.delete(`${this.basePath}/watches`, requestOpts)
+    return this.$http.post(`${this.basePath}/watches/delete`, body)
       .then(response => response.data.results);
   }
 }

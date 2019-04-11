@@ -1,11 +1,10 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
 === Collecting {kib} monitoring data with {metricbeat}
+[subs="attributes"]
 ++++
 <titleabbrev>Collecting monitoring data with {metricbeat}</titleabbrev>
 ++++
-
-beta[]
 
 In 6.4 and later, you can use {metricbeat} to collect data about {kib} 
 and ship it to the monitoring cluster, rather than routing it through the 
@@ -91,7 +90,7 @@ run the following command:
 
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
-metricbeat modules enable kibana
+metricbeat modules enable kibana-xpack
 ----------------------------------------------------------------------
 
 For more information, see 
@@ -99,30 +98,14 @@ For more information, see
 {metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
 --
 
-. Configure the {kib} module in {metricbeat}. +
-+
---
-You must specify the following settings in the `modules.d/kibana.yml` file:
-
-[source,yaml]
-----------------------------------
-- module: kibana
-  metricsets:
-    - stats
-  period: 10s
-  hosts: ["http://localhost:5601"] <1>
-  xpack.enabled: true <2>
-----------------------------------
-<1> This setting identifies the host and port number that are used to access {kib}. 
-<2> This setting ensures that {kib} can read the monitoring data successfully. 
-That is to say, it's stored in the same location and format as monitoring data 
-that is sent by {ref}/es-monitoring-exporters.html[exporters].  
---
+. By default the module will collect {kib} monitoring metrics from `http://localhost:5601`.
+If the local {kib} instance has a different address, you must specify it via the `hosts` setting
+in the `modules.d/kibana-xpack.yml` file.
 
 . If the Elastic {security-features} are enabled, you must also provide a user 
 ID and password so that {metricbeat} can collect metrics successfully. 
 
-... Create a user on the production cluster that has the 
+.. Create a user on the production cluster that has the 
 `remote_monitoring_collector` {stack-ov}/built-in-roles.html[built-in role]. 
 Alternatively, use the `remote_monitoring_user` 
 {stack-ov}/built-in-users.html[built-in user].
@@ -131,7 +114,7 @@ Alternatively, use the `remote_monitoring_user`
 file.
 +
 --
-For example, add the following settings in the `modules.d/kibana.yml` file:
+For example, add the following settings in the `modules.d/kibana-xpack.yml` file:
 
 [source,yaml]
 ----------------------------------
@@ -144,7 +127,7 @@ For example, add the following settings in the `modules.d/kibana.yml` file:
 
 . If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
 you must access it via HTTPS. For example, use a `hosts` setting like 
-`https://localhost:5601` in the `modules.d/kibana.yml` file. 
+`https://localhost:5601` in the `modules.d/kibana-xpack.yml` file. 
 
 . Identify where to send the monitoring data. +
 +

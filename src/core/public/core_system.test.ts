@@ -17,103 +17,45 @@
  * under the License.
  */
 
-import { BasePathService } from './base_path';
-import { ChromeService } from './chrome';
-import { FatalErrorsService } from './fatal_errors';
-import { InjectedMetadataService } from './injected_metadata';
-import { LegacyPlatformService } from './legacy_platform';
-import { LoadingCountService } from './loading_count';
-import { NotificationsService } from './notifications';
-import { UiSettingsService } from './ui_settings';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
-const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
-  function _MockLegacyPlatformService(this: any) {
-    this.start = jest.fn();
-    this.stop = jest.fn();
-  }
-);
-jest.mock('./legacy_platform', () => ({
-  LegacyPlatformService: MockLegacyPlatformService,
-}));
-
-const mockInjectedMetadataStartContract = {};
-const MockInjectedMetadataService = jest.fn<InjectedMetadataService>(
-  function _MockInjectedMetadataService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockInjectedMetadataStartContract);
-  }
-);
-jest.mock('./injected_metadata', () => ({
-  InjectedMetadataService: MockInjectedMetadataService,
-}));
-
-const mockFatalErrorsStartContract = {};
-const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalErrorsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockFatalErrorsStartContract);
-  this.add = jest.fn();
-});
-jest.mock('./fatal_errors', () => ({
-  FatalErrorsService: MockFatalErrorsService,
-}));
-
-const mockNotificationStartContract = {};
-const MockNotificationsService = jest.fn<NotificationsService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockNotificationStartContract);
-  this.add = jest.fn();
-  this.stop = jest.fn();
-});
-jest.mock('./notifications', () => ({
-  NotificationsService: MockNotificationsService,
-}));
-
-const mockLoadingCountContract = {};
-const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
-  this.stop = jest.fn();
-});
-jest.mock('./loading_count', () => ({
-  LoadingCountService: MockLoadingCountService,
-}));
-
-const mockBasePathStartContract = {};
-const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockBasePathStartContract);
-});
-jest.mock('./base_path', () => ({
-  BasePathService: MockBasePathService,
-}));
-
-const mockUiSettingsContract = {};
-const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockUiSettingsContract);
-  this.stop = jest.fn();
-});
-jest.mock('./ui_settings', () => ({
-  UiSettingsService: MockUiSettingsService,
-}));
-
-const mockChromeStartContract = {};
-const MockChromeService = jest.fn<ChromeService>(function _MockNotificationsService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockChromeStartContract);
-  this.stop = jest.fn();
-});
-jest.mock('./chrome', () => ({
-  ChromeService: MockChromeService,
-}));
+import {
+  BasePathServiceConstructor,
+  ChromeServiceConstructor,
+  FatalErrorsServiceConstructor,
+  HttpServiceConstructor,
+  I18nServiceConstructor,
+  InjectedMetadataServiceConstructor,
+  LegacyPlatformServiceConstructor,
+  MockBasePathService,
+  MockChromeService,
+  MockFatalErrorsService,
+  MockHttpService,
+  MockI18nService,
+  MockInjectedMetadataService,
+  MockLegacyPlatformService,
+  MockNotificationsService,
+  MockOverlayService,
+  MockPluginsService,
+  MockUiSettingsService,
+  NotificationServiceConstructor,
+  OverlayServiceConstructor,
+  UiSettingsServiceConstructor,
+} from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
+
 jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  injectedMetadata: {} as any,
+  browserSupportsCsp: true,
+  injectedMetadata: {
+    csp: {
+      warnLegacyBrowsers: true,
+    },
+  } as any,
   requireLegacyFiles: jest.fn(),
 };
 
@@ -121,51 +63,53 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+function createCoreSystem(params = {}) {
+  return new CoreSystem({
+    ...defaultCoreSystemParams,
+    ...params,
+  });
+}
+
 describe('constructor', () => {
   it('creates instances of services', () => {
-    // tslint:disable no-unused-expression
-    new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    createCoreSystem();
 
-    expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
-    expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
-    expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
-    expect(MockNotificationsService).toHaveBeenCalledTimes(1);
-    expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
-    expect(MockBasePathService).toHaveBeenCalledTimes(1);
-    expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
-    expect(MockChromeService).toHaveBeenCalledTimes(1);
+    expect(InjectedMetadataServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(I18nServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
     const injectedMetadata = { injectedMetadata: true } as any;
 
-    // tslint:disable no-unused-expression
-    new CoreSystem({
-      ...defaultCoreSystemParams,
+    createCoreSystem({
       injectedMetadata,
     });
 
-    expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
-    expect(MockInjectedMetadataService).toHaveBeenCalledWith({
+    expect(InjectedMetadataServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(InjectedMetadataServiceConstructor).toHaveBeenCalledWith({
       injectedMetadata,
     });
   });
 
   it('passes requireLegacyFiles, useLegacyTestHarness, and a dom element to LegacyPlatformService', () => {
-    const requireLegacyFiles = { requireLegacyFiles: true } as any;
-    const useLegacyTestHarness = { useLegacyTestHarness: true } as any;
+    const requireLegacyFiles = { requireLegacyFiles: true };
+    const useLegacyTestHarness = { useLegacyTestHarness: true };
 
-    // tslint:disable no-unused-expression
-    new CoreSystem({
-      ...defaultCoreSystemParams,
+    createCoreSystem({
       requireLegacyFiles,
       useLegacyTestHarness,
     });
 
-    expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
-    expect(MockLegacyPlatformService).toHaveBeenCalledWith({
+    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledWith({
       targetDomElement: expect.any(HTMLElement),
       requireLegacyFiles,
       useLegacyTestHarness,
@@ -173,35 +117,39 @@ describe('constructor', () => {
   });
 
   it('passes a dom element to NotificationsService', () => {
-    // tslint:disable no-unused-expression
-    new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    createCoreSystem();
 
-    expect(MockNotificationsService).toHaveBeenCalledTimes(1);
-    expect(MockNotificationsService).toHaveBeenCalledWith({
-      targetDomElement: expect.any(HTMLElement),
+    expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(NotificationServiceConstructor).toHaveBeenCalledWith({
+      targetDomElement$: expect.any(Observable),
+    });
+  });
+
+  it('passes browserSupportsCsp to ChromeService', () => {
+    createCoreSystem();
+
+    expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(ChromeServiceConstructor).toHaveBeenCalledWith({
+      browserSupportsCsp: expect.any(Boolean),
     });
   });
 
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
     const rootDomElement = document.createElement('div');
-    const injectedMetadata = { injectedMetadata: true } as any;
 
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
+    const coreSystem = createCoreSystem({
       rootDomElement,
-      injectedMetadata,
     });
 
-    expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
-    expect(MockFatalErrorsService).toHaveBeenLastCalledWith({
+    expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
+
+    expect(FatalErrorsServiceConstructor).toHaveBeenLastCalledWith({
       rootDomElement,
-      injectedMetadata: expect.any(MockInjectedMetadataService),
+      injectedMetadata: MockInjectedMetadataService,
       stopCoreSystem: expect.any(Function),
     });
 
-    const [{ stopCoreSystem }] = MockFatalErrorsService.mock.calls[0];
+    const [{ stopCoreSystem }] = FatalErrorsServiceConstructor.mock.calls[0];
 
     expect(coreSystem.stop).not.toHaveBeenCalled();
     stopCoreSystem();
@@ -211,196 +159,179 @@ describe('constructor', () => {
 
 describe('#stop', () => {
   it('calls legacyPlatform.stop()', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    const coreSystem = createCoreSystem();
 
-    const [legacyPlatformService] = MockLegacyPlatformService.mock.instances;
-    expect(legacyPlatformService.stop).not.toHaveBeenCalled();
+    expect(MockLegacyPlatformService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(legacyPlatformService.stop).toHaveBeenCalled();
+    expect(MockLegacyPlatformService.stop).toHaveBeenCalled();
   });
 
   it('calls notifications.stop()', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    const coreSystem = createCoreSystem();
 
-    const [notificationsService] = MockNotificationsService.mock.instances;
-    expect(notificationsService.stop).not.toHaveBeenCalled();
+    expect(MockNotificationsService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(notificationsService.stop).toHaveBeenCalled();
+    expect(MockNotificationsService.stop).toHaveBeenCalled();
   });
 
-  it('calls loadingCount.stop()', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
-
-    const [loadingCountService] = MockLoadingCountService.mock.instances;
-    expect(loadingCountService.stop).not.toHaveBeenCalled();
+  it('calls http.stop()', () => {
+    const coreSystem = createCoreSystem();
+    expect(MockHttpService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(loadingCountService.stop).toHaveBeenCalled();
+    expect(MockHttpService.stop).toHaveBeenCalled();
   });
 
   it('calls chrome.stop()', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    const coreSystem = createCoreSystem();
 
-    const [chromeService] = MockChromeService.mock.instances;
-    expect(chromeService.stop).not.toHaveBeenCalled();
+    expect(MockChromeService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(chromeService.stop).toHaveBeenCalled();
+    expect(MockChromeService.stop).toHaveBeenCalled();
   });
 
   it('calls uiSettings.stop()', () => {
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
-    });
+    const coreSystem = createCoreSystem();
 
-    const [uiSettings] = MockUiSettingsService.mock.instances;
-    expect(uiSettings.stop).not.toHaveBeenCalled();
+    expect(MockUiSettingsService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(uiSettings.stop).toHaveBeenCalled();
+    expect(MockUiSettingsService.stop).toHaveBeenCalled();
   });
 
-  it('clears the rootDomElement', () => {
+  it('calls i18n.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockI18nService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockI18nService.stop).toHaveBeenCalled();
+  });
+
+  it('clears the rootDomElement', async () => {
     const rootDomElement = document.createElement('div');
-    const coreSystem = new CoreSystem({
-      ...defaultCoreSystemParams,
+    const coreSystem = createCoreSystem({
       rootDomElement,
     });
 
-    coreSystem.start();
+    await coreSystem.setup();
     expect(rootDomElement.innerHTML).not.toBe('');
-    coreSystem.stop();
+    await coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
 
-describe('#start()', () => {
-  function startCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
-    const core = new CoreSystem({
+describe('#setup()', () => {
+  function setupCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
+    const core = createCoreSystem({
       ...defaultCoreSystemParams,
       rootDomElement,
     });
 
-    core.start();
+    return core.setup();
   }
 
-  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', () => {
+  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', async () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
-    startCore(root);
-    expect(root.innerHTML).toBe('<div></div><div></div>');
+    await setupCore(root);
+    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
   });
 
-  it('calls injectedMetadata#start()', () => {
-    startCore();
-    const [mockInstance] = MockInjectedMetadataService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+  it('calls injectedMetadata#setup()', async () => {
+    await setupCore();
+    expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls loadingCount#start()', () => {
-    startCore();
-    const [mockInstance] = MockLoadingCountService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({
-      fatalErrors: mockFatalErrorsStartContract,
-    });
+  it('calls http#setup()', async () => {
+    await setupCore();
+    expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls basePath#start()', () => {
-    startCore();
-    const [mockInstance] = MockBasePathService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({
-      injectedMetadata: mockInjectedMetadataStartContract,
-    });
+  it('calls basePath#setup()', async () => {
+    await setupCore();
+    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls uiSettings#start()', () => {
-    startCore();
-    const [mockInstance] = MockUiSettingsService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({
-      notifications: mockNotificationStartContract,
-      loadingCount: mockLoadingCountContract,
-      injectedMetadata: mockInjectedMetadataStartContract,
-      basePath: mockBasePathStartContract,
-    });
+  it('calls uiSettings#setup()', async () => {
+    await setupCore();
+    expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls fatalErrors#start()', () => {
-    startCore();
-    const [mockInstance] = MockFatalErrorsService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+  it('calls i18n#setup()', async () => {
+    await setupCore();
+    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls notifications#start()', () => {
-    startCore();
-    const [mockInstance] = MockNotificationsService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+  it('calls fatalErrors#setup()', async () => {
+    await setupCore();
+    expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls chrome#start()', () => {
-    startCore();
-    const [mockInstance] = MockChromeService.mock.instances;
-    expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+  it('calls notifications#setup()', async () => {
+    await setupCore();
+    expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls chrome#setup()', async () => {
+    await setupCore();
+    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls overlays#setup()', () => {
+    setupCore();
+    expect(MockOverlayService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls plugin#setup()', async () => {
+    await setupCore();
+    expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('LegacyPlatform targetDomElement', () => {
-  it('only mounts the element when started, before starting the legacyPlatformService', () => {
+  it('only mounts the element when set up, before setting up the legacyPlatformService', async () => {
     const rootDomElement = document.createElement('div');
-    const core = new CoreSystem({
-      ...defaultCoreSystemParams,
+    const core = createCoreSystem({
       rootDomElement,
     });
 
-    const [legacyPlatform] = MockLegacyPlatformService.mock.instances;
-
-    let targetDomElementParentInStart: HTMLElement;
-    (legacyPlatform as any).start.mockImplementation(() => {
-      targetDomElementParentInStart = targetDomElement.parentElement;
+    let targetDomElementParentInSetup: HTMLElement;
+    MockLegacyPlatformService.setup.mockImplementation(() => {
+      targetDomElementParentInSetup = targetDomElement.parentElement;
     });
 
     // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
-    const [[{ targetDomElement }]] = MockLegacyPlatformService.mock.calls;
+    const [[{ targetDomElement }]] = LegacyPlatformServiceConstructor.mock.calls;
     expect(targetDomElement).toHaveProperty('parentElement', null);
 
-    // starting the core system should mount the targetDomElement as a child of the rootDomElement
-    core.start();
-    expect(targetDomElementParentInStart!).toBe(rootDomElement);
+    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
+    await core.setup();
+    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
   });
 });
 
 describe('Notifications targetDomElement', () => {
-  it('only mounts the element when started, before starting the notificationsService', () => {
+  it('only mounts the element when set up, before setting up the notificationsService', async () => {
     const rootDomElement = document.createElement('div');
-    const core = new CoreSystem({
-      ...defaultCoreSystemParams,
+    const core = createCoreSystem({
       rootDomElement,
     });
 
-    const [notifications] = MockNotificationsService.mock.instances;
+    const [[{ targetDomElement$ }]] = NotificationServiceConstructor.mock.calls;
 
-    let targetDomElementParentInStart: HTMLElement;
-    (notifications as any).start.mockImplementation(() => {
-      targetDomElementParentInStart = targetDomElement.parentElement;
-    });
+    let targetDomElementParentInSetup: HTMLElement | null;
+    MockNotificationsService.setup.mockImplementation(
+      (): any => {
+        (targetDomElement$ as Observable<HTMLElement>).pipe(take(1)).subscribe({
+          next: targetDomElement => {
+            // The targetDomElement should already be a child once it's received by the NotificationsService
+            expect(targetDomElement.parentElement).not.toBeNull();
+            targetDomElementParentInSetup = targetDomElement.parentElement;
+          },
+        });
+      }
+    );
 
-    // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
-    const [[{ targetDomElement }]] = MockNotificationsService.mock.calls;
-    expect(targetDomElement).toHaveProperty('parentElement', null);
-
-    // starting the core system should mount the targetDomElement as a child of the rootDomElement
-    core.start();
-    expect(targetDomElementParentInStart!).toBe(rootDomElement);
+    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
+    await core.setup();
+    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
   });
 });

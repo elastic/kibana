@@ -6,31 +6,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-
-import { StringMap } from '../../../../typings/common';
-import { legacyDecodeURIComponent } from '../../../utils/url';
-// @ts-ignore
-import ErrorGroupDetails from '../ErrorGroupDetails';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { legacyDecodeURIComponent } from '../../shared/Links/url_helpers';
+import { ErrorGroupDetails } from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
 import { Home } from './Home';
+import { BreadcrumbRoute } from './ProvideBreadcrumbs';
 
-interface BreadcrumbArgs {
-  match: {
-    params: StringMap;
-  };
-}
-
-interface RenderArgs {
-  location: StringMap;
-  match: {
-    params: StringMap;
-  };
+interface RouteParams {
+  serviceName: string;
 }
 
 const renderAsRedirectTo = (to: string) => {
-  return ({ location }: RenderArgs) => (
+  return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
         ...location,
@@ -40,7 +29,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes = [
+export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/',
@@ -49,9 +38,34 @@ export const routes = [
   },
   {
     exact: true,
+    path: '/services',
+    component: Home,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+      defaultMessage: 'Services'
+    })
+  },
+  {
+    exact: true,
+    path: '/traces',
+    component: Home,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+      defaultMessage: 'Traces'
+    })
+  },
+  {
+    exact: true,
+    path: '/:serviceName',
+    breadcrumb: ({ match }) => match.params.serviceName,
+    render: (props: RouteComponentProps<RouteParams>) =>
+      renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
+        props
+      )
+  },
+  {
+    exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
-    breadcrumb: ({ match }: BreadcrumbArgs) => match.params.groupId
+    breadcrumb: ({ match }) => match.params.groupId
   },
   {
     exact: true,
@@ -60,50 +74,6 @@ export const routes = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     })
-  },
-  {
-    switch: true,
-    routes: [
-      {
-        exact: true,
-        path: '/invalid-license',
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.invalidLicenseTitle', {
-          defaultMessage: 'Invalid License'
-        }),
-        render: () => (
-          <div>
-            {i18n.translate('xpack.apm.invalidLicenseLabel', {
-              defaultMessage: 'Invalid license'
-            })}
-          </div>
-        )
-      },
-      {
-        exact: true,
-        path: '/services',
-        component: Home,
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-          defaultMessage: 'Services'
-        })
-      },
-      {
-        exact: true,
-        path: '/traces',
-        component: Home,
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-          defaultMessage: 'Traces'
-        })
-      },
-      {
-        exact: true,
-        path: '/:serviceName',
-        breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
-        render: (props: RenderArgs) =>
-          renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
-            props
-          )
-      }
-    ]
   },
   {
     exact: true,
@@ -133,7 +103,7 @@ export const routes = [
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',
     component: TransactionDetails,
-    breadcrumb: ({ match }: BreadcrumbArgs) =>
-      legacyDecodeURIComponent(match.params.transactionName)
+    breadcrumb: ({ match }) =>
+      legacyDecodeURIComponent(match.params.transactionName) || ''
   }
 ];

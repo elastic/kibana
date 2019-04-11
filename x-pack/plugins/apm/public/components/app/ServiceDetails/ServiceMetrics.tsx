@@ -8,96 +8,98 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle
+  EuiPanel,
+  EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
-// @ts-ignore
-import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
-import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
-import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
-import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
-import { MetricsChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
-import { TransactionOverviewChartsRequestForAllTypes } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
+import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { loadErrorDistribution } from '../../../services/rest/apm/error_groups';
+import { IUrlParams } from '../../../store/urlParams';
+import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { CPUUsageChart } from './CPUUsageChart';
 import { MemoryUsageChart } from './MemoryUsageChart';
 
 interface ServiceMetricsProps {
   urlParams: IUrlParams;
+  location: Location;
 }
 
-export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
-  urlParams
-}) => {
+export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
+  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
+  const { data: errorDistributionData } = useFetcher(
+    () =>
+      loadErrorDistribution({ serviceName, start, end, errorGroupId, kuery }),
+    [serviceName, start, end, errorGroupId, kuery]
+  );
+
+  const { data: transactionOverviewChartsData } = useTransactionOverviewCharts(
+    urlParams
+  );
+
+  const { data: serviceMetricChartData } = useServiceMetricCharts(urlParams);
+
+  if (!errorDistributionData) {
+    return null;
+  }
+
   return (
     <React.Fragment>
-      <TransactionOverviewChartsRequestForAllTypes
+      <TransactionCharts
+        charts={transactionOverviewChartsData}
         urlParams={urlParams}
-        render={({ data }) => (
-          <TransactionCharts
-            charts={data}
-            urlParams={urlParams}
-            location={location}
-          />
+        location={location}
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPanel>
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                {
+                  defaultMessage: 'Error occurrences'
+                }
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+
+      <SyncChartGroup
+        render={hoverXHandlers => (
+          <EuiFlexGrid columns={2}>
+            <EuiFlexItem>
+              <EuiPanel>
+                <CPUUsageChart
+                  data={serviceMetricChartData.cpu}
+                  hoverXHandlers={hoverXHandlers}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel>
+                <MemoryUsageChart
+                  data={serviceMetricChartData.memory}
+                  hoverXHandlers={hoverXHandlers}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGrid>
         )}
       />
 
       <EuiSpacer size="xxl" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <ErrorDistributionRequest
-            urlParams={urlParams}
-            render={({ data }) => (
-              <Distribution
-                distribution={data}
-                title={
-                  <EuiTitle size="s">
-                    <span>
-                      {i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                        {
-                          defaultMessage: 'Error occurrences'
-                        }
-                      )}
-                    </span>
-                  </EuiTitle>
-                }
-              />
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xxl" />
-
-      <MetricsChartDataRequest
-        urlParams={urlParams}
-        render={({ data }) => {
-          return (
-            <SyncChartGroup
-              render={hoverXHandlers => (
-                <EuiFlexGrid columns={2}>
-                  <EuiFlexItem>
-                    <CPUUsageChart
-                      data={data.cpu}
-                      hoverXHandlers={hoverXHandlers}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <MemoryUsageChart
-                      data={data.memory}
-                      hoverXHandlers={hoverXHandlers}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGrid>
-              )}
-            />
-          );
-        }}
-      />
     </React.Fragment>
   );
-};
+}

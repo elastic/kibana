@@ -5,13 +5,13 @@
  */
 import React, { Component } from 'react';
 import { RouteProps } from 'react-router';
-import { BASE_PATH } from 'x-pack/plugins/beats_management/common/constants';
+import { BASE_PATH } from '../../../../common/constants';
 import { BreadcrumbConsumer } from './consumer';
 import { Breadcrumb as BreadcrumbData, BreadcrumbContext } from './types';
 
 interface BreadcrumbManagerProps extends RouteProps {
   text: string;
-  href: string;
+  href?: string;
   parents?: BreadcrumbData[];
   context: BreadcrumbContext;
 }
@@ -44,7 +44,7 @@ class BreadcrumbManager extends Component<BreadcrumbManagerProps, {}, Breadcrumb
 
 interface BreadcrumbProps extends RouteProps {
   title: string;
-  path: string;
+  path?: string;
   parentBreadcrumbs?: BreadcrumbData[];
 }
 

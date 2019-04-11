@@ -7,7 +7,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/license/start_basic"
+      "_license/start_basic"
     ],
     "documentation": "https://www.elastic.co/guide/en/x-pack/current/license-management.html"
   }

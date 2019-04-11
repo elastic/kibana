@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CalendarsListTable renders the table with all calendars 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiInMemoryTable
     columns={
       Array [
@@ -26,6 +26,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         },
       ]
     }
+    executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="calendar_id"
     items={
@@ -115,5 +116,5 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

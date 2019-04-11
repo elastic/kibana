@@ -11,13 +11,12 @@ import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
+import { getSelectedPageIndex } from '../selectors/workpad';
 
-function setPageIndex(workpadState, index) {
-  if (index < 0 || !workpadState.pages[index]) {
-    return workpadState;
-  }
-  return set(workpadState, 'page', index);
-}
+const setPageIndex = (workpadState, index) =>
+  index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index
+    ? workpadState
+    : set(workpadState, 'page', index);
 
 function getPageIndexById(workpadState, id) {
   return workpadState.pages.findIndex(page => page.id === id);
@@ -78,16 +77,6 @@ export const pagesReducer = handleActions(
 
     [actions.setPage]: (workpadState, { payload }) => {
       return setPageIndex(workpadState, payload);
-    },
-
-    [actions.gotoPage]: (workpadState, { payload }) => {
-      const newState = setPageIndex(workpadState, payload);
-
-      // changes to the page require navigation
-      const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
-
-      return newState;
     },
 
     [actions.movePage]: (workpadState, { payload }) => {

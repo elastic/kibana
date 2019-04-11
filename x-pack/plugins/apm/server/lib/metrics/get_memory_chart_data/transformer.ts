@@ -3,58 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
-export interface MemoryChartAPIResponse {
-  series: {
-    totalMemory: Coordinate[];
-    freeMemory: Coordinate[];
-    processMemorySize: Coordinate[];
-    processMemoryRss: Coordinate[];
-  };
-  // overall totals for the whole time range
-  overallValues: {
-    totalMemory: number | null;
-    freeMemory: number | null;
-    processMemorySize: number | null;
-    processMemoryRss: number | null;
-  };
-  totalHits: number;
-}
-
-export type MemoryMetricName =
-  | 'totalMemory'
-  | 'freeMemory'
-  | 'processMemorySize'
-  | 'processMemoryRss';
-
+type MemoryMetricName = 'memoryUsedAvg' | 'memoryUsedMax';
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
-  'totalMemory',
-  'freeMemory',
-  'processMemorySize',
-  'processMemoryRss'
+  'memoryUsedAvg',
+  'memoryUsedMax'
 ];
 
-export function transform(result: ESResponse): MemoryChartAPIResponse {
+export type MemoryChartAPIResponse = ReturnType<typeof transform>;
+export function transform(result: ESResponse) {
   const { aggregations, hits } = result;
-  const {
-    timeseriesData,
-    totalMemory,
-    freeMemory,
-    processMemorySize,
-    processMemoryRss
-  } = aggregations;
+  const { timeseriesData, memoryUsedAvg, memoryUsedMax } = aggregations;
 
-  const series: MemoryChartAPIResponse['series'] = {
-    totalMemory: [],
-    freeMemory: [],
-    processMemorySize: [],
-    processMemoryRss: []
+  const series = {
+    memoryUsedAvg: [] as Coordinate[],
+    memoryUsedMax: [] as Coordinate[]
   };
 
   // using forEach here to avoid looping over the entire dataset
-  // 4 times or doing a complicated, memory-heavy map/reduce
+  // multiple times or doing a complicated, memory-heavy map/reduce
   timeseriesData.buckets.forEach(({ key, ...bucket }) => {
     MEMORY_METRIC_NAMES.forEach(name => {
       series[name].push({ x: key, y: bucket[name].value });
@@ -64,10 +33,8 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   return {
     series,
     overallValues: {
-      totalMemory: totalMemory.value,
-      freeMemory: freeMemory.value,
-      processMemorySize: processMemorySize.value,
-      processMemoryRss: processMemoryRss.value
+      memoryUsedAvg: memoryUsedAvg.value,
+      memoryUsedMax: memoryUsedMax.value
     },
     totalHits: hits.total
   };

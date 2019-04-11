@@ -268,7 +268,8 @@ function getTopInfluencers(
   earliestMs,
   latestMs,
   maxFieldValues = 10,
-  influencers = []) {
+  influencers = [],
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -308,6 +309,10 @@ function getTopInfluencers(
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     // Add a should query to filter for each of the specified influencers.
@@ -563,7 +568,8 @@ function getInfluencerValueMaxScoreByTime(
   earliestMs,
   latestMs,
   interval,
-  maxResults) {
+  maxResults,
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -604,13 +610,23 @@ function getInfluencerValueMaxScoreByTime(
       });
     }
 
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
+    }
+
     if (influencerFieldValues && influencerFieldValues.length > 0) {
       let influencerFilterStr = '';
       _.each(influencerFieldValues, (value, i) => {
         if (i > 0) {
           influencerFilterStr += ' OR ';
         }
-        influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        if (value.trim().length > 0) {
+          influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        } else {
+          // Wrap whitespace influencer field values in quotes for the query_string query.
+          influencerFilterStr += `influencer_field_value:"${value}"`;
+        }
+
       });
       boolCriteria.push({
         query_string: {
@@ -810,7 +826,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults) {
+function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -850,6 +866,10 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     // Add a nested query to filter for each of the specified influencers.
@@ -1169,7 +1189,7 @@ function getMetricData(
   index,
   entityFields,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1396,15 +1416,16 @@ function getEventRateData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-const SAMPLER_TOP_TERMS_SHARD_SIZE = 50000;
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 20000;
 const ENTITY_AGGREGATION_SIZE = 10;
 const AGGREGATION_MIN_DOC_COUNT = 1;
+const CARDINALITY_PRECISION_THRESHOLD = 100;
 function getEventDistributionData(
   index,
   splitField,
   filterField = null,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1507,12 +1528,17 @@ function getEventDistributionData(
       if (metricFunction === 'percentiles') {
         metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
       }
+
+      if (metricFunction === 'cardinality') {
+        metricAgg[metricFunction].precision_threshold = CARDINALITY_PRECISION_THRESHOLD;
+      }
       body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
     }
 
     ml.esSearch({
       index,
-      body
+      body,
+      rest_total_hits_as_int: true,
     })
       .then((resp) => {
         // Because of the sampling, results of metricFunctions which use sum or count
@@ -1535,7 +1561,7 @@ function getEventDistributionData(
 
             if (
               metricFunction === 'count'
-              || metricFunction === 'distinct_count'
+              || metricFunction === 'cardinality'
               || metricFunction === 'sum'
             ) {
               value = value * normalizeFactor;

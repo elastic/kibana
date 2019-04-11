@@ -23,8 +23,8 @@ export const pingsSchema = gql`
       size: Int
       monitorId: String
       status: String
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
+      dateRangeStart: String!
+      dateRangeEnd: String!
     ): PingResults!
 
     "Gets the number of documents in the target index"
@@ -37,7 +37,7 @@ export const pingsSchema = gql`
 
   "The monitor's status for a ping"
   type Duration {
-    us: Int
+    us: UnsignedInteger
   }
 
   type StatusCode {
@@ -58,6 +58,10 @@ export const pingsSchema = gql`
     name: String
   }
 
+  type ECS {
+    version: String
+  }
+
   type Error {
     code: Int
     message: String
@@ -69,11 +73,14 @@ export const pingsSchema = gql`
     kernel: String
     platform: String
     version: String
+    name: String
+    build: String
   }
 
   type Host {
     architecture: String
     id: String
+    hostname: String
     ip: String
     mac: String
     name: String
@@ -150,6 +157,7 @@ export const pingsSchema = gql`
     status: String
     "The type of host being monitored"
     type: String
+    check_group: String
   }
 
   type Resolve {
@@ -168,6 +176,11 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
+  type Summary {
+    up: Int
+    down: Int
+  }
+
   type TCP {
     port: Int
     rtt: RTT
@@ -180,13 +193,25 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
+  type URL {
+    full: String
+    scheme: String
+    domain: String
+    port: Int
+    path: String
+    query: String
+  }
+
   "A request sent from a monitor to a host"
   type Ping {
     "The timestamp of the ping's creation"
     timestamp: String!
+    "Milliseconds from the timestamp to the current time"
+    millisFromNow: UnsignedInteger
     "The agent that recorded the ping"
     beat: Beat
     docker: Docker
+    ecs: ECS
     error: Error
     host: Host
     http: HTTP
@@ -196,8 +221,10 @@ export const pingsSchema = gql`
     monitor: Monitor
     resolve: Resolve
     socks5: Socks5
+    summary: Summary
     tags: String
     tcp: TCP
     tls: TLS
+    url: URL
   }
 `;

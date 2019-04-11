@@ -17,33 +17,35 @@
  * under the License.
  */
 
-const mockReactDomRender = jest.fn();
-const mockReactDomUnmount = jest.fn();
-jest.mock('react-dom', () => ({
-  render: mockReactDomRender,
-  unmountComponentAtNode: mockReactDomUnmount,
-}));
+import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
 
+import { of } from 'rxjs';
 import { ToastsService } from './toasts_service';
-import { ToastsStartContract } from './toasts_start_contract';
+import { ToastsSetup } from './toasts_start';
 
-describe('#start()', () => {
+const mockI18n: any = {
+  Context: function I18nContext() {
+    return '';
+  },
+};
+
+describe('#setup()', () => {
   it('renders the GlobalToastList into the targetDomElement param', async () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');
-    const toasts = new ToastsService({ targetDomElement });
+    const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.start();
+    toasts.setup({ i18n: mockI18n });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
 
-  it('returns a ToastsStartContract', () => {
+  it('returns a ToastsSetup', () => {
     const toasts = new ToastsService({
-      targetDomElement: document.createElement('div'),
+      targetDomElement$: of(document.createElement('div')),
     });
 
-    expect(toasts.start()).toBeInstanceOf(ToastsStartContract);
+    expect(toasts.setup({ i18n: mockI18n })).toBeInstanceOf(ToastsSetup);
   });
 });
 
@@ -51,19 +53,19 @@ describe('#stop()', () => {
   it('unmounts the GlobalToastList from the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');
-    const toasts = new ToastsService({ targetDomElement });
+    const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
-    toasts.start();
+    toasts.setup({ i18n: mockI18n });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
     toasts.stop();
     expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
   });
 
-  it('does not fail if start() was never called', () => {
+  it('does not fail if setup() was never called', () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');
-    const toasts = new ToastsService({ targetDomElement });
+    const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
     expect(() => {
       toasts.stop();
     }).not.toThrowError();
@@ -71,9 +73,9 @@ describe('#stop()', () => {
 
   it('empties the content of the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
-    const toasts = new ToastsService({ targetDomElement });
+    const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
-    targetDomElement.appendChild(document.createTextNode('foo bar'));
+    toasts.setup({ i18n: mockI18n });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);
   });

@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, {
-  Component
+  Component, Fragment
 } from 'react';
 
 import {
@@ -18,7 +18,8 @@ import {
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
-import { AnnotationsTable } from '../../../../components/annotations_table';
+import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
+import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
@@ -58,6 +59,7 @@ class JobDetailsUI extends Component {
         general,
         customUrl,
         node,
+        calendars,
         detectors,
         influencers,
         analysisConfig,
@@ -76,7 +78,7 @@ class JobDetailsUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
           defaultMessage: 'Job settings'
         }),
-        content: <JobDetailsPane sections={[general, customUrl, node]} />,
+        content: <JobDetailsPane sections={[general, customUrl, node, calendars]} />,
         time: job.open_time
       }, {
         id: 'job-config',
@@ -137,7 +139,12 @@ class JobDetailsUI extends Component {
             id: 'xpack.ml.jobsList.jobDetails.tabs.annotationsLabel',
             defaultMessage: 'Annotations'
           }),
-          content: <AnnotationsTable jobs={[job]} drillDown={true} />,
+          content: (
+            <Fragment>
+              <AnnotationsTable jobs={[job]} drillDown={true} />
+              <AnnotationFlyout />
+            </Fragment>
+          ),
         });
       }
 

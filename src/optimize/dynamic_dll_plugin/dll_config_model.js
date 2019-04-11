@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, /*IS_KIBANA_DISTRIBUTABLE*/ } from '../../utils';
+import { fromRoot, /*IS_KIBANA_DISTRIBUTABLE*/ } from '../../legacy/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -57,7 +57,10 @@ function generateDLL(config) {
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: dllAlias,
+      alias: {
+        ...dllAlias,
+        'dll/set_csp_nonce$': require.resolve('./public/set_csp_nonce')
+      },
       modules: [
         'webpackShims',
         fromRoot('webpackShims'),
@@ -87,7 +90,6 @@ function generateDLL(config) {
             // distributable. It is valid when running from source
             // both with dev or prod bundles or even when running
             // kibana for dev only.
-
             // if (IS_KIBANA_DISTRIBUTABLE) {
             //   return loaders;
             // }

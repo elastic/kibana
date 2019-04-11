@@ -34,7 +34,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      actions={deprecation.actions}
+      reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
       docUrl={deprecation.url}
       items={items}
     />
@@ -83,17 +83,15 @@ export const DeprecationList: StatelessComponent<{
   // If we're grouping by message and the first deprecation has an index field, show an index
   // group deprecation. Otherwise, show each message.
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
-    // If we're grouping by index we assume that every deprecation message is the same
-    // issue and that each deprecation will have an index associated with it.
+    // We assume that every deprecation message is the same issue (since they have the same
+    // message) and that each deprecation will have an index associated with it.
     const indices = deprecations.map(dep => ({
       index: dep.index!,
       details: dep.details,
-      actions: dep.actions,
+      reindex: dep.reindex === true,
     }));
-
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
-    // If we're grouping by index show all info for each message
     return (
       <div>
         {deprecations.sort(sortByLevelDesc).map(dep => (

@@ -5,11 +5,10 @@
  */
 
 import { take } from 'lodash';
-import { UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
+import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
-const sortPings = (sort: UMPingSortDirectionArg) =>
+const sortPings = (sort: string) =>
   sort === 'asc'
     ? (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 1 : 0)
     : (a: Ping, b: Ping) => (Date.parse(a.timestamp) > Date.parse(b.timestamp) ? 0 : 1);
@@ -23,12 +22,12 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string,
-    status?: string,
-    sort?: UMPingSortDirectionArg,
-    size?: number
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     let pings = this.pingsDB;
     if (monitorId) {
@@ -42,21 +41,28 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     };
   }
 
-  // TODO implement
-  public async getLatestMonitorDocs(
+  // TODO: implement
+  public getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null
   ): Promise<Ping[]> {
     throw new Error('Method not implemented.');
   }
-  // TODO implement
-  public async getPingHistogram(request: any): Promise<HistogramSeries[] | null> {
+
+  // TODO: implement
+  public getPingHistogram(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null | undefined
+  ): Promise<HistogramDataPoint[]> {
     throw new Error('Method not implemented.');
   }
 
-  public async getDocCount(request: any): Promise<DocCount> {
+  // TODO: implement
+  public getDocCount(request: any): Promise<DocCount> {
     throw new Error('Method not implemented.');
   }
 }

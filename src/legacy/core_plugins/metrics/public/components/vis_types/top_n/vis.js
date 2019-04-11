@@ -20,7 +20,7 @@
 import tickFormatter from '../../lib/tick_formatter';
 import TopN from '../../../visualizations/components/top_n';
 import getLastValue from '../../../../common/get_last_value';
-import color from 'color';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -42,7 +42,7 @@ function sortSeries(visData, model) {
       return id === item.id;
     });
     const direction = item.terms_direction || 'desc';
-    if (item.terms_order_by === '_term') return acc.concat(itemSeries);
+    if (item.terms_order_by === '_key') return acc.concat(itemSeries);
     return acc.concat(sortByDirection(itemSeries, direction, s => getLastValue(s.data)));
   }, []);
 }
@@ -76,22 +76,20 @@ function TopNVisualization(props) {
       return item;
     });
 
+  const panelBackgroundColor = model.background_color || backgroundColor;
+  const style = { backgroundColor: panelBackgroundColor };
+
   const params = {
     series: series,
-    reversed: props.reversed
+    reversed: isBackgroundInverted(panelBackgroundColor),
   };
-  const panelBackgroundColor = model.background_color || backgroundColor;
-
-  if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
-  }
 
   if (model.drilldown_url) {
     params.onClick = (item) => {
       window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
     };
   }
-  const style = { backgroundColor: panelBackgroundColor };
+
   return (
     <div className="tvbVis" style={style}>
       <TopN {...params}/>
@@ -106,7 +104,6 @@ TopNVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   getConfig: PropTypes.func
 };

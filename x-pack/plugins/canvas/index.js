@@ -6,15 +6,15 @@
 
 import { resolve } from 'path';
 import init from './init';
-import './server/build_fix';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';
+import { migrations } from './migrations';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
     configPrefix: 'xpack.canvas',
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
@@ -24,6 +24,7 @@ export function canvas(kibana) {
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
+      interpreter: ['plugins/canvas/browser_functions', 'plugins/canvas/renderers'],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override
@@ -31,6 +32,7 @@ export function canvas(kibana) {
       ],
       home: ['plugins/canvas/register_feature'],
       mappings,
+      migrations,
     },
 
     config: Joi => {

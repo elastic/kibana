@@ -21,25 +21,27 @@ import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
 import chrome from 'ui/chrome';
-import { getSort } from 'ui/doc_table/lib/get_sort';
-import * as columnActions from 'ui/doc_table/actions/columns';
-import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
-import 'ui/doc_table';
+
+// doc table
+import '../doc_table';
+import { getSort } from '../doc_table/lib/get_sort';
+import * as columnActions from '../doc_table/actions/columns';
+import * as filterActions from '../doc_table/actions/filter';
+
+import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
-import 'ui/directives/validate_json';
 import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/query_bar';
+import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
-import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -65,6 +67,13 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+
+const fetchStatuses = {
+  UNINITIALIZED: 'uninitialized',
+  LOADING: 'loading',
+  COMPLETE: 'complete',
+};
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -169,7 +178,6 @@ function discoverController(
   let visualizeHandler;
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
@@ -182,16 +190,18 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
+
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
+  $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
   };
-
-  config.bindToScope($scope, 'k7design');
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -350,21 +360,38 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
+  $scope.filters = queryFilter.getFilters();
+  $scope.screenTitle = savedSearch.title;
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.applyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.applyFilters(filters);
+    }
+  });
+
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
-    if (!$scope.fetchStatus) {
+    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
     }
 
     return await new Promise(resolve => {
       const unwatch = $scope.$watch('fetchStatus', (newValue) => {
-        if (newValue) {
-          return;
+        if (newValue === fetchStatuses.COMPLETE) {
+          unwatch();
+          resolve($scope.fieldCounts);
         }
-
-        unwatch();
-        resolve($scope.fieldCounts);
       });
     });
   };
@@ -474,6 +501,12 @@ function discoverController(
         $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
+          $scope.updateRefreshInterval();
+        });
+        $scope.$listen(timefilter, 'timeUpdate', () => {
+          $scope.updateTime();
+        });
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -487,6 +520,7 @@ function discoverController(
 
         // update data source when filters update
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.filters = queryFilter.getFilters();
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
@@ -500,13 +534,8 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
-        timefilter.enableAutoRefreshSelector();
         $scope.$watch('opts.timefield', function (timefield) {
-          if (!!timefield) {
-            timefilter.enableTimeRangeSelector();
-          } else {
-            timefilter.disableTimeRangeSelector();
-          }
+          $scope.enableTimeRangeSelector = !!timefield;
         });
 
         $scope.$watch('state.interval', function () {
@@ -524,7 +553,10 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', $scope.updateQueryAndFetch);
+        $scope.$watch('state.query', (newQuery) => {
+          const query = migrateLegacyQuery(newQuery);
+          $scope.updateQueryAndFetch({ query });
+        });
 
         $scope.$watchMulti([
           'rows',
@@ -542,13 +574,9 @@ function discoverController(
             if (rows == null && oldRows == null) return status.LOADING;
 
             const rowsEmpty = _.isEmpty(rows);
-            // An undefined fetchStatus means the requests are still being
-            // prepared to be sent. When all requests are completed,
-            // fetchStatus is set to null, so it's important that we
-            // specifically check for undefined to determine a loading status.
-            const preparingForFetch = _.isUndefined(fetchStatus);
+            const preparingForFetch = fetchStatus === fetchStatuses.UNINITIALIZED;
             if (preparingForFetch) return status.LOADING;
-            else if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
             else return status.NO_RESULTS;
           }
@@ -637,177 +665,85 @@ function discoverController(
       .then(setupVisualization)
       .then(function () {
         $state.save();
+        $scope.fetchStatus = fetchStatuses.LOADING;
+        logInspectorRequest();
         return courier.fetch();
       })
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
-    $state.query = migrateLegacyQuery(query);
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
+    $state.query = query;
     $scope.fetch();
   };
 
+  function onResults(resp) {
+    logInspectorResponse(resp);
 
-  function handleSegmentedFetch(segmented) {
-    function flushResponseData() {
-      $scope.fetchError = undefined;
-      $scope.hits = 0;
-      $scope.failures = [];
-      $scope.rows = [];
-      $scope.fieldCounts = {};
-    }
-
-    if (!$scope.rows) flushResponseData();
-
-    const sort = $state.sort;
-    const timeField = $scope.indexPattern.timeFieldName;
-
-    /**
-     * Basically an emum.
-     *
-     * opts:
-     *   "time" - sorted by the timefield
-     *   "non-time" - explicitly sorted by a non-time field, NOT THE SAME AS `sortBy !== "time"`
-     *   "implicit" - no sorting set, NOT THE SAME AS "non-time"
-     *
-     * @type {String}
-     */
-    const sortBy = (function () {
-      if (!Array.isArray(sort)) return 'implicit';
-      else if (sort[0] === '_score') return 'implicit';
-      else if (sort[0] === timeField) return 'time';
-      else return 'non-time';
-    }());
-
-    let sortFn = null;
-    if (sortBy !== 'implicit') {
-      sortFn = new HitSortFn(sort[1]);
-    }
-
-    $scope.updateTime();
-
-    if (sort[0] === '_score') {
-      segmented.setMaxSegments(1);
-    }
-
-    segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
-    segmented.setSortFn(sortFn);
-    segmented.setSize($scope.opts.sampleSize);
-
-    let inspectorRequests = [];
-    function logResponseInInspector(resp) {
-      if (inspectorRequests.length > 0) {
-        const inspectorRequest = inspectorRequests.shift();
-        inspectorRequest
-          .stats(getResponseInspectorStats($scope.searchSource, resp))
-          .ok({ json: resp });
-      }
-    }
-
-    // triggered when the status updated
-    segmented.on('status', function (status) {
-      $scope.fetchStatus = status;
-      if (status.complete === 0) {
-        // starting new segmented search request
-        inspectorAdapters.requests.reset();
-        inspectorRequests = [];
-      }
-
-      if (status.remaining > 0) {
-        const inspectorRequest = inspectorAdapters.requests.start(
-          i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusTitle', {
-            defaultMessage: 'Segment {fetchCompleteStatus}',
-            values: {
-              fetchCompleteStatus: $scope.fetchStatus.complete,
+    if ($scope.opts.timefield) {
+      const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
+      $scope.searchSource.rawResponse = resp;
+      Promise
+        .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
+        .then(resp => responseHandler(tabifiedData, resp))
+        .then(resp => {
+          visualizeHandler.render({
+            as: 'visualization',
+            value: {
+              visType: $scope.vis.type.name,
+              visData: resp,
+              visConfig: $scope.vis.params,
+              params: {},
             }
-          }),
-          {
-            description: i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusDescription', {
-              defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-            }),
           });
-        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-        $scope.searchSource.getSearchRequestBody().then(body => {
-          inspectorRequest.json(body);
         });
-        inspectorRequests.push(inspectorRequest);
-      }
+    }
 
-    });
+    $scope.hits = resp.hits.total;
+    $scope.rows = resp.hits.hits;
 
-    segmented.on('first', function () {
-      flushResponseData();
-    });
+    // if we haven't counted yet, reset the counts
+    const counts = $scope.fieldCounts = $scope.fieldCounts || {};
 
-    segmented.on('segment', (resp) => {
-      logResponseInInspector(resp);
-      if (resp._shards.failed > 0) {
-        $scope.failures = _.union($scope.failures, resp._shards.failures);
-        $scope.failures = _.uniq($scope.failures, false, function (failure) {
-          return failure.index + failure.shard + failure.reason;
-        });
-      }
-    });
-
-    segmented.on('emptySegment', function (resp) {
-      logResponseInInspector(resp);
-    });
-
-    segmented.on('mergedSegment', function (merged) {
-      $scope.mergedEsResp = merged;
-
-      if ($scope.opts.timefield) {
-        const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
-        $scope.searchSource.rawResponse = merged;
-        Promise
-          .resolve(responseHandler(tabifiedData))
-          .then(resp => {
-            visualizeHandler.render({ value: resp });
-          });
-      }
-
-      $scope.hits = merged.hits.total;
-
-      const indexPattern = $scope.searchSource.getField('index');
-
-      // the merge rows, use a new array to help watchers
-      $scope.rows = merged.hits.hits.slice();
-
-      let counts = $scope.fieldCounts;
-
-      // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
-      if (!counts || sortFn) counts = $scope.fieldCounts = {};
-
-      $scope.rows.forEach(function (hit) {
-        // skip this work if we have already done it
-        if (hit.$$_counted) return;
-
-        // when we are sorting results, we need to redo the counts each time because the
-        // "top 500" may change with each response, so don't mark this as counted
-        if (!sortFn) hit.$$_counted = true;
-
-        const fields = _.keys(indexPattern.flattenHit(hit));
-        let n = fields.length;
-        let field;
-        while (field = fields[--n]) {
-          if (counts[field]) counts[field] += 1;
-          else counts[field] = 1;
-        }
+    $scope.rows.forEach(hit => {
+      const fields = Object.keys($scope.indexPattern.flattenHit(hit));
+      fields.forEach(fieldName => {
+        counts[fieldName] = (counts[fieldName] || 0) + 1;
       });
     });
 
-    segmented.on('complete', function () {
-      if ($scope.fetchStatus.hitCount === 0) {
-        flushResponseData();
-      }
+    $scope.fetchStatus = fetchStatuses.COMPLETE;
 
-      $scope.fetchStatus = null;
+    return $scope.searchSource.onResults().then(onResults);
+  }
+
+  let inspectorRequest;
+
+  function logInspectorRequest() {
+    inspectorAdapters.requests.reset();
+    const title = i18n('kbn.discover.inspectorRequestDataTitle', {
+      defaultMessage: 'Data',
+    });
+    const description = i18n('kbn.discover.inspectorRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+    });
+    inspectorRequest = inspectorAdapters.requests.start(title, { description });
+    inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+    $scope.searchSource.getSearchRequestBody().then(body => {
+      inspectorRequest.json(body);
     });
   }
 
+  function logInspectorResponse(resp) {
+    inspectorRequest
+      .stats(getResponseInspectorStats($scope.searchSource, resp))
+      .ok({ json: resp });
+  }
 
-  function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
+  function startSearching() {
+    return $scope.searchSource.onResults()
+      .then(onResults)
       .catch((error) => {
         const fetchError = getPainlessError(error);
 
@@ -818,16 +754,29 @@ function discoverController(
         }
 
         // Restart. This enables auto-refresh functionality.
-        beginSegmentedFetch();
+        startSearching();
       });
   }
-  beginSegmentedFetch();
+
+  startSearching();
 
   $scope.updateTime = function () {
     $scope.timeRange = {
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
+    $scope.time = timefilter.getTime();
+  };
+
+  $scope.updateRefreshInterval = function () {
+    $scope.refreshInterval = timefilter.getRefreshInterval();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   $scope.resetQuery = function () {

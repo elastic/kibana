@@ -1,5 +1,5 @@
 <!-- vis type specific options -->
-<div class="kuiSideBarSection">
+<div class="visEditorSidebar__section">
   <div class="form-group">
     <label
       for="coordinateMapOptionsMapType"
@@ -18,17 +18,17 @@
   </div>
 
 
-  <div class="kuiSideBarFormRow" >
+  <div class="visEditorSidebar__formRow" >
     <label
-      class="kuiSideBarFormRow__label"
+      class="visEditorSidebar__formLabel"
       for="colorSchema"
       i18n-id="tileMap.visParams.colorSchemaLabel"
       i18n-default-message="Color Schema"
     ></label>
-    <div class="kuiSideBarFormRow__control">
+    <div class="visEditorSidebar__formControl">
       <select
         id="colorSchema"
-        class="kuiSelect kuiSideBarSelect"
+        class="kuiSelect visEditorSidebar__select"
         ng-model="editorState.params.colorSchema"
         ng-options="mode.id as mode.label for mode in vis.type.editorConfig.collections.colorSchemas"
       ></select>
@@ -62,15 +62,15 @@
 
   <vislib-basic-options></vislib-basic-options>
 
-  <div class="kuiSideBarFormRow">
+  <div class="visEditorSidebar__formRow">
     <label
-      class="kuiSideBarFormRow__label"
+      class="visEditorSidebar__formLabel"
       for="desaturateMapTiles"
       i18n-id="tileMap.visParams.desaturateTilesLabel"
       i18n-default-message="Desaturate tiles"
     ></label>
 
-    <div class="kuiSideBarFormRow__control">
+    <div class="visEditorSidebar__formControl">
       <input
         type="checkbox"
         id="desaturateMapTiles"

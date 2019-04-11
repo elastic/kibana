@@ -10,6 +10,7 @@ interface TestSetup extends Setup {
   client: jest.Mock;
   config: {
     get: jest.Mock;
+    has: () => boolean;
   };
 }
 
@@ -22,7 +23,8 @@ export function getSetupMock(overrides: Partial<TestSetup> = {}) {
       term: { field: 'test.esfilter.query' }
     },
     config: {
-      get: jest.fn()
+      get: jest.fn(),
+      has: () => true
     },
     ...overrides
   };

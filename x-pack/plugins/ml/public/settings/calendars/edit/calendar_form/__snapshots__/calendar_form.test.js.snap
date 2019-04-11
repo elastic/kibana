@@ -25,58 +25,73 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
-  <React.Fragment>
-    <EuiFormRow
-      describedByIds={Array []}
-      error={
-        Array [
-          "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
-        ]
-      }
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      isInvalid={true}
-      label={
-        <FormattedMessage
-          defaultMessage="Calendar ID"
-          id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
-          values={Object {}}
-        />
-      }
-    >
-      <EuiFieldText
-        compressed={false}
-        disabled={false}
-        fullWidth={false}
-        isLoading={false}
-        name="calendarId"
-        onChange={[MockFunction]}
-        value=""
+  <EuiTitle
+    size="m"
+    textTransform="none"
+  >
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create new calendar"
+        id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+        values={Object {}}
       />
-    </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="Description"
-          id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-          values={Object {}}
-        />
-      }
-    >
-      <EuiFieldText
-        compressed={false}
-        disabled={false}
-        fullWidth={false}
-        isLoading={false}
-        name="description"
-        onChange={[MockFunction]}
-        value=""
+    </h1>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    error={
+      Array [
+        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
+      ]
+    }
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label={
+      <FormattedMessage
+        defaultMessage="Calendar ID"
+        id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+        values={Object {}}
       />
-    </EuiFormRow>
-  </React.Fragment>
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={false}
+      disabled={false}
+      fullWidth={false}
+      isLoading={false}
+      name="calendarId"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Description"
+        id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={false}
+      disabled={false}
+      fullWidth={false}
+      isLoading={false}
+      name="description"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}
@@ -88,6 +103,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -111,6 +127,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -138,6 +155,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <InjectIntl(EventsTable)
       canCreateCalendar={true}
@@ -153,16 +171,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="l"
   />
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -172,6 +183,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         iconSide="left"
         isDisabled={true}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -182,7 +194,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -191,6 +202,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         href="undefined/app/ml#/settings/calendars_list"
         iconSide="left"
         isDisabled={false}
+        size="m"
         type="button"
       >
         <FormattedMessage

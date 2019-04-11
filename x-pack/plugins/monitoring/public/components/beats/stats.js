@@ -7,6 +7,7 @@
 import React from 'react';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { SummaryStatus } from '../summary_status';
+import { i18n } from '@kbn/i18n';
 
 export function Stats({ stats }) {
   const {
@@ -20,7 +21,9 @@ export function Stats({ stats }) {
 
   const metrics = [
     {
-      label: 'Total Beats',
+      label: i18n.translate('xpack.monitoring.beats.overview.totalBeatsLabel', {
+        defaultMessage: 'Total Beats'
+      }),
       value: formatMetric(total, 'int_commas'),
       'data-test-subj': 'totalBeats'
     },
@@ -34,13 +37,17 @@ export function Stats({ stats }) {
   })));
 
   metrics.push({
-    label: 'Total Events',
+    label: i18n.translate('xpack.monitoring.beats.overview.totalEventsLabel', {
+      defaultMessage: 'Total Events'
+    }),
     value: formatMetric(totalEvents, '0.[0]a'),
     'data-test-subj': 'totalEvents'
   });
 
   metrics.push({
-    label: 'Bytes Sent',
+    label: i18n.translate('xpack.monitoring.beats.overview.bytesSentLabel', {
+      defaultMessage: 'Bytes Sent'
+    }),
     value: formatMetric(bytesSent, 'byte'),
     'data-test-subj': 'bytesSent'
   });

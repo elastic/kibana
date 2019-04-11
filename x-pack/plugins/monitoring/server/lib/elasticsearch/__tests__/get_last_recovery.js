@@ -5,13 +5,12 @@
  */
 
 import { handleLastRecoveries, filterOldShardActivity } from '../get_last_recovery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('get_last_recovery', () => {
   // Note: times are from the epoch!
   const resp = {
     hits: {
-      total: 1, // We expect either 0 or 1; never more.
       hits: [
         {
           _source: {
@@ -48,7 +47,7 @@ describe('get_last_recovery', () => {
 
   it('No hits results in an empty array', () => {
     // Note: we don't expect it to touch hits without total === 1
-    expect(handleLastRecoveries({ hits: { total: 0 } }, new Date(0))).to.have.length(0);
+    expect(handleLastRecoveries({ hits: { hits: [] } }, new Date(0))).to.have.length(0);
   });
 
   it('Filters on stop time', () => {

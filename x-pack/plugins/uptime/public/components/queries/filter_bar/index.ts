@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FilterBar } from './filter_bar';
+export { FilterBarQuery } from './filter_bar_query';

@@ -30,7 +30,7 @@ async function parseResponse(request) {
 
 export function createHitIterator(logger) {
   return async function* hitIterator(scrollSettings, callEndpoint, searchRequest, cancellationToken) {
-    logger('executing search request');
+    logger.debug('executing search request');
     function search(index, body) {
       return parseResponse(callEndpoint('search', {
         index,
@@ -41,7 +41,7 @@ export function createHitIterator(logger) {
     }
 
     function scroll(scrollId) {
-      logger('executing scroll request');
+      logger.debug('executing scroll request');
       return parseResponse(callEndpoint('scroll', {
         scrollId,
         scroll: scrollSettings.duration
@@ -49,7 +49,7 @@ export function createHitIterator(logger) {
     }
 
     function clearScroll(scrollId) {
-      logger('executing clearScroll request');
+      logger.debug('executing clearScroll request');
       return callEndpoint('clearScroll', {
         scrollId: [ scrollId ]
       });

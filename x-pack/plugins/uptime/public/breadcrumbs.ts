@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export interface UMBreadcrumb {
   text: string;
   href?: string;
 }
 
-export const monitorBreadcrumb: UMBreadcrumb = {
-  text: 'Monitor',
-};
-
 export const overviewBreadcrumb: UMBreadcrumb = {
-  text: 'Overview',
+  text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+    defaultMessage: 'Uptime',
+  }),
   href: '#/',
 };
 
 export const getOverviewPageBreadcrumbs = (): UMBreadcrumb[] => [overviewBreadcrumb];
 
-export const getMonitorPageBreadcrumb = (): UMBreadcrumb[] => [
+export const getMonitorPageBreadcrumb = (name: string): UMBreadcrumb[] => [
   overviewBreadcrumb,
-  monitorBreadcrumb,
+  { text: name },
 ];

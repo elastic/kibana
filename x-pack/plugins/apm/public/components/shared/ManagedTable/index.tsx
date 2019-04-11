@@ -5,40 +5,48 @@
  */
 
 import { EuiBasicTable } from '@elastic/eui';
-import { get, sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash';
 import React, { Component } from 'react';
-import { StringMap } from '../../../../typings/common';
+import { idx } from '../../../../common/idx';
 
 // TODO: this should really be imported from EUI
-export interface ITableColumn {
+export interface ITableColumn<T> {
   field: string;
   name: string;
   dataType?: string;
   align?: string;
   width?: string;
   sortable?: boolean;
-  render?: (value: any, item?: any) => unknown;
+  render?: (value: any, item: T) => unknown;
 }
 
-export interface IManagedTableProps {
-  items: Array<StringMap<any>>;
-  columns: ITableColumn[];
+interface IState {
+  page: { index: number; size: number };
+  sort: {
+    field: string;
+    direction: string;
+  };
+}
+
+interface Props<T> {
+  items: T[];
+  columns: Array<ITableColumn<T>>;
   initialPageIndex?: number;
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: string;
-    direction: 'asc' | 'desc';
+    field: keyof T;
+    direction: string;
   };
   noItemsMessage?: React.ReactNode;
 }
 
-export class ManagedTable extends Component<IManagedTableProps, any> {
-  constructor(props: IManagedTableProps) {
+export class ManagedTable<T> extends Component<Props<T>, IState> {
+  constructor(props: Props<T>) {
     super(props);
 
     const defaultSort = {
-      field: get(props, 'columns[0].field', ''),
+      field: idx(props, _ => _.columns[0].field) || '',
       direction: 'asc'
     };
 
@@ -54,13 +62,13 @@ export class ManagedTable extends Component<IManagedTableProps, any> {
     };
   }
 
-  public onTableChange = ({ page = {}, sort = {} }) => {
+  public onTableChange = ({ page, sort }: IState) => {
     this.setState({ page, sort });
   };
 
   public getCurrentItems() {
     const { items } = this.props;
-    const { sort = {}, page = {} } = this.state;
+    const { sort, page } = this.state;
     // TODO: Use _.orderBy once we upgrade to lodash 4+
     const sorted = sortByOrder(items, sort.field, sort.direction);
     return sorted.slice(page.index * page.size, (page.index + 1) * page.size);

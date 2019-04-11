@@ -4,92 +4,128 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
+import { first } from 'lodash';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
-import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
-import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
-import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/utils/url';
-// @ts-ignore
-import List from './List';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useTransactionList } from '../../../hooks/useTransactionList';
+import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { IUrlParams } from '../../../store/urlParams';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
+import { TransactionList } from './List';
+import { useRedirect } from './useRedirect';
 
-interface TransactionOverviewProps {
+interface TransactionOverviewProps extends RouteComponentProps {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
-  // TODO: find better react-router-dom withRouter prop type handling?
-  history: any;
-  location: any;
-  match: any;
 }
 
-export class TransactionOverviewView extends React.Component<
-  TransactionOverviewProps
-> {
-  public handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { urlParams, history, location } = this.props;
-    const type = legacyEncodeURIComponent(event.target.value);
-    history.push({
+function getRedirectLocation({
+  urlParams,
+  location,
+  serviceTransactionTypes
+}: {
+  location: Location;
+  urlParams: IUrlParams;
+  serviceTransactionTypes: string[];
+}) {
+  const { serviceName, transactionType } = urlParams;
+  const firstTransactionType = first(serviceTransactionTypes);
+  if (!transactionType && firstTransactionType) {
+    return {
       ...location,
-      pathname: `/${urlParams.serviceName}/transactions/${type}`
-    });
-  };
-
-  public render() {
-    const { urlParams, serviceTransactionTypes, location } = this.props;
-    const { serviceName, transactionType } = urlParams;
-
-    // filtering by type is currently required
-    if (!serviceName || !transactionType) {
-      return null;
-    }
-
-    return (
-      <React.Fragment>
-        {serviceTransactionTypes.length > 1 ? (
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.apm.transactionsTable.filterByTypeLabel',
-              {
-                defaultMessage: 'Filter by type'
-              }
-            )}
-          >
-            <EuiSelect
-              options={serviceTransactionTypes.map(type => ({
-                text: `${type}`,
-                value: type
-              }))}
-              value={transactionType}
-              onChange={this.handleTypeChange}
-            />
-          </EuiFormRow>
-        ) : null}
-
-        <TransactionOverviewChartsRequest
-          urlParams={urlParams}
-          render={({ data }) => (
-            <TransactionCharts
-              charts={data}
-              location={location}
-              urlParams={urlParams}
-            />
-          )}
-        />
-
-        <EuiSpacer size="l" />
-
-        <TransactionListRequest
-          urlParams={urlParams}
-          render={({ data }) => <List items={data} serviceName={serviceName} />}
-        />
-      </React.Fragment>
-    );
+      pathname: `/${serviceName}/transactions/${firstTransactionType}`
+    };
   }
 }
 
-export const TransactionOverview = withRouter<TransactionOverviewProps>(
-  TransactionOverviewView
-);
+export function TransactionOverviewView({
+  urlParams,
+  serviceTransactionTypes,
+  location,
+  history
+}: TransactionOverviewProps) {
+  const { serviceName, transactionType } = urlParams;
+
+  // redirect to first transaction type
+  useRedirect(
+    history,
+    getRedirectLocation({
+      urlParams,
+      location,
+      serviceTransactionTypes
+    })
+  );
+
+  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
+    urlParams
+  );
+
+  const { data: transactionListData } = useTransactionList(urlParams);
+
+  // filtering by type is currently required
+  if (!serviceName || !transactionType) {
+    return null;
+  }
+
+  return (
+    <React.Fragment>
+      {serviceTransactionTypes.length > 1 ? (
+        <EuiFormRow
+          id="transaction-type-select-row"
+          label={i18n.translate(
+            'xpack.apm.transactionsTable.filterByTypeLabel',
+            {
+              defaultMessage: 'Filter by type'
+            }
+          )}
+        >
+          <EuiSelect
+            options={serviceTransactionTypes.map(type => ({
+              text: `${type}`,
+              value: type
+            }))}
+            value={transactionType}
+            onChange={event => {
+              const type = legacyEncodeURIComponent(event.target.value);
+              history.push({
+                ...location,
+                pathname: `/${urlParams.serviceName}/transactions/${type}`
+              });
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
+
+      <TransactionCharts
+        charts={transactionOverviewCharts}
+        location={location}
+        urlParams={urlParams}
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h3>Transactions</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <TransactionList
+          items={transactionListData}
+          serviceName={serviceName}
+        />
+      </EuiPanel>
+    </React.Fragment>
+  );
+}
+
+export const TransactionOverview = withRouter(TransactionOverviewView);

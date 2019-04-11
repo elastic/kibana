@@ -17,26 +17,56 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
-import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
-import { VisualizeEmbeddable } from './visualize_embeddable';
+import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import {
+  EmbeddableInstanceConfiguration,
+  OnEmbeddableStateChanged,
+} from 'ui/embeddable/embeddable_factory';
+import { VisTypesRegistry } from 'ui/registry/vis_types';
+import { VisualizeEmbeddable } from './visualize_embeddable';
+import { VisualizationAttributes } from '../../../../../server/saved_objects/service/saved_objects_client';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import { getIndexPattern } from './get_index_pattern';
 
-export interface VisualizeEmbeddableInstanceConfiguration {
-  id: string;
-}
-
-export class VisualizeEmbeddableFactory extends EmbeddableFactory {
+export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationAttributes> {
   private savedVisualizations: SavedVisualizations;
   private config: Legacy.KibanaConfig;
 
-  constructor(savedVisualizations: SavedVisualizations, config: Legacy.KibanaConfig) {
-    super({ name: 'visualization' });
+  constructor(
+    savedVisualizations: SavedVisualizations,
+    config: Legacy.KibanaConfig,
+    visTypes: VisTypesRegistry
+  ) {
+    super({
+      name: 'visualization',
+      savedObjectMetaData: {
+        name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
+        type: 'visualization',
+        getIconForSavedObject: savedObject => {
+          return (
+            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+          );
+        },
+        getTooltipForSavedObject: savedObject => {
+          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
+          return `${savedObject.attributes.title} (${visType})`;
+        },
+        showSavedObject: savedObject => {
+          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
+            return true;
+          }
+          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+          const visType = visTypes.byName[typeName];
+          return visType.stage !== 'experimental';
+        },
+      },
+    });
     this.config = config;
     this.savedVisualizations = savedVisualizations;
   }
@@ -53,30 +83,29 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @param {function} onEmbeddableStateChanged
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
-  public create(
-    panelMetadata: VisualizeEmbeddableInstanceConfiguration,
+  public async create(
+    panelMetadata: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
 
-    const waitFor: [Promise<VisualizeLoader>, Promise<VisSavedObject>] = [
-      getVisualizeLoader(),
-      this.savedVisualizations.get(visId),
-    ];
-    return Promise.all(waitFor).then(([loader, savedObject]: [VisualizeLoader, VisSavedObject]) => {
-      const isLabsEnabled = this.config.get<boolean>('visualize:enableLabs');
+    const loader = await getVisualizeLoader();
+    const savedObject = await this.savedVisualizations.get(visId);
+    const isLabsEnabled = this.config.get<boolean>('visualize:enableLabs');
 
-      if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(savedObject.title);
-      } else {
-        return new VisualizeEmbeddable({
-          onEmbeddableStateChanged,
-          savedVisualization: savedObject,
-          editUrl,
-          loader,
-        });
-      }
+    if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
+      return new DisabledLabEmbeddable(savedObject.title);
+    }
+
+    const indexPattern = await getIndexPattern(savedObject);
+    const indexPatterns = indexPattern ? [indexPattern] : [];
+    return new VisualizeEmbeddable({
+      onEmbeddableStateChanged,
+      savedVisualization: savedObject,
+      editUrl,
+      loader,
+      indexPatterns,
     });
   }
 }

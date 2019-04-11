@@ -83,15 +83,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.closeJob = ca({
     urls: [
       {
-        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
-        req: {
-          jobId: {
-            type: 'string'
-          }
-        }
-      },
-      {
-        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=true',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
@@ -100,30 +92,41 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'boolean'
           }
         }
+      },
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
       }
     ],
     method: 'POST'
   });
 
   ml.deleteJob = ca({
-    urls: [{
-      fmt: '/_ml/anomaly_detectors/<%=jobId%>',
-      req: {
-        jobId: {
-          type: 'string'
+    urls: [
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>?&force=<%=force%>&wait_for_completion=false',
+        req: {
+          jobId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>?&wait_for_completion=false',
+        req: {
+          jobId: {
+            type: 'string'
+          }
         }
       }
-    }, {
-      fmt: '/_ml/anomaly_detectors/<%=jobId%>?force=true',
-      req: {
-        jobId: {
-          type: 'string'
-        },
-        force: {
-          type: 'boolean'
-        }
-      }
-    }],
+    ],
     method: 'DELETE'
   });
 
@@ -207,24 +210,27 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   });
 
   ml.deleteDatafeed = ca({
-    urls: [{
-      fmt: '/_ml/datafeeds/<%=datafeedId%>',
-      req: {
-        datafeedId: {
-          type: 'string'
+    urls: [
+      {
+        fmt: '/_ml/datafeeds/<%=datafeedId%>?force=<%=force%>',
+        req: {
+          datafeedId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/datafeeds/<%=datafeedId%>',
+        req: {
+          datafeedId: {
+            type: 'string'
+          }
         }
       }
-    }, {
-      fmt: '/_ml/datafeeds/<%=datafeedId%>?force=true',
-      req: {
-        datafeedId: {
-          type: 'string'
-        },
-        force: {
-          type: 'boolean'
-        }
-      }
-    }],
+    ],
     method: 'DELETE'
   });
 
@@ -570,7 +576,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     urls: [
       {
         // eslint-disable-next-line max-len
-        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>',
+        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
         req: {
           charset: {
             type: 'string'
@@ -600,6 +606,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'string'
           },
           timestamp_format: {
+            type: 'string'
+          },
+          lines_to_sample: {
             type: 'string'
           },
         }

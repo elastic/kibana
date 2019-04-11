@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { COMPARATORS, SORT_ORDERS } from '../../../../common/constants';
@@ -376,18 +376,18 @@ describe('ThresholdWatch', () => {
     it('should generate a valid ThresholdWatch object', () => {
       const actual = ThresholdWatch.fromUpstreamJson(upstreamJson);
       const expected = {
-        index: "index",
-        timeField: "timeField",
-        triggerIntervalSize: "triggerIntervalSize",
-        triggerIntervalUnit: "triggerIntervalUnit",
-        aggType: "aggType",
-        aggField: "aggField",
-        termSize: "termSize",
-        termField: "termField",
-        thresholdComparator: "thresholdComparator",
-        timeWindowSize: "timeWindowSize",
-        timeWindowUnit: "timeWindowUnit",
-        threshold: "threshold"
+        index: 'index',
+        timeField: 'timeField',
+        triggerIntervalSize: 'triggerIntervalSize',
+        triggerIntervalUnit: 'triggerIntervalUnit',
+        aggType: 'aggType',
+        aggField: 'aggField',
+        termSize: 'termSize',
+        termField: 'termField',
+        thresholdComparator: 'thresholdComparator',
+        timeWindowSize: 'timeWindowSize',
+        timeWindowUnit: 'timeWindowUnit',
+        threshold: 'threshold'
       };
 
       expect(actual).to.eql(expected);
@@ -426,18 +426,18 @@ describe('ThresholdWatch', () => {
     it('should generate a valid ThresholdWatch object', () => {
       const actual = ThresholdWatch.fromDownstreamJson(downstreamJson);
       const expected = {
-        index: "index",
-        timeField: "timeField",
-        triggerIntervalSize: "triggerIntervalSize",
-        triggerIntervalUnit: "triggerIntervalUnit",
-        aggType: "aggType",
-        aggField: "aggField",
-        termSize: "termSize",
-        termField: "termField",
-        thresholdComparator: "thresholdComparator",
-        timeWindowSize: "timeWindowSize",
-        timeWindowUnit: "timeWindowUnit",
-        threshold: "threshold"
+        index: 'index',
+        timeField: 'timeField',
+        triggerIntervalSize: 'triggerIntervalSize',
+        triggerIntervalUnit: 'triggerIntervalUnit',
+        aggType: 'aggType',
+        aggField: 'aggField',
+        termSize: 'termSize',
+        termField: 'termField',
+        thresholdComparator: 'thresholdComparator',
+        timeWindowSize: 'timeWindowSize',
+        timeWindowUnit: 'timeWindowUnit',
+        threshold: 'threshold'
       };
 
       expect(actual).to.eql(expected);

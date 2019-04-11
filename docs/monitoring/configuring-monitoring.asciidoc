@@ -20,4 +20,3 @@ To learn about monitoring in general, see
 include::monitoring-kibana.asciidoc[]
 include::monitoring-metricbeat.asciidoc[]
 include::viewing-metrics.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]

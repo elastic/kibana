@@ -32,6 +32,14 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 require('ui/autoload/all');
+
+// TODO: remove ui imports completely (move to plugins)
+import 'ui/directives/input_focus';
+import 'ui/directives/saved_object_finder';
+import 'ui/listen';
+import 'ui/kbn_top_nav';
+import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -79,9 +87,6 @@ require('ui/routes')
             'search': '/'
           }));
       }
-    },
-    controller($scope, config) {
-      config.bindToScope($scope, 'k7design');
     }
   });
 

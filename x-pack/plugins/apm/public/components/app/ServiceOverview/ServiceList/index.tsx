@@ -8,14 +8,15 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { RelativeLink } from '../../../../utils/url';
-import { ManagedTable } from '../../../shared/ManagedTable';
+import { APMLink } from '../../../shared/Links/APMLink';
+import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
-  items: IServiceListItem[];
+  items?: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
 }
 
@@ -30,20 +31,17 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return (
-    value ||
-    i18n.translate('xpack.apm.servicesTable.notAvailableLabel', {
-      defaultMessage: 'N/A'
-    })
-  );
+  return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(RelativeLink)`
+const AppLink = styled(APMLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS = [
+export const SERVICE_COLUMNS: Array<
+  ITableColumn<ServiceListAPIResponse['items'][0]>
+> = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {

@@ -39,7 +39,8 @@ function MarkdownSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions
   } = props;
 
   const defaults = { label: '', var_name: '' };
@@ -76,6 +77,7 @@ function MarkdownSeriesUi(props) {
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -196,7 +198,8 @@ MarkdownSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  uiRestrictions: PropTypes.object,
 };
 
 const MarkdownSeries = injectI18n(MarkdownSeriesUi);

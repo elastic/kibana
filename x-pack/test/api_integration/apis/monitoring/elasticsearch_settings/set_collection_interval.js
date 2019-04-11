@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe.skip('update collection_interval setting', () => {
+  describe('update collection_interval setting', () => {
     it('should set collection.interval to 10s', async () => {
       const { body } = await supertest
         .put('/api/monitoring/v1/elasticsearch_settings/set/collection_interval')

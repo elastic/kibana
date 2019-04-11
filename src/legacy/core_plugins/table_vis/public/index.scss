@@ -1,4 +1,4 @@
-@import 'src/ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 // Prefix all styles with "tbv" to avoid conflicts.
 // Examples
@@ -7,4 +7,6 @@
 //   tbvChart__legend--small
 //   tbvChart__legend-isLoading
 
+@import 'agg_table/index';
+@import 'paginated_table/index';
 @import './table_vis';

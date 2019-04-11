@@ -14,7 +14,7 @@
             on-select="selectField()"
             ng-disabled="formConfig.overField === undefined || jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
             append-to-body=true>
-            <ui-select-match placeholder="Add field">
+            <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.fieldsSelectionPopulation.addFieldPlaceholder' | i18n: {defaultMessage: 'Add field'} }}">
                 <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
             </ui-select-match>
             <ui-select-choices repeat="field in ui.fields | filter: { name: $select.search }" group-by="'mlType'">

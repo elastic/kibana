@@ -2,26 +2,24 @@
 
 exports[`Table editing should show a save button 1`] = `
 <div>
-  <React.Fragment>
-    <EuiButtonIcon
-      aria-label="Save"
-      color="primary"
-      iconSize="m"
-      iconType="checkInCircleFilled"
-      onClick={[Function]}
-      size="s"
-      type="button"
-    />
-    <EuiButtonIcon
-      aria-label="Cancel"
-      color="primary"
-      iconSize="m"
-      iconType="cross"
-      onClick={[Function]}
-      size="s"
-      type="button"
-    />
-  </React.Fragment>
+  <EuiButtonIcon
+    aria-label="Save"
+    color="primary"
+    iconSize="m"
+    iconType="checkInCircleFilled"
+    onClick={[Function]}
+    size="s"
+    type="button"
+  />
+  <EuiButtonIcon
+    aria-label="Cancel"
+    color="primary"
+    iconSize="m"
+    iconType="cross"
+    onClick={[Function]}
+    size="s"
+    type="button"
+  />
 </div>
 `;
 
@@ -86,6 +84,7 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
+  executeQueryOptions={Object {}}
   items={
     Array [
       Object {

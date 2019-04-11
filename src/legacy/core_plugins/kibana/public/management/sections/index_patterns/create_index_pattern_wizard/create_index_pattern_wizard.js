@@ -136,7 +136,7 @@ export class CreateIndexPatternWizard extends Component {
     }
 
     services.indexPatterns.cache.clear(createdId);
-    services.changeUrl(`/management/kibana/indices/${createdId}`);
+    services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   }
 
   goToTimeFieldStep = (indexPattern) => {

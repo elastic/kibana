@@ -26,8 +26,9 @@ export default function (kibana) {
       visTypes: [
         'plugins/table_vis/table_vis'
       ],
+      interpreter: ['plugins/table_vis/table_vis_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+    },
   });
 
 }

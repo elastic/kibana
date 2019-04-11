@@ -1,34 +1,7 @@
 @import '@elastic/eui/src/components/form/variables';
 
 .spcSpaceSelector {
-  padding: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: $euiZLevel9 + 1000;
-  background: inherit;
-  background-image: linear-gradient(0deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
-  overflow: auto;
-}
-
-.spcSpaceSelector::before {
-  // SASSTODO: webpack pipeline isn't setup to handle image urls in SASS yet
-  // content: url(../../assets/bg_top_branded.svg);
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-
-.spcSpaceSelector::after {
-  // SASSTODO: webpack pipeline isn't setup to handle image urls in SASS yet
-  // content: url(../../assets/bg_bottom_branded.svg);
-  position: fixed;
-  bottom: -2px; // Hides an odd space at the bottom of the svg
-  left: 0;
-  z-index: 1;
+  @include kibanaFullScreenGraphics;
 }
 
 .spcSpaceSelector__pageContent {

@@ -7,25 +7,29 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
 
-export const AutoFollowPatternIndicesPreview = injectI18n(({ prefix, suffix, leaderIndexPatterns, intl }) => {
+export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPatterns }) => {
   const { indicesPreview } = getPreviewIndicesFromAutoFollowPattern({
     prefix,
     suffix,
     leaderIndexPatterns
   });
 
-  const title = intl.formatMessage({
-    id: 'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
-    defaultMessage: 'Index name examples',
-  });
+  const title = i18n.translate(
+    'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
+    {
+      defaultMessage: 'Index name examples'
+    }
+  );
 
   return (
     <EuiCallOut
       title={title}
       iconType="indexMapping"
+      data-test-subj="ccrAutoFollowPatternIndicesPreview"
     >
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
@@ -33,11 +37,11 @@ export const AutoFollowPatternIndicesPreview = injectI18n(({ prefix, suffix, lea
       />
       <ul>
         {indicesPreview.map(({ followPattern: { prefix, suffix, template } }, i) => (
-          <li key={i}>
+          <li key={i} data-test-subj="ccrAutoFollowPatternIndexPreview">
             {prefix}<strong>{template}</strong>{suffix}
           </li>
         ))}
       </ul>
     </EuiCallOut>
   );
-});
+};

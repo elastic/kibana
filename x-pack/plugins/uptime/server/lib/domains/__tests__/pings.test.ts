@@ -45,8 +45,8 @@ describe('Pings domain lib', () => {
       const request: any = {};
       const apiResponse = await libs.pings.getAll(
         request,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'asc',
@@ -61,8 +61,8 @@ describe('Pings domain lib', () => {
     it('should sort desc and take a range', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'desc',
@@ -77,8 +77,8 @@ describe('Pings domain lib', () => {
     it('should take range without sort', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         undefined,
@@ -93,8 +93,8 @@ describe('Pings domain lib', () => {
     it('should sort without range', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'desc',
@@ -110,8 +110,8 @@ describe('Pings domain lib', () => {
     it('should return unsorted, with default size of 10', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         undefined,

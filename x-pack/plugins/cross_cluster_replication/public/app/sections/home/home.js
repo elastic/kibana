@@ -4,136 +4,103 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { BASE_PATH } from '../../../../common/constants';
 
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
-  EuiText,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { listBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
-import { SectionUnauthorized } from '../../components';
+import { FollowerIndicesList } from './follower_indices_list';
 
-export const CrossClusterReplicationHome = injectI18n(
-  class extends PureComponent {
-    static propTypes = {
-      autoFollowPatterns: PropTypes.array,
-    }
+export class CrossClusterReplicationHome extends PureComponent {
+  state = {
+    activeSection: 'follower_indices'
+  }
 
-    state = {
-      sectionActive: 'auto-follow'
-    }
+  tabs = [{
+    id: 'follower_indices',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
+        defaultMessage="Follower indices"
+      />
+    ),
+    testSubj: 'ccrFollowerIndicesTab',
+  }, {
+    id: 'auto_follow_patterns',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+        defaultMessage="Auto-follow patterns"
+      />
+    ),
+    testSubj: 'ccrAutoFollowPatternsTab',
+  }]
 
-    componentDidMount() {
-      chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
-    }
+  componentDidMount() {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+  }
 
-    getHeaderSection() {
-      const { isAutoFollowApiAuthorized, autoFollowPatterns } = this.props;
+  static getDerivedStateFromProps(props) {
+    const { match: { params: { section } } } = props;
+    return {
+      activeSection: section
+    };
+  }
 
-      // We want to show the title when the user isn't authorized.
-      if (isAutoFollowApiAuthorized && !autoFollowPatterns.length) {
-        return null;
-      }
+  onSectionChange = (section) => {
+    routing.navigate(`/${section}`);
+  }
 
-      return (
-        <Fragment>
-          <EuiTitle size="l">
+  render() {
+    return (
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiTitle size="l" data-test-subj="ccrAppTitle">
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross Cluster Replication"
+                defaultMessage="Cross-Cluster Replication"
               />
             </h1>
           </EuiTitle>
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-                    defaultMessage="Auto-follow patterns"
-                  />
-                </h2>
-              </EuiTitle>
+          <EuiTabs>
+            {this.tabs.map(tab => (
+              <EuiTab
+                onClick={() => this.onSectionChange(tab.id)}
+                isSelected={tab.id === this.state.activeSection}
+                key={tab.id}
+                data-test-subj={tab.testSubj}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
 
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
-                      cluster to follower indices on the local cluster."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
+          <EuiSpacer size="m" />
 
-            <EuiFlexItem grow={false}>
-              {isAutoFollowApiAuthorized && (
-                <EuiButton
-                  {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-                  fill
-                >
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
-                    defaultMessage="Create an auto-follow pattern"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
-
-    getUnauthorizedSection() {
-      const { isAutoFollowApiAuthorized } = this.props;
-      if (!isAutoFollowApiAuthorized) {
-        return (
-          <SectionUnauthorized>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
-              defaultMessage="You do not have permission to view or add auto-follow patterns."
-            />
-          </SectionUnauthorized>
-        );
-      }
-    }
-
-    render() {
-      return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {this.getHeaderSection()}
-              {this.getUnauthorizedSection()}
-              <Switch>
-                <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-              </Switch>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      );
-    }
+          <Switch>
+            <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+          </Switch>
+        </EuiPageContent>
+      </EuiPageBody>
+    );
   }
-);
+}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -86,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
       // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
       const expectedChartValues = [935];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');

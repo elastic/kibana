@@ -6,21 +6,21 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import {
-  colors,
   fontFamilyCode,
   fontSizes,
   px,
   truncate,
-  unit,
   units
 } from '../../../style/variables';
 
 export interface IStickyProperty {
-  val: React.ReactNode | Date;
+  val: JSX.Element | string | Date;
   label: string;
   fieldName?: string;
   width?: 0 | string;
@@ -34,7 +34,7 @@ const TooltipFieldName = styled.span`
 const PropertyLabel = styled.div`
   margin-bottom: ${px(units.half)};
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 
   span {
     cursor: help;
@@ -43,27 +43,28 @@ const PropertyLabel = styled.div`
 PropertyLabel.displayName = 'PropertyLabel';
 
 const PropertyValueDimmed = styled.span`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
+const propertyValueLineHeight = 1.2;
 const PropertyValue = styled.div`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
 `;
 PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
   ${truncate('100%')};
 `;
 
 function TimestampValue({ timestamp }: { timestamp: Date }) {
   const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : 'N/A';
+  const timeAgo = timestamp ? time.fromNow() : NOT_AVAILABLE_LABEL;
   const timestampFull = timestamp
     ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : 'N/A';
+    : NOT_AVAILABLE_LABEL;
 
   return (
     <PropertyValue>

@@ -29,7 +29,7 @@ describe('when response has data', () => {
   let onSelectionEnd;
 
   beforeEach(() => {
-    const series = getResponseTimeSeries(responseWithData);
+    const series = getResponseTimeSeries({ apmTimeseries: responseWithData });
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();
@@ -243,8 +243,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(20)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
@@ -265,8 +265,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(10)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {

@@ -1,31 +1,4 @@
 <div ng-controller="doc" class="app-container">
-  <div class="kuiLocalNav" ng-if="!k7design">
-    <div class="kuiLocalNavRow">
-      <div class="kuiLocalNavRow__section">
-        <div
-          class="kuiLocalTitle"
-          i18n-id="kbn.doc.singleDocumentTitle"
-          i18n-default-message="Single Document"
-        ></div>
-      </div>
-    </div>
-    <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
-      <div class="kuiLocalTabs">
-        <div
-          class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-bind-template="{{ hit._type }}#{{ hit._id | uriescape }}"
-          ng-if="!!hit"
-        ></div>
-        <div
-          class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-if="!hit"
-          i18n-id="kbn.doc.unknownIdTitle"
-          i18n-default-message="Unknown Id"
-        ></div>
-      </div>
-    </div>
-  </div>
-
   <div class="kuiViewContent">
     <!-- no results -->
     <div class="kuiViewContentItem" ng-if="status === 'notFound'">
@@ -42,7 +15,7 @@
           <div
             class="kuiInfoPanelBody__message"
             i18n-id="kbn.doc.couldNotFindDocumentsDescription"
-            i18n-default-message="Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better"  
+            i18n-default-message="Unfortunately I could not find any documents matching that id, of that type, in that index. I tried really hard. I wanted it to be there. Sometimes I swear documents grow legs and just walk out of the index. Sneaky. I wish I could offer some advice here, something to make you feel better"
           ></div>
         </div>
       </div>
@@ -63,7 +36,7 @@
           <div
             class="kuiInfoPanelBody__message"
             i18n-id="kbn.doc.somethingWentWrongDescription"
-            i18n-default-message="Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here."  
+            i18n-default-message="Oh no. Something went very wrong. Its not just that I couldn't find your document, I couldn't even try. The index was missing, or the type. Go check out Elasticsearch, something isn't quite right here."
           ></div>
         </div>
       </div>

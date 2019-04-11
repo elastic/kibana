@@ -30,7 +30,7 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import 'babel-polyfill';
+import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
@@ -50,11 +50,16 @@ new CoreSystem({
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
+      devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
       }
     },
+    csp: {
+      warnLegacyBrowsers: false,
+    },
+    uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,
@@ -80,6 +85,9 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      interpreterConfig: {
+        enableInVisualize: true
+      }
     },
   },
   rootDomElement,
@@ -87,5 +95,5 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).start()
+}).setup()
 `;

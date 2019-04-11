@@ -14,20 +14,22 @@ import { ElasticsearchMetadataAdapter } from '../adapters/metadata/elasticsearch
 import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapter';
 import { ElasticsearchNodesAdapter } from '../adapters/nodes/elasticsearch_nodes_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
-import { InfraConfigurationSourcesAdapter } from '../adapters/sources/configuration_sources_adapter';
 import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetadataDomain } from '../domains/metadata_domain';
 import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraNodesDomain } from '../domains/nodes_domain';
-import { InfraBackendLibs, InfraConfiguration, InfraDomainLibs } from '../infra_types';
+import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
 
 export function compose(server: Server): InfraBackendLibs {
-  const configuration = new InfraKibanaConfigurationAdapter<InfraConfiguration>(server);
+  const configuration = new InfraKibanaConfigurationAdapter(server);
   const framework = new InfraKibanaBackendFrameworkAdapter(server);
-  const sources = new InfraSources(new InfraConfigurationSourcesAdapter(configuration));
+  const sources = new InfraSources({
+    configuration,
+    savedObjects: framework.getSavedObjectsService(),
+  });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,
   });

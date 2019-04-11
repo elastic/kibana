@@ -15,7 +15,6 @@ export function fieldsServiceProvider(callWithRequest) {
   // with values equal to the cardinality of the field.
   function getCardinalityOfFields(
     index,
-    types,
     fieldNames,
     query,
     timeFieldName,
@@ -35,10 +34,6 @@ export function fieldsServiceProvider(callWithRequest) {
         }
       }
     ];
-
-    if (types && types.length) {
-      mustCriteria.push({ terms: { _type: types } });
-    }
 
     if (query) {
       mustCriteria.push(query);

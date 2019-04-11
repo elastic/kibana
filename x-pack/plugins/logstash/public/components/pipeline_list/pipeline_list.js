@@ -95,7 +95,7 @@ class PipelineListUi extends React.Component {
 
     this.setState({
       message: (
-        <div>
+        <div data-test-subj="loadingPipelines">
           <EuiLoadingSpinner size="m" />
           &nbsp; <FormattedMessage
             id="xpack.logstash.pipelineList.pipelinesLoadingMessage"
@@ -274,7 +274,7 @@ class PipelineListUi extends React.Component {
           <EuiTitle size="m">
             <h1><FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" /></h1>
           </EuiTitle>
-          <EuiText color="subdued">
+          <EuiText color="subdued" size="s">
             <p>
               <FormattedMessage
                 id="xpack.logstash.pipelineList.subhead"

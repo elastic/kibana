@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,
@@ -16,7 +16,10 @@ export default function upgradeAssistantFunctionalTests({
 
   describe('Upgrade Checkup', () => {
     before(async () => await esArchiver.load('empty_kibana'));
-    after(async () => await esArchiver.unload('empty_kibana'));
+    after(async () => {
+      await PageObjects.upgradeAssistant.expectTelemetryHasFinish();
+      await esArchiver.unload('empty_kibana');
+    });
 
     it('allows user to navigate to upgrade checkup', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();

@@ -6,34 +6,24 @@
 
 import { i18n } from '@kbn/i18n';
 
+export interface Tab {
+  key: string;
+  label: string;
+}
+
 export const PROPERTY_CONFIG = [
   {
-    key: 'request',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.requestLabel', {
-      defaultMessage: 'Request'
+    key: 'http',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.httpLabel', {
+      defaultMessage: 'HTTP'
     }),
     required: false,
-    presortedKeys: [
-      'http_version',
-      'method',
-      'url',
-      'socket',
-      'headers',
-      'body'
-    ]
+    presortedKeys: []
   },
   {
-    key: 'response',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.responseLabel', {
-      defaultMessage: 'Response'
-    }),
-    required: false,
-    presortedKeys: ['status_code', 'headers', 'headers_sent', 'finished']
-  },
-  {
-    key: 'system',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.systemLabel', {
-      defaultMessage: 'System'
+    key: 'host',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.hostLabel', {
+      defaultMessage: 'Host'
     }),
     required: false,
     presortedKeys: ['hostname', 'architecture', 'platform']
@@ -44,7 +34,7 @@ export const PROPERTY_CONFIG = [
       defaultMessage: 'Service'
     }),
     required: false,
-    presortedKeys: ['runtime', 'framework', 'agent', 'version']
+    presortedKeys: ['runtime', 'framework', 'version']
   },
   {
     key: 'process',
@@ -52,7 +42,31 @@ export const PROPERTY_CONFIG = [
       defaultMessage: 'Process'
     }),
     required: false,
-    presortedKeys: ['pid', 'title', 'argv']
+    presortedKeys: ['pid', 'title', 'args']
+  },
+  {
+    key: 'agent',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.agentLabel', {
+      defaultMessage: 'Agent'
+    }),
+    required: false,
+    presortedKeys: []
+  },
+  {
+    key: 'url',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
+      defaultMessage: 'URL'
+    }),
+    required: false,
+    presortedKeys: []
+  },
+  {
+    key: 'container',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.containerLabel', {
+      defaultMessage: 'Container'
+    }),
+    required: false,
+    presortedKeys: []
   },
   {
     key: 'user',
@@ -63,19 +77,30 @@ export const PROPERTY_CONFIG = [
     presortedKeys: ['id', 'username', 'email']
   },
   {
-    key: 'tags',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.tagsLabel', {
-      defaultMessage: 'Tags'
+    key: 'labels',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.labelsLabel', {
+      defaultMessage: 'Labels'
     }),
     required: true,
     presortedKeys: []
   },
   {
-    key: 'custom',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.customLabel', {
+    key: 'transaction.custom',
+    label: i18n.translate(
+      'xpack.apm.propertiesTable.tabs.transactionCustomLabel',
+      {
+        defaultMessage: 'Custom'
+      }
+    ),
+    required: false,
+    presortedKeys: []
+  },
+  {
+    key: 'error.custom',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.errorCustomLabel', {
       defaultMessage: 'Custom'
     }),
-    required: true,
+    required: false,
     presortedKeys: []
   }
 ];

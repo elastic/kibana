@@ -4,9 +4,11 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T12:41:57.071Z",
     "version": 1,
+    "migrationVersion": {
+      "canvas-workpad": "7.0.0"
+    },
     "attributes": {
       "name": "[Logs] Web Traffic",
-      "id": "workpad-5563cc40-5760-4afe-bf33-9da72fac53b7",
       "width": 1280,
       "height": 720,
       "page": 0,
@@ -191,7 +193,7 @@
                 "height": 110,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql query=\"SELECT SUM(bytes) as total_bytes\nFROM kibana_sample_data_logs\"\n| math \"total_bytes\"\n| formatNumber \"0.00b\"\n| metric \"BYTES TRANSFERRED\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "\nfilters\n| essql query=\"SELECT SUM(bytes) as total_bytes\nFROM kibana_sample_data_logs\"\n| math \"total_bytes\"\n| formatNumber \"0.00b\"\n| metric \"BYTES TRANSFERRED\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-a684991f-f179-4fcc-b474-5ed71b0a6f3e",
@@ -202,7 +204,7 @@
                 "height": 104,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql query=\"SELECT COUNT(timestamp) as total_visitors\nFROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "\nfilters\n| essql query=\"SELECT COUNT(timestamp) as total_visitors\nFROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-a8a8fa93-8e08-4e9f-b3e4-f4014543fe1f",
@@ -305,7 +307,7 @@
                 "height": 104.94140625,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"total_errors\"\n| metric \"TOTAL ISSUES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"total_errors\"\n| metric \"TOTAL ISSUES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {

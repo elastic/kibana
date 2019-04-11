@@ -6,35 +6,35 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiSpacer,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
-export function SectionError({ title, error }) {
+export function SectionError(props) {
+  const { title, error, ...rest } = props;
+  const data = error.data ? error.data : error;
   const {
     error: errorString,
     cause, // wrapEsError() on the server add a "cause" array
     message,
-  } = error.data;
+  } = data;
 
   return (
-    <Fragment>
-      <EuiCallOut
-        title={title}
-        color="danger"
-        iconType="alert"
-      >
-        <div>{message || errorString}</div>
-        { cause && (
-          <Fragment>
-            <EuiSpacer size="m" />
-            <ul>
-              { cause.map((message, i) => <li key={i}>{message}</li>) }
-            </ul>
-          </Fragment>
-        )}
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </Fragment>
+    <EuiCallOut
+      title={title}
+      color="danger"
+      iconType="alert"
+      {...rest}
+    >
+      <div>{message || errorString}</div>
+      { cause && (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <ul>
+            { cause.map((message, i) => <li key={i}>{message}</li>) }
+          </ul>
+        </Fragment>
+      )}
+    </EuiCallOut>
   );
 }

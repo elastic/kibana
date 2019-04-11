@@ -4,30 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+// @ts-ignore EuiSearchBar missing
+import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from '../components/queries/empty_state';
-import { ErrorList } from '../components/queries/error_list';
-import { FilterBar } from '../components/queries/filter_bar';
-import { MonitorList } from '../components/queries/monitor_list';
-import { Snapshot } from '../components/queries/snapshot';
+import {
+  EmptyStateQuery,
+  ErrorListQuery,
+  FilterBarQuery,
+  MonitorListQuery,
+  SnapshotQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
+import { UptimeCommonProps } from '../uptime_app';
 
 interface OverviewPageProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
+  basePath: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
+type Props = OverviewPageProps & UptimeCommonProps;
+
 interface OverviewPageState {
+  currentFilterObj?: object;
   currentFilterQuery?: string;
 }
 
-export class OverviewPage extends React.Component<OverviewPageProps, OverviewPageState> {
-  constructor(props: OverviewPageProps) {
+export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
+
+export class OverviewPage extends React.Component<Props, OverviewPageState> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       currentFilterQuery: undefined,
@@ -36,46 +43,63 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
 
   public componentWillMount() {
     this.props.setBreadcrumbs(getOverviewPageBreadcrumbs());
+    this.props.setHeadingText(
+      i18n.translate('xpack.uptime.overviewPage.headerText', {
+        defaultMessage: 'Overview',
+        description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+      })
+    );
   }
 
   public render() {
-    const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
+    const commonVariables = {
+      dateRangeStart: this.props.dateRangeStart,
+      dateRangeEnd: this.props.dateRangeEnd,
+      filters: this.state.currentFilterQuery,
+    };
     return (
       <Fragment>
-        <EmptyState
-          autorefreshEnabled={autorefreshEnabled}
-          autorefreshInterval={autorefreshInterval}
+        <EmptyStateQuery
+          implementsCustomErrorState={true}
+          variables={commonVariables}
+          {...this.props}
         >
-          <FilterBar
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            updateQuery={(query: object | undefined) => {
-              this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
-            }}
+          <FilterBarQuery
+            {...this.props}
+            currentQuery={this.state.currentFilterObj}
+            updateQuery={this.onFilterQueryChange}
+            variables={commonVariables}
           />
-          <Snapshot
-            autorefreshEnabled={autorefreshEnabled}
-            autorefreshInterval={autorefreshInterval}
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
-          <EuiSpacer size="xl" />
-          <MonitorList
-            autorefreshEnabled={autorefreshEnabled}
-            autorefreshInterval={autorefreshInterval}
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
-          <EuiSpacer />
-          <ErrorList
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
-        </EmptyState>
+          <EuiSpacer size="s" />
+          <SnapshotQuery variables={commonVariables} {...this.props} />
+          <EuiSpacer size="s" />
+          <MonitorListQuery variables={commonVariables} {...this.props} />
+          <EuiSpacer size="s" />
+          <ErrorListQuery variables={commonVariables} {...this.props} />
+        </EmptyStateQuery>
       </Fragment>
     );
   }
+
+  private onFilterQueryChange: UptimeSearchBarQueryChangeHandler = ({
+    query,
+  }: {
+    query?: { text: string };
+  }) => {
+    try {
+      let esQuery;
+      if (query && query.text) {
+        esQuery = EuiSearchBar.Query.toESQuery(query);
+      }
+      this.setState(
+        {
+          currentFilterObj: query,
+          currentFilterQuery: esQuery ? JSON.stringify(esQuery) : esQuery,
+        },
+        () => this.props.refreshApp()
+      );
+    } catch (e) {
+      this.setState({ currentFilterQuery: undefined });
+    }
+  };
 }

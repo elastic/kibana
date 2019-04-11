@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -22,40 +22,59 @@ import {
 } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getColumns(viewForecast) {
   return [
     {
       field: 'forecast_create_timestamp',
-      name: 'Created',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.createdColumnName', {
+        defaultMessage: 'Created'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_start_timestamp',
-      name: 'From',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.fromColumnName', {
+        defaultMessage: 'From'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_end_timestamp',
-      name: 'To',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.toColumnName', {
+        defaultMessage: 'To'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
-      name: 'View',
-      render: (forecast) => (
-        <EuiButton
-          className="view-forecast-btn"
-          onClick={() => viewForecast(forecast.forecast_id)}
-        >
-          <i aria-hidden="true" className="fa fa-line-chart"/>
-        </EuiButton>
-      )
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
+        defaultMessage: 'View'
+      }),
+      width: '60px',
+      render: (forecast) => {
+        const viewForecastAriaLabel = i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel', {
+            defaultMessage: 'View forecast created at {createdDate}',
+            values: { createdDate: formatHumanReadableDateTimeSeconds(forecast.forecast_create_timestamp) }
+          }
+        );
+
+        return (
+          <EuiButtonIcon
+            onClick={() => viewForecast(forecast.forecast_id)}
+            iconType="stats"
+            aria-label={viewForecastAriaLabel}
+          />
+        );
+      }
     }
   ];
 }
@@ -69,11 +88,17 @@ export function ForecastsList({ forecasts, viewForecast }) {
         aria-describedby="ml_aria_description_forecasting_modal_view_list"
         style={{ display: 'inline', paddingRight: '5px' }}
       >
-        Previous forecasts
+        <FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
+          defaultMessage="Previous forecasts"
+        />
       </h3>
       <EuiToolTip
         position="right"
-        content="Lists a maximum of five of the most recently run forecasts."
+        content={<FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
+          defaultMessage="Lists a maximum of five of the most recently run forecasts."
+        />}
       >
         <EuiIcon
           type="questionInCircle"

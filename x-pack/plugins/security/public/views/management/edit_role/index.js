@@ -9,7 +9,7 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
@@ -29,7 +29,7 @@ import { EditRolePage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -134,7 +134,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       const domNode = document.getElementById('editRoleReactRoot');
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <EditRolePage
             runAsUsers={users}
             role={role}
@@ -149,7 +149,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spacesEnabled={enableSpaceAwarePrivileges}
             userProfile={userProfile}
           />
-        </I18nProvider>, domNode);
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

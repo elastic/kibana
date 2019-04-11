@@ -18,23 +18,20 @@
  */
 
 import Promise from 'bluebird';
-import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-const NoConnections = elasticsearch.errors.NoConnections;
-
-export default function (plugin, server) {
-  const config = server.config();
-  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
+export default function (plugin, server, requestDelay) {
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  const NoConnections = adminCluster.errors.NoConnections;
+  const callAdminAsKibanaUser = adminCluster.callWithInternalUser;
 
   plugin.status.yellow('Waiting for Elasticsearch');
   function waitForPong(callWithInternalUser) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
       plugin.status.red(`Unable to connect to Elasticsearch.`);
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser));
+      return Promise.delay(requestDelay).then(waitForPong.bind(null, callWithInternalUser));
     });
   }
 
@@ -47,7 +44,7 @@ export default function (plugin, server) {
   function waitForEsVersion() {
     return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
-      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
+      return Promise.delay(requestDelay).then(waitForEsVersion);
     });
   }
 
@@ -81,7 +78,7 @@ export default function (plugin, server) {
   }
 
   function startorRestartChecking() {
-    scheduleCheck(stopChecking() ? REQUEST_DELAY : 1);
+    scheduleCheck(stopChecking() ? requestDelay : 1);
   }
 
   function stopChecking() {

@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
+import { Location } from 'history';
 import React, { Component } from 'react';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
-import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
+import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { IUrlParams } from '../../../../store/urlParams';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -45,22 +47,88 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 }
 
 interface Props {
-  location: any;
-  distribution: ITransactionDistributionAPIResponse;
+  location: Location;
+  distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
-export class Distribution extends Component<Props> {
+export class TransactionDistribution extends Component<Props> {
   public formatYShort = (t: number) => {
-    return `${t} ${unitShort(this.props.urlParams.transactionType)}`;
+    return i18n.translate(
+      'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
+      {
+        defaultMessage:
+          '{transCount} {transType, select, request {req.} other {trans.}}',
+        values: {
+          transCount: t,
+          transType: this.props.urlParams.transactionType
+        }
+      }
+    );
   };
 
   public formatYLong = (t: number) => {
-    return `${t} ${unitLong(this.props.urlParams.transactionType, t)}`;
+    return this.props.urlParams.transactionType === 'request'
+      ? i18n.translate(
+          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
+          {
+            defaultMessage:
+              '{transCount, plural, =0 {# request} one {# request} other {# requests}}',
+            values: {
+              transCount: t
+            }
+          }
+        )
+      : i18n.translate(
+          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
+          {
+            defaultMessage:
+              '{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}',
+            values: {
+              transCount: t
+            }
+          }
+        );
   };
+
+  public redirectToTransactionType() {
+    const { urlParams, location, distribution } = this.props;
+
+    if (
+      !distribution ||
+      !distribution.defaultSample ||
+      urlParams.traceId ||
+      urlParams.transactionId
+    ) {
+      return;
+    }
+
+    const { traceId, transactionId } = distribution.defaultSample;
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        traceId,
+        transactionId
+      })
+    });
+  }
+
+  public componentDidMount() {
+    this.redirectToTransactionType();
+  }
+
+  public componentDidUpdate() {
+    this.redirectToTransactionType();
+  }
 
   public render() {
     const { location, distribution, urlParams } = this.props;
+
+    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
+      return null;
+    }
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -73,7 +141,16 @@ export class Distribution extends Component<Props> {
     const unit = timeUnit(xMax);
 
     if (isEmpty) {
-      return <EmptyMessage heading="No transactions were found." />;
+      return (
+        <EmptyMessage
+          heading={i18n.translate(
+            'xpack.apm.transactionDetails.notFoundLabel',
+            {
+              defaultMessage: 'No transactions were found.'
+            }
+          )}
+        />
+      );
     }
 
     const bucketIndex = buckets.findIndex(
@@ -85,25 +162,30 @@ export class Distribution extends Component<Props> {
 
     return (
       <div>
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h5>
-            Transactions duration distribution{' '}
-            <EuiToolTip
-              content={
-                <div>
-                  <EuiText>
-                    <strong>Sampling</strong>
-                  </EuiText>
-                  <EuiText>
-                    Each bucket will show a sample transaction. If there&apos;s
-                    no sample available, it&apos;s most likely because of the
-                    sampling limit set in the agent configuration.
-                  </EuiText>
-                </div>
+            {i18n.translate(
+              'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
+              {
+                defaultMessage: 'Transactions duration distribution'
               }
-            >
-              <EuiIcon type="questionInCircle" />
-            </EuiToolTip>
+            )}{' '}
+            <EuiIconTip
+              title={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
+                {
+                  defaultMessage: 'Sampling'
+                }
+              )}
+              content={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
+                {
+                  defaultMessage:
+                    "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
+                }
+              )}
+              position="top"
+            />
           </h5>
         </EuiTitle>
 
@@ -113,7 +195,7 @@ export class Distribution extends Component<Props> {
           bucketIndex={bucketIndex}
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
-              history.replace({
+              history.push({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),
@@ -139,20 +221,16 @@ export class Distribution extends Component<Props> {
             )} ${unit}`
           }
           tooltipFooter={(bucket: IChartPoint) =>
-            !bucket.sample && 'No sample available for this bucket'
+            !bucket.sample &&
+            i18n.translate(
+              'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
+              {
+                defaultMessage: 'No sample available for this bucket'
+              }
+            )
           }
         />
       </div>
     );
   }
-}
-
-function unitShort(type: string | undefined) {
-  return type === 'request' ? 'req.' : 'trans.';
-}
-
-function unitLong(type: string | undefined, count: number) {
-  const suffix = count > 1 ? 's' : '';
-
-  return type === 'request' ? `request${suffix}` : `transaction${suffix}`;
 }

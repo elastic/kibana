@@ -7,25 +7,22 @@
 
 import 'ngreact';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import { wrapInI18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectSeverity, mlSelectSeverityService } from './select_severity';
+import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
+import { SelectSeverity, severity$ } from './select_severity';
 
-module.service('mlSelectSeverityService', function (Private) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlSelectSeverityService.state = stateFactory('mlSelectSeverity', {
-    threshold: { display: 'warning', val: 0 }
-  });
-  mlSelectSeverityService.intialized = true;
+module.service('mlSelectSeverityService', function (AppState, $rootScope) {
+  subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync());
 })
   .directive('mlSelectSeverity', function ($injector) {
     const reactDirective = $injector.get('reactDirective');
 
     return reactDirective(
-      SelectSeverity,
+      wrapInI18nContext(SelectSeverity),
       undefined,
       { restrict: 'E' },
     );

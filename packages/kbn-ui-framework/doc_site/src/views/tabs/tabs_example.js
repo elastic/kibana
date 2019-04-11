@@ -53,13 +53,6 @@ export default props => (
       <GuideDemo>
         <Tabs />
       </GuideDemo>
-
-      <GuideText>
-        Dark themed tabs
-      </GuideText>
-      <GuideDemo isDarkTheme={true}>
-        <Tabs />
-      </GuideDemo>
     </GuideSection>
 
   </GuidePage>

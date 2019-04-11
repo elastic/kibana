@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorStatusBar } from './monitor_status_bar';
+export { MonitorStatusBarQuery } from './monitor_status_bar_query';

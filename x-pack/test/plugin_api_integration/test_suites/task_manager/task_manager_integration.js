@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
@@ -37,7 +37,6 @@ export default function ({ getService }) {
     function historyDocs() {
       return es.search({
         index: testHistoryIndex,
-        type: '_doc',
         q: 'type:task',
       }).then(result => result.hits.hits);
     }

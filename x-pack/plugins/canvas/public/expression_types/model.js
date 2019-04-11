@@ -15,9 +15,11 @@ function getModelArgs(expressionType) {
   if (!expressionType) {
     return NO_NEXT_EXP;
   }
+
   if (!expressionType.modelArgs) {
     return MISSING_MODEL_ARGS;
   }
+
   return expressionType.modelArgs.length > 0 ? expressionType.modelArgs : MISSING_MODEL_ARGS;
 }
 
@@ -39,18 +41,9 @@ export class Model extends FunctionForm {
     const { nextExpressionType } = props;
     const modelArgs = getModelArgs(nextExpressionType);
 
-    // if modelArgs are missing, something went wrong here
-    if (modelArgs === MISSING_MODEL_ARGS) {
-      // if there is a next expression, it is lacking modelArgs, so we throw
-      throw new Error(`${nextExpressionType.displayName} modelArgs Error:
-        The modelArgs value is empty. Either it should contain an arg,
-        or a model should not be used in the expression.
-      `);
-    }
-
-    // if there is no following expression, argument is skipped
-    if (modelArgs === NO_NEXT_EXP) {
-      return { skipRender: true };
+    // if there is no following expression, or no modelArgs, argument is shown by default
+    if (modelArgs === NO_NEXT_EXP || modelArgs === MISSING_MODEL_ARGS) {
+      return { skipRender: false };
     }
 
     // if argument is missing from modelArgs, mark it as skipped

@@ -9,34 +9,28 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-
-import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
-import { px, unit } from '../../../../../../../style/variables';
-
+import { idx } from '../../../../../../../../common/idx';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
+import { Stacktrace } from '../../../../../../shared/Stacktrace';
+import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
-
-import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
-import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { Span } from '../../../../../../../../typings/es_schemas/Span';
-import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-
-const StackTraceContainer = styled.div`
-  margin-top: ${px(unit)};
-`;
 
 const TagName = styled.div`
   font-weight: bold;
@@ -58,33 +52,46 @@ export function SpanFlyout({
   if (!span) {
     return null;
   }
+
   const stackframes = span.span.stacktrace;
-  const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
-  const dbContext = span.context.db;
-  const httpContext = span.context.http;
-  const tagContext = span.context.tags;
-  const tags = keys(tagContext).map(key => ({
+  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
+  const dbContext = idx(span, _ => _.span.db);
+  const httpContext = idx(span, _ => _.span.http);
+  const spanLabels = span.labels;
+  const labels = keys(spanLabels).map(key => ({
     key,
-    value: get(tagContext, key)
+    value: get(spanLabels, key)
   }));
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>Span details</h2>
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+                    {
+                      defaultMessage: 'Span details'
+                    }
+                  )}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverSpanButton span={span}>
+              <DiscoverSpanLink span={span}>
                 <EuiButtonEmpty iconType="discoverApp">
-                  {`View span in Discover`}
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                    {
+                      defaultMessage: 'View span in Discover'
+                    }
+                  )}
                 </EuiButtonEmpty>
-              </DiscoverSpanButton>
+              </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -93,27 +100,36 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
+          <HttpContext httpContext={httpContext} />
+          <DatabaseContext dbContext={dbContext} />
           <EuiTabbedContent
             tabs={[
               {
                 id: 'stack-trace',
-                name: 'Stack Trace',
+                name: i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+                  {
+                    defaultMessage: 'Stack Trace'
+                  }
+                ),
                 content: (
                   <Fragment>
-                    <HttpContext httpContext={httpContext} />
-                    <DatabaseContext dbContext={dbContext} />
-                    <StackTraceContainer>
-                      <Stacktrace
-                        stackframes={stackframes}
-                        codeLanguage={codeLanguage}
-                      />
-                    </StackTraceContainer>
+                    <EuiSpacer size="l" />
+                    <Stacktrace
+                      stackframes={stackframes}
+                      codeLanguage={codeLanguage}
+                    />
                   </Fragment>
                 )
               },
               {
-                id: 'tags',
-                name: 'Tags',
+                id: 'labels',
+                name: i18n.translate(
+                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  {
+                    defaultMessage: 'Labels'
+                  }
+                ),
                 content: (
                   <Fragment>
                     <EuiBasicTable
@@ -128,7 +144,7 @@ export function SpanFlyout({
                           field: 'value'
                         }
                       ]}
-                      items={tags}
+                      items={labels}
                     />
                   </Fragment>
                 )
@@ -136,7 +152,7 @@ export function SpanFlyout({
             ]}
           />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }

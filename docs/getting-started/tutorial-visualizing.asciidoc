@@ -75,14 +75,14 @@ image::images/tutorial-visualize-pie-3.png[]
 
 To save this chart so you can use it later:
 
-* Click *Save* in the top menu bar and enter `Pie Example`.
+Click *Save* in the top menu bar and enter `Pie Example`.
 
 === Bar chart
 
 You'll use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-* Create a *Vertical Bar* chart and set the search source to `shakes*`.
+Create a *Vertical Bar* chart and set the search source to `shakes*`.
 
 Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
@@ -113,9 +113,6 @@ Show the plays along the X-axis.
 . To list plays alphabetically, in the *Order* dropdown menu, select *Ascending*.
 . Give the axis a custom label, `Play Name`.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
-
-[role="screenshot"]
-image::images/0[]
 
 Hovering over a bar shows a tooltip with the number of speaking parts for
 that play.
@@ -174,7 +171,7 @@ The final visualization is a Markdown widget that renders formatted text.
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
 
-. Click  *Apply changes* image:images/apply-changes-button.png[].
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
 The Markdown renders in the preview pane:
 

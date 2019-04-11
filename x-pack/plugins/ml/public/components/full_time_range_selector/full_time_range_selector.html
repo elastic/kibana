@@ -3,7 +3,10 @@
   type="button"
   ng-disabled="disabled"
   class="euiButton euiButton--primary euiButton--small euiButton--fill">
-  <span class="euiButton__content">
-    Use full {{indexPattern.title}} data
-  </span>
+    <span
+      class="euiButton__content"
+      i18n-id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+      i18n-default-message="Use full {indexPatternTitle} data"
+      i18n-values="{ indexPatternTitle: indexPattern.title }"
+    ></span>
 </button>

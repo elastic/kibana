@@ -1,20 +1,3 @@
-<!-- Local nav. -->
-<kbn-top-nav name="visualize" ng-if="listingController.showPluginBreadcrumbs">
-  <!-- Transcluded elements. -->
-  <div data-transclude-slots>
-    <!-- Title. -->
-    <div data-transclude-slot="topLeftCorner">
-      <div
-        class="kuiLocalTitle"
-        role="heading"
-        aria-level="1"
-        i18n-id="kbn.visualize.listing.topLeftCornerTitle"
-        i18n-default-message="Visualize"
-      ></div>
-    </div>
-  </div>
-</kbn-top-nav>
-
 <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem"
      data-test-subj="visualizeLandingPage"
 >
@@ -48,9 +31,11 @@
   </div>
 
   <visualize-listing-table
-    fetch-items="listingController.fetchItems"
-    delete-selected-items="listingController.deleteSelectedItems"
-    on-create-vis="listingController.createNewVis"
+    find-items="listingController.fetchItems"
+    delete-items="listingController.deleteSelectedItems"
+    create-item="listingController.createNewVis"
+    get-view-url="listingController.getViewUrl"
+    edit-item="listingController.editItem"
   ></visualize-listing-table>
 
   <new-vis-modal

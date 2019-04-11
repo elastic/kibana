@@ -5,23 +5,17 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
-import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-import { ExternalLink } from '../../../utils/url';
-import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
-import { PROPERTY_CONFIG } from './propertyConfig';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/Agent';
+import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
+import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';
+import { NestedKeyValueTable } from './NestedKeyValueTable';
+import { PropertyTabKey } from './tabConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -31,32 +25,21 @@ const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   line-height: 1.5;
 `;
 
 const TableInfoHeader = styled(TableInfo)`
   font-size: ${fontSizes.large};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
 `;
 
 const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export interface Tab {
-  key: string;
-  label: string;
-}
-
-export function getPropertyTabNames(selected: string[]): Tab[] {
-  return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || selected.includes(key)
-  ).map(({ key, label }) => ({ key, label }));
-}
-
-function getAgentFeatureText(featureName: string) {
-  switch (featureName) {
+function getTabHelpText(tabKey: PropertyTabKey) {
+  switch (tabKey) {
     case 'user':
       return i18n.translate(
         'xpack.apm.propertiesTable.userTab.agentFeatureText',
@@ -65,15 +48,16 @@ function getAgentFeatureText(featureName: string) {
             'You can configure your agent to add contextual information about your users.'
         }
       );
-    case 'tags':
+    case 'labels':
       return i18n.translate(
-        'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
+        'xpack.apm.propertiesTable.labelsTab.agentFeatureText',
         {
           defaultMessage:
             'You can configure your agent to add filterable tags on transactions.'
         }
       );
-    case 'custom':
+    case 'transaction.custom':
+    case 'error.custom':
       return i18n.translate(
         'xpack.apm.propertiesTable.customTab.agentFeatureText',
         {
@@ -84,14 +68,17 @@ function getAgentFeatureText(featureName: string) {
   }
 }
 
-export function AgentFeatureTipMessage({
-  featureName,
+export function TabHelpMessage({
+  tabKey,
   agentName
 }: {
-  featureName: string;
-  agentName?: string;
+  tabKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
-  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!tabKey) {
+    return null;
+  }
+  const docsUrl = getAgentDocUrlForTab(tabKey, agentName);
   if (!docsUrl) {
     return null;
   }
@@ -99,45 +86,30 @@ export function AgentFeatureTipMessage({
   return (
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
-      {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
+      {getTabHelpText(tabKey)}{' '}
+      <EuiLink target="_blank" rel="noopener" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
           { defaultMessage: 'Learn more in the documentation.' }
         )}
-      </ExternalLink>
+      </EuiLink>
     </TableInfo>
   );
 }
-
-export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
-  const presorted = get(
-    indexedPropertyConfig,
-    `${currentKey}.presortedKeys`,
-    []
-  );
-  return uniq([...presorted, ...Object.keys(object).sort()]);
-};
 
 export function PropertiesTable({
   propData,
   propKey,
   agentName
 }: {
-  propData?: StringMap<any>;
-  propKey: string;
-  agentName?: string;
+  propData?: StringMap;
+  propKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
   return (
     <TableContainer>
       {propData ? (
-        <NestedKeyValueTable
-          data={propData}
-          parentKey={propKey}
-          keySorter={sortKeysByConfig}
-          depth={1}
-        />
+        <NestedKeyValueTable data={propData} parentKey={propKey} depth={1} />
       ) : (
         <TableInfoHeader>
           {i18n.translate(
@@ -146,7 +118,8 @@ export function PropertiesTable({
           )}
         </TableInfoHeader>
       )}
-      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
+
+      <TabHelpMessage tabKey={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

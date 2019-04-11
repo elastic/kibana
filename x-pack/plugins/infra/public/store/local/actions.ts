@@ -5,10 +5,8 @@
  */
 
 export { logFilterActions } from './log_filter';
-export { logMinimapActions } from './log_minimap';
 export { logPositionActions } from './log_position';
-export { logTextviewActions } from './log_textview';
-export { metricTimeActions } from './metric_time';
 export { waffleFilterActions } from './waffle_filter';
 export { waffleTimeActions } from './waffle_time';
 export { waffleOptionsActions } from './waffle_options';
+export { flyoutOptionsActions } from './log_flyout';

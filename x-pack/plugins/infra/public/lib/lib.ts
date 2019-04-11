@@ -15,6 +15,7 @@ import {
   InfraNodeMetric,
   InfraNodePath,
   InfraPathInput,
+  InfraPathType,
   InfraTimerangeInput,
   SourceQuery,
 } from '../graphql/types';
@@ -32,9 +33,7 @@ export type InfraApolloClient = ApolloClient<NormalizedCacheObject>;
 export interface InfraFrameworkAdapter {
   // Insstance vars
   appState?: object;
-  dateFormat?: string;
   kbnVersion?: string;
-  scaledDateFormat?: string;
   timezone?: string;
 
   // Methods
@@ -43,9 +42,10 @@ export interface InfraFrameworkAdapter {
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
-export interface InfraFramworkAdapterConstructable {
-  new (uiModule: IModule, timezoneProvider: InfraTimezoneProvider): InfraFrameworkAdapter;
-}
+export type InfraFramworkAdapterConstructable = new (
+  uiModule: IModule,
+  timezoneProvider: InfraTimezoneProvider
+) => InfraFrameworkAdapter;
 
 // TODO: replace AxiosRequestConfig with something more defined
 export type InfraRequestConfig = AxiosRequestConfig;
@@ -163,7 +163,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: SourceQuery.Fields | null;
+  fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: InfraMetricInput;
@@ -173,7 +173,6 @@ export interface InfraWaffleMapOptions {
 }
 
 export interface InfraOptions {
-  sourceId: string;
   timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
 }
@@ -202,4 +201,10 @@ export enum InfraWaffleMapDataFormat {
   bitsBinaryIEC = 'bitsBinaryIEC',
   bitsBinaryJEDEC = 'bitsBinaryJEDEC',
   abbreviatedNumber = 'abbreviatedNumber',
+}
+
+export interface InfraGroupByOptions {
+  text: string;
+  type: InfraPathType;
+  field: string;
 }

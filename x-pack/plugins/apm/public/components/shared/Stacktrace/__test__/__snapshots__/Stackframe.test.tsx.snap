@@ -2,9 +2,10 @@
 
 exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
 .c2 {
-  color: #98A2B3;
+  color: #98a2b3;
   padding: 8px;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-size: 14px;
 }
 
 .c3 {
@@ -23,7 +24,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   height: 18px;
   top: 36px;
   pointer-events: none;
-  background-color: #FCF2E6;
+  background-color: #fef6e5;
 }
 
 .c6 {
@@ -31,7 +32,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   top: 0;
   left: 0;
   border-radius: 0 0 0 5px;
-  background: #F5F7FA;
+  background: #f5f7fa;
 }
 
 .c7 {
@@ -39,10 +40,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #98A2B3;
+  color: #98a2b3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #D3DAE6;
+  border-right: 1px solid #d3dae6;
 }
 
 .c7:last-of-type {
@@ -54,11 +55,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #98A2B3;
+  color: #98a2b3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #D3DAE6;
-  background-color: #FCF2E6;
+  border-right: 1px solid #d3dae6;
+  background-color: #fef6e5;
 }
 
 .c8:last-of-type {
@@ -96,17 +97,17 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c1 {
-  border-bottom: 1px solid #D3DAE6;
+  border-bottom: 1px solid #d3dae6;
   border-radius: 5px 5px 0 0;
 }
 
 .c0 {
-  margin: 0 0 24px 0;
   position: relative;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  border: 1px solid #D3DAE6;
+  font-size: 14px;
+  border: 1px solid #d3dae6;
   border-radius: 5px;
-  background: #F5F7FA;
+  background: #f5f7fa;
 }
 
 <Stackframe

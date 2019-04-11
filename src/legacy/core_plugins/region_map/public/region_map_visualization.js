@@ -18,17 +18,17 @@
  */
 
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
-import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { TileMapTooltipFormatter } from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
 export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
-  const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
+  const tooltipFormatter = Private(TileMapTooltipFormatter);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
@@ -39,8 +39,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       this._choroplethLayer = null;
     }
 
-    async render(esResponse, status) {
-      await super.render(esResponse, status);
+    async render(esResponse, visParams, status) {
+      await super.render(esResponse, visParams, status);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
@@ -48,36 +48,40 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
     async _updateData(table) {
       this._chartData = table;
+      const termColumn = this._params.bucket ? table.columns[this._params.bucket.accessor] : null;
+      const valueColumn = table.columns[this._params.metric.accessor];
       let results;
-      if (!table || !table.rows.length || table.columns.length !== 2) {
+      if (!this._hasColumns() || !table.rows.length) {
         results = [];
       } else {
-        const termColumn = table.columns[0].id;
-        const valueColumn = table.columns[1].id;
         results = table.rows.map(row => {
-          const term = row[termColumn];
-          const value = row[valueColumn];
+          const term = row[termColumn.id];
+          const value = row[valueColumn.id];
           return { term: term, value: value };
         });
       }
 
-      if (!this._vis.params.selectedJoinField && this._vis.params.selectedLayer) {
-        this._vis.params.selectedJoinField = this._vis.params.selectedLayer.fields[0];
+      if (!this._params.selectedJoinField && this._params.selectedLayer) {
+        this._params.selectedJoinField = this._params.selectedLayer.fields[0];
       }
 
-      if (!this._vis.params.selectedLayer) {
+      if (!this._params.selectedLayer) {
         return;
       }
 
       this._updateChoroplethLayerForNewMetrics(
-        this._vis.params.selectedLayer.name,
-        this._vis.params.selectedLayer.attribution,
-        this._vis.params.showAllShapes,
+        this._params.selectedLayer.name,
+        this._params.selectedLayer.attribution,
+        this._params.showAllShapes,
         results
       );
-      const metricsAgg = _.first(this._vis.getAggConfig().bySchemaName.metric);
-      this._choroplethLayer.setMetrics(results, metricsAgg);
-      this._setTooltipFormatter();
+
+      const metricFieldFormatter = getFormat(this._params.metric.format);
+
+      this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
+      if (termColumn && valueColumn) {
+        this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, termColumn.name, valueColumn.name);
+      }
 
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
@@ -85,8 +89,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
     async  _updateParams() {
 
       await super._updateParams();
+      const visParams = this._params;
 
-      const visParams = this.vis.params;
       if (!visParams.selectedJoinField && visParams.selectedLayer) {
         visParams.selectedJoinField = visParams.selectedLayer.fields[0];
       }
@@ -98,12 +102,15 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       this._updateChoroplethLayerForNewProperties(
         visParams.selectedLayer.name,
         visParams.selectedLayer.attribution,
-        this._vis.params.showAllShapes
+        this._params.showAllShapes
       );
+
+      const metricFieldFormatter = getFormat(this._params.metric.format);
+
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
-      this._setTooltipFormatter();
+      this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, this._metricLabel);
 
     }
 
@@ -130,37 +137,29 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
           name,
           attribution,
-          this.vis.params.selectedLayer.format,
+          this._params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta,
-          this.vis.params.selectedLayer
+          this._params.selectedLayer.meta,
+          this._params.selectedLayer
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
           name,
           attribution,
-          this.vis.params.selectedLayer.format,
+          this._params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta,
-          this.vis.params.selectedLayer
+          this._params.selectedLayer.meta,
+          this._params.selectedLayer
         );
       }
 
       this._choroplethLayer.on('select', (event) => {
-
-
-        if (!this._isAggReady()) {
-          //even though we have maps data available and have added the choropleth layer to the map
-          //the aggregation may not be available yet
-          return;
-        }
-
         const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
         this._vis.API.events.filter({ table: this._chartData, column: 0, row: rowIndex, value: event });
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {
-        const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+        const shouldShowWarning = this._params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
             title: i18n('regionMap.visualization.unableToShowMismatchesWarningTitle', {
@@ -185,19 +184,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
     }
 
-    _isAggReady() {
-      return this._vis.getAggConfig().bySchemaName.segment && this._vis.getAggConfig().bySchemaName.segment[0];
-    }
-
-
-    _setTooltipFormatter() {
-      const metricsAgg = _.first(this._vis.getAggConfig().bySchemaName.metric);
-      if (this._isAggReady()) {
-        const fieldName = this._vis.getAggConfig().bySchemaName.segment[0].makeLabel();
-        this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
-      } else {
-        this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
-      }
+    _hasColumns() {
+      return this._chartData && this._chartData.columns.length === 2;
     }
 
   };

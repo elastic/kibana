@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { EnrichedDeprecationInfo } from 'x-pack/plugins/upgrade_assistant/server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 import { DeprecationList } from './list';
 
@@ -71,14 +71,14 @@ describe('DeprecationList', () => {
   indices={
     Array [
       Object {
-        "actions": undefined,
         "details": undefined,
         "index": "0",
+        "reindex": false,
       },
       Object {
-        "actions": undefined,
         "details": undefined,
         "index": "1",
+        "reindex": false,
       },
     ]
   }

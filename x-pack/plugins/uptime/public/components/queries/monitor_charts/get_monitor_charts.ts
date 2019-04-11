@@ -6,59 +6,34 @@
 
 import gql from 'graphql-tag';
 
-export const createGetMonitorChartsQuery = gql`
-  query MonitorCharts(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $monitorId: String
+export const getMonitorChartsQueryString = `
+query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String!) {
+  monitorChartsData: getMonitorChartsData(
+    monitorId: $monitorId
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
   ) {
-    monitorChartsData: getMonitorChartsData(
-      monitorId: $monitorId
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-    ) {
-      minDuration {
-        x
-        y
-      }
-      maxDuration {
-        x
-        y
-      }
-      maxContent {
-        x
-        y
-      }
-      maxResponse {
-        x
-        y
-      }
-      maxValidate {
-        x
-        y
-      }
-      maxTotal {
-        x
-        y
-      }
-      maxWriteRequest {
-        x
-        y
-      }
-      maxTcpRtt {
-        x
-        y
-      }
-      avgDuration {
-        x
-        y
-      }
-      status {
-        x
-        up
-        down
-        total
-      }
+    durationArea {
+      x
+      yMin
+      yMax
     }
+    durationLine {
+      x
+      y
+    }
+    status {
+      x
+      up
+      down
+      total
+    }
+    statusMaxCount
+    durationMaxValue
   }
+}
+`;
+
+export const getMonitorChartsQuery = gql`
+  ${getMonitorChartsQueryString}
 `;

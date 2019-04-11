@@ -85,7 +85,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.modalTitle"
-              defaultMessage={`Remove lifecycle policy from "{target}"`}
+              defaultMessage="Remove lifecycle policy from &quot;{target}&quot;"
               values={{
                 target
               }}
@@ -108,8 +108,8 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removeMessage"
-            defaultMessage={`You are about to remove the index lifecycle policy from "{target}".
-              This operation cannot be undone.`}
+            defaultMessage="You are about to remove the index lifecycle policy from &quot;{target}&quot;.
+              This operation cannot be undone."
             values={{
               target
             }}

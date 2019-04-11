@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { AZURE } from '../azure';
 
 describe('Azure', () => {
@@ -83,40 +83,40 @@ describe('Azure', () => {
     // it's expected that most users use the resource manager UI (which has been out for years)
     it('parses object in expected format', () => {
       const body = {
-        "compute": {
-          "location": "eastus",
-          "name": "pickypg-ubuntu-rm",
-          "offer": "UbuntuServer",
-          "osType": "Linux",
-          "platformFaultDomain": "0",
-          "platformUpdateDomain": "0",
-          "publisher": "Canonical",
-          "sku": "16.04-LTS",
-          "version": "16.04.201706191",
-          "vmId": "d4c57456-2b3b-437a-9f1f-7082cf123456",
-          "vmSize": "Standard_A1"
+        'compute': {
+          'location': 'eastus',
+          'name': 'pickypg-ubuntu-rm',
+          'offer': 'UbuntuServer',
+          'osType': 'Linux',
+          'platformFaultDomain': '0',
+          'platformUpdateDomain': '0',
+          'publisher': 'Canonical',
+          'sku': '16.04-LTS',
+          'version': '16.04.201706191',
+          'vmId': 'd4c57456-2b3b-437a-9f1f-7082cf123456',
+          'vmSize': 'Standard_A1'
         },
-        "network": {
-          "interface": [
+        'network': {
+          'interface': [
             {
-              "ipv4": {
-                "ipAddress": [
+              'ipv4': {
+                'ipAddress': [
                   {
-                    "privateIpAddress": "10.1.0.4",
-                    "publicIpAddress": "52.170.25.71"
+                    'privateIpAddress': '10.1.0.4',
+                    'publicIpAddress': '52.170.25.71'
                   }
                 ],
-                "subnet": [
+                'subnet': [
                   {
-                    "address": "10.1.0.0",
-                    "prefix": "24"
+                    'address': '10.1.0.0',
+                    'prefix': '24'
                   }
                 ]
               },
-              "ipv6": {
-                "ipAddress": [ ]
+              'ipv6': {
+                'ipAddress': [ ]
               },
-              "macAddress": "000D3A143CE3"
+              'macAddress': '000D3A143CE3'
             }
           ]
         }
@@ -128,19 +128,19 @@ describe('Azure', () => {
       expect(response.isConfirmed()).to.eql(true);
       expect(response.toJSON()).to.eql({
         name: 'azure',
-        id: "d4c57456-2b3b-437a-9f1f-7082cf123456",
-        vm_type: "Standard_A1",
-        region: "eastus",
+        id: 'd4c57456-2b3b-437a-9f1f-7082cf123456',
+        vm_type: 'Standard_A1',
+        region: 'eastus',
         zone: undefined,
         metadata: {
-          name: "pickypg-ubuntu-rm",
-          offer: "UbuntuServer",
-          osType: "Linux",
-          platformFaultDomain: "0",
-          platformUpdateDomain: "0",
-          publisher: "Canonical",
-          sku: "16.04-LTS",
-          version: "16.04.201706191"
+          name: 'pickypg-ubuntu-rm',
+          offer: 'UbuntuServer',
+          osType: 'Linux',
+          platformFaultDomain: '0',
+          platformUpdateDomain: '0',
+          publisher: 'Canonical',
+          sku: '16.04-LTS',
+          version: '16.04.201706191'
         }
       });
     });
@@ -148,27 +148,27 @@ describe('Azure', () => {
     // classic represents the "old" way of launching things in Azure
     it('parses object in expected classic format', () => {
       const body = {
-        "network": {
-          "interface": [
+        'network': {
+          'interface': [
             {
-              "ipv4": {
-                "ipAddress": [
+              'ipv4': {
+                'ipAddress': [
                   {
-                    "privateIpAddress": "10.1.0.4",
-                    "publicIpAddress": "52.170.25.71"
+                    'privateIpAddress': '10.1.0.4',
+                    'publicIpAddress': '52.170.25.71'
                   }
                 ],
-                "subnet": [
+                'subnet': [
                   {
-                    "address": "10.1.0.0",
-                    "prefix": "24"
+                    'address': '10.1.0.0',
+                    'prefix': '24'
                   }
                 ]
               },
-              "ipv6": {
-                "ipAddress": [ ]
+              'ipv6': {
+                'ipAddress': [ ]
               },
-              "macAddress": "000D3A143CE3"
+              'macAddress': '000D3A143CE3'
             }
           ]
         }

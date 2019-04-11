@@ -101,7 +101,7 @@ class JobsListUI extends Component {
   render() {
     const { intl, loading } = this.props;
     const selectionControls = {
-      selectable: () => true,
+      selectable: job => (job.deleting !== true),
       selectableMessage: (selectable) => (!selectable) ? intl.formatMessage({
         id: 'xpack.ml.jobsList.cannotSelectJobTooltip',
         defaultMessage: 'Cannot select job' })
@@ -115,6 +115,7 @@ class JobsListUI extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
+            isDisabled={(item.deleting === true)}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={this.state.itemIdToExpandedRowMap[item.id]
               ? intl.formatMessage({
@@ -204,7 +205,8 @@ class JobsListUI extends Component {
               (item.latestTimestampMs === undefined) ? '' : moment(item.latestTimestampMs).format(TIME_FORMAT)
             }
           </span>
-        )
+        ),
+        textOnly: true,
       }, {
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.actionsLabel',
@@ -255,7 +257,16 @@ class JobsListUI extends Component {
     return (
       <EuiBasicTable
         loading={loading === true}
-        noItemsMessage={loading ? 'Loading jobs...' : 'No jobs found'}
+        noItemsMessage={loading ?
+          intl.formatMessage({
+            id: 'xpack.ml.jobsList.loadingJobsLabel',
+            defaultMessage: 'Loading jobs…'
+          }) :
+          intl.formatMessage({
+            id: 'xpack.ml.jobsList.noJobsFoundLabel',
+            defaultMessage: 'No jobs found'
+          })
+        }
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}

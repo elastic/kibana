@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperAgent } from 'superagent';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -29,14 +29,6 @@ const nonExistantSpaceId = 'not-a-space';
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
-  };
-
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
   };
 
   const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
@@ -104,7 +96,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     createExpectRbacForbidden,
     createExpectEmptyResult,
     createExpectNotFoundResult,
-    createExpectLegacyForbidden,
     getTest,
     nonExistantSpaceId,
   };

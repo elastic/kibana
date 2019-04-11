@@ -18,7 +18,6 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c'
       });
     });

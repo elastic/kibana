@@ -13,12 +13,8 @@ export const CanvasLoading = ({ msg }) => (
     <EuiPanel>
       <EuiLoadingChart size="m" />
       <EuiSpacer size="s" />
-      <EuiText>
-        {/*
-            For some reason a styled color is required,
-            likely something with the chrome css from Kibana
-          */}
-        <p style={{ color: '#000' }}>{msg}</p>
+      <EuiText color="default" size="s">
+        <p>{msg}</p>
       </EuiText>
     </EuiPanel>
   </div>

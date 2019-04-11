@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('line charts', function () {
     const vizName1 = 'Visualization LineChart';
@@ -36,8 +37,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = Split Chart');
       await PageObjects.visualize.clickBucket('Split Chart');
       log.debug('Aggregation = Terms');
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
     before(initLineChart);
 
     afterEach(async () => {
-      await PageObjects.visualize.closeInspector();
+      await inspector.close();
     });
 
     it('should show correct chart', async function () {
@@ -77,8 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart order by Term', async function () {
@@ -107,17 +106,12 @@ export default function ({ getService, getPageObjects }) {
 
       const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
