@@ -21,7 +21,7 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
   const updateDatasource = async () => {
     const headerRow = text.split('\n')[0].split(',');
     const firstRow = text.split('\n')[1].split(',');
-    const resultColumns: Array<{ name: string; type: string }> = headerRow.map(
+    const resultColumns: Array<{ name: string; type: 'number' | 'string' }> = headerRow.map(
       (columnHeader: string, index: number) => ({
         name: columnHeader,
         type: /\d+/.test(firstRow[index]) ? 'number' : 'string',
@@ -66,7 +66,13 @@ function toExpression(viewState: VisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
   return `literal_table keep='${
-    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
+    viewState.datasource
+      ? JSON.stringify(
+          firstQuery.select.map(column => ('argument' in column ? column.argument.field : ''))
+        )
+      : '[]'
+  }' columnNames='${
+    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.id)) : '[]'
   }' lines='${
     viewState.datasource ? JSON.stringify(viewState.datasource.meta.text.split('\n')) : '[]'
   }'`;

@@ -17,14 +17,14 @@ import {
   getColumnIdByIndex,
   getOperatorsForField,
   operationToName,
-  selectColumn,
   Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
-import { columnSummary } from '../../common/components/config_panel';
+import { AngleAxisEditor } from './angleaxis_editor';
+import { SliceAxisEditor } from './sliceaxis_editor';
 
 const PLUGIN_NAME = 'pie_chart';
 
@@ -48,13 +48,23 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Slice pie by</span>
         {sliceAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, visModel))}</span>
+          <SliceAxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Size slices by</span>
         {angleAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, visModel))}</span>
+          <AngleAxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
     </>
@@ -111,8 +121,9 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 
   // TODO we maybe need a more stable way to get these
-  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
-  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
+  // TODO check whether we have a split series candidate
 
   if (xAxisRef && yAxisRef) {
     return updatePieState(visModel, {
@@ -144,6 +155,9 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: PieChartVisModel
 ): Suggestion[] {
+  if (!field.aggregatable) {
+    return [];
+  }
   const operationNames = getOperatorsForField(field);
 
   if (operationNames.length === 0) {
@@ -151,7 +165,7 @@ function getSuggestionsForField(
   }
 
   return operationNames.map(operationName => {
-    const firstOperation = fieldToOperation(field, operationName);
+    const firstOperation = fieldToOperation('slice', field, operationName);
     const formattedNameSlice = operationToName(operationName);
     const formattedNameSize = operationToName('count');
 
@@ -162,14 +176,14 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef,
-          select: [{ ...firstOperation, alias: field.name }, { operator: 'count', alias: 'count' }],
+          select: [{ operator: 'count', id: 'count' }, { ...firstOperation, id: field.name }],
         },
       },
       private: {
         ...visModel.private,
         pieChart: {
-          sliceAxis: { title: 'Slice By', columns: ['q1_0'] },
-          angleAxis: { title: 'Size By', columns: ['q1_1'] },
+          sliceAxis: { title: 'Slice By', columns: [`q1_${field.name}`] },
+          angleAxis: { title: 'Size By', columns: ['q1_count'] },
         },
       },
     };

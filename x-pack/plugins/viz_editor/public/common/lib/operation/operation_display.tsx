@@ -38,6 +38,10 @@ const prettyNames: OperationPrettyNames = {
     defaultMessage: 'Date histogram',
     description: '',
   }),
+  window: i18n.translate('xpack.viz_editor.operations.window', {
+    defaultMessage: 'Window',
+    description: '',
+  }),
 };
 
 export function operationToName(operation: SelectOperator): string {

@@ -11,14 +11,14 @@ import {
   EditorPlugin,
   getColumnIdByIndex,
   getTypes,
-  selectColumn,
+  selectOperation,
   Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
-import { columnSummary } from '../../common/components/config_panel';
+import { AxisEditor } from './axis_editor';
 
 interface ScatterChartPrivateState {
   xAxis: Axis;
@@ -32,7 +32,10 @@ const updateScatterState = updatePrivateState<'scatterChart', ScatterChartPrivat
   'scatterChart'
 );
 
-function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>) {
+function configPanel({
+  visModel,
+  onChangeVisModel,
+}: VisualizationPanelProps<ScatterChartVisModel>) {
   if (!visModel.private.scatterChart) {
     return <>No chart configured</>;
   }
@@ -48,13 +51,23 @@ function configPanel({ visModel }: VisualizationPanelProps<ScatterChartVisModel>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
+          <AxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <span key={col}>{columnSummary(selectColumn(col as string, visModel))}</span>
+          <AxisEditor
+            key={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
         ))}
       </div>
     </>
@@ -76,8 +89,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
     },
   } = visModel;
 
-  const xColumn = selectColumn(xAxis.columns[0], visModel);
-  const yColumn = selectColumn(yAxis.columns[0], visModel);
+  const xColumn = selectOperation(xAxis.columns[0], visModel);
+  const yColumn = selectOperation(yAxis.columns[0], visModel);
 
   const xScaleType = hasDate ? 'time' : 'linear';
 
@@ -96,7 +109,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${xColumn && xColumn.alias}"},
+        "domain": {"data": "table", "field": "${xColumn && xColumn.id}"},
         "range": "width"
       },
       {
@@ -105,7 +118,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "round": true,
         "nice": true,
         "zero": true,
-        "domain": {"data": "table", "field": "${yColumn && yColumn.alias}"},
+        "domain": {"data": "table", "field": "${yColumn && yColumn.id}"},
         "range": "height"
       }
     ],
@@ -140,8 +153,8 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "from": {"data": "table"},
         "encode": {
           "update": {
-            "x": {"scale": "x", "field": "${xColumn && xColumn.alias}"},
-            "y": {"scale": "y", "field": "${yColumn && yColumn.alias}"},
+            "x": {"scale": "x", "field": "${xColumn && xColumn.id}"},
+            "y": {"scale": "y", "field": "${yColumn && yColumn.id}"},
             "shape": {"value": "circle"},
             "strokeWidth": {"value": 2},
             "opacity": {"value": 0.5},
@@ -167,8 +180,8 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 
   // TODO we maybe need a more stable way to get these
-  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
-  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
 
   if (xAxisRef && yAxisRef) {
     return updateScatterState(visModel, {
@@ -226,18 +239,22 @@ function getSuggestionsForField(
   const { datasource } = visModel;
 
   const select: ColumnOperation[] = [
-    fieldToOperation(field, 'column') as ColumnOperation,
-    fieldToOperation(field, 'column') as ColumnOperation,
+    { ...(fieldToOperation('y', field, 'column') as ColumnOperation), id: '0' },
+    { ...(fieldToOperation('x', field, 'column') as ColumnOperation), id: '1' },
   ];
 
   let hasDate = false;
 
   if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
     hasDate = true;
-    select[0] = fieldToOperation(
-      datasource.fields.find(f => f.name === datasource.timeFieldName)!,
-      'column'
-    ) as ColumnOperation;
+    select[1] = {
+      ...(fieldToOperation(
+        'x',
+        datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+        'column'
+      ) as ColumnOperation),
+      id: '1',
+    };
   }
 
   const prefilledVisModel: ScatterChartVisModel = {
@@ -252,8 +269,8 @@ function getSuggestionsForField(
     private: {
       ...visModel.private,
       scatterChart: {
-        xAxis: { title: 'X Axis', columns: ['q1_0'] },
-        yAxis: { title: 'Y Axis', columns: ['q1_1'] },
+        xAxis: { title: 'X Axis', columns: [`q1_1`] },
+        yAxis: { title: 'Y Axis', columns: [`q1_0`] },
         hasDate,
       },
     },

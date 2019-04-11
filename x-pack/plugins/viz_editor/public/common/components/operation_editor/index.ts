@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './config_panel';
+export * from './operation_definitions';
+export * from './operation_editor';

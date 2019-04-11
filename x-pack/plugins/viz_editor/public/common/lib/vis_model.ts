@@ -46,17 +46,16 @@ export type UnknownVisModel = VisModel<string, unknown>;
 
 // TODO: the way the "id" works is too hacky. Need to modify this, probably should
 // use a dispatch mechanism, too, to avoid deep knowledge of VisModel everywhere...
-export function selectColumn(id: string, model: VisModel) {
-  const [queryId, columnIndex] = id.split('_');
+export function selectOperation(id: string, model: VisModel) {
+  const [queryId, operationId] = id.split('_');
   const query = model.queries[queryId];
 
-  return query ? query.select[parseInt(columnIndex, 10)] : undefined;
+  return query ? query.select.find(({ id: currentId }) => currentId === operationId) : undefined;
 }
 
-export function updateColumn(id: string, col: SelectOperation, model: VisModel) {
-  const [queryId, columnIndex] = id.split('_');
+export function removeOperation(id: string, model: VisModel) {
+  const [queryId, operationId] = id.split('_');
   const query = model.queries[queryId];
-  const index = parseInt(columnIndex, 10);
 
   return {
     ...model,
@@ -64,7 +63,25 @@ export function updateColumn(id: string, col: SelectOperation, model: VisModel) 
       ...model.queries,
       [queryId]: {
         ...query,
-        select: query.select.map((s, i) => (i === index ? col : s)),
+        select: query.select.filter(({ id: currentId }) => currentId !== operationId),
+      },
+    },
+  };
+}
+
+export function updateOperation(id: string, operation: SelectOperation, model: VisModel) {
+  const [queryId, operationId] = id.split('_');
+  const query = model.queries[queryId];
+
+  return {
+    ...model,
+    queries: {
+      ...model.queries,
+      [queryId]: {
+        ...query,
+        select: query.select.map(currentOperation =>
+          currentOperation.id === operationId ? operation : currentOperation
+        ),
       },
     },
   };
@@ -91,7 +108,8 @@ export function getColumnIdByIndex(
 ): string | undefined {
   const queryId = Object.keys(queries).sort()[queryIndex];
   if (queryId) {
-    return `${queryId}_${columnIndex}`;
+    const columnId = queries[queryId].select[columnIndex].id;
+    return `${queryId}_${columnId}`;
   }
 }
 

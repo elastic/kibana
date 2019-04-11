@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
+import { removeOperation, selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
-import { selectOperation, updateOperation, VisModel } from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
-export function XAxisEditor({
+export function SeriesAxisEditor({
   operationId,
   visModel,
   onChangeVisModel,
@@ -35,6 +35,26 @@ export function XAxisEditor({
       allowedScale="ordinal"
       allowedCardinality="multi"
       defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
+      removable
+      onOperationRemove={() => {
+        // TODO there should be a helper function for that
+        const updatedModel: VisModel = {
+          ...removeOperation(operationId, visModel),
+          private: {
+            ...visModel.private,
+            xyChart: {
+              ...visModel.private.xyChart,
+              seriesAxis: {
+                ...visModel.private.xyChart.seriesAxis,
+                columns: visModel.private.xyChart.seriesAxis.columns.filter(
+                  (currentOperation: any) => currentOperation !== operationId
+                ),
+              },
+            },
+          },
+        };
+        onChangeVisModel(updatedModel);
+      }}
       canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
     >
       {getOperationSummary(operation)}

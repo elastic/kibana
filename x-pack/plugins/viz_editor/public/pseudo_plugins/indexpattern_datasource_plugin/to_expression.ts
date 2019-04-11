@@ -41,14 +41,26 @@ function queryToEsAggsConfigs(query: Query): any {
           type: 'sum',
         };
       case 'terms':
+        const { field, size, orderBy, orderByDirection } = selectOperation.argument;
+        const orderByTerms = orderBy === selectOperation.id;
+        const orderSettings =
+          typeof orderBy !== 'undefined'
+            ? {
+                order: orderByDirection || 'desc',
+                orderBy: orderByTerms
+                  ? '_key'
+                  : String(query.select.findIndex(({ id }) => id === orderBy)),
+              }
+            : {};
         return {
           id: String(index),
           enabled: true,
           type: 'terms',
           schema: 'segment',
           params: {
-            field: selectOperation.argument.field,
-            size: selectOperation.argument.size,
+            field,
+            size,
+            ...orderSettings,
           },
         };
       case 'date_histogram':
@@ -84,6 +96,8 @@ export function toExpression(viewState: VisModel) {
       firstQuery.select.map(operation =>
         operation.operator === 'column' ? operation.argument.field : ''
       )
+    )}' fieldNames='${JSON.stringify(
+      firstQuery.select.map(operation => (operation.operator === 'column' ? operation.id : ''))
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }
   return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${

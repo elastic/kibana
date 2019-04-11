@@ -29,6 +29,7 @@ import {
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
+import { SeriesAxisEditor } from './seriesaxis_editor';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
@@ -39,6 +40,7 @@ type XyDisplayType = 'line' | 'area' | 'bar';
 interface XyChartPrivateState {
   xAxis: Axis;
   yAxis: Axis;
+  seriesAxis: Axis;
   displayType?: XyDisplayType;
   stacked: boolean;
 }
@@ -54,7 +56,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
 
   const {
     private: {
-      xyChart: { xAxis, yAxis, displayType, stacked },
+      xyChart: { xAxis, yAxis, seriesAxis, displayType, stacked },
     },
   } = visModel;
 
@@ -98,7 +100,18 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
         {yAxis.columns.map(col => (
           <YAxisEditor
             key={col}
-            col={col}
+            operationId={col}
+            visModel={visModel}
+            onChangeVisModel={onChangeVisModel}
+          />
+        ))}
+      </div>
+      <div className="configPanel-axis">
+        <span className="configPanel-axis-title">Split series by</span>
+        {seriesAxis.columns.map(col => (
+          <SeriesAxisEditor
+            key={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -109,7 +122,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
         {xAxis.columns.map(col => (
           <XAxisEditor
             key={col}
-            col={col}
+            operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
           />
@@ -147,17 +160,20 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayT
   // TODO we maybe need a more stable way to get these
   const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  // TODO check whether we have a split series candidate
 
   if (xAxisRef && yAxisRef) {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+      seriesAxis: { title: 'Series Axis', columns: [] },
       displayType: displayType || 'line',
     });
   } else {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
+      seriesAxis: { title: 'Series Axis', columns: [] },
       displayType: displayType || 'line',
     });
   }
@@ -206,14 +222,19 @@ function getSuggestion(
 function buildViewModel(
   visModel: XyChartVisModel,
   xAxis: SelectOperation[],
-  yAxis: SelectOperation[]
+  yAxis: SelectOperation[],
+  seriesAxis: SelectOperation[]
 ): XyChartVisModel {
   const formattedNameX = xAxis
     .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
-    .join(' split by ');
+    .join(', ');
   const formattedNameY = yAxis
     .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
-    .join(' split by ');
+    .join(', ');
+
+  const formattedSplitName = `split by ${seriesAxis
+    .map(op => operationToName(op.operator) + ('argument' in op ? ` of ${op.argument.field}` : ''))
+    .join(', ')}`;
 
   return {
     ...visModel,
@@ -221,7 +242,7 @@ function buildViewModel(
       xyChartQuery: {
         datasourceRef: visModel.datasource!.title,
         // Split by Y values, then bucket by X
-        select: yAxis.concat(xAxis),
+        select: seriesAxis.concat(yAxis).concat(xAxis),
       },
     },
     editorPlugin: PLUGIN_NAME,
@@ -231,11 +252,15 @@ function buildViewModel(
         ...visModel.private.xyChart,
         xAxis: {
           title: formattedNameX,
-          columns: xAxis.map((_, index) => `xyChartQuery_${index + yAxis.length}`),
+          columns: xAxis.map(column => `xyChartQuery_${column.id}`),
+        },
+        seriesAxis: {
+          title: formattedSplitName,
+          columns: seriesAxis.map(column => `xyChartQuery_${column.id}`),
         },
         yAxis: {
           title: formattedNameY,
-          columns: yAxis.map((_, index) => `xyChartQuery_${index}`),
+          columns: yAxis.map(column => `xyChartQuery_${column.id}`),
         },
       },
     },
@@ -262,10 +287,10 @@ function _getSuggestionsForFieldAsReplacement(
       return null;
     }
 
-    xAxis = [fieldToOperation(field, op)];
-    yAxis = [fieldToOperation(field, 'count')];
+    xAxis = [fieldToOperation('x', field, op)];
+    yAxis = [fieldToOperation('y', field, 'count')];
 
-    const newVisModel = buildViewModel(visModel, xAxis, yAxis);
+    const newVisModel = buildViewModel(visModel, xAxis, yAxis, []);
 
     return buildSuggestion(newVisModel, {
       iconType: displayTypeIcon.line,
@@ -275,18 +300,21 @@ function _getSuggestionsForFieldAsReplacement(
   const opWithDateHistogram = (op: SelectOperator): Suggestion | null => {
     let xAxis = [];
     let yAxis = [];
+    let seriesAxis: SelectOperation[] = [];
 
     if (op === 'column') {
       xAxis = [
         fieldToOperation(
+          'x',
           datasource.fields.find(f => f.name === datasource.timeFieldName)!,
           'column'
         ),
       ];
-      yAxis = [fieldToOperation(field, op)];
+      yAxis = [fieldToOperation('y', field, op)];
     } else {
       xAxis = [
         fieldToOperation(
+          'x',
           datasource.fields.find(f => f.name === datasource.timeFieldName)!,
           'date_histogram'
         ),
@@ -295,11 +323,12 @@ function _getSuggestionsForFieldAsReplacement(
       if (op === 'count') {
         return null;
       } else {
-        yAxis = [fieldToOperation(field, op), fieldToOperation(field, 'count')];
+        seriesAxis = [fieldToOperation('series', field, op)];
+        yAxis = [fieldToOperation('y', field, 'count')];
       }
     }
 
-    const newVisModel = buildViewModel(visModel, xAxis, yAxis);
+    const newVisModel = buildViewModel(visModel, xAxis, yAxis, seriesAxis);
 
     return buildSuggestion(newVisModel, {
       iconType: displayTypeIcon.line,

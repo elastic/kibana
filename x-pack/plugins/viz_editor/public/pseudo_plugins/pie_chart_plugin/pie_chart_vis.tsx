@@ -36,10 +36,14 @@ function sampleVisFunction() {
       },
     },
     context: { types: ['kibana_datatable'] },
-    fn(context: any, args: any) {
-      // normally this would prepare the data, but in this case the kibana_pie function takes care of it
-      // TODO swirtch over to elastic-charts pie as soon as they are ready
-      return { ...context, type: 'kibana_datatable' };
+    fn(context: { rows: any[]; columns: any[] }, args: any) {
+      // we have to reverse the order of the columns because the current kibana pie chart implementation always
+      // expects the value column directly after the bucket column
+      const columns = [...context.columns].reverse();
+      return {
+        ...context,
+        columns,
+      };
     },
   };
 }

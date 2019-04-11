@@ -13,17 +13,22 @@ import { register } from '@kbn/interpreter/common';
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
-function filterColumns(keep: string[], columns: Array<{ id: string; type: string }>) {
-  return keep.map(columnId => {
-    return columns.find(column => column.id === columnId);
+function filterColumns(
+  keep: string[],
+  columnNames: string[],
+  columns: Array<{ id: string; type: string }>
+) {
+  return keep.map((columnId, index) => {
+    const { type } = columns.find(column => column.id === columnId) as any;
+    return { id: columnNames[index], type };
   });
 }
 
-function filterRows(keep: string[], rows: Array<{ [id: string]: any }>) {
+function filterRows(keep: string[], columnNames: string[], rows: Array<{ [id: string]: any }>) {
   return rows.map(row => {
     const newRow = {} as any;
-    keep.forEach(columnId => {
-      newRow[columnId] = row[columnId];
+    keep.forEach((columnId, index) => {
+      newRow[columnNames[index]] = row[columnId];
     });
     return newRow;
   });
@@ -32,7 +37,7 @@ function filterRows(keep: string[], rows: Array<{ [id: string]: any }>) {
 function literalTableFunction() {
   return {
     name: 'literal_table',
-    type: 'datatable',
+    type: 'kibana_datatable',
     args: {
       lines: {
         types: ['string'],
@@ -40,11 +45,15 @@ function literalTableFunction() {
       keep: {
         types: ['string'],
       },
+      columnNames: {
+        types: ['string'],
+      },
     },
     context: { types: [] },
     fn(context: any, args: any) {
       const text = JSON.parse(args.lines) as string[];
       const keepColumns: string[] = JSON.parse(args.keep);
+      const columnNames: string[] = JSON.parse(args.columnNames);
 
       const rows = text.map(row => row.split(','));
       const headerRow = rows.shift() as string[];
@@ -67,9 +76,9 @@ function literalTableFunction() {
       });
 
       return {
-        type: 'datatable',
-        rows: filterRows(keepColumns, parsedRows),
-        columns: filterColumns(keepColumns, columns),
+        type: 'kibana_datatable',
+        rows: filterRows(keepColumns, columnNames, parsedRows),
+        columns: filterColumns(keepColumns, columnNames, columns),
       };
     },
   };

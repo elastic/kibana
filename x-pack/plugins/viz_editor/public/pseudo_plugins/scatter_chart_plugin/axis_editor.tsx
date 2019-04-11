@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
+import { selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
-import { selectOperation, updateOperation, VisModel } from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
-export function XAxisEditor({
+export function AxisEditor({
   operationId,
   visModel,
   onChangeVisModel,
@@ -32,10 +32,10 @@ export function XAxisEditor({
       onOperationChange={newOperation => {
         onChangeVisModel(updateOperation(operationId, newOperation, visModel));
       }}
-      allowedScale="ordinal"
+      allowedScale="interval"
       allowedCardinality="multi"
-      defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
-      canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
+      defaultOperator={() => 'column'}
+      canDrop={(f: DatasourceField) => f && f.type === 'number'}
     >
       {getOperationSummary(operation)}
     </OperationEditor>

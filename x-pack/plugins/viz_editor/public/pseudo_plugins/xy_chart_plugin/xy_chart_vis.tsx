@@ -64,7 +64,7 @@ function sampleVisFunction() {
       },
     },
     context: { types: ['kibana_datatable'] },
-    fn(context: any, args: any) {
+    fn(context: { rows: any[]; columns: any[] }, args: any) {
       if (context.columns.length <= 1) {
         // Can't render an XY chart without two columns
         return;
@@ -79,6 +79,8 @@ function sampleVisFunction() {
       const data: any[][] = context.rows.map((row: any) => {
         return {
           ...row,
+          [yColumn.id]:
+            yColumn.type === 'date' ? moment(row[yColumn.id] as any).valueOf() : row[yColumn.id],
           [xColumn.id]:
             xColumn.type === 'date' ? moment(row[xColumn.id] as any).valueOf() : row[xColumn.id],
         };
@@ -135,12 +137,15 @@ function getFormatterFunction(type: ScaleType) {
 function XyChart(props: { config: XyChartConfig }) {
   const config = props.config;
 
+  const key = config.yAccessors.concat([config.xAccessor]).join(',');
+
   return (
-    <Chart renderer="canvas">
+    <Chart renderer="canvas" key={key}>
       <Settings
         showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
         legendPosition={Position.Right}
         tooltipType={config.hideTooltips ? TooltipType.None : TooltipType.VerticalCursor}
+        animateData={false}
       />
       {config.showAxes && (
         <>
@@ -161,7 +166,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'line' && (
         <LineSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}
@@ -174,7 +179,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'area' && (
         <AreaSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}
@@ -187,7 +192,7 @@ function XyChart(props: { config: XyChartConfig }) {
       )}
       {config.seriesType === 'bar' && (
         <BarSeries
-          id={getSpecId(config.yAxisName)}
+          id={getSpecId(config.yAccessors.join(','))}
           xScaleType={config.xAxisType}
           yScaleType={ScaleType.Linear}
           xAccessor={config.xAccessor}

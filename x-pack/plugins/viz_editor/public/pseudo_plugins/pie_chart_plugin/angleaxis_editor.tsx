@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
+import { selectOperation, updateOperation, VisModel } from '../..';
 import { DatasourceField } from '../../../common';
-import { selectOperation, updateOperation, VisModel } from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
-export function XAxisEditor({
-  operationId,
+export function AngleAxisEditor({
+  operationId: col,
   visModel,
   onChangeVisModel,
 }: {
@@ -18,7 +18,7 @@ export function XAxisEditor({
   visModel: any;
   onChangeVisModel: (visModel: VisModel) => void;
 }) {
-  const operation = selectOperation(operationId, visModel);
+  const operation = selectOperation(col, visModel);
 
   if (!operation) {
     // TODO...
@@ -29,13 +29,13 @@ export function XAxisEditor({
     <OperationEditor
       operation={operation}
       visModel={visModel}
-      onOperationChange={newOperation => {
-        onChangeVisModel(updateOperation(operationId, newOperation, visModel));
+      onOperationChange={newColumn => {
+        onChangeVisModel(updateOperation(col, newColumn, visModel));
       }}
-      allowedScale="ordinal"
-      allowedCardinality="multi"
-      defaultOperator={field => (field.type === 'date' ? 'date_histogram' : 'terms')}
-      canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
+      allowedScale="interval"
+      allowedCardinality="single"
+      defaultOperator={() => 'sum'}
+      canDrop={(f: DatasourceField) => f && f.type === 'number'}
     >
       {getOperationSummary(operation)}
     </OperationEditor>

@@ -9,7 +9,36 @@
 // ------------------------------------------------------------------------------------------
 
 import { Legacy } from 'kibana';
-import { API_PREFIX } from '../../common';
+import { API_PREFIX, FieldType } from '../../common';
+
+export function normalizeType(type: string) {
+  const normalTypes = {
+    string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
+    number: [
+      'float',
+      'half_float',
+      'scaled_float',
+      'double',
+      'integer',
+      'long',
+      'short',
+      'byte',
+      'token_count',
+      '_version',
+    ],
+    date: ['date', 'datetime'],
+    boolean: ['boolean'],
+  } as { [key in FieldType]: string[] };
+
+  const normalizedType = Object.keys(normalTypes).find(t =>
+    normalTypes[t as FieldType].includes(type)
+  );
+
+  if (normalizedType) {
+    return normalizedType;
+  }
+  throw new Error(`Type not supported: ${type}`);
+}
 
 /**
  * Expose a RESTful endpoint that runs an Elasticsearch query based on our
@@ -32,7 +61,7 @@ export function route(server: Legacy.Server) {
         },
       });
 
-      return result.columns;
+      return result.columns.map((column: any) => ({ ...column, type: normalizeType(column.type) }));
     },
   });
 }

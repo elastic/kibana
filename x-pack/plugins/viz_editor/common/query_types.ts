@@ -8,27 +8,20 @@
 // Select clause
 // ----------------------------------------
 
-export type SelectOperator =
-  | 'column'
-  | 'count'
-  | 'cardinality'
-  | 'date_histogram'
-  | 'sum'
-  | 'avg'
-  | 'terms';
+export type SelectOperator = SelectOperation['operator'];
 
-export interface Aliasable {
+export interface BasicOperation {
   operator: SelectOperator;
-  alias?: string;
+  id: string;
 }
 
 export interface Field {
   field: string;
 }
 
-export type FieldOperation = Aliasable & {
+export interface FieldOperation extends BasicOperation {
   argument: Field;
-};
+}
 
 export interface ColumnOperation extends FieldOperation {
   operator: 'column';
@@ -51,11 +44,33 @@ export interface SumOperation extends FieldOperation {
 export interface AvgOperation extends FieldOperation {
   operator: 'avg';
 }
+
+export type WindowFunction =
+  | 'max'
+  | 'min'
+  | 'sum'
+  | 'stdDev'
+  | 'unweightedAvg'
+  | 'linearWeightedAvg'
+  | 'ewma'
+  | 'holt'
+  | 'holtWinters';
+
+export interface WindowOperationArgument extends Field {
+  windowFunction: WindowFunction;
+  windowSize: number;
+}
+
+export interface WindowOperation extends FieldOperation {
+  operator: 'window';
+  argument: WindowOperationArgument;
+}
+
 export interface CardinalityOperation extends FieldOperation {
   operator: 'cardinality';
 }
 
-export interface CountOperation extends Aliasable {
+export interface CountOperation extends BasicOperation {
   operator: 'count';
 }
 
@@ -63,6 +78,8 @@ export interface TermsOperation extends FieldOperation {
   operator: 'terms';
   argument: Field & {
     size: number;
+    orderBy?: string;
+    orderByDirection?: 'asc' | 'desc';
   };
 }
 
@@ -73,7 +90,8 @@ export type SelectOperation =
   | CountOperation
   | AvgOperation
   | CardinalityOperation
-  | TermsOperation;
+  | TermsOperation
+  | WindowOperation;
 
 // ----------------------------------------
 // Where clause

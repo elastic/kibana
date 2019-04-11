@@ -63,6 +63,9 @@ function esDocsFunction() {
       fields: {
         types: ['string'],
       },
+      fieldNames: {
+        types: ['string'],
+      },
       filter: {
         types: ['string'],
       },
@@ -75,6 +78,7 @@ function esDocsFunction() {
       const SearchSource = Private(SearchSourceProvider);
       const queryFilter = Private(FilterBarQueryFilterProvider);
       const fields: string[] = JSON.parse(args.fields);
+      const fieldNames: string[] = JSON.parse(args.fieldNames);
 
       const indexPattern = await indexPatterns.get(args.index);
 
@@ -90,11 +94,17 @@ function esDocsFunction() {
 
       return {
         type: 'kibana_datatable',
-        columns: fields.map(fieldName => ({
-          id: fieldName,
+        columns: fields.map((fieldName, index) => ({
+          id: fieldNames[index],
           type: indexPattern.fields.find((field: any) => field.name === fieldName).type,
         })),
-        rows: response.hits.hits.map((hit: any) => hit._source),
+        rows: response.hits.hits.map((hit: any) => {
+          const entries = Object.entries(hit._source).map(([key, value]: [string, any]) => [
+            fieldNames[fields.indexOf(key)],
+            value,
+          ]);
+          return entries.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {} as any);
+        }),
       };
     },
   };
