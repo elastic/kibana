@@ -201,8 +201,6 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem>
             {serviceTransactionTypes.length > 1 ? (
               <TransactionSelect
-                hasMLJob={hasMLJob}
-                serviceName={serviceName}
                 selectedTransactionType={transactionType}
                 transactionTypes={serviceTransactionTypes}
                 onChange={(value: string) => {
