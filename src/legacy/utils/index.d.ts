@@ -17,25 +17,6 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
+export function parseCommaSeparatedList(input: string | string[]): string[];
 
-import {
-  parseCommaSeparatedList,
-  formatListAsProse,
-} from '../../../../utils';
-
-uiModules
-  .get('kibana')
-  .filter('commaList', function () {
-  /**
-   * Angular filter that accepts either an array or a comma-separated string
-   * and outputs a comma-separated string for presentation.
-   *
-   * @param {String|Array} input - The comma-separated list or array
-   * @param {Boolean} inclusive - Should the list be joined with an "and"?
-   * @return {String}
-   */
-    return function (input, inclusive = false) {
-      return formatListAsProse(parseCommaSeparatedList(input), { inclusive });
-    };
-  });
+export function formatListAsProse(list: string[], options?: { inclusive?: boolean }): string;

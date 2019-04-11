@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis/agg_config';
+import { AggConfig } from '../vis';
 
 interface AggParam {
   type: string;
   name: string;
+  required?: boolean;
   displayName?: string;
   displayLabel?: string;
   displayToolTip?: string;
+  onChange?(agg: AggConfig): void;
   disabled?(agg: AggConfig): boolean;
   shouldShow?(agg: AggConfig): boolean;
 }
