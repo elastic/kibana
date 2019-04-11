@@ -12,6 +12,7 @@ export const loadRepositories = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
+    initialData: [],
   });
 };
 
@@ -26,6 +27,7 @@ export const loadRepositoryTypes = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
     method: 'get',
+    initialData: [],
   });
 };
 

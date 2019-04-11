@@ -4,11 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-// import { useAppDependencies } from '../../../../index';
+import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
 
 interface Props extends RouteComponentProps {
@@ -22,15 +33,199 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   snapshotId,
   onClose,
 }) => {
-  // const {
-  //   core: { i18n },
-  // } = useAppDependencies();
-
   const {
-    // error,
-    // loading,
-    data: snapshotDetails,
-  } = loadSnapshot(repositoryName, snapshotId);
+    core: {
+      i18n: { FormattedMessage },
+    },
+  } = useAppDependencies();
+
+  const { error, loading, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
+
+  const includeGlobalStateToHumanizedMap = {
+    0: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
+        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
+        defaultMessage="No"
+      />
+    ),
+    1: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
+        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
+        defaultMessage="Yes"
+      />
+    ),
+  };
+
+  let content;
+
+  if (loading) {
+    // TODO
+  } else if (error) {
+    // TODO
+  } else {
+    const {
+      versionId,
+      version,
+      // By setting includeGlobalState to false it’s possible to prevent the cluster global state
+      // to be stored as part of the snapshot.
+      includeGlobalState,
+      indices,
+      state,
+      failures,
+      // TODO: startTimeInMillis,
+      // TODO: endTimeInMillis,
+      // TODO: durationInMillis,
+      uuid,
+    } = snapshotDetails;
+
+    const indicesList = indices.length ? (
+      <ul>
+        {indices.map(index => (
+          <li key={index}>{index}</li>
+        ))}
+      </ul>
+    ) : (
+      <em>
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
+          data-test-subj="srSnapshotDetailsIndicesNoneTitle"
+          defaultMessage="-"
+        />
+      </em>
+    );
+
+    const failuresList = failures.length ? (
+      <ul>
+        {failures.map(failure => (
+          <li key={failure}>{failure}</li>
+        ))}
+      </ul>
+    ) : (
+      <em>
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.itemfFailuresNoneLabel"
+          data-test-subj="srSnapshotDetailsFailuressNoneTitle"
+          defaultMessage="-"
+        />
+      </em>
+    );
+
+    content = (
+      <EuiDescriptionList textStyle="reverse">
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="srSnapshotDetailsVersionItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemVersionLabel"
+                data-test-subj="srSnapshotDetailsVersionTitle"
+                defaultMessage="Version / Version ID"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailsVersionDescription"
+            >
+              {version} / {versionId}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalUuidItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemUuidLabel"
+                data-test-subj="srSnapshotDetailsUuidTitle"
+                defaultMessage="UUID"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailUuidDescription"
+            >
+              {uuid}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalStateItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateLabel"
+                data-test-subj="srSnapshotDetailsIncludeGlobalStateTitle"
+                defaultMessage="Includes global state"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailIncludeGlobalStateDescription"
+            >
+              {includeGlobalStateToHumanizedMap[includeGlobalState]}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem data-test-subj="srSnapshotDetailsStateItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
+                data-test-subj="srSnapshotDetailsStateTitle"
+                defaultMessage="State"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailStateDescription"
+            >
+              {state}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="srSnapshotDetailsIndicesItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
+                data-test-subj="srSnapshotDetailsIndicesTitle"
+                defaultMessage="Indices ({indicesCount})"
+                values={{ indicesCount: indices.length }}
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailIndicesDescription"
+            >
+              <EuiText>{indicesList}</EuiText>
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem data-test-subj="srSnapshotDetailsFailuresItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemFailuresLabel"
+                data-test-subj="srSnapshotDetailsFailuresTitle"
+                defaultMessage="Failures ({failuresCount})"
+                values={{ failuresCount: failures.length }}
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailFailuresDescription"
+            >
+              {failuresList}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiDescriptionList>
+    );
+  }
 
   return (
     <EuiFlyout
@@ -41,16 +236,26 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       maxWidth={400}
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="srSnapshotDetailsFlyoutTitle">
-            {repositoryName} > {snapshotId}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="srSnapshotDetailsFlyoutTitle">
+                {snapshotId}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <p>
+                <EuiTextColor color="subdued">{repositoryName}</EuiTextColor>
+              </p>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">
-        {snapshotDetails && snapshotDetails.uid}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
     </EuiFlyout>
   );
 };

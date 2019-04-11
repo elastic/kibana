@@ -43,10 +43,10 @@ interface UseRequest extends SendRequest {
   interval?: number;
 }
 
-export const useRequest = ({ path, method, body, interval }: UseRequest) => {
+export const useRequest = ({ path, method, body, interval, initialData }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<any>(initialData);
   const isMounted = useRef<boolean>(true);
 
   const request = async () => {

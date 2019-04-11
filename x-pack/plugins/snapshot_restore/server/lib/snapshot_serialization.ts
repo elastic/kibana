@@ -39,7 +39,7 @@ export function deserializeSnapshotDetails(
     versionId,
     version,
     indices,
-    includeGlobalState,
+    includeGlobalState: Boolean(includeGlobalState) ? 1 : 0,
     state,
     startTime,
     startTimeInMillis,

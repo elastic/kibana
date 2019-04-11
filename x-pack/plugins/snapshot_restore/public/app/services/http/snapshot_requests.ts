@@ -11,6 +11,7 @@ export const loadSnapshots = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
+    initialData: [],
   });
 };
 
