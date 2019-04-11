@@ -6,5 +6,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type Authenticate<T> = (request: Request, sessionStorage: SessionStorage<T>, t: typeof toolkit) => Promise<AuthResult>;
+export declare type Authenticate<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
 ```

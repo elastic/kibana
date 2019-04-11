@@ -22,5 +22,5 @@ export { HttpService, HttpServiceSetup } from './http_service';
 export { Router, KibanaRequest } from './router';
 export { HttpServerInfo } from './http_server';
 export { BasePathProxyServer } from './base_path_proxy_server';
-export { Authenticate } from './lifecycle/auth';
-export { OnRequest } from './lifecycle/on_request';
+export { Authenticate, AuthToolkit } from './lifecycle/auth';
+export { OnRequest, OnRequestToolkit } from './lifecycle/on_request';

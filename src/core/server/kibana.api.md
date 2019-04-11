@@ -21,11 +21,19 @@ import { TypeOf } from '@kbn/config-schema';
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
 
 // Warning: (ae-forgotten-export) The symbol "SessionStorage" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "toolkit" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type Authenticate<T> = (request: Request, sessionStorage: SessionStorage<T>, t: typeof toolkit) => Promise<AuthResult>;
+export type Authenticate<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
+
+// @public
+export interface AuthToolkit {
+    authenticated: (credentials: any) => AuthResult;
+    redirected: (url: string) => AuthResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => AuthResult;
+}
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 // Warning: (ae-internal-missing-underscore) The name bootstrap should be prefixed with an underscore because the declaration is marked as "@internal"
@@ -216,11 +224,19 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-forgotten-export) The symbol "toolkit" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "OnRequestResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: typeof toolkit_2) => OnRequestResult;
+export type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult;
+
+// @public
+export interface OnRequestToolkit {
+    next: () => OnRequestResult;
+    redirected: (url: string) => OnRequestResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => OnRequestResult;
+}
 
 // @public
 export interface PluginInitializerContext {

@@ -25,18 +25,17 @@ enum ResultType {
   redirected = 'redirected',
   rejected = 'rejected',
 }
-interface ErrorParams {
-  statusCode?: number;
-}
+
+/** @internal */
 class AuthResult {
-  public static authenticated(credentials: any = {}) {
+  public static authenticated(credentials: any) {
     return new AuthResult(ResultType.authenticated, credentials);
   }
   public static redirected(url: string) {
     return new AuthResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error, { statusCode }: ErrorParams = {}) {
-    return new AuthResult(ResultType.rejected, { error, statusCode });
+  public static rejected(error: Error, options: { statusCode?: number } = {}) {
+    return new AuthResult(ResultType.rejected, { error, statusCode: options.statusCode });
   }
   public static isValidResult(candidate: any) {
     return candidate instanceof AuthResult;
@@ -53,7 +52,20 @@ class AuthResult {
   }
 }
 
-const toolkit = {
+/**
+ * @public
+ * A tool set defining an outcome of Auth interceptor for incoming request.
+ */
+export interface AuthToolkit {
+  /** Authentication is successful with given credentials, allow request to pass through */
+  authenticated: (credentials: any) => AuthResult;
+  /** Authentication requires to interrupt request handling and redirect to a configured url */
+  redirected: (url: string) => AuthResult;
+  /** Authentication is unsuccessful, fail the request with specified error. */
+  rejected: (error: Error, options?: { statusCode?: number }) => AuthResult;
+}
+
+const toolkit: AuthToolkit = {
   authenticated: AuthResult.authenticated,
   redirected: AuthResult.redirected,
   rejected: AuthResult.rejected,
@@ -63,7 +75,7 @@ const toolkit = {
 export type Authenticate<T> = (
   request: Request,
   sessionStorage: SessionStorage<T>,
-  t: typeof toolkit
+  t: AuthToolkit
 ) => Promise<AuthResult>;
 
 /** @public */

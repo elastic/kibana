@@ -27,9 +27,7 @@ enum ResultType {
   rejected = 'rejected',
 }
 
-interface ErrorParams {
-  statusCode?: number;
-}
+/** @internal */
 class OnRequestResult {
   public static next() {
     return new OnRequestResult(ResultType.next);
@@ -37,8 +35,8 @@ class OnRequestResult {
   public static redirected(url: string) {
     return new OnRequestResult(ResultType.redirected, url);
   }
-  public static rejected(error: Error, { statusCode }: ErrorParams = {}) {
-    return new OnRequestResult(ResultType.rejected, { error, statusCode });
+  public static rejected(error: Error, options: { statusCode?: number } = {}) {
+    return new OnRequestResult(ResultType.rejected, { error, statusCode: options.statusCode });
   }
   public static isValidResult(candidate: any) {
     return candidate instanceof OnRequestResult;
@@ -55,7 +53,20 @@ class OnRequestResult {
   }
 }
 
-const toolkit = {
+/**
+ * @public
+ * A tool set defining an outcome of OnRequest interceptor for incoming request.
+ */
+export interface OnRequestToolkit {
+  /** To pass request to the next handler */
+  next: () => OnRequestResult;
+  /** To interrupt request handling and redirect to a configured url */
+  redirected: (url: string) => OnRequestResult;
+  /** Fail the request with specified error. */
+  rejected: (error: Error, options?: { statusCode?: number }) => OnRequestResult;
+}
+
+const toolkit: OnRequestToolkit = {
   next: OnRequestResult.next,
   redirected: OnRequestResult.redirected,
   rejected: OnRequestResult.rejected,
@@ -64,7 +75,7 @@ const toolkit = {
 /** @public */
 export type OnRequest<Params = any, Query = any, Body = any> = (
   req: KibanaRequest<Params, Query, Body>,
-  t: typeof toolkit
+  t: OnRequestToolkit
 ) => OnRequestResult;
 
 /**

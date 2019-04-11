@@ -17,7 +17,7 @@
  * under the License.
  */
 import { ElasticsearchServiceSetup } from './elasticsearch';
-import { Authenticate, HttpServiceSetup, KibanaRequest, OnRequest, Router } from './http';
+import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
@@ -30,6 +30,14 @@ export {
   ElasticsearchClientConfig,
   APICaller,
 } from './elasticsearch';
+export {
+  Authenticate,
+  AuthToolkit,
+  KibanaRequest,
+  OnRequest,
+  OnRequestToolkit,
+  Router,
+} from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
@@ -45,12 +53,4 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
-export {
-  Router,
-  Authenticate,
-  OnRequest,
-  KibanaRequest,
-  ElasticsearchServiceSetup,
-  HttpServiceSetup,
-  PluginsServiceSetup,
-};
+export { HttpServiceSetup, ElasticsearchServiceSetup, PluginsServiceSetup };
