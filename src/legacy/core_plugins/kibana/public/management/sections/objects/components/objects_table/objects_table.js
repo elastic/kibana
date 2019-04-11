@@ -273,7 +273,20 @@ class ObjectsTableUI extends Component {
     const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
-    const blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+
+    let blob;
+    try {
+      blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.export.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
       title: intl.formatMessage({
@@ -295,7 +308,20 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+
+    let blob;
+    try {
+      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.exportAll.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
       title: intl.formatMessage({
