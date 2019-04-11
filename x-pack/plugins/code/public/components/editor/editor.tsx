@@ -21,6 +21,7 @@ import { refUrlSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
+import { encodeRevisionString } from '../../utils/url';
 
 export interface EditorActions {
   closeReferences(changeUrl: boolean): void;
@@ -169,7 +170,7 @@ export class EditorComponent extends React.Component<IProps> {
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
         if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-          const uri = `${repo}/blob/${revision}/${file}`;
+          const uri = `${repo}/blob/${encodeRevisionString(revision)}/${file}`;
           history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
         }
         this.monaco!.container.focus();
