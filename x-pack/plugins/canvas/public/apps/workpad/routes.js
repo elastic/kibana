@@ -13,7 +13,7 @@ import { setAssets, resetAssets } from '../../state/actions/assets';
 import { setPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { isFirstLoad } from '../../state/selectors/app';
-import { selectToplevelNodes, setCanUserWrite, setFirstLoad } from '../../state/actions/transient';
+import { setCanUserWrite, setFirstLoad } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -90,7 +90,6 @@ export const routes = [
           const pageIndex = pageNumber - 1;
           if (pageIndex !== workpad.page) {
             dispatch(setPage(pageIndex));
-            dispatch(selectToplevelNodes([]));
           }
 
           // update the application's breadcrumb
