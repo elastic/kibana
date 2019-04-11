@@ -8,6 +8,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import React, { Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -53,10 +54,6 @@ const WatchHistoryUI = ({
     watchStatus?: { actionStatuses?: any };
   }>({});
   const [executionDetail, setExecutionDetail] = useState<string>('');
-  const [watch, setWatch] = useState<{
-    id?: string;
-    watchStatus: { isActive?: boolean };
-  }>({});
 
   const pagination = {
     initialPageSize: 10,
@@ -65,7 +62,6 @@ const WatchHistoryUI = ({
 
   const loadWatch = async () => {
     const loadedWatch = await fetchWatchDetail(watchId);
-    setWatch(loadedWatch);
     setIsActivated(loadedWatch.watchStatus.isActive);
   };
 
@@ -189,13 +185,25 @@ const WatchHistoryUI = ({
   };
 
   const toggleWatchActivation = async () => {
-    if (isActivated) {
-      await deactivateWatch(watchId);
-    } else {
-      await activateWatch(watchId);
+    try {
+      if (isActivated) {
+        await deactivateWatch(watchId);
+      } else {
+        await activateWatch(watchId);
+      }
+      setIsActivated(!isActivated);
+    } catch (e) {
+      if (e.data.statusCode !== 200) {
+        toastNotifications.addDanger(
+          i18n.translate(
+            'xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText',
+            {
+              defaultMessage: "Couldn't deactivate watch",
+            }
+          )
+        );
+      }
     }
-    // TODO[pcs]: error handling, response checking, etc...
-    setIsActivated(!isActivated);
   };
 
   useEffect(() => {
