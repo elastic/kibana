@@ -13,7 +13,13 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const dataFrame = {
-  createDataFrameTransformsJob(jobId, jobConfig) {
+  getDataFrameTransforms() {
+    return http({
+      url: `${basePath}/_data_frame/transforms`,
+      method: 'GET'
+    });
+  },
+  putDataFrameTransformsJob(jobId, jobConfig) {
     return http({
       url: `${basePath}/_data_frame/transforms/${jobId}`,
       method: 'PUT',
@@ -30,6 +36,12 @@ export const dataFrame = {
   startDataFrameTransformsJob(jobId) {
     return http({
       url: `${basePath}/_data_frame/transforms/${jobId}/_start`,
+      method: 'POST',
+    });
+  },
+  stopDataFrameTransformsJob(jobId) {
+    return http({
+      url: `${basePath}/_data_frame/transforms/${jobId}/_stop`,
       method: 'POST',
     });
   },

@@ -12,14 +12,14 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { I18nContext } from 'ui/i18n';
-import { DataFrameList } from './data_frame_list';
+import { Page } from './page';
 
 module.directive('mlDataFramePage', () => {
   return {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      ReactDOM.render(<I18nContext>{React.createElement(DataFrameList)}</I18nContext>, element[0]);
+      ReactDOM.render(<I18nContext>{React.createElement(Page)}</I18nContext>, element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

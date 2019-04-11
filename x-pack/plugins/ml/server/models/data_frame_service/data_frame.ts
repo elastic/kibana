@@ -10,7 +10,7 @@ import _ from 'lodash';
 export type callWithRequestType = (action: string, params?: any) => Promise<any>;
 
 export function dataFrameProvider(callWithRequest: callWithRequestType) {
-  async function getDataFrameTransformsJobs() {
+  async function getDataFrameTransforms() {
     try {
       return await callWithRequest('ml.getDataFrameTransforms');
     } catch (error) {
@@ -51,7 +51,7 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
   }
 
   return {
-    getDataFrameTransformsJobs,
+    getDataFrameTransforms,
     createDataFrameTransformsJob,
     getDataFrameTransformsPreview,
     startDataFrameTransformsJob,

@@ -15,8 +15,8 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { getDataFrameTransformsJobs } = dataFrameServiceProvider(callWithRequest);
-      return getDataFrameTransformsJobs()
+      const { getDataFrameTransforms } = dataFrameServiceProvider(callWithRequest);
+      return getDataFrameTransforms()
         .catch(resp => wrapError(resp));
     },
     config: {
