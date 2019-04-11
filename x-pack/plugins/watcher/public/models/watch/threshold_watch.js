@@ -160,7 +160,7 @@ export class ThresholdWatch extends BaseWatch {
           i18n.translate(
             'xpack.watcher.thresholdWatchExpression.aggType.xpack.watcher.thresholdWatchExpression.groupBy.requiredValueValidationMessage',
             {
-              defaultMessage: 'A value is required',
+              defaultMessage: 'A value is required.',
             }
           )
         );
@@ -170,7 +170,7 @@ export class ThresholdWatch extends BaseWatch {
           i18n.translate(
             'xpack.watcher.thresholdWatchExpression.groupBy.requiredFieldValidationMessage',
             {
-              defaultMessage: 'Please select a field',
+              defaultMessage: 'Please select a field.',
             }
           )
         );
@@ -181,7 +181,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
           {
-            defaultMessage: 'A value is required',
+            defaultMessage: 'A value is required.',
           }
         )
       );
@@ -191,7 +191,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeIsRequiredValidationMessage',
           {
-            defaultMessage: 'Window duration size is required',
+            defaultMessage: 'Window duration size is required.',
           }
         )
       );

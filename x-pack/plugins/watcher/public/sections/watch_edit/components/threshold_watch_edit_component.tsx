@@ -165,7 +165,7 @@ const ThresholdWatchEditUi = ({
   const expressionErrorMessage = i18n.translate(
     'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
     {
-      defaultMessage: 'Please fix the errors in the expression below',
+      defaultMessage: 'Please fix the errors in the expression below.',
     }
   );
   const expressionFields = ['termSize', 'termField', 'threshold', 'timeWindowSize'];
