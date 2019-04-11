@@ -1372,6 +1372,17 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
+"@elastic/github-checks-reporter@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.1.tgz#f2341464866391a7d31b204e173bb7650e53a72b"
+  integrity sha512-8MhXPHKGHv+Yu+AcrnM3H48esHZ28sQFzV9lbWq9LoxVu4Je851yeSA+dEybgk/OY4jEiHfKAAkj/JNj4i85cg==
+  dependencies:
+    "@octokit/app" "^2.2.2"
+    "@octokit/request" "^2.4.2"
+    "@octokit/rest" "^16.23.2"
+    convict "^4.4.1"
+    strip-ansi "^5.2.0"
+
 "@elastic/good@8.1.1-kibana2":
   version "8.1.1-kibana2"
   resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana2.tgz#3ba7413da9fae4c67f128f3e9b1dc28f24523c7a"
@@ -12016,17 +12027,6 @@ github-username@^3.0.0:
   integrity sha1-CnciGbMTB0NCnyRW0L3T21Xc57E=
   dependencies:
     gh-got "^5.0.0"
-
-github-xyz@^0.0.21:
-  version "0.0.21"
-  resolved "https://registry.yarnpkg.com/github-xyz/-/github-xyz-0.0.21.tgz#7082e93a14f3b3d63ade4e0155ea92a66fdcbeb5"
-  integrity sha512-GyRooCx0+poBD3KS2DZpO7er0uevnrrIo55alfQLezArC5YZGQrDI+/0oy6LRmhJla8t6Hg6YxJUsNozomKCSQ==
-  dependencies:
-    "@octokit/app" "^2.2.2"
-    "@octokit/request" "^2.4.2"
-    "@octokit/rest" "^16.23.2"
-    convict "^4.4.1"
-    strip-ansi "^5.2.0"
 
 gl-matrix@^2.6.1:
   version "2.8.1"
