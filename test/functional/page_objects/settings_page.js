@@ -257,7 +257,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async increasePopularity() {
       const field = await testSubjects.find('editorFieldCount');
-      await field.clearValue();
+      await field.clearValueWithKeyboard();
       await field.type('1');
     }
 

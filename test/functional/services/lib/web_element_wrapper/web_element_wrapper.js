@@ -121,6 +121,17 @@ export class WebElementWrapper {
     await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
   }
 
+
+  /**
+   * Clear the value of this element using Keyboard
+   */
+  async clearValueWithKeyboard() {
+    const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await this.pressKeys([selectionKey, 'a']);
+    await this.pressKeys(this._Keys.NULL); // Release modifier keys
+    await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+  }
+
   /**
    * Types a key sequence on the DOM element represented by this instance. Modifier keys
    * (SHIFT, CONTROL, ALT, META) are stateful; once a modifier is processed in the key sequence,
