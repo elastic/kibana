@@ -56,7 +56,7 @@ export class AutoFollowPatternAdd extends PureComponent {
           {({ isLoading, error, remoteClusters }) => {
             if (isLoading) {
               return (
-                <SectionLoading>
+                <SectionLoading dataTestSubj="remoteClustersLoading">
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
                     defaultMessage="Loading remote clusters…"
