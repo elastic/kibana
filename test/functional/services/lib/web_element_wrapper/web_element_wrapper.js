@@ -121,15 +121,23 @@ export class WebElementWrapper {
     await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
   }
 
-
   /**
    * Clear the value of this element using Keyboard
+   * @param { charByChar: false } options
    */
-  async clearValueWithKeyboard() {
-    const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await this.pressKeys([selectionKey, 'a']);
-    await this.pressKeys(this._Keys.NULL); // Release modifier keys
-    await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+  async clearValueWithKeyboard(options = { charByChar: false }) {
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 1; i <= value.length; i++) {
+        await this.pressKeys(this._Keys.BACK_SPACE);
+        await delay(100);
+      }
+    } else {
+      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      await this.pressKeys([selectionKey, 'a']);
+      await this.pressKeys(this._Keys.NULL); // Release modifier keys
+      await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+    }
   }
 
   /**

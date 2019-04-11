@@ -477,7 +477,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      await datePatternField.clearValue();
+      // Both clearValue & clearValueWithKeyboard does not work here
+      // Send Backspace event for each char in value string to clear field
+      await datePatternField.clearValueWithKeyboard({ charByChar: true });
       await datePatternField.type(datePattern);
     }
 
