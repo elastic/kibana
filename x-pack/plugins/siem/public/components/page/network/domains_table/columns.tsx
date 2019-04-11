@@ -5,8 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { isEmpty } from 'lodash/fp';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import {
@@ -18,10 +17,11 @@ import {
 } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { DefaultDraggable } from '../../../draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
+import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
 import { FirstLastSeenDomain } from './first_last_seen';
@@ -46,8 +46,34 @@ export const getDomainsColumns = (
     render: (domainName: string | null) => {
       const domainNameAttr = `${flowTarget}.domainName`;
       if (domainName != null) {
-        const id = `${tableId}-table-${flowTarget}-${flowDirection}-domain-${domainName}`;
-        return <DefaultDraggable id={id} field={domainNameAttr} value={domainName} />;
+        const id = escapeDataProviderId(
+          `${tableId}-table-${flowTarget}-${flowDirection}-domain-${domainName}`
+        );
+        return (
+          <DraggableWrapper
+            key={id}
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id,
+              name: ip,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: { field: domainNameAttr, value: ip },
+              queryDate: { from: startDate, to: Date.now() },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                <>{domainName}</>
+              )
+            }
+          />
+        );
+        // <DefaultDraggable id={id} field={domainNameAttr} value={domainName} />;
       } else {
         return getEmptyTagValue();
       }
@@ -124,7 +150,6 @@ export const getDomainsColumns = (
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
     render: ({ node }) => {
       const domainNameAttr = `${flowTarget}.domainName`;
       const domainName = getOr(null, domainNameAttr, node);
@@ -145,7 +170,6 @@ export const getDomainsColumns = (
     name: i18n.LAST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
     render: ({ node }) => {
       const domainNameAttr = `${flowTarget}.domainName`;
       const domainName = getOr(null, domainNameAttr, node);

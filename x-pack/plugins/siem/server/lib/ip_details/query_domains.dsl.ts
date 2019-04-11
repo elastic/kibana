@@ -187,8 +187,9 @@ const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
       return FlowTarget.client;
     case FlowTarget.client:
       return FlowTarget.server;
+    default:
+      return assertUnreachable(flowTarget);
   }
-  assertUnreachable(flowTarget);
 };
 
 const assertUnreachable = (x: never): never => {
@@ -211,7 +212,9 @@ const getQueryOrder = (domainsSortField: DomainsSortField): QueryOrder => {
       return { uniqueIpCount: domainsSortField.direction };
     case DomainsFields.domainName:
       return { _key: domainsSortField.direction };
+    case DomainsFields.direction:
+      return { _key: domainsSortField.direction };
     default:
-      return { bytes: Direction.desc };
+      return assertUnreachable(domainsSortField.field);
   }
 };

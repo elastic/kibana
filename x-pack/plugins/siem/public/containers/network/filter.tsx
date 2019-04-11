@@ -92,10 +92,10 @@ const NetworkFilterComponent = pure<NetworkFilterProps>(
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryDraft = networkSelectors.networkFilterQueryDraft();
   const getIsNetworkFilterQueryDraftValid = networkSelectors.isNetworkFilterQueryDraftValid();
-  const mapStateToProps = (state: State) => {
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
     return {
-      networkFilterQueryDraft: getNetworkFilterQueryDraft(state),
-      isNetworkFilterQueryDraftValid: getIsNetworkFilterQueryDraftValid(state),
+      networkFilterQueryDraft: getNetworkFilterQueryDraft(state, type),
+      isNetworkFilterQueryDraftValid: getIsNetworkFilterQueryDraftValid(state, type),
     };
   };
   return mapStateToProps;

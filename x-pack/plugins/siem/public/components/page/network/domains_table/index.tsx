@@ -12,6 +12,7 @@ import { ActionCreator } from 'redux';
 import styled from 'styled-components';
 
 import {
+  Direction,
   DomainsEdges,
   DomainsFields,
   DomainsSortField,
@@ -20,7 +21,7 @@ import {
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
-import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
@@ -116,10 +117,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
-        sorting={{
-          field: `node.${domainsSortField.field}`,
-          direction: domainsSortField.direction,
-        }}
+        sorting={getSortField(domainsSortField, flowTarget)}
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
@@ -184,3 +182,33 @@ export const DomainsTable = connect(
     updateDomainsSort: networkActions.updateDomainsSort,
   }
 )(DomainsTableComponent);
+
+const getSortField = (sortField: DomainsSortField, flowTarget: FlowTarget): SortingBasicTable => {
+  switch (sortField.field) {
+    case DomainsFields.domainName:
+      return {
+        field: `node.${flowTarget}.${sortField.field}`,
+        direction: sortField.direction,
+      };
+    case DomainsFields.bytes:
+      return {
+        field: `node.network.${sortField.field}`,
+        direction: sortField.direction,
+      };
+    case DomainsFields.packets:
+      return {
+        field: `node.network.${sortField.field}`,
+        direction: sortField.direction,
+      };
+    case DomainsFields.uniqueIpCount:
+      return {
+        field: `node.${flowTarget}.${sortField.field}`,
+        direction: sortField.direction,
+      };
+    default:
+      return {
+        field: `node.network.bytes`,
+        direction: Direction.desc,
+      };
+  }
+};

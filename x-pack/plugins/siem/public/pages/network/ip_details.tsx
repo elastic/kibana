@@ -62,7 +62,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
-            <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+            <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
@@ -138,10 +138,10 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
 );
 
 const makeMapStateToProps = () => {
-  const getNetworkFilterQuery = networkSelectors.networkFilterQueryExpression();
+  const getNetworkFilterQuery = networkSelectors.networkFilterQueryAsJson();
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => ({
-    filterQueryExpression: getNetworkFilterQuery(state) || '',
+    filterQuery: getNetworkFilterQuery(state, networkModel.NetworkType.details) || '',
     flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 };
