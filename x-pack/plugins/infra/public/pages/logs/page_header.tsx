@@ -7,7 +7,8 @@
 import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import React from 'react';
 
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';

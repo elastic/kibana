@@ -6,7 +6,8 @@
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import chrome from 'ui/chrome';
 
 interface Props {

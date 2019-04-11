@@ -17,6 +17,21 @@ import { Toast } from '@elastic/eui';
 // @public (undocumented)
 export type BasePathSetup = ReturnType<BasePathService['setup']>;
 
+// @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export interface CapabilitiesSetup {
+    getCapabilities: () => Capabilities;
+}
+
 // @public (undocumented)
 export interface ChromeBadge {
     // (undocumented)
@@ -63,6 +78,8 @@ export interface CoreContext {
 export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
+    // (undocumented)
+    capabilities: CapabilitiesSetup;
     // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)

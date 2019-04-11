@@ -18,6 +18,7 @@
  */
 
 import { BasePathSetup } from './base_path';
+import { Capabilities, CapabilitiesSetup } from './capabilities';
 import {
   ChromeBadge,
   ChromeBrand,
@@ -48,6 +49,7 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   http: HttpSetup;
   basePath: BasePathSetup;
+  capabilities: CapabilitiesSetup;
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
   overlays: OverlaySetup;
@@ -58,6 +60,8 @@ export {
   HttpSetup,
   FatalErrorsSetup,
   I18nSetup,
+  CapabilitiesSetup,
+  Capabilities,
   ChromeSetup,
   ChromeBadge,
   ChromeBreadcrumb,

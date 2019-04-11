@@ -16,35 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Capabilities, CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getInjected: (key: string) => {
-      if (key !== 'uiCapabilities') {
-        throw new Error(`Unexpected key for test: ${key}`);
-      }
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<CapabilitiesSetup> = {
+    getCapabilities: jest.fn(),
+  };
+  setupContract.getCapabilities.mockReturnValue({
+    catalogue: {},
+    management: {},
+    navLinks: {},
+  } as Capabilities);
+  return setupContract;
+};
 
-      return {
-        navLinks: {},
-        app1: {
-          feature1: true,
-          feature2: false,
-        },
-        app2: {
-          feature1: true,
-          feature3: true,
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
+type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
+const createMock = () => {
+  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
 
-import { uiCapabilities } from './ui_capabilities';
-
-describe('uiCapabilities', () => {
-  it('allows a nested property to be accessed', () => {
-    expect(uiCapabilities.app1.feature2).toEqual(false);
-  });
-});
+export const capabilitiesServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

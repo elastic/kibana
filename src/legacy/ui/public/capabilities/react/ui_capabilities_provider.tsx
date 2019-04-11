@@ -18,7 +18,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { uiCapabilities } from '../ui_capabilities';
+import { uiCapabilities } from '..';
 import { UICapabilitiesContext } from './ui_capabilities_context';
 
 interface Props {
