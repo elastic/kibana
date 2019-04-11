@@ -78,7 +78,7 @@ export function init(server: Server, options: any) {
       let info = await codeNodeClient.getCodeNodeInfo();
       if (!info) {
         let url: string = server.info.uri;
-        const serverHost = server.config().get('server.host');
+        const serverHost = server.config().get('xpack.code.publish_host');
         if (serverHost !== undefined && serverHost !== 'localhost') {
           const serverPort = server.config().get('server.port');
           const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';

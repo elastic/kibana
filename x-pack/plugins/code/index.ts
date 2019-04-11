@@ -69,6 +69,7 @@ export const code = (kibana: any) =>
         disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNode: Joi.boolean().default(false),
+        publish_host: Joi.string().default('localhost'),
       }).default();
     },
     init,
