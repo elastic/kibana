@@ -32,7 +32,7 @@ export const LogsPageHeader = injectUICapabilities(
               }),
             },
           ]}
-          readOnlyBadge={!uiCapabilities.infrastructure.save}
+          readOnlyBadge={!uiCapabilities.logs.save}
         />
         <DocumentTitle
           title={intl.formatMessage({
