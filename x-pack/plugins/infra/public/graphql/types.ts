@@ -787,6 +787,92 @@ export namespace MetricsQuery {
   };
 }
 
+export namespace CreateSourceConfigurationMutation {
+  export type Variables = {
+    sourceId: string;
+    sourceConfiguration: CreateSourceInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    createSource: CreateSource;
+  };
+
+  export type CreateSource = {
+    __typename?: 'CreateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace UpdateSourceMutation {
+  export type Variables = {
+    sourceId?: string | null;
+    changes: UpdateSourceInput[];
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    updateSource: UpdateSource;
+  };
+
+  export type UpdateSource = {
+    __typename?: 'UpdateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
 export namespace WaffleNodesQuery {
   export type Variables = {
     sourceId: string;
@@ -843,62 +929,6 @@ export namespace WaffleNodesQuery {
 
     max: number;
   };
-}
-
-export namespace CreateSourceMutation {
-  export type Variables = {
-    sourceId: string;
-    sourceConfiguration: CreateSourceInput;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    createSource: CreateSource;
-  };
-
-  export type CreateSource = {
-    __typename?: 'CreateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace UpdateSourceMutation {
-  export type Variables = {
-    sourceId?: string | null;
-    changes: UpdateSourceInput[];
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    updateSource: UpdateSource;
-  };
-
-  export type UpdateSource = {
-    __typename?: 'UpdateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
 }
 
 export namespace LogEntries {
@@ -979,31 +1009,17 @@ export namespace LogEntries {
   };
 }
 
-export namespace SourceFields {
+export namespace SourceConfigurationFields {
   export type Fragment = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    version?: string | null;
-
-    updatedAt?: number | null;
-
-    configuration: Configuration;
-
-    status: Status;
-  };
-
-  export type Configuration = {
     __typename?: 'InfraSourceConfiguration';
 
     name: string;
 
     description: string;
 
-    metricAlias: string;
-
     logAlias: string;
+
+    metricAlias: string;
 
     fields: Fields;
   };
@@ -1023,8 +1039,10 @@ export namespace SourceFields {
 
     timestamp: string;
   };
+}
 
-  export type Status = {
+export namespace SourceStatusFields {
+  export type Fragment = {
     __typename?: 'InfraSourceStatus';
 
     indexFields: IndexFields[];
@@ -1054,5 +1072,17 @@ export namespace InfraTimeKeyFields {
     time: number;
 
     tiebreaker: number;
+  };
+}
+
+export namespace InfraSourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: string | null;
+
+    updatedAt?: number | null;
   };
 }
