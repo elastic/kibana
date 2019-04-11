@@ -25,7 +25,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for an OR query missing a right side sub-query', () => {
     expect(() => {
       fromKueryExpression('response:200 or ');
-    }).toThrow('Expected "(", NOT, field name or value but end of input found.\n' +
+    }).toThrow('Expected "(", NOT, field name, value but end of input found.\n' +
       'response:200 or \n' +
       '----------------^');
   });
@@ -33,7 +33,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for an OR list of values missing a right side sub-query', () => {
     expect(() => {
       fromKueryExpression('response:(200 or )');
-    }).toThrow('Expected "(", NOT or value but ")" found.\n' +
+    }).toThrow('Expected "(", NOT, value but ")" found.\n' +
       'response:(200 or )\n' +
       '-----------------^');
   });
@@ -41,7 +41,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for a NOT query missing a sub-query', () => {
     expect(() => {
       fromKueryExpression('response:200 and not ');
-    }).toThrow('Expected "(", field name or value but end of input found.\n' +
+    }).toThrow('Expected "(", field name, value but end of input found.\n' +
       'response:200 and not \n' +
       '---------------------^');
   });
@@ -49,7 +49,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for a NOT list missing a sub-query', () => {
     expect(() => {
       fromKueryExpression('response:(200 and not )');
-    }).toThrow('Expected "(" or value but ")" found.\n' +
+    }).toThrow('Expected "(", value but ")" found.\n' +
       'response:(200 and not )\n' +
       '----------------------^');
   });
@@ -57,7 +57,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for unbalanced quotes', () => {
     expect(() => {
       fromKueryExpression('foo:"ba ');
-    }).toThrow('Expected "(", value or whitespace but "\\"" found.\n' +
+    }).toThrow('Expected "(", value, whitespace but "\"" found.\n' +
       'foo:"ba \n' +
       '----^');
   });
@@ -65,7 +65,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for unescaped quotes in a quoted string', () => {
     expect(() => {
       fromKueryExpression('foo:"ba "r"');
-    }).toThrow('Expected AND, OR, end of input or whitespace but "r" found.\n' +
+    }).toThrow('Expected AND, OR, end of input, whitespace but "r" found.\n' +
       'foo:"ba "r"\n' +
       '---------^');
   });
@@ -73,7 +73,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for unescaped special characters in literals', () => {
     expect(() => {
       fromKueryExpression('foo:ba:r');
-    }).toThrow('Expected AND, OR, end of input or whitespace but ":" found.\n' +
+    }).toThrow('Expected AND, OR, end of input, whitespace but ":" found.\n' +
       'foo:ba:r\n' +
       '------^');
   });

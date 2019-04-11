@@ -17,52 +17,65 @@
  * under the License.
  */
 
-// const errors = [
-//   {
-//     defaultMessage: '"or" requires a left and right side',
-//     key: 'kbnESQuery.kql.missingOrSubQuerySyntaxError',
-//   },
-//   {
-//     defaultMessage: '"not" requires a sub-query',
-//     key: 'kbnESQuery.kql.missingNotSubQuerySyntaxError',
-//   },
-// ];
-//
-// export class KQLSyntaxError extends Error {
-//   constructor(translationKey) {
-//     const kqlSyntaxErrorLabel = i18n.translate('kbnESQuery.kql.syntaxErrorLabel', {
-//       defaultMessage: 'KQL Syntax Error',
-//     });
-//
-//     const unknownError = i18n.translate('kbnESQuery.kql.unknownSyntaxError', {
-//       defaultMessage: '{kqlSyntaxError}: Unknown KQL syntax error',
-//       values: {
-//         kqlSyntaxError: kqlSyntaxErrorLabel,
-//       },
-//     });
-//
-//     const error = errors.find(info => info.key === translationKey);
-//
-//     if (!error) {
-//       super(unknownError);
-//     } else {
-//       const translatedError = i18n.translate(error.key, {
-//         defaultMessage: `{kqlSyntaxError}: ${error.defaultMessage}`,
-//         values: {
-//           kqlSyntaxError: kqlSyntaxErrorLabel,
-//         },
-//       });
-//       super(translatedError);
-//     }
-//
-//     this.name = 'KQLSyntaxError';
-//   }
-// }
+import { repeat } from 'lodash';
+import { i18n } from '@kbn/i18n';
+
+const translationConfigs = {
+  fieldName: {
+    defaultMessage: 'field name',
+    key: 'kbnESQuery.kql.errors.fieldNameText',
+  },
+  value: {
+    defaultMessage: 'value',
+    key: 'kbnESQuery.kql.errors.valueText',
+  },
+  literal: {
+    defaultMessage: 'literal',
+    key: 'kbnESQuery.kql.errors.LiteralText',
+  },
+  whitespace: {
+    defaultMessage: 'whitespace',
+    key: 'kbnESQuery.kql.errors.whitespaceText',
+  },
+};
+
+const endOfInputText = i18n.translate('kbnESQuery.kql.errors.endOfInputText', {
+  defaultMessage: 'end of input',
+});
 
 export class KQLSyntaxError extends Error {
-  constructor(message, shortMessage) {
-    super(message);
+  constructor(error, expression) {
+    const translatedExpectations = error.expected.map((expected) => {
+      const translationConfig = translationConfigs[expected.description];
+      if (!translationConfig) {
+        return expected.description;
+      }
+
+      return i18n.translate(translationConfig.key, {
+        defaultMessage: translationConfig.defaultMessage,
+      });
+    });
+
+    const translatedExpectationText = translatedExpectations.join(', ');
+
+    const message = i18n.translate('kbnESQuery.kql.errors.syntaxError', {
+      defaultMessage: 'Expected {expectedList} but {foundInput} found.',
+      values: {
+        expectedList: translatedExpectationText,
+        foundInput: error.found ? `"${error.found}"` : endOfInputText
+      }
+    });
+
+    console.log(message);
+    console.log(JSON.stringify(error, null, 2));
+    const fullMessage = [
+      message,
+      expression,
+      repeat('-', error.location.start.offset) + '^',
+    ].join('\n');
+
+    super(fullMessage);
     this.name = 'KQLSyntaxError';
-    this.shortMessage = shortMessage;
+    this.shortMessage = message;
   }
 }

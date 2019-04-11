@@ -41,10 +41,7 @@ export function fromKueryExpression(expression, parseOptions) {
     fromExpression(expression, parseOptions, parseKuery);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      throw new KQLSyntaxError(
-        [error.message, expression, _.repeat('-', error.location.start.offset) + '^'].join('\n'),
-        error.message,
-      );
+      throw new KQLSyntaxError(error, expression);
     } else {
       throw error;
     }
