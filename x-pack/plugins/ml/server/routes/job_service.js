@@ -92,6 +92,23 @@ export function jobServiceRoutes(server, commonRouteConfig) {
 
   server.route({
     method: 'POST',
+    path: '/api/ml/jobs/jobs_with_timerange',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
+      return jobsWithTimerange()
+        .catch(resp => {
+          console.log('SOMETHING IS UP ****', resp, jobsWithTimerange);  // remove
+          wrapError(resp);
+        });
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
     path: '/api/ml/jobs/jobs',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);

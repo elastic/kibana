@@ -140,6 +140,40 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
+  async function jobsWithTimerange() {
+    const [JOBS, JOB_STATS] = [0, 1];
+    const jobs = [];
+
+    const requests = [
+      callWithRequest('ml.jobs'),
+      callWithRequest('ml.jobStats'),
+    ];
+
+    const results = await Promise.all(requests);
+
+    if (results[JOBS] && results[JOBS].jobs) {
+      results[JOBS].jobs.forEach((job) => {
+        job.timerange = {};
+
+        if (results[JOB_STATS] && results[JOB_STATS].jobs) {
+          const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
+
+          if (jobStats !== undefined) {
+            job.state = jobStats.state;
+            if (jobStats.data_counts !== undefined) {
+              job.timerange.to = jobStats.data_counts.latest_record_timestamp;
+              job.timerange.from = jobStats.data_counts.earliest_record_timestamp;
+            }
+          }
+        }
+
+        jobs.push(job);
+      });
+    }
+    // TODO: add timerange stuff to each job
+    return jobs;
+  }
+
   async function createFullJobsList(jobIds = []) {
     const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
@@ -298,6 +332,7 @@ export function jobsProvider(callWithRequest) {
     deleteJobs,
     closeJobs,
     jobsSummary,
+    jobsWithTimerange,
     createFullJobsList,
     deletingJobTasks,
   };
