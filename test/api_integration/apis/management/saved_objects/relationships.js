@@ -30,11 +30,15 @@ export default function ({ getService }) {
         .uuid()
         .required(),
       type: Joi.string().required(),
+      direction: Joi.string().valid('To', 'From').required(),
       meta: Joi.object().keys({
         title: Joi.string().required(),
         icon: Joi.string().required(),
         editUrl: Joi.string().required(),
-        inAppUrl: Joi.string().required(),
+        inAppUrl: Joi.object().keys({
+          path: Joi.string().required(),
+          refresh: Joi.boolean().required(),
+        }).required(),
       }).required(),
     })
   );
@@ -63,21 +67,29 @@ export default function ({ getService }) {
               {
                 id: '8963ca30-3224-11e8-a572-ffca06da1357',
                 type: 'index-pattern',
+                direction: 'To',
                 meta: {
                   title: 'saved_objects*',
                   icon: 'indexPatternApp',
                   editUrl: '#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
               {
                 id: 'a42c0580-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
+                direction: 'From',
                 meta: {
                   title: 'VisualizationFromSavedSearch',
                   icon: 'visualizeApp',
                   editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
             ]);
@@ -110,21 +122,29 @@ export default function ({ getService }) {
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
+                direction: 'To',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
                   editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
               {
                 id: 'a42c0580-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
+                direction: 'To',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
                   editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
             ]);
@@ -159,21 +179,29 @@ export default function ({ getService }) {
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
                 type: 'search',
+                direction: 'To',
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
                   editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
               {
                 id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
                 type: 'dashboard',
+                direction: 'From',
                 meta: {
                   icon: 'dashboardApp',
                   title: 'Dashboard',
                   editUrl: '#/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
             ]);
@@ -207,21 +235,29 @@ export default function ({ getService }) {
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
                 type: 'search',
+                direction: 'From',
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
                   editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
+                direction: 'From',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
                   editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                    refresh: false,
+                  },
                 },
               },
             ]);

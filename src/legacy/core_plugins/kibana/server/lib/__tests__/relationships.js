@@ -153,31 +153,43 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'visualization',
+        direction: 'From',
         meta: {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/visualize/edit/1',
+          inAppUrl: {
+            path: '/visualize/edit/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '2',
         type: 'visualization',
+        direction: 'From',
         meta: {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/visualize/edit/2',
+          inAppUrl: {
+            path: '/visualize/edit/2',
+            refresh: false,
+          },
         },
       },
       {
         id: '3',
         type: 'visualization',
+        direction: 'From',
         meta: {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/visualize/edit/3',
+          inAppUrl: {
+            path: '/visualize/edit/3',
+            refresh: false,
+          }
         },
       },
     ]);
@@ -268,34 +280,46 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'index-pattern',
+        direction: 'To',
         meta:
         {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
           editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '1',
         type: 'dashboard',
+        direction: 'From',
         meta:
         {
           icon: 'dashboardApp',
           title: 'My Dashboard',
           editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: '/dashboard/1',
+          inAppUrl: {
+            path: '/dashboard/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '2',
         type: 'dashboard',
+        direction: 'From',
         meta:
         {
           icon: 'dashboardApp',
           title: 'Your Dashboard',
           editUrl: '#/management/kibana/objects/savedDashboards/2',
-          inAppUrl: '/dashboard/2',
+          inAppUrl: {
+            path: '/dashboard/2',
+            refresh: false,
+          },
         },
       },
     ]);
@@ -375,45 +399,61 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'index-pattern',
+        direction: 'To',
         meta:
         {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
           editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '1',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/visualize/edit/1',
+          inAppUrl: {
+            path: '/visualize/edit/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '2',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/visualize/edit/2',
+          inAppUrl: {
+            path: '/visualize/edit/2',
+            refresh: false,
+          },
         },
       },
       {
         id: '3',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/visualize/edit/3',
+          inAppUrl: {
+            path: '/visualize/edit/3',
+            refresh: false,
+          },
         },
       },
     ]);
@@ -495,45 +535,61 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/visualize/edit/1',
+          inAppUrl: {
+            path: '/visualize/edit/1',
+            refresh: false,
+          },
         },
       },
       {
         id: '2',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/visualize/edit/2',
+          inAppUrl: {
+            path: '/visualize/edit/2',
+            refresh: false,
+          },
         },
       },
       {
         id: '3',
         type: 'visualization',
+        direction: 'From',
         meta:
         {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/visualize/edit/3',
+          inAppUrl: {
+            path: '/visualize/edit/3',
+            refresh: false,
+          },
         },
       },
       {
         id: '1',
         type: 'search',
+        direction: 'From',
         meta:
         {
           icon: 'search',
           title: 'My Saved Search',
           editUrl: '#/management/kibana/objects/savedSearches/1',
-          inAppUrl: '/discover/1',
+          inAppUrl: {
+            path: '/discover/1',
+            refresh: false,
+          },
         },
       },
     ]);

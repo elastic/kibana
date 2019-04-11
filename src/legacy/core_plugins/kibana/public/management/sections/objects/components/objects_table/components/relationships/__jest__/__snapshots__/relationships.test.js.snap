@@ -59,6 +59,13 @@ exports[`Relationships should render dashboards normally 1`] = `
             },
             Object {
               "dataType": "string",
+              "field": "direction",
+              "name": "Direction",
+              "sortable": false,
+              "width": "75px",
+            },
+            Object {
+              "dataType": "string",
               "description": "Title of the saved object",
               "field": "meta.title",
               "name": "Title",
@@ -229,6 +236,13 @@ exports[`Relationships should render index patterns normally 1`] = `
             },
             Object {
               "dataType": "string",
+              "field": "direction",
+              "name": "Direction",
+              "sortable": false,
+              "width": "75px",
+            },
+            Object {
+              "dataType": "string",
               "description": "Title of the saved object",
               "field": "meta.title",
               "name": "Title",
@@ -355,6 +369,13 @@ exports[`Relationships should render searches normally 1`] = `
             },
             Object {
               "dataType": "string",
+              "field": "direction",
+              "name": "Direction",
+              "sortable": false,
+              "width": "75px",
+            },
+            Object {
+              "dataType": "string",
               "description": "Title of the saved object",
               "field": "meta.title",
               "name": "Title",
@@ -478,6 +499,13 @@ exports[`Relationships should render visualizations normally 1`] = `
               "render": [Function],
               "sortable": false,
               "width": "50px",
+            },
+            Object {
+              "dataType": "string",
+              "field": "direction",
+              "name": "Direction",
+              "sortable": false,
+              "width": "75px",
             },
             Object {
               "dataType": "string",
