@@ -154,7 +154,7 @@ const WatchHistoryUI = ({
     },
   ];
 
-  const onTimespanChange = (e: any) => {
+  const onTimespanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const timespan = e.target.value;
     setWatchHistoryTimeSpan(timespan);
     loadWatchHistory(timespan);
