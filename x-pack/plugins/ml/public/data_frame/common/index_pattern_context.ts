@@ -8,7 +8,7 @@ import React from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-// Because we're only getting the actual contextvalue  within a wrapping angular component,
+// Because we're only getting the actual contextvalue within a wrapping angular component,
 // we need to initialize here with `null` because TypeScript doesn't allow createContext()
 // without a default value. The union type `IndexPatternContextValue` takes care of allowing
 // the actual required type and `null`.

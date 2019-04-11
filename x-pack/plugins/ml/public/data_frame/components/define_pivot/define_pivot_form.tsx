@@ -61,158 +61,148 @@ interface Props {
   onChange(s: DefinePivotExposedState): void;
 }
 
-export const DefinePivotForm: SFC<Props> = React.memo(
-  ({ overrides = {}, onChange }) => {
-    const defaults = { ...getDefaultPivotState(), ...overrides };
+export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const defaults = { ...getDefaultPivotState(), ...overrides };
 
-    const indexPattern = useContext(IndexPatternContext);
+  const indexPattern = useContext(IndexPatternContext);
 
-    if (indexPattern === null) {
-      return null;
-    }
-
-    const fields = indexPattern.fields
-      .filter(field => field.aggregatable === true)
-      .map(field => ({ name: field.name, type: field.type }));
-
-    // The search filter
-    const [search, setSearch] = useState(defaults.search);
-
-    const addToSearch = (newSearch: string) => {
-      const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
-      setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
-    };
-
-    const searchHandler = (d: ChangeEvent<HTMLInputElement>) => {
-      const newSearch =
-        d.currentTarget.value === emptySearch ? defaultSearch : d.currentTarget.value;
-      setSearch(newSearch);
-    };
-
-    // The list of selected group by fields
-    const [groupBy, setGroupBy] = useState(defaults.groupBy as Label[]);
-
-    const addGroupBy = (d: DropDownLabel[]) => {
-      const label: Label = d[0].label;
-      const newList = uniq([...groupBy, label]);
-      setGroupBy(newList);
-    };
-
-    const deleteGroupBy = (label: Label) => {
-      const newList = groupBy.filter(l => l !== label);
-      setGroupBy(newList);
-    };
-
-    // The list of selected aggregations
-    const [aggList, setAggList] = useState(defaults.aggList as Label[]);
-
-    const addAggregation = (d: DropDownLabel[]) => {
-      const label: Label = d[0].label;
-      const newList = uniq([...aggList, label]);
-      setAggList(newList);
-    };
-
-    const deleteAggregation = (label: Label) => {
-      const newList = aggList.filter(l => l !== label);
-      setAggList(newList);
-    };
-
-    // The available fields for group by
-    const groupByOptions: EuiComboBoxOptionProps[] = [];
-    fields.forEach(field => {
-      const o: DropDownLabel = { label: field.name };
-      groupByOptions.push(o);
-    });
-
-    // The available aggregations
-    const aggOptions: EuiComboBoxOptionProps[] = [];
-    const aggOptionsData: Dictionary<OptionsDataElement> = {};
-
-    fields.forEach(field => {
-      const o: DropDownOption = { label: field.name, options: [] };
-      pivotSupportedAggs.forEach(agg => {
-        if (
-          (agg === 'cardinality' && (field.type === 'string' || field.type === 'ip')) ||
-          (agg !== 'cardinality' && field.type === 'number')
-        ) {
-          const label = `${agg}(${field.name})`;
-          o.options.push({ label });
-          const formRowLabel = `${agg}_${field.name}`;
-          aggOptionsData[label] = { agg, field: field.name, formRowLabel };
-        }
-      });
-      aggOptions.push(o);
-    });
-
-    const pivotAggs = aggList.map(l => aggOptionsData[l]);
-    const pivotGroupBy = groupBy;
-    const pivotQuery = getPivotQuery(search);
-
-    useEffect(
-      () => {
-        const valid = pivotGroupBy.length > 0 && aggList.length > 0;
-        onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
-      },
-      [JSON.stringify([aggList, pivotAggs, pivotGroupBy, search])] // TODO improve ...
-    );
-
-    const displaySearch = search === defaultSearch ? emptySearch : search;
-
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
-          <EuiForm>
-            <EuiFormRow label="Query">
-              <EuiFieldSearch
-                placeholder="Search..."
-                onChange={searchHandler}
-                value={displaySearch}
-              />
-            </EuiFormRow>
-
-            <EuiFormRow label="Group by">
-              <Fragment>
-                <GroupByList list={pivotGroupBy} deleteHandler={deleteGroupBy} />
-                <DropDown
-                  changeHandler={addGroupBy}
-                  options={groupByOptions}
-                  placeholder="Add a group by field ..."
-                />
-              </Fragment>
-            </EuiFormRow>
-
-            <EuiFormRow label="Aggregations">
-              <Fragment>
-                <AggListForm
-                  list={aggList}
-                  optionsData={aggOptionsData}
-                  deleteHandler={deleteAggregation}
-                />
-                <DropDown
-                  changeHandler={addAggregation}
-                  options={aggOptions}
-                  placeholder="Add an aggregation ..."
-                />
-              </Fragment>
-            </EuiFormRow>
-          </EuiForm>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiText>
-            <SourceIndexPreview
-              cellClick={addToSearch}
-              query={pivotQuery}
-            />
-
-            <PivotPreview
-              aggs={pivotAggs}
-              groupBy={pivotGroupBy}
-              query={pivotQuery.query}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  if (indexPattern === null) {
+    return null;
   }
-);
+
+  const fields = indexPattern.fields
+    .filter(field => field.aggregatable === true)
+    .map(field => ({ name: field.name, type: field.type }));
+
+  // The search filter
+  const [search, setSearch] = useState(defaults.search);
+
+  const addToSearch = (newSearch: string) => {
+    const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
+    setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
+  };
+
+  const searchHandler = (d: ChangeEvent<HTMLInputElement>) => {
+    const newSearch = d.currentTarget.value === emptySearch ? defaultSearch : d.currentTarget.value;
+    setSearch(newSearch);
+  };
+
+  // The list of selected group by fields
+  const [groupBy, setGroupBy] = useState(defaults.groupBy as Label[]);
+
+  const addGroupBy = (d: DropDownLabel[]) => {
+    const label: Label = d[0].label;
+    const newList = uniq([...groupBy, label]);
+    setGroupBy(newList);
+  };
+
+  const deleteGroupBy = (label: Label) => {
+    const newList = groupBy.filter(l => l !== label);
+    setGroupBy(newList);
+  };
+
+  // The list of selected aggregations
+  const [aggList, setAggList] = useState(defaults.aggList as Label[]);
+
+  const addAggregation = (d: DropDownLabel[]) => {
+    const label: Label = d[0].label;
+    const newList = uniq([...aggList, label]);
+    setAggList(newList);
+  };
+
+  const deleteAggregation = (label: Label) => {
+    const newList = aggList.filter(l => l !== label);
+    setAggList(newList);
+  };
+
+  // The available fields for group by
+  const groupByOptions: EuiComboBoxOptionProps[] = [];
+  fields.forEach(field => {
+    const o: DropDownLabel = { label: field.name };
+    groupByOptions.push(o);
+  });
+
+  // The available aggregations
+  const aggOptions: EuiComboBoxOptionProps[] = [];
+  const aggOptionsData: Dictionary<OptionsDataElement> = {};
+
+  fields.forEach(field => {
+    const o: DropDownOption = { label: field.name, options: [] };
+    pivotSupportedAggs.forEach(agg => {
+      if (
+        (agg === 'cardinality' && (field.type === 'string' || field.type === 'ip')) ||
+        (agg !== 'cardinality' && field.type === 'number')
+      ) {
+        const label = `${agg}(${field.name})`;
+        o.options.push({ label });
+        const formRowLabel = `${agg}_${field.name}`;
+        aggOptionsData[label] = { agg, field: field.name, formRowLabel };
+      }
+    });
+    aggOptions.push(o);
+  });
+
+  const pivotAggs = aggList.map(l => aggOptionsData[l]);
+  const pivotGroupBy = groupBy;
+  const pivotQuery = getPivotQuery(search);
+
+  useEffect(
+    () => {
+      const valid = pivotGroupBy.length > 0 && aggList.length > 0;
+      onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
+    },
+    [JSON.stringify([aggList, pivotAggs, pivotGroupBy, search])] // TODO improve ...
+  );
+
+  const displaySearch = search === defaultSearch ? emptySearch : search;
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
+        <EuiForm>
+          <EuiFormRow label="Query">
+            <EuiFieldSearch
+              placeholder="Search..."
+              onChange={searchHandler}
+              value={displaySearch}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow label="Group by">
+            <Fragment>
+              <GroupByList list={pivotGroupBy} deleteHandler={deleteGroupBy} />
+              <DropDown
+                changeHandler={addGroupBy}
+                options={groupByOptions}
+                placeholder="Add a group by field ..."
+              />
+            </Fragment>
+          </EuiFormRow>
+
+          <EuiFormRow label="Aggregations">
+            <Fragment>
+              <AggListForm
+                list={aggList}
+                optionsData={aggOptionsData}
+                deleteHandler={deleteAggregation}
+              />
+              <DropDown
+                changeHandler={addAggregation}
+                options={aggOptions}
+                placeholder="Add an aggregation ..."
+              />
+            </Fragment>
+          </EuiFormRow>
+        </EuiForm>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiText>
+          <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
+
+          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});

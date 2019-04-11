@@ -58,16 +58,14 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
       <div ref={definePivotRef} />
       {isCurrentStep && (
         <Fragment>
-            <DefinePivotForm onChange={setPivot} overrides={pivotState} />
-            <WizardNav
-              next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
-              nextActive={pivotState.valid}
-            />
+          <DefinePivotForm onChange={setPivot} overrides={pivotState} />
+          <WizardNav
+            next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
+            nextActive={pivotState.valid}
+          />
         </Fragment>
       )}
-      {!isCurrentStep && (
-        <DefinePivotSummary {...pivotState} />
-      )}
+      {!isCurrentStep && <DefinePivotSummary {...pivotState} />}
     </Fragment>
   );
 };
@@ -144,7 +142,7 @@ export const Wizard: SFC = React.memo(() => {
             <WizardNav
               previous={() => {
                 setCurrentStep(WIZARD_STEPS.DEFINE_PIVOT);
-                //scrollToRef();
+                // scrollToRef();
               }}
               next={() => setCurrentStep(WIZARD_STEPS.JOB_CREATE)}
               nextActive={jobDetailsState.valid}

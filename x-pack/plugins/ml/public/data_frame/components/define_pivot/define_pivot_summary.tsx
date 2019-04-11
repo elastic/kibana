@@ -111,11 +111,7 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview
-            aggs={pivotAggs}
-            groupBy={pivotGroupBy}
-            query={pivotQuery.query}
-          />
+          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

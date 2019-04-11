@@ -6,14 +6,7 @@
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer
-} from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -83,8 +76,7 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
           Start data frame
         </EuiButton>
       )}
-
-      {(created && started) && (
+      {created && started && (
         <Fragment>
           <EuiSpacer size="m" />
 

@@ -33,7 +33,8 @@ module.directive('mlNewDataFrame', ($route: any, Private: any) => {
             {React.createElement(Page)}
           </IndexPatternContext.Provider>
         </I18nContext>,
-      element[0]);
+        element[0]
+      );
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);
