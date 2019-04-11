@@ -93,8 +93,8 @@ export interface IndexPatternSavedObject {
 
 export interface TimeRangeParams {
   timezone: string;
-  min: Date;
-  max: Date;
+  min: Date | string | number;
+  max: Date | string | number;
 }
 
 export interface VisPanel {
@@ -110,13 +110,8 @@ export interface SearchPanel {
   timerange: TimeRangeParams;
 }
 
-export interface SearchSourceQuery {
-  query: string;
-  language: string;
-}
-
 export interface SearchSource {
-  query: SearchSourceQuery;
+  query: any;
   filter: any[];
 }
 

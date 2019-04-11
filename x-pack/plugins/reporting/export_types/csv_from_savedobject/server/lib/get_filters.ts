@@ -5,15 +5,15 @@
  */
 
 import { badRequest } from 'boom';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import { SavedSearchObjectAttributes, TimeRangeParams } from '../../';
 import { QueryFilter, Filter, SearchSourceFilter } from './';
 
 export function getFilters(
   indexPatternId: string,
-  indexPatternTimeField: string,
-  timerange: TimeRangeParams,
+  indexPatternTimeField: string | null,
+  timerange: TimeRangeParams | null,
   savedSearchObjectAttr: SavedSearchObjectAttributes,
   searchSourceFilter: SearchSourceFilter,
   queryFilter: QueryFilter
@@ -29,18 +29,20 @@ export function getFilters(
       );
     }
 
-    const savedSearchCols = savedSearchObjectAttr.columns || [];
-    includes = [indexPatternTimeField, ...savedSearchCols];
+    timezone = timerange.timezone;
+    const { min: gte, max: lte } = timerange;
     timeFilter = {
       range: {
         [indexPatternTimeField]: {
-          format: 'epoch_millis',
-          gte: moment(timerange.min).valueOf(),
-          lte: moment(timerange.max).valueOf(),
+          format: 'strict_date_time',
+          gte: moment.tz(moment(gte), timezone).format(),
+          lte: moment.tz(moment(lte), timezone).format(),
         },
       },
     };
-    timezone = timerange.timezone;
+
+    const savedSearchCols = savedSearchObjectAttr.columns || [];
+    includes = [indexPatternTimeField, ...savedSearchCols];
   } else {
     includes = savedSearchObjectAttr.columns || [];
     timeFilter = null;
@@ -49,5 +51,5 @@ export function getFilters(
 
   const combinedFilter: Filter[] = [timeFilter, searchSourceFilter, queryFilter].filter(Boolean); // builds an array of defined filters
 
-  return { combinedFilter, includes, timezone };
+  return { timezone, combinedFilter, includes };
 }

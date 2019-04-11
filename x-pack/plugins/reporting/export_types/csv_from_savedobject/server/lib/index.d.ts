@@ -70,16 +70,16 @@ export interface GenerateCsvParams {
  * and passes them through to other non-TS modules.
  */
 export interface Filter {
-  isFilter: true;
+  isFilter: boolean;
 }
 export interface TimeFilter extends Filter {
-  isTimeFilter: true;
+  isTimeFilter: boolean;
 }
 export interface QueryFilter extends Filter {
-  isQueryFilter: true;
+  isQueryFilter: boolean;
 }
 export interface SearchSourceFilter extends Filter {
-  isSearchSourceFilter: true;
+  isSearchSourceFilter: boolean;
 }
 
 export interface ESQueryConfig {
