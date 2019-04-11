@@ -116,7 +116,7 @@ export class ThresholdWatch extends BaseWatch {
     if (this.index !== undefined && this.index.length < 1) {
       errors.index.push(
         i18n.translate(
-          'xpack.watcher.sections.watchEdit.titlePanel.enterOneOrMoreIndicesValidationMessage',
+          'xpack.watcher.sections.watchEdit.tbreshold.enterOneOrMoreIndicesValidationMessage',
           {
             defaultMessage: 'Enter one or more indices',
           }
@@ -126,7 +126,7 @@ export class ThresholdWatch extends BaseWatch {
     if (!this.timeField) {
       errors.timeField.push(
         i18n.translate(
-          'xpack.watcher.sections.watchEdit.titlePanel.timeFieldIsRequiredValidationText',
+          'xpack.watcher.sections.watchEdit.threshold.timeFieldIsRequiredValidationText',
           {
             defaultMessage: 'A time field is required',
           }
@@ -136,7 +136,7 @@ export class ThresholdWatch extends BaseWatch {
     if (!this.triggerIntervalSize) {
       errors.triggerIntervalSize.push(
         i18n.translate(
-          'xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage',
+          'xpack.watcher.sections.watchEdit.threshold.intervalSizeIsRequiredValidationMessage',
           {
             defaultMessage: 'Interval size is required',
           }
@@ -146,7 +146,7 @@ export class ThresholdWatch extends BaseWatch {
     if (aggTypes[this.aggType].fieldRequired && !this.aggField) {
       errors.aggField.push(
         i18n.translate(
-          'xpack.watcher.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage',
+          'xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage',
           {
             defaultMessage: 'Please select a field',
           }
