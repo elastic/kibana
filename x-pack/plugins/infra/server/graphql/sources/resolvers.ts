@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { convertChangeToUpdater } from '../../../common/source_configuration';
+import { UserInputError } from 'apollo-server-errors';
+import { failure } from 'io-ts/lib/PathReporter';
+
 import {
   InfraSourceLogColumn,
   InfraSourceResolvers,
@@ -14,9 +16,10 @@ import {
 import { InfraSourceStatus } from '../../lib/source_status';
 import {
   InfraSources,
-  StaticSourceConfigurationFieldColumnRuntimeType,
-  StaticSourceConfigurationMessageColumnRuntimeType,
-  StaticSourceConfigurationTimestampColumnRuntimeType,
+  SavedSourceConfigurationFieldColumnRuntimeType,
+  SavedSourceConfigurationMessageColumnRuntimeType,
+  SavedSourceConfigurationTimestampColumnRuntimeType,
+  SavedSourceConfigurationColumnRuntimeType,
 } from '../../lib/sources';
 import {
   ChildResolverOf,
@@ -103,15 +106,15 @@ export const createSourcesResolvers = (
   },
   InfraSourceLogColumn: {
     __resolveType(logColumn) {
-      if (StaticSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
+      if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
         return 'InfraSourceTimestampLogColumn';
       }
 
-      if (StaticSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
+      if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
         return 'InfraSourceMessageLogColumn';
       }
 
-      if (StaticSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
         return 'InfraSourceFieldLogColumn';
       }
 
@@ -120,12 +123,21 @@ export const createSourcesResolvers = (
   },
   Mutation: {
     async createSource(root, args, { req }) {
+      const logColumns = (args.sourceProperties.logColumns || []).map(logColumn =>
+        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
+          throw new UserInputError(failure(errors).join('\n'));
+        })
+      );
+
       const sourceConfiguration = await libs.sources.createSourceConfiguration(
         req,
         args.id,
         compactObject({
-          ...args.source,
-          fields: args.source.fields ? compactObject(args.source.fields) : undefined,
+          ...args.sourceProperties,
+          fields: args.sourceProperties.fields
+            ? compactObject(args.sourceProperties.fields)
+            : undefined,
+          logColumns,
         })
       );
 
@@ -141,12 +153,22 @@ export const createSourcesResolvers = (
       };
     },
     async updateSource(root, args, { req }) {
-      const updaters = args.changes.map(convertChangeToUpdater);
+      const logColumns = (args.sourceProperties.logColumns || []).map(logColumn =>
+        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
+          throw new UserInputError(failure(errors).join('\n'));
+        })
+      );
 
       const updatedSourceConfiguration = await libs.sources.updateSourceConfiguration(
         req,
         args.id,
-        updaters
+        compactObject({
+          ...args.sourceProperties,
+          fields: args.sourceProperties.fields
+            ? compactObject(args.sourceProperties.fields)
+            : undefined,
+          logColumns,
+        })
       );
 
       return {

@@ -29,7 +29,7 @@ import { Source } from '../../containers/source';
 import { LogsToolbar } from './page_toolbar';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern, sourceId } = useContext(Source.Context);
+  const { derivedIndexPattern, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
 
   return (
@@ -56,7 +56,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       </WithLogFilter>
       <WithFlyoutOptions>
         {({ showFlyout, setFlyoutItem }) => (
-          <PageContent>
+          <PageContent key={`${sourceId}-${version}`}>
             <AutoSizer content>
               {({ measureRef, content: { width = 0, height = 0 } }) => (
                 <LogPageEventStreamColumn innerRef={measureRef}>

@@ -47,7 +47,9 @@ export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
   InfraSource: {
-    logEntriesAround: InfraSourceLogEntriesAroundResolver; logEntriesBetween: InfraSourceLogEntriesBetweenResolver; logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logEntriesAround: InfraSourceLogEntriesAroundResolver;
+    logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
+    logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
     logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {

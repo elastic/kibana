@@ -21,10 +21,20 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
   },
   logColumns: [
     {
-      kind: 'timestamp',
+      timestampColumn: {
+        id: '5e7f964a-be8a-40d8-88d2-fbcfbdca0e2f',
+      },
     },
     {
-      kind: 'message',
+      fieldColumn: {
+        id: ' eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
+        field: 'event.dataset',
+      },
+    },
+    {
+      messageColumn: {
+        id: 'b645d6da-824b-4723-9a2a-e8cece1645c0',
+      },
     },
   ],
 };

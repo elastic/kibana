@@ -19,9 +19,9 @@ import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../ad
 import {
   InfraSourceConfiguration,
   InfraSources,
-  StaticSourceConfigurationFieldColumnRuntimeType,
-  StaticSourceConfigurationMessageColumnRuntimeType,
-  StaticSourceConfigurationTimestampColumnRuntimeType,
+  SavedSourceConfigurationFieldColumnRuntimeType,
+  SavedSourceConfigurationMessageColumnRuntimeType,
+  SavedSourceConfigurationTimestampColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
 import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
@@ -229,18 +229,18 @@ const convertLogDocumentToEntry = (
   gid: document.gid,
   source: sourceId,
   columns: logColumns.map(logColumn => {
-    if (StaticSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
+    if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
       return {
         timestamp: document.key.time,
       };
-    } else if (StaticSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
+    } else if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
       return {
         message: formatLogMessage(document.fields),
       };
     } else {
       return {
-        field: logColumn.field,
-        value: stringify(document.fields[logColumn.field] || null),
+        field: logColumn.fieldColumn.field,
+        value: stringify(document.fields[logColumn.fieldColumn.field] || null),
       };
     }
   }),
@@ -260,8 +260,8 @@ const getRequiredFields = (
 ): string[] => {
   const fieldsFromCustomColumns = configuration.logColumns.reduce<string[]>(
     (accumulatedFields, logColumn) => {
-      if (StaticSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
-        return [...accumulatedFields, logColumn.field];
+      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+        return [...accumulatedFields, logColumn.fieldColumn.field];
       }
       return accumulatedFields;
     },

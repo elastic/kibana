@@ -35,19 +35,18 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 };
 
 export const isTimestampColumn = (column: LogEntryColumn): column is LogEntryTimestampColumn =>
-  column.__typename === 'InfraLogEntryTimestampColumn';
+  'timestamp' in column;
 
 export const isMessageColumn = (column: LogEntryColumn): column is LogEntryMessageColumn =>
-  column.__typename === 'InfraLogEntryMessageColumn';
+  'message' in column;
 
 export const isFieldColumn = (column: LogEntryColumn): column is LogEntryFieldColumn =>
-  column.__typename === 'InfraLogEntryFieldColumn';
+  'field' in column;
 
 export const isConstantSegment = (
   segment: LogEntryMessageSegment
-): segment is LogEntryConstantMessageSegment =>
-  segment.__typename === 'InfraLogMessageConstantSegment';
+): segment is LogEntryConstantMessageSegment => 'constant' in segment;
 
 export const isFieldSegment = (
   segment: LogEntryMessageSegment
-): segment is LogEntryFieldMessageSegment => segment.__typename === 'InfraLogMessageFieldSegment';
+): segment is LogEntryFieldMessageSegment => 'field' in segment && 'value' in segment;

@@ -22,14 +22,20 @@ export const sourceConfigurationFieldsFragment = gql`
     }
     logColumns {
       ... on InfraSourceTimestampLogColumn {
-        kind
+        timestampColumn {
+          id
+        }
       }
       ... on InfraSourceMessageLogColumn {
-        kind
+        messageColumn {
+          id
+        }
       }
       ... on InfraSourceFieldLogColumn {
-        kind
-        field
+        fieldColumn {
+          id
+          field
+        }
       }
     }
   }

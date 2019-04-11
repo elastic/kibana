@@ -22,10 +22,6 @@ export const LogTextStreamItemFieldField: React.FunctionComponent<
 > = ({ encodedValue, isHovered, scale }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
 
-  if (value === null) {
-    return null;
-  }
-
   return (
     <LogTextStreamItemFieldFieldWrapper isHovered={isHovered} scale={scale}>
       {value}
@@ -43,10 +39,11 @@ const hoveredFieldStyle = css`
 const LogTextStreamItemFieldFieldWrapper = LogTextStreamItemField.extend.attrs<{
   isHovered: boolean;
 }>({})`
-  flex-grow: 1;
+  flex: 1 0 0%;
   text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
-  padding: 0 ${props => props.theme.eui.paddingSizes.l};
 
   ${props => (props.isHovered ? hoveredFieldStyle : '')};
 `;

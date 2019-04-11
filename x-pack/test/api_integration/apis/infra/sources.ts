@@ -53,7 +53,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const response = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
               description: 'DESCRIPTION',
               logAlias: 'filebeat-**',
@@ -92,7 +92,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const response = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -121,7 +121,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -132,7 +132,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           .mutate<any>({
             mutation: createSourceMutation,
             variables: {
-              source: {
+              sourceProperties: {
                 name: 'NAME',
               },
               sourceId: 'default',
@@ -154,7 +154,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -179,11 +179,11 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
     });
 
     describe('updateSource mutation', () => {
-      it('applies multiple updates to an existing source', async () => {
+      it('applies all top-level field updates to an existing source', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -200,33 +200,12 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            changes: [
-              {
-                setName: {
-                  name: 'UPDATED_NAME',
-                },
-              },
-              {
-                setDescription: {
-                  description: 'UPDATED_DESCRIPTION',
-                },
-              },
-              {
-                setAliases: {
-                  logAlias: 'filebeat-**',
-                  metricAlias: 'metricbeat-**',
-                },
-              },
-              {
-                setFields: {
-                  container: 'UPDATED_CONTAINER',
-                  host: 'UPDATED_HOST',
-                  pod: 'UPDATED_POD',
-                  tiebreaker: 'UPDATED_TIEBREAKER',
-                  timestamp: 'UPDATED_TIMESTAMP',
-                },
-              },
-            ],
+            sourceProperties: {
+              name: 'UPDATED_NAME',
+              description: 'UPDATED_DESCRIPTION',
+              metricAlias: 'metricbeat-**',
+              logAlias: 'filebeat-**',
+            },
           },
         });
 
@@ -240,20 +219,20 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.description).to.be('UPDATED_DESCRIPTION');
         expect(configuration.metricAlias).to.be('metricbeat-**');
         expect(configuration.logAlias).to.be('filebeat-**');
-        expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
-        expect(configuration.fields.host).to.be('UPDATED_HOST');
-        expect(configuration.fields.pod).to.be('UPDATED_POD');
-        expect(configuration.fields.tiebreaker).to.be('UPDATED_TIEBREAKER');
-        expect(configuration.fields.timestamp).to.be('UPDATED_TIMESTAMP');
+        expect(configuration.fields.host).to.be('host.name');
+        expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
+        expect(configuration.fields.tiebreaker).to.be('_doc');
+        expect(configuration.fields.timestamp).to.be('@timestamp');
+        expect(configuration.fields.container).to.be('container.id');
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
 
-      it('updates a single alias', async () => {
+      it('applies a single top-level update to an existing source', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -270,13 +249,9 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            changes: [
-              {
-                setAliases: {
-                  metricAlias: 'metricbeat-**',
-                },
-              },
-            ],
+            sourceProperties: {
+              metricAlias: 'metricbeat-**',
+            },
           },
         });
 
@@ -292,11 +267,56 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(status.metricIndicesExist).to.be(true);
       });
 
-      it('updates a single field', async () => {
+      it('applies a single nested field update to an existing source', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            source: {
+            sourceProperties: {
+              name: 'NAME',
+              fields: {
+                host: 'HOST',
+              },
+            },
+            sourceId: 'default',
+          },
+        });
+
+        const { version: initialVersion, updatedAt: createdAt } =
+          creationResponse.data && creationResponse.data.createSource.source;
+
+        expect(initialVersion).to.be.a('string');
+        expect(createdAt).to.be.greaterThan(0);
+
+        const updateResponse = await client.mutate<any>({
+          mutation: updateSourceMutation,
+          variables: {
+            sourceId: 'default',
+            sourceProperties: {
+              fields: {
+                container: 'UPDATED_CONTAINER',
+              },
+            },
+          },
+        });
+
+        const { version, updatedAt, configuration } =
+          updateResponse.data && updateResponse.data.updateSource.source;
+
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
+        expect(updatedAt).to.be.greaterThan(createdAt);
+        expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
+        expect(configuration.fields.host).to.be('HOST');
+        expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
+        expect(configuration.fields.tiebreaker).to.be('_doc');
+        expect(configuration.fields.timestamp).to.be('@timestamp');
+      });
+
+      it('applies a log column update to an existing source', async () => {
+        const creationResponse = await client.mutate<any>({
+          mutation: createSourceMutation,
+          variables: {
+            sourceProperties: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -313,13 +333,16 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            changes: [
-              {
-                setFields: {
-                  container: 'UPDATED_CONTAINER',
+            sourceProperties: {
+              logColumns: [
+                {
+                  fieldLogColumn: {
+                    kind: 'field',
+                    field: 'ADDED_COLUMN_FIELD',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         });
 
@@ -329,11 +352,12 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(version).to.be.a('string');
         expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
-        expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
-        expect(configuration.fields.host).to.be('host.name');
-        expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
-        expect(configuration.fields.tiebreaker).to.be('_doc');
-        expect(configuration.fields.timestamp).to.be('@timestamp');
+        expect(configuration.logColumns).to.equal([
+          {
+            kind: 'field',
+            field: 'ADDED_COLUMN_FIELD',
+          },
+        ]);
       });
     });
   });
@@ -343,8 +367,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
 export default sourcesTests;
 
 const createSourceMutation = gql`
-  mutation createSource($sourceId: ID!, $source: CreateSourceInput!) {
-    createSource(id: $sourceId, source: $source) {
+  mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
+    createSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
         id
         version
@@ -380,8 +404,8 @@ const deleteSourceMutation = gql`
 `;
 
 const updateSourceMutation = gql`
-  mutation updateSource($sourceId: ID!, $changes: [UpdateSourceInput!]!) {
-    updateSource(id: $sourceId, changes: $changes) {
+  mutation updateSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
+    updateSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
         id
         version

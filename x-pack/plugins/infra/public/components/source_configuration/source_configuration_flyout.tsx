@@ -13,211 +13,291 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import { Source } from '../../containers/source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
+import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
+import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
+import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
-import { useSourceConfigurationFormState } from './source_configuration_form_state';
 
 const noop = () => undefined;
 
 interface SourceConfigurationFlyoutProps {
+  intl: InjectedIntl;
   shouldAllowEdit: boolean;
 }
 
-export const SourceConfigurationFlyout: React.FunctionComponent<
-  SourceConfigurationFlyoutProps
-> = props => {
-  const { shouldAllowEdit } = props;
-  const { isVisible, hide } = useContext(SourceConfigurationFlyoutState.Context);
+export const SourceConfigurationFlyout = injectI18n(
+  ({ intl, shouldAllowEdit }: SourceConfigurationFlyoutProps) => {
+    const { isVisible, hide } = useContext(SourceConfigurationFlyoutState.Context);
 
-  const {
-    createSourceConfiguration,
-    source,
-    sourceExists,
-    isLoading,
-    updateSourceConfiguration,
-  } = useContext(Source.Context);
+    const {
+      createSourceConfiguration,
+      source,
+      sourceExists,
+      isLoading,
+      updateSourceConfiguration,
+    } = useContext(Source.Context);
+    const configuration = source && source.configuration;
+    const availableFields = useMemo(
+      () => (source && source.status ? source.status.indexFields.map(field => field.name) : []),
+      [source]
+    );
 
-  const configuration = source && source.configuration;
-  const initialFormState = useMemo(
-    () =>
-      configuration
-        ? {
-            name: configuration.name,
-            description: configuration.description,
+    const indicesConfigurationFormState = useIndicesConfigurationFormState({
+      initialFormState: useMemo(
+        () =>
+          configuration
+            ? {
+                name: configuration.name,
+                description: configuration.description,
+                logAlias: configuration.logAlias,
+                metricAlias: configuration.metricAlias,
+                containerField: configuration.fields.container,
+                hostField: configuration.fields.host,
+                messageField: configuration.fields.message,
+                podField: configuration.fields.pod,
+                tiebreakerField: configuration.fields.tiebreaker,
+                timestampField: configuration.fields.timestamp,
+              }
+            : undefined,
+        [configuration]
+      ),
+    });
+    const logColumnsConfigurationFormState = useLogColumnsConfigurationFormState({
+      initialFormState: useMemo(
+        () =>
+          configuration
+            ? {
+                logColumns: configuration.logColumns,
+              }
+            : undefined,
+        [configuration]
+      ),
+    });
+
+    const resetForms = useCallback(
+      () => {
+        indicesConfigurationFormState.resetForm();
+        logColumnsConfigurationFormState.resetForm();
+      },
+      [indicesConfigurationFormState.resetForm, logColumnsConfigurationFormState.formState]
+    );
+
+    const isFormDirty = useMemo(
+      () =>
+        indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,
+      [indicesConfigurationFormState.isFormDirty, logColumnsConfigurationFormState.isFormDirty]
+    );
+
+    const isFormValid = useMemo(
+      () =>
+        indicesConfigurationFormState.isFormValid && logColumnsConfigurationFormState.isFormValid,
+      [indicesConfigurationFormState.isFormValid, logColumnsConfigurationFormState.isFormValid]
+    );
+
+    const persistUpdates = useCallback(
+      async () => {
+        if (sourceExists) {
+          await updateSourceConfiguration({
+            name: indicesConfigurationFormState.formStateChanges.name,
+            description: indicesConfigurationFormState.formStateChanges.description,
+            logAlias: indicesConfigurationFormState.formStateChanges.logAlias,
+            metricAlias: indicesConfigurationFormState.formStateChanges.metricAlias,
             fields: {
-              container: configuration.fields.container,
-              host: configuration.fields.host,
-              message: configuration.fields.message,
-              pod: configuration.fields.pod,
-              tiebreaker: configuration.fields.tiebreaker,
-              timestamp: configuration.fields.timestamp,
+              container: indicesConfigurationFormState.formStateChanges.containerField,
+              host: indicesConfigurationFormState.formStateChanges.hostField,
+              pod: indicesConfigurationFormState.formStateChanges.podField,
+              tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
+              timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
             },
-            logAlias: configuration.logAlias,
-            metricAlias: configuration.metricAlias,
-            logColumns: configuration.logColumns.map(({ __typename, ...logColumn }) => logColumn),
-          }
-        : defaultFormState,
-    [configuration]
-  );
+            logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
+          });
+        } else {
+          await createSourceConfiguration({
+            name: indicesConfigurationFormState.formState.name,
+            description: indicesConfigurationFormState.formState.description,
+            logAlias: indicesConfigurationFormState.formState.logAlias,
+            metricAlias: indicesConfigurationFormState.formState.metricAlias,
+            fields: {
+              container: indicesConfigurationFormState.formState.containerField,
+              host: indicesConfigurationFormState.formState.hostField,
+              pod: indicesConfigurationFormState.formState.podField,
+              tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
+              timestamp: indicesConfigurationFormState.formState.timestampField,
+            },
+            logColumns: logColumnsConfigurationFormState.formState.logColumns,
+          });
+        }
+        resetForms();
+      },
+      [
+        sourceExists,
+        updateSourceConfiguration,
+        createSourceConfiguration,
+        resetForms,
+        indicesConfigurationFormState.formState,
+        indicesConfigurationFormState.formStateChanges,
+        logColumnsConfigurationFormState.formState,
+        logColumnsConfigurationFormState.formStateChanges,
+      ]
+    );
 
-  const {
-    fieldProps,
-    formState,
-    isFormDirty,
-    isFormValid,
-    resetForm,
-    updates,
-  } = useSourceConfigurationFormState({
-    initialFormState,
-  });
+    if (!isVisible || !configuration) {
+      return null;
+    }
 
-  const persistUpdates = useCallback(
-    async () => {
-      if (sourceExists) {
-        await updateSourceConfiguration(updates);
-      } else {
-        await createSourceConfiguration(formState);
-      }
-      resetForm();
-    },
-    [sourceExists, updateSourceConfiguration, createSourceConfiguration, resetForm, formState]
-  );
+    const tabs: EuiTabbedContentTab[] = [
+      {
+        id: 'indicesAndFields',
+        name: intl.formatMessage({
+          id: 'xpack.infra.sourceConfiguration.sourceConfigurationIndicesTabTitle',
+          defaultMessage: 'Indices and fields',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <NameConfigurationPanel
+              isLoading={isLoading}
+              nameFieldProps={indicesConfigurationFormState.fieldProps.name}
+              readOnly={!shouldAllowEdit}
+            />
+            <EuiSpacer />
+            <IndicesConfigurationPanel
+              isLoading={isLoading}
+              logAliasFieldProps={indicesConfigurationFormState.fieldProps.logAlias}
+              metricAliasFieldProps={indicesConfigurationFormState.fieldProps.metricAlias}
+              readOnly={!shouldAllowEdit}
+            />
+            <EuiSpacer />
+            <FieldsConfigurationPanel
+              containerFieldProps={indicesConfigurationFormState.fieldProps.containerField}
+              hostFieldProps={indicesConfigurationFormState.fieldProps.hostField}
+              isLoading={isLoading}
+              podFieldProps={indicesConfigurationFormState.fieldProps.podField}
+              readOnly={!shouldAllowEdit}
+              tiebreakerFieldProps={indicesConfigurationFormState.fieldProps.tiebreakerField}
+              timestampFieldProps={indicesConfigurationFormState.fieldProps.timestampField}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'logs',
+        name: intl.formatMessage({
+          id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogsTabTitle',
+          defaultMessage: 'Log entries',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <LogColumnsConfigurationPanel
+              addLogColumn={logColumnsConfigurationFormState.addLogColumn}
+              availableFields={availableFields}
+              isLoading={isLoading}
+              logColumnConfiguration={logColumnsConfigurationFormState.logColumnConfigurationProps}
+            />
+          </>
+        ),
+      },
+    ];
 
-  if (!isVisible || !configuration) {
-    return null;
-  }
-
-  return (
-    <EuiFlyout
-      aria-labelledby="sourceConfigurationTitle"
-      data-test-subj="sourceConfigurationFlyout"
-      hideCloseButton
-      onClose={noop}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle>
-          <h2 id="sourceConfigurationTitle">
-            {shouldAllowEdit ? (
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
-                defaultMessage="Configure source"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
-                defaultMessage="View source configuration"
-              />
-            )}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <NameConfigurationPanel
-          isLoading={isLoading}
-          readOnly={!shouldAllowEdit}
-          nameFieldProps={fieldProps.name}
-        />
-        <EuiSpacer />
-        <IndicesConfigurationPanel
-          isLoading={isLoading}
-          readOnly={!shouldAllowEdit}
-          logAliasFieldProps={fieldProps.logAlias}
-          metricAliasFieldProps={fieldProps.metricAlias}
-        />
-        <EuiSpacer />
-        <FieldsConfigurationPanel
-          containerFieldProps={fieldProps.containerField}
-          hostFieldProps={fieldProps.hostField}
-          isLoading={isLoading}
-          readOnly={!shouldAllowEdit}
-          podFieldProps={fieldProps.podField}
-          tiebreakerFieldProps={fieldProps.tiebreakerField}
-          timestampFieldProps={fieldProps.timestampField}
-        />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            {!isFormDirty ? (
-              <EuiButtonEmpty
-                data-test-subj="closeFlyoutButton"
-                iconType="cross"
-                isDisabled={isLoading}
-                onClick={() => hide()}
-              >
+    return (
+      <EuiFlyout
+        aria-labelledby="sourceConfigurationTitle"
+        data-test-subj="sourceConfigurationFlyout"
+        hideCloseButton
+        onClose={noop}
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2 id="sourceConfigurationTitle">
+              {shouldAllowEdit ? (
                 <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.closeButtonLabel"
-                  defaultMessage="Close"
+                  id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
+                  defaultMessage="Configure source"
                 />
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonEmpty
-                data-test-subj="discardAndCloseFlyoutButton"
-                color="danger"
-                iconType="cross"
-                isDisabled={isLoading}
-                onClick={() => {
-                  resetForm();
-                  hide();
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.discardAndCloseButtonLabel"
-                  defaultMessage="Discard and Close"
-                />
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem />
-          {shouldAllowEdit && (
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiButton color="primary" isLoading fill>
-                  Loading
-                </EuiButton>
               ) : (
-                <EuiButton
-                  data-test-subj="updateSourceConfigurationButton"
-                  color="primary"
-                  isDisabled={!isFormDirty || !isFormValid}
-                  fill
-                  onClick={persistUpdates}
+                <FormattedMessage
+                  id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
+                  defaultMessage="View source configuration"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiTabbedContent tabs={tabs} />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              {!isFormDirty ? (
+                <EuiButtonEmpty
+                  data-test-subj="closeFlyoutButton"
+                  iconType="cross"
+                  isDisabled={isLoading}
+                  onClick={() => hide()}
                 >
                   <FormattedMessage
-                    id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
-                    defaultMessage="Update Source"
+                    id="xpack.infra.sourceConfiguration.closeButtonLabel"
+                    defaultMessage="Close"
                   />
-                </EuiButton>
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  data-test-subj="discardAndCloseFlyoutButton"
+                  color="danger"
+                  iconType="cross"
+                  isDisabled={isLoading}
+                  onClick={() => {
+                    resetForms();
+                    hide();
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.sourceConfiguration.discardAndCloseButtonLabel"
+                    defaultMessage="Discard and Close"
+                  />
+                </EuiButtonEmpty>
               )}
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
-};
-
-const defaultFormState = {
-  name: '',
-  description: '',
-  fields: {
-    container: '',
-    host: '',
-    message: [],
-    pod: '',
-    tiebreaker: '',
-    timestamp: '',
-  },
-  logAlias: '',
-  metricAlias: '',
-  logColumns: [],
-};
+            <EuiFlexItem />
+            {shouldAllowEdit && (
+              <EuiFlexItem grow={false}>
+                {isLoading ? (
+                  <EuiButton color="primary" isLoading fill>
+                    Loading
+                  </EuiButton>
+                ) : (
+                  <EuiButton
+                    data-test-subj="updateSourceConfigurationButton"
+                    color="primary"
+                    isDisabled={!isFormDirty || !isFormValid}
+                    fill
+                    onClick={persistUpdates}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
+                      defaultMessage="Update Source"
+                    />
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
+);

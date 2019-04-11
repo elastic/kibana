@@ -64,13 +64,13 @@ export const LogTextStreamLogEntryItemView = injectI18n(
         onMouseEnter={setItemIsHovered}
         onMouseLeave={setItemIsNotHovered}
       >
-        {logEntry.columns.map(column => {
+        {logEntry.columns.map((column, columnIndex) => {
           if (isTimestampColumn(column)) {
             return (
               <LogTextStreamItemDateField
                 hasHighlights={false}
                 isHovered={isHovered}
-                key="timestamp"
+                key={`${columnIndex}`}
                 scale={scale}
               >
                 <FormattedTime time={column.timestamp} />
@@ -82,7 +82,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
               defaultMessage: 'View Details',
             });
             return (
-              <Fragment key="message">
+              <Fragment key={`${columnIndex}`}>
                 <LogTextStreamIconDiv isHovered={isHovered}>
                   {isHovered ? (
                     <EuiToolTip content={viewDetailsLabel}>
@@ -109,7 +109,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
               <LogTextStreamItemFieldField
                 encodedValue={column.value}
                 isHovered={isHovered}
-                key={`field-${column.field}`}
+                key={`${columnIndex}`}
                 scale={scale}
               />
             );

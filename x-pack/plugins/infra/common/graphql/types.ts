@@ -75,16 +75,31 @@ export interface InfraSourceFields {
 }
 /** The built-in timestamp log column */
 export interface InfraSourceTimestampLogColumn {
-  kind: string;
+  timestampColumn: InfraSourceTimestampLogColumnAttributes;
+}
+
+export interface InfraSourceTimestampLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
 }
 /** The built-in message log column */
 export interface InfraSourceMessageLogColumn {
-  kind: string;
+  messageColumn: InfraSourceMessageLogColumnAttributes;
+}
+
+export interface InfraSourceMessageLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
 }
 /** A log column containing a field value */
 export interface InfraSourceFieldLogColumn {
-  kind: string;
+  fieldColumn: InfraSourceFieldLogColumnAttributes;
+}
 
+export interface InfraSourceFieldLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
+  /** The field name this column refers to */
   field: string;
 }
 /** The status of an infrastructure data source */
@@ -305,20 +320,15 @@ export interface InfraDataPoint {
 
 export interface Mutation {
   /** Create a new source of infrastructure data */
-  createSource: CreateSourceResult;
-  /** Modify an existing source using the given sequence of update operations */
+  createSource: UpdateSourceResult;
+  /** Modify an existing source */
   updateSource: UpdateSourceResult;
   /** Delete a source of infrastructure data */
   deleteSource: DeleteSourceResult;
 }
-/** The result of a successful source creation */
-export interface CreateSourceResult {
-  /** The source that was created */
-  source: InfraSource;
-}
-/** The result of a sequence of source update operations */
+/** The result of a successful source update */
 export interface UpdateSourceResult {
-  /** The source after the operations were performed */
+  /** The source that was updated */
   source: InfraSource;
 }
 /** The result of a source deletion operations */
@@ -380,10 +390,10 @@ export interface InfraSnapshotMetricInput {
   /** The type of metric */
   type: InfraSnapshotMetricType;
 }
-/** The source to be created */
-export interface CreateSourceInput {
+/** The properties to update the source with */
+export interface UpdateSourceInput {
   /** The name of the data source */
-  name: string;
+  name?: string | null;
   /** A description of the data source */
   description?: string | null;
   /** The alias to read metric data from */
@@ -391,10 +401,12 @@ export interface CreateSourceInput {
   /** The alias to read log data from */
   logAlias?: string | null;
   /** The field mapping to use for this source */
-  fields?: CreateSourceFieldsInput | null;
+  fields?: UpdateSourceFieldsInput | null;
+  /** The log columns to display for this source */
+  logColumns?: UpdateSourceLogColumnInput[] | null;
 }
 /** The mapping of semantic fields of the source to be created */
-export interface CreateSourceFieldsInput {
+export interface UpdateSourceFieldsInput {
   /** The field to identify a container by */
   container?: string | null;
   /** The fields to identify a host by */
@@ -406,46 +418,28 @@ export interface CreateSourceFieldsInput {
   /** The field to use as a timestamp for metrics and logs */
   timestamp?: string | null;
 }
-/** The update operations to be performed */
-export interface UpdateSourceInput {
-  /** The name update operation to be performed */
-  setName?: UpdateSourceNameInput | null;
-  /** The description update operation to be performed */
-  setDescription?: UpdateSourceDescriptionInput | null;
-  /** The alias update operation to be performed */
-  setAliases?: UpdateSourceAliasInput | null;
-  /** The field update operation to be performed */
-  setFields?: UpdateSourceFieldsInput | null;
+/** One of the log column types to display for this source */
+export interface UpdateSourceLogColumnInput {
+  /** A custom field log column */
+  fieldColumn?: UpdateSourceFieldLogColumnInput | null;
+  /** A built-in message log column */
+  messageColumn?: UpdateSourceMessageLogColumnInput | null;
+  /** A built-in timestamp log column */
+  timestampColumn?: UpdateSourceTimestampLogColumnInput | null;
 }
-/** A name update operation */
-export interface UpdateSourceNameInput {
-  /** The new name to be set */
-  name: string;
+
+export interface UpdateSourceFieldLogColumnInput {
+  id: string;
+
+  field: string;
 }
-/** A description update operation */
-export interface UpdateSourceDescriptionInput {
-  /** The new description to be set */
-  description: string;
+
+export interface UpdateSourceMessageLogColumnInput {
+  id: string;
 }
-/** An alias update operation */
-export interface UpdateSourceAliasInput {
-  /** The new log index pattern or alias to bet set */
-  logAlias?: string | null;
-  /** The new metric index pattern or alias to bet set */
-  metricAlias?: string | null;
-}
-/** A field update operations */
-export interface UpdateSourceFieldsInput {
-  /** The new container field to be set */
-  container?: string | null;
-  /** The new host field to be set */
-  host?: string | null;
-  /** The new pod field to be set */
-  pod?: string | null;
-  /** The new tiebreaker field to be set */
-  tiebreaker?: string | null;
-  /** The new timestamp field to be set */
-  timestamp?: string | null;
+
+export interface UpdateSourceTimestampLogColumnInput {
+  id: string;
 }
 
 // ====================================================
@@ -534,13 +528,13 @@ export interface CreateSourceMutationArgs {
   /** The id of the source */
   id: string;
 
-  source: CreateSourceInput;
+  sourceProperties: UpdateSourceInput;
 }
 export interface UpdateSourceMutationArgs {
   /** The id of the source */
   id: string;
-  /** A sequence of update operations */
-  changes: UpdateSourceInput[];
+  /** The properties to update the source with */
+  sourceProperties: UpdateSourceInput;
 }
 export interface DeleteSourceMutationArgs {
   /** The id of the source */
@@ -829,7 +823,7 @@ export namespace MetricsQuery {
 export namespace CreateSourceConfigurationMutation {
   export type Variables = {
     sourceId: string;
-    sourceConfiguration: CreateSourceInput;
+    sourceProperties: UpdateSourceInput;
   };
 
   export type Mutation = {
@@ -839,7 +833,7 @@ export namespace CreateSourceConfigurationMutation {
   };
 
   export type CreateSource = {
-    __typename?: 'CreateSourceResult';
+    __typename?: 'UpdateSourceResult';
 
     source: Source;
   };
@@ -884,7 +878,7 @@ export namespace SourceQuery {
 export namespace UpdateSourceMutation {
   export type Variables = {
     sourceId?: string | null;
-    changes: UpdateSourceInput[];
+    sourceProperties: UpdateSourceInput;
   };
 
   export type Mutation = {
@@ -1055,19 +1049,37 @@ export namespace SourceConfigurationFields {
   export type InfraSourceTimestampLogColumnInlineFragment = {
     __typename?: 'InfraSourceTimestampLogColumn';
 
-    kind: string;
+    timestampColumn: TimestampColumn;
+  };
+
+  export type TimestampColumn = {
+    __typename?: 'InfraSourceTimestampLogColumnAttributes';
+
+    id: string;
   };
 
   export type InfraSourceMessageLogColumnInlineFragment = {
     __typename?: 'InfraSourceMessageLogColumn';
 
-    kind: string;
+    messageColumn: MessageColumn;
+  };
+
+  export type MessageColumn = {
+    __typename?: 'InfraSourceMessageLogColumnAttributes';
+
+    id: string;
   };
 
   export type InfraSourceFieldLogColumnInlineFragment = {
     __typename?: 'InfraSourceFieldLogColumn';
 
-    kind: string;
+    fieldColumn: FieldColumn;
+  };
+
+  export type FieldColumn = {
+    __typename?: 'InfraSourceFieldLogColumnAttributes';
+
+    id: string;
 
     field: string;
   };

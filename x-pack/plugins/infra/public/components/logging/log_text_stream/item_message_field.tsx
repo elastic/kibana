@@ -99,9 +99,10 @@ const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs
   isHovered: boolean;
   isWrapped?: boolean;
 }>({})`
-  flex-grow: 1;
+  flex: 5 0 0%
   text-overflow: ellipsis;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  padding-left: 0;
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
   ${props => (props.isHovered ? hoveredFieldStyle : '')};
