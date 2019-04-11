@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricType } from '../../../graphql/types';
+import { InfraSnapshotMetricType } from '../../../graphql/types';
 import { count } from './count';
 import { cpu } from './cpu';
 import { load } from './load';
@@ -14,11 +14,11 @@ import { rx } from './rx';
 import { tx } from './tx';
 
 export const metricAggregationCreators = {
-  [InfraMetricType.count]: count,
-  [InfraMetricType.cpu]: cpu,
-  [InfraMetricType.memory]: memory,
-  [InfraMetricType.rx]: rx,
-  [InfraMetricType.tx]: tx,
-  [InfraMetricType.load]: load,
-  [InfraMetricType.logRate]: logRate,
+  [InfraSnapshotMetricType.count]: count,
+  [InfraSnapshotMetricType.cpu]: cpu,
+  [InfraSnapshotMetricType.memory]: memory,
+  [InfraSnapshotMetricType.rx]: rx,
+  [InfraSnapshotMetricType.tx]: tx,
+  [InfraSnapshotMetricType.load]: load,
+  [InfraSnapshotMetricType.logRate]: logRate,
 };

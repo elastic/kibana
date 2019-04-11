@@ -24,15 +24,6 @@ export const nodesSchema: any = gql`
     metric: InfraNodeMetric!
   }
 
-  input InfraTimerangeInput {
-    "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
-    interval: String!
-    "The end of the timerange"
-    to: Float!
-    "The beginning of the timerange"
-    from: Float!
-  }
-
   enum InfraOperator {
     gt
     gte

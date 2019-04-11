@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
 
@@ -441,15 +441,6 @@ export interface UpdateSourceFieldsInput {
   tiebreaker?: string | null;
   /** The new timestamp field to be set */
   timestamp?: string | null;
-}
-
-export interface InfraSnapshotTimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
 }
 
 // ====================================================

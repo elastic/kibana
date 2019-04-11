@@ -3541,47 +3541,6 @@
           { "name": "eq", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "InfraSnapshotTimerangeInput",
-        "description": "",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "interval",
-            "description": "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan.",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "to",
-            "description": "The end of the timerange",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "from",
-            "description": "The beginning of the timerange",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
       }
     ],
     "directives": [

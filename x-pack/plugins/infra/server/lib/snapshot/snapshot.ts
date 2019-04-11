@@ -8,7 +8,7 @@ import {
   InfraSnapshotGroupbyInput,
   InfraSnapshotMetricInput,
   InfraSnapshotNode,
-  InfraSnapshotTimerangeInput,
+  InfraTimerangeInput,
   InfraSnapshotType,
   InfraSourceConfiguration,
 } from '../../graphql/types';
@@ -23,7 +23,7 @@ import { getNodeMetrics, getNodeMetricsForLookup, getNodePath } from './response
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraSnapshotType;
   sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraSnapshotTimerangeInput;
+  timerange: InfraTimerangeInput;
   groupby: InfraSnapshotGroupbyInput[];
   metric: InfraSnapshotMetricInput;
   filterQuery: JsonObject | undefined;
