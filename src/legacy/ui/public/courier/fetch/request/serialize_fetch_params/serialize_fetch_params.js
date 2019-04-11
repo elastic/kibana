@@ -32,7 +32,7 @@ export function serializeFetchParams(requestsFetchParams, options) {
     }
 
     const header = {
-      index: fetchParams.index.title,
+      index: fetchParams.index.toIndex(),
       type: fetchParams.type,
       search_type: fetchParams.search_type,
       ignore_unavailable: true,

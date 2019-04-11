@@ -42,7 +42,6 @@ export default function (Private) {
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
     this.routes = getRoutes();
-
     this.getComputedFields = getComputedFields.bind(this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));

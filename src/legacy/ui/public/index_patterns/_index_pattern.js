@@ -308,17 +308,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
-    isTimeBasedWildcard() {
-      return this.isTimeBased() && this.isWildcard();
-    }
-
     getTimeField() {
       if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
       return this.fields.byName[this.timeFieldName];
-    }
-
-    isWildcard() {
-      return _.includes(this.title, '*');
     }
 
     prepBody() {
