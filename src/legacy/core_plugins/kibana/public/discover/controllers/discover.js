@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
+import moment from 'moment';
 import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
 
@@ -32,7 +33,6 @@ import * as filterActions from '../doc_table/actions/filter';
 import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
-import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
@@ -766,6 +766,13 @@ function discoverController(
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
     $scope.time = timefilter.getTime();
+  };
+
+  $scope.toMoment = function (datetime) {
+    const format = config.get('dateFormat');
+    if (moment.isMoment(datetime)) return datetime.format(format);
+    if (_.isDate(datetime)) return moment(datetime).format(format);
+    return datetime;
   };
 
   $scope.updateRefreshInterval = function () {
