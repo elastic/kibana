@@ -29,7 +29,7 @@ import {
   statusSelector,
   treeCommitsSelector,
 } from '../../selectors';
-import { history } from '../../utils/url';
+import { encodeRevisionString, history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
 import { CommitHistory, CommitHistoryLoading } from './commit_history';
@@ -141,16 +141,24 @@ class CodeContent extends React.PureComponent<Props> {
     const repoUri = `${resource}/${org}/${repo}`;
     switch (id) {
       case ButtonOption.Code:
-        history.push(`/${repoUri}/${PathTypes.blob}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.Folder:
-        history.push(`/${repoUri}/${PathTypes.tree}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.Blame:
-        history.push(`/${repoUri}/${PathTypes.blame}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.History:
-        history.push(`/${repoUri}/${PathTypes.commits}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
     }
   };
@@ -158,7 +166,9 @@ class CodeContent extends React.PureComponent<Props> {
   public openRawFile = () => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
-    window.open(chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`));
+    window.open(
+      chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`)
+    );
   };
 
   public renderButtons = () => {
@@ -298,8 +308,9 @@ class CodeContent extends React.PureComponent<Props> {
                     <h3>Recent Commits</h3>
                   </Title>
                   <EuiButton
-                    href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
-                      ''}`}
+                    href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
+                      revision
+                    )}/${path || ''}`}
                   >
                     View All
                   </EuiButton>

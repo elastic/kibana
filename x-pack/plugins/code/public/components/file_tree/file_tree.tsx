@@ -17,6 +17,7 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
+import { encodeRevisionString } from '../../utils/url';
 
 const DirectoryNode = styled.span`
   margin-left: ${theme.euiSizeS};
@@ -64,7 +65,9 @@ export class CodeFileTree extends React.Component<Props> {
       } else {
         pathType = PathTypes.tree;
       }
-      this.props.history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
+      this.props.history.push(
+        `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${node.path}`
+      );
     }
   };
 
