@@ -49,7 +49,10 @@ describe('getCollectionStatus', () => {
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [{ key: 'beats_1' }] }
+              beats_uuids: { buckets: [
+                { key: 'apm_1', beat_type: { buckets: [ { key: 'apm-server' }] } },
+                { key: 'beats_1' }
+              ] }
             },
             {
               key: '.monitoring-logstash-7-2019',
@@ -69,6 +72,10 @@ describe('getCollectionStatus', () => {
     expect(result.beats.totalUniqueInstanceCount).to.be(1);
     expect(result.beats.totalUniqueFullyMigratedCount).to.be(0);
     expect(result.beats.byUuid.beats_1.isInternalCollector).to.be(true);
+
+    expect(result.apm.totalUniqueInstanceCount).to.be(1);
+    expect(result.apm.totalUniqueFullyMigratedCount).to.be(0);
+    expect(result.apm.byUuid.apm_1.isInternalCollector).to.be(true);
 
     expect(result.logstash.totalUniqueInstanceCount).to.be(1);
     expect(result.logstash.totalUniqueFullyMigratedCount).to.be(0);

@@ -6,7 +6,9 @@
 
 import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID, APM_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
+
+const APM_CUSTOM_ID = 'apm';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
   const start = get(req.payload, 'timeRange.min', 'now-30s');
@@ -80,6 +82,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                   max: {
                     field: 'timestamp'
                   }
+                },
+                beat_type: {
+                  terms: {
+                    field: 'beats_stats.beat.type'
+                  }
                 }
               }
             },
@@ -116,7 +123,7 @@ async function detectProducts(req) {
     [BEATS_SYSTEM_ID]: {
       mightExist: false,
     },
-    [APM_SYSTEM_ID]: {
+    [APM_CUSTOM_ID]: {
       mightExist: false,
     },
     [LOGSTASH_SYSTEM_ID]: {
@@ -161,7 +168,7 @@ async function detectProducts(req) {
   }
 
   if (get(apmDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[APM_SYSTEM_ID].mightExist = true;
+    result[APM_CUSTOM_ID].mightExist = true;
   }
 
   return result;
@@ -174,11 +181,29 @@ function getUuidBucketName(productName) {
     case KIBANA_SYSTEM_ID:
       return 'kibana_uuids';
     case BEATS_SYSTEM_ID:
-    case APM_SYSTEM_ID:
+    case APM_CUSTOM_ID:
       return 'beats_uuids';
     case LOGSTASH_SYSTEM_ID:
       return 'logstash_uuids';
   }
+}
+
+function isBeatFromAPM(bucket) {
+  if (!bucket.beat_type) {
+    return false;
+  }
+
+  return get(bucket, 'beat_type.buckets[0].key') === 'apm-server';
+}
+
+function shouldSkipBucket(product, bucket) {
+  if (product.name === BEATS_SYSTEM_ID && isBeatFromAPM(bucket)) {
+    return true;
+  }
+  if (product.name === APM_CUSTOM_ID && !isBeatFromAPM(bucket)) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -209,7 +234,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
     { name: LOGSTASH_SYSTEM_ID },
-    { name: APM_SYSTEM_ID, token: '-beats-' },
+    { name: APM_CUSTOM_ID, token: '-beats-' },
     { name: 'elasticsearch', token: '-es-' },
   ];
 
@@ -249,9 +274,14 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       const singleIndexBucket = indexBuckets[0];
       const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
 
+
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
-      for (const { key, by_timestamp: byTimestamp } of uuidBuckets) {
+      for (const bucket of uuidBuckets) {
+        if (shouldSkipBucket(product, bucket)) {
+          continue;
+        }
+        const { key, by_timestamp: byTimestamp } = bucket;
         if (!map[key]) {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
         }
@@ -282,7 +312,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
         const uuidBuckets = get(indexBucket, `${uuidBucketName}.buckets`, []);
-        for (const { key, by_timestamp: byTimestamp } of uuidBuckets) {
+        for (const bucket of uuidBuckets) {
+          if (shouldSkipBucket(product, bucket)) {
+            continue;
+          }
+
+          const { key, by_timestamp: byTimestamp } = bucket;
           if (!map[key]) {
             if (otherMap[key]) {
               partiallyMigratedUuidsMap[key] = true;
