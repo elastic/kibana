@@ -166,8 +166,7 @@ export interface InfraWaffleMapOptions {
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: InfraSnapshotMetricInput;
-  path: InfraSnapshotGroupbyInput[];
-  groupBy: InfraSnapshotGroupbyInput[];
+  groupby: InfraSnapshotGroupbyInput[];
   legend: InfraWaffleMapLegend;
 }
 

@@ -8,9 +8,8 @@ import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { last } from 'lodash';
 import React from 'react';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { createWaffleMapNode } from '../../containers/waffle/nodes_to_wafflemap';
-import { InfraSnapshotNode, InfraSnapshotNodePath, InfraTimerangeInput } from '../../graphql/types';
+import { InfraSnapshotNode, InfraSnapshotNodePath, InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { fieldToName } from '../waffle/lib/field_to_display_name';
 import { NodeContextMenu } from '../waffle/node_context_menu';
@@ -72,7 +71,7 @@ export const TableView = injectI18n(
             </NodeContextMenu>
           ),
         },
-        ...options.groupBy.map((grouping, index) => ({
+        ...options.groupby.map((grouping, index) => ({
           field: `group_${index}`,
           name: fieldToName((grouping && grouping.field) || '', intl),
           sortable: true,

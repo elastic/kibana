@@ -40,12 +40,12 @@ export class GroupName extends React.PureComponent<Props, {}> {
 
   private handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    const { groupBy } = this.props.options;
+    const { groupby } = this.props.options;
     // When groupBy is empty that means there is nothing todo so let's just do nothing.
-    if (groupBy.length === 0) {
+    if (groupby.length === 0) {
       return;
     }
-    const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
+    const currentPath = this.props.isChild && groupby.length > 1 ? groupby[1] : groupby[0];
     this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
   };
 }
