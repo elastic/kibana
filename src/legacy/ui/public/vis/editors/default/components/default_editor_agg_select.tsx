@@ -88,7 +88,7 @@ function DefaultEditorAggSelect({
     errors.push(
       i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
         defaultMessage:
-          'The index pattern {indexPatternTitle} does not contain any of aggregations.',
+          'The index pattern {indexPatternTitle} does not contain any aggregations.',
         values: {
           indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
         },
