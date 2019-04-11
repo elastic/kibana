@@ -19,7 +19,6 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           },
           "node": Object {
             "_id": "cPsuhGcB0WOhS6qyTKC0",
-            "firstSeen": "2018-12-06T15:40:53.319Z",
             "host": Object {
               "name": "elrond.elstc.co",
               "os": Object {
@@ -35,7 +34,6 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           },
           "node": Object {
             "_id": "KwQDiWcB0WOhS6qyXmrW",
-            "firstSeen": "2018-12-07T14:12:38.560Z",
             "host": Object {
               "name": "siem-kibana",
               "os": Object {
@@ -51,6 +49,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
     loadMore={[MockFunction]}
     loading={false}
     nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+    startDate={1546965070707}
     totalCount={4}
     type="page"
   />

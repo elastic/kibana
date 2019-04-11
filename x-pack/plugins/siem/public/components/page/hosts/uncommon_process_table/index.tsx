@@ -211,15 +211,10 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                   excluded: false,
                   kqlQuery: '',
                   queryMatch: {
-                    displayField: 'host.name',
-                    displayValue: name!,
-                    field: 'host.id',
-                    value: id!,
+                    field: 'host.name',
+                    value: name!,
                   },
-                  queryDate: {
-                    from: startDate,
-                    to: Date.now(),
-                  },
+                  queryDate: { from: startDate, to: Date.now() },
                 }}
                 render={(dataProvider, _, snapshot) =>
                   snapshot.isDragging ? (
@@ -227,7 +222,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                       <Provider dataProvider={dataProvider} />
                     </DragEffects>
                   ) : (
-                    <HostDetailsLink hostId={id!}>{name}</HostDetailsLink>
+                    <HostDetailsLink hostName={name!}>{name}</HostDetailsLink>
                   )
                 }
               />

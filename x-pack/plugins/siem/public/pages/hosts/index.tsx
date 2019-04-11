@@ -17,7 +17,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <>
     <Switch>
       <Route strict exact path={match.url} component={Hosts} />
-      <Route path={`${match.url}/:hostId`} component={HostDetails} />
+      <Route path={`${match.url}/:hostName`} component={HostDetails} />
       <Redirect from="/hosts/" to="/hosts" />
     </Switch>
   </>

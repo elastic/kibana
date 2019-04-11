@@ -9,9 +9,7 @@ import gql from 'graphql-tag';
 export const hostsSchema = gql`
   type HostItem {
     _id: String
-    firstSeen: Date
     host: HostEcsFields
-    lastBeat: Date
   }
 
   type HostsEdges {
@@ -25,6 +23,11 @@ export const hostsSchema = gql`
     pageInfo: PageInfo!
   }
 
+  type FirstLastSeenHost {
+    firstSeen: Date
+    lastSeen: Date
+  }
+
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Hosts(
@@ -33,5 +36,7 @@ export const hostsSchema = gql`
       pagination: PaginationInput!
       filterQuery: String
     ): HostsData!
+    HostDetails(id: String, hostName: String!, timerange: TimerangeInput!): HostItem!
+    HostFirstLastSeen(id: String, hostName: String!): FirstLastSeenHost!
   }
 `;
