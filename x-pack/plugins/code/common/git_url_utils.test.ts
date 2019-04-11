@@ -4,46 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValidGitUrl } from './git_url_utils';
+import { validateGitUrl } from './git_url_utils';
 
 test('Git url validation', () => {
   // An url ends with .git
-  expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git')).toBeTruthy();
+  expect(validateGitUrl('https://github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url ends without .git
-  expect(isValidGitUrl('https://github.com/elastic/elasticsearch')).toBeTruthy();
+  expect(validateGitUrl('https://github.com/elastic/elasticsearch')).toBeTruthy();
 
   // An url with http://
-  expect(isValidGitUrl('http://github.com/elastic/elasticsearch')).toBeTruthy();
+  expect(validateGitUrl('http://github.com/elastic/elasticsearch')).toBeTruthy();
 
   // An url with ssh://
-  expect(isValidGitUrl('ssh://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
+  expect(validateGitUrl('ssh://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with ssh:// and port
-  expect(isValidGitUrl('ssh://elastic@github.com:9999/elastic/elasticsearch.git')).toBeTruthy();
+  expect(validateGitUrl('ssh://elastic@github.com:9999/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with git://
-  expect(isValidGitUrl('git://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
+  expect(validateGitUrl('git://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with an invalid protocol
-  expect(
-    isValidGitUrl('file:///Users/elastic/elasticsearch', [], ['ssh', 'https', 'git'])
-  ).toBeFalsy();
+  expect(() => {
+    validateGitUrl('file:///Users/elastic/elasticsearch', [], ['ssh', 'https', 'git']);
+  }).toThrow('Git url protocol is not whitelisted.');
 
   // An url without protocol
-  expect(isValidGitUrl('/Users/elastic/elasticsearch', [], ['ssh', 'https', 'git'])).toBeFalsy();
-  expect(
-    isValidGitUrl('github.com/elastic/elasticsearch', [], ['ssh', 'https', 'git'])
-  ).toBeFalsy();
+  expect(() => {
+    validateGitUrl('/Users/elastic/elasticsearch', [], ['ssh', 'https', 'git']);
+  }).toThrow('Git url protocol is not whitelisted.');
+  expect(() => {
+    validateGitUrl('github.com/elastic/elasticsearch', [], ['ssh', 'https', 'git']);
+  }).toThrow('Git url protocol is not whitelisted.');
 
   // An valid git url but without whitelisted host
-  expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git', ['gitlab.com'])).toBeFalsy();
+  expect(() => {
+    validateGitUrl('https://github.com/elastic/elasticsearch.git', ['gitlab.com']);
+  }).toThrow('Git url host is not whitelisted.');
 
   // An valid git url but without whitelisted protocol
-  expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git', [], ['ssh'])).toBeFalsy();
+  expect(() => {
+    validateGitUrl('https://github.com/elastic/elasticsearch.git', [], ['ssh']);
+  }).toThrow('Git url protocol is not whitelisted.');
 
   // An valid git url with both whitelisted host and protocol
   expect(
-    isValidGitUrl('https://github.com/elastic/elasticsearch.git', ['github.com'], ['https'])
+    validateGitUrl('https://github.com/elastic/elasticsearch.git', ['github.com'], ['https'])
   ).toBeTruthy();
 });
