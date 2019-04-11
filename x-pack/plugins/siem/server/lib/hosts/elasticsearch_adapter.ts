@@ -87,7 +87,7 @@ export const formatHostEdgesData = (
       flattenedFields.cursor.value = hostId || '';
 
       const fieldValue = getHostFieldValue(fieldName, bucket);
-      if (fieldValue) {
+      if (fieldValue != null) {
         return set(`node.${fieldName}`, fieldValue, flattenedFields);
       }
       return flattenedFields;
@@ -104,7 +104,7 @@ export const formatHostEdgesData = (
 const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem =>
   fields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
-    if (fieldValue) {
+    if (fieldValue != null) {
       return set(fieldName, fieldValue, flattenedFields);
     }
     return flattenedFields;

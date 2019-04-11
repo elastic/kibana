@@ -12,7 +12,7 @@ export const buildFieldsTermAggregation = (esFields: ReadonlyArray<string>): Agg
       ...res,
       ...getAggregationTypeFromField(field),
     }),
-    {} as AggregationRequest
+    {}
   );
 
 const getAggregationTypeFromField = (field: string): AggregationRequest => {
