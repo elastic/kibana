@@ -24,7 +24,10 @@ async function getConfig() {
   }
 }
 
-function getOptions(config: CombinedConfig, cliArgs: yargs.Arguments) {
+function getOptions(
+  config: CombinedConfig,
+  cliArgs: ReturnType<typeof getCliArgs>
+) {
   try {
     return validateOptions({
       ...config,
@@ -42,21 +45,20 @@ function getOptions(config: CombinedConfig, cliArgs: yargs.Arguments) {
   }
 }
 
-async function initYargs() {
-  const config = await getConfig();
-  const cliArgs = yargs
+function getCliArgs(config: CombinedConfig) {
+  return yargs
     .usage('$0 [args]')
     .option('multiple', {
       default: config.multiple,
       description: 'Select multiple branches/commits',
       type: 'boolean'
     })
-    .option('multiple-commits', {
+    .option('multipleCommits', {
       default: config.multipleCommits,
       description: 'Backport multiple commits',
       type: 'boolean'
     })
-    .option('multiple-branches', {
+    .option('multipleBranches', {
       default: config.multipleBranches,
       description: 'Backport to multiple branches',
       type: 'boolean'
@@ -87,7 +89,11 @@ async function initYargs() {
     .alias('v', 'version')
     .version()
     .help().argv;
+}
 
+async function initYargs() {
+  const config = await getConfig();
+  const cliArgs = getCliArgs(config);
   const options = getOptions(config, cliArgs);
 
   if (cliArgs.showConfig) {

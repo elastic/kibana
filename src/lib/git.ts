@@ -62,13 +62,16 @@ function cloneRepo(
       }
     );
 
-    execProcess.stderr.on('data', data => {
-      const regex = /^Receiving objects:\s+(\d+)%/;
-      const [, progress]: RegExpMatchArray = data.toString().match(regex) || [];
-      if (progress) {
-        callback(progress);
-      }
-    });
+    if (execProcess.stderr) {
+      execProcess.stderr.on('data', data => {
+        const regex = /^Receiving objects:\s+(\d+)%/;
+        const [, progress]: RegExpMatchArray =
+          data.toString().match(regex) || [];
+        if (progress) {
+          callback(progress);
+        }
+      });
+    }
   });
 }
 

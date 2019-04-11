@@ -69,10 +69,10 @@ describe('config.js', () => {
   describe('getGlobalConfig', () => {
     let res: GlobalConfig;
     beforeEach(async () => {
-      jest.spyOn(rpc, 'chmod').mockResolvedValue(null);
-      jest.spyOn(rpc, 'mkdirp').mockResolvedValue(null);
-      jest.spyOn(rpc, 'writeFile').mockResolvedValue(null);
-      jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
+      jest.spyOn(rpc, 'chmod').mockResolvedValue();
+      jest.spyOn(rpc, 'mkdirp').mockResolvedValue();
+      jest.spyOn(rpc, 'writeFile').mockResolvedValue();
+      jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 } as any);
       jest.spyOn(rpc, 'readFile').mockResolvedValue(
         JSON.stringify({
           accessToken: 'myAccessToken',
@@ -148,20 +148,24 @@ describe('config.js', () => {
     let res: CombinedConfig;
 
     beforeEach(async () => {
-      jest.spyOn(rpc, 'readFile').mockImplementation((filepath: string) => {
-        if (filepath.includes('/configTemplate.json')) {
-          return 'myConfigTemplate';
-        } else if (filepath === '/path/to/project/config') {
-          return JSON.stringify({
-            upstream: 'elastic/kibana',
-            branches: ['6.x', '6.1']
-          });
-        } else if (filepath === '/myHomeDir/.backport/config.json') {
-          return JSON.stringify({
-            username: 'sqren',
-            accessToken: 'myAccessToken'
-          });
+      jest.spyOn(rpc, 'readFile').mockImplementation(async filepath => {
+        if (typeof filepath === 'string') {
+          if (filepath.includes('/configTemplate.json')) {
+            return 'myConfigTemplate';
+          } else if (filepath === '/path/to/project/config') {
+            return JSON.stringify({
+              upstream: 'elastic/kibana',
+              branches: ['6.x', '6.1']
+            });
+          } else if (filepath === '/myHomeDir/.backport/config.json') {
+            return JSON.stringify({
+              username: 'sqren',
+              accessToken: 'myAccessToken'
+            });
+          }
         }
+
+        throw new Error(`Unknown filepath: "${filepath}"`);
       });
       res = await getCombinedConfig();
     });
@@ -201,7 +205,7 @@ describe('config.js', () => {
 
   describe('validateGlobalConfig', () => {
     beforeEach(() => {
-      jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
+      jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 } as any);
     });
 
     it('should fail if config is invalid', () => {
