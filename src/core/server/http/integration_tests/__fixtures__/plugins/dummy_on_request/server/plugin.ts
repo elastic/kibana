@@ -21,6 +21,7 @@ import { CoreSetup } from '../../../../../..';
 export const url = {
   exception: '/exception',
   failed: '/failed',
+  independentReq: '/independent-request',
   root: '/',
   redirect: '/redirect',
   redirectTo: '/redirect-to',
@@ -45,6 +46,24 @@ export class DummyOnRequestPlugin {
     core.http.registerOnRequest((request, t) => {
       if (request.path === url.exception) {
         throw new Error('sensitive info');
+      }
+      return t.next();
+    });
+
+    core.http.registerOnRequest((request, t) => {
+      if (request.path === url.independentReq) {
+        // @ts-ignore
+        request.customField = { value: 42 };
+      }
+      return t.next();
+    });
+
+    core.http.registerOnRequest((request, t) => {
+      if (request.path === url.independentReq) {
+        // @ts-ignore
+        if (typeof request.customField !== 'undefined') {
+          throw new Error('Request object was mutated');
+        }
       }
       return t.next();
     });

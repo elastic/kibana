@@ -125,8 +125,9 @@ describe('http service', () => {
         );
 
         const router = new Router('');
-        router.get({ path: onReqUrl.root, validate: false }, async (req, res) =>
-          res.ok({ content: 'ok' })
+        // routes with expected success status response should have handlers
+        [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
+          router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
         );
         // TODO fix me when registerRouter is available before HTTP server is run
         (root as any).server.http.registerRouter(router);
@@ -153,6 +154,9 @@ describe('http service', () => {
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         });
+      });
+      it(`Shouldn't share request object between interceptors`, async () => {
+        await kbnTestServer.request.get(root, onReqUrl.independentReq).expect(200);
       });
     });
   });
