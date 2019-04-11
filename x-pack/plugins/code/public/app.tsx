@@ -13,6 +13,7 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { App } from './components/app';
+import { HelpMenu } from './components/help_menu';
 import { store } from './stores';
 
 const app = uiModules.get('apps/code');
@@ -50,3 +51,10 @@ chrome.breadcrumbs.set([
     href: '#/',
   },
 ]);
+
+chrome.helpExtension.set(domNode => {
+  render(<HelpMenu />, domNode);
+  return () => {
+    unmountComponentAtNode(domNode);
+  };
+});
