@@ -102,7 +102,9 @@ const toastMessage = (
       We’ve made some changes to roles and permissions in Kibana. Read more about what these changes
       mean for you below.{' '}
     </p>
-    <EuiButton size="s" href="">Learn More</EuiButton>
+    <EuiButton size="s" href="">
+      Learn More
+    </EuiButton>
   </div>
 );
 

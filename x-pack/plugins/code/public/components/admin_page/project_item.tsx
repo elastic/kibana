@@ -101,7 +101,10 @@ class CodeProjectItem extends React.PureComponent<{
     const settingsVisibility = settingsShow ? 'visible' : 'hidden';
 
     const indexShow =
-      status && status.state !== RepoState.CLONING && status.state !== RepoState.DELETING;
+      status &&
+      status.state !== RepoState.CLONING &&
+      status.state !== RepoState.DELETING &&
+      status.state !== RepoState.INDEXING;
     const indexVisibility = indexShow ? 'visible' : 'hidden';
 
     const deleteShow = status && status.state !== RepoState.DELETING;
