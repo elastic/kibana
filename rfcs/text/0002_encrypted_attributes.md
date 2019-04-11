@@ -1,5 +1,5 @@
 - Start Date: 2019-03-22
-- RFC PR: (leave this empty)
+- RFC PR: https://github.com/elastic/kibana/pull/34526
 - Kibana Issue: (leave this empty)
 
 # Summary
@@ -11,22 +11,51 @@ removes encrypted attributes from being exposed through regular means.
 
 # Basic example
 
-Registering a type with the `savedObjectAttributeCrypto` plugin
+Register saved object type with the `encrypted_saved_objects` plugin:
 
-```JS
-server.plugins.savedObjectAttributeCrypto.registerType({
+```typescript
+server.plugins.encrypted_saved_objects.registerType({
   type: 'server-action',
-  encryptedAttributes: ['secretParams'],
-  excludedFromAad: ['temporaryState'], /* list of attributes that might not contain user specified data */
+  attributesToEncrypt: new Set(['credentials', 'apiKey']),
+  // Optional list of attributes that might not contain user specified data.
+  attributesToExcludeFromAAD: new Set(['temporaryState']),
 });
 ```
 
-Retrieve a method that would receive the decrypted attributes.
+Use the same API to create saved objects with encrypted attributes as for any other saved object type:
 
-```JS
-const fullObject = await server.plugins.savedObjectAttributeCrypto.get(it, type);
+```typescript
+const savedObject = await server.savedObjects
+  .getScopedSavedObjectsClient(request)
+  .create('server-action', { 
+    name: 'my-server-action',
+    credentials: { username: 'some-user', password: 'some-password' },
+    apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb'
+  });
 
-const { username, password } = fullObject.secretsParams;
+// savedObject = { 
+//   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
+//   type: 'server-action',
+//   name: 'my-server-action',
+// };
+
+```
+
+Use dedicated method to retrieve saved object with decrypted attributes on behalf of Kibana internal user:
+
+```typescript
+const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsInternalUser(
+  'server-action',
+  'dd9750b9-ef0a-444c-8405-4dfcc2e9d670'
+);
+
+// savedObject = { 
+//   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
+//   type: 'server-action',
+//   name: 'my-server-action',
+//   credentials: { username: 'some-user', password: 'some-password' },
+//   apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb',
+// };
 ```
 
 # Motivation
@@ -38,73 +67,129 @@ call webhooks using tokens.
 # Detailed design
 
 In order for this to be in basic it needs to be done as a wrapper around the
-saved object client. This can be added from a plugin in `x-pack`. In order to
-use the plugin you would need to depend on it and register your saved object
-type and the desired encrypted fields. The plugin would define its own
-wrapper around the client that would encrypt the registered attributes and
-remove any secret attributes on saved objects returned by the wrapped client.
+saved object client. This can be added from the `x-pack` plugin.
 
-```JS
-server.plugins.savedObjectAttributeCrypto.registerType({
+## General
+
+To be able to manage saved objects with encrypted attributes from any plugin one should
+do the following:
+
+1. Define `encrypted_saved_objects` plugin as a dependency.
+2. Add attributes to be encrypted in `mappings.json` file for the respective saved object type. These attributes should
+always have a `binary` type since they'll contain encrypted content as a `Base64` encoded string and should never be
+searchable or analyzed. This makes defining of attributes that require encryption explicit and auditable, and significantly
+simplifies implementation:
+```json
+{
+ "server-action": {
+   "properties": {
+     "name": { "type": "keyword" },
+     "credentials": { "type": "binary" },
+     "apiKey": { "type": "binary" }
+   }
+ }
+}
+```
+3. Register saved object type and attributes that should be encrypted with `encrypted_saved_objects` plugin:
+```typescript
+server.plugins.encrypted_saved_objects.registerType({
   type: 'server-action',
-  encryptedAttributes: ['secretParams'],
-  excludedFromAad: ['temporaryState'], /* list of attributes that might not contain user specified data */
+  attributesToEncrypt: new Set(['credentials', 'apiKey']),
+  // Optional list of attributes that might not contain user specified data.
+  attributesToExcludeFromAAD: new Set(['temporaryState']),
 });
 ```
 
-If the wrapper gets a request to create, or update a registered type.
+Since `encrypted_saved_objects` adds its own wrapper (`EncryptedSavedObjectsClientWrapper`) into `SavedObjectsClient`
+wrapper chain consumers will be able to create, update, delete and retrieve saved objects using standard Saved Objects API.
+To main responsibilities of the wrapper are:
 
-It would use the following procedure.
-- extract and delete the registered encrypted attributes
-- extract and delete the excluded from aad attributes
-- use the resulting id, type, and attributes as additional authentication data
-  encrypt the extracted attributes.
-- add the encrypted attributes back to the saved object and pass it to the
-  wrapped client.
+* It encrypts attributes that are supposed to be encrypted during `create`, `bulkCreate` and `update` operations
+* It strips encrypted attributes from **any** saved object returned from the Saved Objects API
 
-The secret attribute(s) would be scrubbed from all get, bulkGet, and find
-operations. Using the following procedure
+As noted above the wrapper is stripping encrypted attributes from saved objects returned from the API methods, that means
+that there is no way at all to retrieve encrypted attributes using standard Saved Objects API unless `encrypted_saved_objects`
+plugin is disabled. This potentially can lead to the situation when consumer retrieves saved object, updates its non-encrypted
+properties and passed that same object to the `update` Saved Objects API method without re-defining encrypted attributes.
+At this stage we consider this as a developer mistake and don't prevent it from happening in any way apart from logging
+this type of event.
 
-- Forward call to wrapped client
-- If no results or results blank return
-- For each result
-  - if the result type is a secret type
-    - delete the encrypted attribute field
-  - otherwise keep the results intact
+Saved object ID is an essential part of Additional authenticated data (AAD) used during encryption process and hence
+should be as hard to guess as possible. To fulfil this requirements wrapper generates highly random IDs (UUIDv4) for the
+saved objects that contain encrypted attributes and hence consumers are not allowed to specify ID when calling `create`
+or `bulkCreate` method and if they try to do so the error will be thrown.
 
-The wrapper will be injected for all saved object clients.
+To reduce the risk of unintentional decryption and consequent leaking of the sensitive information there is only one way
+to retrieve saved object and decrypt its encrypted attributes and it's exposed only through `encrypted_saved_objects` plugin:
 
-## Benefits
+```typescript
+const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsInternalUser(
+  'server-action',
+  'dd9750b9-ef0a-444c-8405-4dfcc2e9d670'
+);
 
-None of the registered types will expose their encrypted details. The saved
+// savedObject = { 
+//   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
+//   type: 'server-action',
+//   name: 'my-server-action',
+//   credentials: { username: 'some-user', password: 'some-password' },
+//   apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb',
+// };
+```
+
+As can be seen from the method name, the request to retrieve saved object and decrypt its attributes is performed on
+behalf of the internal Kibana user and hence isn't supposed to be called within user request context.
+
+**Note:** the fact that saved object with encrypted attributes is created using standard Saved Objects API within a 
+particular user and space context, but retrieved out of any context makes it unclear how consumers are supposed to 
+provide that context and retrieve saved object from a particular space. Current plan for `getDecryptedAsInternalUser` 
+method is to accept a third `BaseOptions` argument that allows consumers to specify `namespace` that they can retrieve
+from the request using public `spaces` plugin API.
+
+## Encryption and decryption
+
+Saved object attributes are encrypted using [@elastic/node-crypto](https://github.com/elastic/node-crypto) library. Please
+take a look at the source code of this library to know how encryption is performed exactly, what algorithm and encryption 
+parameters are used, but in short it's AES Encryption with AES-256-GCM that uses random initialization vector and salt.
+
+As with encryption key for Kibana's session cookie, master encryption key used by `encrypted_saved_objects` plugin can be
+defined as a configuration value (`xpack.encrypted_saved_objects.encryptionKey`) via `kibana.yml`, but it's **highly 
+recommended** to define this key in the [Kibana Keystore](https://www.elastic.co/guide/en/kibana/current/secure-settings.html)
+instead. The master key should be cryptographically safe and be equal or greater than 32 bytes.
+
+To prevent certain vectors of attacks where raw content of encrypted attributes of one saved object is copied to another
+saved object that would unconsciously allow to decrypt content that was not supposed to be decrypted we rely on Additional
+authenticated data (AAD) during encryption and decryption. AAD consists of the following components:
+
+* Saved object ID
+* Saved object type
+* Saved object attributes
+ 
+AAD does not include encrypted attributes themselves and attributes defined in optional `attributesToExcludeFromAAD` 
+parameter provided during saved object type registration with `encrypted_saved_objects` plugin.
+
+## Audit
+
+Encrypted attributes will most likely contain a sensitive information and any attempt to access these should be properly
+logged to allow any further audit procedures. The following events will be logged with Kibana audit log functionality:
+
+* Successful attempt to encrypt attributes (incl. saved object ID, type and attributes names)
+* Failed attempt to encrypt attribute (incl. saved object ID, type and attribute name)
+* Successful attempt to decrypt attributes (incl. saved object ID, type and attributes names)
+* Failed attempt to decrypt attribute (incl. saved object ID, type and attribute name)
+
+In addition to audit log events we'll issue ordinary log events for any attempts to save, update or decrypt saved objects
+with missing attributes that were supposed to be encrypted/decrypted based on the registration parameters. 
+
+# Benefits
+
+* None of the registered types will expose their encrypted details. The saved
 objects with their unencrypted attributes could still be obtained and searched
 on. The wrapper will follow all the security and spaces filtering of saved
 objects so that only users with appropriate permissions will be able to obtain
 the scrubbed objects or _save_ objects with encrypted attributes.
 
-## Possible Problems
-
-Consumers of scrubbed objects may try to modify them causing the encrypted
-attributes to be dropped. But this could be prevented by disallowing updates
-from the default saved objects client. And instead force all updates to go
-through the plugin directly.
-
-## Decrypting attributes
-
-In order to get the resulting decrypted attributes back the plugin would require
-a method be registered which would be passed the saved object including the
-decrypted attributes then return an invokable method that would perform the
-retrieval of the saved object the decryption and invoking of the desired method.
-
-```JS
-const fullObject = await server.plugins.savedObjectAttributeCrypto.get(it, type);
-
-const { username, password } = fullObject.secretsParams;
-```
-
-## Benefits
-
-No explicit access to a method that takes in an encrypted string exists. And no
+* No explicit access to a method that takes in an encrypted string exists. And no
 access to the private key used is exposed through the plugin. If the type was not
 registered no decryption is possible. No need to handle the saved object with
 the encrypted attributes reducing the risk of accidentally returning it in a
@@ -112,12 +197,9 @@ handler.
 
 # Drawbacks
 
-- This would add the ability to encrypt data on any saved object in the system.
-- Possibly add performance issues to retrieving saved objects.
-- Might be complicated to test along with spaces and security
-- Could be too complicated in general
-- The attributes that are encrypted have to be defined and if they change they
-  need to be migrated.
+* Possibly have a performance impact on Saved Objects API operations that require encryption/decryption
+* Will require non trivial tests to test functionality along with spaces and security
+* The attributes that are encrypted have to be defined and if they change they need to be migrated
 
 # Alternatives
 
@@ -127,23 +209,20 @@ of the saved object are handled there directly. And the saved objects are
 
 # Adoption strategy
 
-Integration should be pretty easy which would include depending on the plugin.
-And registering the desired saved object type with it. And building and using
-the desired decryption contexts.
+Integration should be pretty easy which would include depending on the plugin, registering the desired saved object type
+with it and defining encrypted attributes in the `mappings.json`.
 
 # How we teach this
 
-`savedObjectAttributeCrypto` as the name of the `thing` where it's seen as a separate
+The `encrypted_saved_objects` as the name of the `thing` where it's seen as a separate
 extension on top of the saved object service.
 
-Provide a README.md in the plugin directory with examples for how to depend on
-the plugin and define a type has hidden attributes.
+Provide a README.md in the plugin directory with the usage examples.
 
 # Unresolved questions
 
-- Is `savedObjectAttributeCrypto` an acceptable name for the plugin
-- Is building a method that receives the object with the decrypted attributes
-  make sense?
-- Are there other use-cases that are not served with that interface?
-- How would this work with migrations, if the attribute names wanted to be
-  changed, a decrypt context would need to be created for migration.
+* Is it acceptable to have this plugin in Basic?
+* Are there any other use-cases that are not served with that interface?
+* How would this work with Saved Objects Export\Import API?
+* How would this work with migrations, if the attribute names wanted to be
+  changed, a decrypt context would need to be created for migration?
