@@ -88,6 +88,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoScope: string[];
   fetchMoreCommits(repoUri: string): void;
 }
+const LANG_MD = 'markdown';
 
 enum ButtonOption {
   Code = 'Code',
@@ -96,13 +97,18 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
+enum ButtonLabel {
+  Code = 'Code',
+  Content = 'Content',
+  Download = 'Download',
+  Raw = 'Raw',
+}
+
 const Title = styled(EuiTitle)`
   margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {
-  public rawButtonOptions = [{ id: 'Raw', label: 'Raw' }];
-
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
       return undefined;
@@ -169,12 +175,14 @@ class CodeContent extends React.PureComponent<Props> {
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
-      const { isUnsupported, isOversize, isImage } = this.props.file!;
+      const { isUnsupported, isOversize, isImage, lang } = this.props.file!;
+      const isMarkdown = lang === LANG_MD;
+      const isText = !isUnsupported && !isOversize && !isImage;
 
       const buttonOptions = [
         {
           id: ButtonOption.Code,
-          label: ButtonOption.Code,
+          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
         },
         {
           id: ButtonOption.Blame,
@@ -185,6 +193,9 @@ class CodeContent extends React.PureComponent<Props> {
           id: ButtonOption.History,
           label: ButtonOption.History,
         },
+      ];
+      const rawButtonOptions = [
+        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
       ];
 
       return (
@@ -200,7 +211,7 @@ class CodeContent extends React.PureComponent<Props> {
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.rawButtonOptions}
+            options={rawButtonOptions}
             type="single"
             idSelected={''}
             onChange={this.openRawFile}
@@ -338,7 +349,7 @@ class CodeContent extends React.PureComponent<Props> {
             />
           );
         }
-        if (fileLanguage === 'markdown') {
+        if (fileLanguage === LANG_MD) {
           return (
             <div className="markdown-body code-markdown-container">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
