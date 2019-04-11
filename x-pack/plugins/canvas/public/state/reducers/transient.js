@@ -7,7 +7,8 @@
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
-import * as actions from '../actions/transient';
+import * as pageActions from '../actions/pages';
+import * as transientActions from '../actions/transient';
 import { removeElements } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 
@@ -28,27 +29,39 @@ export const transientReducer = handleActions(
       );
     },
 
-    [actions.setCanUserWrite]: (transientState, { payload }) => {
+    [transientActions.setCanUserWrite]: (transientState, { payload }) => {
       return set(transientState, 'canUserWrite', Boolean(payload));
     },
 
-    [actions.setFirstLoad]: (transientState, { payload }) => {
+    [transientActions.setFirstLoad]: (transientState, { payload }) => {
       return set(transientState, 'isFirstLoad', Boolean(payload));
     },
 
-    [actions.setFullscreen]: (transientState, { payload }) => {
+    [transientActions.setFullscreen]: (transientState, { payload }) => {
       return set(transientState, 'fullscreen', Boolean(payload));
     },
 
-    [actions.setElementStats]: (transientState, { payload }) => {
+    [transientActions.setElementStats]: (transientState, { payload }) => {
       return set(transientState, 'elementStats', payload);
     },
 
-    [actions.selectToplevelNodes]: (transientState, { payload }) => {
+    [transientActions.selectToplevelNodes]: (transientState, { payload }) => {
       return {
         ...transientState,
         selectedToplevelNodes: payload,
       };
+    },
+
+    [pageActions.setPage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
+    },
+
+    [pageActions.addPage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
+    },
+
+    [pageActions.duplicatePage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
     },
 
     [setRefreshInterval]: (transientState, { payload }) => {
