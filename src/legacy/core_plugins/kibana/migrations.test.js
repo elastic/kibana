@@ -20,6 +20,124 @@
 import { migrations } from './migrations';
 
 describe('visualization', () => {
+  describe('date histogram time zone removal', () => {
+    const migrate = doc => migrations.visualization['6.7.2'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  // Doesn't make much sense but we want to test it's not removing it from anything else
+                  time_zone: 'Europe/Berlin',
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'time_zone': 'Europe/Berlin',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'auto',
+                      'min_doc_count': 1,
+                      'time_zone': 'Europe/Berlin',
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove time_zone from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should not remove time_zone from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+    });
+
+    it('should remove time_zone from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+    });
+
+    it('should not fail on date histograms without a time_zone', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should be able to apply the migration twice, since we need it for 6.7.2 and 7.0.1', () => {
+      const migratedDoc = migrate(migrate(doc));
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+  });
+
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
     const generateDoc = ({ type, aggs }) => ({
