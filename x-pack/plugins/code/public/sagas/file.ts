@@ -5,8 +5,11 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
+import Url from 'url';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+
 import { FileTree } from '../../model';
 import {
   fetchDirectory,
@@ -90,7 +93,7 @@ function requestRepoTree({
     query.parents = true;
   }
   return kfetch({
-    pathname: `../api/code/repo/${uri}/tree/${revision}/${path}`,
+    pathname: `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
     query,
   });
 }
@@ -110,7 +113,7 @@ function* handleFetchBranches(action: Action<FetchRepoPayload>) {
 
 function requestBranches({ uri }: FetchRepoPayload) {
   return kfetch({
-    pathname: `../api/code/repo/${uri}/references`,
+    pathname: `/api/code/repo/${uri}/references`,
   });
 }
 
@@ -155,7 +158,7 @@ function requestCommits(
 ) {
   const pathStr = path ? `/${path}` : '';
   const options: any = {
-    pathname: `../api/code/repo/${uri}/history/${revision}${pathStr}`,
+    pathname: `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
   };
   if (loadMore) {
     options.query = { after: 1 };
@@ -171,11 +174,13 @@ export async function requestFile(
   line?: string
 ): Promise<FetchFileResponse> {
   const { uri, revision, path } = payload;
-  let url = `../api/code/repo/${uri}/blob/${revision}/${path}`;
+  const url = `/api/code/repo/${uri}/blob/${encodeURIComponent(revision)}/${path}`;
+  const query: any = {};
   if (line) {
-    url += '?line=' + line;
+    query.line = line;
   }
-  const response: Response = await fetch(url);
+  const response: Response = await fetch(chrome.addBasePath(Url.format({ pathname: url, query })));
+
   if (response.status >= 200 && response.status < 300) {
     const contentType = response.headers.get('Content-Type');
 
@@ -198,7 +203,7 @@ export async function requestFile(
       return {
         payload,
         isImage: true,
-        content: await response.text(),
+        content: '',
         url,
         isUnsupported: false,
       };
@@ -206,7 +211,7 @@ export async function requestFile(
       return {
         payload,
         isImage: false,
-        content: await response.text(),
+        content: '',
         url,
         isUnsupported: true,
       };

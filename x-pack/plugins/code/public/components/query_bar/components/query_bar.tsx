@@ -7,14 +7,17 @@
 import { debounce, isEqual } from 'lodash';
 import React, { Component } from 'react';
 
-import { SearchOptions as ISearchOptions } from '../../../actions';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { connect } from 'react-redux';
+import {
+  saveSearchOptions,
+  SearchOptions as ISearchOptions,
+  searchReposForScope,
+} from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-import { connect } from 'react-redux';
 import { SearchScope } from '../../../../model';
-import { repositorySearch, saveSearchOptions } from '../../../actions';
 import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
 import {
@@ -158,7 +161,7 @@ export class CodeQueryBar extends Component<Props, State> {
       if (prevGroupIndex < 0) {
         prevGroupIndex = this.state.suggestionGroups.length - 1;
       }
-      const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[currGroupIndex];
+      const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[prevGroupIndex];
       prevItemIndex = group.suggestions.length - 1;
     }
 
@@ -218,7 +221,9 @@ export class CodeQueryBar extends Component<Props, State> {
         isSuggestionsVisible: false,
       },
       () => {
-        this.props.onSelect(item);
+        if (item) {
+          this.props.onSelect(item);
+        }
       }
     );
   };
@@ -430,7 +435,7 @@ export class CodeQueryBar extends Component<Props, State> {
               aria-owns="typeahead-items"
               aria-controls="typeahead-items"
             >
-              <form role="form" name="queryBarForm">
+              <form name="queryBarForm">
                 <div className="kuiLocalSearch" role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
@@ -485,16 +490,14 @@ export class CodeQueryBar extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  repoSearchResults: state.search.repositorySearchResults
-    ? state.search.repositorySearchResults.repositories
-    : [],
-  searchLoading: state.search.isLoading,
+  repoSearchResults: state.search.scopeSearchResults.repositories,
+  searchLoading: state.search.isScopeSearchLoading,
   searchScope: state.search.scope,
   searchOptions: state.search.searchOptions,
 });
 
 const mapDispatchToProps = {
-  repositorySearch,
+  repositorySearch: searchReposForScope,
   saveSearchOptions,
 };
 

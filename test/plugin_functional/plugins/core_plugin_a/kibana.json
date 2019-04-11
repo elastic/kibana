@@ -1,0 +1,7 @@
+{
+  "id": "core_plugin_a",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_plugin_a"],
+  "ui": true
+}

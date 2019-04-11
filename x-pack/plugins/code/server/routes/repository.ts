@@ -60,10 +60,10 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Create the index for the repository
-          const initializer = repoIndexInitializerFactory.create(
+          const initializer = (await repoIndexInitializerFactory.create(
             repo.uri,
             ''
-          ) as RepositoryIndexInitializer;
+          )) as RepositoryIndexInitializer;
           await initializer.init();
 
           // Persist to elasticsearch
@@ -78,10 +78,10 @@ export function repositoryRoute(
           };
           await cloneWorker.enqueueJob(payload, {});
           return repo;
-        } catch (error) {
+        } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
           log.error(msg);
-          log.error(error);
+          log.error(error2);
           return Boom.badRequest(msg);
         }
       }

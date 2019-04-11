@@ -26,11 +26,15 @@ test('Git url validation', () => {
   expect(isValidGitUrl('git://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with an invalid protocol
-  expect(isValidGitUrl('file:///Users/elastic/elasticsearch')).toBeFalsy();
+  expect(
+    isValidGitUrl('file:///Users/elastic/elasticsearch', [], ['ssh', 'https', 'git'])
+  ).toBeFalsy();
 
   // An url without protocol
-  expect(isValidGitUrl('/Users/elastic/elasticsearch')).toBeFalsy();
-  expect(isValidGitUrl('github.com/elastic/elasticsearch')).toBeTruthy();
+  expect(isValidGitUrl('/Users/elastic/elasticsearch', [], ['ssh', 'https', 'git'])).toBeFalsy();
+  expect(
+    isValidGitUrl('github.com/elastic/elasticsearch', [], ['ssh', 'https', 'git'])
+  ).toBeFalsy();
 
   // An valid git url but without whitelisted host
   expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git', ['gitlab.com'])).toBeFalsy();

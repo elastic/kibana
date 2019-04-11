@@ -8,7 +8,6 @@ import JoiNamespace from 'joi';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { mappings } from './server/code_node_client';
 import { init } from './server/init';
 
 export const code = (kibana: any) =>
@@ -20,13 +19,11 @@ export const code = (kibana: any) =>
 
     uiExports: {
       app: {
-        title: 'Code',
-        description: 'Code Search Plugin',
+        title: 'Code (Beta)',
         main: 'plugins/code/app',
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      mappings,
     },
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
@@ -66,10 +63,10 @@ export const code = (kibana: any) =>
             ]),
           gitProtocolWhitelist: Joi.array()
             .items(Joi.string())
-            .default(['https', 'git']),
+            .default(['https', 'git', 'ssh']),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
+        disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNode: Joi.boolean().default(false),
       }).default();

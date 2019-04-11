@@ -23,7 +23,7 @@ import '../directives/scroll_bottom';
 import '../filter/comma_list';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
-import '../../filters/sort_prefix_first';
+import '../filters/sort_prefix_first';
 import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';

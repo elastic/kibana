@@ -7,6 +7,7 @@
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { IRange } from 'monaco-editor';
 
+import { DiffKind } from '../common/git_diff';
 import { Repository, SourceHit } from '../model';
 import { RepositoryUri } from './repository';
 
@@ -29,6 +30,12 @@ export interface LspIndexRequest extends IndexRequest {
   localRepoPath: string; // The repository local file path
   filePath: string; // The file path within the repository
   revision: string; // The revision of the current repository
+}
+
+export interface LspIncIndexRequest extends LspIndexRequest {
+  originPath?: string;
+  kind: DiffKind;
+  originRevision: string;
 }
 
 // The request for RepositoryIndexer

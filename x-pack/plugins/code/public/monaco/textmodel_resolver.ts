@@ -5,6 +5,8 @@
  */
 
 import { editor, IDisposable, Uri } from 'monaco-editor';
+import chrome from 'ui/chrome';
+
 import { ImmortalReference } from './immortal_reference';
 
 export interface IReference<T> extends IDisposable {
@@ -52,7 +54,9 @@ export class TextModelResolverService implements ITextModelService {
     const repo = `${resource.authority}${resource.path}`;
     const revision = resource.query;
     const file = resource.fragment;
-    const response = await fetch(`../api/code/repo/${repo}/blob/${revision}/${file}`);
+    const response = await fetch(
+      chrome.addBasePath(`/api/code/repo/${repo}/blob/${revision}/${file}`)
+    );
     if (response.status === 200) {
       const contentType = response.headers.get('Content-Type');
 

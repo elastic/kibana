@@ -54,7 +54,7 @@ export function redirectRoute(server: hapi.Server, redirect: string, log: Logger
     handler: proxyHandler,
   });
   server.route({
-    path: '/api/lsp/{p*}',
+    path: '/api/code/lsp/{p*}',
     method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     handler: proxyHandler,
   });

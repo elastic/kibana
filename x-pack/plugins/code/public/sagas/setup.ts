@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import { checkSetupFailed, checkSetupSuccess } from '../actions';
 import { rootRoutePattern, setupRoutePattern } from './patterns';
 

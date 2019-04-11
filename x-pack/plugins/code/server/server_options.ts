@@ -26,13 +26,15 @@ export class ServerOptions {
 
   public readonly repoPath = resolve(this.config.get('path.data'), 'code/repos');
 
+  public readonly credsPath = resolve(this.config.get('path.data'), 'code/credentials');
+
   public readonly langServerPath = resolve(this.config.get('path.data'), 'code/langserver');
 
   public readonly jdtWorkspacePath = resolve(this.config.get('path.data'), 'code/jdt_ws');
 
   public readonly jdtConfigPath = resolve(this.config.get('path.data'), 'code/jdt_config');
 
-  public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
+  public readonly updateFrequencyMs: number = this.options.updateFrequencyMs;
 
   public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
 
@@ -42,7 +44,7 @@ export class ServerOptions {
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
-  public readonly disableScheduler: boolean = this.options.disableScheduler;
+  public readonly disableIndexScheduler: boolean = this.options.disableIndexScheduler;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 

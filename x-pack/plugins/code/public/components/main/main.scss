@@ -148,12 +148,12 @@
   width: calc(100% - $euiSizeXL);
 
   &:hover {
-    background: $euiColorLightShade;
+    background: $euiFocusBackgroundColor;
   }
 }
 
 .codeSearch__suggestion-item--active {
-  background: $euiColorLightShade;
+  background: $euiFocusBackgroundColor;
 }
 
 .codeSearch-suggestion--inner {
@@ -229,7 +229,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: $euiFontSizeXS;
-  padding: $euiSizeXS $euiSize;
+  padding: $euiSizeXS $euiSizeS;
 }
 
 .codeSearch-suggestion__token {
@@ -278,4 +278,9 @@
   margin: auto 0 auto $euiSizeM;
   text-align: center;
   flex-shrink: 0;
+}
+
+.code-line-decoration {
+  border-right: $euiBorderThick;
+  width: 316px !important;
 }

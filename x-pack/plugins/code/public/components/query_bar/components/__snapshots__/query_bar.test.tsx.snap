@@ -42,6 +42,7 @@ exports[`render correctly with empty query string 1`] = `
               compressed={false}
               fullWidth={false}
               hasDividers={false}
+              isInvalid={false}
               onChange={[Function]}
               options={
                 Array [
@@ -116,6 +117,7 @@ exports[`render correctly with empty query string 1`] = `
                     className=""
                     compressed={false}
                     fullWidth={false}
+                    isInvalid={false}
                     isLoading={false}
                     onChange={[Function]}
                     onClick={[Function]}
@@ -214,6 +216,7 @@ exports[`render correctly with empty query string 1`] = `
                         className=""
                         compressed={false}
                         fullWidth={false}
+                        isInvalid={false}
                         isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
@@ -548,7 +551,6 @@ exports[`render correctly with empty query string 1`] = `
             >
               <form
                 name="queryBarForm"
-                role="form"
               >
                 <div
                   className="kuiLocalSearch"
@@ -778,6 +780,7 @@ exports[`render correctly with input query string changed 1`] = `
                   compressed={false}
                   fullWidth={false}
                   hasDividers={false}
+                  isInvalid={false}
                   onChange={[Function]}
                   options={
                     Array [
@@ -852,6 +855,7 @@ exports[`render correctly with input query string changed 1`] = `
                         className=""
                         compressed={false}
                         fullWidth={false}
+                        isInvalid={false}
                         isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
@@ -950,6 +954,7 @@ exports[`render correctly with input query string changed 1`] = `
                             className=""
                             compressed={false}
                             fullWidth={false}
+                            isInvalid={false}
                             isLoading={false}
                             onChange={[Function]}
                             onClick={[Function]}
@@ -1284,7 +1289,6 @@ exports[`render correctly with input query string changed 1`] = `
                 >
                   <form
                     name="queryBarForm"
-                    role="form"
                   >
                     <div
                       className="kuiLocalSearch"

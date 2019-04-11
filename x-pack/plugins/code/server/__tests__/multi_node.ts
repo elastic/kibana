@@ -6,12 +6,8 @@
 
 import getPort from 'get-port';
 import { resolve } from 'path';
-import { Root } from '../../../../../src/core/server/root';
-import {
-  createRootWithCorePlugins,
-  request,
-  startTestServers,
-} from '../../../../../src/test_utils/kbn_server';
+import { Root } from 'src/core/server/root';
+import { createRootWithCorePlugins, request, startTestServers } from 'src/test_utils/kbn_server';
 
 describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';

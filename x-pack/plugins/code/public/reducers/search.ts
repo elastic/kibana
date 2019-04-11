@@ -21,6 +21,8 @@ import {
   repositorySearchSuccess,
   saveSearchOptions,
   SearchOptions,
+  searchReposForScope,
+  searchReposForScopeSuccess,
 } from '../actions';
 
 export interface SearchState {
@@ -30,17 +32,21 @@ export interface SearchState {
   languages?: Set<string>;
   repositories?: Set<RepositoryUri>;
   isLoading: boolean;
+  isScopeSearchLoading: boolean;
   error?: Error;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
   searchOptions: SearchOptions;
+  scopeSearchResults: { repositories: any[] };
 }
 
 const initialState: SearchState = {
   query: '',
   isLoading: false,
+  isScopeSearchLoading: false,
   scope: SearchScope.DEFAULT,
   searchOptions: { repoScope: [] },
+  scopeSearchResults: { repositories: [] },
 };
 
 export const search = handleActions<SearchState, any>(
@@ -158,6 +164,15 @@ export const search = handleActions<SearchState, any>(
     [String(saveSearchOptions)]: (state: SearchState, action: Action<any>) =>
       produce<SearchState>(state, draft => {
         draft.searchOptions = action.payload;
+      }),
+    [String(searchReposForScope)]: (state: SearchState, action: Action<RepositorySearchPayload>) =>
+      produce<SearchState>(state, draft => {
+        draft.isScopeSearchLoading = true;
+      }),
+    [String(searchReposForScopeSuccess)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        draft.scopeSearchResults = action.payload;
+        draft.isScopeSearchLoading = false;
       }),
   },
   initialState

@@ -13,6 +13,7 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { App } from './components/app';
+import { HelpMenu } from './components/help_menu';
 import { store } from './stores';
 
 const app = uiModules.get('apps/code');
@@ -46,7 +47,14 @@ function RootController($scope: any, $element: any, $http: any) {
 chrome.setRootController('code', RootController);
 chrome.breadcrumbs.set([
   {
-    text: 'Code',
+    text: 'Code (Beta)',
     href: '#/',
   },
 ]);
+
+chrome.helpExtension.set(domNode => {
+  render(<HelpMenu />, domNode);
+  return () => {
+    unmountComponentAtNode(domNode);
+  };
+});

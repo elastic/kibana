@@ -293,6 +293,9 @@ disable the License Management user interface.
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
 
+`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`.
+
+
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]

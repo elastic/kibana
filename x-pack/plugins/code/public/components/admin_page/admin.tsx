@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-import { connect } from 'react-redux';
-
 import { EuiTab, EuiTabs } from '@elastic/eui';
-
+import React from 'react';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
+import url from 'url';
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { parse as parseQuery } from 'querystring';
@@ -70,7 +68,7 @@ class AdminPage extends React.PureComponent<Props, State> {
     },
     {
       id: AdminTabs.languageServers,
-      name: 'Language Servers',
+      name: 'Language servers',
       disabled: false,
     },
   ];
@@ -91,7 +89,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public getAdminTabClickHandler = (tab: AdminTabs) => () => {
     this.setState({ tab });
-    this.props.history.push(`/admin?tab=${tab}`);
+    this.props.history.push(url.format({ pathname: '/admin', query: { tab } }));
   };
 
   public renderTabs() {

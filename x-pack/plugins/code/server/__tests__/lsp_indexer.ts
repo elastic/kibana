@@ -124,7 +124,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
     })
   );
 }
-describe('lsp_indexer', () => {
+describe('lsp_indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
@@ -244,7 +244,7 @@ describe('lsp_indexer', () => {
     assert.ok(bulkSpy.notCalled);
   });
 
-  it('Index continues from checkpoint', async () => {
+  it('Index continues from a checkpoint', async () => {
     // Setup the esClient spies
     const {
       existsAliasSpy,

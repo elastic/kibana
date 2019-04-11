@@ -5,8 +5,8 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import {
   loadLanguageServers,
   loadLanguageServersFailed,
@@ -18,13 +18,13 @@ import {
 
 function fetchLangServers() {
   return kfetch({
-    pathname: '../api/code/install',
+    pathname: '/api/code/install',
   });
 }
 
 function installLanguageServer(languageServer: string) {
   return kfetch({
-    pathname: `../api/code/install/${languageServer}`,
+    pathname: `/api/code/install/${languageServer}`,
     method: 'POST',
   });
 }

@@ -8,7 +8,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import styled from 'styled-components';
-import Url from 'url';
+import url from 'url';
 
 import { SearchScope } from '../../../model';
 import { history } from '../../utils/url';
@@ -32,7 +32,7 @@ export class ScopeTabs extends React.PureComponent<Props> {
       const { query } = this.props;
       const queries = querystring.parse(history.location.search.replace('?', ''));
       history.push(
-        Url.format({
+        url.format({
           pathname: '/search',
           query: {
             ...queries,

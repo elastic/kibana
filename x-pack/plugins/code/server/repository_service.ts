@@ -21,9 +21,15 @@ import { Logger } from './log';
 
 export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => void;
 
+const SSH_AUTH_ERROR = new Error('Failed to authenticate SSH session');
+
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
-  constructor(private readonly repoVolPath: string, private log: Logger) {}
+  constructor(
+    private readonly repoVolPath: string,
+    private readonly credsPath: string,
+    private log: Logger
+  ) {}
 
   public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
@@ -34,7 +40,7 @@ export class RepositoryService {
         this.log.info(`Repository exist in local path. Do update instead of clone.`);
         try {
           // Do update instead of clone if the local repo exists.
-          const updateRes = await this.update(repo.uri);
+          const updateRes = await this.update(repo);
           return {
             uri: repo.uri,
             repo: {
@@ -61,65 +67,11 @@ export class RepositoryService {
           })
         );
       }
-
       // Go head with the actual clone.
-      try {
-        const gitRepo = await Git.Clone.clone(repo.url, localPath, {
-          bare: 1,
-          fetchOpts: {
-            callbacks: {
-              transferProgress: {
-                // Make the progress update less frequent to avoid too many
-                // concurrently update of git status in elasticsearch.
-                throttle: 1000,
-                callback: (stats: any) => {
-                  const progress =
-                    (100 * (stats.receivedObjects() + stats.indexedObjects())) /
-                    (stats.totalObjects() * 2);
-                  const cloneProgress = {
-                    isCloned: false,
-                    receivedObjects: stats.receivedObjects(),
-                    indexedObjects: stats.indexedObjects(),
-                    totalObjects: stats.totalObjects(),
-                    localObjects: stats.localObjects(),
-                    totalDeltas: stats.totalDeltas(),
-                    indexedDeltas: stats.indexedDeltas(),
-                    receivedBytes: stats.receivedBytes(),
-                  };
-                  if (handler) {
-                    handler(progress, cloneProgress);
-                  }
-                },
-              } as any,
-              certificateCheck: () => {
-                // Ignore cert check failures.
-                return 1;
-              },
-            },
-          },
-        });
-        const headCommit = await gitRepo.getHeadCommit();
-        const headRevision = headCommit.sha();
-        const currentBranch = await gitRepo.getCurrentBranch();
-        const currentBranchName = currentBranch.shorthand();
-        this.log.info(
-          `Clone repository from ${
-            repo.url
-          } done with head revision ${headRevision} and default branch ${currentBranchName}`
-        );
-        return {
-          uri: repo.uri,
-          repo: {
-            ...repo,
-            defaultBranch: currentBranchName,
-            revision: headRevision,
-          },
-        };
-      } catch (error) {
-        const msg = `Clone repository from ${repo.url} error.`;
-        this.log.error(msg);
-        this.log.error(error);
-        throw new Error(msg);
+      if (repo.protocol === 'ssh') {
+        return this.tryWithKeys(key => this.doClone(repo, localPath, handler, key));
+      } else {
+        return await this.doClone(repo, localPath, handler);
       }
     }
   }
@@ -139,12 +91,22 @@ export class RepositoryService {
       throw error;
     }
   }
-
-  public async update(uri: string): Promise<UpdateWorkerResult> {
+  public async update(repo: Repository): Promise<UpdateWorkerResult> {
+    if (repo.protocol === 'ssh') {
+      return await this.tryWithKeys(key => this.doUpdate(repo.uri, key));
+    } else {
+      return await this.doUpdate(repo.uri);
+    }
+  }
+  public async doUpdate(uri: string, key?: string): Promise<UpdateWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
       const repo = await Git.Repository.open(localPath);
-      await repo.fetchAll();
+      await repo.fetchAll({
+        callbacks: {
+          credentials: this.credentialFunc(key),
+        },
+      });
       // TODO(mengwei): deal with the case when the default branch has changed.
       const currentBranch = await repo.getCurrentBranch();
       const currentBranchName = currentBranch.shorthand();
@@ -162,9 +124,127 @@ export class RepositoryService {
         revision: headCommit.sha(),
       };
     } catch (error) {
-      const msg = `update repository ${uri} error: ${error}`;
-      this.log.error(msg);
-      throw new Error(msg);
+      if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
+        throw SSH_AUTH_ERROR;
+      } else {
+        const msg = `update repository ${uri} error: ${error}`;
+        this.log.error(msg);
+        throw new Error(msg);
+      }
     }
+  }
+
+  /**
+   * read credentials dir, try using each privateKey until action is successful
+   * @param action
+   */
+  private async tryWithKeys<R>(action: (key: string) => Promise<R>): Promise<R> {
+    const files = fs.existsSync(this.credsPath)
+      ? new Set(fs.readdirSync(this.credsPath))
+      : new Set();
+    for (const f of files) {
+      if (f.endsWith('.pub')) {
+        const privateKey = f.slice(0, f.length - 4);
+        if (files.has(privateKey)) {
+          try {
+            this.log.debug(`try with key ${privateKey}`);
+            return await action(privateKey);
+          } catch (e) {
+            if (e !== SSH_AUTH_ERROR) {
+              throw e;
+            }
+            // continue to try another key
+          }
+        }
+      }
+    }
+    throw SSH_AUTH_ERROR;
+  }
+
+  private async doClone(
+    repo: Repository,
+    localPath: string,
+    handler?: CloneProgressHandler,
+    keyFile?: string
+  ) {
+    try {
+      const gitRepo = await Git.Clone.clone(repo.url, localPath, {
+        bare: 1,
+        fetchOpts: {
+          callbacks: {
+            transferProgress: {
+              // Make the progress update less frequent to avoid too many
+              // concurrently update of git status in elasticsearch.
+              throttle: 1000,
+              callback: (stats: any) => {
+                if (handler) {
+                  const progress =
+                    (100 * (stats.receivedObjects() + stats.indexedObjects())) /
+                    (stats.totalObjects() * 2);
+                  const cloneProgress = {
+                    isCloned: false,
+                    receivedObjects: stats.receivedObjects(),
+                    indexedObjects: stats.indexedObjects(),
+                    totalObjects: stats.totalObjects(),
+                    localObjects: stats.localObjects(),
+                    totalDeltas: stats.totalDeltas(),
+                    indexedDeltas: stats.indexedDeltas(),
+                    receivedBytes: stats.receivedBytes(),
+                  };
+                  handler(progress, cloneProgress);
+                }
+              },
+            } as any,
+            certificateCheck: () => {
+              // Ignore cert check failures.
+              return 1;
+            },
+            credentials: this.credentialFunc(keyFile),
+          },
+        },
+      });
+      const headCommit = await gitRepo.getHeadCommit();
+      const headRevision = headCommit.sha();
+      const currentBranch = await gitRepo.getCurrentBranch();
+      const currentBranchName = currentBranch.shorthand();
+      this.log.info(
+        `Clone repository from ${
+          repo.url
+        } done with head revision ${headRevision} and default branch ${currentBranchName}`
+      );
+      return {
+        uri: repo.uri,
+        repo: {
+          ...repo,
+          defaultBranch: currentBranchName,
+          revision: headRevision,
+        },
+      };
+    } catch (error) {
+      if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
+        throw SSH_AUTH_ERROR;
+      } else {
+        const msg = `Clone repository from ${repo.url} error.`;
+        this.log.error(msg);
+        this.log.error(error);
+        throw new Error(msg);
+      }
+    }
+  }
+
+  private credentialFunc(keyFile: string | undefined) {
+    return (url: string, userName: string) => {
+      if (keyFile) {
+        this.log.debug(`try with key ${path.join(this.credsPath, keyFile)}`);
+        return Git.Cred.sshKeyNew(
+          userName,
+          path.join(this.credsPath, `${keyFile}.pub`),
+          path.join(this.credsPath, keyFile),
+          ''
+        );
+      } else {
+        return Git.Cred.defaultNew();
+      }
+    };
   }
 }

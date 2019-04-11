@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function manageRepositoriesFunctonalTests({
   getService,
   getPageObjects,
@@ -63,6 +63,41 @@ export default function manageRepositoriesFunctonalTests({
       it('delete repository', async () => {
         log.debug('Code test delete repository');
         // Click the delete repository button.
+        await PageObjects.code.clickDeleteRepositoryButton();
+
+        await retry.try(async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          expect(repositoryItems).to.have.length(0);
+        });
+      });
+
+      it('import a git:// repository', async () => {
+        log.debug('Code test import repository');
+        // Fill in the import repository input box with a valid git repository url.
+        await PageObjects.code.fillImportRepositoryUrlInputBox(
+          'git://github.com/Microsoft/TypeScript-Node-Starter'
+        );
+        // Click the import repository button.
+        await PageObjects.code.clickImportRepositoryButton();
+
+        await retry.tryForTime(300000, async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          expect(repositoryItems).to.have.length(1);
+          expect(await repositoryItems[0].getVisibleText()).to.equal(
+            'Microsoft/TypeScript-Node-Starter'
+          );
+        });
+
+        // Wait for the index to start.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+        });
+        // Wait for the index to end.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+        });
+
+        // Delete the repository
         await PageObjects.code.clickDeleteRepositoryButton();
 
         await retry.try(async () => {

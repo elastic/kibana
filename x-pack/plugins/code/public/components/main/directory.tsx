@@ -11,6 +11,7 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
+import { encodeRevisionString } from '../../utils/url';
 
 const Root = styled.div`
   padding: ${theme.paddingSizes.m};
@@ -84,7 +85,7 @@ export const Directory = withRouter((props: Props) => {
   }
   const { resource, org, repo, revision } = props.match.params;
   const getUrl = (pathType: PathTypes) => (path: string) =>
-    `/${resource}/${org}/${repo}/${pathType}/${revision}/${path}`;
+    `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`;
   const fileList = <DirectoryNodes nodes={files} title="Files" getUrl={getUrl(PathTypes.blob)} />;
   const folderList = (
     <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />

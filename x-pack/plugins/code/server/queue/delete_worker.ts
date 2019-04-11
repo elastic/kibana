@@ -7,7 +7,7 @@
 import moment from 'moment';
 
 import { RepositoryUri, WorkerReservedProgress } from '../../model';
-import { WorkerProgress, WorkerResult } from '../../model/repository';
+import { WorkerProgress } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -44,7 +44,11 @@ export class DeleteWorker extends AbstractWorker {
     this.cancellationService.cancelIndexJob(uri);
 
     // 2. Delete repository on local fs.
-    const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(
+      this.serverOptions.repoPath,
+      this.serverOptions.credsPath,
+      this.log
+    );
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     // 3. Delete ES indices and aliases
@@ -107,21 +111,16 @@ export class DeleteWorker extends AbstractWorker {
     return await this.objectClient.setRepositoryDeleteStatus(repoUri, progress);
   }
 
-  public async onJobCompleted(_: Job, res: WorkerResult) {
-    this.log.info(`Delete job ${this.id} completed with result ${JSON.stringify(res)}`);
-    // Don't update the delete progress anymore.
-    return new Promise<WorkerResult>((resolve, reject) => {
-      resolve();
-    });
-  }
-
-  public async updateProgress(uri: string, progress: number) {
+  public async updateProgress(job: Job, progress: number) {
+    const { uri } = job.payload;
     const p: WorkerProgress = {
       uri,
       progress,
       timestamp: new Date(),
     };
-    return await this.objectClient.updateRepositoryDeleteStatus(uri, p);
+    if (progress !== WorkerReservedProgress.COMPLETED) {
+      return await this.objectClient.updateRepositoryDeleteStatus(uri, p);
+    }
   }
 
   protected async getTimeoutMs(_: any) {

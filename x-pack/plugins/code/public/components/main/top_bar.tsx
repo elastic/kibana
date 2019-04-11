@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { SearchScope } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
+import { encodeRevisionString } from '../../utils/url';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
@@ -38,7 +39,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
       value: e.target.value,
     });
     const revision = this.props.branches.find(b => b.name === e.target.value)!.commit.id;
-    history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${path}`);
+    history.push(
+      `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`
+    );
   };
 
   public render() {

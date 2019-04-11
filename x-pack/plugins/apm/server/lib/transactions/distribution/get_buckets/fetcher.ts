@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AggregationSearchResponse,
-  ESFilter,
-  SearchResponse
-} from 'elasticsearch';
+import { ESFilter, SearchResponse } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -18,10 +14,11 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../typings/common';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../../helpers/range_filter';
+import { Setup } from '../../../helpers/setup_request';
 
 interface Bucket {
   key: number;
@@ -40,8 +37,7 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
+export type ESResponse = PromiseReturnType<typeof bucketFetcher>;
 export function bucketFetcher(
   serviceName: string,
   transactionName: string,
@@ -50,7 +46,7 @@ export function bucketFetcher(
   traceId: string,
   bucketSize: number,
   setup: Setup
-): Promise<ESResponse> {
+) {
   const { start, end, esFilterQuery, client, config } = setup;
   const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
   const filter: ESFilter[] = [

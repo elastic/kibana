@@ -64,7 +64,7 @@ const createSearchSpy = (nextUpdateTimestamp: number): sinon.SinonSpy => {
   );
 };
 
-const createGetSpy = (progress: number): sinon.SinonSpy => {
+const createGetSpy = (progress: number): sinon.SinonStub => {
   const cloneStatus: CloneWorkerProgress = {
     uri: 'github.com/elastic/code',
     progress,
@@ -73,13 +73,16 @@ const createGetSpy = (progress: number): sinon.SinonSpy => {
       isCloned: true,
     } as CloneProgress,
   };
-  return sinon.fake.returns(
+  const stub = sinon.stub();
+  stub.onFirstCall().throwsException('Failed to get delete status');
+  stub.onSecondCall().returns(
     Promise.resolve({
       _source: {
         [RepositoryGitStatusReservedField]: cloneStatus,
       },
     })
   );
+  return stub;
 };
 
 afterEach(() => {
@@ -150,9 +153,10 @@ test('Next job should not execute when repo is still in clone.', done => {
   const onScheduleFinished = () => {
     try {
       // Expect the search stub to be called to pull all repositories and
-      // the get stub to be called to pull out git status.
+      // the get stub to be called twice to pull out git status and delete
+      // status.
       expect(searchSpy.calledOnce).toBeTruthy();
-      expect(getSpy.calledOnce).toBeTruthy();
+      expect(getSpy.calledTwice).toBeTruthy();
       // Expect no update on anything regarding the update task scheduling.
       expect(enqueueJobSpy.notCalled).toBeTruthy();
       expect(updateSpy.notCalled).toBeTruthy();
@@ -197,8 +201,8 @@ test('Next job should execute.', done => {
     try {
       // Expect the search stub to be called to pull all repositories.
       expect(searchSpy.calledOnce).toBeTruthy();
-      // Expect the get stub to be called to pull git status.
-      expect(getSpy.calledOnce).toBeTruthy();
+      // Expect the get stub to be called to pull git status and delete status.
+      expect(getSpy.calledTwice).toBeTruthy();
       // Expect the update stub to be called to update next schedule timestamp.
       expect(updateSpy.calledOnce).toBeTruthy();
       // Expect the enqueue job stub to be called to issue the update job.

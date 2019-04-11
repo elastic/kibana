@@ -8,7 +8,7 @@ import { Logger } from './log';
 import { RepositoryService } from './repository_service';
 
 export class RepositoryServiceFactory {
-  public newInstance(repoPath: string, log: Logger): RepositoryService {
-    return new RepositoryService(repoPath, log);
+  public newInstance(repoPath: string, credsPath: string, log: Logger): RepositoryService {
+    return new RepositoryService(repoPath, credsPath, log);
   }
 }

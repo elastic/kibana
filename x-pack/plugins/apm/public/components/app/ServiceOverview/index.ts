@@ -5,8 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-import { IReduxState } from 'x-pack/plugins/apm/public/store/rootReducer';
-import { getUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IReduxState } from '../../../store/rootReducer';
+import { getUrlParams } from '../../../store/urlParams';
 import { ServiceOverview as View } from './view';
 
 function mapStateToProps(state = {} as IReduxState) {

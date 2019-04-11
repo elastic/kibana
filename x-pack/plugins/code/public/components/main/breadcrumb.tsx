@@ -8,6 +8,7 @@
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
+import { encodeRevisionString } from '../../utils/url';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -22,7 +23,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
 
     pathSegments.forEach((p, index) => {
       const paths = pathSegments.slice(0, index + 1);
-      const href = `#${repoUri}/tree/${revision}/${paths.join('/')}`;
+      const href = `#${repoUri}/tree/${encodeRevisionString(revision)}/${paths.join('/')}`;
       breadcrumbs.push({
         text: p,
         href,

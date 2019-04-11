@@ -6,7 +6,7 @@
 
 import querystring from 'querystring';
 import React from 'react';
-import Url from 'url';
+import url from 'url';
 
 import { SearchScope } from '../../../model';
 import { SearchScopeText } from '../../common/types';
@@ -34,7 +34,7 @@ export class SearchBar extends React.PureComponent<Props> {
     // Update the url and push to history as well.
     const queries = querystring.parse(history.location.search.replace('?', ''));
     history.push(
-      Url.format({
+      url.format({
         pathname: '/search',
         query: {
           ...queries,

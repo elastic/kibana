@@ -5,14 +5,16 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import { Match } from '../actions';
 import { loadBlame, loadBlameFailed, LoadBlamePayload, loadBlameSuccess } from '../actions/blame';
 import { blamePattern } from './patterns';
 
 function requestBlame(repoUri: string, revision: string, path: string) {
-  return kfetch({ pathname: `../api/code/repo/${repoUri}/blame/${revision}/${path}` });
+  return kfetch({
+    pathname: `/api/code/repo/${repoUri}/blame/${encodeURIComponent(revision)}/${path}`,
+  });
 }
 
 function* handleFetchBlame(action: Action<LoadBlamePayload>) {

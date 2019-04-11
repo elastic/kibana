@@ -65,7 +65,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       try {
-        const blob = await fileResolver.fileContent(uri, path, ref);
+        const blob = await fileResolver.fileContent(uri, path, decodeURIComponent(ref));
         if (blob.isBinary()) {
           const type = fileType(blob.content());
           if (type && type.mime && type.mime.startsWith('image/')) {
@@ -109,13 +109,13 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
   });
 
   server.route({
-    path: '/api/code/repo/{uri*3}/raw/{rev}/{path*}',
+    path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
     async handler(req, h: hapi.ResponseToolkit) {
       const fileResolver = new GitOperations(options.repoPath);
-      const { uri, path, rev } = req.params;
+      const { uri, path, ref } = req.params;
       try {
-        const blob = await fileResolver.fileContent(uri, path, rev);
+        const blob = await fileResolver.fileContent(uri, path, ref);
         if (blob.isBinary()) {
           return h.response(blob.content()).type('application/octet-stream');
         } else {
@@ -149,7 +149,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     const after = queries.after !== undefined;
     try {
       const repository = await gitOperations.openRepo(uri);
-      const commit = await gitOperations.getCommit(repository, ref);
+      const commit = await gitOperations.getCommit(repository, decodeURIComponent(ref));
       const walk = repository.createRevWalk();
       walk.sorting(Revwalk.SORT.TIME);
       walk.push(commit.id());
@@ -223,7 +223,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const gitOperations = new GitOperations(options.repoPath);
       const { uri, path, revision } = req.params;
       try {
-        const blames = await gitOperations.blame(uri, revision, path);
+        const blames = await gitOperations.blame(uri, decodeURIComponent(revision), path);
         return blames;
       } catch (e) {
         if (e.isBoom) {

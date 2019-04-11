@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 
 import { EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
@@ -16,6 +17,7 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
+import { encodeRevisionString } from '../../utils/url';
 
 const DirectoryNode = styled.span`
   margin-left: ${theme.euiSizeS};
@@ -63,7 +65,9 @@ export class CodeFileTree extends React.Component<Props> {
       } else {
         pathType = PathTypes.tree;
       }
-      this.props.history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
+      this.props.history.push(
+        `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${node.path}`
+      );
     }
   };
 
@@ -114,6 +118,8 @@ export class CodeFileTree extends React.Component<Props> {
               data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
               role="button"
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
             >
               {forceOpen ? (
@@ -142,6 +148,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"
@@ -162,6 +170,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-Link-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"
@@ -182,6 +192,8 @@ export class CodeFileTree extends React.Component<Props> {
           <Container>
             <div
               data-test-subj={`codeFileTreeNode-File-${node.path}`}
+              tabIndex={0}
+              onKeyDown={onClick}
               onClick={onClick}
               className={classes(className, 'code-file-tree-file')}
               role="button"

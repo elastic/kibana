@@ -82,7 +82,7 @@ export const repository = handleActions(
         draft.importLoading = false;
         draft.showToast = true;
         draft.toastType = ToastType.success;
-        draft.toastMessage = `${action.payload.name} has been successfully imported!`;
+        draft.toastMessage = `${action.payload.name} has been successfully submitted!`;
         draft.repositories = [...state.repositories, action.payload];
       }),
     [String(importRepoFailed)]: (state: RepositoryState, action: Action<any>) =>

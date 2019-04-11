@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import {
   deleteRepo,
   deleteRepoFailed,
@@ -35,7 +35,7 @@ import { history } from '../utils/url';
 import { adminRoutePattern } from './patterns';
 
 function requestRepos(): any {
-  return kfetch({ pathname: '../api/code/repos' });
+  return kfetch({ pathname: '/api/code/repos' });
 }
 
 function* handleFetchRepos() {
@@ -48,11 +48,11 @@ function* handleFetchRepos() {
 }
 
 function requestDeleteRepo(uri: string) {
-  return kfetch({ pathname: `../api/code/repo/${uri}`, method: 'delete' });
+  return kfetch({ pathname: `/api/code/repo/${uri}`, method: 'delete' });
 }
 
 function requestIndexRepo(uri: string) {
-  return kfetch({ pathname: `../api/code/repo/index/${uri}`, method: 'post' });
+  return kfetch({ pathname: `/api/code/repo/index/${uri}`, method: 'post' });
 }
 
 function* handleDeleteRepo(action: Action<string>) {
@@ -87,7 +87,7 @@ function* handleIndexRepo(action: Action<string>) {
 
 function requestImportRepo(uri: string) {
   return kfetch({
-    pathname: '../api/code/repo',
+    pathname: '/api/code/repo',
     method: 'post',
     body: JSON.stringify({ url: uri }),
   });
@@ -117,7 +117,7 @@ function* handleFetchRepoConfigs() {
 }
 
 function requestRepoConfigs() {
-  return kfetch({ pathname: '../api/code/workspace', method: 'get' });
+  return kfetch({ pathname: '/api/code/workspace', method: 'get' });
 }
 
 function* handleInitCmd(action: Action<string>) {
@@ -127,7 +127,7 @@ function* handleInitCmd(action: Action<string>) {
 
 function requestRepoInitCmd(repoUri: string) {
   return kfetch({
-    pathname: `../api/code/workspace/${repoUri}/master`,
+    pathname: `/api/code/workspace/${repoUri}/master`,
     query: { force: true },
     method: 'post',
   });
@@ -139,7 +139,7 @@ function* handleGotoRepo(action: Action<string>) {
 }
 
 function requestRepo(uri: string) {
-  return kfetch({ pathname: `../api/code/repo${uri}`, method: 'get' });
+  return kfetch({ pathname: `/api/code/repo${uri}`, method: 'get' });
 }
 
 export function* watchImportRepo() {

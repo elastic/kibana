@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* tslint:disable */
+/* eslint-disable no-console */
 
 import fs from 'fs';
 import Git from '@elastic/nodegit';
@@ -19,7 +19,7 @@ export class TestRepoManager {
   }
 
   public async importAllRepos() {
-    for (let repo of this.repos) {
+    for (const repo of this.repos) {
       await this.importRepo(repo.url, repo.path);
     }
   }
@@ -53,7 +53,7 @@ export class TestRepoManager {
       } else {
         resolve(true);
       }
-    })
+    });
   }
 
   public getRepo(language: string): Repo {

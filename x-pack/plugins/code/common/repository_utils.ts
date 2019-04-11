@@ -28,6 +28,7 @@ export class RepositoryUtils {
       url: repo.href as string,
       name,
       org,
+      protocol: repo.protocol,
     };
   }
 

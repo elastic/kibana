@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CodeLine extends Array<Token> {}
+export type CodeLine = Token[];
 
 export interface Token {
   value: string;

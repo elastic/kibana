@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiText, EuiToken, IconType } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Url from 'url';
+import url from 'url';
 
 import {
   AutocompleteSuggestion,
@@ -32,6 +32,15 @@ export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
+  private viewMoreUrl() {
+    return url.format({
+      pathname: '/search',
+      query: {
+        q: this.props.query,
+      },
+    });
+  }
+
   public render() {
     if (!this.props.show || isEmpty(this.props.suggestionGroups)) {
       return null;
@@ -42,7 +51,11 @@ export class SuggestionsComponent extends Component<Props> {
         <div className="kbnTypeahead">
           <div className="kbnTypeahead__popover">
             {this.renderSuggestionGroups()}
-            <div className="codeSearch__full-text-button">Press ⮐ Return for Full Text Search</div>
+            <Link to={this.viewMoreUrl()}>
+              <div className="codeSearch__full-text-button">
+                Press ⮐ Return for Full Text Search
+              </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -102,15 +115,9 @@ export class SuggestionsComponent extends Component<Props> {
           </EuiFlexGroup>
         );
 
-        const viewMoreUrl = Url.format({
-          pathname: '/search',
-          query: {
-            q: this.props.query,
-          },
-        });
         const viewMore = (
           <div className="codeSearch-suggestion__link">
-            <Link to={viewMoreUrl}>View More</Link>
+            <Link to={this.viewMoreUrl()}>View More</Link>
           </div>
         );
 

@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import {
   Blame,
   Commit,
+  Diff as NodeGitDiff,
   Error,
   Object,
   Oid,
@@ -18,7 +21,7 @@ import {
 import Boom from 'boom';
 import * as Path from 'path';
 import { GitBlame } from '../common/git_blame';
-import { CommitDiff, DiffKind } from '../common/git_diff';
+import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
@@ -103,18 +106,16 @@ export class GitOperations {
     if (revision.toUpperCase() === 'HEAD') {
       return await repo.getHeadCommit();
     }
-    try {
-      return await repo.getBranchCommit(revision);
-    } catch (e) {
-      if (e.errno === Error.CODE.ENOTFOUND) {
-        return checkExists(
-          () => this.findCommit(repo, revision),
-          `revision or branch ${revision} not found in ${repo.path()}`
-        );
-      } else {
-        throw e;
-      }
+    // branches and tags
+    const refs = [`refs/remotes/origin/${revision}`, `refs/tags/${revision}`];
+    const commit = await this.findCommitByRefs(repo, refs);
+    if (commit === null) {
+      return (await checkExists(
+        () => this.findCommit(repo, revision),
+        `revision or branch ${revision} not found in ${repo.path()}`
+      )) as Commit;
     }
+    return commit;
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
@@ -157,6 +158,7 @@ export class GitOperations {
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
     let count = 0;
+
     async function walk(t: Tree) {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
@@ -169,6 +171,7 @@ export class GitOperations {
         }
       }
     }
+
     await walk(tree);
     return count;
   }
@@ -180,6 +183,7 @@ export class GitOperations {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
+
     async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
@@ -192,6 +196,7 @@ export class GitOperations {
         }
       }
     }
+
     return await walk(tree);
   }
 
@@ -336,6 +341,65 @@ export class GitOperations {
     return commitDiff;
   }
 
+  public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
+    const repo = await this.openRepo(uri);
+    const oldCommit = await this.getCommit(repo, oldRevision);
+    const newCommit = await this.getCommit(repo, newRevision);
+    const oldTree = await oldCommit.getTree();
+    const newTree = await newCommit.getTree();
+
+    const diff = await NodeGitDiff.treeToTree(repo, oldTree, newTree);
+
+    const res: Diff = {
+      additions: 0,
+      deletions: 0,
+      files: [],
+    };
+    const patches = await diff.patches();
+    for (const patch of patches) {
+      const { total_deletions, total_additions } = patch.lineStats();
+      res.additions += total_additions;
+      res.deletions += total_deletions;
+      if (patch.isAdded()) {
+        const path = patch.newFile().path();
+        res.files.push({
+          path,
+          additions: total_additions,
+          deletions: total_deletions,
+          kind: DiffKind.ADDED,
+        });
+      } else if (patch.isDeleted()) {
+        const path = patch.oldFile().path();
+        res.files.push({
+          path,
+          kind: DiffKind.DELETED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      } else if (patch.isModified()) {
+        const path = patch.newFile().path();
+        const originPath = patch.oldFile().path();
+        res.files.push({
+          path,
+          originPath,
+          kind: DiffKind.MODIFIED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      } else if (patch.isRenamed()) {
+        const path = patch.newFile().path();
+        res.files.push({
+          path,
+          originPath: patch.oldFile().path(),
+          kind: DiffKind.RENAMED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      }
+    }
+    return res;
+  }
+
   private async getOriginCode(commit: Commit, repo: Repository, path: string) {
     for (const oid of commit.parents()) {
       const parentCommit = await repo.getCommit(oid);
@@ -353,6 +417,7 @@ export class GitOperations {
     const entry = await commit.getEntry(path);
     return (await entry.getBlob()).content().toString('utf8');
   }
+
   private async walkTree(
     fileTree: FileTree,
     tree: Tree,
@@ -415,18 +480,37 @@ export class GitOperations {
     return fileTree;
   }
 
-  private async findCommit(repo: Repository, revision: string): Promise<Commit> {
-    const obj = await Object.lookupPrefix(
-      repo,
-      Oid.fromString(revision),
-      revision.length,
-      Object.TYPE.COMMIT
-    );
-    if (obj) {
-      return repo.getCommit(obj.id());
+  private async findCommit(repo: Repository, revision: string): Promise<Commit | null> {
+    try {
+      const obj = await Object.lookupPrefix(
+        repo,
+        Oid.fromString(revision),
+        revision.length,
+        Object.TYPE.COMMIT
+      );
+      if (obj) {
+        return repo.getCommit(obj.id());
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
-    // @ts-ignore
-    return null;
+  }
+
+  private async findCommitByRefs(repo: Repository, refs: string[]): Promise<Commit | null> {
+    if (refs.length === 0) {
+      return null;
+    }
+    const [ref, ...rest] = refs;
+    try {
+      return await repo.getReferenceCommit(ref);
+    } catch (e) {
+      if (e.errno === Error.CODE.ENOTFOUND) {
+        return await this.findCommitByRefs(repo, rest);
+      } else {
+        throw e;
+      }
+    }
   }
 }
 
