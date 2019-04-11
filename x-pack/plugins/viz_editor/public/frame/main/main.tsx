@@ -51,19 +51,22 @@ export interface RootState {
   };
 }
 
-function getExpression(visModel: VisModel) {
+function getFetchExpression(visModel: VisModel) {
+  return datasourceRegistry.getByName(visModel.datasourcePlugin).toExpression(visModel, 'full');
+}
+
+function getTableExpression(visModel: VisModel) {
+  return `${getFetchExpression(visModel)} | display_kibana_datatable`;
+}
+
+function getRenderExpression(visModel: VisModel) {
   const { toExpression: toRenderExpression } = editorRegistry.getByName(visModel.editorPlugin);
 
-  const { toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
-    visModel.datasourcePlugin
-  );
   const renderExpression = toRenderExpression
     ? toRenderExpression(visModel, 'edit')
     : `${visModel.editorPlugin}_chart { config }`;
 
-  const fetchExpression = toDataFetchExpression(visModel, 'full');
-
-  return `${fetchExpression} | ${renderExpression}`;
+  return `${getFetchExpression(visModel)} | ${renderExpression}`;
 }
 
 function addDataFetchingToSuggestion(suggestion: Suggestion): Suggestion {
@@ -88,7 +91,7 @@ function reducer(state: RootState, action: Action): RootState {
           ...state.visModel,
           private: {
             ...state.visModel.private,
-            expression: getExpression(state.visModel),
+            expression: getRenderExpression(state.visModel),
           },
         },
       };
@@ -140,7 +143,7 @@ export function Main(props: MainProps) {
 
   const expression = state.metadata.expressionMode
     ? state.visModel.private.expression
-    : getExpression(state.visModel);
+    : getRenderExpression(state.visModel);
 
   const suggestions = editorRegistry
     .getAll()
@@ -211,6 +214,10 @@ export function Main(props: MainProps) {
               ) : (
                 <>
                   <EuiFlexItem>
+                    <ExpressionRenderer
+                      {...props}
+                      expression={getTableExpression(state.visModel)}
+                    />
                     <EuiCodeBlock>{expression}</EuiCodeBlock>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
