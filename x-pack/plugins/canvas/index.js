@@ -40,6 +40,9 @@ export function canvas(kibana) {
           getTitle(obj) {
             return obj.attributes.name;
           },
+          getInAppUrl(obj) {
+            return `/workpad/${obj.id}`;
+          },
         },
       },
     },

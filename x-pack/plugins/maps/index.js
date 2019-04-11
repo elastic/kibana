@@ -59,6 +59,9 @@ export function maps(kibana) {
           getTitle(obj) {
             return obj.attributes.title;
           },
+          getInAppUrl(obj) {
+            return `/map/${obj}`;
+          },
         },
         'maps-telemetry': {
           isNamespaceAgnostic: true,
