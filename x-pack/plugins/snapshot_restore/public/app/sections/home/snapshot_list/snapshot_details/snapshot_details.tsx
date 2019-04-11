@@ -21,6 +21,7 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
+import { formatDate } from '../../../../services/text';
 
 interface Props extends RouteComponentProps {
   repositoryName: string;
@@ -74,16 +75,20 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       indices,
       state,
       failures,
-      // TODO: startTimeInMillis,
-      // TODO: endTimeInMillis,
-      // TODO: durationInMillis,
+      startTimeInMillis,
+      endTimeInMillis,
+      durationInMillis,
       uuid,
     } = snapshotDetails;
 
     const indicesList = indices.length ? (
       <ul>
         {indices.map((index: string) => (
-          <li key={index}>{index}</li>
+          <li key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </li>
         ))}
       </ul>
     ) : (
@@ -99,7 +104,11 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     const failuresList = failures.length ? (
       <ul>
         {failures.map((failure: any) => (
-          <li key={failure}>{failure}</li>
+          <li key={failure}>
+            <EuiTitle size="xs">
+              <span>{failure}</span>
+            </EuiTitle>
+          </li>
         ))}
       </ul>
     ) : (
@@ -220,6 +229,66 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
               data-test-subj="srSnapshotDetailFailuresDescription"
             >
               {failuresList}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="srSnapshotDetailsStartTimeItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemStartTimeLabel"
+                data-test-subj="srSnapshotDetailsStartTimeTitle"
+                defaultMessage="Start time"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailStartTimeDescription"
+            >
+              {formatDate(startTimeInMillis)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem data-test-subj="srSnapshotDetailsEndTimeItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemEndTimeLabel"
+                data-test-subj="srSnapshotDetailsEndTimeTitle"
+                defaultMessage="End time"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailEndTimeDescription"
+            >
+              {formatDate(endTimeInMillis)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="srSnapshotDetailsDurationItem">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
+                data-test-subj="srSnapshotDetailsDurationTitle"
+                defaultMessage="Duration"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription
+              className="eui-textBreakWord"
+              data-test-subj="srSnapshotDetailDurationDescription"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
+                data-test-subj="srSnapshotDetailsDurationValue"
+                defaultMessage="{seconds} seconds"
+                values={{ seconds: Math.round(durationInMillis / 1000) }}
+              />
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>

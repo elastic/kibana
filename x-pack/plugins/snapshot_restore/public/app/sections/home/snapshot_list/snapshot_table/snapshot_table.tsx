@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import moment from 'moment';
+
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+
 import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
-
-const DATE_FORMAT = 'MMMM Do, YYYY h:mm:ss A';
+import { formatDate } from '../../../../services/text';
 
 interface Props extends RouteComponentProps {
   snapshots: SnapshotDetails[];
@@ -63,8 +63,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (startTimeInMillis: number) =>
-        moment.unix(Number(startTimeInMillis)).format(DATE_FORMAT),
+      render: (startTimeInMillis: number) => formatDate(startTimeInMillis),
     },
     {
       field: 'durationInMillis',
@@ -74,7 +73,13 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       width: '100px',
-      render: (durationInMillis: number) => Math.round(durationInMillis / 1000),
+      render: (durationInMillis: number) => (
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
+          defaultMessage="{seconds}s"
+          values={{ seconds: Math.round(durationInMillis / 1000) }}
+        />
+      ),
     },
     {
       field: 'indices',
