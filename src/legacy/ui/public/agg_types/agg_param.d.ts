@@ -23,7 +23,10 @@ interface AggParam {
   type: string;
   name: string;
   displayName?: string;
+  displayLabel?: string;
+  displayToolTip?: string;
   disabled?(agg: AggConfig): boolean;
+  shouldShow?(agg: AggConfig): boolean;
 }
 
 export { AggParam };
