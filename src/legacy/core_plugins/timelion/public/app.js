@@ -82,7 +82,7 @@ require('ui/routes')
           defaultMessage: 'Read only',
         }),
         tooltip: i18n('timelion.badge.readOnly.tooltip', {
-          defaultMessage: 'Unable to save timelion sheets',
+          defaultMessage: 'Unable to save Timelion sheets',
         }),
         iconType: 'glasses'
       };
