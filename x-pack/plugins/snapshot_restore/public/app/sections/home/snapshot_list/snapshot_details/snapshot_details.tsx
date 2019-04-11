@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
 import { formatDate } from '../../../../services/text';
@@ -36,7 +37,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 }) => {
   const {
     core: {
-      i18n: { FormattedMessage },
+      i18n: { FormattedMessage, translate },
     },
   } = useAppDependencies();
 
@@ -62,15 +63,46 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   let content;
 
   if (loading) {
-    // TODO
+    content = (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.loadingLabel"
+          defaultMessage="Loading snapshot…"
+        />
+      </SectionLoading>
+    );
   } else if (error) {
-    // TODO
+    const notFound = error.status === 404;
+    const errorObject = notFound
+      ? {
+          data: {
+            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or that repository doesn't exist.`,
+              values: {
+                snapshotId,
+                repositoryName,
+              },
+            }),
+          },
+        }
+      : error;
+    content = (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.errorLoadingRepositoryTitle"
+            defaultMessage="Error loading repository"
+          />
+        }
+        error={errorObject}
+      />
+    );
   } else {
     const {
       versionId,
       version,
-      // By setting includeGlobalState to false it’s possible to prevent the cluster global state
-      // to be stored as part of the snapshot.
+      // TODO: Add a tooltip explaining that: a false value means that the cluster global state
+      // is not stored as part of the snapshot.
       includeGlobalState,
       indices,
       state,

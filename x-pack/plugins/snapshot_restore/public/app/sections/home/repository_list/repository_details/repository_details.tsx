@@ -77,7 +77,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.loadingRepository"
-          defaultMessage="Loading repository..."
+          defaultMessage="Loading repository…"
         />
       </SectionLoading>
     );
