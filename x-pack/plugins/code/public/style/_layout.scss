@@ -66,6 +66,10 @@
   margin-right: $euiSizeS;
 }
 
+.code-search-settings-flyout {
+  max-width: 28rem;
+}
+
 .codeFooter--error {
   color: $euiColorDanger;
 }
