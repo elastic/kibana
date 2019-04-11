@@ -158,15 +158,6 @@
   }
 }
 
-@media (hover: none) {
-  /**
-   * Always show the option menu button on devices that don't support hovering (like most touch devices).
-   */
-  .dshPanel_optionsMenuButton {
-    opacity: 1;
-  }
-}
-
 .dshPanel_optionsMenuPopover[class*="-isOpen"],
 .dshPanel:hover  {
   .dshPanel_optionsMenuButton,
