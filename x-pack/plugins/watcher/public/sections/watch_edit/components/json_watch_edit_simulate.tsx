@@ -40,7 +40,7 @@ interface TableDataRow {
   actionMode: string | undefined;
   type: string;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface TableData extends Array<TableDataRow> {}
 
 const EXECUTE_DETAILS_INITIAL_STATE = {

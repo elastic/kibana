@@ -36,7 +36,6 @@ import { comparators } from '../comparators';
 import { timeUnits } from '../time_units';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
-import { waitForDomChange } from 'react-testing-library';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
@@ -442,7 +441,7 @@ const ThresholdWatchEditUi = ({
                     <EuiFlexItem grow={false} style={{ width: 150 }}>
                       <ErrableFormRow
                         errorKey="aggField"
-                        isShowingErrors={hasErrors && watch.aggField != undefined}
+                        isShowingErrors={hasErrors && watch.aggField !== undefined}
                         errors={errors}
                       >
                         <EuiSelect
@@ -549,7 +548,7 @@ const ThresholdWatchEditUi = ({
                       <EuiFlexItem grow={false}>
                         <ErrableFormRow
                           errorKey="termField"
-                          isShowingErrors={hasErrors && watch.termField != undefined}
+                          isShowingErrors={hasErrors && watch.termField !== undefined}
                           errors={errors}
                         >
                           <EuiSelect
