@@ -1,0 +1,9 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) &gt; [getInjectedVar](./kibana-plugin-public.injectedmetadatasetup.getinjectedvar.md)
+
+## InjectedMetadataSetup.getInjectedVar property
+
+<b>Signature:</b>
+
+```typescript
+getInjectedVar: (name: string, defaultValue?: any) => unknown;
+```
