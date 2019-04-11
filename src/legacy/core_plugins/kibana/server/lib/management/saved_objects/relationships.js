@@ -45,8 +45,18 @@ export async function findRelationships(type, id, options = {}) {
   ]);
 
   return [].concat(
-    injectMetaAttributes(referencedObjects.saved_objects, savedObjectSchemas).map(extractCommonProperties),
-    injectMetaAttributes(referencedResponse.saved_objects, savedObjectSchemas).map(extractCommonProperties),
+    injectMetaAttributes(referencedObjects.saved_objects, savedObjectSchemas)
+      .map(extractCommonProperties)
+      .map(obj => ({
+        ...obj,
+        direction: 'To',
+      })),
+    injectMetaAttributes(referencedResponse.saved_objects, savedObjectSchemas)
+      .map(extractCommonProperties)
+      .map(obj => ({
+        ...obj,
+        direction: 'From',
+      })),
   );
 }
 

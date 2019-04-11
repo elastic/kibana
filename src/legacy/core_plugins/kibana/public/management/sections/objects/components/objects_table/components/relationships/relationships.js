@@ -136,6 +136,16 @@ class RelationshipsUI extends Component {
         },
       },
       {
+        field: 'direction',
+        name: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnDirectionName',
+          defaultMessage: 'Direction',
+        }),
+        dataType: 'string',
+        sortable: false,
+        width: '75px',
+      },
+      {
         field: 'meta.title',
         name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title' }),
         description:
