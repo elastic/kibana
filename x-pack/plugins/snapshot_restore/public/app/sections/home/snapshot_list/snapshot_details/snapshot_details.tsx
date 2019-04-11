@@ -41,7 +41,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     },
   } = useAppDependencies();
 
-  const { error, loading, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
+  const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
   const includeGlobalStateToHumanizedMap: Record<string, any> = {
     0: (
@@ -62,42 +62,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 
   let content;
 
-  if (loading) {
-    content = (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotDetails.loadingLabel"
-          defaultMessage="Loading snapshot…"
-        />
-      </SectionLoading>
-    );
-  } else if (error) {
-    const notFound = error.status === 404;
-    const errorObject = notFound
-      ? {
-          data: {
-            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
-              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or that repository doesn't exist.`,
-              values: {
-                snapshotId,
-                repositoryName,
-              },
-            }),
-          },
-        }
-      : error;
-    content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryDetails.errorLoadingRepositoryTitle"
-            defaultMessage="Error loading repository"
-          />
-        }
-        error={errorObject}
-      />
-    );
-  } else {
+  if (snapshotDetails) {
     const {
       versionId,
       version,
@@ -321,6 +286,42 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiDescriptionList>
+    );
+  } else if (error) {
+    const notFound = error.status === 404;
+    const errorObject = notFound
+      ? {
+          data: {
+            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or that repository doesn't exist.`,
+              values: {
+                snapshotId,
+                repositoryName,
+              },
+            }),
+          },
+        }
+      : error;
+    content = (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.errorLoadingRepositoryTitle"
+            defaultMessage="Error loading repository"
+          />
+        }
+        error={errorObject}
+      />
+    );
+  } else {
+    // Assume the content is loading.
+    content = (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.loadingLabel"
+          defaultMessage="Loading snapshot…"
+        />
+      </SectionLoading>
     );
   }
 

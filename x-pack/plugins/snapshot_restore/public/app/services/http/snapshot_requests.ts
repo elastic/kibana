@@ -7,16 +7,15 @@ import { API_BASE_PATH } from '../../../../common/constants';
 import { httpService } from './http';
 import { useRequest } from './use_request';
 
-export const loadSnapshots = () => {
-  return useRequest({
+export const loadSnapshots = () =>
+  useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
     initialData: [],
   });
-};
 
-export const loadSnapshot = (repositoryName: string, snapshotId: string) => {
-  return useRequest({
+export const loadSnapshot = (repositoryName: string, snapshotId: string) =>
+  useRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
         snapshotId
@@ -24,4 +23,3 @@ export const loadSnapshot = (repositoryName: string, snapshotId: string) => {
     ),
     method: 'get',
   });
-};

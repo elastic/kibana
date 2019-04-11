@@ -35,11 +35,13 @@ export const getAllHandler: RouterRouteHandler = async (
 
   const fetchSnapshotsForRepository = async (repository: string) => {
     try {
+      // If any of these repositories 504 they will cost the request significant time.
       const {
         snapshots: fetchedSnapshots,
       }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
         repository,
         snapshot: '_all',
+        ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
       });
 
       // Decorate each snapshot with the repository with which it's associated.

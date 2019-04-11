@@ -125,7 +125,7 @@ export const SnapshotList: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      {pathRepositoryName && pathSnapshotId ? (
+      {repositoryName && snapshotId ? (
         <SnapshotDetails
           repositoryName={repositoryName}
           snapshotId={snapshotId}
