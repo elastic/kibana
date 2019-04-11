@@ -6,20 +6,10 @@
 
 import React from 'react';
 import chrome from 'ui/chrome';
-import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer, EuiPortal } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { documentationLinks } from '../../lib/documentation_links';
 
 export class HelpMenu extends React.PureComponent {
-  state = { isFlyoutVisible: false };
-
-  showFlyout = () => {
-    this.setState({ isFlyoutVisible: true });
-  };
-
-  hideFlyout = () => {
-    this.setState({ isFlyoutVisible: false });
-  };
-
   public render() {
     return (
       <React.Fragment>
@@ -36,20 +26,6 @@ export class HelpMenu extends React.PureComponent {
         <EuiButton fill iconType="popout" href={documentationLinks.code} target="_blank">
           Code documentation
         </EuiButton>
-
-        {
-          // TODO: add shortcut information
-          /*
-          <EuiSpacer />
-          <EuiButton onClick={this.showFlyout} target="_blank">
-            Keyboard shortcuts
-          </EuiButton>
-          {this.state.isFlyoutVisible && (
-          <EuiPortal>
-            <ShortcutsProvider onClose={this.hideFlyout} />
-          </EuiPortal>
-        )} */
-        }
       </React.Fragment>
     );
   }
