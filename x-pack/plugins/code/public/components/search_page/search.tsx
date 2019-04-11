@@ -8,11 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import url from 'url';
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { DocumentSearchResult, SearchScope } from '../../../model';
 import { changeSearchScope, SearchOptions } from '../../actions';
 import { RootState } from '../../reducers';
@@ -24,25 +22,6 @@ import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
 import { SearchBar } from './search_bar';
 import { SideBar } from './side_bar';
-
-const SearchContainer = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MainContentContainer = styled.div`
-  overflow-y: scroll;
-  padding: 16px;
-`;
-
-const CodeResultContainer = styled.div`
-  margin-top: ${theme.euiSize};
-`;
-
-const RepositoryResultContainer = CodeResultContainer;
 
 interface Props {
   searchOptions: SearchOptions;
@@ -182,11 +161,11 @@ class SearchPage extends React.PureComponent<Props, State> {
         </EuiTitle>
       );
       mainComp = (
-        <MainContentContainer>
+        <div className="codeContainer__search--inner">
           {statsComp}
           <EuiSpacer />
-          <RepositoryResultContainer>{resultComps}</RepositoryResultContainer>
-        </MainContentContainer>
+          <div className="codeContainer__search--results">{resultComps}</div>
+        </div>
       );
     } else if (
       scope === SearchScope.DEFAULT &&
@@ -205,19 +184,19 @@ class SearchPage extends React.PureComponent<Props, State> {
         </EuiTitle>
       );
       mainComp = (
-        <MainContentContainer>
+        <div className="codeContainer__search--inner">
           {statsComp}
           <EuiSpacer />
-          <CodeResultContainer>
+          <div className="codeContainer__search--results">
             <CodeResult results={results!} />
-          </CodeResultContainer>
+          </div>
           <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
-        </MainContentContainer>
+        </div>
       );
     }
 
     return (
-      <SearchContainer>
+      <div className="codeContainer__search">
         <ShortcutsProvider />
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem style={{ maxWidth: '256px' }}>
@@ -242,7 +221,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             {mainComp}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </SearchContainer>
+      </div>
     );
   }
 }
