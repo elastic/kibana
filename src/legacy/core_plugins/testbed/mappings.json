@@ -4,8 +4,11 @@
       "publicProperty": {
         "type": "keyword"
       },
+      "publicPropertyExcludedFromAAD": {
+        "type": "keyword"
+      },
       "privateProperty": {
-        "type": "text"
+        "type": "binary"
       }
     }
   }

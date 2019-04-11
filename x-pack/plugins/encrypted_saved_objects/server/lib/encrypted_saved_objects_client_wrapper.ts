@@ -4,22 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import {
   BaseOptions,
   BulkCreateObject,
+  BulkCreateResponse,
   BulkGetObjects,
+  BulkGetResponse,
   CreateOptions,
+  CreateResponse,
   FindOptions,
+  FindResponse,
+  GetResponse,
   SavedObjectAttributes,
   SavedObjectsClient,
   UpdateOptions,
+  UpdateResponse,
 } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
 interface EncryptedSavedObjectsClientOptions {
   baseClient: SavedObjectsClient;
   service: Readonly<EncryptedSavedObjectsService>;
-  dontStripOption: symbol;
+}
+
+function generateID() {
+  return uuid.v4();
 }
 
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
@@ -31,37 +41,61 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T = {} as T,
-    options: CreateOptions
+    options: CreateOptions = {}
   ) {
-    await this.options.service.encryptAttributes(type, attributes, options.id);
+    if (!this.options.service.isRegistered(type)) {
+      return await this.options.baseClient.create(type, attributes, options);
+    }
 
-    const createResult = await this.options.baseClient.create(type, attributes, options);
-    this.options.service.stripEncryptedAttributes(createResult.type, createResult.attributes);
+    // Saved objects with encrypted attributes should have IDs that are hard to guess especially
+    // since IDs are part of the AAD used during encryption, that's why we control them within this
+    // wrapper and don't allow consumers to specify their own IDs directly.
+    if (options.id) {
+      throw new Error(
+        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+      );
+    }
 
-    return createResult;
+    const id = generateID();
+    await this.options.service.encryptAttributes(type, id, attributes);
+
+    return this.stripEncryptedAttributesFromResponse(
+      await this.options.baseClient.create(type, attributes, {
+        ...options,
+        id,
+      })
+    );
   }
 
   public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions) {
-    // We encrypt attributes for every object sequentially, if it turns out to be very slow,
-    // we can consider switching this to `Promise.all` with a fixed max number of operations to be
-    // executed in parallel to not exhaust libuv/NodeJS thread pool.
-    for (const bulkCreateObject of objects) {
-      await this.options.service.encryptAttributes(
-        bulkCreateObject.type,
-        bulkCreateObject.attributes,
-        bulkCreateObject.id
-      );
-    }
+    // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
+    // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
+    // sequential processing.
+    const encryptedObjects = await Promise.all(
+      objects.map(async object => {
+        if (!this.options.service.isRegistered(object.type)) {
+          return object;
+        }
 
-    const bulkCreateResult = await this.options.baseClient.bulkCreate(objects, options);
-    for (const bulkCreateObject of bulkCreateResult.saved_objects) {
-      this.options.service.stripEncryptedAttributes(
-        bulkCreateObject.type,
-        bulkCreateObject.attributes
-      );
-    }
+        // Saved objects with encrypted attributes should have IDs that are hard to guess especially
+        // since IDs are part of the AAD used during encryption, that's why we control them within this
+        // wrapper and don't allow consumers to specify their own IDs directly.
+        if (object.id) {
+          throw new Error(
+            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+          );
+        }
 
-    return bulkCreateResult;
+        const id = generateID();
+        await this.options.service.encryptAttributes(object.type, id, object.attributes);
+
+        return { ...object, id };
+      })
+    );
+
+    return this.stripEncryptedAttributesFromBulkResponse(
+      await this.options.baseClient.bulkCreate(encryptedObjects, options)
+    );
   }
 
   public async delete(type: string, id: string, options: BaseOptions = {}) {
@@ -69,33 +103,21 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
   }
 
   public async find(options: FindOptions = {}) {
-    const findResult = await await this.options.baseClient.find(options);
-
-    for (const savedObject of findResult.saved_objects) {
-      this.options.service.stripEncryptedAttributes(savedObject.type, savedObject.attributes);
-    }
-
-    return findResult;
+    return this.stripEncryptedAttributesFromBulkResponse(
+      await this.options.baseClient.find(options)
+    );
   }
 
   public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions) {
-    const bulkGetResult = await this.options.baseClient.bulkGet(objects, options);
-
-    for (const savedObject of bulkGetResult.saved_objects) {
-      this.options.service.stripEncryptedAttributes(savedObject.type, savedObject.attributes);
-    }
-
-    return bulkGetResult;
+    return this.stripEncryptedAttributesFromBulkResponse(
+      await this.options.baseClient.bulkGet(objects, options)
+    );
   }
 
   public async get(type: string, id: string, options: BaseOptions) {
-    const getResult = await this.options.baseClient.get(type, id, options);
-
-    if (!(this.options.dontStripOption in options)) {
-      this.options.service.stripEncryptedAttributes(getResult.type, getResult.attributes);
-    }
-
-    return getResult;
+    return this.stripEncryptedAttributesFromResponse(
+      await this.options.baseClient.get(type, id, options)
+    );
   }
 
   public async update<T extends SavedObjectAttributes>(
@@ -104,11 +126,29 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     attributes: Partial<T>,
     options: UpdateOptions
   ) {
-    await this.options.service.encryptAttributes(type, attributes, id);
+    if (!this.options.service.isRegistered(type)) {
+      return await this.options.baseClient.update(type, id, attributes, options);
+    }
 
-    const updateResult = await this.options.baseClient.update(type, id, attributes, options);
-    this.options.service.stripEncryptedAttributes(updateResult.type, updateResult.attributes);
+    await this.options.service.encryptAttributes(type, id, attributes);
+    return this.stripEncryptedAttributesFromResponse(
+      await this.options.baseClient.update(type, id, attributes, options)
+    );
+  }
 
-    return updateResult;
+  private stripEncryptedAttributesFromResponse<
+    T extends UpdateResponse | CreateResponse | GetResponse
+  >(response: T): T {
+    this.options.service.stripEncryptedAttributes(response.type, response.attributes);
+    return response;
+  }
+
+  private stripEncryptedAttributesFromBulkResponse<
+    T extends BulkCreateResponse | BulkGetResponse | FindResponse
+  >(response: T): T {
+    for (const savedObject of response.saved_objects) {
+      this.options.service.stripEncryptedAttributes(savedObject.type, savedObject.attributes);
+    }
+    return response;
   }
 }

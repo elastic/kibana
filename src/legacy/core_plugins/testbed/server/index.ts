@@ -41,6 +41,7 @@ export function initServer(server: Legacy.Server) {
       validate: {
         payload: Joi.object().keys({
           publicProperty: Joi.string().required(),
+          publicPropertyExcludedFromAAD: Joi.string().required(),
           privateProperty: Joi.string().required(),
         }),
       },
@@ -59,16 +60,26 @@ export function initServer(server: Legacy.Server) {
       validate: {
         payload: Joi.object().keys({
           id: Joi.string().required(),
-          publicProperty: Joi.string().required(),
-          privateProperty: Joi.string().required(),
+          publicProperty: Joi.string().optional(),
+          publicPropertyExcludedFromAAD: Joi.string().optional(),
+          privateProperty: Joi.string().optional(),
         }),
       },
     },
     async handler(request: Request) {
-      const { id, publicProperty, privateProperty } = request.payload as any;
+      const {
+        id,
+        publicProperty,
+        publicPropertyExcludedFromAAD,
+        privateProperty,
+      } = request.payload as any;
       return await server.savedObjects
         .getScopedSavedObjectsClient(request)
-        .update(SAVED_OBJECT_WITH_SECRET_TYPE, id, { publicProperty, privateProperty });
+        .update(SAVED_OBJECT_WITH_SECRET_TYPE, id, {
+          publicProperty,
+          publicPropertyExcludedFromAAD,
+          privateProperty,
+        });
     },
   });
 
@@ -96,10 +107,11 @@ export function initServer(server: Legacy.Server) {
     method: 'GET',
     path: '/api/testbed/v1/encrypted-saved-objects/get-decrypted/{id}',
     async handler(request: Request) {
-      return await (server.plugins as any).encrypted_saved_objects.getDecrypted(
-        request,
+      const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
+      return await (server.plugins as any).encrypted_saved_objects.getDecryptedAsInternalUser(
+        SAVED_OBJECT_WITH_SECRET_TYPE,
         request.params.id,
-        SAVED_OBJECT_WITH_SECRET_TYPE
+        { namespace: namespace === 'default' ? undefined : namespace }
       );
     },
   });
@@ -107,5 +119,6 @@ export function initServer(server: Legacy.Server) {
   (server.plugins as any).encrypted_saved_objects.registerType({
     type: SAVED_OBJECT_WITH_SECRET_TYPE,
     attributesToEncrypt: new Set(['privateProperty']),
+    attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
   });
 }

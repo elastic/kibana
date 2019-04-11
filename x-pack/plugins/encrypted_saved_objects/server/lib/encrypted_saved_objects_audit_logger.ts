@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * Represents all audit events the plugin can log.
+ */
 export class EncryptedSavedObjectsAuditLogger {
   constructor(private readonly enabled: boolean, private readonly auditLogger: any) {}
 
-  public encryptAttributeFailure(attributeName: string, type: string, id?: string) {
+  public encryptAttributeFailure(attributeName: string, type: string, id: string) {
     if (!this.enabled) {
       return;
     }
@@ -31,7 +34,7 @@ export class EncryptedSavedObjectsAuditLogger {
     );
   }
 
-  public encryptAttributesSuccess(attributesNames: ReadonlySet<string>, type: string, id?: string) {
+  public encryptAttributesSuccess(attributesNames: ReadonlySet<string>, type: string, id: string) {
     if (!this.enabled) {
       return;
     }
@@ -39,7 +42,7 @@ export class EncryptedSavedObjectsAuditLogger {
     const attributesNamesArray = Array.from(attributesNames);
     this.auditLogger.log(
       'encrypt_success',
-      `Successfully encrypted attributes "${attributesNamesArray}" for saved object "${type}:${id}".`,
+      `Successfully encrypted attributes "[${attributesNamesArray}]" for saved object "${type}:${id}".`,
       { id, type, attributesNames: attributesNamesArray }
     );
   }
@@ -52,7 +55,7 @@ export class EncryptedSavedObjectsAuditLogger {
     const attributesNamesArray = Array.from(attributesNames);
     this.auditLogger.log(
       'decrypt_success',
-      `Successfully decrypted attributes "${attributesNamesArray}" for saved object "${type}:${id}".`,
+      `Successfully decrypted attributes "[${attributesNamesArray}]" for saved object "${type}:${id}".`,
       { id, type, attributesNames: attributesNamesArray }
     );
   }
