@@ -10,13 +10,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiGlobalToastList,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { importRepo } from '../../actions';
+import { closeToast, importRepo } from '../../actions';
 import { RootState } from '../../reducers';
+import { ToastType } from '../../reducers/repository';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 const ImportButton = styled(EuiButton)`
@@ -32,6 +34,10 @@ class CodeImportProject extends React.PureComponent<
   {
     importRepo: (p: string) => void;
     importLoading: boolean;
+    toastMessage?: string;
+    showToast: boolean;
+    toastType?: ToastType;
+    closeToast: () => void;
   },
   { value: string; isInvalid: boolean }
 > {
@@ -60,8 +66,17 @@ class CodeImportProject extends React.PureComponent<
   };
 
   public render() {
+    const { importLoading, toastMessage, showToast, toastType } = this.props;
+
     return (
       <ImportWrapper>
+        {showToast && (
+          <EuiGlobalToastList
+            toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
+            dismissToast={this.props.closeToast}
+            toastLifeTimeMs={6000}
+          />
+        )}
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -70,14 +85,14 @@ class CodeImportProject extends React.PureComponent<
               helpText="e.g. https://github.com/elastic/elasticsearch"
               fullWidth
               isInvalid={this.state.isInvalid}
-              error="This field shouldn't be empty."
+              error="The URL shouldn't be empty."
             >
               <EuiFieldText
                 value={this.state.value}
                 onChange={this.onChange}
                 aria-label="input project url"
                 data-test-subj="importRepositoryUrlInputBox"
-                isLoading={this.props.importLoading}
+                isLoading={importLoading}
                 fullWidth={true}
                 onBlur={this.updateIsInvalid}
                 isInvalid={this.state.isInvalid}
@@ -102,10 +117,14 @@ class CodeImportProject extends React.PureComponent<
 
 const mapStateToProps = (state: RootState) => ({
   importLoading: state.repository.importLoading,
+  toastMessage: state.repository.toastMessage,
+  toastType: state.repository.toastType,
+  showToast: state.repository.showToast,
 });
 
 const mapDispatchToProps = {
   importRepo,
+  closeToast,
 };
 
 export const ImportProject = connect(
