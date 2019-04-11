@@ -351,7 +351,10 @@ class TableListViewUi extends React.Component {
           defaultMessage: 'Actions'
         }),
         width: '100px',
-        actions
+        actions,
+        mobileOptions: {
+          show: !this.props.hideWriteControlsOnMobile,
+        }
       });
     }
 
@@ -363,12 +366,9 @@ class TableListViewUi extends React.Component {
       />
     );
 
-    const className = this.props.hideActionsOnMobile ? 'tableListView__table--hideActionsOnMobile' : '';
-
     return (
       <EuiInMemoryTable
         itemId="id"
-        className={className}
         items={this.state.items}
         columns={columns}
         pagination={pagination}
@@ -475,7 +475,7 @@ TableListViewUi.propTypes = {
   editItem: PropTypes.func.isRequired,
 
   listingLimit: PropTypes.number,
-  hideActionsOnMobile: PropTypes.bool,
+  hideWriteControlsOnMobile: PropTypes.bool,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
 

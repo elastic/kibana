@@ -1,8 +1,0 @@
-@include euiBreakpoint('xs', 's') {
-  .tableListView__table--hideActionsOnMobile {
-    /* Hide action cells on mobile when that property was specified. */
-    .euiTableRowCell--hasActions {
-      display: none !important;
-    }
-  }
-}
