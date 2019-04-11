@@ -139,7 +139,10 @@ export default function (kibana) {
             return `#/management/kibana/index_patterns/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/management/kibana/index_patterns/${obj.id}`;
+            return {
+              path: `/management/kibana/index_patterns/${obj.id}`,
+              refresh: false,
+            };
           },
         },
         visualization: {
@@ -152,7 +155,10 @@ export default function (kibana) {
             return `#/management/kibana/objects/savedVisualizations/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/visualize/edit/${obj.id}`;
+            return {
+              path: `/visualize/edit/${obj.id}`,
+              refresh: false,
+            };
           },
         },
         search: {
@@ -165,7 +171,10 @@ export default function (kibana) {
             return `#/management/kibana/objects/savedSearches/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/discover/${obj.id}`;
+            return {
+              path: `/discover/${obj.id}`,
+              refresh: false,
+            };
           },
         },
         dashboard: {
@@ -178,7 +187,10 @@ export default function (kibana) {
             return `#/management/kibana/objects/savedDashboards/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/dashboard/${obj.id}`;
+            return {
+              path: `/dashboard/${obj.id}`,
+              refresh: false,
+            };
           },
         },
         url: {

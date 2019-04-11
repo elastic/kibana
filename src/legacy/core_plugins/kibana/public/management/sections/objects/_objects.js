@@ -64,8 +64,13 @@ function updateObjectsTable($scope, $injector) {
             }
           }}
           goInApp={object => {
-            const inAppUrl = object.meta.inAppUrl;
-            kbnUrl.change(inAppUrl);
+            const { path, refresh } = object.meta.inAppUrl;
+            if (refresh) {
+              // When the app's routes are defined elsewhere and require a refresh
+              window.location.href = chrome.addBasePath(path);
+              return;
+            }
+            kbnUrl.change(path);
             $scope.$apply();
           }}
         />

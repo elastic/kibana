@@ -38,7 +38,10 @@ export function graph(kibana) {
             return obj.attributes.title;
           },
           getInAppUrl(obj) {
-            return `/workspace/${obj.id}`;
+            return {
+              path: `/app/graph#/workspace/${obj.id}`,
+              refresh: true,
+            };
           },
         },
       },

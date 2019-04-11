@@ -41,7 +41,10 @@ export function canvas(kibana) {
             return obj.attributes.name;
           },
           getInAppUrl(obj) {
-            return `/workpad/${obj.id}`;
+            return {
+              path: `/app/canvas#/workpad/${obj.id}`,
+              refresh: true,
+            };
           },
         },
       },
