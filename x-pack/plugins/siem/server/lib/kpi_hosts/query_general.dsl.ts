@@ -64,20 +64,6 @@ export const buildGeneralQuery = ({
             field: 'destination.ip',
           },
         },
-        auditd_count: {
-          filter: {
-            term: {
-              'event.module': 'auditd',
-            },
-          },
-        },
-        fim_count: {
-          filter: {
-            term: {
-              'event.module': 'file_integrity',
-            },
-          },
-        },
       },
       query: {
         bool: {
