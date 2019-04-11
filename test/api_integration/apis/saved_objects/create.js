@@ -48,7 +48,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               migrationVersion: {
-                visualization: '7.0.0'
+                visualization: '7.0.1'
               },
               updated_at: resp.body.updated_at,
               version: 'WzgsMV0=',
@@ -56,7 +56,7 @@ export default function ({ getService }) {
                 title: 'My favorite vis'
               },
               migrationVersion: {
-                visualization: '7.0.0',
+                visualization: '7.0.1',
               },
               references: [],
             });
@@ -93,7 +93,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               migrationVersion: {
-                visualization: '7.0.0'
+                visualization: '7.0.1'
               },
               updated_at: resp.body.updated_at,
               version: 'WzAsMV0=',
@@ -101,7 +101,7 @@ export default function ({ getService }) {
                 title: 'My favorite vis'
               },
               migrationVersion: {
-                visualization: '7.0.0',
+                visualization: '7.0.1',
               },
               references: [],
             });
