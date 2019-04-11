@@ -65,14 +65,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
-<<<<<<< HEAD
-        await PageObjects.visualBuilder.createNewAgg();
-        await PageObjects.visualBuilder.selectAggType('Math', 1);
-        await PageObjects.visualBuilder.fillInVariable();
-        await PageObjects.visualBuilder.fillInExpression('params.test + 1');
-=======
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
->>>>>>> master
       });
 
       it('should not have inspector enabled', async () => {
