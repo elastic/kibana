@@ -59,16 +59,16 @@ exports[`Listing should render with certain data pieces missing 1`] = `
     Array [
       Object {
         "availability": true,
-        "cpu_usage": undefined,
-        "events_ingested": undefined,
-        "jvm_heap_used": undefined,
-        "load_average": undefined,
-        "name": undefined,
+        "cpu_usage": "N/A",
+        "events_ingested": "N/A",
+        "jvm_heap_used": "N/A",
+        "load_average": "N/A",
+        "name": "N/A",
         "reloads": Object {
           "failures": 0,
           "successes": 0,
         },
-        "version": undefined,
+        "version": "N/A",
       },
     ]
   }

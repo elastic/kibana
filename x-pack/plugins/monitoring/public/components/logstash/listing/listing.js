@@ -115,12 +115,12 @@ class ListingUI extends PureComponent {
     const columns = this.getColumns();
     const flattenedData = data.map(item => ({
       ...item,
-      name: get(item, 'logstash.name'),
-      cpu_usage: get(item, 'process.cpu.percent'),
-      load_average: get(item, 'os.cpu.load_average.1m'),
-      jvm_heap_used: get(item, 'jvm.mem.heap_used_percent'),
-      events_ingested: get(item, 'events.out'),
-      version: get(item, 'logstash.version'),
+      name: get(item, 'logstash.name', 'N/A'),
+      cpu_usage: get(item, 'process.cpu.percent', 'N/A'),
+      load_average: get(item, 'os.cpu.load_average.1m', 'N/A'),
+      jvm_heap_used: get(item, 'jvm.mem.heap_used_percent', 'N/A'),
+      events_ingested: get(item, 'events.out', 'N/A'),
+      version: get(item, 'logstash.version', 'N/A'),
     }));
 
     return (
