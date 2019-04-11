@@ -20,6 +20,61 @@
 import expect from '@kbn/expect';
 import { findRelationships } from '../management/saved_objects/relationships';
 
+const savedObjectSchemas = {
+  'index-pattern': {
+    icon: 'indexPatternApp',
+    titleSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `#/management/kibana/index_patterns/${obj.id}`;
+    },
+    getInAppUrl(obj) {
+      return `/management/kibana/index_patterns/${obj.id}`;
+    },
+  },
+  visualization: {
+    icon: 'visualizeApp',
+    titleSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `#/management/kibana/objects/savedVisualizations/${obj.id}`;
+    },
+    getInAppUrl(obj) {
+      return `/visualize/edit/${obj.id}`;
+    },
+  },
+  search: {
+    icon: 'search',
+    titleSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `#/management/kibana/objects/savedSearches/${obj.id}`;
+    },
+    getInAppUrl(obj) {
+      return `/discover/${obj.id}`;
+    },
+  },
+  dashboard: {
+    icon: 'dashboardApp',
+    titleSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `#/management/kibana/objects/savedDashboards/${obj.id}`;
+    },
+    getInAppUrl(obj) {
+      return `/dashboard/${obj.id}`;
+    },
+  },
+};
+
 describe('findRelationships', () => {
   it('should find relationships for dashboards', async () => {
     const type = 'dashboard';
@@ -78,16 +133,42 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
-    expect(result).to.eql({
-      visualization: [
-        { id: '1', title: 'Foo' },
-        { id: '2', title: 'Bar' },
-        { id: '3', title: 'FooBar' },
-      ],
-    });
+    expect(result).to.eql([
+      {
+        id: '1',
+        type: 'visualization',
+        meta: {
+          icon: 'visualizeApp',
+          title: 'Foo',
+          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/visualize/edit/1',
+        },
+      },
+      {
+        id: '2',
+        type: 'visualization',
+        meta: {
+          icon: 'visualizeApp',
+          title: 'Bar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/visualize/edit/2',
+        },
+      },
+      {
+        id: '3',
+        type: 'visualization',
+        meta: {
+          icon: 'visualizeApp',
+          title: 'FooBar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/visualize/edit/3',
+        },
+      },
+    ]);
   });
 
   it('should find relationships for visualizations', async () => {
@@ -167,18 +248,45 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
-    expect(result).to.eql({
-      'index-pattern': [
-        { id: '1', title: 'My Index Pattern' },
-      ],
-      dashboard: [
-        { id: '1', title: 'My Dashboard' },
-        { id: '2', title: 'Your Dashboard' },
-      ],
-    });
+    expect(result).to.eql([
+      {
+        id: '1',
+        type: 'index-pattern',
+        meta:
+        {
+          icon: 'indexPatternApp',
+          title: 'My Index Pattern',
+          editUrl: '#/management/kibana/index_patterns/1',
+          inAppUrl: '/management/kibana/index_patterns/1',
+        },
+      },
+      {
+        id: '1',
+        type: 'dashboard',
+        meta:
+        {
+          icon: 'dashboardApp',
+          title: 'My Dashboard',
+          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          inAppUrl: '/dashboard/1',
+        },
+      },
+      {
+        id: '2',
+        type: 'dashboard',
+        meta:
+        {
+          icon: 'dashboardApp',
+          title: 'Your Dashboard',
+          editUrl: '#/management/kibana/objects/savedDashboards/2',
+          inAppUrl: '/dashboard/2',
+        },
+      },
+    ]);
   });
 
   it('should find relationships for saved searches', async () => {
@@ -247,17 +355,56 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
-    expect(result).to.eql({
-      visualization: [
-        { id: '1', title: 'Foo' },
-        { id: '2', title: 'Bar' },
-        { id: '3', title: 'FooBar' },
-      ],
-      'index-pattern': [{ id: '1', title: 'My Index Pattern' }],
-    });
+    expect(result).to.eql([
+      {
+        id: '1',
+        type: 'index-pattern',
+        meta:
+        {
+          icon: 'indexPatternApp',
+          title: 'My Index Pattern',
+          editUrl: '#/management/kibana/index_patterns/1',
+          inAppUrl: '/management/kibana/index_patterns/1',
+        },
+      },
+      {
+        id: '1',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'Foo',
+          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/visualize/edit/1',
+        },
+      },
+      {
+        id: '2',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'Bar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/visualize/edit/2',
+        },
+      },
+      {
+        id: '3',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'FooBar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/visualize/edit/3',
+        },
+      },
+    ]);
   });
 
   it('should find relationships for index patterns', async () => {
@@ -328,13 +475,56 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
-    expect(result).to.eql({
-      visualization: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }, { id: '3', title: 'FooBar' }],
-      search: [{ id: '1', title: 'My Saved Search' }],
-    });
+    expect(result).to.eql([
+      {
+        id: '1',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'Foo',
+          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/visualize/edit/1',
+        },
+      },
+      {
+        id: '2',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'Bar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/visualize/edit/2',
+        },
+      },
+      {
+        id: '3',
+        type: 'visualization',
+        meta:
+        {
+          icon: 'visualizeApp',
+          title: 'FooBar',
+          editUrl: '#/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/visualize/edit/3',
+        },
+      },
+      {
+        id: '1',
+        type: 'search',
+        meta:
+        {
+          icon: 'search',
+          title: 'My Saved Search',
+          editUrl: '#/management/kibana/objects/savedSearches/1',
+          inAppUrl: '/discover/1',
+        },
+      },
+    ]);
   });
 
   it('should return an empty object for non related objects', async () => {
@@ -360,6 +550,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectSchemas,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
