@@ -49,7 +49,7 @@ interface HostsFilterDispatchProps {
   }>;
 }
 
-type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
+export type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
 
 const HostsFilterComponent = pure<HostsFilterProps>(
   ({

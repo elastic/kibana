@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -124,7 +124,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const processName: string | null = get('process.name', node);
+      const processName: string | null = get('process.name[0]', node);
       if (processName != null) {
         const id = escapeDataProviderId(
           `uncommon-process-table-${node._id}-processName-${processName}`
@@ -174,7 +174,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     name: i18n.LAST_COMMAND,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.process.title),
+    render: ({ node }) => defaultToEmptyTag(getOr(null, 'node.process.title[0]', node)),
   },
   {
     name: i18n.NUMBER_OF_INSTANCES,
@@ -211,15 +211,10 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                   excluded: false,
                   kqlQuery: '',
                   queryMatch: {
-                    displayField: 'host.name',
-                    displayValue: name!,
-                    field: 'host.id',
-                    value: id!,
+                    field: 'host.name',
+                    value: name!,
                   },
-                  queryDate: {
-                    from: startDate,
-                    to: Date.now(),
-                  },
+                  queryDate: { from: startDate, to: Date.now() },
                 }}
                 render={(dataProvider, _, snapshot) =>
                   snapshot.isDragging ? (
@@ -227,7 +222,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                       <Provider dataProvider={dataProvider} />
                     </DragEffects>
                   ) : (
-                    <HostDetailsLink hostId={id!}>{name}</HostDetailsLink>
+                    <HostDetailsLink hostName={name!}>{name}</HostDetailsLink>
                   )
                 }
               />

@@ -101,13 +101,6 @@ export const BY_SERVER_IP = i18n.translate(
   }
 );
 
-export const FILTER_TO_KQL = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.description.filterToKQLDescription',
-  {
-    defaultMessage: 'Add to KQL',
-  }
-);
-
 export const MORE = i18n.translate('xpack.siem.networkTopNFlowTable.moreDescription', {
   defaultMessage: 'More ...',
 });

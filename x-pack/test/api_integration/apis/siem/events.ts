@@ -15,7 +15,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'suricata-sensor-amsterdam';
-const TOTAL_COUNT = 1747;
+const TOTAL_COUNT = 1748;
 const EDGE_LENGTH = 2;
 const CURSOR_ID = '1550608953561';
 

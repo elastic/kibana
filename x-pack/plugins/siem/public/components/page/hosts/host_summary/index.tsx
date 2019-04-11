@@ -10,27 +10,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
-import { get, getOr, isArray } from 'lodash/fp';
+import { get, isEmpty, kebabCase } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { HostItem, HostsEdges } from '../../../../../server/graphql/types';
+import { HostItem } from '../../../../../server/graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue, getEmptyValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
 
 interface OwnProps {
-  data: HostsEdges[];
+  data: HostItem;
   loading: boolean;
   startDate: number;
   endDate: number;
@@ -45,9 +45,8 @@ export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, l
         <EuiTitle size="s">
           <h3>{i18n.SUMMARY}</h3>
         </EuiTitle>
-
         <EuiHorizontalRule margin="xs" />
-        {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
+        {getEuiDescriptionList(data, startDate, endDate, loading)}
       </EuiPanel>
     </StyledEuiFlexItem>
   </EuiFlexGroup>
@@ -55,7 +54,8 @@ export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, l
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.name': i18n.NAME,
-  lastBeat: i18n.LAST_BEAT,
+  firstSeen: i18n.FIRST_SEEN,
+  lastSeen: i18n.LAST_SEEN,
   'host.id': i18n.ID,
   'host.ip': i18n.IP_ADDRESS,
   'host.mac': i18n.MAC_ADDRESS,
@@ -67,12 +67,11 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.architecture': i18n.ARCHITECTURE,
 };
 
-const dateFields: string[] = ['lastBeat'];
-
 export const getEuiDescriptionList = (
   host: HostItem | null,
   startDate: number,
-  endDate: number
+  endDate: number,
+  loading: boolean
 ): JSX.Element => (
   <EuiDescriptionList type="column" compressed>
     {Object.entries(fieldTitleMapping).map(([field, title]) => {
@@ -82,11 +81,19 @@ export const getEuiDescriptionList = (
           <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
           {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
           <div>
-            {isArray(summaryValue)
-              ? summaryValue.map((value: string) =>
-                  createDraggable(value, field, startDate, endDate, dateFields)
+            {loading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : Array.isArray(summaryValue) ? (
+              isEmpty(summaryValue) ? (
+                getEmptyTagValue()
+              ) : (
+                summaryValue.map((value: string) =>
+                  createDraggable(value, field, startDate, endDate, get('host.name', host))
                 )
-              : createDraggable(summaryValue, field, startDate, endDate, dateFields)}
+              )
+            ) : (
+              createDraggable(summaryValue, field, startDate, endDate, get('host.name', host))
+            )}
           </div>
         </React.Fragment>
       );
@@ -99,9 +106,11 @@ export const createDraggable = (
   field: string,
   startDate: number,
   endDate: number,
-  relativeFields: string[]
+  hostName: string | null | undefined
 ) =>
-  summaryValue == null ? (
+  summaryValue == null && hostName != null && ['firstSeen', 'lastSeen'].includes(field) ? (
+    <FirstLastSeenHost hostname={hostName} type={kebabCase(field) as FirstLastSeenHostType} />
+  ) : summaryValue == null ? (
     <>{getEmptyValue()}</>
   ) : (
     <DraggableWrapper
@@ -113,24 +122,14 @@ export const createDraggable = (
         id: escapeDataProviderId(`host-summary-${field}-${summaryValue}`),
         name: summaryValue,
         kqlQuery: '',
-        queryMatch: {
-          field,
-          value: summaryValue,
-        },
-        queryDate: {
-          from: startDate,
-          to: endDate,
-        },
+        queryMatch: { field, value: summaryValue },
+        queryDate: { from: startDate, to: endDate },
       }}
       render={(dataProvider, _, snapshot) =>
         snapshot.isDragging ? (
           <DragEffects>
             <Provider dataProvider={dataProvider} />
           </DragEffects>
-        ) : relativeFields.includes(field) ? (
-          <EuiToolTip position="bottom" content={summaryValue}>
-            <FormattedRelative value={new Date(summaryValue)} />
-          </EuiToolTip>
         ) : field === 'host.ip' ? (
           <IPDetailsLink ip={summaryValue} />
         ) : (

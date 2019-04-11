@@ -156,7 +156,7 @@ const getUniDirectionAggs = (
               },
               aggs: {
                 timestamp: {
-                  sum: {
+                  max: {
                     field: '@timestamp',
                   },
                 },
@@ -220,7 +220,7 @@ const getBiDirectionAggs = (
               },
               aggs: {
                 timestamp: {
-                  sum: {
+                  max: {
                     field: '@timestamp',
                   },
                 },

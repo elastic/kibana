@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview Network Data rendering it renders the default OverviewNetworkStats 1`] = `
+exports[`Overview Network Stat Data rendering it renders the default OverviewNetworkStats 1`] = `
 <Component
   data={
     Object {
@@ -11,5 +11,6 @@ exports[`Overview Network Data rendering it renders the default OverviewNetworkS
       "packetbeatFlow": 16,
     }
   }
+  loading={false}
 />
 `;

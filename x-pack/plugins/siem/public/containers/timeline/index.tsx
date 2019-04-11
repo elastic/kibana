@@ -17,7 +17,7 @@ import {
   TimelineItem,
 } from '../../graphql/types';
 import { inputsModel } from '../../store';
-import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { timelineQuery } from './index.gql_query';
@@ -74,7 +74,7 @@ export class TimelineQuery extends QueryTemplate<
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
         query={timelineQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
+        fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         pollInterval={poll}
         variables={variables}

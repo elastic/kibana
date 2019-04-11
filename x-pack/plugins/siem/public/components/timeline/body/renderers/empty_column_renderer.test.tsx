@@ -13,8 +13,7 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
-import { emptyColumnRenderer } from '.';
-import { deleteItemIdx, findItem } from './helpers';
+import { deleteItemIdx, emptyColumnRenderer, findItem } from '.';
 
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];

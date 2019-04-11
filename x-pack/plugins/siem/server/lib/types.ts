@@ -142,3 +142,25 @@ export interface MSearchHeader {
   allowNoIndices?: boolean;
   ignoreUnavailable?: boolean;
 }
+
+export interface AggregationRequest {
+  [aggField: string]: {
+    terms?: {
+      field: string;
+      size?: number;
+      order?: {
+        [aggSortField: string]: SortRequestDirection;
+      };
+    };
+    max?: {
+      field: string;
+    };
+    aggs?: {
+      [aggSortField: string]: {
+        [aggType: string]: {
+          field: string;
+        };
+      };
+    };
+  };
+}

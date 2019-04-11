@@ -49,7 +49,7 @@ interface NetworkFilterDispatchProps {
   }>;
 }
 
-type NetworkFilterProps = OwnProps & NetworkFilterReduxProps & NetworkFilterDispatchProps;
+export type NetworkFilterProps = OwnProps & NetworkFilterReduxProps & NetworkFilterDispatchProps;
 
 const NetworkFilterComponent = pure<NetworkFilterProps>(
   ({

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock';
+import { getEmptyString } from '../empty_value';
 
 import {
   DefaultDraggable,
@@ -20,7 +22,7 @@ import {
 describe('draggables', () => {
   describe('rendering', () => {
     test('it renders the default DefaultDraggable', () => {
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <DefaultDraggable
           id="draggable-id"
           field="some-field"
@@ -34,7 +36,7 @@ describe('draggables', () => {
     });
 
     test('it renders the default Badge', () => {
-      const wrapper = shallowWithIntl(
+      const wrapper = shallow(
         <DraggableBadge
           contextId="context-id"
           eventId="event-id"
@@ -243,6 +245,21 @@ describe('draggables', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toBeNull();
+    });
+
+    test('it returns Empty string text if value is an empty string', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DraggableBadge
+            contextId="context-id"
+            eventId="event-id"
+            field="some-field"
+            value=""
+            iconType="document"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual(getEmptyString());
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {

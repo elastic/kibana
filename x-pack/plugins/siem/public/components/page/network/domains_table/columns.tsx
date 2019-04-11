@@ -22,7 +22,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
-import { AddToKql } from '../network_top_n_flow_table/add_to_kql';
+import { AddToKql } from '../../add_to_kql';
 
 import { FirstLastSeenDomain } from './first_last_seen';
 import * as i18n from './translations';
@@ -67,9 +67,9 @@ export const getDomainsColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              content={i18n.DIRECTION}
               expression={`network.direction: ${escapeQueryValue(direction)}`}
               type={type}
+              componentFilterType={'network'}
             >
               <>
                 {defaultToEmptyTag(direction)}

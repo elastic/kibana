@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -97,9 +98,7 @@ const getSourceDestinationInstance = () => (
 
 describe('SourceDestination', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallowWithIntl(
-      <TestProviders>{getSourceDestinationInstance()}</TestProviders>
-    );
+    const wrapper = shallow(<div>{getSourceDestinationInstance()}</div>);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 

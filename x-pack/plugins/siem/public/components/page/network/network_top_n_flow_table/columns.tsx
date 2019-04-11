@@ -25,8 +25,8 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import { AddToKql } from '../../add_to_kql';
 
-import { AddToKql } from './add_to_kql';
 import * as i18n from './translations';
 
 type valueof<T> = T[keyof T];
@@ -158,8 +158,8 @@ export const getNetworkTopNFlowColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              content={i18n.FILTER_TO_KQL}
               expression={`network.direction: ${escapeQueryValue(direction)}`}
+              componentFilterType="network"
               type={type}
             >
               <>

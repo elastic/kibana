@@ -79,8 +79,8 @@ export const hostIdRenderer = (host: HostEcsFields, ipFilter?: string): React.Re
   host.id && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.id'} value={host.id}>
-          <HostDetailsLink hostId={host.id} />
+        <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.name'} value={host.name}>
+          <HostDetailsLink hostName={host.name!} />
         </DefaultDraggable>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -92,8 +92,8 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.
   host.id && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.id}>
-          <HostDetailsLink hostId={host.id}>
+        <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name}>
+          <HostDetailsLink hostName={host.name!}>
             {host.name ? host.name : getEmptyTagValue()}
           </HostDetailsLink>
         </DefaultDraggable>

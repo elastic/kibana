@@ -15,7 +15,7 @@
 
 export type Date = any;
 
-export type ToStringArray = any;
+export type ToStringArray = string[];
 
 export type EsValue = any;
 
@@ -47,6 +47,10 @@ export interface Source {
   TimelineDetails: TimelineDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
+
+  HostDetails: HostItem;
+
+  HostFirstLastSeen: FirstLastSeenHost;
 
   IpOverview?: IpOverviewData | null;
 
@@ -326,33 +330,35 @@ export interface Ecs {
 
   timestamp?: Date | null;
 
-  message?: string[] | null;
+  message?: ToStringArray | null;
 
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
 
   file?: FileFields | null;
+
+  system?: SystemEcsField | null;
 }
 
 export interface AuditdEcsFields {
-  result?: string | null;
+  result?: ToStringArray | null;
 
-  session?: string | null;
+  session?: ToStringArray | null;
 
   data?: AuditdData | null;
 
   summary?: Summary | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface AuditdData {
-  acct?: string | null;
+  acct?: ToStringArray | null;
 
-  terminal?: string | null;
+  terminal?: ToStringArray | null;
 
-  op?: string | null;
+  op?: ToStringArray | null;
 }
 
 export interface Summary {
@@ -360,19 +366,19 @@ export interface Summary {
 
   object?: PrimarySecondary | null;
 
-  how?: string | null;
+  how?: ToStringArray | null;
 
-  message_type?: string | null;
+  message_type?: ToStringArray | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface PrimarySecondary {
-  primary?: string | null;
+  primary?: ToStringArray | null;
 
-  secondary?: string | null;
+  secondary?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface DestinationEcsFields {
@@ -390,25 +396,41 @@ export interface DestinationEcsFields {
 }
 
 export interface EventEcsFields {
+  action?: string | null;
+
   category?: string | null;
+
+  created?: Date | null;
+
+  dataset?: string | null;
 
   duration?: number | null;
 
-  id?: number | null;
+  end?: Date | null;
+
+  hash?: string | null;
+
+  id?: string | null;
+
+  kind?: string | null;
 
   module?: string | null;
+
+  original?: (string | null)[] | null;
+
+  outcome?: ToStringArray | null;
+
+  risk_score?: number | null;
+
+  risk_score_norm?: number | null;
 
   severity?: number | null;
 
   start?: Date | null;
 
-  end?: Date | null;
-
-  action?: string | null;
+  timezone?: string | null;
 
   type?: string | null;
-
-  dataset?: string | null;
 }
 
 export interface NetworkEcsField {
@@ -432,15 +454,15 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: number | null;
+  flow_id?: ToStringArray | null;
 
-  proto?: string | null;
+  proto?: ToStringArray | null;
 }
 
 export interface SuricataAlertData {
-  signature?: string | null;
+  signature?: ToStringArray | null;
 
-  signature_id?: number | null;
+  signature_id?: ToStringArray | null;
 }
 
 export interface TlsEcsFields {
@@ -642,27 +664,21 @@ export interface UrlEcsFields {
 }
 
 export interface ProcessEcsFields {
-  pid?: number | null;
+  pid?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  ppid?: number | null;
+  ppid?: ToStringArray | null;
 
-  args?: (string | null)[] | null;
+  args?: ToStringArray | null;
 
-  executable?: string | null;
+  executable?: ToStringArray | null;
 
-  title?: string | null;
+  title?: ToStringArray | null;
 
-  thread?: Thread | null;
+  thread?: ToStringArray | null;
 
-  working_directory?: string | null;
-}
-
-export interface Thread {
-  id?: number | null;
-
-  start?: string | null;
+  working_directory?: ToStringArray | null;
 }
 
 export interface FileFields {
@@ -693,6 +709,40 @@ export interface FileFields {
   mtime?: Date | null;
 
   ctime?: Date | null;
+}
+
+export interface SystemEcsField {
+  audit?: AuditEcsFields | null;
+
+  auth?: AuthEcsFields | null;
+}
+
+export interface AuditEcsFields {
+  package?: PackageEcsFields | null;
+}
+
+export interface PackageEcsFields {
+  arch?: ToStringArray | null;
+
+  entity_id?: ToStringArray | null;
+
+  name?: ToStringArray | null;
+
+  size?: ToStringArray | null;
+
+  summary?: ToStringArray | null;
+
+  version?: ToStringArray | null;
+}
+
+export interface AuthEcsFields {
+  ssh?: SshEcsFields | null;
+}
+
+export interface SshEcsFields {
+  method?: ToStringArray | null;
+
+  signature?: ToStringArray | null;
 }
 
 export interface TimelineData {
@@ -762,11 +812,13 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
+  host?: HostEcsFields | null;
+}
+
+export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
-  host?: HostEcsFields | null;
-
-  lastBeat?: Date | null;
+  lastSeen?: Date | null;
 }
 
 export interface IpOverviewData {
@@ -1006,6 +1058,12 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface Thread {
+  id?: ToStringArray | null;
+
+  start?: ToStringArray | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -1100,6 +1158,18 @@ export interface HostsSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+}
+export interface HostDetailsSourceArgs {
+  id?: string | null;
+
+  hostName: string;
+
+  timerange: TimerangeInput;
+}
+export interface HostFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  hostName: string;
 }
 export interface IpOverviewSourceArgs {
   id?: string | null;
@@ -1625,7 +1695,7 @@ export namespace GetEventsQuery {
 
     category?: string | null;
 
-    id?: number | null;
+    id?: string | null;
   };
 
   export type Host = {
@@ -1671,9 +1741,9 @@ export namespace GetEventsQuery {
   export type Eve = {
     __typename?: 'SuricataEveData';
 
-    proto?: string | null;
+    proto?: ToStringArray | null;
 
-    flow_id?: number | null;
+    flow_id?: ToStringArray | null;
 
     alert?: Alert | null;
   };
@@ -1681,9 +1751,9 @@ export namespace GetEventsQuery {
   export type Alert = {
     __typename?: 'SuricataAlertData';
 
-    signature?: string | null;
+    signature?: ToStringArray | null;
 
-    signature_id?: number | null;
+    signature_id?: ToStringArray | null;
   };
 
   export type Zeek = {
@@ -1693,12 +1763,11 @@ export namespace GetEventsQuery {
   };
 }
 
-export namespace GetHostSummaryQuery {
+export namespace GetHostDetailsQuery {
   export type Variables = {
     sourceId: string;
+    hostName: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
-    filterQuery?: string | null;
   };
 
   export type Query = {
@@ -1712,35 +1781,13 @@ export namespace GetHostSummaryQuery {
 
     id: string;
 
-    Hosts: Hosts;
+    HostDetails: HostDetails;
   };
 
-  export type Hosts = {
-    __typename?: 'HostsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-  };
-
-  export type Edges = {
-    __typename?: 'HostsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
+  export type HostDetails = {
     __typename?: 'HostItem';
 
     _id?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastBeat?: Date | null;
 
     host?: Host | null;
   };
@@ -1774,25 +1821,34 @@ export namespace GetHostSummaryQuery {
 
     version?: string | null;
   };
+}
 
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+export namespace GetHostFirstLastSeenQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
   };
 
-  export type PageInfo = {
-    __typename?: 'PageInfo';
+  export type Query = {
+    __typename?: 'Query';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
+    source: Source;
   };
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
+  export type Source = {
+    __typename?: 'Source';
 
-    value: string;
+    id: string;
+
+    HostFirstLastSeen: HostFirstLastSeen;
+  };
+
+  export type HostFirstLastSeen = {
+    __typename?: 'FirstLastSeenHost';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
   };
 }
 
@@ -1840,10 +1896,6 @@ export namespace GetHostsTableQuery {
     __typename?: 'HostItem';
 
     _id?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastBeat?: Date | null;
 
     host?: Host | null;
   };
@@ -2645,6 +2697,10 @@ export namespace GetTimelineQuery {
 
     timestamp?: Date | null;
 
+    message?: ToStringArray | null;
+
+    system?: System | null;
+
     event?: Event | null;
 
     auditd?: Auditd | null;
@@ -2676,34 +2732,96 @@ export namespace GetTimelineQuery {
     zeek?: Zeek | null;
   };
 
+  export type System = {
+    __typename?: 'SystemEcsField';
+
+    auth?: Auth | null;
+
+    audit?: Audit | null;
+  };
+
+  export type Auth = {
+    __typename?: 'AuthEcsFields';
+
+    ssh?: Ssh | null;
+  };
+
+  export type Ssh = {
+    __typename?: 'SshEcsFields';
+
+    signature?: ToStringArray | null;
+
+    method?: ToStringArray | null;
+  };
+
+  export type Audit = {
+    __typename?: 'AuditEcsFields';
+
+    package?: Package | null;
+  };
+
+  export type Package = {
+    __typename?: 'PackageEcsFields';
+
+    arch?: ToStringArray | null;
+
+    entity_id?: ToStringArray | null;
+
+    name?: ToStringArray | null;
+
+    size?: ToStringArray | null;
+
+    summary?: ToStringArray | null;
+
+    version?: ToStringArray | null;
+  };
+
   export type Event = {
     __typename?: 'EventEcsFields';
 
     action?: string | null;
 
-    severity?: number | null;
-
-    module?: string | null;
-
     category?: string | null;
 
-    id?: number | null;
+    created?: Date | null;
 
     dataset?: string | null;
 
     duration?: number | null;
 
+    end?: Date | null;
+
+    hash?: string | null;
+
+    id?: string | null;
+
+    kind?: string | null;
+
+    module?: string | null;
+
+    original?: (string | null)[] | null;
+
+    outcome?: ToStringArray | null;
+
+    risk_score?: number | null;
+
+    risk_score_norm?: number | null;
+
+    severity?: number | null;
+
     start?: Date | null;
 
-    end?: Date | null;
+    timezone?: string | null;
+
+    type?: string | null;
   };
 
   export type Auditd = {
     __typename?: 'AuditdEcsFields';
 
-    result?: string | null;
+    result?: ToStringArray | null;
 
-    session?: string | null;
+    session?: ToStringArray | null;
 
     data?: _Data | null;
 
@@ -2713,11 +2831,11 @@ export namespace GetTimelineQuery {
   export type _Data = {
     __typename?: 'AuditdData';
 
-    acct?: string | null;
+    acct?: ToStringArray | null;
 
-    terminal?: string | null;
+    terminal?: ToStringArray | null;
 
-    op?: string | null;
+    op?: ToStringArray | null;
   };
 
   export type Summary = {
@@ -2727,29 +2845,29 @@ export namespace GetTimelineQuery {
 
     object?: Object | null;
 
-    how?: string | null;
+    how?: ToStringArray | null;
 
-    message_type?: string | null;
+    message_type?: ToStringArray | null;
 
-    sequence?: number | null;
+    sequence?: ToStringArray | null;
   };
 
   export type Actor = {
     __typename?: 'PrimarySecondary';
 
-    primary?: string | null;
+    primary?: ToStringArray | null;
 
-    secondary?: string | null;
+    secondary?: ToStringArray | null;
   };
 
   export type Object = {
     __typename?: 'PrimarySecondary';
 
-    primary?: string | null;
+    primary?: ToStringArray | null;
 
-    secondary?: string | null;
+    secondary?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type File = {
@@ -2871,9 +2989,9 @@ export namespace GetTimelineQuery {
   export type Eve = {
     __typename?: 'SuricataEveData';
 
-    proto?: string | null;
+    proto?: ToStringArray | null;
 
-    flow_id?: number | null;
+    flow_id?: ToStringArray | null;
 
     alert?: Alert | null;
   };
@@ -2881,9 +2999,9 @@ export namespace GetTimelineQuery {
   export type Alert = {
     __typename?: 'SuricataAlertData';
 
-    signature?: string | null;
+    signature?: ToStringArray | null;
 
-    signature_id?: number | null;
+    signature_id?: ToStringArray | null;
   };
 
   export type Network = {
@@ -3013,19 +3131,19 @@ export namespace GetTimelineQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    pid?: number | null;
+    pid?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ppid?: number | null;
+    ppid?: ToStringArray | null;
 
-    args?: (string | null)[] | null;
+    args?: ToStringArray | null;
 
-    executable?: string | null;
+    executable?: ToStringArray | null;
 
-    title?: string | null;
+    title?: ToStringArray | null;
 
-    working_directory?: string | null;
+    working_directory?: ToStringArray | null;
   };
 
   export type Zeek = {
@@ -3228,9 +3346,9 @@ export namespace GetUncommonProcessesQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    title?: string | null;
+    title?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type User = {

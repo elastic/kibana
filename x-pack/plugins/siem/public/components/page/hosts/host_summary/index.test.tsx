@@ -6,9 +6,14 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
+import { render } from 'react-testing-library';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
+import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
 import { getEmptyString, getEmptyValue } from '../../../empty_value';
 
@@ -16,13 +21,34 @@ import { createDraggable, getEuiDescriptionList, HostSummary } from './index';
 import { mockData } from './mock';
 
 describe('Host Summary Component', () => {
+  // this is just a little hack to silence a warning that we'll get until react
+  // fixes this: https://github.com/facebook/react/pull/14853
+  // For us that mean we need to upgrade to 16.9.0
+  // and we will be able to do that when we are in master
+  // tslint:disable-next-line:no-console
+  const originalError = console.error;
+  beforeAll(() => {
+    // tslint:disable-next-line:no-console
+    console.error = (...args: string[]) => {
+      if (/Warning.*not wrapped in act/.test(args[0])) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+  });
+
+  afterAll(() => {
+    // tslint:disable-next-line:no-console
+    console.error = originalError;
+  });
+
   describe('rendering', () => {
     test('it renders the default Host Summary', () => {
       const wrapper = shallow(
         <TestProviders>
           <HostSummary
             loading={false}
-            data={mockData.Hosts.edges}
+            data={mockData.Hosts.edges[0].node}
             startDate={552204000000}
             endDate={618472800000}
           />
@@ -40,79 +66,93 @@ describe('Host Summary Component', () => {
         'Platform',
         552204000000,
         618472800000,
-        mockData.DateFields
+        'siem-kibana'
       );
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe('debian');
     });
-
-    test('if it returns a FormattedRelative element', () => {
-      const draggable = createDraggable(
-        '2019-01-28T22:14:16.039Z',
-        'lastBeat',
-        552204000000,
-        618472800000,
-        ['lastBeat']
+    test('if it returns a euiToolTipAnchor element', async () => {
+      const { container } = render(
+        <TestProviders>
+          <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+            {createDraggable(null, 'firstSeen', 552204000000, 618472800000, 'kibana-siem')}
+          </MockedProvider>
+        </TestProviders>
       );
-      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
-      expect(wrapper.find('FormattedRelative')).toHaveLength(1);
+      await wait();
+      expect(container.innerHTML).toBe(
+        '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+      );
     });
-
     test('if it returns an empty value', () => {
       const draggable = createDraggable(
         null,
         'Platform',
         552204000000,
         618472800000,
-        mockData.DateFields
+        'siem-kibana'
       );
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
-
     test('if it returns a string placeholder with an empty string', () => {
-      const draggable = createDraggable(
-        '',
-        'Platform',
-        552204000000,
-        618472800000,
-        mockData.DateFields
-      );
+      const draggable = createDraggable('', 'Platform', 552204000000, 618472800000, 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyString());
     });
-
     test('if works with a string with a single space as a valid value and NOT an empty value', () => {
-      const draggable = createDraggable(
-        ' ',
-        'Platform',
-        552204000000,
-        618472800000,
-        mockData.DateFields
-      );
+      const draggable = createDraggable(' ', 'Platform', 552204000000, 618472800000, 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(' ');
     });
   });
 
   describe('#getEuiDescriptionList', () => {
-    test('if it creates a description list', () => {
-      const euiDescriptionList = getEuiDescriptionList(
-        mockData.Hosts.edges[0].node,
-        552204000000,
-        618472800000
+    test('All item in description list are loading', async () => {
+      const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
+      myMockData.host!.name = 'kibana-siem';
+      const { container } = render(
+        <TestProviders>
+          <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, true)}
+          </MockedProvider>
+        </TestProviders>
       );
-      const wrapper = mountWithIntl(<TestProviders>{euiDescriptionList}</TestProviders>);
-      expect(wrapper.text()).toBe(
-        'Namesiem-kibanaLast Beat--Idaa7ca589f1b8220002f2fc61c64cfbf1IP Address10.142.0.7fe80::4001:aff:fe8e:7MAC Addr42:01:0a:8e:00:07Typeprojects/189716325846/machineTypes/n1-standard-1PlatformdebianOS NameDebian GNU/LinuxFamilydebianVersion9 (stretch)Architecturex86_64'
-      );
+      expect(container).toMatchSnapshot();
     });
 
+    test('if it creates a description list', async () => {
+      const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
+      myMockData.host!.name = 'kibana-siem';
+      const { container } = render(
+        <TestProviders>
+          <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, false)}
+          </MockedProvider>
+        </TestProviders>
+      );
+      await wait();
+      expect(container).toMatchSnapshot();
+    });
+
+    test('if IP is an empty list in description list', async () => {
+      const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
+      myMockData.host!.ip = [];
+      const { container } = render(
+        <TestProviders>
+          <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
+            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, false)}
+          </MockedProvider>
+        </TestProviders>
+      );
+      await wait();
+      expect(container).toMatchSnapshot();
+    });
     test('if it creates an empty description list', () => {
-      const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000);
+      const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000, false);
       const wrapper = mountWithIntl(<TestProviders>{euiDescriptionList}</TestProviders>);
       expect(wrapper.text()).toBe(
-        'Name--Last Beat--Id--IP Address--MAC Addr--Type--Platform--OS Name--Family--Version--Architecture--'
+        'Name--First Seen--Last Seen--Id--IP Address--MAC Addr--Type--Platform--OS Name--Family--Version--Architecture--'
       );
     });
   });
