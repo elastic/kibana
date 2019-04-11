@@ -6,7 +6,7 @@
 
 import { delay } from 'lodash';
 
-import { isValidGitUrl } from '../../common/git_url_utils';
+import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import {
   CloneProgress,
@@ -38,14 +38,15 @@ export class CloneWorker extends AbstractGitWorker {
 
   public async executeJob(job: Job) {
     const { url } = job.payload;
-    if (
-      !isValidGitUrl(
+    try {
+      validateGitUrl(
         url,
         this.serverOptions.security.gitHostWhitelist,
         this.serverOptions.security.gitProtocolWhitelist
-      )
-    ) {
-      this.log.error(`Invalid git url ${url}`);
+      );
+    } catch (error) {
+      this.log.error(`Validate git url ${url} error.`);
+      this.log.error(error);
       return {
         uri: url,
         // Return a null repo for invalid git url.

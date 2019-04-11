@@ -6,28 +6,27 @@
 
 import GitUrlParse from 'git-url-parse';
 
-export function isValidGitUrl(
+// return true if the git url is valid, otherwise throw Error with
+// exact reasons.
+export function validateGitUrl(
   url: string,
   hostWhitelist?: string[],
   protocolWhitelist?: string[]
 ): boolean {
-  try {
-    const repo = GitUrlParse(url);
+  const repo = GitUrlParse(url);
 
-    let isHostValid = true;
-    if (hostWhitelist && hostWhitelist.length > 0) {
-      const hostSet = new Set(hostWhitelist);
-      isHostValid = hostSet.has(repo.source);
+  if (hostWhitelist && hostWhitelist.length > 0) {
+    const hostSet = new Set(hostWhitelist);
+    if (!hostSet.has(repo.source)) {
+      throw new Error('Git url host is not whitelisted.');
     }
-
-    let isProtocolValid = true;
-    if (protocolWhitelist && protocolWhitelist.length > 0) {
-      const protocolSet = new Set(protocolWhitelist);
-      isProtocolValid = protocolSet.has(repo.protocol);
-    }
-
-    return isHostValid && isProtocolValid;
-  } catch (error) {
-    return false;
   }
+
+  if (protocolWhitelist && protocolWhitelist.length > 0) {
+    const protocolSet = new Set(protocolWhitelist);
+    if (!protocolSet.has(repo.protocol)) {
+      throw new Error('Git url protocol is not whitelisted.');
+    }
+  }
+  return true;
 }
