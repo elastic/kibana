@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { dateFormatAliases } from '@elastic/eui/lib/services/format';
 import moment from 'moment';
 

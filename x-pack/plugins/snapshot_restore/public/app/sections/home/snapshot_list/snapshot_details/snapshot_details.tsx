@@ -47,14 +47,12 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     0: (
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
-        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
         defaultMessage="No"
       />
     ),
     1: (
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
         defaultMessage="Yes"
       />
     ),
@@ -101,7 +99,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         {failures.map((failure: any) => (
           <li key={failure}>
             <EuiTitle size="xs">
-              <span>{failure}</span>
+              <span>{JSON.stringify(failure)}</span>
             </EuiTitle>
           </li>
         ))}
@@ -109,7 +107,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     ) : (
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotDetails.itemfFailuresNoneLabel"
-        data-test-subj="srSnapshotDetailsFailuressNoneTitle"
+        data-test-subj="srSnapshotDetailsFailuresNoneTitle"
         defaultMessage="-"
       />
     );

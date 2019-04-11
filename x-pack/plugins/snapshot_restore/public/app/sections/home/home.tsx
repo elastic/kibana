@@ -104,9 +104,13 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
             path={`${BASE_PATH}/repositories/:repositoryName*`}
             component={RepositoryList}
           />
+          {/* We have two separate SnapshotList routes because repository names could have slashes in
+           *  them. This would break a route with a path like snapshots/:repositoryName?/:snapshotId*
+           */}
+          <Route exact path={`${BASE_PATH}/snapshots`} component={SnapshotList} />
           <Route
             exact
-            path={`${BASE_PATH}/snapshots/:repositoryName?/:snapshotId*`}
+            path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
             component={SnapshotList}
           />
         </Switch>

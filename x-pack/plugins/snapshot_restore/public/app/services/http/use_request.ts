@@ -54,7 +54,9 @@ export const useRequest = ({ path, method, body, interval, initialData }: UseReq
 
   const request = async () => {
     setError(null);
+    setData(initialData);
     setLoading(true);
+
     const { data: responseData, error: responseError } = await sendRequest({
       path,
       method,
@@ -66,11 +68,8 @@ export const useRequest = ({ path, method, body, interval, initialData }: UseReq
       return;
     }
 
-    if (responseError) {
-      setError(responseError);
-    } else {
-      setData(responseData);
-    }
+    setError(responseError);
+    setData(responseData);
     setLoading(false);
   };
 

@@ -52,8 +52,6 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      // We deliberately don't link to the repository from here because the API request for populating
-      // this table takes so long, and navigating away by accident is a really poor UX.
       render: (repository: string) => repository,
     },
     {
