@@ -76,6 +76,7 @@ export class KibanaPrivilegeCalculator {
         ignoreAssigned
       ),
       feature: {},
+      reserved: privilegeSpec._reserved,
     };
 
     // If calculations wish to ignoreAssigned, then we still need to know what the real effective base privilege is

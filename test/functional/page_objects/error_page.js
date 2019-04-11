@@ -18,13 +18,22 @@
  */
 import expect from '@kbn/expect';
 
-export function ErrorPageProvider({ getService }) {
-  const find = getService('find');
+export function ErrorPageProvider({ getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
 
   class ErrorPage {
+    async expectForbidden() {
+      const messageText = await PageObjects.common.getBodyText();
+      expect(messageText).to.eql(
+        JSON.stringify({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden'
+        })
+      );
+    }
     async expectNotFound() {
-      const el = await find.byCssSelector('body>pre');
-      const messageText = await el.getVisibleText();
+      const messageText = await PageObjects.common.getBodyText();
       expect(messageText).to.eql(
         JSON.stringify({
           statusCode: 404,

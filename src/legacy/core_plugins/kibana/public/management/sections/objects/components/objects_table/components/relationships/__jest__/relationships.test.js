@@ -20,6 +20,8 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -35,6 +37,14 @@ jest.mock('ui/errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
+}));
+
+jest.mock('../../../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
 }));
 
 import { Relationships } from '../relationships';

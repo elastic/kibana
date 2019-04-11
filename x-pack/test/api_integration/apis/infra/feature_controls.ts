@@ -19,7 +19,6 @@ const introspectionQuery = gql`
   }
 `;
 
-// tslint:disable:no-default-export
 const featureControlsTests: KbnTestProvider = ({ getService }) => {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
@@ -294,5 +293,5 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default featureControlsTests;

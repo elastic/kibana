@@ -172,6 +172,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             disabled={true}
             fullWidth={true}
             hasDividers={true}
+            isInvalid={false}
             onChange={[Function]}
             options={
               Array [
@@ -321,6 +322,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 "isDirectlyAssigned": true,
               },
               "feature": Object {},
+              "reserved": undefined,
             }
           }
           disabled={true}
@@ -432,6 +434,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               "rawKibanaPrivileges": Object {
                 "features": Object {},
                 "global": Object {},
+                "reserved": Object {},
                 "space": Object {},
               },
             }

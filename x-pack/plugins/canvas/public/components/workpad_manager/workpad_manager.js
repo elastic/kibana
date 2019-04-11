@@ -22,7 +22,7 @@ export const WorkpadManager = ({ onClose }) => {
   const tabs = [
     {
       id: 'workpadLoader',
-      name: 'My Workpads',
+      name: 'My workpads',
       content: (
         <Fragment>
           <EuiSpacer />

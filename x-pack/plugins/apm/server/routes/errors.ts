@@ -5,9 +5,9 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
+import { CoreSetup } from 'src/core/server';
 import { getDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
@@ -16,12 +16,13 @@ import { setupRequest } from '../lib/helpers/setup_request';
 
 const ROOT = '/api/apm/services/{serviceName}/errors';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initErrorsApi(server: Server) {
+export function initErrorsApi(core: CoreSetup) {
+  const { server } = core.http;
   server.route({
     method: 'GET',
     path: ROOT,

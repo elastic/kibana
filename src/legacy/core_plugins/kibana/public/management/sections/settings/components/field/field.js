@@ -284,6 +284,34 @@ class FieldUI extends PureComponent {
     });
   }
 
+  showPageReloadToast = () => {
+    if (this.props.setting.requiresPageReload) {
+      toastNotifications.add({
+        title: this.props.intl.formatMessage({
+          id: 'kbn.management.settings.field.requiresPageReloadToastDescription',
+          defaultMessage: 'Please reload the page for the "{settingName}" setting to take effect.',
+        }, {
+          settingName: this.props.setting.displayName || this.props.setting.name,
+        }),
+        text: (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={() => window.location.reload()}>
+                  {this.props.intl.formatMessage({
+                    id: 'kbn.management.settings.field.requiresPageReloadToastButtonLabel',
+                    defaultMessage: 'Reload page'
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ),
+        color: 'success',
+      });
+    }
+  }
+
   saveEdit = async () => {
     const { name, defVal, type } = this.props.setting;
     const { changeImage, savedValue, unsavedValue, isJsonArray } = this.state;
@@ -315,6 +343,8 @@ class FieldUI extends PureComponent {
         await this.props.save(name, valueToSave);
       }
 
+      this.showPageReloadToast();
+
       if (changeImage) {
         this.cancelChangeImage();
       }
@@ -335,6 +365,7 @@ class FieldUI extends PureComponent {
     this.setLoading(true);
     try {
       await this.props.clear(name);
+      this.showPageReloadToast();
       this.cancelChangeImage();
       this.clearError();
     } catch (e) {

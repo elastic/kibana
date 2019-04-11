@@ -7,13 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import mappings from './mappings.json';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-import { initErrorsApi } from './server/routes/errors';
-import { initMetricsApi } from './server/routes/metrics';
-import { initServicesApi } from './server/routes/services';
-import { initTracesApi } from './server/routes/traces';
-import { initTransactionGroupsApi } from './server/routes/transaction_groups';
+import { plugin } from './server/new-platform/index';
 
 // TODO: get proper types
 export function apm(kibana: any) {
@@ -73,7 +69,7 @@ export function apm(kibana: any) {
     },
 
     // TODO: get proper types
-    init(server: any) {
+    init(server: Server) {
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
@@ -104,12 +100,14 @@ export function apm(kibana: any) {
           }
         }
       });
-      initTransactionGroupsApi(server);
-      initTracesApi(server);
-      initServicesApi(server);
-      initErrorsApi(server);
-      initMetricsApi(server);
-      makeApmUsageCollector(server);
+
+      const initializerContext = {} as PluginInitializerContext;
+      const core = {
+        http: {
+          server
+        }
+      } as CoreSetup;
+      plugin(initializerContext).setup(core);
     }
   });
 }

@@ -11,7 +11,7 @@ import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function uiCapabilitiesTests({
   loadTestFile,
   getService,
@@ -35,16 +35,20 @@ export default function uiCapabilitiesTests({
       }
 
       for (const user of Users) {
+        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: [user.role.name],
+          roles: roles.map(role => role.name),
         });
-        if (isCustomRoleSpecification(user.role)) {
-          await securityService.role.create(user.role.name, {
-            elasticsearch: user.role.elasticsearch,
-            kibana: user.role.kibana,
-          });
+
+        for (const role of roles) {
+          if (isCustomRoleSpecification(role)) {
+            await securityService.role.create(role.name, {
+              kibana: role.kibana,
+            });
+          }
         }
       }
     });
@@ -56,8 +60,12 @@ export default function uiCapabilitiesTests({
 
       for (const user of Users) {
         await securityService.user.delete(user.username);
-        if (isCustomRoleSpecification(user.role)) {
-          await securityService.role.delete(user.role.name);
+
+        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+        for (const role of roles) {
+          if (isCustomRoleSpecification(role)) {
+            await securityService.role.delete(role.name);
+          }
         }
       }
     });

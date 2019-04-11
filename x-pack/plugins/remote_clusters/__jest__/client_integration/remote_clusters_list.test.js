@@ -14,6 +14,16 @@ import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/remote_clusters',
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
 }));
 
 const testBedOptions = {
@@ -204,7 +214,10 @@ describe('<RemoteClusterList />', () => {
     describe('confirmation modal (delete remote cluster)', () => {
       test('should remove the remote cluster from the table after delete is successful', async () => {
         // Mock HTTP DELETE request
-        setDeleteRemoteClusterResponse();
+        setDeleteRemoteClusterResponse({
+          itemsDeleted: [remoteCluster1.name],
+          errors: [],
+        });
 
         // Make sure that we have our 2 remote clusters in the table
         expect(rows.length).toBe(2);

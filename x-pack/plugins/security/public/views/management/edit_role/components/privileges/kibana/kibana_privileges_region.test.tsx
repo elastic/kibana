@@ -43,6 +43,7 @@ const buildProps = (customProps = {}) => {
       global: {},
       space: {},
       features: {},
+      reserved: {},
     }),
     intl: null as any,
     uiCapabilities: {

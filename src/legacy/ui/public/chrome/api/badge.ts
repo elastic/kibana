@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { IRootScopeService } from 'angular';
-import { fatalError } from 'ui/notify/fatal_error';
 import { ChromeBadge, ChromeSetup } from '../../../../../core/public';
 export type Badge = ChromeBadge;
 
@@ -34,18 +32,6 @@ export function __newPlatformInit__(instance: ChromeSetup) {
 }
 
 function createBadgeApi(chrome: { [key: string]: any }) {
-  // A flag used to determine if we should automatically
-  // clear the badge between angular route changes.
-  let badgeSetSinceRouteChange = false;
-
-  // reset badgeSetSinceRouteChange any time the badge changes, even
-  // if it was done directly through the new platform
-  newPlatformChrome.getBadge$().subscribe({
-    next() {
-      badgeSetSinceRouteChange = true;
-    },
-  });
-
   return {
     badge: {
       /**
@@ -63,39 +49,6 @@ function createBadgeApi(chrome: { [key: string]: any }) {
         newPlatformChrome.setBadge(newBadge);
       },
     },
-
-    /**
-     * internal angular run function that will be called when angular bootstraps and
-     * lets us integrate with the angular router so that we can automatically clear
-     * the badge if we switch to a Kibana app that does not use the badge correctly
-     */
-    $setupBadgeAutoClear: ($rootScope: IRootScopeService, $injector: any) => {
-      const $route = $injector.has('$route') ? $injector.get('$route') : {};
-
-      $rootScope.$on('$routeChangeStart', () => {
-        badgeSetSinceRouteChange = false;
-      });
-
-      $rootScope.$on('$routeChangeSuccess', () => {
-        const current = $route.current || {};
-
-        if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-          return;
-        }
-
-        const badgeProvider = current.badge;
-        if (!badgeProvider) {
-          newPlatformChrome.setBadge(undefined);
-          return;
-        }
-
-        try {
-          newPlatformChrome.setBadge($injector.invoke(badgeProvider));
-        } catch (error) {
-          fatalError(error);
-        }
-      });
-    },
   };
 }
 
@@ -103,7 +56,6 @@ export function initChromeBadgeApi(
   chrome: { [key: string]: any },
   internals: { [key: string]: any }
 ) {
-  const { badge, $setupBadgeAutoClear } = createBadgeApi(chrome);
+  const { badge } = createBadgeApi(chrome);
   chrome.badge = badge;
-  internals.$setupBadgeAutoClear = $setupBadgeAutoClear;
 }

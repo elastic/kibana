@@ -10,7 +10,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 

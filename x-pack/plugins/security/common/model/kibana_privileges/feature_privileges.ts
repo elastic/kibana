@@ -19,7 +19,12 @@ export class KibanaFeaturePrivileges {
   }
 
   public getPrivileges(featureId: string): string[] {
-    return Object.keys(this.featurePrivilegesMap[featureId]);
+    const featurePrivileges = this.featurePrivilegesMap[featureId];
+    if (featurePrivileges == null) {
+      return [];
+    }
+
+    return Object.keys(featurePrivileges);
   }
 
   public getActions(featureId: string, privilege: string): string[] {

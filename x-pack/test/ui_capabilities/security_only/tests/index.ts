@@ -9,7 +9,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function uiCapabilitesTests({
   loadTestFile,
   getService,
@@ -21,15 +21,20 @@ export default function uiCapabilitesTests({
 
     before(async () => {
       for (const user of UserScenarios) {
+        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: [user.role.name],
+          roles: roles.map(role => role.name),
         });
-        if (isCustomRoleSpecification(user.role)) {
-          await securityService.role.create(user.role.name, {
-            kibana: user.role.kibana,
-          });
+
+        for (const role of roles) {
+          if (isCustomRoleSpecification(role)) {
+            await securityService.role.create(role.name, {
+              kibana: role.kibana,
+            });
+          }
         }
       }
     });
@@ -37,8 +42,12 @@ export default function uiCapabilitesTests({
     after(async () => {
       for (const user of UserScenarios) {
         await securityService.user.delete(user.username);
-        if (isCustomRoleSpecification(user.role)) {
-          await securityService.role.delete(user.role.name);
+
+        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+        for (const role of roles) {
+          if (isCustomRoleSpecification(role)) {
+            await securityService.role.delete(role.name);
+          }
         }
       }
     });

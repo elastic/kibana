@@ -13,7 +13,7 @@ import {
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
@@ -27,7 +27,14 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           space.id
         );
         switch (scenario.id) {
-          case 'superuser at everything_space':
+          case 'superuser at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
@@ -36,8 +43,11 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           case 'everything_space_read at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is enabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            // everything except ml and monitoring is enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+            );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }

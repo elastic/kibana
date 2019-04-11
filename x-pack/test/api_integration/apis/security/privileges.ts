@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
@@ -468,36 +468,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `ui:${version}:savedObjectsManagement/graph-workspace/read`,
                 ],
               },
-              monitoring: {
-                all: [
-                  'login:',
-                  `version:${version}`,
-                  `app:${version}:monitoring`,
-                  `app:${version}:kibana`,
-                  `ui:${version}:catalogue/monitoring`,
-                  `ui:${version}:navLinks/monitoring`,
-                  `saved_object:${version}:config/bulk_get`,
-                  `saved_object:${version}:config/get`,
-                  `saved_object:${version}:config/find`,
-                  `ui:${version}:savedObjectsManagement/config/read`,
-                  'allHack:',
-                ],
-              },
-              ml: {
-                all: [
-                  'login:',
-                  `version:${version}`,
-                  `app:${version}:ml`,
-                  `app:${version}:kibana`,
-                  `ui:${version}:catalogue/ml`,
-                  `ui:${version}:navLinks/ml`,
-                  `saved_object:${version}:config/bulk_get`,
-                  `saved_object:${version}:config/get`,
-                  `saved_object:${version}:config/find`,
-                  `ui:${version}:savedObjectsManagement/config/read`,
-                  'allHack:',
-                ],
-              },
               apm: {
                 all: [
                   'login:',
@@ -884,12 +854,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/graph-workspace/read`,
                 `ui:${version}:graph/save`,
                 `ui:${version}:graph/delete`,
-                `app:${version}:monitoring`,
-                `ui:${version}:catalogue/monitoring`,
-                `ui:${version}:navLinks/monitoring`,
-                `app:${version}:ml`,
-                `ui:${version}:catalogue/ml`,
-                `ui:${version}:navLinks/ml`,
                 `api:${version}:apm`,
                 `app:${version}:apm`,
                 `ui:${version}:catalogue/apm`,
@@ -1014,12 +978,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `saved_object:${version}:graph-workspace/get`,
                 `saved_object:${version}:graph-workspace/find`,
                 `ui:${version}:savedObjectsManagement/graph-workspace/read`,
-                `app:${version}:monitoring`,
-                `ui:${version}:catalogue/monitoring`,
-                `ui:${version}:navLinks/monitoring`,
-                `app:${version}:ml`,
-                `ui:${version}:catalogue/ml`,
-                `ui:${version}:navLinks/ml`,
                 `api:${version}:apm`,
                 `app:${version}:apm`,
                 `ui:${version}:catalogue/apm`,
@@ -1180,12 +1138,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/graph-workspace/read`,
                 `ui:${version}:graph/save`,
                 `ui:${version}:graph/delete`,
-                `app:${version}:monitoring`,
-                `ui:${version}:catalogue/monitoring`,
-                `ui:${version}:navLinks/monitoring`,
-                `app:${version}:ml`,
-                `ui:${version}:catalogue/ml`,
-                `ui:${version}:navLinks/ml`,
                 `api:${version}:apm`,
                 `app:${version}:apm`,
                 `ui:${version}:catalogue/apm`,
@@ -1310,12 +1262,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `saved_object:${version}:graph-workspace/get`,
                 `saved_object:${version}:graph-workspace/find`,
                 `ui:${version}:savedObjectsManagement/graph-workspace/read`,
-                `app:${version}:monitoring`,
-                `ui:${version}:catalogue/monitoring`,
-                `ui:${version}:navLinks/monitoring`,
-                `app:${version}:ml`,
-                `ui:${version}:catalogue/ml`,
-                `ui:${version}:navLinks/ml`,
                 `api:${version}:apm`,
                 `app:${version}:apm`,
                 `ui:${version}:catalogue/apm`,
@@ -1349,6 +1295,30 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:navLinks/uptime`,
               ],
             },
+            reserved: {
+              monitoring: [
+                `version:${version}`,
+                `app:${version}:monitoring`,
+                `app:${version}:kibana`,
+                `ui:${version}:catalogue/monitoring`,
+                `ui:${version}:navLinks/monitoring`,
+                `saved_object:${version}:config/bulk_get`,
+                `saved_object:${version}:config/get`,
+                `saved_object:${version}:config/find`,
+                `ui:${version}:savedObjectsManagement/config/read`,
+              ],
+              ml: [
+                `version:${version}`,
+                `app:${version}:ml`,
+                `app:${version}:kibana`,
+                `ui:${version}:catalogue/ml`,
+                `ui:${version}:navLinks/ml`,
+                `saved_object:${version}:config/bulk_get`,
+                `saved_object:${version}:config/get`,
+                `saved_object:${version}:config/find`,
+                `ui:${version}:savedObjectsManagement/config/read`,
+              ],
+            },
           });
       });
 
@@ -1368,17 +1338,16 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 indexPatterns: ['all', 'read'],
                 timelion: ['all', 'read'],
                 graph: ['all', 'read'],
-                monitoring: ['all'],
-                ml: ['all'],
-                apm: ['all', 'read'],
                 maps: ['all', 'read'],
                 canvas: ['all', 'read'],
                 infrastructure: ['all', 'read'],
                 logs: ['all', 'read'],
                 uptime: ['all', 'read'],
+                apm: ['all', 'read'],
               },
               global: ['all', 'read'],
               space: ['all', 'read'],
+              reserved: ['monitoring', 'ml'],
             });
         });
       });

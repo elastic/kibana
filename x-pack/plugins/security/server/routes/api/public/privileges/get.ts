@@ -33,6 +33,7 @@ export function initGetPrivilegesApi(
           },
           {}
         ),
+        reserved: Object.keys(privileges.reserved),
       };
     },
     config: {

@@ -5,7 +5,8 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
+
+import { CoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTopTraces } from '../lib/traces/get_top_traces';
@@ -13,12 +14,14 @@ import { getTrace } from '../lib/traces/get_trace';
 
 const ROOT = '/api/apm/traces';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initTracesApi(server: Server) {
+export function initTracesApi(core: CoreSetup) {
+  const { server } = core.http;
+
   // Get trace list
   server.route({
     method: 'GET',

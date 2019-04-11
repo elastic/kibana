@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+interface FeaturesPrivileges {
+  [featureId: string]: string[];
+}
 
 // TODO: Consolidate the following type definitions
 interface CustomRoleSpecificationElasticsearchIndices {
@@ -10,28 +13,19 @@ interface CustomRoleSpecificationElasticsearchIndices {
   privileges: string[];
 }
 
-interface CustomRoleSpecification {
+export interface RoleKibanaPrivilege {
+  spaces: string[];
+  base?: string[];
+  feature?: FeaturesPrivileges;
+}
+
+export interface CustomRoleSpecification {
   name: string;
   elasticsearch?: {
     cluster: string[];
     indices: CustomRoleSpecificationElasticsearchIndices[];
   };
-  kibana?: {
-    global: {
-      minimum?: string[];
-      feature?: {
-        [featureName: string]: string[];
-      };
-    };
-    space?: {
-      [spaceId: string]: {
-        minimum?: string[];
-        feature?: {
-          [featureName: string]: string[];
-        };
-      };
-    };
-  };
+  kibana?: RoleKibanaPrivilege[];
 }
 
 interface ReservedRoleSpecification {
@@ -51,7 +45,8 @@ export interface User {
   username: string;
   fullName: string;
   password: string;
-  role: ReservedRoleSpecification | CustomRoleSpecification;
+  role?: ReservedRoleSpecification | CustomRoleSpecification;
+  roles?: Array<ReservedRoleSpecification | CustomRoleSpecification>;
 }
 
 export interface Space {

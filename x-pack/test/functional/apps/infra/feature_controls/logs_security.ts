@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// tslint:disable no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
@@ -72,7 +72,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('logsChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('configureSourceButton');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -137,7 +137,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('logsChangeSourceConfigurationButton');
+          await testSubjects.missingOrFail('configureSourceButton');
         });
 
         it(`shows read-only badge`, async () => {

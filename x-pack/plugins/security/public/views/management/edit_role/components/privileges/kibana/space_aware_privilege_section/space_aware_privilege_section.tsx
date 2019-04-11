@@ -19,6 +19,7 @@ import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../../../xpack_main/types';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { isReservedRole } from '../../../../../../../lib/role_utils';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -219,7 +220,9 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>{addPrivilegeButton}</EuiFlexItem>
-        {hasPrivilegesAssigned && <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>}
+        {hasPrivilegesAssigned && !isReservedRole(this.props.role) && (
+          <EuiFlexItem grow={false}>{viewMatrixButton}</EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };

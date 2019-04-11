@@ -103,6 +103,7 @@ describe('PrivilegeMatrix', () => {
           all: [],
           read: [],
         },
+        reserved: {},
       })
     ).getInstance(role);
 
