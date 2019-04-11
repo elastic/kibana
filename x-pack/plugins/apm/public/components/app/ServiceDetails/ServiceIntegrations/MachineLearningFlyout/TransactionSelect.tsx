@@ -16,23 +16,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getMlJobId } from '../../../../../../common/ml_job_constants';
-import { MLJobApiResponse } from '../../../../../services/rest/ml';
 
 interface TransactionSelectProps {
   serviceName: string;
-  existingJobs: MLJobApiResponse['jobs'];
   transactionTypes: string[];
-  selected?: string;
   onChange: (value: string) => void;
+  hasMLJob: boolean;
+  selectedTransactionType: string;
 }
 
 export function TransactionSelect({
   serviceName,
-  existingJobs,
   transactionTypes,
-  selected,
-  onChange
+  onChange,
+  hasMLJob,
+  selectedTransactionType
 }: TransactionSelectProps) {
   return (
     <EuiFormRow
@@ -44,12 +42,9 @@ export function TransactionSelect({
       )}
     >
       <EuiSuperSelect
-        valueOfSelected={selected}
+        valueOfSelected={selectedTransactionType}
         onChange={onChange}
         options={transactionTypes.map(transactionType => {
-          const hasMlJobs = existingJobs.some(
-            job => job.job_id === getMlJobId(serviceName, transactionType)
-          );
           return {
             value: transactionType,
             inputDisplay: transactionType,
@@ -59,7 +54,7 @@ export function TransactionSelect({
                   <EuiText>{transactionType}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {hasMlJobs ? (
+                  {hasMLJob ? (
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobTooltip',
