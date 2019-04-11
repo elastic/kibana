@@ -872,8 +872,9 @@ export namespace WaffleNodesQuery {
     sourceId: string;
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
-    metric: InfraMetricInput;
-    path: InfraPathInput[];
+    metric: InfraSnapshotMetricInput;
+    groupby: InfraSnapshotGroupbyInput[];
+    type: InfraNodeType;
   };
 
   export type Query = {
@@ -887,17 +888,17 @@ export namespace WaffleNodesQuery {
 
     id: string;
 
-    map?: Map | null;
+    snapshot?: Snapshot | null;
   };
 
-  export type Map = {
-    __typename?: 'InfraResponse';
+  export type Snapshot = {
+    __typename?: 'InfraSnapshotResponse';
 
     nodes: Nodes[];
   };
 
   export type Nodes = {
-    __typename?: 'InfraNode';
+    __typename?: 'InfraSnapshotNode';
 
     path: Path[];
 
@@ -905,7 +906,7 @@ export namespace WaffleNodesQuery {
   };
 
   export type Path = {
-    __typename?: 'InfraNodePath';
+    __typename?: 'InfraSnapshotNodePath';
 
     value: string;
 
@@ -913,15 +914,15 @@ export namespace WaffleNodesQuery {
   };
 
   export type Metric = {
-    __typename?: 'InfraNodeMetric';
+    __typename?: 'InfraSnapshotNodeMetric';
 
-    name: InfraMetricType;
+    name: InfraSnapshotMetricType;
 
-    value: number;
+    value?: number | null;
 
-    avg: number;
+    avg?: number | null;
 
-    max: number;
+    max?: number | null;
   };
 }
 

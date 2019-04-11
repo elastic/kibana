@@ -15,15 +15,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraIndexField, InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraIndexField, InfraNodeType, InfraSnapshotGroupbyInput } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 import { fieldToName } from './lib/field_to_display_name';
 
 interface Props {
   nodeType: InfraNodeType;
-  groupBy: InfraPathInput[];
-  onChange: (groupBy: InfraPathInput[]) => void;
+  groupBy: InfraSnapshotGroupbyInput[];
+  onChange: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
   fields: InfraIndexField[];
   intl: InjectedIntl;
@@ -32,7 +32,6 @@ interface Props {
 
 const createFieldToOptionMapper = (intl: InjectedIntl) => (field: string) => ({
   text: fieldToName(field, intl),
-  type: InfraPathType.terms,
   field,
 });
 
@@ -40,7 +39,7 @@ let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
-): Array<{ text: string; type: InfraPathType; field: string }> => {
+): Array<{ text: string; field: string }> => {
   if (!OPTIONS) {
     const mapFieldToOption = createFieldToOptionMapper(intl);
     OPTIONS = {
@@ -190,7 +189,6 @@ export const WaffleGroupByControls = injectI18n(
         {
           text: field,
           field,
-          type: InfraPathType.custom,
         },
       ];
       this.props.onChangeCustomOptions(options);
@@ -203,7 +201,7 @@ export const WaffleGroupByControls = injectI18n(
       if (groupBy.some(g => g.field === field)) {
         this.handleRemove(field)();
       } else if (this.props.groupBy.length < 2) {
-        this.props.onChange([...groupBy, { type: InfraPathType.terms, field }]);
+        this.props.onChange([...groupBy, { field }]);
         this.handleClose();
       }
     };
