@@ -196,7 +196,7 @@ const WatchHistoryUI = ({
       if (e.data.statusCode !== 200) {
         toastNotifications.addDanger(
           i18n.translate(
-            'xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText',
+            'xpack.watcher.sections.watchList.deactivateWatchErrorNotification.descriptionText',
             {
               defaultMessage: "Couldn't deactivate watch",
             }
