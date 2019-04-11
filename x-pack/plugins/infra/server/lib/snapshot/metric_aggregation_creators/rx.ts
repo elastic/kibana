@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSnapshotType } from '../../../graphql/types';
+import { InfraNodeType } from '../../../graphql/types';
 import { rate } from './rate';
 
 const FIELDS = {
-  [InfraSnapshotType.host]: 'system.network.in.bytes',
-  [InfraSnapshotType.pod]: 'kubernetes.pod.network.rx.bytes',
-  [InfraSnapshotType.container]: 'docker.network.in.bytes',
+  [InfraNodeType.host]: 'system.network.in.bytes',
+  [InfraNodeType.pod]: 'kubernetes.pod.network.rx.bytes',
+  [InfraNodeType.container]: 'docker.network.in.bytes',
 };
 
 export const rx = rate('rx', FIELDS);

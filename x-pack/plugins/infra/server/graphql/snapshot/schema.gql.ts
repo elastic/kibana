@@ -48,12 +48,6 @@ export const snapshotSchema: any = gql`
     type: InfraSnapshotMetricType!
   }
 
-  enum InfraSnapshotType {
-    host
-    pod
-    container
-  }
-
   input InfraSnapshotGroupbyInput {
     "The label to use in the results for the group by for the terms group by"
     label: String
@@ -64,7 +58,7 @@ export const snapshotSchema: any = gql`
   type InfraSnapshotResponse {
     "Nodes of type host, container or pod grouped by 0, 1 or 2 terms"
     nodes(
-      type: InfraSnapshotType!
+      type: InfraNodeType!
       groupby: [InfraSnapshotGroupbyInput!]!
       metric: InfraSnapshotMetricInput!
     ): [InfraSnapshotNode!]!

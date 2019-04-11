@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSnapshotType } from '../../../graphql/types';
+import { InfraNodeType } from '../../../graphql/types';
 
 interface Fields {
-  [InfraSnapshotType.container]: string;
-  [InfraSnapshotType.pod]: string;
-  [InfraSnapshotType.host]: string;
+  [InfraNodeType.container]: string;
+  [InfraNodeType.pod]: string;
+  [InfraNodeType.host]: string;
 }
 
 export const rate = (id: string, fields: Fields) => {
-  return (nodeType: InfraSnapshotType) => {
+  return (nodeType: InfraNodeType) => {
     const field = fields[nodeType];
     if (field) {
       return {

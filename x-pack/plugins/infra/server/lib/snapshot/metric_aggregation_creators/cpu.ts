@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSnapshotType } from '../../../graphql/types';
+import { InfraNodeType } from '../../../graphql/types';
 
 const FIELDS = {
-  [InfraSnapshotType.host]: 'system.cpu.user.pct',
-  [InfraSnapshotType.pod]: 'kubernetes.pod.cpu.usage.node.pct',
-  [InfraSnapshotType.container]: 'docker.cpu.total.pct',
+  [InfraNodeType.host]: 'system.cpu.user.pct',
+  [InfraNodeType.pod]: 'kubernetes.pod.cpu.usage.node.pct',
+  [InfraNodeType.container]: 'docker.cpu.total.pct',
 };
 
-export const cpu = (nodeType: InfraSnapshotType) => {
-  if (nodeType === InfraSnapshotType.host) {
+export const cpu = (nodeType: InfraNodeType) => {
+  if (nodeType === InfraNodeType.host) {
     return {
       cpu_user: {
         avg: {

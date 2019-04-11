@@ -491,7 +491,7 @@ export interface NodesInfraResponseArgs {
   metric: InfraMetricInput;
 }
 export interface NodesInfraSnapshotResponseArgs {
-  type: InfraSnapshotType;
+  type: InfraNodeType;
 
   groupby: InfraSnapshotGroupbyInput[];
 
@@ -547,12 +547,6 @@ export enum InfraMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
-}
-
-export enum InfraSnapshotType {
-  host = 'host',
-  pod = 'pod',
-  container = 'container',
 }
 
 export enum InfraSnapshotMetricType {

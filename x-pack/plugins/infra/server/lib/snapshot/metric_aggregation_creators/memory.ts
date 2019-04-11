@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSnapshotType } from '../../../graphql/types';
+import { InfraNodeType } from '../../../graphql/types';
 
 const FIELDS = {
-  [InfraSnapshotType.host]: 'system.memory.actual.used.pct',
-  [InfraSnapshotType.pod]: 'kubernetes.pod.memory.usage.node.pct',
-  [InfraSnapshotType.container]: 'docker.memory.usage.pct',
+  [InfraNodeType.host]: 'system.memory.actual.used.pct',
+  [InfraNodeType.pod]: 'kubernetes.pod.memory.usage.node.pct',
+  [InfraNodeType.container]: 'docker.memory.usage.pct',
 };
 
-export const memory = (nodeType: InfraSnapshotType) => {
+export const memory = (nodeType: InfraNodeType) => {
   return { memory: { avg: { field: FIELDS[nodeType] } } };
 };

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSnapshotType } from '../../../graphql/types';
+import { InfraNodeType } from '../../../graphql/types';
 
 const FIELDS = {
-  [InfraSnapshotType.host]: 'system.load.5',
-  [InfraSnapshotType.pod]: '',
-  [InfraSnapshotType.container]: '',
+  [InfraNodeType.host]: 'system.load.5',
+  [InfraNodeType.pod]: '',
+  [InfraNodeType.container]: '',
 };
 
-export const load = (nodeType: InfraSnapshotType) => {
+export const load = (nodeType: InfraNodeType) => {
   const field = FIELDS[nodeType];
   if (field) {
     return { load: { avg: { field } } };

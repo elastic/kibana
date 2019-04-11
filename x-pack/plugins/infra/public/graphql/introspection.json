@@ -1869,7 +1869,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "InfraSnapshotType", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "InfraNodeType", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -1930,25 +1930,6 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraSnapshotType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "host", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "pod", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "container",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
         "possibleTypes": null
       },
       {

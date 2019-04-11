@@ -9,7 +9,7 @@ import {
   InfraSnapshotMetricInput,
   InfraSnapshotNode,
   InfraTimerangeInput,
-  InfraSnapshotType,
+  InfraNodeType,
   InfraSourceConfiguration,
 } from '../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
@@ -21,7 +21,7 @@ import { getGroupedNodesSources, getMetricsAggregations, getMetricsSources } fro
 import { getNodeMetrics, getNodeMetricsForLookup, getNodePath } from './response_helpers';
 
 export interface InfraSnapshotRequestOptions {
-  nodeType: InfraSnapshotType;
+  nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   groupby: InfraSnapshotGroupbyInput[];
