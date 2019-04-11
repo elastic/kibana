@@ -6,6 +6,8 @@
 
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
@@ -88,7 +90,11 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
 
   return (
     <Fragment>
-      <h3>Data Frame Pivot Preview</h3>
+      <h3>
+        {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+          defaultMessage: 'Data Frame Pivot Preview',
+        })}
+      </h3>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
       {dataFramePreviewData.length > 0 && (

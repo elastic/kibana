@@ -6,6 +6,8 @@
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
@@ -63,17 +65,23 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
   return (
     <Fragment>
       <EuiButton isDisabled={created} onClick={createDataFrame}>
-        Create data frame
+        {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameButton', {
+          defaultMessage: 'Create data frame',
+        })}
       </EuiButton>
       &nbsp;
       {!created && (
         <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
-          Create and start data frame
+          {i18n.translate('xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameButton', {
+            defaultMessage: 'Create and start data frame',
+          })}
         </EuiButton>
       )}
       {created && (
         <EuiButton isDisabled={created && started} onClick={startDataFrame}>
-          Start data frame
+          {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
+            defaultMessage: 'Start data frame',
+          })}
         </EuiButton>
       )}
       {created && started && (
@@ -84,8 +92,15 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
             <EuiFlexItem>
               <EuiCard
                 icon={<EuiIcon size="xxl" type="list" />}
-                title="Job Management"
-                description="Return to the data frame job management page."
+                title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobManagementCardTitle', {
+                  defaultMessage: 'Job management',
+                })}
+                description={i18n.translate(
+                  'xpack.ml.dataframe.jobCreateForm.jobManagementCardDescription',
+                  {
+                    defaultMessage: 'Return to the data frame job management page.',
+                  }
+                )}
                 onClick={gotToDataFrameJobManagement}
               />
             </EuiFlexItem>

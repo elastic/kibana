@@ -114,7 +114,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
-  ml.putDataFrameTranformsJob = ca({
+  ml.createDataFrameTransformsJob = ca({
     urls: [
       {
         fmt: '/_data_frame/transforms/<%=jobId%>',

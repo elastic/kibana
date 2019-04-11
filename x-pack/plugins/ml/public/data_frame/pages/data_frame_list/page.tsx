@@ -6,6 +6,8 @@
 
 import React, { SFC } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiPage,
@@ -30,12 +32,20 @@ export const Page: SFC = () => (
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>Data Frame</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.jobsList.dataFrameTitle"
+                  defaultMessage="Data frame"
+                />
+              </h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             <EuiButton fill onClick={newJob} iconType="plusInCircle">
-              Create Data Frame
+              <FormattedMessage
+                id="xpack.ml.dataframe.jobsList.createDataFrameButton"
+                defaultMessage="Create data frame"
+              />
             </EuiButton>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>

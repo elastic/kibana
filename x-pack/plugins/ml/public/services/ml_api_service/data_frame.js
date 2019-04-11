@@ -19,7 +19,7 @@ export const dataFrame = {
       method: 'GET'
     });
   },
-  putDataFrameTransformsJob(jobId, jobConfig) {
+  createDataFrameTransformsJob(jobId, jobConfig) {
     return http({
       url: `${basePath}/_data_frame/transforms/${jobId}`,
       method: 'PUT',

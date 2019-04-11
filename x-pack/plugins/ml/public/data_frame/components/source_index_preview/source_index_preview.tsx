@@ -6,6 +6,8 @@
 
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { SearchResponse } from 'elasticsearch';
 
 import {
@@ -152,14 +154,22 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       render: (item: EsDoc) => (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
+          aria-label={
+            itemIdToExpandedRowMap[item._id]
+              ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
+                  defaultMessage: 'Expand',
+                })
+          }
           iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
     });
   }
 
-  if (tableItems.length === 0) {
+  if (!loading && tableItems.length === 0) {
     return (
       <EuiEmptyPrompt title={<h2>No results</h2>} body={<p>Check the syntax of your query.</p>} />
     );
@@ -169,14 +179,23 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     <Fragment>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <h3>Source Index {indexPattern.title}</h3>
+          <h3>
+            {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+              defaultMessage: 'Source Index {indexPatternTitle}',
+              values: { indexPatternTitle: indexPattern.title },
+            })}
+          </h3>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <span>
-                  showing {selectedFields.length} of {docFieldsCount} fields
+                  {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
+                    defaultMessage:
+                      'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
+                    values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
+                  })}
                 </span>
               )}
             </EuiFlexItem>
@@ -187,14 +206,26 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                   <EuiButtonIcon
                     iconType="gear"
                     onClick={toggleColumnsPopover}
-                    aria-label="Select columns"
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataframe.sourceIndexPreview.selectColumnsAriaLabel',
+                      {
+                        defaultMessage: 'Select columns',
+                      }
+                    )}
                   />
                 }
                 isOpen={isColumnsPopoverVisible}
                 closePopover={closeColumnsPopover}
                 ownFocus
               >
-                <EuiPopoverTitle>Select Fields</EuiPopoverTitle>
+                <EuiPopoverTitle>
+                  {i18n.translate(
+                    'xpack.ml.dataframe.sourceIndexPreview.selectFieldsPopoverTitle',
+                    {
+                      defaultMessage: 'Select Fields',
+                    }
+                  )}
+                </EuiPopoverTitle>
                 <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
                   {docFields.map(d => (
                     <EuiCheckbox

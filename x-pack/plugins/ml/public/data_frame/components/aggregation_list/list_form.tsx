@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -37,17 +39,29 @@ export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, options
         label={
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow label="Custom name">
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.customNameLabel', {
+                  defaultMessage: 'Custom name',
+                })}
+              >
                 <EuiFieldText defaultValue={optionsData[l].formRowLabel} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="Aggregation">
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.aggregationLabel', {
+                  defaultMessage: 'Aggregation',
+                })}
+              >
                 <EuiFieldText defaultValue={optionsData[l].agg} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="Field">
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.fieldLabel', {
+                  defaultMessage: 'Field',
+                })}
+              >
                 <EuiFieldText defaultValue={optionsData[l].field} />
               </EuiFormRow>
             </EuiFlexItem>

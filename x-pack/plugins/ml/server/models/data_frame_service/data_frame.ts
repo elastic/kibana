@@ -20,7 +20,7 @@ export function dataFrameProvider(callWithRequest: callWithRequestType) {
 
   async function createDataFrameTransformsJob(jobId: string, jobConfig: any) {
     try {
-      return await callWithRequest('ml.putDataFrameTranformsJob', { body: jobConfig, jobId });
+      return await callWithRequest('ml.createDataFrameTransformsJob', { body: jobConfig, jobId });
     } catch (error) {
       throw Boom.badRequest(error);
     }

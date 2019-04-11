@@ -6,6 +6,8 @@
 
 import { uniq } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import {
@@ -160,26 +162,45 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          <EuiFormRow label="Query">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
+              defaultMessage: 'Query',
+            })}
+          >
             <EuiFieldSearch
-              placeholder="Search..."
+              placeholder={i18n.translate('xpack.ml.dataframe.definePivotForm.queryPlaceholder', {
+                defaultMessage: 'Search...',
+              })}
               onChange={searchHandler}
               value={displaySearch}
             />
           </EuiFormRow>
 
-          <EuiFormRow label="Group by">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotForm.groupByLabel', {
+              defaultMessage: 'Group by',
+            })}
+          >
             <Fragment>
               <GroupByList list={pivotGroupBy} deleteHandler={deleteGroupBy} />
               <DropDown
                 changeHandler={addGroupBy}
                 options={groupByOptions}
-                placeholder="Add a group by field ..."
+                placeholder={i18n.translate(
+                  'xpack.ml.dataframe.definePivotForm.groupByPlaceholder',
+                  {
+                    defaultMessage: 'Add a group by field ...',
+                  }
+                )}
               />
             </Fragment>
           </EuiFormRow>
 
-          <EuiFormRow label="Aggregations">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotForm.aggregationsLabel', {
+              defaultMessage: 'Aggregations',
+            })}
+          >
             <Fragment>
               <AggListForm
                 list={aggList}
@@ -189,7 +210,12 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
               <DropDown
                 changeHandler={addAggregation}
                 options={aggOptions}
-                placeholder="Add an aggregation ..."
+                placeholder={i18n.translate(
+                  'xpack.ml.dataframe.definePivotForm.aggregationsPlaceholder',
+                  {
+                    defaultMessage: 'Add an aggregation ...',
+                  }
+                )}
               />
             </Fragment>
           </EuiFormRow>

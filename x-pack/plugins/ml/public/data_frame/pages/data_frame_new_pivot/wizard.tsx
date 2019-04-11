@@ -6,6 +6,8 @@
 
 import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
 import { WizardNav } from '../../components/wizard_nav';
@@ -123,7 +125,9 @@ export const Wizard: SFC = React.memo(() => {
 
   const stepsConfig = [
     {
-      title: 'Define pivot',
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+        defaultMessage: 'Define pivot',
+      }),
       children: (
         <DefinePivotStep
           isCurrentStep={currentStep === WIZARD_STEPS.DEFINE_PIVOT}
@@ -134,7 +138,9 @@ export const Wizard: SFC = React.memo(() => {
       ),
     },
     {
-      title: 'Job details',
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.jobDetailsStepTitle', {
+        defaultMessage: 'Job details',
+      }),
       children: (
         <Fragment>
           {jobDetails}
@@ -153,7 +159,9 @@ export const Wizard: SFC = React.memo(() => {
       status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
-      title: 'Create',
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.createStepTitle', {
+        defaultMessage: 'Create',
+      }),
       children: (
         <Fragment>
           {jobCreate}

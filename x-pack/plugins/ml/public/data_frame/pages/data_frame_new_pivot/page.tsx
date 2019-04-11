@@ -6,6 +6,8 @@
 
 import React, { SFC } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiPage,
   EuiPageBody,
@@ -25,7 +27,12 @@ export const Page: SFC = () => (
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>New data frame</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
+                  defaultMessage="New data frame"
+                />
+              </h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>

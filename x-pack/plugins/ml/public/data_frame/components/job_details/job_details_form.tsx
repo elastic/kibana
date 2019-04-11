@@ -6,6 +6,8 @@
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { JobId, TargetIndex } from './common';
@@ -47,20 +49,35 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   return (
     <Fragment>
-      <EuiFormRow label="Job id">
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdLabel', {
+          defaultMessage: 'Job id',
+        })}
+      >
         <EuiFieldText
           placeholder="job id"
           value={jobId}
           onChange={e => setJobId(e.target.value)}
-          aria-label="Choose a unique job id."
+          aria-label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.jobIdInputAriaLabel', {
+            defaultMessage: 'Choose a unique job id.',
+          })}
         />
       </EuiFormRow>
-      <EuiFormRow label="Target index">
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsForm.targetIndexLabel', {
+          defaultMessage: 'Target index',
+        })}
+      >
         <EuiFieldText
           placeholder="target index"
           value={targetIndex}
           onChange={e => setTargetIndex(e.target.value)}
-          aria-label="Choose a non-existant target index name."
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.jobDetailsForm.targetIndexInputAriaLabel',
+            {
+              defaultMessage: 'Choose a non-existant target index name.',
+            }
+          )}
         />
       </EuiFormRow>
     </Fragment>

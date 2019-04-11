@@ -6,6 +6,8 @@
 
 import React, { SFC, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonIcon, EuiEmptyPrompt, EuiInMemoryTable, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
@@ -18,13 +20,16 @@ interface GetDataFrameTransformsResponse {
 }
 
 interface DataFrameJob {
+  dest: string;
   id: string;
+  source: string;
 }
 
-enum DataFrameJobFields {
+// Used to pass on attribute names to table columns
+enum DataFrameJobAttribute {
+  dest = 'dest',
   id = 'id',
   source = 'source',
-  dest = 'dest',
 }
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
@@ -72,26 +77,34 @@ export const DataFrameList: SFC = () => {
       render: (item: DataFrameJob) => (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate('xpack.ml.dataframe.jobsList.rowCollapse', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.ml.dataframe.jobsList.rowExpand', {
+                  defaultMessage: 'Expand',
+                })
+          }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
     },
     {
-      field: DataFrameJobFields.id,
+      field: DataFrameJobAttribute.id,
       name: 'ID',
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameJobFields.source,
-      name: 'Source index',
+      field: DataFrameJobAttribute.source,
+      name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameJobFields.dest,
-      name: 'Target index',
+      field: DataFrameJobAttribute.dest,
+      name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
       sortable: true,
       truncateText: true,
     },
@@ -104,7 +117,7 @@ export const DataFrameList: SFC = () => {
       pagination={true}
       hasActions={false}
       isSelectable={false}
-      itemId={DataFrameJobFields.id}
+      itemId={DataFrameJobAttribute.id}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
     />

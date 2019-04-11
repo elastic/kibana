@@ -6,6 +6,8 @@
 
 import React, { SFC, useContext } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiComboBoxOptionProps,
   EuiFlexGroup,
@@ -95,15 +97,27 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          <EuiFormRow label="Query">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotSummary.queryLabel', {
+              defaultMessage: 'Query',
+            })}
+          >
             <span>{displaySearch}</span>
           </EuiFormRow>
 
-          <EuiFormRow label="Group by">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotSummary.groupByLabel', {
+              defaultMessage: 'Group by',
+            })}
+          >
             <GroupByList list={pivotGroupBy} />
           </EuiFormRow>
 
-          <EuiFormRow label="Aggregations">
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.definePivotSummary.aggregationsLabel', {
+              defaultMessage: 'Aggregations',
+            })}
+          >
             <AggListSummary list={aggList} optionsData={aggOptionsData} />
           </EuiFormRow>
         </EuiForm>

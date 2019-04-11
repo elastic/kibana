@@ -6,6 +6,8 @@
 
 import React, { SFC } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface StepsNavProps {
@@ -26,14 +28,18 @@ export const WizardNav: SFC<StepsNavProps> = ({
     {previous && (
       <EuiFlexItem grow={false}>
         <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
-          Previous
+          {i18n.translate('xpack.ml.dataframe.wizard.previousStepButton', {
+            defaultMessage: 'Previous',
+          })}
         </EuiButton>
       </EuiFlexItem>
     )}
     {next && (
       <EuiFlexItem grow={false}>
         <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
-          Next
+          {i18n.translate('xpack.ml.dataframe.wizard.nextStepButton', {
+            defaultMessage: 'Next',
+          })}
         </EuiButton>
       </EuiFlexItem>
     )}

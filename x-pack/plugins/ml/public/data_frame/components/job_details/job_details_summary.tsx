@@ -6,6 +6,8 @@
 
 import React, { Fragment, SFC } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiFormRow } from '@elastic/eui';
 
 import { JobId, TargetIndex } from './common';
@@ -23,10 +25,18 @@ export const JobDetailsSummary: SFC<Props> = React.memo(({ jobId, targetIndex, t
 
   return (
     <Fragment>
-      <EuiFormRow label="Job id">
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.jobIdLabel', {
+          defaultMessage: 'Job id',
+        })}
+      >
         <span>{jobId}</span>
       </EuiFormRow>
-      <EuiFormRow label="Target index">
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.targetIndexLabel', {
+          defaultMessage: 'Target index',
+        })}
+      >
         <span>{targetIndex}</span>
       </EuiFormRow>
     </Fragment>
