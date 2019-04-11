@@ -177,6 +177,15 @@ class RelationshipsUI extends Component {
       },
     ];
 
+    const filterTypesMap = new Map();
+    for (const relationship of relationships) {
+      filterTypesMap.set(relationship.type, {
+        value: relationship.type,
+        name: relationship.type,
+        view: relationship.type,
+      });
+    }
+
     return (
       <div>
         <EuiTitle size="s">
@@ -191,6 +200,17 @@ class RelationshipsUI extends Component {
           items={relationships}
           columns={columns}
           pagination={true}
+          search={{
+            filters: [
+              {
+                type: 'field_value_selection',
+                field: 'type',
+                name: 'Type',
+                multiSelect: 'or',
+                options: [...filterTypesMap.values()],
+              },
+            ],
+          }}
         />
       </div>
     );
