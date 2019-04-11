@@ -81,6 +81,12 @@ export interface InfraSourceTimestampLogColumn {
 export interface InfraSourceMessageLogColumn {
   kind: string;
 }
+/** A log column containing a field value */
+export interface InfraSourceFieldLogColumn {
+  kind: string;
+
+  field: string;
+}
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
   /** Whether the configured metric alias exists */
@@ -181,6 +187,13 @@ export interface InfraLogMessageFieldSegment {
 export interface InfraLogMessageConstantSegment {
   /** The segment's message */
   constant: string;
+}
+/** A column that contains the value of a field of the log entry */
+export interface InfraLogEntryFieldColumn {
+  /** The field name of the column */
+  field: string;
+  /** The value of the field in the log entry */
+  value: string;
 }
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
@@ -622,10 +635,16 @@ export enum InfraOperator {
 // ====================================================
 
 /** All known log column types */
-export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
+export type InfraSourceLogColumn =
+  | InfraSourceTimestampLogColumn
+  | InfraSourceMessageLogColumn
+  | InfraSourceFieldLogColumn;
 
 /** A column of a log entry */
-export type InfraLogEntryColumn = InfraLogEntryTimestampColumn | InfraLogEntryMessageColumn;
+export type InfraLogEntryColumn =
+  | InfraLogEntryTimestampColumn
+  | InfraLogEntryMessageColumn
+  | InfraLogEntryFieldColumn;
 
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
@@ -1030,7 +1049,8 @@ export namespace SourceConfigurationFields {
 
   export type LogColumns =
     | InfraSourceTimestampLogColumnInlineFragment
-    | InfraSourceMessageLogColumnInlineFragment;
+    | InfraSourceMessageLogColumnInlineFragment
+    | InfraSourceFieldLogColumnInlineFragment;
 
   export type InfraSourceTimestampLogColumnInlineFragment = {
     __typename?: 'InfraSourceTimestampLogColumn';
@@ -1042,6 +1062,14 @@ export namespace SourceConfigurationFields {
     __typename?: 'InfraSourceMessageLogColumn';
 
     kind: string;
+  };
+
+  export type InfraSourceFieldLogColumnInlineFragment = {
+    __typename?: 'InfraSourceFieldLogColumn';
+
+    kind: string;
+
+    field: string;
   };
 }
 
@@ -1112,7 +1140,8 @@ export namespace InfraLogEntryFields {
 
   export type Columns =
     | InfraLogEntryTimestampColumnInlineFragment
-    | InfraLogEntryMessageColumnInlineFragment;
+    | InfraLogEntryMessageColumnInlineFragment
+    | InfraLogEntryFieldColumnInlineFragment;
 
   export type InfraLogEntryTimestampColumnInlineFragment = {
     __typename?: 'InfraLogEntryTimestampColumn';
@@ -1142,5 +1171,13 @@ export namespace InfraLogEntryFields {
     __typename?: 'InfraLogMessageConstantSegment';
 
     constant: string;
+  };
+
+  export type InfraLogEntryFieldColumnInlineFragment = {
+    __typename?: 'InfraLogEntryFieldColumn';
+
+    field: string;
+
+    value: string;
   };
 }

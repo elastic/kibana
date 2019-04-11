@@ -27,6 +27,10 @@ export const sourceConfigurationFieldsFragment = gql`
       ... on InfraSourceMessageLogColumn {
         kind
       }
+      ... on InfraSourceFieldLogColumn {
+        kind
+        field
+      }
     }
   }
 `;

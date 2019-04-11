@@ -109,6 +109,12 @@ export interface InfraSourceTimestampLogColumn {
 export interface InfraSourceMessageLogColumn {
   kind: string;
 }
+/** A log column containing a field value */
+export interface InfraSourceFieldLogColumn {
+  kind: string;
+
+  field: string;
+}
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
   /** Whether the configured metric alias exists */
@@ -209,6 +215,13 @@ export interface InfraLogMessageFieldSegment {
 export interface InfraLogMessageConstantSegment {
   /** The segment's message */
   constant: string;
+}
+/** A column that contains the value of a field of the log entry */
+export interface InfraLogEntryFieldColumn {
+  /** The field name of the column */
+  field: string;
+  /** The value of the field in the log entry */
+  value: string;
 }
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
@@ -650,10 +663,16 @@ export enum InfraOperator {
 // ====================================================
 
 /** All known log column types */
-export type InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn;
+export type InfraSourceLogColumn =
+  | InfraSourceTimestampLogColumn
+  | InfraSourceMessageLogColumn
+  | InfraSourceFieldLogColumn;
 
 /** A column of a log entry */
-export type InfraLogEntryColumn = InfraLogEntryTimestampColumn | InfraLogEntryMessageColumn;
+export type InfraLogEntryColumn =
+  | InfraLogEntryTimestampColumn
+  | InfraLogEntryMessageColumn
+  | InfraLogEntryFieldColumn;
 
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
@@ -974,6 +993,25 @@ export namespace InfraSourceMessageLogColumnResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
+/** A log column containing a field value */
+export namespace InfraSourceFieldLogColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceFieldLogColumn> {
+    kind?: KindResolver<string, TypeParent, Context>;
+
+    field?: FieldResolver<string, TypeParent, Context>;
+  }
+
+  export type KindResolver<
+    R = string,
+    Parent = InfraSourceFieldLogColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type FieldResolver<
+    R = string,
+    Parent = InfraSourceFieldLogColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
 /** The status of an infrastructure data source */
 export namespace InfraSourceStatusResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceStatus> {
@@ -1283,6 +1321,26 @@ export namespace InfraLogMessageConstantSegmentResolvers {
   export type ConstantResolver<
     R = string,
     Parent = InfraLogMessageConstantSegment,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** A column that contains the value of a field of the log entry */
+export namespace InfraLogEntryFieldColumnResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogEntryFieldColumn> {
+    /** The field name of the column */
+    field?: FieldResolver<string, TypeParent, Context>;
+    /** The value of the field in the log entry */
+    value?: ValueResolver<string, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string,
+    Parent = InfraLogEntryFieldColumn,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = string,
+    Parent = InfraLogEntryFieldColumn,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

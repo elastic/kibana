@@ -14,6 +14,7 @@ export type LogEntry = InfraLogEntryFields.Fragment;
 export type LogEntryColumn = InfraLogEntryFields.Columns;
 export type LogEntryMessageColumn = InfraLogEntryFields.InfraLogEntryMessageColumnInlineFragment;
 export type LogEntryTimestampColumn = InfraLogEntryFields.InfraLogEntryTimestampColumnInlineFragment;
+export type LogEntryFieldColumn = InfraLogEntryFields.InfraLogEntryFieldColumnInlineFragment;
 
 export type LogEntryMessageSegment = InfraLogEntryFields.Message;
 export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;
@@ -34,10 +35,13 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 };
 
 export const isTimestampColumn = (column: LogEntryColumn): column is LogEntryTimestampColumn =>
-  'timestamp' in column;
+  column.__typename === 'InfraLogEntryTimestampColumn';
 
 export const isMessageColumn = (column: LogEntryColumn): column is LogEntryMessageColumn =>
-  'message' in column;
+  column.__typename === 'InfraLogEntryMessageColumn';
+
+export const isFieldColumn = (column: LogEntryColumn): column is LogEntryFieldColumn =>
+  column.__typename === 'InfraLogEntryFieldColumn';
 
 export const isConstantSegment = (
   segment: LogEntryMessageSegment

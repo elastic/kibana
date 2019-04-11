@@ -10,10 +10,16 @@ import React, { useState, useCallback, Fragment } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { LogEntry, isMessageColumn, isTimestampColumn } from '../../../utils/log_entry';
+import {
+  LogEntry,
+  isFieldColumn,
+  isMessageColumn,
+  isTimestampColumn,
+} from '../../../utils/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
 import { FormattedTime } from '../../formatted_time';
 import { LogTextStreamItemDateField } from './item_date_field';
+import { LogTextStreamItemFieldField } from './item_field_field';
 import { LogTextStreamItemMessageField } from './item_message_field';
 
 interface LogTextStreamLogEntryItemViewProps {
@@ -97,6 +103,15 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                   segments={column.message}
                 />
               </Fragment>
+            );
+          } else if (isFieldColumn(column)) {
+            return (
+              <LogTextStreamItemFieldField
+                encodedValue={column.value}
+                isHovered={isHovered}
+                key={`field-${column.field}`}
+                scale={scale}
+              />
             );
           }
         })}

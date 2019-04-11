@@ -38,8 +38,19 @@ export const logEntriesSchema = gql`
     message: [InfraLogMessageSegment!]!
   }
 
+  "A column that contains the value of a field of the log entry"
+  type InfraLogEntryFieldColumn {
+    "The field name of the column"
+    field: String!
+    "The value of the field in the log entry"
+    value: String!
+  }
+
   "A column of a log entry"
-  union InfraLogEntryColumn = InfraLogEntryTimestampColumn | InfraLogEntryMessageColumn
+  union InfraLogEntryColumn =
+      InfraLogEntryTimestampColumn
+    | InfraLogEntryMessageColumn
+    | InfraLogEntryFieldColumn
 
   "A log entry"
   type InfraLogEntry {

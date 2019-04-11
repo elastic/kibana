@@ -671,7 +671,8 @@
         "enumValues": null,
         "possibleTypes": [
           { "kind": "OBJECT", "name": "InfraSourceTimestampLogColumn", "ofType": null },
-          { "kind": "OBJECT", "name": "InfraSourceMessageLogColumn", "ofType": null }
+          { "kind": "OBJECT", "name": "InfraSourceMessageLogColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraSourceFieldLogColumn", "ofType": null }
         ]
       },
       {
@@ -704,6 +705,41 @@
         "fields": [
           {
             "name": "kind",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceFieldLogColumn",
+        "description": "A log column containing a field value",
+        "fields": [
+          {
+            "name": "kind",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "field",
             "description": "",
             "args": [],
             "type": {
@@ -1278,7 +1314,8 @@
         "enumValues": null,
         "possibleTypes": [
           { "kind": "OBJECT", "name": "InfraLogEntryTimestampColumn", "ofType": null },
-          { "kind": "OBJECT", "name": "InfraLogEntryMessageColumn", "ofType": null }
+          { "kind": "OBJECT", "name": "InfraLogEntryMessageColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraLogEntryFieldColumn", "ofType": null }
         ]
       },
       {
@@ -1411,6 +1448,41 @@
           {
             "name": "constant",
             "description": "The segment's message",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraLogEntryFieldColumn",
+        "description": "A column that contains the value of a field of the log entry",
+        "fields": [
+          {
+            "name": "field",
+            "description": "The field name of the column",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": "The value of the field in the log entry",
             "args": [],
             "type": {
               "kind": "NON_NULL",

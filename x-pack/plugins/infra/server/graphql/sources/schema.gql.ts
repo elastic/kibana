@@ -66,8 +66,17 @@ export const sourcesSchema = gql`
     kind: String!
   }
 
+  "A log column containing a field value"
+  type InfraSourceFieldLogColumn {
+    kind: String!
+    field: String!
+  }
+
   "All known log column types"
-  union InfraSourceLogColumn = InfraSourceTimestampLogColumn | InfraSourceMessageLogColumn
+  union InfraSourceLogColumn =
+      InfraSourceTimestampLogColumn
+    | InfraSourceMessageLogColumn
+    | InfraSourceFieldLogColumn
 
   extend type Query {
     """

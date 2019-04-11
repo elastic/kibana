@@ -42,6 +42,10 @@ export const sharedFragments = {
             }
           }
         }
+        ... on InfraLogEntryFieldColumn {
+          field
+          value
+        }
       }
     }
   `,

@@ -75,9 +75,15 @@ export const StaticSourceConfigurationMessageColumnRuntimeType = runtimeTypes.ty
   kind: runtimeTypes.literal('message'),
 });
 
+export const StaticSourceConfigurationFieldColumnRuntimeType = runtimeTypes.type({
+  kind: runtimeTypes.literal('field'),
+  field: runtimeTypes.string,
+});
+
 const StaticSourceConfigurationColumnRuntimeType = runtimeTypes.taggedUnion('kind', [
   StaticSourceConfigurationTimestampColumnRuntimeType,
   StaticSourceConfigurationMessageColumnRuntimeType,
+  StaticSourceConfigurationFieldColumnRuntimeType,
 ]);
 
 export const StaticSourceConfigurationRuntimeType = runtimeTypes.partial({

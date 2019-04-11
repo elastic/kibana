@@ -14,8 +14,9 @@ import {
 import { InfraSourceStatus } from '../../lib/source_status';
 import {
   InfraSources,
-  StaticSourceConfigurationTimestampColumnRuntimeType,
+  StaticSourceConfigurationFieldColumnRuntimeType,
   StaticSourceConfigurationMessageColumnRuntimeType,
+  StaticSourceConfigurationTimestampColumnRuntimeType,
 } from '../../lib/sources';
 import {
   ChildResolverOf,
@@ -71,7 +72,11 @@ export const createSourcesResolvers = (
   InfraSourceLogColumn: {
     __resolveType(
       logColumn: InfraSourceLogColumn
-    ): 'InfraSourceTimestampLogColumn' | 'InfraSourceMessageLogColumn' | null;
+    ):
+      | 'InfraSourceTimestampLogColumn'
+      | 'InfraSourceMessageLogColumn'
+      | 'InfraSourceFieldLogColumn'
+      | null;
   };
   Mutation: {
     createSource: MutationCreateSourceResolver;
@@ -104,6 +109,10 @@ export const createSourcesResolvers = (
 
       if (StaticSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
         return 'InfraSourceMessageLogColumn';
+      }
+
+      if (StaticSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceFieldLogColumn';
       }
 
       return null;
