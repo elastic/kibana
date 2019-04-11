@@ -21,6 +21,7 @@ import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { ConfigService } from './config';
 export {
   CallAPIOptions,
   ClusterClient,
@@ -30,8 +31,11 @@ export {
   APICaller,
 } from './elasticsearch';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+
 export {
   DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,
@@ -43,3 +47,5 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   plugins: PluginsServiceSetup;
 }
+
+export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
