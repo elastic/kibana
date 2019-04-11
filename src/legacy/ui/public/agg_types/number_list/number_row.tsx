@@ -29,7 +29,7 @@ interface NumberRowProps {
   labelledbyId: string;
   model: NumberRowModel;
   range: Range;
-  onChange(model: NumberRowModel): void;
+  onChange({id, value}: { id: string, value: string}): void;
   onDelete(index: string): void;
 }
 

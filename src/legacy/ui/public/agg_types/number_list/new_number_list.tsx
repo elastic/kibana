@@ -49,19 +49,18 @@ function NumberList({
   setValidity,
 }: NumberListProps) {
   const numberRange = getRange(range);
-  const validateAscOrder = isUndefined(validateAscendingOrder) ? true : validateAscendingOrder;
   const [numberList, setNumberList] = useState(initArray.map(num => ({ value: num, id: generateId() })))
 
   const onChangeValue = ({ id, value }: { id: string, value: string}) => {
     const parsedValue = parse(value, numberRange);
-    const isInputValid = isValid(parsedValue, numberRange);
-    setValidity(isInputValid)
+    const errors = validate(parsedValue, numberRange, numberList, id, validateAscendingOrder);
+    setValidity(!!errors)
 
     const currentModel = numberList.find(model => model.id === id);
     currentModel && (currentModel.value = parsedValue);
 
     setNumberList([...numberList]);
-    isInputValid && onChange(numberList.map(model => model.value));
+    !!errors && onChange(numberList.map(model => model.value));
   };
 
   const onAdd = () => {
@@ -130,33 +129,24 @@ function NumberList({
 
 function parse(value: string, range: Range) {
   const parsedValue = parseFloat(value);
-
-  if (isNaN(parsedValue)) {
-    return '';
-  }
-
-  if (!range.within(parsedValue)) {
-      //return INVALID
-      return parsedValue;
-  };
-
-  // if (validateAscOrder && index > 0) {
-  //   const i = index - 1;
-  //   const prev = list[i];
-  //   if (parsedValue <= prev) {
-  //     //return INVALID
-  //     return parsedValue;
-  //   };
-  // }
-
-    return parsedValue;
+  return isNaN(parsedValue) ? '' : parsedValue;
 }
 
-function isValid(value: number | '', range: Range) {
-  if (value === '' || !range.within(value)) {
-    return false;
+function validate(value: number | '', range: Range, list: NumberRowModel[], id: string, validateAscOrder?: boolean) {
+  if (value === '') {
+    return [];
   };
-  return true;
+  if (!range.within(value)) {
+    return [];
+  };
+  if (isUndefined(validateAscOrder) || validateAscOrder) {
+    const currentModelIndex = list.findIndex(obj => obj.id === id);
+    const previousModel = list[currentModelIndex - 1]
+    if (value <= previousModel.value) {
+      return [];
+    }
+  };
+  return;
 }
 
 function getRange(range?: string) {
