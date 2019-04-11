@@ -14,51 +14,48 @@ export class DomPreview extends React.Component {
     height: PropTypes.number.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    this.container = null;
-    this.content = null;
-    this.observer = null;
-    this.original = null;
-    this.updateTimeout = null;
-  }
-
   componentDidMount() {
     this.update();
   }
 
   componentWillUnmount() {
-    clearTimeout(this.updateTimeout);
-    this.observer && this.observer.disconnect(); // observer not guaranteed to exist
+    clearTimeout(this._updateTimeout);
+    this._observer && this._observer.disconnect(); // observer not guaranteed to exist
   }
 
+  _container = null;
+  _content = null;
+  _observer = null;
+  _original = null;
+  _updateTimeout = null;
+
   update = () => {
-    if (!this.content || !this.container) {
+    if (!this._content || !this._container) {
       return;
     }
 
     const currentOriginal = document.querySelector(`#${this.props.elementId}`);
-    const originalChanged = currentOriginal !== this.original;
+    const originalChanged = currentOriginal !== this._original;
     if (originalChanged) {
-      this.observer && this.observer.disconnect();
-      this.original = currentOriginal;
+      this._observer && this._observer.disconnect();
+      this._original = currentOriginal;
       if (currentOriginal) {
         const slowUpdate = debounce(this.update, 100);
-        this.observer = new MutationObserver(slowUpdate);
+        this._observer = new MutationObserver(slowUpdate);
         // configuration of the observer
         const config = { attributes: true, childList: true, subtree: true };
         // pass in the target node, as well as the observer options
-        this.observer.observe(this.original, config);
+        this._observer.observe(this._original, config);
       } else {
-        clearTimeout(this.updateTimeout); // to avoid the assumption that we fully control when `update` is called
-        this.updateTimeout = setTimeout(this.update, 30);
+        clearTimeout(this._updateTimeout); // to avoid the assumption that we fully control when `update` is called
+        this._updateTimeout = setTimeout(this.update, 30);
         return;
       }
     }
 
-    const thumb = this.original.cloneNode(true);
+    const thumb = this._original.cloneNode(true);
 
-    const originalStyle = window.getComputedStyle(this.original, null);
+    const originalStyle = window.getComputedStyle(this._original, null);
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
     const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
@@ -66,16 +63,16 @@ export class DomPreview extends React.Component {
     const scale = thumbHeight / originalHeight;
     const thumbWidth = originalWidth * scale;
 
-    if (this.content.hasChildNodes()) {
-      this.content.removeChild(this.content.firstChild);
+    if (this._content.hasChildNodes()) {
+      this._content.removeChild(this._content.firstChild);
     }
-    this.content.appendChild(thumb);
+    this._content.appendChild(thumb);
 
-    this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
-    this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
+    this._content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
+    this._container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
 
     // Copy canvas data
-    const originalCanvas = this.original.querySelectorAll('canvas');
+    const originalCanvas = this._original.querySelectorAll('canvas');
     const thumbCanvas = thumb.querySelectorAll('canvas');
 
     // Cloned canvas elements are blank and need to be explicitly redrawn
@@ -90,13 +87,13 @@ export class DomPreview extends React.Component {
     return (
       <div
         ref={container => {
-          this.container = container;
+          this._container = container;
         }}
         className="dom-preview"
       >
         <div
           ref={content => {
-            this.content = content;
+            this._content = content;
           }}
         />
       </div>
