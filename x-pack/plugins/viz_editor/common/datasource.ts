@@ -6,6 +6,7 @@
 
 import { Scale } from '../public/common/components/operation_editor';
 
+// TODO: extend this to everything Kibana currently supports
 export type BasicFieldType = 'number' | 'string' | 'date' | 'boolean' | 'unknown';
 
 export interface DatasourceField<T extends string = BasicFieldType> {
