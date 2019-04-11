@@ -16,6 +16,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
+    loadTestFile(require.resolve('./kpi_hosts'));
     loadTestFile(require.resolve('./kpi_network'));
     loadTestFile(require.resolve('./overview_network'));
     loadTestFile(require.resolve('./overview_host'));
