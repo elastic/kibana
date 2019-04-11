@@ -33,6 +33,11 @@ const migrateIncludeExcludeFormat = {
   },
   write: function (aggConfig, output) {
     const value = aggConfig.params[this.name];
+
+    if (isNotType('string')(aggConfig)) {
+      return;
+    }
+
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value) {

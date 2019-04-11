@@ -34,7 +34,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       values: {
         size: aggConfig.params.size,
         fieldName: aggConfig.getFieldDisplayName(),
-      }
+      },
     });
   },
   createFilter: createFilterTerms,
@@ -43,7 +43,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       scriptable: false,
-      filterFieldTypes: 'string'
+      filterFieldTypes: 'string',
     },
     {
       name: 'size',
@@ -52,22 +52,22 @@ export const significantTermsBucketAgg = new BucketAggType({
     {
       name: 'exclude',
       displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
-        defaultMessage: 'Exclude'
+        defaultMessage: 'Exclude',
       }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
-      ...migrateIncludeExcludeFormat
+      shouldShow: isNotType('string'),
+      ...migrateIncludeExcludeFormat,
     },
     {
       name: 'include',
       displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
-        defaultMessage: 'Include'
+        defaultMessage: 'Include',
       }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
-      ...migrateIncludeExcludeFormat
-    }
-  ]
+      shouldShow: isNotType('string'),
+      ...migrateIncludeExcludeFormat,
+    },
+  ],
 });

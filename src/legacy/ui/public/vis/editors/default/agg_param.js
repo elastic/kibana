@@ -32,7 +32,9 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid',
-    'field'
+    'field',
+    'otherBucket',
+    'missingBucket',
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -60,6 +62,8 @@ uiModules
             is-invalid="isInvalid"
             set-validity="setValidity"
             field="agg.params.field"
+            other-bucket="agg.params.otherBucket"
+            missing-bucket="agg.params.missingBucket"
           ></vis-agg-param-react-wrapper>`;
         }
 

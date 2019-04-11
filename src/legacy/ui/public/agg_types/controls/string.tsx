@@ -23,21 +23,21 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
 function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
-  if (aggParam.disabled && aggParam.disabled(agg)) {
-    // reset model value
-    setValue();
+  const { displayName, name, shouldShow } = aggParam;
+
+  if (shouldShow && shouldShow(agg)) {
     return null;
   }
 
   return (
     <EuiFormRow
-      label={aggParam.displayName || aggParam.name}
+      label={displayName || name}
       fullWidth={true}
       className="visEditorSidebar__aggParamFormRow"
     >
       <EuiFieldText
         value={value || ''}
-        data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
+        data-test-subj={`visEditorStringInput${agg.id}${name}`}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
       />
