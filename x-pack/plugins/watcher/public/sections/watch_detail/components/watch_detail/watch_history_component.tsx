@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { fetchWatchDetail } from '../../../../lib/api';
 import { DeleteWatchesModal } from '../../../../components/delete_watches_modal';
 import { WatchActionStatus } from './watch_action_status';
 import {
@@ -52,10 +53,20 @@ const WatchHistoryUI = ({
     watchStatus?: { actionStatuses?: any };
   }>({});
   const [executionDetail, setExecutionDetail] = useState<string>('');
+  const [watch, setWatch] = useState<{
+    id?: string;
+    watchStatus: { isActive?: boolean };
+  }>({});
 
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
+  };
+
+  const loadWatch = async () => {
+    const loadedWatch = await fetchWatchDetail(watchId);
+    setWatch(loadedWatch);
+    setIsActivated(loadedWatch.watchStatus.isActive);
   };
 
   const watchHistoryTimeSpanOptions = [
@@ -154,7 +165,7 @@ const WatchHistoryUI = ({
     },
   ];
 
-  const onTimespanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onTimespanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const timespan = e.target.value;
     setWatchHistoryTimeSpan(timespan);
     loadWatchHistory(timespan);
@@ -189,6 +200,7 @@ const WatchHistoryUI = ({
 
   useEffect(() => {
     loadWatchHistory(watchHistoryTimeSpan);
+    loadWatch();
     // only run the first time the component loads
   }, []);
 
