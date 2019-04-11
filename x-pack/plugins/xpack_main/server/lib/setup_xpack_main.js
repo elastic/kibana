@@ -21,7 +21,7 @@ export function setupXPackMain(server) {
     pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
   });
 
-  const usage = new XPackUsage(server, {
+  const usage = new XPackUsage(server.log.bind(server), {
     pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
   }).setup({ elasticsearch: server.plugins.elasticsearch });
 

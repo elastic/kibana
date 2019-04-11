@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
+
 import * as Rx from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Cluster, ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
@@ -54,6 +54,8 @@ export interface XPackUsageDeps {
   elasticsearch: ElasticsearchPlugin;
 }
 
+type Logger = (...args: any[]) => void;
+
 export class XPackUsage {
   private cluster: Cluster | null;
 
@@ -67,11 +69,11 @@ export class XPackUsage {
 
   private readonly usage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>(undefined);
 
-  constructor(server: Server, { pollFrequencyInMillis = 30000 }: XPackUsageOptions) {
+  constructor(logger: Logger, { pollFrequencyInMillis = 30000 }: XPackUsageOptions) {
     this.cluster = null;
     this.pollFrequencyInMillis = pollFrequencyInMillis;
     this.poller = null;
-    this.log = server.log.bind(server);
+    this.log = logger;
   }
 
   public setup(deps: XPackUsageDeps): XPackUsageContract {
@@ -85,6 +87,8 @@ export class XPackUsage {
     });
 
     this.stop$ = new Rx.ReplaySubject(1);
+
+    this.poller.start();
 
     return {
       getUsage$: () => {
