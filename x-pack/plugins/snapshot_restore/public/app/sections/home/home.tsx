@@ -99,7 +99,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}/repositories/:name*`} component={RepositoryList} />
+          <Route
+            exact
+            path={`${BASE_PATH}/repositories/:repositoryName*`}
+            component={RepositoryList}
+          />
           <Route
             exact
             path={`${BASE_PATH}/snapshots/:repositoryName?/:snapshotId*`}
