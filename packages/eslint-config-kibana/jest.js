@@ -1,7 +1,9 @@
 module.exports = {
   overrides: [
     {
-      files: ['**/*.test.js'],
+      files: [
+        '**/*.{test,test.mocks,mock}.{js,ts,tsx}',
+      ],
       plugins: [
         'jest',
       ],
@@ -13,6 +15,7 @@ module.exports = {
       rules: {
         'jest/no-focused-tests': 'error',
         'jest/no-identical-title': 'error',
+        'import/order': 'off'
       },
     }
   ]

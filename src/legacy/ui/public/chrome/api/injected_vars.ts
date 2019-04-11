@@ -31,7 +31,7 @@ export function __newPlatformInit__(instance: InjectedMetadataSetup) {
 }
 
 export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
-  chrome.getInjected = (name: string, defaultValue: any) =>
+  chrome.getInjected = (name?: string, defaultValue?: any) =>
     cloneDeep(
       name
         ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)

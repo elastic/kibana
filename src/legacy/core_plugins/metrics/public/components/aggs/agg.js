@@ -22,17 +22,26 @@ import React from 'react';
 import aggToComponent from '../lib/agg_to_component';
 import { sortable } from 'react-anything-sortable';
 import { UnsupportedAgg } from './unsupported_agg';
+import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
+
+import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 
 function Agg(props) {
-  const { model } = props;
+  const { model, uiRestrictions } = props;
+
   let Component = aggToComponent[model.type];
+
   if (!Component) {
     Component = UnsupportedAgg;
+  } else if (!isMetricEnabled(model.type, uiRestrictions)) {
+    Component = TemporaryUnsupportedAgg;
   }
+
   const style = {
     cursor: 'default',
     ...props.style,
   };
+
   return (
     <div
       className={props.className}
@@ -50,6 +59,7 @@ function Agg(props) {
         panel={props.panel}
         series={props.series}
         siblings={props.siblings}
+        uiRestrictions={props.uiRestrictions}
       />
     </div>
   );
@@ -70,6 +80,7 @@ Agg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
   sortData: PropTypes.string,
+  uiRestrictions: PropTypes.object,
 };
 
 export default sortable(Agg);

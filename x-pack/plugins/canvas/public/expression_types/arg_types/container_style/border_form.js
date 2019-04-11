@@ -13,7 +13,7 @@ import {
   EuiFieldNumber,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { ColorPickerMini } from '../../../components/color_picker_mini';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
 
 const styles = [
   'none',
@@ -87,7 +87,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
 
       <EuiFlexItem grow={1}>
         <EuiFormRow label="Color" style={{ fontSize: 0 }}>
-          <ColorPickerMini
+          <ColorPickerPopover
             value={borderColor}
             onChange={borderColorChange}
             colors={colors}

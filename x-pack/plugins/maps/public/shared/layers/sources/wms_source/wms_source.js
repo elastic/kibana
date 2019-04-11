@@ -11,6 +11,7 @@ import { TileLayer } from '../../tile_layer';
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../../common/i18n_getters';
+import { WmsClient } from './wms_client';
 
 export class WMSSource extends AbstractTMSSource {
 
@@ -84,8 +85,7 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   getUrlTemplate() {
-    const styles = this._descriptor.styles || '';
-    // eslint-disable-next-line max-len
-    return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${styles}`;
+    const client = new WmsClient({ serviceUrl: this._descriptor.serviceUrl });
+    return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }
 }

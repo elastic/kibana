@@ -1,7 +1,5 @@
-const { resolve } = require('path');
 const { readdirSync } = require('fs');
-
-const restrictedModules = { paths: ['gulp-util'] };
+const { resolve } = require('path');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -33,62 +31,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
-  plugins: ['@kbn/eslint-plugin-eslint'],
-
-  settings: {
-    'import/resolver': {
-      '@kbn/eslint-import-resolver-kibana': {
-        forceNode: true,
-      },
-    },
-  },
-
-  rules: {
-    'no-restricted-imports': [2, restrictedModules],
-    'no-restricted-modules': [2, restrictedModules],
-    '@kbn/eslint/no-restricted-paths': [
-      'error',
-      {
-        basePath: __dirname,
-        zones: [
-          {
-            target: [
-              'src/legacy/**/*',
-              'x-pack/**/*',
-              '!x-pack/**/*.test.*',
-              'src/plugins/**/(public|server)/**/*',
-              'src/core/(public|server)/**/*',
-            ],
-            from: [
-              'src/core/public/**/*',
-              '!src/core/public/index*',
-              '!src/core/public/utils/**/*',
-
-              'src/core/server/**/*',
-              '!src/core/server/index*',
-
-              'src/plugins/**/public/**/*',
-              '!src/plugins/**/public/index*',
-
-              'src/plugins/**/server/**/*',
-              '!src/plugins/**/server/index*',
-            ],
-            allowSameFolder: true,
-          },
-        ],
-      },
-    ],
-    '@kbn/eslint/module_migration': [
-      'error',
-      [
-        {
-          from: 'expect.js',
-          to: '@kbn/expect',
-        },
-      ],
-    ],
-  },
+  extends: ['@elastic/eslint-config-kibana'],
 
   overrides: [
     /**
@@ -112,6 +55,7 @@ module.exports = {
         'src/legacy/server/saved_objects/**/*',
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
+        '**/*.{ts,tsx}',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -124,12 +68,99 @@ module.exports = {
     },
 
     /**
+     * Files that require Apache 2.0 headers, settings
+     * are overridden below for files that require Elastic
+     * Licence headers
+     */
+    {
+      files: ['**/*.{js,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: APACHE_2_0_LICENSE_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [ELASTIC_LICENSE_HEADER],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Files that require Elastic license headers instead of Apache 2.0 header
+     */
+    {
+      files: ['x-pack/**/*.{js,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: ELASTIC_LICENSE_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [APACHE_2_0_LICENSE_HEADER],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Restricted paths
+     */
+    {
+      files: ['**/*.{js,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/no-restricted-paths': [
+          'error',
+          {
+            basePath: __dirname,
+            zones: [
+              {
+                target: [
+                  'src/legacy/**/*',
+                  'x-pack/**/*',
+                  '!x-pack/**/*.test.*',
+                  'src/plugins/**/(public|server)/**/*',
+                  'src/core/(public|server)/**/*',
+                ],
+                from: [
+                  'src/core/public/**/*',
+                  '!src/core/public/index.ts',
+                  '!src/core/public/mocks.ts',
+                  '!src/core/public/utils/**/*',
+
+                  'src/core/server/**/*',
+                  '!src/core/server/index.ts',
+                  '!src/core/server/mocks.ts',
+
+                  'src/plugins/**/public/**/*',
+                  '!src/plugins/**/public/index*',
+
+                  'src/plugins/**/server/**/*',
+                  '!src/plugins/**/server/index*',
+                ],
+                allowSameFolder: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
      * Allow default exports
      */
     {
-      files: ['x-pack/test/functional/apps/**/*', 'x-pack/plugins/apm/**/*'],
+      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
       rules: {
-        '@kbn/eslint/no-default-export': 'off',
+        'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -139,10 +170,10 @@ module.exports = {
      */
     {
       files: [
-        '**/public/**',
-        '**/webpackShims/**',
-        'packages/kbn-ui-framework/doc_site/src/**',
-        'src/fixtures/**', // TODO: this directory needs to be more obviously "public" (or go away)
+        '**/public/**/*.js',
+        '**/webpackShims/**/*.js',
+        'packages/kbn-ui-framework/doc_site/src/**/*.js',
+        'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat modules
@@ -170,7 +201,11 @@ module.exports = {
      * Files that ARE NOT allowed to use devDependencies
      */
     {
-      files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*', 'packages/kbn-interpreter/**/*'],
+      files: [
+        'packages/kbn-ui-framework/**/*.js',
+        'x-pack/**/*.js',
+        'packages/kbn-interpreter/**/*.js',
+      ],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
@@ -188,14 +223,14 @@ module.exports = {
     {
       files: [
         'packages/kbn-ui-framework/**/*.test.js',
-        'packages/kbn-ui-framework/doc_site/**/*',
-        'packages/kbn-ui-framework/generator-kui/**/*',
+        'packages/kbn-ui-framework/doc_site/**/*.js',
+        'packages/kbn-ui-framework/generator-kui/**/*.js',
         'packages/kbn-ui-framework/Gruntfile.js',
-        'packages/kbn-es/src/**/*',
-        'packages/kbn-interpreter/tasks/**/*',
-        'packages/kbn-interpreter/src/plugin/**/*',
-        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
+        'packages/kbn-es/src/**/*.js',
+        'packages/kbn-interpreter/tasks/**/*.js',
+        'packages/kbn-interpreter/src/plugin/**/*.js',
+        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
+        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
@@ -216,7 +251,7 @@ module.exports = {
      * Files that run BEFORE node version check
      */
     {
-      files: ['scripts/**/*', 'src/setup_node_env/**/*'],
+      files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread/prefer-object-spread': 'off',
@@ -249,7 +284,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        '**/browser_exec_scripts/**/*',
+        '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
         'prefer-object-spread/prefer-object-spread': 'off',
@@ -280,14 +315,14 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*',
-        'packages/kbn-plugin-generator/**/*',
-        'packages/kbn-plugin-helpers/**/*',
-        'packages/kbn-eslint-import-resolver-kibana/**/*',
+        '**/webpackShims/**/*.js',
+        'packages/kbn-plugin-generator/**/*.js',
+        'packages/kbn-plugin-helpers/**/*.js',
+        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
-        'x-pack/scripts/*',
+        'x-pack/scripts/*.js',
       ],
       rules: {
         'import/no-commonjs': 'off',
@@ -303,54 +338,10 @@ module.exports = {
     },
 
     /**
-     * Files that require Apache 2.0 headers, settings
-     * are overridden below for files that require Elastic
-     * Licence headers
-     */
-    {
-      files: ['**/*.js'],
-      rules: {
-        '@kbn/eslint/require-license-header': [
-          'error',
-          {
-            license: APACHE_2_0_LICENSE_HEADER,
-          },
-        ],
-        '@kbn/eslint/disallow-license-headers': [
-          'error',
-          {
-            licenses: [ELASTIC_LICENSE_HEADER],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Files that require Elastic license headers instead of Apache 2.0 header
-     */
-    {
-      files: ['x-pack/**/*.js'],
-      rules: {
-        '@kbn/eslint/require-license-header': [
-          'error',
-          {
-            license: ELASTIC_LICENSE_HEADER,
-          },
-        ],
-        '@kbn/eslint/disallow-license-headers': [
-          'error',
-          {
-            licenses: [APACHE_2_0_LICENSE_HEADER],
-          },
-        ],
-      },
-    },
-
-    /**
      * APM overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*'],
+      files: ['x-pack/plugins/apm/**/*.js'],
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
@@ -361,7 +352,7 @@ module.exports = {
      * GIS overrides
      */
     {
-      files: ['x-pack/plugins/maps/**/*'],
+      files: ['x-pack/plugins/maps/**/*.js'],
       rules: {
         'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
@@ -371,7 +362,7 @@ module.exports = {
      * Graph overrides
      */
     {
-      files: ['x-pack/plugins/graph/**/*'],
+      files: ['x-pack/plugins/graph/**/*.js'],
       globals: {
         angular: true,
         $: true,
@@ -394,7 +385,7 @@ module.exports = {
      * ML overrides
      */
     {
-      files: ['x-pack/plugins/ml/**/*'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
       },
@@ -404,7 +395,7 @@ module.exports = {
      * disable jsx-a11y for kbn-ui-framework
      */
     {
-      files: ['packages/kbn-ui-framework/**'],
+      files: ['packages/kbn-ui-framework/**/*.js'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/anchor-has-content': 'off',
@@ -418,7 +409,7 @@ module.exports = {
      * Monitoring overrides
      */
     {
-      files: ['x-pack/plugins/monitoring/**/*'],
+      files: ['x-pack/plugins/monitoring/**/*.js'],
       rules: {
         'block-spacing': ['error', 'always'],
         curly: ['error', 'all'],
@@ -427,7 +418,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/monitoring/public/**/*'],
+      files: ['x-pack/plugins/monitoring/public/**/*.js'],
       env: { browser: true },
     },
 
@@ -435,7 +426,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/**/*'],
+      files: ['x-pack/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
         curly: ['error', 'all'],
@@ -485,8 +476,8 @@ module.exports = {
         'x-pack/plugins/canvas/scripts/*.js',
         'x-pack/plugins/canvas/tasks/*.js',
         'x-pack/plugins/canvas/tasks/**/*.js',
-        'x-pack/plugins/canvas/__tests__/**/*',
-        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
+        'x-pack/plugins/canvas/__tests__/**/*.js',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -499,7 +490,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -511,13 +502,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/public/**/*'],
+      files: ['x-pack/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
       },

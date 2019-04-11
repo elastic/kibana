@@ -43,6 +43,7 @@ describe('collectSavedObjects()', () => {
 Array [
   Object {
     "foo": true,
+    "migrationVersion": Object {},
   },
 ]
 `);
@@ -60,6 +61,7 @@ Array [
 Array [
   Object {
     "foo": true,
+    "migrationVersion": Object {},
   },
 ]
 `);

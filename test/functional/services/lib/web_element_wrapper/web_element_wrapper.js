@@ -40,6 +40,17 @@ export class WebElementWrapper {
     this._logger = log;
   }
 
+  async _findWithCustomTimeout(findFunction, timeout) {
+    if (timeout && timeout !== this._defaultFindTimeout) {
+      await this._driver.manage().setTimeouts({ implicit: timeout });
+    }
+    const elements = await findFunction();
+    if (timeout && timeout !== this._defaultFindTimeout) {
+      await this._driver.manage().setTimeouts({ implicit: this._defaultFindTimeout });
+    }
+    return elements;
+  }
+
   _wrap(otherWebElement) {
     return new WebElementWrapper(otherWebElement, this._webDriver, this._defaultFindTimeout, this._fixedHeaderHeight, this._logger);
   }
@@ -278,10 +289,16 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByCssSelector(selector) {
-    return this._wrapAll(await this._webElement.findElements(this._By.css(selector)));
+  async findAllByCssSelector(selector, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.css(selector)),
+        timeout
+      )
+    );
   }
 
   /**
@@ -300,11 +317,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} className
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByClassName(className) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.className(className))
+  async findAllByClassName(className, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.className(className)),
+        timeout
+      )
     );
   }
 
@@ -324,11 +345,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} tagName
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByTagName(tagName) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.tagName(tagName))
+  async findAllByTagName(tagName, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.tagName(tagName)),
+        timeout
+      )
     );
   }
 
@@ -348,11 +373,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByXpath(selector) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.xpath(selector))
+  async findAllByXpath(selector, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.xpath(selector)),
+        timeout
+      )
     );
   }
 
@@ -372,11 +401,15 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *
    * @param {string} selector
+   * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByPartialLinkText(linkText) {
-    return await this._wrapAll(
-      await this._webElement.findElements(this._By.partialLinkText(linkText))
+  async findAllByPartialLinkText(linkText, timeout) {
+    return this._wrapAll(
+      await this._findWithCustomTimeout(
+        async () => await this._webElement.findElements(this._By.partialLinkText(linkText)),
+        timeout
+      )
     );
   }
 
