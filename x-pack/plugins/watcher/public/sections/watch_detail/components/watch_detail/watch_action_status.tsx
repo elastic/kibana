@@ -6,9 +6,8 @@
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { WATCH_STATES } from '../../../../../common/constants/watch_states';
-
 import { EuiIcon } from '@elastic/eui';
+import { WATCH_STATES } from '../../../../../common/constants/watch_states';
 
 const WatchActionStatusUi = ({ intl, watchState }: { intl: InjectedIntl; watchState: string }) => {
   const stateToIcon: { [key: string]: JSX.Element } = {

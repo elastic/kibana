@@ -4,15 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { Fragment, useEffect, useState } from 'react';
-
-import { fetchWatchDetail } from '../../../../lib/api';
-
-import { WatchActionStatus } from './watch_action_status';
-
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +12,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import React, { Fragment, useEffect, useState } from 'react';
+import { fetchWatchDetail } from '../../../../lib/api';
+import { WatchActionStatus } from './watch_action_status';
 
 const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isWatchesLoading, setIsWatchesLoading] = useState<boolean>(true);

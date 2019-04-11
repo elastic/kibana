@@ -7,18 +7,7 @@
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import React, { Fragment, useEffect, useState } from 'react';
-
-import {
-  activateWatch,
-  deactivateWatch,
-  fetchWatchHistory,
-  fetchWatchHistoryDetail,
-} from '../../../../lib/api';
-
 import { i18n } from '@kbn/i18n';
-
-import { WatchActionStatus } from './watch_action_status';
-
 import {
   EuiButton,
   EuiCodeBlock,
@@ -33,7 +22,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { DeleteWatchesModal } from 'x-pack/plugins/watcher/public/components/delete_watches_modal';
+import { DeleteWatchesModal } from '../../../../components/delete_watches_modal';
+import { WatchActionStatus } from './watch_action_status';
+import {
+  activateWatch,
+  deactivateWatch,
+  fetchWatchHistory,
+  fetchWatchHistoryDetail,
+} from '../../../../lib/api';
 
 const WatchHistoryUI = ({
   intl,
