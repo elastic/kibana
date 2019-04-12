@@ -13,6 +13,12 @@ import {
   DeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
 
+const CLOUD_FILTERS = [
+  'Security realm settings structure changed',
+  'TLS v1.0 has been removed from default TLS/SSL protocols',
+  'GCS Repository settings changed',
+];
+
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
@@ -65,8 +71,8 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
     .concat(deprecations.node_settings);
 
   if (isCloudEnabled) {
-    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    // In Cloud, this is handled at upgrade time. Filter it out improve upgrade UX.
+    return combined.filter(d => CLOUD_FILTERS.indexOf(d.message) === -1);
   } else {
     return combined;
   }
