@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const getMonitorStatusBarQueryString = `
+export const monitorStatusBarQueryString = `
 query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String) {
   monitorStatus: getLatestMonitors(
     dateRangeStart: $dateRangeStart
@@ -28,6 +28,6 @@ query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
 }
 `;
 
-export const getMonitorStatusBarQuery = gql`
-  ${getMonitorStatusBarQueryString}
+export const monitorStatusBarQuery = gql`
+  ${monitorStatusBarQueryString}
 `;
