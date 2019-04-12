@@ -77,6 +77,10 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
+  HostDetails: HostItem;
+
+  HostFirstLastSeen: FirstLastSeenHost;
+
   IpOverview?: IpOverviewData | null;
 
   KpiNetwork?: KpiNetworkData | null;
@@ -833,11 +837,13 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
+  host?: HostEcsFields | null;
+}
+
+export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
-  host?: HostEcsFields | null;
-
-  lastBeat?: Date | null;
+  lastSeen?: Date | null;
 }
 
 export interface IpOverviewData {
@@ -1112,6 +1118,18 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface HostDetailsSourceArgs {
+  id?: string | null;
+
+  hostName: string;
+
+  timerange: TimerangeInput;
+}
+export interface HostFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  hostName: string;
+}
 export interface IpOverviewSourceArgs {
   id?: string | null;
 
@@ -1291,6 +1309,10 @@ export namespace SourceResolvers {
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
+    HostDetails?: HostDetailsResolver<HostItem, TypeParent, Context>;
+
+    HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, Context>;
+
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
@@ -1395,6 +1417,31 @@ export namespace SourceResolvers {
     pagination: PaginationInput;
 
     filterQuery?: string | null;
+  }
+
+  export type HostDetailsResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    HostDetailsArgs
+  >;
+  export interface HostDetailsArgs {
+    id?: string | null;
+
+    hostName: string;
+
+    timerange: TimerangeInput;
+  }
+
+  export type HostFirstLastSeenResolver<
+    R = FirstLastSeenHost,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, HostFirstLastSeenArgs>;
+  export interface HostFirstLastSeenArgs {
+    id?: string | null;
+
+    hostName: string;
   }
 
   export type IpOverviewResolver<
@@ -3964,11 +4011,7 @@ export namespace HostItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
-
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
-
-    lastBeat?: LastBeatResolver<Date | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -3976,19 +4019,28 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
-  export type FirstSeenResolver<
-    R = Date | null,
-    Parent = HostItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = HostEcsFields | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type LastBeatResolver<
+}
+
+export namespace FirstLastSeenHostResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenHost> {
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type FirstSeenResolver<
     R = Date | null,
-    Parent = HostItem,
+    Parent = FirstLastSeenHost,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = FirstLastSeenHost,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

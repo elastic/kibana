@@ -244,15 +244,10 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
+                field: 'host.name',
+                value: hostName,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -260,7 +255,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
+                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
               )
             }
           />
@@ -354,15 +349,10 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
+                field: 'host.name',
+                value: hostName,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -370,7 +360,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
+                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
               )
             }
           />

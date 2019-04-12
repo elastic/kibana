@@ -4,22 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { EuiBadge, EuiIconTip, EuiPanel } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { HostsEdges } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import { AddToKql } from '../../add_to_kql';
+import { FirstLastSeenHost } from '../first_last_seen_host';
 
 import * as i18n from './translations';
 
@@ -28,6 +31,7 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
+  startDate: number;
   totalCount: number;
   loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
@@ -66,6 +70,15 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
+const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
+
+const Sup = styled.sup`
+  vertical-align: super;
+  padding: 0 5px;
+`;
+
 const HostsTableComponent = pure<HostsTableProps>(
   ({
     data,
@@ -76,11 +89,12 @@ const HostsTableComponent = pure<HostsTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
+    startDate,
     type,
   }) => (
     <EuiPanel>
       <LoadMoreTable
-        columns={getHostsColumns()}
+        columns={getHostsColumns(startDate, type)}
         loadingTitle={i18n.HOSTS}
         loading={loading}
         pageOfItems={data}
@@ -93,7 +107,11 @@ const HostsTableComponent = pure<HostsTableProps>(
         }
         title={
           <h3>
-            {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+            {i18n.HOSTS}
+            <Sup>
+              <EuiIconTip content={i18n.TOOLTIP} position="right" />
+            </Sup>
+            <CountBadge color="hollow">{totalCount}</CountBadge>
           </h3>
         }
       />
@@ -116,14 +134,17 @@ export const HostsTable = connect(
   }
 )(HostsTableComponent);
 
-const getHostsColumns = (): Array<Columns<HostsEdges>> => [
+const getHostsColumns = (
+  startDate: number,
+  type: hostsModel.HostsType
+): Array<Columns<HostsEdges>> => [
   {
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('host.name', node);
-      const hostId: string | null = get('host.id', node);
+      const hostName: string | null | undefined = get('host.name', node);
+      const hostId: string | null | undefined = get('host.id', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
         return (
@@ -136,16 +157,8 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
               id,
               name: hostName,
               kqlQuery: '',
-              queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
-              },
-              queryDate: {
-                from: new Date(node.firstSeen!).valueOf(),
-                to: Date.now(),
-              },
+              queryMatch: { field: 'host.name', value: hostName },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -153,39 +166,83 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
+                <AddToKql
+                  expression={`host.name: ${escapeQueryValue(hostName)}`}
+                  componentFilterType="hosts"
+                  type={type}
+                >
+                  <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
+                </AddToKql>
               )
             }
           />
         );
-      } else {
-        return getEmptyTagValue();
       }
+      return getEmptyTagValue();
     },
   },
   {
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      node.firstSeen && node.firstSeen !== '' ? (
-        <EuiToolTip position="bottom" content={node.firstSeen}>
-          <FormattedRelative value={node.firstSeen} />
-        </EuiToolTip>
-      ) : (
-        defaultToEmptyTag(node.firstSeen)
-      ),
+    render: ({ node }) => {
+      const hostname: string | null | undefined = get('host.name', node);
+      if (hostname != null) {
+        return <FirstLastSeenHost hostname={hostname} type="first-seen" />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
+    name: i18n.LAST_SEEN,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) => {
+      const hostname: string | null | undefined = get('host.name', node);
+      if (hostname != null) {
+        return <FirstLastSeenHost hostname={hostname} type="last-seen" />;
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     name: i18n.OS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag('host.os.name', node),
+    render: ({ node }) => {
+      const hostOsName: string | null | undefined = get('host.os.name', node);
+      if (hostOsName != null) {
+        return (
+          <AddToKql
+            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
+            componentFilterType="hosts"
+            type={type}
+          >
+            <>{hostOsName}</>
+          </AddToKql>
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     name: i18n.VERSION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag('host.os.version', node),
+    render: ({ node }) => {
+      const hostOsVersion: string | null | undefined = get('host.os.version', node);
+      if (hostOsVersion != null) {
+        return (
+          <AddToKql
+            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
+            componentFilterType="hosts"
+            type={type}
+          >
+            <>{hostOsVersion}</>
+          </AddToKql>
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
 ];

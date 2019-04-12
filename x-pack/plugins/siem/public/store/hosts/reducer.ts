@@ -23,36 +23,20 @@ export type HostsState = HostsModel;
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      hosts: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      events: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      uncommonProcesses: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
+      authentications: { limit: DEFAULT_TABLE_LIMIT },
+      hosts: { limit: DEFAULT_TABLE_LIMIT },
+      events: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      authentications: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      hosts: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      events: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      uncommonProcesses: {
-        limit: DEFAULT_TABLE_LIMIT,
-      },
+      authentications: { limit: DEFAULT_TABLE_LIMIT },
+      hosts: { limit: DEFAULT_TABLE_LIMIT },
+      events: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,

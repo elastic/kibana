@@ -47,10 +47,10 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       <pure(Component)
         field="host.name"
         id="ip-overview-host-name"
-        value="b19a781f683541a7a25ee345133aa399"
+        value="raspberrypi"
       >
         <pure(Component)
-          hostId="b19a781f683541a7a25ee345133aa399"
+          hostName="raspberrypi"
         >
           raspberrypi
         </pure(Component)>
@@ -72,10 +72,10 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       <pure(Component)
         field="host.name"
         id="ip-overview-host-name"
-        value="b19a781f683541a7a25ee345133aa399"
+        value="raspberrypi"
       >
         <pure(Component)
-          hostId="b19a781f683541a7a25ee345133aa399"
+          hostName="raspberrypi"
         >
           raspberrypi
         </pure(Component)>

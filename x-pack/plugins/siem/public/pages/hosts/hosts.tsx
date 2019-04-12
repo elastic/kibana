@@ -81,6 +81,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       refetch={refetch}
                       setQuery={setQuery}
                       loading={loading}
+                      startDate={from}
                       data={hosts}
                       totalCount={totalCount}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}

@@ -21,22 +21,23 @@ import { getBreadcrumbsForRoute, HeaderBreadcrumbs } from './breadcrumb';
 
 describe('Navigation Breadcrumbs', () => {
   const hostId = '1d63559c1a3f4c4e9d979c4b3d8b83ff';
+  const hostName = 'siem-kibana';
   describe('#getBreadcrumbsforRoute', () => {
-    const hostBreadcrumbs = getHostDetailsBreadcrumbs(hostId);
+    const hostBreadcrumbs = getHostDetailsBreadcrumbs(hostName);
     const ipv4 = '192.0.2.255';
     const ipv4Breadcrumbs = getIPDetailsBreadcrumbs(ipv4);
     const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
     const ipv6Encoded = encodeIpv6(ipv6);
     const ipv6Breadcrumbs = getIPDetailsBreadcrumbs(ipv6Encoded);
 
-    test('should return Host Details breadcrumbs when supplied link-to pathname with hostId', () => {
-      const pathname = `/link-to/hosts/${hostId}`;
+    test('should return Host Details breadcrumbs when supplied link-to pathname with hostName', () => {
+      const pathname = `/link-to/hosts/${hostName}`;
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
       expect(breadcrumbs).toEqual(hostBreadcrumbs);
     });
 
-    test('should return Host Details breadcrumbs when supplied a pathname with hostId', () => {
-      const pathname = `/hosts/${hostId}`;
+    test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
+      const pathname = `/hosts/${hostName}`;
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
       expect(breadcrumbs).toEqual(hostBreadcrumbs);
     });
