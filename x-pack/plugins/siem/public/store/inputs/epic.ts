@@ -43,7 +43,7 @@ export const createGlobalTimeEpic = <State>(): Epic<
       timer(0, policy.duration).pipe(
         map(() => {
           const option = get('option', timerange);
-          const momentDate = dateMath.parse(option!);
+          const momentDate = option != null ? dateMath.parse(option) : null;
           return setRelativeRangeDatePicker({
             id: 'global',
             option: option!,
