@@ -76,7 +76,7 @@ const toolkit: OnRequestToolkit = {
 export type OnRequest<Params = any, Query = any, Body = any> = (
   req: KibanaRequest<Params, Query, Body>,
   t: OnRequestToolkit
-) => OnRequestResult;
+) => OnRequestResult | Promise<OnRequestResult>;
 
 /**
  * @public

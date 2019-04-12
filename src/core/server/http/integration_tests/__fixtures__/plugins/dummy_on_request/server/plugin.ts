@@ -29,7 +29,8 @@ export const url = {
 
 export class DummyOnRequestPlugin {
   public setup(core: CoreSetup) {
-    core.http.registerOnRequest((request, t) => {
+    core.http.registerOnRequest(async (request, t) => {
+      await Promise.resolve();
       if (request.path === url.redirect) {
         return t.redirected(url.redirectTo);
       }
