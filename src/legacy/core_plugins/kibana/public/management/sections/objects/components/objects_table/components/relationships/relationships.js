@@ -33,6 +33,7 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 
@@ -41,8 +42,7 @@ class RelationshipsUI extends Component {
     getRelationships: PropTypes.func.isRequired,
     savedObject: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
-    getEditUrl: PropTypes.func.isRequired,
-    goInApp: PropTypes.func.isRequired,
+    goEditObject: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -98,7 +98,7 @@ class RelationshipsUI extends Component {
   }
 
   renderRelationships() {
-    const { getEditUrl, goInApp, intl } = this.props;
+    const { intl, goEditObject } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -177,14 +177,14 @@ class RelationshipsUI extends Component {
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
-          const editUrl = getEditUrl(object);
-          if (!editUrl) {
+          const { inAppUrl } = object.meta;
+          if (!inAppUrl) {
             return (
               <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={editUrl}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(inAppUrl)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },
@@ -201,9 +201,9 @@ class RelationshipsUI extends Component {
                 defaultMessage: 'View this saved object within Kibana'
               }),
             type: 'icon',
-            icon: 'eye',
-            onClick: object => goInApp(object),
-            available: object => !!object.meta.inAppUrl,
+            icon: 'pencil',
+            onClick: object => goEditObject(object),
+            available: object => !!object.meta.editUrl,
           },
         ],
       },

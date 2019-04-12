@@ -221,9 +221,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 exports[`ObjectsTable relationships should show the flyout 1`] = `
 <InjectIntl(RelationshipsUI)
   close={[Function]}
-  getEditUrl={[Function]}
   getRelationships={[Function]}
-  goInApp={[Function]}
   savedObject={
     Object {
       "id": "2",
@@ -278,8 +276,6 @@ exports[`ObjectsTable should render normally 1`] = `
         },
       ]
     }
-    getEditUrl={[Function]}
-    goInApp={[Function]}
     isSearching={false}
     itemId="id"
     items={

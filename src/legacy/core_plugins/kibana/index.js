@@ -136,13 +136,10 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `#/management/kibana/index_patterns/${obj.id}`;
+            return `/management/kibana/index_patterns/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return {
-              path: `/management/kibana/index_patterns/${obj.id}`,
-              refresh: false,
-            };
+            return `/app/kibana#/management/kibana/index_patterns/${obj.id}`;
           },
         },
         visualization: {
@@ -152,13 +149,10 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `#/management/kibana/objects/savedVisualizations/${obj.id}`;
+            return `/management/kibana/objects/savedVisualizations/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return {
-              path: `/visualize/edit/${obj.id}`,
-              refresh: false,
-            };
+            return `/app/kibana#/visualize/edit/${obj.id}`;
           },
         },
         search: {
@@ -168,13 +162,10 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `#/management/kibana/objects/savedSearches/${obj.id}`;
+            return `/management/kibana/objects/savedSearches/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return {
-              path: `/discover/${obj.id}`,
-              refresh: false,
-            };
+            return `/app/kibana#/discover/${obj.id}`;
           },
         },
         dashboard: {
@@ -184,13 +175,10 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `#/management/kibana/objects/savedDashboards/${obj.id}`;
+            return `/management/kibana/objects/savedDashboards/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return {
-              path: `/dashboard/${obj.id}`,
-              refresh: false,
-            };
+            return `/app/kibana#/dashboard/${obj.id}`;
           },
         },
         url: {

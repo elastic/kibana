@@ -58,20 +58,11 @@ function updateObjectsTable($scope, $injector) {
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
-          getEditUrl={object => {
+          goEditObject={object => {
             if (object.meta.editUrl) {
-              return kbnUrl.eval(object.meta.editUrl);
+              kbnUrl.change(object.meta.editUrl);
+              $scope.$apply();
             }
-          }}
-          goInApp={object => {
-            const { path, refresh } = object.meta.inAppUrl;
-            if (refresh) {
-              // When the app's routes are defined elsewhere and require a refresh
-              window.location.href = chrome.addBasePath(path);
-              return;
-            }
-            kbnUrl.change(path);
-            $scope.$apply();
           }}
         />
       </I18nContext>,

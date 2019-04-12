@@ -60,10 +60,7 @@ export function maps(kibana) {
             return obj.attributes.title;
           },
           getInAppUrl(obj) {
-            return {
-              path: `/app/maps#/map/${obj.id}`,
-              refresh: true,
-            };
+            return `/app/maps#/map/${obj.id}`;
           },
         },
         'maps-telemetry': {

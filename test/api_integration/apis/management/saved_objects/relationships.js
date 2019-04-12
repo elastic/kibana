@@ -35,10 +35,7 @@ export default function ({ getService }) {
         title: Joi.string().required(),
         icon: Joi.string().required(),
         editUrl: Joi.string().required(),
-        inAppUrl: Joi.object().keys({
-          path: Joi.string().required(),
-          refresh: Joi.boolean().required(),
-        }).required(),
+        inAppUrl: Joi.string().required(),
       }).required(),
     })
   );
@@ -71,11 +68,8 @@ export default function ({ getService }) {
                 meta: {
                   title: 'saved_objects*',
                   icon: 'indexPatternApp',
-                  editUrl: '#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 },
               },
               {
@@ -85,11 +79,8 @@ export default function ({ getService }) {
                 meta: {
                   title: 'VisualizationFromSavedSearch',
                   icon: 'visualizeApp',
-                  editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 },
               },
             ]);
@@ -126,11 +117,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
-                  editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 },
               },
               {
@@ -140,11 +128,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
-                  editUrl: '#/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 },
               },
             ]);
@@ -183,11 +168,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
-                  editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                 },
               },
               {
@@ -197,11 +179,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'dashboardApp',
                   title: 'Dashboard',
-                  editUrl: '#/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 },
               },
             ]);
@@ -239,11 +218,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
-                  editUrl: '#/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/discover/960372e0-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                 },
               },
               {
@@ -253,11 +229,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
-                  editUrl: '#/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: {
-                    path: '/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                    refresh: false,
-                  },
+                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 },
               },
             ]);

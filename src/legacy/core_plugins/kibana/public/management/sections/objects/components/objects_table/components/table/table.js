@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -48,8 +49,7 @@ class TableUI extends PureComponent {
     filterOptions: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
-    getEditUrl: PropTypes.func.isRequired,
-    goInApp: PropTypes.func.isRequired,
+    goEditObject: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -125,8 +125,7 @@ class TableUI extends PureComponent {
       onDelete,
       selectedSavedObjects,
       onTableChange,
-      goInApp,
-      getEditUrl,
+      goEditObject,
       onShowRelationships,
       intl,
     } = this.props;
@@ -192,23 +191,14 @@ class TableUI extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
-          const editUrl = getEditUrl(object);
-          if (!editUrl) {
+          const { inAppUrl } = object.meta;
+          if (!inAppUrl) {
             return (
-              <EuiToolTip
-                content={
-                  intl.formatMessage({
-                    id: 'kbn.management.objects.objectsTable.table.columnTitleNoEditTooltip',
-                    defaultMessage: 'This object type doesn\'t support editing',
-                  })
-                }
-              >
-                <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
-              </EuiToolTip>
+              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={editUrl}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(inAppUrl)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },
@@ -225,9 +215,9 @@ class TableUI extends PureComponent {
                 defaultMessage: 'View this saved object within Kibana'
               }),
             type: 'icon',
-            icon: 'eye',
-            onClick: object => goInApp(object),
-            available: object => !!object.meta.inAppUrl,
+            icon: 'pencil',
+            onClick: object => goEditObject(object),
+            available: object => !!object.meta.editUrl,
           },
           {
             name:

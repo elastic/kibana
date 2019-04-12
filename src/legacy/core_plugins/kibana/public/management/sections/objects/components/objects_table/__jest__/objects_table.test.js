@@ -130,8 +130,6 @@ const defaultProps = {
   newIndexPatternUrl: '',
   kbnIndex: '',
   services: [],
-  getEditUrl: () => {},
-  goInApp: () => {},
 };
 
 beforeEach(() => {

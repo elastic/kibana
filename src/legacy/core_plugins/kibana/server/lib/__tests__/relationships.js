@@ -28,13 +28,10 @@ const savedObjectSchemas = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `#/management/kibana/index_patterns/${obj.id}`;
+      return `/management/kibana/index_patterns/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return {
-        path: `/management/kibana/index_patterns/${obj.id}`,
-        refresh: false,
-      };
+      return `/app/kibana#/management/kibana/index_patterns/${obj.id}`;
     },
   },
   visualization: {
@@ -44,13 +41,10 @@ const savedObjectSchemas = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `#/management/kibana/objects/savedVisualizations/${obj.id}`;
+      return `/management/kibana/objects/savedVisualizations/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return {
-        path: `/visualize/edit/${obj.id}`,
-        refresh: false,
-      };
+      return `/app/kibana#/visualize/edit/${obj.id}`;
     },
   },
   search: {
@@ -60,13 +54,10 @@ const savedObjectSchemas = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `#/management/kibana/objects/savedSearches/${obj.id}`;
+      return `/management/kibana/objects/savedSearches/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return {
-        path: `/discover/${obj.id}`,
-        refresh: false,
-      };
+      return `/app/kibana#/discover/${obj.id}`;
     },
   },
   dashboard: {
@@ -76,13 +67,10 @@ const savedObjectSchemas = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `#/management/kibana/objects/savedDashboards/${obj.id}`;
+      return `/management/kibana/objects/savedDashboards/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return {
-        path: `/dashboard/${obj.id}`,
-        refresh: false,
-      };
+      return `/app/kibana#/dashboard/${obj.id}`;
     },
   },
 };
@@ -157,11 +145,8 @@ describe('findRelationships', () => {
         meta: {
           icon: 'visualizeApp',
           title: 'Foo',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: {
-            path: '/visualize/edit/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/app/kibana#/visualize/edit/1',
         },
       },
       {
@@ -171,11 +156,8 @@ describe('findRelationships', () => {
         meta: {
           icon: 'visualizeApp',
           title: 'Bar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: {
-            path: '/visualize/edit/2',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/app/kibana#/visualize/edit/2',
         },
       },
       {
@@ -185,11 +167,8 @@ describe('findRelationships', () => {
         meta: {
           icon: 'visualizeApp',
           title: 'FooBar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: {
-            path: '/visualize/edit/3',
-            refresh: false,
-          }
+          editUrl: '/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/app/kibana#/visualize/edit/3',
         },
       },
     ]);
@@ -285,11 +264,8 @@ describe('findRelationships', () => {
         {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
-          editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
         },
       },
       {
@@ -300,11 +276,8 @@ describe('findRelationships', () => {
         {
           icon: 'dashboardApp',
           title: 'My Dashboard',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: {
-            path: '/dashboard/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedDashboards/1',
+          inAppUrl: '/app/kibana#/dashboard/1',
         },
       },
       {
@@ -315,11 +288,8 @@ describe('findRelationships', () => {
         {
           icon: 'dashboardApp',
           title: 'Your Dashboard',
-          editUrl: '#/management/kibana/objects/savedDashboards/2',
-          inAppUrl: {
-            path: '/dashboard/2',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedDashboards/2',
+          inAppUrl: '/app/kibana#/dashboard/2',
         },
       },
     ]);
@@ -404,11 +374,8 @@ describe('findRelationships', () => {
         {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
-          editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
         },
       },
       {
@@ -419,11 +386,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'Foo',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: {
-            path: '/visualize/edit/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/app/kibana#/visualize/edit/1',
         },
       },
       {
@@ -434,11 +398,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'Bar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: {
-            path: '/visualize/edit/2',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/app/kibana#/visualize/edit/2',
         },
       },
       {
@@ -449,11 +410,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'FooBar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: {
-            path: '/visualize/edit/3',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/app/kibana#/visualize/edit/3',
         },
       },
     ]);
@@ -540,11 +498,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'Foo',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: {
-            path: '/visualize/edit/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/1',
+          inAppUrl: '/app/kibana#/visualize/edit/1',
         },
       },
       {
@@ -555,11 +510,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'Bar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: {
-            path: '/visualize/edit/2',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/2',
+          inAppUrl: '/app/kibana#/visualize/edit/2',
         },
       },
       {
@@ -570,11 +522,8 @@ describe('findRelationships', () => {
         {
           icon: 'visualizeApp',
           title: 'FooBar',
-          editUrl: '#/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: {
-            path: '/visualize/edit/3',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedVisualizations/3',
+          inAppUrl: '/app/kibana#/visualize/edit/3',
         },
       },
       {
@@ -585,11 +534,8 @@ describe('findRelationships', () => {
         {
           icon: 'search',
           title: 'My Saved Search',
-          editUrl: '#/management/kibana/objects/savedSearches/1',
-          inAppUrl: {
-            path: '/discover/1',
-            refresh: false,
-          },
+          editUrl: '/management/kibana/objects/savedSearches/1',
+          inAppUrl: '/app/kibana#/discover/1',
         },
       },
     ]);
