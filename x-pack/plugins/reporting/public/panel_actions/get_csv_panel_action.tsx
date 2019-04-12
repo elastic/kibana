@@ -45,9 +45,9 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   }
 
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
-    const enablePanelActionDownlad = chrome.getInjected('enablePanelActionDownlad');
+    const enablePanelActionDownload = chrome.getInjected('enablePanelActionDownload');
 
-    if (!enablePanelActionDownlad) {
+    if (!enablePanelActionDownload) {
       return false;
     }
 
