@@ -352,6 +352,14 @@ Test runner arguments:
  - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
  - `[test path]` is the relative path to the test file.
 
+ Examples:
+  - Run the entire elasticsearch_service test suite with yarn:
+    `yarn test:jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the jest test case whose description matches 'stops both admin and data clients':
+    `yarn test:jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the x-pack api integration test case whose description matches the given string:
+    `node scripts/functional_tests --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
+
 ### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
