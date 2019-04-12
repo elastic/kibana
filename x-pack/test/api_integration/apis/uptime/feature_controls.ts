@@ -69,7 +69,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       .catch((error: any) => ({ error, response: undefined }));
   };
 
-  describe.only('feature controls', () => {
+  describe('feature controls', () => {
     it(`APIs can't be accessed by heartbeat-* read privileges role`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
