@@ -85,10 +85,10 @@ const runApiDocumenter = async (folder: string) => {
 };
 
 const renameExtractedApiPackageName = async (folder: string) => {
-  const json = JSON.parse(fs.readFileSync(`build/${folder}/kibana.api.json`).toString());
+  const json = JSON.parse(fs.readFileSync(`build/${folder}/${folder}.api.json`).toString());
   json.canonicalReference = `kibana-plugin-${folder}`;
   json.name = `kibana-plugin-${folder}`;
-  fs.writeFileSync(`build/${folder}/kibana.api.json`, JSON.stringify(json, null, 2));
+  fs.writeFileSync(`build/${folder}/${folder}.api.json`, JSON.stringify(json, null, 2));
 };
 
 /**

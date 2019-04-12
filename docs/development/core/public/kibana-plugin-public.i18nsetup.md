@@ -1,18 +1,10 @@
 [Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [I18nSetup](./kibana-plugin-public.i18nsetup.md)
 
-## I18nSetup interface
+## I18nSetup type
 
-I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree.
 
 <b>Signature:</b>
 
 ```typescript
-export interface I18nSetup 
+export declare type I18nSetup = ReturnType<I18nService['setup']>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [Context](./kibana-plugin-public.i18nsetup.context.md) | <code>({ children }: {`<p/>`        children: React.ReactNode;`<p/>`    }) =&gt; JSX.Element</code> | React Context provider required as the topmost component for any i18n-compatible React tree. |
-

@@ -1,24 +1,10 @@
 [Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md)
 
-## InjectedMetadataSetup interface
+## InjectedMetadataSetup type
 
-Provides access to the metadata injected by the server into the page
 
 <b>Signature:</b>
 
 ```typescript
-export interface InjectedMetadataSetup 
+export declare type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [getBasePath](./kibana-plugin-public.injectedmetadatasetup.getbasepath.md) | <code>() =&gt; string</code> |  |
-|  [getCspConfig](./kibana-plugin-public.injectedmetadatasetup.getcspconfig.md) | <code>() =&gt; {`<p/>`        warnLegacyBrowsers: boolean;`<p/>`    }</code> |  |
-|  [getInjectedVar](./kibana-plugin-public.injectedmetadatasetup.getinjectedvar.md) | <code>(name: string, defaultValue?: any) =&gt; unknown</code> |  |
-|  [getInjectedVars](./kibana-plugin-public.injectedmetadatasetup.getinjectedvars.md) | <code>() =&gt; {`<p/>`        [key: string]: unknown;`<p/>`    }</code> |  |
-|  [getKibanaVersion](./kibana-plugin-public.injectedmetadatasetup.getkibanaversion.md) | <code>() =&gt; string</code> |  |
-|  [getLegacyMetadata](./kibana-plugin-public.injectedmetadatasetup.getlegacymetadata.md) | <code>() =&gt; {`<p/>`        app: unknown;`<p/>`        translations: unknown;`<p/>`        bundleId: string;`<p/>`        nav: unknown;`<p/>`        version: string;`<p/>`        branch: string;`<p/>`        buildNum: number;`<p/>`        buildSha: string;`<p/>`        basePath: string;`<p/>`        serverName: string;`<p/>`        devMode: boolean;`<p/>`        uiSettings: {`<p/>`            defaults: UiSettingsState;`<p/>`            user?: UiSettingsState &#124; undefined;`<p/>`        };`<p/>`    }</code> |  |
-|  [getPlugins](./kibana-plugin-public.injectedmetadatasetup.getplugins.md) | <code>() =&gt; Array&lt;{`<p/>`        id: string;`<p/>`        plugin: DiscoveredPlugin;`<p/>`    }&gt;</code> | An array of frontend plugins in topological order. |
-
