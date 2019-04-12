@@ -262,7 +262,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async increasePopularity() {
       const field = await testSubjects.find('editorFieldCount');
-      await field.clearValueWithKeyboard();
+      await field.clearValue();
       await field.type('1');
     }
 
@@ -487,9 +487,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      // Both clearValue & clearValueWithKeyboard does not work here
-      // Send Backspace event for each char in value string to clear field
-      await datePatternField.clearValueWithKeyboard({ charByChar: true });
+      await datePatternField.clearValue();
       await datePatternField.type(datePattern);
     }
 
@@ -510,11 +508,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
       const field = await testSubjects.find('editorFieldScript');
-      const currentValue = await field.getAttribute('value');
-      if (script === currentValue) {
-        return;
-      }
-      await field.clearValueWithKeyboard({ charByChar: true });
+      await field.clearValue();
       await field.type(script);
     }
 
@@ -547,9 +541,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
         await comboBox.set('additionalFieldsSelect', additionalField);
-        await testSubjects.find('scriptedFieldPreview');
         await testSubjects.click('runScriptButton');
-        await testSubjects.waitForDeleted('.euiLoadingSpinner');
       }
       let scriptResults;
       await retry.try(async () => {
