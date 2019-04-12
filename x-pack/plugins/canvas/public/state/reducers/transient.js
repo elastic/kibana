@@ -29,10 +29,6 @@ export const transientReducer = handleActions(
       );
     },
 
-    [transientActions.setCanUserWrite]: (transientState, { payload }) => {
-      return set(transientState, 'canUserWrite', Boolean(payload));
-    },
-
     [transientActions.setFirstLoad]: (transientState, { payload }) => {
       return set(transientState, 'isFirstLoad', Boolean(payload));
     },

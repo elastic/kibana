@@ -47,6 +47,7 @@ import {
 import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
+import { uiCapabilities } from 'ui/capabilities';
 
 const app = uiModules.get('app/graph');
 
@@ -796,35 +797,43 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
     }),
     run: function () {canWipeWorkspace(function () {kbnUrl.change('/home', {}); });  },
   });
-  if (!$scope.allSavingDisabled) {
-    $scope.topNavMenu.push({
-      key: 'save',
-      label: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
-        defaultMessage: 'Save',
-      }),
-      description: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
-        defaultMessage: 'Save Workspace',
-      }),
-      tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
-        defaultMessage: 'Save this workspace',
-      }),
-      disableButton: function () {return $scope.selectedFields.length === 0;},
-      template: require('./templates/save_workspace.html')
-    });
-  }else {
-    $scope.topNavMenu.push({
-      key: 'save',
-      label: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledLabel', {
-        defaultMessage: 'Save',
-      }),
-      description: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
-        defaultMessage: 'Save Workspace',
-      }),
-      tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
-        defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
-      }),
-      disableButton: true
-    });
+
+  // if saving is disabled using uiCapabilities, we don't want to render the save
+  // button so it's consistent with all of the other applications
+  if (uiCapabilities.graph.save) {
+    // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
+    if (!$scope.allSavingDisabled) {
+      $scope.topNavMenu.push({
+        key: 'save',
+        label: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
+          defaultMessage: 'Save',
+        }),
+        description: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
+          defaultMessage: 'Save Workspace',
+        }),
+        tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
+          defaultMessage: 'Save this workspace',
+        }),
+        disableButton: function () {return $scope.selectedFields.length === 0;},
+        template: require('./templates/save_workspace.html'),
+        testId: 'graphSaveButton',
+      });
+    } else {
+      $scope.topNavMenu.push({
+        key: 'save',
+        label: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledLabel', {
+          defaultMessage: 'Save',
+        }),
+        description: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
+          defaultMessage: 'Save Workspace',
+        }),
+        tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
+          defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+        }),
+        disableButton: true,
+        testId: 'graphSaveButton',
+      });
+    }
   }
   $scope.topNavMenu.push({
     key: 'open',
@@ -837,65 +846,74 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
     tooltip: i18n('xpack.graph.topNavMenu.loadWorkspaceTooltip', {
       defaultMessage: 'Load a saved workspace',
     }),
-    template: require('./templates/load_workspace.html')
+    template: require('./templates/load_workspace.html'),
+    testId: 'graphOpenButton',
   });
-  if (!$scope.allSavingDisabled) {
-    $scope.topNavMenu.push({
-      key: 'delete',
-      disableButton: function () {
-        return $route.current.locals === undefined || $route.current.locals.savedWorkspace === undefined;
-      },
-      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledLabel', {
-        defaultMessage: 'Delete',
-      }),
-      description: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaLabel', {
-        defaultMessage: 'Delete Saved Workspace',
-      }),
-      tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaTooltip', {
-        defaultMessage: 'Delete this workspace',
-      }),
-      run: function () {
-        const title = $route.current.locals.savedWorkspace.title;
-        function doDelete() {
-          $route.current.locals.SavedWorkspacesProvider.delete($route.current.locals.savedWorkspace.id);
-          kbnUrl.change('/home', {});
+  // if deleting is disabled using uiCapabilities, we don't want to render the delete
+  // button so it's consistent with all of the other applications
+  if (uiCapabilities.graph.delete) {
 
-          toastNotifications.addSuccess(
-            i18n('xpack.graph.topNavMenu.deleteWorkspaceNotification', {
-              defaultMessage: `Deleted '{workspaceTitle}'`,
-              values: { workspaceTitle: title },
-            })
+    // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
+    if (!$scope.allSavingDisabled) {
+      $scope.topNavMenu.push({
+        key: 'delete',
+        disableButton: function () {
+          return $route.current.locals === undefined || $route.current.locals.savedWorkspace === undefined;
+        },
+        label: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledLabel', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaLabel', {
+          defaultMessage: 'Delete Saved Workspace',
+        }),
+        tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaTooltip', {
+          defaultMessage: 'Delete this workspace',
+        }),
+        testId: 'graphDeleteButton',
+        run: function () {
+          const title = $route.current.locals.savedWorkspace.title;
+          function doDelete() {
+            $route.current.locals.SavedWorkspacesProvider.delete($route.current.locals.savedWorkspace.id);
+            kbnUrl.change('/home', {});
+
+            toastNotifications.addSuccess(
+              i18n('xpack.graph.topNavMenu.deleteWorkspaceNotification', {
+                defaultMessage: `Deleted '{workspaceTitle}'`,
+                values: { workspaceTitle: title },
+              })
+            );
+          }
+          const confirmModalOptions = {
+            onConfirm: doDelete,
+            confirmButtonText: i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmButtonLabel', {
+              defaultMessage: 'Delete workspace',
+            }),
+          };
+          confirmModal(
+            i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmText', {
+              defaultMessage: 'Are you sure you want to delete the workspace {title} ?',
+              values: { title },
+            }),
+            confirmModalOptions
           );
         }
-        const confirmModalOptions = {
-          onConfirm: doDelete,
-          confirmButtonText: i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmButtonLabel', {
-            defaultMessage: 'Delete workspace',
-          }),
-        };
-        confirmModal(
-          i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmText', {
-            defaultMessage: 'Are you sure you want to delete the workspace {title} ?',
-            values: { title },
-          }),
-          confirmModalOptions
-        );
-      }
-    });
-  }else {
-    $scope.topNavMenu.push({
-      key: 'delete',
-      disableButton: true,
-      label: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledLabel', {
-        defaultMessage: 'Delete',
-      }),
-      description: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledAriaLabel', {
-        defaultMessage: 'Delete Saved Workspace',
-      }),
-      tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledTooltip', {
-        defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
-      }),
-    });
+      });
+    }else {
+      $scope.topNavMenu.push({
+        key: 'delete',
+        disableButton: true,
+        label: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledLabel', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledAriaLabel', {
+          defaultMessage: 'Delete Saved Workspace',
+        }),
+        tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledTooltip', {
+          defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+        }),
+        testId: 'graphDeleteButton',
+      });
+    }
   }
   $scope.topNavMenu.push({
     key: 'settings',

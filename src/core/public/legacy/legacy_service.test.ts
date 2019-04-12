@@ -53,6 +53,14 @@ jest.mock('ui/i18n', () => {
   };
 });
 
+const mockUICapabilitiesInit = jest.fn();
+jest.mock('ui/capabilities', () => {
+  mockLoadOrder.push('ui/capabilities');
+  return {
+    __newPlatformInit__: mockUICapabilitiesInit,
+  };
+});
+
 const mockFatalErrorInit = jest.fn();
 jest.mock('ui/notify/fatal_error', () => {
   mockLoadOrder.push('ui/notify/fatal_error');
@@ -142,6 +150,7 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
 });
 
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -159,6 +168,7 @@ const httpSetup = httpServiceMock.createSetupContract();
 const i18nSetup = i18nServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
+const capabilitiesSetup = capabilitiesServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
 const overlaySetup = overlayServiceMock.createSetupContract();
 
@@ -176,6 +186,7 @@ const defaultSetupDeps = {
   notifications: notificationsSetup,
   http: httpSetup,
   basePath: basePathSetup,
+  capabilities: capabilitiesSetup,
   uiSettings: uiSettingsSetup,
   chrome: chromeSetup,
   overlays: overlaySetup,
@@ -213,6 +224,17 @@ describe('#setup()', () => {
 
       expect(mockI18nContextInit).toHaveBeenCalledTimes(1);
       expect(mockI18nContextInit).toHaveBeenCalledWith(i18nSetup.Context);
+    });
+
+    it('passes uiCapabilities to ui/capabilities', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.setup(defaultSetupDeps);
+
+      expect(mockUICapabilitiesInit).toHaveBeenCalledTimes(1);
+      expect(mockUICapabilitiesInit).toHaveBeenCalledWith(capabilitiesSetup);
     });
 
     it('passes fatalErrors service to ui/notify/fatal_errors', () => {
