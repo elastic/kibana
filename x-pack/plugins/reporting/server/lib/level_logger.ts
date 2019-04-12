@@ -12,7 +12,7 @@ export class LevelLogger implements Logger {
   private _logger: any;
   private _tags: string[];
 
-  public warn: (msg: string, tags: string[]) => void;
+  public warn: (msg: string, tags?: string[]) => void;
 
   static createForServer(server: any, tags: string[]) {
     return new LevelLogger((tags: string[], msg: string) => server.log(tags, msg), tags);
