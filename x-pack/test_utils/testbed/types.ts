@@ -11,11 +11,12 @@ import { MemoryRouter } from 'react-router-dom';
 
 export type RegisterTestBed = (
   component: ComponentType,
-  defaultProps: any,
-  store: Store | null
+  defaultProps?: any,
+  options?: TestBedOptions,
+  store?: Store | null
 ) => SetupFunc;
 
-export type SetupFunc = (props: any, options: TestBedOptions) => TestBed;
+export type SetupFunc = (props?: any) => TestBed;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */

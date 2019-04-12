@@ -16,10 +16,12 @@ const defaultOptions = {
   },
 };
 
-export const registerTestBed: RegisterTestBed = (Component, defaultProps = {}, store = null) => (
-  props,
-  options = defaultOptions
-) => {
+export const registerTestBed: RegisterTestBed = (
+  Component,
+  defaultProps = {},
+  options = defaultOptions,
+  store = null
+) => props => {
   const component = mountComponent(Component, options, store, { ...defaultProps, ...props });
 
   /**
