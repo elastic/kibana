@@ -103,6 +103,9 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       saved_objects: [
         {
           type: 'visualization',
+          migrationVersion: {
+            visualization: '6.7.2',
+          },
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           version: resp.body.saved_objects[0].version,
           attributes: {

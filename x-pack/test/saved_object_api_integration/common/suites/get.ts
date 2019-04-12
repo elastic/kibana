@@ -103,6 +103,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
       type: 'visualization',
+      migrationVersion: {
+        visualization: '6.7.2',
+      },
       updated_at: '2017-09-21T18:51:23.794Z',
       version: resp.body.version,
       attributes: {

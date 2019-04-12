@@ -41,6 +41,9 @@ export default function ({ getService }) {
               saved_objects: [
                 {
                   type: 'visualization',
+                  migrationVersion: {
+                    visualization: '6.7.2',
+                  },
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   version: 'WzIsMV0=',
                   attributes: {

@@ -56,6 +56,9 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       saved_objects: [
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+          migrationVersion: {
+            visualization: '6.7.2',
+          },
           type: 'visualization',
           error: {
             statusCode: 404,
