@@ -487,8 +487,10 @@ describe('TokenAuthenticationProvider', () => {
   describe('`deauthenticate` method', () => {
     let provider: TokenAuthenticationProvider;
     let callWithInternalUser: sinon.SinonStub;
+    let xpackUsage$: Rx.BehaviorSubject<undefined>;
     beforeEach(() => {
       callWithInternalUser = sinon.stub();
+      xpackUsage$ = new Rx.BehaviorSubject<undefined>(undefined);
       provider = new TokenAuthenticationProvider({
         client: { callWithInternalUser } as any,
         log() {
@@ -496,9 +498,7 @@ describe('TokenAuthenticationProvider', () => {
         },
         basePath: '/base-path',
         clusterSecurityFeatures: new ClusterSecurityFeatures({
-          getUsage$: () => {
-            throw new Error('should not be called via this test');
-          },
+          getUsage$: () => xpackUsage$,
           refreshNow: () => {
             throw new Error('should not be called via this test');
           },
