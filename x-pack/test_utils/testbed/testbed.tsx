@@ -4,91 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import React from 'react';
 
-import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from '../enzyme_helpers';
-import { WithMemoryRouter, WithRoute } from '../router_helpers';
-import { WithStore } from '../redux_helpers';
-import { findTestSubject as findTestSubjectHelper } from './temp_test_subject';
+import { findTestSubject as findTestSubjectHelper } from '../find_test_subject';
+import { mountComponent } from './mount_component';
+import { RegisterTestBed, TestBed } from './types';
 
-const registerTestSubjExists = (component: ReactWrapper) => (testSubject: string, count = 1) =>
-  findTestSubjectHelper(component, testSubject).length === count;
-
-interface TestBedOptions {
+const defaultOptions = {
   memoryRouter: {
-    wrapRoute: boolean;
-    initialEntries?: string[];
-    initialIndex?: number;
-    componentRoutePath?: string;
-    onRouter?: (router: MemoryRouter) => void;
-  };
-}
-
-const defaultOptions: TestBedOptions = {
-  memoryRouter: {
-    wrapRoute: true,
+    wrapComponent: true,
   },
 };
 
-/**
- * Register a testBed for a React component to be tested inside a Redux provider
- *
- * @param {React.SFC} Component A react component to test
- * @param {object} defaultProps Props to initialize the component with
- * @param {object} store The Redux store to initialize the Redux Provider with
- *
- * @returns {object} with the following properties:
- *
- * - component The component wrapped by the Redux provider
- * - exists() Method to check if a test subject exists in the mounted component
- * - find() Method to find a test subject in the mounted componenet
- * - setProp() Method to update the props on the wrapped component
- * - getMetadataFromEuiTable() Method that will extract the table rows and column + their values from an Eui tablle component
- * - form.setInput() Method to update a form input value
- * - form.selectCheckBox() Method to select a form checkbox
- * - form.getErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
- */
-export const registerTestBed = (Component: ComponentType, defaultProps = {}, store = null) => (
-  props: any,
+export const registerTestBed: RegisterTestBed = (Component, defaultProps = {}, store = null) => (
+  props,
   options = defaultOptions
 ) => {
-  const wrapRoute = options.memoryRouter.wrapRoute !== false;
+  const component = mountComponent(Component, options, store, { ...defaultProps, ...props });
 
   /**
    * ----------------------------------------------------------------
-   * Component mount
+   * Utils
    * ----------------------------------------------------------------
    */
-  let Comp;
 
-  if (wrapRoute) {
-    const { componentRoutePath, onRouter, initialEntries, initialIndex } = options.memoryRouter;
+  /**
+   * Look in the component if a data test subject exists, and return true or false
+   *
+   * @param testSubject The data test subject to look for
+   * @param count The number of times the subject needs to appear
+   */
+  const exists: TestBed['exists'] = (testSubject, count = 1) =>
+    findTestSubjectHelper(component, testSubject).length === count;
 
-    // Wrap the componenet with a MemoryRouter and attach it to a <Route />
-    Comp = WithMemoryRouter(initialEntries, initialIndex)(
-      WithRoute(componentRoutePath, onRouter)(Component)
-    );
+  /**
+   * Look for a data test subject in the component and return it
+   *
+   * @param testSubject The data test subject to look for
+   */
+  const find: TestBed['find'] = testSubject => findTestSubjectHelper(component, testSubject);
 
-    // Wrap the component with a Redux Provider
-    if (store !== null) {
-      Comp = WithStore(store)(Comp);
-    }
-  } else {
-    Comp = store !== null ? WithStore(store)(Component) : Component;
-  }
-
-  const component = mountWithIntl(<Comp {...defaultProps} {...props} />);
-
-  const setProps = (updatedProps: any) => {
-    if (wrapRoute) {
+  /**
+   * Update the props of the mounted component
+   *
+   * @param updatedProps The updated prop object
+   */
+  const setProps: TestBed['setProps'] = updatedProps => {
+    if (options.memoryRouter.wrapComponent !== false) {
       throw new Error(
         'setProps() can only be called on a component **not** wrapped by a router route.'
       );
     }
     if (store === null) {
-      return component.setProps(updatedProps);
+      return component.setProps({ ...defaultProps, ...updatedProps });
     }
     // Update the props on the Redux Provider children
     return component.setProps({
@@ -96,44 +64,59 @@ export const registerTestBed = (Component: ComponentType, defaultProps = {}, sto
     });
   };
 
-  const exists = registerTestSubjExists(component);
-  const find = (testSubject: string) => findTestSubjectHelper(component, testSubject);
-
   /**
    * ----------------------------------------------------------------
    * Forms
    * ----------------------------------------------------------------
    */
-  const setInputValue = (input: string | ReactWrapper, value: string, isAsync = false) => {
+
+  /**
+   * Set the value of a form text input.
+   *
+   * In some cases, changing an input value triggers an HTTP request to validate
+   * the field. Even if we return immediately the response on the mock server we
+   * still need to wait until the next tick before the DOM updates.
+   * Setting isAsync to "true" takes care of that.
+   *
+   * @param input The form input. Can either be a data-test-subj or a reactWrapper
+   * @param value The value to set
+   * @param isAsync If set to true will return a Promise that resolves on the next "tick"
+   */
+  const setInputValue: TestBed['form']['setInputValue'] = (input, value, isAsync = false) => {
     const formInput = typeof input === 'string' ? find(input) : input;
 
     formInput.simulate('change', { target: { value } });
     component.update();
 
-    // In some cases, changing an input value triggers an http request to validate
-    // it. Even by returning immediately the response on the mock server we need
-    // to wait until the next tick before the DOM updates.
-    // Setting isAsync to "true" solves that problem.
     if (!isAsync) {
       return;
     }
     return new Promise(resolve => setTimeout(resolve));
   };
 
-  const selectCheckBox = (checkboxTestSubject: string) => {
-    find(checkboxTestSubject).simulate('change', { target: { checked: true } });
+  /**
+   * Select or unselect a form checkbox.
+   *
+   * @param dataTestSubject The test subject of the checkbox
+   * @param isChecked Defines if the checkobx is active or not
+   */
+  const selectCheckBox: TestBed['form']['selectCheckBox'] = (dataTestSubject, isChecked = true) => {
+    find(dataTestSubject).simulate('change', { target: { checked: isChecked } });
   };
 
-  // It works the exact same way :)
-  const toggleEuiSwitch = selectCheckBox;
+  /**
+   * Toggle the EuiSwitch
+   */
+  const toggleEuiSwitch: TestBed['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
 
   /**
-   * The EUI ComboBox is a special input as we need to press the ENTER key
-   * in order for the EuiComboBox to register the value
+   * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
+   * in order to register the value set. This helpers automatically does that.
    *
-   * @param {string} value The value to add to the combobox
+   * @param comboBoxTestSubject The data test subject of the EuiComboBox
+   * @param value The value to set
    */
-  const setComboBoxValue = (comboBoxTestSubject: string, value: string) => {
+  const setComboBoxValue: TestBed['form']['setComboBoxValue'] = (comboBoxTestSubject, value) => {
     const comboBox = find(comboBoxTestSubject);
     const formInput = findTestSubjectHelper(comboBox, 'comboBoxSearchInput');
     setInputValue(formInput, value);
@@ -143,7 +126,10 @@ export const registerTestBed = (Component: ComponentType, defaultProps = {}, sto
     component.update();
   };
 
-  const getErrorsMessages = () => {
+  /**
+   * Get a list of the form error messages that are visible in the DOM of the component
+   */
+  const getErrorsMessages: TestBed['form']['getErrorsMessages'] = () => {
     const errorMessagesWrappers = component.find('.euiFormErrorText');
     return errorMessagesWrappers.map(err => err.text());
   };
@@ -155,11 +141,11 @@ export const registerTestBed = (Component: ComponentType, defaultProps = {}, sto
    */
 
   /**
-   * Helper to parse an EUI table and return its rows and column reactWrapper
+   * Parse an EUI table and return meta data information about its rows and colum content
    *
-   * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
+   * @param tableTestSubject The data test subject of the EUI table
    */
-  const getMetaData = (tableTestSubject: string) => {
+  const getMetaData: TestBed['table']['getMetaData'] = (tableTestSubject: string) => {
     const table = find(tableTestSubject);
 
     if (!table.length) {
