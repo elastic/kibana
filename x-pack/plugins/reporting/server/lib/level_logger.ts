@@ -15,7 +15,8 @@ export class LevelLogger implements Logger {
   public warn: (msg: string, tags?: string[]) => void;
 
   static createForServer(server: any, tags: string[]) {
-    return new LevelLogger((tags: string[], msg: string) => server.log(tags, msg), tags);
+    const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
+    return new LevelLogger(serverLog, tags);
   }
 
   constructor(logger: ServerLog, tags: string[]) {
