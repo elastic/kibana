@@ -43,4 +43,5 @@ export async function initializeMixin(kbnServer, server, config) {
 
   await callHookOnPlugins('preInit');
   await callHookOnPlugins('init');
+  await callHookOnPlugins('postInit');
 }
