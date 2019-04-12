@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimeRangeParams } from '../../types';
+
 export interface SavedObjectServiceError {
   statusCode: number;
   error?: string;
@@ -89,12 +91,6 @@ export interface IndexPatternSavedObject {
     fieldFormatMap: string;
     fields: string;
   };
-}
-
-export interface TimeRangeParams {
-  timezone: string;
-  min: Date | string | number;
-  max: Date | string | number;
 }
 
 export interface VisPanel {
