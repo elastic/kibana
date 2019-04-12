@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import Keys from 'leadfoot/keys';
+import { delay } from 'bluebird';
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 
 export class LeadfootElementWrapper {
@@ -69,7 +71,28 @@ export class LeadfootElementWrapper {
    * @return {Promise<void>}
    */
   async clearValue() {
-    await this._leadfootElement.clearValue();
+    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+    // await this._leadfootElement.clearValue();
+    await this._leadfoot.execute(`arguments[0].value=''`, this._leadfootElement);
+  }
+
+  /**
+   * Clear the value of this element using Keyboard
+   * @param { charByChar: false } options
+   */
+  async clearValueWithKeyboard(options = { charByChar: false }) {
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 1; i <= value.length; i++) {
+        await this._leadfoot.pressKeys(Keys.BACKSPACE);
+        await delay(100);
+      }
+    } else {
+      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      await this._leadfoot.pressKeys([selectionKey, 'a']);
+      await this._leadfoot.pressKeys(Keys.NULL); // Release modifier keys
+      await this._leadfoot.pressKeys(Keys.BACKSPACE); // Delete all content
+    }
   }
 
   /**
