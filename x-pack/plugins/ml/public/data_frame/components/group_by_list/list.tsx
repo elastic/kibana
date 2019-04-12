@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
-import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 interface ListProps {
   list: string[];
@@ -16,20 +16,25 @@ interface ListProps {
 export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
   <EuiListGroup flush={true}>
     {list.map((l: string) => (
-      <EuiListGroupItem
-        key={l}
-        label={l}
-        extraAction={
-          (deleteHandler && {
-            onClick: () => deleteHandler(l),
-            iconType: 'cross',
-            iconSize: 's',
-            'aria-label': l,
-            alwaysShow: false,
-          }) ||
-          undefined
-        }
-      />
+      <Fragment key={l}>
+        <EuiPanel paddingSize="s">
+          <EuiListGroupItem
+            iconType="string"
+            label={l}
+            extraAction={
+              (deleteHandler && {
+                onClick: () => deleteHandler(l),
+                iconType: 'cross',
+                iconSize: 's',
+                'aria-label': l,
+                alwaysShow: false,
+              }) ||
+              undefined
+            }
+          />
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
     ))}
   </EuiListGroup>
 );

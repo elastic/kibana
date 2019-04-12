@@ -16,7 +16,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormHelpText,
   EuiFormRow,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -148,9 +150,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const pivotGroupBy = groupBy;
   const pivotQuery = getPivotQuery(search);
 
+  const valid = pivotGroupBy.length > 0 && aggList.length > 0;
+
   useEffect(
     () => {
-      const valid = pivotGroupBy.length > 0 && aggList.length > 0;
       onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
     },
     [JSON.stringify([aggList, pivotAggs, pivotGroupBy, search])] // TODO improve ...
@@ -219,6 +222,14 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
               />
             </Fragment>
           </EuiFormRow>
+          {!valid && (
+            <EuiFormHelpText style={{ maxWidth: '320px' }}>
+              {i18n.translate('xpack.ml.dataframe.definePivotForm.formHelp', {
+                defaultMessage:
+                  'Data Frame Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
+              })}
+            </EuiFormHelpText>
+          )}
         </EuiForm>
       </EuiFlexItem>
 
