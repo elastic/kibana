@@ -1412,6 +1412,22 @@
             "deprecationReason": null
           },
           {
+            "name": "timestamp",
+            "description": "The timestamp value for the document - derived from the source configuration timestamp setting",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tiebreaker",
+            "description": "The tiebreaker value for the document - derived from the source configuration tiebreaker setting",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "An array of flattened fields and values",
             "args": [],

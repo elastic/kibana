@@ -17,21 +17,38 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
+import { TimeKey } from '../../../common/time';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 import { InfraLoadingPanel } from '../loading';
+import moment from 'moment';
+
 interface Props {
   flyoutItem: InfraLogItem | null;
-  hideFlyout: () => void;
+  setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string) => void;
+  setTarget: (target: TimeKey) => void;
+  setSurroundingLogsId: (id: string) => void;
   intl: InjectedIntl;
   loading: boolean;
 }
 
 export const LogFlyout = injectI18n(
-  ({ flyoutItem, loading, hideFlyout, setFilter, intl }: Props) => {
+  ({ flyoutItem, loading, setFlyoutVisibility, setFilter, setTarget, setSurroundingLogsId, intl }: Props) => {
     const handleFilter = (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
+
+      if (flyoutItem && flyoutItem.timestamp && flyoutItem.tiebreaker) {
+        const timestampMoment = moment(flyoutItem.timestamp);
+        
+        if (timestampMoment.isValid()) {
+          setTarget({
+            time: timestampMoment.valueOf(),
+            tiebreaker: flyoutItem.tiebreaker,
+          });
+          setSurroundingLogsId(flyoutItem.id);
+        }
+      }
     };
 
     const columns = [
@@ -74,7 +91,7 @@ export const LogFlyout = injectI18n(
       },
     ];
     return (
-      <EuiFlyout onClose={() => hideFlyout()} size="m">
+      <EuiFlyout onClose={() => setFlyoutVisibility(false)} size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h3 id="flyoutTitle">

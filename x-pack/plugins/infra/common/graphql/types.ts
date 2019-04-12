@@ -188,6 +188,10 @@ export interface InfraLogItem {
   id: string;
   /** The index where the document was found */
   index: string;
+  /** The timestamp value for the document - derived from the source configuration timestamp setting */
+  timestamp?: string | null;
+  /** The tiebreaker value for the document - derived from the source configuration tiebreaker setting */
+  tiebreaker?: number | null;
   /** An array of flattened fields and values */
   fields: InfraLogItemField[];
 }
@@ -638,6 +642,8 @@ export namespace FlyoutItemQuery {
     id: string;
 
     index: string;
+
+    tiebreaker?: number | null;
 
     fields: Fields[];
   };

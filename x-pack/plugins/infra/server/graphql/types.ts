@@ -216,6 +216,10 @@ export interface InfraLogItem {
   id: string;
   /** The index where the document was found */
   index: string;
+  /** The timestamp value for the document - derived from the source configuration timestamp setting */
+  timestamp?: string | null;
+  /** The tiebreaker value for the document - derived from the source configuration tiebreaker setting */
+  tiebreaker?: number | null;
   /** An array of flattened fields and values */
   fields: InfraLogItemField[];
 }
@@ -1271,6 +1275,10 @@ export namespace InfraLogItemResolvers {
     id?: IdResolver<string, TypeParent, Context>;
     /** The index where the document was found */
     index?: IndexResolver<string, TypeParent, Context>;
+    /** The timestamp value for the document - derived from the source configuration timestamp setting */
+    timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+    /** The tiebreaker value for the document - derived from the source configuration tiebreaker setting */
+    tiebreaker?: TiebreakerResolver<number | null, TypeParent, Context>;
     /** An array of flattened fields and values */
     fields?: FieldsResolver<InfraLogItemField[], TypeParent, Context>;
   }
@@ -1285,6 +1293,16 @@ export namespace InfraLogItemResolvers {
     Parent,
     Context
   >;
+  export type TimestampResolver<
+    R = string | null,
+    Parent = InfraLogItem,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type TiebreakerResolver<
+    R = number | null,
+    Parent = InfraLogItem,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type FieldsResolver<
     R = InfraLogItemField[],
     Parent = InfraLogItem,

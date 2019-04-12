@@ -135,9 +135,13 @@ export class InfraLogEntriesDomain {
       { field: '_index', value: document._index },
       { field: '_id', value: document._id },
     ];
+    const documentTimestamp = document._source[sourceConfiguration.fields.timestamp];
+
     return {
       id: document._id,
       index: document._index,
+      timestamp: documentTimestamp && typeof documentTimestamp === 'string' ? documentTimestamp : null,
+      tiebreaker: document.sort[0],
       fields: sortBy(
         [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
         'field'
@@ -150,6 +154,7 @@ interface LogItemHit {
   _index: string;
   _id: string;
   _source: JsonObject;
+  sort: [number];
 }
 
 export interface LogEntriesAdapter {

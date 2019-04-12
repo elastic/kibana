@@ -7,7 +7,7 @@
 import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
-import React from 'react';
+import React, { useContext } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 
@@ -19,6 +19,7 @@ interface LogTimeControlsProps {
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
+  setSurroundingLogsId: (id: string | null) => void;
   intl: InjectedIntl;
 }
 
@@ -88,6 +89,7 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
 
   private startLiveStreaming = () => {
     this.props.startLiveStreaming(5000);
+    this.props.setSurroundingLogsId(null);
   };
 
   private stopLiveStreaming = () => {

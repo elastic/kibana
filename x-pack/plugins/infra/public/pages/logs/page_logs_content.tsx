@@ -16,9 +16,7 @@ import { PageContent } from '../../components/page';
 import { WithSummary } from '../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
-import { WithLogFlyout } from '../../containers/logs/with_log_flyout';
-import { WithFlyoutOptionsUrlState } from '../../containers/logs/with_log_flyout_options';
-import { WithFlyoutOptions } from '../../containers/logs/with_log_flyout_options';
+import { LogFlyout as LogFlyoutState, WithFlyoutOptionsUrlState } from '../../containers/logs/log_flyout';
 import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
@@ -31,6 +29,14 @@ import { LogsToolbar } from './page_toolbar';
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { derivedIndexPattern, sourceId } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  const { setFlyoutVisibility,
+    flyoutVisible,
+    setFlyoutId,
+    surroundingLogsId,
+    setSurroundingLogsId,
+    flyoutItem,
+    isLoading,
+  } = useContext(LogFlyoutState.Context);
 
   return (
     <>
@@ -40,22 +46,26 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <WithLogFilter indexPattern={derivedIndexPattern}>
-        {({ applyFilterQueryFromKueryExpression }) => (
-          <WithLogFlyout sourceId={sourceId}>
-            {({ flyoutItem, hideFlyout, loading }) => (
-              <LogFlyout
-                setFilter={applyFilterQueryFromKueryExpression}
-                flyoutItem={flyoutItem}
-                hideFlyout={hideFlyout}
-                loading={loading}
-              />
+      <WithLogPosition>
+        {({ jumpToTargetPosition }) => (
+          <WithLogFilter indexPattern={derivedIndexPattern}>
+            {({ applyFilterQueryFromKueryExpression }) => (
+              flyoutVisible ? (
+                <LogFlyout
+                  setFilter={applyFilterQueryFromKueryExpression}
+                  setTarget={jumpToTargetPosition}
+                  setFlyoutVisibility={setFlyoutVisibility}
+                  setSurroundingLogsId={setSurroundingLogsId}
+                  flyoutItem={flyoutItem}
+                  loading={isLoading}
+                />
+              ) : null
             )}
-          </WithLogFlyout>
+          </WithLogFilter>
         )}
-      </WithLogFilter>
-      <WithFlyoutOptions>
-        {({ showFlyout, setFlyoutItem }) => (
+      </WithLogPosition>
+      <WithLogFilter indexPattern={derivedIndexPattern}>
+        {({ filterQuery }) => (
           <PageContent>
             <AutoSizer content>
               {({ measureRef, content: { width = 0, height = 0 } }) => (
@@ -93,8 +103,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                             target={targetPosition}
                             width={width}
                             wrap={textWrap}
-                            setFlyoutItem={setFlyoutItem}
-                            showFlyout={showFlyout}
+                            setFlyoutItem={setFlyoutId}
+                            setFlyoutVisibility={setFlyoutVisibility}
+                            highlightedItem={surroundingLogsId ? surroundingLogsId : null}
                           />
                         )}
                       </WithStreamItems>
@@ -130,7 +141,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             </AutoSizer>
           </PageContent>
         )}
-      </WithFlyoutOptions>
+      </WithLogFilter>
     </>
   );
 };
