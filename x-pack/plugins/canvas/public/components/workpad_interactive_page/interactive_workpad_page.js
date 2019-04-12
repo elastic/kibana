@@ -12,8 +12,8 @@ import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
+import { interactiveWorkpadPagePropTypes } from '../workpad_page/prop_types';
 import { WorkpadShortcuts } from './workpad_shortcuts';
-import { interactiveWorkpadPagePropTypes } from './prop_types';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;

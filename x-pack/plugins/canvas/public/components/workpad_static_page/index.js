@@ -5,7 +5,7 @@
  */
 
 import { withProps } from 'recompose';
-import { elementToShape } from '../workpad_page/integration_utils';
+import { elementToShape } from '../workpad_interactive_page/integration_utils';
 import { StaticWorkpadPage as StaticComponent } from './static_workpad_page';
 
 const simplePositioning = ({ elements }) => ({
