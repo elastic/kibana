@@ -18,7 +18,9 @@ export enum MetricsExplorerAggregation {
   max = 'max',
   min = 'min',
   cardinality = 'cardinality',
-  rate = 'rate',
+  rateMax = 'rateMax',
+  rateMin = 'rateMin',
+  rateAvg = 'rateAvg',
   count = 'count',
 }
 

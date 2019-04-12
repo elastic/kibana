@@ -6,6 +6,11 @@
 
 import { InfraMetricModel, InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
 import { MetricsExplorerAggregation, MetricsExplorerRequest } from '../types';
+const RATE_AGGS = [
+  MetricsExplorerAggregation.rateAvg,
+  MetricsExplorerAggregation.rateMax,
+  MetricsExplorerAggregation.rateMin,
+];
 export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricModel => {
   return {
     id: 'custom',
@@ -18,26 +23,33 @@ export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricM
     // when the responses are processed and combined with the grouping request.
     series: options.metrics.map((metric, index) => {
       // If the metric is a rate then we need to add TSVB metrics for calculating the derivative
-      if (metric.aggregation === MetricsExplorerAggregation.rate) {
+      if (RATE_AGGS.includes(metric.aggregation)) {
+        let agg = InfraMetricModelMetricType.max;
+        if (metric.aggregation === MetricsExplorerAggregation.rateMin) {
+          agg = InfraMetricModelMetricType.min;
+        }
+        if (metric.aggregation === MetricsExplorerAggregation.rateAvg) {
+          agg = InfraMetricModelMetricType.avg;
+        }
         return {
           id: `metric_${index}`,
           split_mode: 'everything',
           metrics: [
             {
-              id: `metric_max_${index}`,
+              id: `metric_${agg}_${index}`,
               field: metric.field,
-              type: InfraMetricModelMetricType.max,
+              type: agg,
             },
             {
-              id: `metric_deriv_max_${index}`,
-              field: `metric_max_${index}`,
+              id: `metric_deriv_${agg}_${index}`,
+              field: `metric_${agg}_${index}`,
               type: InfraMetricModelMetricType.derivative,
               unit: '1s',
             },
             {
-              id: `metric_posonly_deriv_max_${index}`,
+              id: `metric_posonly_deriv_${agg}_${index}`,
               type: InfraMetricModelMetricType.calculation,
-              variables: [{ id: 'var-rate', name: 'rate', field: `metric_deriv_max_${index}` }],
+              variables: [{ id: 'var-rate', name: 'rate', field: `metric_deriv_${agg}_${index}` }],
               script: 'params.rate > 0.0 ? params.rate : 0.0',
             },
           ],

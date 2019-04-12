@@ -253,4 +253,5 @@ const ChartTitle = euiStyled.button`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 `;
