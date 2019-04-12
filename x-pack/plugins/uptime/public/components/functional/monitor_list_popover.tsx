@@ -24,7 +24,6 @@ export const MonitorListPopover = ({ basePath, dateRangeStart, dateRangeEnd, mon
   const drs = 'now-15m';
   const dre = 'now';
 
-  console.log(monitor);
   return (
     <EuiPopover
       anchorPosition="rightCenter"
