@@ -74,15 +74,15 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     {({ hostDetails, loading, id, refetch }) => {
                       return (
                         <>
-                          {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available */}
+                          {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available
                           <HeaderPage
                             subtitle={
                               <LastBeatStat lastSeen={getOr(null, 'node.lastBeat', hosts[0])} />
                             }
-                            title={getOr(hostId, 'node.host.name', hosts[0])}
+                            title={hostName}
                           >
-                            {/* DEV NOTE: Date picker to be moved here */}
-                          </HeaderPage>
+                             DEV NOTE: Date picker to be moved here
+                          </HeaderPage> */}
                           <HostSummaryManage
                             id={id}
                             refetch={refetch}

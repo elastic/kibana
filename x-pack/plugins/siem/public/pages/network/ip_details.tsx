@@ -48,21 +48,6 @@ type IPDetailsComponentProps = IPDetailsComponentReduxProps &
   IPDetailsDispatchProps &
   NetworkComponentProps;
 
-const getQuickBeatStat = (data: Overview) =>
-  data && data.lastSeen != null ? (
-    <EuiToolTip position="bottom" content={data.lastSeen}>
-      <FormattedMessage
-        id="xpack.siem.ipDetails.pageSubtitle"
-        defaultMessage="Last Beat: {beat}"
-        values={{
-          beat: <FormattedRelative value={new Date(data.lastSeen)} />,
-        }}
-      />
-    </EuiToolTip>
-  ) : (
-    getEmptyTagValue()
-  );
-
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
@@ -87,7 +72,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   >
                     {({ ipOverviewData, loading }) => {
                       const typeData: Overview = ipOverviewData[flowType]!;
-                      console.log('typeData', typeData);
                       return (
                         <>
                           <NetworkKql
