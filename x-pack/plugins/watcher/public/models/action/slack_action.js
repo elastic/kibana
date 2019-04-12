@@ -32,13 +32,13 @@ export class SlackAction extends BaseAction {
           defaultMessage="This watch has a Slack {ymlValue} setting without a 'to' property. If this property is already set in your elasticsearch.yml file, you're all set. Otherwise, you can include it here in the watch JSON. {docsLink}"
           values={{
             ymlValue: (
-              <EuiCode>message_defaults</EuiCode>
+              <EuiCode transparentBackground>message_defaults</EuiCode>
             ),
             docsLink: (
               <EuiLink href={documentationLinks.watcher.watchNotificationSettings} target="_blank">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.documentationLink"
-                  defaultMessage="Learn more"
+                  defaultMessage="Learn more."
                 />
               </EuiLink>
             ),

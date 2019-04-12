@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 
 import {
   EuiButton,
@@ -36,17 +36,8 @@ export const JsonWatchEditForm = ({
   const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
-  const prevWatchString = usePrevious(watch.watchString);
 
-  function usePrevious(value: any) {
-    const ref = useRef(null);
-    useEffect(() => {
-      ref.current = value;
-    });
-    return ref.current;
-  }
-
-  if (prevWatchString !== watch.watchString && errors.json.length === 0) {
+  if (errors.json.length === 0) {
     setWatchProperty('watch', JSON.parse(watch.watchString));
   }
 

@@ -8,6 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Watch } from 'plugins/watcher/models/watch';
 import React, { useEffect, useReducer } from 'react';
+import { isEqual } from 'lodash';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { loadWatch } from '../../../lib/api';
@@ -38,7 +39,12 @@ const watchReducer = (state: any, action: any) => {
     case 'setWatch':
       return payload;
     case 'setProperty':
-      return new (Watch.getWatchTypes())[state.type]({ ...state, ...payload });
+      const { property, value } = payload;
+      if (!isEqual(state[property], value)) {
+        return new (Watch.getWatchTypes())[state.type]({ ...state, [property]: value });
+      } else {
+        return state;
+      }
     case 'addAction':
       const newWatch = new (Watch.getWatchTypes())[state.type](state);
       newWatch.addAction(payload);
@@ -62,7 +68,7 @@ export const WatchEdit = ({
   // hooks
   const [watch, dispatch] = useReducer(watchReducer, null);
   const setWatchProperty = (property: string, value: any) => {
-    dispatch({ command: 'setProperty', payload: { [property]: value } });
+    dispatch({ command: 'setProperty', payload: { property, value } });
   };
   const addAction = (action: any) => {
     dispatch({ command: 'addAction', payload: action });
