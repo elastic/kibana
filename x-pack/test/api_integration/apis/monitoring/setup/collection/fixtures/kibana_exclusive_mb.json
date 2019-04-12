@@ -21,6 +21,12 @@
       }
     }
   },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": null,
+    "byUuid": {}
+  },
   "logstash": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,

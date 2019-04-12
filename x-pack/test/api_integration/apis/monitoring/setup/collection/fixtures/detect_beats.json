@@ -14,8 +14,15 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "detected": {
-      "doesExist": false,
       "mightExist": true
+    },
+    "byUuid": null
+  },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "mightExist": false
     },
     "byUuid": null
   },
@@ -23,7 +30,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "detected": {
-      "doesExist": false,
       "mightExist": false
     },
     "byUuid": null
