@@ -12,7 +12,7 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, take } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -165,13 +165,16 @@ export const SuperDatePickerComponent = class extends Component<
     if (!isInvalid) {
       this.updateReduxTime({ start, end, isQuickSelection, isInvalid });
       this.setState((prevState: SuperDatePickerState) => {
-        let recentlyUsedRanges = prevState.recentlyUsedRanges.filter(
-          recentlyUsedRange => !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
-        );
-        recentlyUsedRanges =
-          recentlyUsedRanges.length > MAX_RECENTLY_USED_RANGES
-            ? [{ start, end }, ...recentlyUsedRanges.slice(0, MAX_RECENTLY_USED_RANGES)]
-            : [{ start, end }, ...recentlyUsedRanges];
+        const recentlyUsedRanges = [
+          { start, end },
+          ...take(
+            MAX_RECENTLY_USED_RANGES,
+            prevState.recentlyUsedRanges.filter(
+              recentlyUsedRange =>
+                !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
+            )
+          ),
+        ];
 
         return {
           recentlyUsedRanges,
