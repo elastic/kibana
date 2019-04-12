@@ -27,17 +27,7 @@ const appleKeyboard = Boolean(
 
 const primaryUpdate = state => state.primaryUpdate;
 
-const gestureStatePrev = select(
-  scene =>
-    scene.gestureState || {
-      cursor: {
-        x: 0,
-        y: 0,
-      },
-      mouseIsDown: false,
-      mouseButtonState: { buttonState: 'up', downX: null, downY: null },
-    }
-)(scene);
+const gestureStatePrev = select(scene => scene.gestureState)(scene);
 
 /**
  * Gestures - derived selectors for transient state
