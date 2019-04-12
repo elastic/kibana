@@ -168,7 +168,7 @@ export default class ClusterManager {
       fromRoot('src/legacy/server'),
       fromRoot('src/legacy/ui'),
       fromRoot('src/legacy/utils'),
-      fromRoot('x-pack/common'),
+      fromRoot('x-pack/legacy/common'),
       fromRoot('x-pack/legacy/plugins'),
       fromRoot('x-pack/legacy/server'),
       fromRoot('config'),
