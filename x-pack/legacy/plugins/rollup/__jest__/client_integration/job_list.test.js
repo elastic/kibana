@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import axios from 'axios';
 
-import { registerTestBed, nextTick } from '../../../../test_utils';
+import { registerTestBed, nextTick } from '../../../../../test_utils';
 import { createRollupJobsStore } from '../../public/crud_app/store';
 import { setHttp, registerRouter, getRouter } from '../../public/crud_app/services';
 import { JobList } from '../../public/crud_app/sections/job_list';

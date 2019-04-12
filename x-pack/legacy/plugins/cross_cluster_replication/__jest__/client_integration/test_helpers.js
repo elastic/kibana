@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed, findTestSubject } from '../../../../test_utils';
+import { registerTestBed, findTestSubject } from '../../../../../test_utils';
 import { ccrStore } from '../../public/app/store';
 import { setHttpClient } from '../../public/app/services/api';
 import routing from '../../public/app/services/routing';
@@ -150,7 +150,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) =
   return userActions[section]();
 };
 
-export { nextTick, getRandomString, findTestSubject } from '../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
 export const initTestBed = (component, props = {}, options) => {
   const testBed = registerTestBed(component, {}, ccrStore)(props, options);

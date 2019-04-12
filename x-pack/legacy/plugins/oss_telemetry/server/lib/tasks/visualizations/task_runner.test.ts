@@ -10,7 +10,7 @@ import {
   getMockCallWithInternal,
   getMockKbnServer,
   getMockTaskInstance,
-} from '../../../../test_utils';
+} from '../../../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
 
 describe('visualizationsTaskRunner', () => {

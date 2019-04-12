@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed, findTestSubject } from '../../../../test_utils';
+import { registerTestBed, findTestSubject } from '../../../../../test_utils';
 import { createRemoteClustersStore } from '../../public/store';
 import { setHttpClient } from '../../public/services/api';
 import { registerRouter } from '../../public/services';
@@ -92,7 +92,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
   return userActions[section]();
 };
 
-export { nextTick, getRandomString, findTestSubject } from '../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
 export const initTestBed = (component, props = {}, options) => {
   const testBed = registerTestBed(component, {}, createRemoteClustersStore())(props, options);

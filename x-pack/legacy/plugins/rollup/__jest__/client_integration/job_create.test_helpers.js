@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed } from '../../../../test_utils';
+import { registerTestBed } from '../../../../../test_utils';
 import { rollupJobsStore } from '../../public/crud_app/store';
 import {
   setHttp,
@@ -103,7 +103,7 @@ export const initTestBed = () => {
   };
 };
 
-export { nextTick } from '../../../../test_utils';
+export { nextTick } from '../../../../../test_utils';
 
 export const mockServerResponses = server => {
   const mockIndexPatternValidityResponse = (response) => {

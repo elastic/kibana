@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { PluginStatement } from '../plugin_statement';
-import { shallowWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
+import { shallowWithIntl } from '../../../../../../../../../test_utils/enzyme_helpers';
 
 import { EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 

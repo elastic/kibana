@@ -9,7 +9,7 @@ import { camelCase } from 'lodash';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore
-import { TestKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
+import { TestKbnServerConfig } from '../../../../../../../../test_utils/kbn_server_config';
 import { CONFIG_PREFIX } from '../../../../../common/constants/plugin';
 import { PLUGIN } from './../../../../../common/constants/plugin';
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';

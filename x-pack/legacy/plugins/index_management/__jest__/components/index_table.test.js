@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/store/actions';
 import { indexManagementStore } from '../../public/store';
 import { BASE_PATH } from '../../common/constants';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import { setHttpClient } from '../../public/services/api';

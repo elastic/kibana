@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { SummaryStatus } from './summary_status';
 
 describe('Summary Status Component', () => {

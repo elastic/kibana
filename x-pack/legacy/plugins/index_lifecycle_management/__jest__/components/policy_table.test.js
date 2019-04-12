@@ -8,7 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { fetchedPolicies } from '../../public/store/actions';
 import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { PolicyTable } from '../../public/sections/policy_table';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 // axios has a $http like interface so using it to simulate $http
