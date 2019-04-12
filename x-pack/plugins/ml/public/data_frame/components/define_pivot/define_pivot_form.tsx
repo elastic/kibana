@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
@@ -223,11 +223,9 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiText>
-          <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
-
-          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
-        </EuiText>
+        <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
+        <EuiSpacer size="l" />
+        <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,9 +18,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiText,
+  EuiTitle,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
@@ -196,69 +199,73 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   }
 
   return (
-    <Fragment>
+    <EuiPanel>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <h3>
-            {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-              defaultMessage: 'Source Index {indexPatternTitle}',
-              values: { indexPatternTitle: indexPattern.title },
-            })}
-          </h3>
+          <EuiTitle size="xs">
+            <span>
+              {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+                defaultMessage: 'Source Index {indexPatternTitle}',
+                values: { indexPatternTitle: indexPattern.title },
+              })}
+            </span>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
-                <span>
+                <EuiText size="s">
                   {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
                     defaultMessage:
                       'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
                   })}
-                </span>
+                </EuiText>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="popover"
-                button={
-                  <EuiButtonIcon
-                    iconType="gear"
-                    onClick={toggleColumnsPopover}
-                    aria-label={i18n.translate(
-                      'xpack.ml.dataframe.sourceIndexPreview.selectColumnsAriaLabel',
+              <EuiText size="s">
+                <EuiPopover
+                  id="popover"
+                  button={
+                    <EuiButtonIcon
+                      iconType="gear"
+                      onClick={toggleColumnsPopover}
+                      aria-label={i18n.translate(
+                        'xpack.ml.dataframe.sourceIndexPreview.selectColumnsAriaLabel',
+                        {
+                          defaultMessage: 'Select columns',
+                        }
+                      )}
+                    />
+                  }
+                  isOpen={isColumnsPopoverVisible}
+                  closePopover={closeColumnsPopover}
+                  ownFocus
+                >
+                  <EuiPopoverTitle>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.sourceIndexPreview.selectFieldsPopoverTitle',
                       {
-                        defaultMessage: 'Select columns',
+                        defaultMessage: 'Select Fields',
                       }
                     )}
-                  />
-                }
-                isOpen={isColumnsPopoverVisible}
-                closePopover={closeColumnsPopover}
-                ownFocus
-              >
-                <EuiPopoverTitle>
-                  {i18n.translate(
-                    'xpack.ml.dataframe.sourceIndexPreview.selectFieldsPopoverTitle',
-                    {
-                      defaultMessage: 'Select Fields',
-                    }
-                  )}
-                </EuiPopoverTitle>
-                <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
-                  {docFields.map(d => (
-                    <EuiCheckbox
-                      key={d}
-                      id={d}
-                      label={d}
-                      checked={selectedFields.includes(d)}
-                      onChange={() => toggleColumn(d)}
-                      disabled={selectedFields.includes(d) && selectedFields.length === 1}
-                    />
-                  ))}
-                </div>
-              </EuiPopover>
+                  </EuiPopoverTitle>
+                  <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
+                    {docFields.map(d => (
+                      <EuiCheckbox
+                        key={d}
+                        id={d}
+                        label={d}
+                        checked={selectedFields.includes(d)}
+                        onChange={() => toggleColumn(d)}
+                        disabled={selectedFields.includes(d) && selectedFields.length === 1}
+                      />
+                    ))}
+                  </div>
+                </EuiPopover>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -276,6 +283,6 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         isExpandable={true}
         sorting={sorting}
       />
-    </Fragment>
+    </EuiPanel>
   );
 });

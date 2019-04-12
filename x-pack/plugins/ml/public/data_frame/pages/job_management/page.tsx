@@ -12,10 +12,11 @@ import {
   EuiButton,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPanel,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -28,31 +29,32 @@ function newJob() {
 export const Page: SFC = () => (
   <EuiPage>
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.jobsList.dataFrameTitle"
-                  defaultMessage="Data frame"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            <EuiButton fill onClick={newJob} iconType="plusInCircle">
+      <EuiPageContentHeader>
+        <EuiPageContentHeaderSection>
+          <EuiTitle>
+            <h1>
               <FormattedMessage
-                id="xpack.ml.dataframe.jobsList.createDataFrameButton"
-                defaultMessage="Create data frame"
+                id="xpack.ml.dataframe.jobsList.dataFrameTitle"
+                defaultMessage="Data frame jobs"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
+            </h1>
+          </EuiTitle>
+        </EuiPageContentHeaderSection>
+        <EuiPageContentHeaderSection>
+          <EuiButton fill onClick={newJob} iconType="plusInCircle" size="s">
+            <FormattedMessage
+              id="xpack.ml.dataframe.jobsList.createDataFrameButton"
+              defaultMessage="Create data frame"
+            />
+          </EuiButton>
+        </EuiPageContentHeaderSection>
+      </EuiPageContentHeader>
+      <EuiPageContentBody>
+        <EuiSpacer size="l" />
+        <EuiPanel>
           <DataFrameJobList />
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPanel>
+      </EuiPageContentBody>
     </EuiPageBody>
   </EuiPage>
 );

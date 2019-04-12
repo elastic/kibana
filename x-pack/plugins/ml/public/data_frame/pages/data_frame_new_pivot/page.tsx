@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -23,23 +23,22 @@ import { Wizard } from './wizard';
 export const Page: SFC = () => (
   <EuiPage>
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
-                  defaultMessage="New data frame"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
-          <Wizard />
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageContentHeader>
+        <EuiPageContentHeaderSection>
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
+                defaultMessage="New data frame"
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageContentHeaderSection>
+      </EuiPageContentHeader>
+      <EuiPageContentBody>
+        <EuiSpacer size="l" />
+        <Wizard />
+      </EuiPageContentBody>
     </EuiPageBody>
   </EuiPage>
 );
