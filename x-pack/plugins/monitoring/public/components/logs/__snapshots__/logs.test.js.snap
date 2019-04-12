@@ -96,7 +96,7 @@ exports[`Logs should render a reason if the logs are disabled 1`] = `
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 15 total logs
+      Showing the most recent logs for this cluster, up to 15 total logs.
     </p>
   </EuiText>
   <EuiSpacer
@@ -158,7 +158,7 @@ exports[`Logs should render normally 1`] = `
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 10 total logs
+      Showing the most recent logs for this cluster, up to 10 total logs.
     </p>
   </EuiText>
   <EuiSpacer
