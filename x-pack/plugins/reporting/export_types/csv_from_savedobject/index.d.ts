@@ -110,8 +110,13 @@ export interface SearchPanel {
   timerange: TimeRangeParams;
 }
 
+export interface SearchSourceQuery {
+  query: string;
+  language: string;
+}
+
 export interface SearchSource {
-  query: any;
+  query: SearchSourceQuery;
   filter: any[];
 }
 
