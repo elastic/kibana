@@ -170,7 +170,7 @@ export default class ClusterManager {
       fromRoot('src/legacy/utils'),
       fromRoot('x-pack/common'),
       fromRoot('x-pack/legacy/plugins'),
-      fromRoot('x-pack/server'),
+      fromRoot('x-pack/legacy/server'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));

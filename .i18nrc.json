@@ -41,7 +41,7 @@
     "xpack.rollupJobs": "x-pack/legacy/plugins/rollup",
     "xpack.searchProfiler": "x-pack/legacy/plugins/searchprofiler",
     "xpack.security": "x-pack/legacy/plugins/security",
-    "xpack.server": "x-pack/server",
+    "xpack.server": "x-pack/legacy/server",
     "xpack.spaces": "x-pack/legacy/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/legacy/plugins/upgrade_assistant",
     "xpack.uptime": "x-pack/legacy/plugins/uptime",
