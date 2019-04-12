@@ -49,13 +49,13 @@ export async function findRelationships(type, id, options = {}) {
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,
-        direction: 'To',
+        relationship: 'child',
       })),
     injectMetaAttributes(referencedResponse.saved_objects, savedObjectSchemas)
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,
-        direction: 'From',
+        relationship: 'parent',
       })),
   );
 }

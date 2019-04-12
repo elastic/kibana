@@ -30,7 +30,7 @@ export default function ({ getService }) {
         .uuid()
         .required(),
       type: Joi.string().required(),
-      direction: Joi.string().valid('To', 'From').required(),
+      relationship: Joi.string().valid('parent', 'child').required(),
       meta: Joi.object().keys({
         title: Joi.string().required(),
         icon: Joi.string().required(),
@@ -67,7 +67,7 @@ export default function ({ getService }) {
               {
                 id: '8963ca30-3224-11e8-a572-ffca06da1357',
                 type: 'index-pattern',
-                direction: 'To',
+                relationship: 'child',
                 meta: {
                   title: 'saved_objects*',
                   icon: 'indexPatternApp',
@@ -81,7 +81,7 @@ export default function ({ getService }) {
               {
                 id: 'a42c0580-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
-                direction: 'From',
+                relationship: 'parent',
                 meta: {
                   title: 'VisualizationFromSavedSearch',
                   icon: 'visualizeApp',
@@ -122,7 +122,7 @@ export default function ({ getService }) {
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
-                direction: 'To',
+                relationship: 'child',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
@@ -136,7 +136,7 @@ export default function ({ getService }) {
               {
                 id: 'a42c0580-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
-                direction: 'To',
+                relationship: 'child',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
@@ -179,7 +179,7 @@ export default function ({ getService }) {
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
                 type: 'search',
-                direction: 'To',
+                relationship: 'child',
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
@@ -193,7 +193,7 @@ export default function ({ getService }) {
               {
                 id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
                 type: 'dashboard',
-                direction: 'From',
+                relationship: 'parent',
                 meta: {
                   icon: 'dashboardApp',
                   title: 'Dashboard',
@@ -235,7 +235,7 @@ export default function ({ getService }) {
               {
                 id: '960372e0-3224-11e8-a572-ffca06da1357',
                 type: 'search',
-                direction: 'From',
+                relationship: 'parent',
                 meta: {
                   icon: 'search',
                   title: 'OneRecord',
@@ -249,7 +249,7 @@ export default function ({ getService }) {
               {
                 id: 'add810b0-3224-11e8-a572-ffca06da1357',
                 type: 'visualization',
-                direction: 'From',
+                relationship: 'parent',
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',

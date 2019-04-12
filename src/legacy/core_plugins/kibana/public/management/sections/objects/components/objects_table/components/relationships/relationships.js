@@ -136,14 +136,36 @@ class RelationshipsUI extends Component {
         },
       },
       {
-        field: 'direction',
+        field: 'relationship',
         name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnDirectionName',
-          defaultMessage: 'Direction',
+          id: 'kbn.management.objects.objectsTable.relationships.columnRelationshipName',
+          defaultMessage: 'Relationship',
         }),
         dataType: 'string',
         sortable: false,
-        width: '75px',
+        width: '100px',
+        render: relationship => {
+          if (relationship === 'parent') {
+            return (
+              <EuiText size="s">
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.relationships.columnRelationship.parentAsValue"
+                  defaultMessage="Parent"
+                />
+              </EuiText>
+            );
+          }
+          if (relationship === 'child') {
+            return (
+              <EuiText size="s">
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.relationships.columnRelationship.childAsValue"
+                  defaultMessage="Child"
+                />
+              </EuiText>
+            );
+          }
+        },
       },
       {
         field: 'meta.title',
@@ -196,6 +218,48 @@ class RelationshipsUI extends Component {
       });
     }
 
+    const search = {
+      filters: [
+        {
+          type: 'field_value_selection',
+          field: 'relationship',
+          name: intl.formatMessage({
+            id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
+            defaultMessage: 'Relationship',
+          }),
+          multiSelect: 'or',
+          options: [
+            {
+              value: 'parent',
+              name: 'parent',
+              view: intl.formatMessage({
+                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
+                defaultMessage: 'Parent',
+              }),
+            },
+            {
+              value: 'child',
+              name: 'child',
+              view: intl.formatMessage({
+                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
+                defaultMessage: 'Child',
+              }),
+            },
+          ],
+        },
+        {
+          type: 'field_value_selection',
+          field: 'type',
+          name: intl.formatMessage({
+            id: 'kbn.management.objects.objectsTable.relationships.search.filters.type.name',
+            defaultMessage: 'Type',
+          }),
+          multiSelect: 'or',
+          options: [...filterTypesMap.values()],
+        },
+      ],
+    };
+
     return (
       <div>
         <EuiTitle size="s">
@@ -210,17 +274,7 @@ class RelationshipsUI extends Component {
           items={relationships}
           columns={columns}
           pagination={true}
-          search={{
-            filters: [
-              {
-                type: 'field_value_selection',
-                field: 'type',
-                name: 'Type',
-                multiSelect: 'or',
-                options: [...filterTypesMap.values()],
-              },
-            ],
-          }}
+          search={search}
         />
       </div>
     );

@@ -153,7 +153,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta: {
           icon: 'visualizeApp',
           title: 'Foo',
@@ -167,7 +167,7 @@ describe('findRelationships', () => {
       {
         id: '2',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta: {
           icon: 'visualizeApp',
           title: 'Bar',
@@ -181,7 +181,7 @@ describe('findRelationships', () => {
       {
         id: '3',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta: {
           icon: 'visualizeApp',
           title: 'FooBar',
@@ -280,7 +280,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'index-pattern',
-        direction: 'To',
+        relationship: 'child',
         meta:
         {
           icon: 'indexPatternApp',
@@ -295,7 +295,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'dashboard',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'dashboardApp',
@@ -310,7 +310,7 @@ describe('findRelationships', () => {
       {
         id: '2',
         type: 'dashboard',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'dashboardApp',
@@ -399,7 +399,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'index-pattern',
-        direction: 'To',
+        relationship: 'child',
         meta:
         {
           icon: 'indexPatternApp',
@@ -414,7 +414,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -429,7 +429,7 @@ describe('findRelationships', () => {
       {
         id: '2',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -444,7 +444,7 @@ describe('findRelationships', () => {
       {
         id: '3',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -535,7 +535,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -550,7 +550,7 @@ describe('findRelationships', () => {
       {
         id: '2',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -565,7 +565,7 @@ describe('findRelationships', () => {
       {
         id: '3',
         type: 'visualization',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'visualizeApp',
@@ -580,7 +580,7 @@ describe('findRelationships', () => {
       {
         id: '1',
         type: 'search',
-        direction: 'From',
+        relationship: 'parent',
         meta:
         {
           icon: 'search',
