@@ -500,7 +500,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
       const field = await testSubjects.find('editorFieldScript');
-      await field.clearValue();
+      const currentValue = await field.getAttribute('value');
+      if (script === currentValue) {
+        return;
+      }
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type(script);
     }
 
@@ -533,7 +537,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
         await comboBox.set('additionalFieldsSelect', additionalField);
+        await testSubjects.find('scriptedFieldPreview');
         await testSubjects.click('runScriptButton');
+        await testSubjects.waitForDeleted('.euiLoadingSpinner');
       }
       let scriptResults;
       await retry.try(async () => {
