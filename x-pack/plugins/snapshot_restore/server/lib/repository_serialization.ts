@@ -35,6 +35,9 @@ const flatten = (source: any, path: any[] = []): any => {
 };
 
 export const deserializeRepositorySettings = (settings: RepositorySettings): RepositorySettings => {
+  // HDFS repositories return settings like:
+  // `{ security: { principal: 'some_value'}, conf: { foo: { bar: 'another_value' }}}`
+  // Flattening such settings makes it easier to consume in the UI, for both viewing and updating
   const flattenedSettings: RepositorySettings = flatten(settings);
   const deserializedSettings: RepositorySettings = {};
 
