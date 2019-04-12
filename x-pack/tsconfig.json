@@ -28,7 +28,7 @@
       ],
       "test_utils/*": [
         "x-pack/test_utils/*"
-      ]
+      ],
     },
     "types": [
       "node",

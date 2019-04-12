@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  data-test-subj="dashboardAddPanel"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={true}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="Add panels"
+          id="kbn.embeddables.addPanelsTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <SavedObjectFinder
+      noItemsMessage="No matching objects found."
+      onChoose={[Function]}
+      savedObjectMetaData={Array []}
+      showFilter={true}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={true}
+      >
+        <EuiSuperSelect
+          compressed={false}
+          data-test-subj="createNew"
+          fullWidth={false}
+          hasDividers={false}
+          isInvalid={false}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "inputDisplay": <EuiText>
+                  <FormattedMessage
+                    defaultMessage="Create new ..."
+                    id="kbn.embeddables.addPanel.createNewDefaultOption"
+                    values={Object {}}
+                  />
+                </EuiText>,
+                "value": "createNew",
+              },
+              Object {
+                "data-test-subj": "createNew-hello_world",
+                "inputDisplay": <EuiText>
+                  <FormattedMessage
+                    defaultMessage="Create new {factoryName}"
+                    id="kbn.embeddables.addPanel.createNew"
+                    values={
+                      Object {
+                        "factoryName": "hello_world",
+                      }
+                    }
+                  />
+                </EuiText>,
+                "value": "hello_world",
+              },
+            ]
+          }
+          valueOfSelected="createNew"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;

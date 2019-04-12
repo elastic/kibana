@@ -21,6 +21,7 @@ import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
+import { SavedObject } from 'ui/saved_objects/saved_object';
 
 export interface TimeRange {
   from: string;
@@ -48,13 +49,14 @@ export interface Query {
   query: string;
 }
 
-export interface VisSavedObject {
+export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
   searchSource: SearchSource;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
+  id: string;
 }
 
 interface VisResponseValue {

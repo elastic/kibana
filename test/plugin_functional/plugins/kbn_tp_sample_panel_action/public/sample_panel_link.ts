@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
+import {
+  ContextMenuAction,
+  ContextMenuActionsRegistryProvider,
+} from 'plugins/embeddable_api/index';
 
 class SamplePanelLink extends ContextMenuAction {
   constructor() {

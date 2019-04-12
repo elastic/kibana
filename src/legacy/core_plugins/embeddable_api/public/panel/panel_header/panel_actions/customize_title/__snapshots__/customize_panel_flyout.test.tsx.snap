@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot 1`] = `
+<Fragment>
+  <EuiFlyoutHeader>
+    <EuiTitle
+      data-test-subj="customizePanelTitle"
+      size="s"
+    >
+      <h1>
+        Joe foo
+      </h1>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <InjectIntl(CustomizeTitleFormUi)
+      onReset={[Function]}
+      onUpdatePanelTitle={[Function]}
+      title="Joe foo"
+    />
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      onClick={[Function]}
+      size="m"
+      type="button"
+    >
+      Save & Close
+    </EuiButton>
+  </EuiFlyoutBody>
+</Fragment>
+`;

@@ -126,3 +126,31 @@ export function renderWithIntl<T>(
 
   return render(nodeWithIntlProp(node), options);
 }
+
+export const nextTick = () => new Promise(res => process.nextTick(res));
+const MAX_WAIT = 30;
+export const waitFor = async (fn: () => void, wrapper?: ReactWrapper) => {
+  console.log('in waitFor');
+  await nextTick();
+  if (wrapper) {
+    wrapper.update();
+  }
+  let errorCount = 0;
+  while (true) {
+    try {
+      fn();
+      return;
+    } catch (e) {
+      errorCount++;
+      console.log('Error: ', e);
+      await nextTick();
+      if (wrapper) {
+        wrapper.update();
+      }
+      if (errorCount > MAX_WAIT) {
+        throw new Error(e);
+        return;
+      }
+    }
+  }
+};

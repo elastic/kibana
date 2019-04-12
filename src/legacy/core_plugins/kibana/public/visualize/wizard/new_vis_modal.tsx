@@ -34,6 +34,7 @@ interface TypeSelectionProps {
   onClose: () => void;
   visTypesRegistry: VisType[];
   editorParams?: string[];
+  onCreate?: (options: { visType: string, searchId?: string, searchType?: string }) => void;
 }
 
 interface TypeSelectionState {
@@ -109,7 +110,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     } else {
       const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
       this.props.onClose();
-      location.assign(`${baseUrl}${params.join('&')}`);
+      if (!this.props.onCreate) {
+        location.assign(`${baseUrl}${params.join('&')}`);
+      } else {
+        this.props.onCreate({ visType: this.state.visType!.name });
+      }
     }
   };
 
@@ -121,7 +126,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
       ...this.props.editorParams!,
     ];
-    location.assign(`${baseUrl}${params.join('&')}`);
+    if (!this.props.onCreate) {
+      location.assign(`${baseUrl}${params.join('&')}`);
+    } else {
+      this.props.onCreate({ visType: this.state.visType!.name, searchType, searchId });
+    }
   };
 }
 

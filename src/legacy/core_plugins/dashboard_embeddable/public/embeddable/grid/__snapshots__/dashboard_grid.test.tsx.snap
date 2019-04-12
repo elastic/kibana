@@ -1,0 +1,229 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DashboardGrid removes panel when removed from container 1`] = `
+<SizeMe(ResponsiveGrid)
+  isViewMode={true}
+  layout={Array []}
+  onLayoutChange={[Function]}
+/>
+`;
+
+exports[`renders DashboardGrid 1`] = `
+<SizeMe(ResponsiveGrid)
+  isViewMode={true}
+  layout={
+    Array [
+      Object {
+        "h": 6,
+        "i": "1",
+        "w": 6,
+        "x": 0,
+        "y": 0,
+      },
+      Object {
+        "h": 6,
+        "i": "2",
+        "w": 6,
+        "x": 6,
+        "y": 6,
+      },
+    ]
+  }
+  onLayoutChange={[Function]}
+>
+  <div
+    className=""
+    key="1"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
+  >
+    <InjectIntl(DashboardPanelUi)
+      container={
+        DashboardContainer {
+          "anyChangeListeners": Array [
+            [Function],
+            [Function],
+          ],
+          "destoyed": false,
+          "embeddableFactories": EmbeddableFactoryRegistry {
+            "factories": Object {
+              "hello_world": HelloWorldEmbeddableFactory {
+                "name": "hello_world",
+                "savedObjectMetaData": undefined,
+              },
+            },
+          },
+          "embeddables": Object {},
+          "id": "123",
+          "input": Object {
+            "customization": Object {},
+            "filters": Array [],
+            "id": "123",
+            "isFullScreenMode": false,
+            "panels": Object {
+              "1": Object {
+                "embeddableId": "1",
+                "gridData": Object {
+                  "h": 6,
+                  "i": "1",
+                  "w": 6,
+                  "x": 0,
+                  "y": 0,
+                },
+                "explicitInput": Object {
+                  "firstName": "Bob",
+                },
+                "type": "hello_world",
+              },
+              "2": Object {
+                "embeddableId": "2",
+                "gridData": Object {
+                  "h": 6,
+                  "i": "2",
+                  "w": 6,
+                  "x": 6,
+                  "y": 6,
+                },
+                "partialInput": Object {
+                  "firstName": "Stacey",
+                },
+                "type": "hello_world",
+              },
+            },
+            "query": Object {
+              "language": "kuery",
+              "query": "hi",
+            },
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+            "title": "My Dashboard",
+            "useMargins": false,
+            "viewMode": "view",
+          },
+          "inputChangeListeners": Array [
+            [Function],
+          ],
+          "isContainer": true,
+          "onExitFullScreenMode": [Function],
+          "onPanelsUpdated": [Function],
+          "output": Object {
+            "embeddableLoaded": Object {},
+          },
+          "outputChangeListeners": Array [],
+          "panelContainer": undefined,
+          "parent": undefined,
+          "parentChangesUnsubscribe": undefined,
+          "type": "dashboard",
+        }
+      }
+      embeddableId="1"
+    />
+  </div>
+  <div
+    className=""
+    key="2"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
+  >
+    <InjectIntl(DashboardPanelUi)
+      container={
+        DashboardContainer {
+          "anyChangeListeners": Array [
+            [Function],
+            [Function],
+          ],
+          "destoyed": false,
+          "embeddableFactories": EmbeddableFactoryRegistry {
+            "factories": Object {
+              "hello_world": HelloWorldEmbeddableFactory {
+                "name": "hello_world",
+                "savedObjectMetaData": undefined,
+              },
+            },
+          },
+          "embeddables": Object {},
+          "id": "123",
+          "input": Object {
+            "customization": Object {},
+            "filters": Array [],
+            "id": "123",
+            "isFullScreenMode": false,
+            "panels": Object {
+              "1": Object {
+                "embeddableId": "1",
+                "gridData": Object {
+                  "h": 6,
+                  "i": "1",
+                  "w": 6,
+                  "x": 0,
+                  "y": 0,
+                },
+                "partialInput": Object {
+                  "firstName": "Bob",
+                },
+                "type": "hello_world",
+              },
+              "2": Object {
+                "embeddableId": "2",
+                "gridData": Object {
+                  "h": 6,
+                  "i": "2",
+                  "w": 6,
+                  "x": 6,
+                  "y": 6,
+                },
+                "partialInput": Object {
+                  "firstName": "Stacey",
+                },
+                "type": "hello_world",
+              },
+            },
+            "query": Object {
+              "language": "kuery",
+              "query": "hi",
+            },
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+            "title": "My Dashboard",
+            "useMargins": false,
+            "viewMode": "view",
+          },
+          "inputChangeListeners": Array [
+            [Function],
+          ],
+          "isContainer": true,
+          "onExitFullScreenMode": [Function],
+          "onPanelsUpdated": [Function],
+          "output": Object {
+            "embeddableLoaded": Object {},
+          },
+          "outputChangeListeners": Array [],
+          "panelContainer": undefined,
+          "parent": undefined,
+          "parentChangesUnsubscribe": undefined,
+          "type": "dashboard",
+        }
+      }
+      embeddableId="2"
+    />
+  </div>
+</SizeMe(ResponsiveGrid)>
+`;
+
+exports[`renders DashboardGrid with no visualizations 1`] = `
+<SizeMe(ResponsiveGrid)
+  isViewMode={true}
+  layout={Array []}
+  onLayoutChange={[Function]}
+/>
+`;

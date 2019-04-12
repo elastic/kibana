@@ -56,6 +56,7 @@ declare module 'hapi' {
     savedObjects: SavedObjectsService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
+    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
   }
 
   interface Request {

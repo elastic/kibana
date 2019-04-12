@@ -6,15 +6,18 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import { EmbeddableFactory } from 'ui/embeddable';
+import { EmbeddableFactory, embeddableFactories } from '../../../../../src/legacy/core_plugins/embeddable_api/public';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
+
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import '../angular/services/gis_map_saved_object_loader';
+import 'ui/vis/map/service_settings';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
-  constructor(gisMapSavedObjectLoader) {
+  constructor() {
     super({
       name: 'map',
       savedObjectMetaData: {
@@ -25,7 +28,6 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         getIconForSavedObject: () => APP_ICON
       },
     });
-    this._savedObjectLoader = gisMapSavedObjectLoader;
   }
 
   async _getIndexPatterns(indexPatternIds = []) {
@@ -42,16 +44,20 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return _.compact(indexPatterns);
   }
 
-  async create(panelMetadata, onEmbeddableStateChanged) {
-    const savedMap = await this._savedObjectLoader.get(panelMetadata.id);
+  async create(initialInput) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedObjectLoader = $injector.get('gisMapSavedObjectLoader');
+
+    const savedMap = await savedObjectLoader.get(initialInput.savedObjectId);
     const indexPatterns = await this._getIndexPatterns(savedMap.indexPatternIds);
 
     return new MapEmbeddable({
-      onEmbeddableStateChanged,
-      embeddableConfig: panelMetadata.embeddableConfig,
       savedMap,
-      editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
+      editUrl: chrome.addBasePath(createMapPath(initialInput.savedObjectId)),
       indexPatterns,
+      ...initialInput
     });
   }
 }
+
+embeddableFactories.registerFactory(new MapEmbeddableFactory());

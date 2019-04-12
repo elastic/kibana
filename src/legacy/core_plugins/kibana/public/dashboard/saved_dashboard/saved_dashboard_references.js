@@ -25,7 +25,7 @@ export function extractReferences({ attributes, references = [] }) {
       throw new Error(`"type" attribute is missing from panel "${i}"`);
     }
     if (!panel.id) {
-      throw new Error(`"id" attribute is missing from panel "${i}"`);
+      return;
     }
     panel.panelRefName = `panel_${i}`;
     panelReferences.push({

@@ -1,0 +1,305 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DashboardPanel renders an embeddable when it is done loading 1`] = `
+<DashboardPanelUi
+  container={
+    DashboardContainer {
+      "anyChangeListeners": Array [
+        [Function],
+        [Function],
+      ],
+      "destoyed": false,
+      "embeddableFactories": EmbeddableFactoryRegistry {
+        "factories": Object {
+          "FILTERABLE_EMBEDDABLE": FilterableEmbeddableFactory {
+            "name": "FILTERABLE_EMBEDDABLE",
+            "savedObjectMetaData": undefined,
+          },
+          "dashboard": DashboardContainerFactory {
+            "name": "dashboard",
+            "savedObjectMetaData": undefined,
+          },
+          "hello_world": HelloWorldEmbeddableFactory {
+            "name": "hello_world",
+            "savedObjectMetaData": undefined,
+          },
+        },
+      },
+      "embeddables": Object {
+        "123": HelloWorldEmbeddable {
+          "anyChangeListeners": Array [],
+          "destoyed": false,
+          "id": "123",
+          "input": Object {
+            "filters": Array [],
+            "firstName": "Sue",
+            "hidePanelTitles": undefined,
+            "id": "123",
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
+            "refreshConfig": undefined,
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+            "viewMode": "edit",
+          },
+          "inputChangeListeners": Array [
+            [Function],
+          ],
+          "isContainer": false,
+          "node": <div
+            class="embeddable-root panel-content"
+          >
+            <div>
+              Hello World!
+              <br />
+               Sincerly, $
+              
+            </div>
+          </div>,
+          "output": Object {
+            "birthLastName": undefined,
+            "birthName": "Sue",
+            "name": "Sue",
+          },
+          "outputChangeListeners": Array [
+            [Function],
+          ],
+          "panelContainer": <div
+            class="embPanel panel-content"
+            id="embeddedPanel"
+          >
+            <div
+              class="euiPanel embPanel embPanel--editing"
+              data-test-subj="embeddablePanel"
+            >
+              <div
+                class="embPanel__header embPanel__header--floater"
+                data-test-subj="dashboardPanelHeading-"
+              >
+                <div
+                  aria-label="Dashboard panel: "
+                  class="embPanel__title embPanel__dragger"
+                  data-test-subj="dashboardPanelTitle"
+                />
+                <div
+                  class="euiPopover euiPopover--anchorDownRight euiPopover--withTitle embPanel_optionsMenuPopover"
+                  data-test-subj="embeddablePanelContextMenuClosed"
+                  id="dashboardPanelContextMenu"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <button
+                      aria-label="Panel options"
+                      class="euiButtonIcon euiButtonIcon--text embPanel_optionsMenuButton"
+                      data-test-subj="embeddablePanelToggleMenuIcon"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                      >
+                        <defs>
+                          <path
+                            d="M.164 10.329L1.87 8 .163 5.67c.18-.601.43-1.19.758-1.757a8.197 8.197 0 0 1 1.142-1.535l2.872.313L6.099.05a8.166 8.166 0 0 1 3.8-.003l1.166 2.644 2.872-.313a8.166 8.166 0 0 1 1.899 3.293L14.13 8l1.706 2.33c-.18.601-.43 1.19-.758 1.757a8.197 8.197 0 0 1-1.142 1.535l-2.872-.313-1.164 2.641a8.166 8.166 0 0 1-3.8.003l-1.166-2.644-2.872.313a8.166 8.166 0 0 1-1.899-3.293zm4.663 1.986a1 1 0 0 1 1.023.591l.957 2.17c.79.134 1.597.132 2.387-.001l.956-2.169a1 1 0 0 1 1.023-.59l2.358.256a7.23 7.23 0 0 0 1.194-2.068l-1.401-1.913a1 1 0 0 1 0-1.182l1.4-1.912a7.165 7.165 0 0 0-1.192-2.069l-2.359.257a1 1 0 0 1-1.023-.591L9.193.924a7.165 7.165 0 0 0-2.387.001L5.85 3.094a1 1 0 0 1-1.023.59l-2.358-.256a7.23 7.23 0 0 0-1.194 2.068l1.401 1.913a1 1 0 0 1 0 1.182l-1.4 1.912c.28.751.681 1.45 1.192 2.069l2.359-.257zM8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-1a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
+                            id="gear-a"
+                          />
+                        </defs>
+                        <use
+                          xlink:href="#gear-a"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="embeddable-root panel-content"
+              >
+                <div>
+                  Hello World!
+                  <br />
+                   Sincerly, $
+                  
+                </div>
+              </div>
+            </div>
+          </div>,
+          "parent": [Circular],
+          "parentChangesUnsubscribe": [Function],
+          "type": "hello_world",
+          "unsubscribe": [Function],
+        },
+      },
+      "id": "123",
+      "input": Object {
+        "filters": Array [],
+        "id": "123",
+        "isFullScreenMode": false,
+        "panels": Object {
+          "123": Object {
+            "embeddableId": "123",
+            "gridData": Object {
+              "h": 15,
+              "i": "123",
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "partialInput": Object {
+              "firstName": "Sue",
+              "id": "123",
+            },
+            "type": "hello_world",
+          },
+        },
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "timeRange": Object {
+          "from": "now-15m",
+          "to": "now",
+        },
+        "title": "My Test Dashboard",
+        "useMargins": false,
+        "viewMode": "edit",
+      },
+      "inputChangeListeners": Array [],
+      "isContainer": true,
+      "onExitFullScreenMode": [Function],
+      "onPanelsUpdated": [Function],
+      "output": Object {
+        "embeddableLoaded": Object {
+          "123": true,
+        },
+      },
+      "outputChangeListeners": Array [
+        [Function],
+      ],
+      "panelContainer": undefined,
+      "parent": undefined,
+      "parentChangesUnsubscribe": undefined,
+      "type": "dashboard",
+    }
+  }
+  embeddableId="123"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <div
+    className="embPanel panel-content"
+    id="embeddedPanel"
+  />
+</DashboardPanelUi>
+`;

@@ -453,7 +453,7 @@ export class EmbeddedVisualizeHandler {
         }
         return data;
       })
-      .catch(this.handleDataLoaderError);
+     // .catch(this.handleDataLoaderError);
   };
 
   /**

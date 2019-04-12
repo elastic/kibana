@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { DashboardPanelContainer as DashboardPanel } from './dashboard_panel_container';
-export { createPanelState } from './panel_state';
+export { createPanelState } from './panel_utils';

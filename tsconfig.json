@@ -11,7 +11,13 @@
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
-      ]
+      ],
+      "plugins/dashboard_embeddable/*": [
+        "src/legacy/core_plugins/dashboard_embeddable/public/*"
+      ],
+      "plugins/embeddable_api/*": [
+        "src/legacy/core_plugins/embeddable_api/public/*"
+      ],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

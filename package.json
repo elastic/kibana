@@ -404,6 +404,7 @@
     "nock": "10.0.4",
     "node-sass": "^4.9.4",
     "normalize-path": "^3.0.0",
+    "nyc": "^14.0.0",
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
     "pngjs": "^3.4.0",

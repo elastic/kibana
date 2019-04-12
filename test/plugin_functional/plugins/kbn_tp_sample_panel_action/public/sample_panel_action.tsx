@@ -23,8 +23,8 @@ import { getNewPlatform } from 'ui/new_platform';
 import {
   ContextMenuAction,
   ContextMenuActionsRegistryProvider,
-  PanelActionAPI,
-} from 'ui/embeddable';
+  ExecuteActionContext,
+} from 'plugins/embeddable_api/index';
 
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
@@ -34,7 +34,7 @@ class SamplePanelAction extends ContextMenuAction {
       parentPanelId: 'mainMenu',
     });
   }
-  public onClick = ({ embeddable }: PanelActionAPI) => {
+  public onClick = ({ embeddable }: ExecuteActionContext) => {
     if (!embeddable) {
       return;
     }

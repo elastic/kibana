@@ -21,5 +21,5 @@ import { VisSavedObject } from 'ui/visualize/loader/types';
 
 export interface SavedVisualizations {
   urlFor: (id: string) => string;
-  get: (id: string) => Promise<VisSavedObject>;
+  get: (id?: string | { type: string, savedSearchId?: string; indexPattern?: string }) => Promise<VisSavedObject>;
 }

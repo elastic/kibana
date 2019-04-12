@@ -1,0 +1,52 @@
+{
+  "ui_action": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "type": {
+        "type": "text"
+      },
+      "embeddableType": {
+        "type": "text"
+      },
+      "embeddableId": {
+        "type": "text"
+      },
+      "embeddableTemplateMapping": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "configuration": {
+        "type": "text"
+      }
+    }
+  },
+  "ui_trigger": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "actions": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "embeddableType": {
+        "type": "text"
+      },
+      "embeddableId": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      }
+    }
+  }
+}

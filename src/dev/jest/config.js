@@ -44,7 +44,13 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
-    'src/legacy/core_plugins/metrics/**/*.js'
+    'src/legacy/core_plugins/metrics/**/*.js',
+    'src/legacy/core_plugins/embeddable_api/public/**/*',
+    '!src/legacy/core_plugins/embeddable_api/public/__test__/**/*',
+    '!src/legacy/core_plugins/embeddable_api/public/**/__snapshots__/**/*',
+    'src/legacy/core_plugins/dashboard_embeddable/public/**/*',
+    '!src/legacy/core_plugins/dashboard_embeddable/public/__test__/**/*',
+    '!src/legacy/core_plugins/dashboard_embeddable/public/**/__snapshots__/**/*',
   ],
   moduleNameMapper: {
     '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',

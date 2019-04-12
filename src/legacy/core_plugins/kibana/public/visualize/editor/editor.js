@@ -76,7 +76,7 @@ uiRoutes
         return savedVisualizations.get($route.current.params)
           .catch(redirectWhenMissing({
             '*': '/visualize'
-          }));
+          })); 
       }
     }
   })

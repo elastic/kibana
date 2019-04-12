@@ -26,11 +26,12 @@ import { NewVisModal } from './new_vis_modal';
 
 interface ShowNewVisModalParams {
   editorParams?: string[];
+  onCreate?: (options: { visType: string, searchId?: string, searchType?: string}) => void;
 }
 
 export function showNewVisModal(
   visTypeRegistry: VisType[],
-  { editorParams = [] }: ShowNewVisModalParams = {}
+  { editorParams = [], onCreate }: ShowNewVisModalParams = {},
 ) {
   const container = document.createElement('div');
   const onClose = () => {
@@ -46,6 +47,7 @@ export function showNewVisModal(
         onClose={onClose}
         visTypesRegistry={visTypeRegistry}
         editorParams={editorParams}
+        onCreate={onCreate}
       />
     </I18nContext>
   );
