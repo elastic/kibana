@@ -54,7 +54,27 @@ describe('xpack_usage', () => {
     expect(service.refreshNow).toBeInstanceOf(Function);
   });
 
-  it('requests a refresh based on the provided interval', async () => {
+  it('can be stopped', () => {
+    const xpackUsage = new XPackUsage(logger, { pollFrequencyInMillis: 10 });
+
+    xpackUsage.setup({ elasticsearch: esPlugin });
+
+    expectNotCallCluster();
+
+    jest.advanceTimersByTime(10);
+
+    expectCallCluster();
+
+    cluster.callWithInternalUser.mockReset();
+
+    xpackUsage.stop();
+
+    jest.advanceTimersByTime(20);
+
+    expectNotCallCluster();
+  });
+
+  it('requests a refresh based on the provided interval', () => {
     const xpackUsage = new XPackUsage(logger, { pollFrequencyInMillis: 10 });
 
     xpackUsage.setup({ elasticsearch: esPlugin });
@@ -66,7 +86,7 @@ describe('xpack_usage', () => {
     expectCallCluster();
   });
 
-  it('can be refreshed on demand', async () => {
+  it('can be refreshed on demand', () => {
     const xpackUsage = new XPackUsage(logger, { pollFrequencyInMillis: 1000000 });
 
     const service: XPackUsageContract = xpackUsage.setup({ elasticsearch: esPlugin });
@@ -79,7 +99,7 @@ describe('xpack_usage', () => {
     expectCallCluster();
   });
 
-  it('returns the xpack usage information from Elasticsearch', async () => {
+  it('returns the xpack usage information from Elasticsearch', () => {
     const xpackUsage = new XPackUsage(logger, { pollFrequencyInMillis: 10 });
 
     const service: XPackUsageContract = xpackUsage.setup({ elasticsearch: esPlugin });
