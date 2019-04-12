@@ -91,11 +91,12 @@ export interface IpOverviewHit {
 
 export interface DirectionBuckets {
   key: NetworkDirectionEcs;
+  doc_count?: number;
 }
 
 export interface DomainsBuckets {
   key: string;
-  timestamp: {
+  timestamp?: {
     value: number;
     value_as_string: string;
   };
@@ -110,6 +111,14 @@ export interface DomainsBuckets {
   };
   direction: {
     buckets: DirectionBuckets[];
+  };
+  firstSeen?: {
+    value: number;
+    value_as_string: string;
+  };
+  lastSeen?: {
+    value: number;
+    value_as_string: string;
   };
 }
 

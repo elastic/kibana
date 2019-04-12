@@ -146,7 +146,10 @@ const getDomainsEdges = (
   );
 };
 
-const formatDomainsEdges = (buckets: DomainsBuckets[], flowTarget: FlowTarget): DomainsEdges[] =>
+export const formatDomainsEdges = (
+  buckets: DomainsBuckets[],
+  flowTarget: FlowTarget
+): DomainsEdges[] =>
   buckets.map((bucket: DomainsBuckets) => ({
     node: {
       _id: bucket.key,

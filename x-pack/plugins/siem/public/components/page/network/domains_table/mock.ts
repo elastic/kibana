@@ -4,53 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDirectionEcs, NetworkTopNFlowData } from '../../../../graphql/types';
+import { DomainsData } from '../../../../graphql/types';
 
-export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
-  NetworkTopNFlow: {
-    totalCount: 524,
-    edges: [
-      {
-        node: {
-          source: {
-            ip: '8.8.8.8',
-            domain: ['test.domain.com'],
-            count: 1,
-          },
-          destination: null,
-          network: {
-            bytes: 3826633497,
-            packets: 4185805,
-            direction: [NetworkDirectionEcs.inbound],
-          },
+export const mockDomainsData: DomainsData = {
+  totalCount: 2,
+  edges: [
+    {
+      node: {
+        source: null,
+        destination: {
+          uniqueIpCount: 96,
+          domainName: 'samsungtv-kitchen.iot.sr.local.example.com',
+          firstSeen: null,
+          lastSeen: null,
         },
-        cursor: {
-          value: '8.8.8.8',
+        network: {
+          bytes: 1054651765,
+          direction: [],
+          packets: 707990,
         },
       },
-      {
-        node: {
-          source: {
-            ip: '9.9.9.9',
-            domain: ['test.domain.net', 'test.old.domain.net'],
-          },
-          destination: null,
-          network: {
-            bytes: 325909849,
-            packets: 221494,
-            direction: [NetworkDirectionEcs.inbound, NetworkDirectionEcs.outbound],
-          },
-        },
-        cursor: {
-          value: '9.9.9.9',
-        },
+      cursor: {
+        value: 'samsungtv-kitchen.iot.sr.local.example.com',
       },
-    ],
-    pageInfo: {
-      endCursor: {
-        value: '10',
-      },
-      hasNextPage: true,
     },
+    {
+      node: {
+        source: null,
+        destination: {
+          uniqueIpCount: 6,
+          domainName: '.row.exmaple.com',
+          firstSeen: null,
+          lastSeen: null,
+        },
+        network: {
+          bytes: 0,
+          direction: [],
+          packets: 0,
+        },
+      },
+      cursor: {
+        value: 'row.exmaple.com',
+      },
+    },
+    {
+      node: {
+        source: null,
+        destination: {
+          uniqueIpCount: 1,
+          domainName: '10.10.10.10',
+          firstSeen: null,
+          lastSeen: null,
+        },
+        network: {
+          bytes: 0,
+          direction: [],
+          packets: 0,
+        },
+      },
+      cursor: {
+        value: '10.10.10.10',
+      },
+    },
+  ],
+  pageInfo: {
+    endCursor: {
+      value: '10',
+    },
+    hasNextPage: false,
   },
 };

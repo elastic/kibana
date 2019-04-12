@@ -32,6 +32,7 @@ type valueof<T> = T[keyof T];
 export const getDomainsColumns = (
   ip: string,
   startDate: number,
+  endDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
@@ -56,11 +57,11 @@ export const getDomainsColumns = (
               and: [],
               enabled: true,
               id,
-              name: ip,
+              name: domainName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: domainNameAttr, value: ip },
-              queryDate: { from: startDate, to: Date.now() },
+              queryMatch: { field: domainNameAttr, value: domainName },
+              queryDate: { from: startDate, to: endDate },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

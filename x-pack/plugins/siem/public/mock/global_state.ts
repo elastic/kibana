@@ -73,7 +73,7 @@ export const mockGlobalState: State = {
         domains: {
           limit: 10,
           flowDirection: FlowDirection.uniDirectional,
-          domainsSortField: { field: DomainsFields.domainName, direction: Direction.desc },
+          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
       },
     },

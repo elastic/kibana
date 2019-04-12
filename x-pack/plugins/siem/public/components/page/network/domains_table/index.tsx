@@ -35,6 +35,7 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
+  endDate: number;
   startDate: number;
   type: networkModel.NetworkType;
 }
@@ -101,6 +102,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       nextCursor,
       updateDomainsLimit,
       startDate,
+      endDate,
       flowDirection,
       flowTarget,
       type,
@@ -108,7 +110,15 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
 
     return (
       <LoadMoreTable
-        columns={getDomainsColumns(ip, startDate, flowDirection, flowTarget, type, DomainsTableId)}
+        columns={getDomainsColumns(
+          ip,
+          startDate,
+          endDate,
+          flowDirection,
+          flowTarget,
+          type,
+          DomainsTableId
+        )}
         loadingTitle={i18n.DOMAINS}
         loading={loading}
         pageOfItems={data}

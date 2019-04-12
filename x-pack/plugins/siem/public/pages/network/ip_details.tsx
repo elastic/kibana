@@ -113,6 +113,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             refetch={refetch}
                             setQuery={setQuery}
                             startDate={from}
+                            endDate={to}
                             totalCount={totalCount}
                             type={networkModel.NetworkType.details}
                           />
