@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Snapshot as SnapshotType } from '../../../../common/graphql/types';
-import { Snapshot } from '../snapshot';
+import { SnapshotComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
   const snapshot: SnapshotType = {
@@ -31,7 +31,11 @@ describe('Snapshot component', () => {
 
   it('renders without errors', () => {
     const wrapper = shallowWithIntl(
-      <Snapshot dangerColor="#F050F0" successColor="#000000" snapshot={snapshot} />
+      <SnapshotComponent
+        colors={{ danger: '#F050F0', mean: '#001100', range: '#FF00FF', success: '#000000' }}
+        data={{ snapshot }}
+        loading={false}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });

@@ -59,7 +59,7 @@ class DashboardSaveModalUi extends React.Component {
     this.setState({
       timeRestore: event.target.checked,
     });
-  }
+  };
 
   renderDashboardSaveOptions() {
     return (
@@ -79,10 +79,6 @@ class DashboardSaveModalUi extends React.Component {
         </EuiFormRow>
 
         <EuiFormRow
-          label={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-            defaultMessage="Store time with dashboard"
-          />}
           helpText={<FormattedMessage
             id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
             defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
@@ -92,6 +88,10 @@ class DashboardSaveModalUi extends React.Component {
             data-test-subj="storeTimeWithDashboard"
             checked={this.state.timeRestore}
             onChange={this.onTimeRestoreChange}
+            label={<FormattedMessage
+              id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+              defaultMessage="Store time with dashboard"
+            />}
           />
         </EuiFormRow>
       </Fragment>
