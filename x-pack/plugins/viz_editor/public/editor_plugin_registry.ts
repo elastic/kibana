@@ -8,6 +8,7 @@ import { IconType } from '@elastic/eui';
 import { DatasourceField } from '../common';
 import { UnknownVisModel, VisModel } from '../public';
 
+import { config as metricChartConfig } from './pseudo_plugins/metric_chart_plugin';
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
 import { config as scatterChartConfig } from './pseudo_plugins/scatter_chart_plugin';
 import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';
@@ -32,6 +33,8 @@ export type GetSuggestionsType<S extends VisModel> = (
 export interface VisualizationPanelProps<S extends VisModel = VisModel> {
   visModel: S;
   onChangeVisModel: (visModel: S) => void;
+  getSuggestionsForField: GetSuggestionsType<S>;
+  getSuggestions: (visModel: S) => Suggestion[];
 }
 
 /**
@@ -57,6 +60,7 @@ export interface EditorPlugin<S extends VisModel = VisModel> {
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {
   xy_chart: xyChartConfig,
+  metric_chart: metricChartConfig,
   pie_chart: pieChartConfig,
   vega_chart: vegaChartConfig,
   scatter_chart: scatterChartConfig,

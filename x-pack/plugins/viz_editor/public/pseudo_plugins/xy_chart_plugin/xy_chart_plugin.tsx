@@ -18,38 +18,24 @@ import {
   SelectOperator,
 } from '../../../common';
 import {
-  Axis,
   EditorPlugin,
-  getColumnIdByIndex,
   getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
-  updatePrivateState,
-  VisModel,
   VisualizationPanelProps,
 } from '../../../public';
 import { SeriesAxisEditor } from './seriesaxis_editor';
+import { prefillPrivateState, updateXyState } from './state_helpers';
+import { PLUGIN_NAME, XyChartVisModel, XyDisplayType } from './types';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
-const PLUGIN_NAME = 'xy_chart';
-
-type XyDisplayType = 'line' | 'area' | 'bar';
-
-interface XyChartPrivateState {
-  xAxis: Axis;
-  yAxis: Axis;
-  seriesAxis: Axis;
-  displayType?: XyDisplayType;
-  stacked: boolean;
-}
-
-type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
-
-const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
-
-function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyChartVisModel>) {
+function configPanel({
+  visModel,
+  onChangeVisModel,
+  getSuggestions,
+}: VisualizationPanelProps<XyChartVisModel>) {
   if (!visModel.private.xyChart) {
     return <>No chart configured</>;
   }
@@ -103,6 +89,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
             operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
+            getSuggestions={getSuggestions}
           />
         ))}
       </div>
@@ -125,6 +112,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<XyC
             operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
+            getSuggestions={getSuggestions}
           />
         ))}
       </div>
@@ -148,37 +136,6 @@ function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'ed
   `;
 }
 
-function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayType) {
-  if (visModel.private.xyChart) {
-    if (displayType) {
-      return updateXyState(visModel, { displayType });
-    } else {
-      return visModel as XyChartVisModel;
-    }
-  }
-
-  // TODO we maybe need a more stable way to get these
-  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
-  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
-  // TODO check whether we have a split series candidate
-
-  if (xAxisRef && yAxisRef) {
-    return updateXyState(visModel, {
-      xAxis: { title: 'X Axis', columns: [xAxisRef] },
-      yAxis: { title: 'Y Axis', columns: [yAxisRef] },
-      seriesAxis: { title: 'Series Axis', columns: [] },
-      displayType: displayType || 'line',
-    });
-  } else {
-    return updateXyState(visModel, {
-      xAxis: { title: 'X Axis', columns: [] },
-      yAxis: { title: 'Y Axis', columns: [] },
-      seriesAxis: { title: 'Series Axis', columns: [] },
-      displayType: displayType || 'line',
-    });
-  }
-}
-
 const displayTypeIcon: { [type: string]: IconType } = {
   line: 'visLine',
   area: 'visArea',
@@ -199,7 +156,7 @@ function buildSuggestion(
     title,
     visModel,
     previewExpression: toExpression(visModel, 'preview'),
-    score: 0.5,
+    score: 0.7,
     iconType: displayTypeIcon.line,
     pluginName: PLUGIN_NAME,
     category: 'line',
@@ -211,12 +168,17 @@ function getSuggestion(
   visModel: XyChartVisModel,
   displayType: XyDisplayType,
   title: string
-): Suggestion {
+): Suggestion[] {
+  const firstQuery = Object.values(visModel.queries)[0];
+
+  if (firstQuery && firstQuery.select.length < 2) {
+    return [];
+  }
   const prefilledVisModel = prefillPrivateState(
     visModel as UnknownVisModel,
     displayType
   ) as XyChartVisModel;
-  return buildSuggestion(prefilledVisModel, { title, iconType: displayTypeIcon[displayType] });
+  return [buildSuggestion(prefilledVisModel, { title, iconType: displayTypeIcon[displayType] })];
 }
 
 function buildViewModel(
@@ -368,7 +330,7 @@ export const config: EditorPlugin<XyChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
-  getChartSuggestions: visModel => [getSuggestion(visModel, 'line', 'Switch to line chart')],
+  getChartSuggestions: visModel => getSuggestion(visModel, 'line', 'Switch to line chart'),
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),

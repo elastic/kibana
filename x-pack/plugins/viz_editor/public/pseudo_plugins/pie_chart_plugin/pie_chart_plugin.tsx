@@ -138,16 +138,23 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 }
 
-function getSuggestion(visModel: PieChartVisModel): Suggestion {
+function getSuggestions(visModel: PieChartVisModel): Suggestion[] {
+  const firstQuery = Object.values(visModel.queries)[0];
+
+  if (firstQuery && firstQuery.select.length < 2) {
+    return [];
+  }
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as PieChartVisModel;
-  return {
-    pluginName: PLUGIN_NAME,
-    previewExpression: toExpression(prefilledVisModel, 'preview'),
-    score: 0.5,
-    visModel: prefilledVisModel,
-    title: 'Standard Pie Chart',
-    iconType: 'visPie',
-  } as Suggestion;
+  return [
+    {
+      pluginName: PLUGIN_NAME,
+      previewExpression: toExpression(prefilledVisModel, 'preview'),
+      score: 0.5,
+      visModel: prefilledVisModel,
+      title: 'Standard Pie Chart',
+      iconType: 'visPie',
+    } as Suggestion,
+  ];
 }
 
 function getSuggestionsForField(
@@ -204,7 +211,7 @@ export const config: EditorPlugin<PieChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
-  getChartSuggestions: visModel => [getSuggestion(visModel)],
+  getChartSuggestions: visModel => getSuggestions(visModel),
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),

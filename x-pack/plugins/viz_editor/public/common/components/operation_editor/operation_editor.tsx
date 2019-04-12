@@ -80,7 +80,7 @@ export function OperationEditor<T extends SelectOperation>(props: OperationEdito
         .filter(
           ({ operator }) =>
             isApplicableForScale(operator, allowedScale) &&
-            isApplicableForCardinality(operator, allowedCardinality)
+            (!allowedCardinality || isApplicableForCardinality(operator, allowedCardinality))
         )
         .map(op => ({
           name: op.name,
