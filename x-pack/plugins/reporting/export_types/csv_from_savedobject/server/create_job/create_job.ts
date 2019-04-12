@@ -82,16 +82,13 @@ function createJobFn(server: KbnServer): CreateJobFn {
         throw new Error(`Unable to create a job from saved object data! Error: ${err}`);
       });
 
-    let type: string = '';
-    let result: any = null;
-
     return {
-      jobParams: { ...jobParams, panel, visType },
-      title,
-      type,
-      objects: result ? result.content : result,
-      headers: serializedEncryptedHeaders,
       basePath: req.getBasePath(),
+      headers: serializedEncryptedHeaders,
+      jobParams: { ...jobParams, panel, visType },
+      type: null,    // resolved in executeJob
+      objects: null, // resolved in executeJob
+      title,
     };
   };
 }
