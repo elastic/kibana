@@ -65,7 +65,7 @@ export const NodeContextMenu = injectUICapabilities(
           })
         : undefined;
 
-      const apmTracesUrl = uiCapabilities.apm.show
+      const apmTracesUrl = uiCapabilities.apm && uiCapabilities.apm.show
         ? {
             name: intl.formatMessage(
               {
