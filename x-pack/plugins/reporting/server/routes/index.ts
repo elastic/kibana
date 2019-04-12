@@ -18,7 +18,6 @@ import { registerLegacy } from './legacy';
 export function registerRoutes(server: KbnServer) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  const hasPanelActionCSVEnabled = config.get('xpack.reporting.csv.enablePanelActionDownload');
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
@@ -64,8 +63,9 @@ export function registerRoutes(server: KbnServer) {
   registerGenerate(server, handler, handleError);
   registerLegacy(server, handler, handleError);
 
-  if (hasPanelActionCSVEnabled) {
+  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
     registerGenerateCsvFromSavedObject(server, handler, handleError);
   }
+
   registerJobs(server);
 }
