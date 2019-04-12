@@ -18,12 +18,12 @@ Note: Run the following commands from `kibana/`.
 ### Prettier
 
 ```
-yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
+yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
 ### ESLint
 ```
-yarn eslint ./x-pack/plugins/apm --fix
+yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```
 
 ### Ensure everything from master has been backported to 6.x

@@ -15,7 +15,7 @@
     "paths": {
       "layout/*": ["aeroelastic/*"]
     },
-    "types": ["@kbn/x-pack/plugins/canvas/public/lib/aeroelastic"]
+    "types": ["@kbn/x-pack/legacy/plugins/canvas/public/lib/aeroelastic"]
   },
   "exclude": ["node_modules", "**/*.spec.ts", "node_modules/@types/mocha"]
 }
