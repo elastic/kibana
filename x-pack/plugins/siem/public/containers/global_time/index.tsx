@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, inputsSelectors, State } from '../../store';
@@ -24,6 +23,7 @@ interface OwnProps {
 
 interface GlobalTimeDispatch {
   setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
+  deleteAllQuery: () => void;
 }
 
 interface GlobalTimeReduxState {
@@ -34,16 +34,25 @@ interface GlobalTimeReduxState {
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
-const GlobalTimeComponent = pure<GlobalTimeProps>(({ children, poll, from, to, setQuery }) => (
-  <>
-    {children({
-      poll,
-      from,
-      to,
-      setQuery,
-    })}
-  </>
-));
+class GlobalTimeComponent extends React.PureComponent<GlobalTimeProps> {
+  public componentDidMount() {
+    this.props.deleteAllQuery();
+  }
+
+  public render() {
+    const { children, poll, from, to, setQuery } = this.props;
+    return (
+      <>
+        {children({
+          poll,
+          from,
+          to,
+          setQuery,
+        })}
+      </>
+    );
+  }
+}
 
 const mapStateToProps = (state: State) => {
   const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
@@ -58,6 +67,7 @@ const mapStateToProps = (state: State) => {
 export const GlobalTime = connect(
   mapStateToProps,
   {
+    deleteAllQuery: inputsActions.deleteAllQuery,
     setQuery: inputsActions.setQuery,
   }
 )(GlobalTimeComponent);
