@@ -206,3 +206,18 @@ export const crawlTree = shapes => shapeId => {
   ];
   return rec(shapeId);
 };
+
+export const simplePositioning = ({ elements }) => ({
+  elements: elements.map((element, i) => {
+    const { type, subtype, transformMatrix } = elementToShape(element, i);
+    return {
+      id: element.id,
+      filter: element.filter,
+      width: element.position.width,
+      height: element.position.height,
+      type,
+      subtype,
+      transformMatrix,
+    };
+  }),
+});
