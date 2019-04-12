@@ -53,13 +53,11 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton
+        <EuiButtonEmpty
           color="primary"
           data-test-subj="saveCancelButton"
-          fill={false}
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -67,7 +65,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             id="common.ui.savedObjects.saveModal.cancelButtonLabel"
             values={Object {}}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
         <EuiButton
           color="primary"
           data-test-subj="confirmSaveSavedObjectButton"
