@@ -5,10 +5,10 @@
  */
 
 // @ts-ignore untyped module
-export { LevelLogger } from './level_logger';
-// @ts-ignore untyped module
 export { createTaggedLogger } from './create_tagged_logger';
 // @ts-ignore untyped module
 export { cryptoFactory } from './crypto';
 // @ts-ignore untyped module
 export { oncePerServer } from './once_per_server';
+
+export { LevelLogger } from './level_logger';

@@ -6,8 +6,8 @@
 
 import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 
+import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
 import { CONTENT_TYPE_CSV } from '../../../common/constants';
 import { createGenerateCsv } from './lib/generate_csv';
@@ -27,7 +27,10 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
   const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
   const generateCsv = createGenerateCsv(logger);
 
-  return async function executeJob(job: JobDocPayload, realRequest?: Request): Promise<JobDocOutputExecuted> {
+  return async function executeJob(
+    job: JobDocPayload,
+    realRequest?: Request
+  ): Promise<JobDocOutputExecuted> {
     const { basePath, jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
 

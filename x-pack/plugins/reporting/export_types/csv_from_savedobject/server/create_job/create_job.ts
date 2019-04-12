@@ -7,7 +7,7 @@
 import { notFound, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
-// @ts-ignore
+
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
 import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
 import {
@@ -30,7 +30,7 @@ type CreateJobFn = (jobParams: JobParams, headers: any, req: Request) => Promise
 
 function createJobFn(server: KbnServer): CreateJobFn {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);;
+  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
 
   return async function createJob(
     jobParams: JobParams,
