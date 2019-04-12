@@ -186,12 +186,15 @@ module.exports = {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce((acc, name) => {
-              if (!name.startsWith('_')) {
-                acc[name] = `x-pack/legacy/plugins/${name}`;
-              }
-              return acc;
-            }, {}),
+            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
+              (acc, name) => {
+                if (!name.startsWith('_')) {
+                  acc[name] = `x-pack/legacy/plugins/${name}`;
+                }
+                return acc;
+              },
+              {}
+            ),
           },
         },
       },
