@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { DataFrameList } from './data_frame_list';
+import { DataFrameJobList } from './components/job_list';
 
 function newJob() {
   window.location.href = `#/data_frame/new_job`;
@@ -50,7 +50,7 @@ export const Page: SFC = () => (
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
-          <DataFrameList />
+          <DataFrameJobList />
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>

@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './data_frame_list';
+export { getJobsFactory } from './get_jobs';
+export { deleteJobFactory } from './delete_job';
+export { startJobFactory } from './start_job';
+export { stopJobFactory } from './stop_job';
