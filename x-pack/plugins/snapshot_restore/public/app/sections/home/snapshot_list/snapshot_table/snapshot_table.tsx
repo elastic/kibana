@@ -12,6 +12,7 @@ import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
+import { linkToRepository } from '../../../../services/navigation';
 
 interface Props extends RouteComponentProps {
   snapshots: SnapshotDetails[];
@@ -52,7 +53,11 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (repository: string) => repository,
+      render: (repositoryName: string) => (
+        <EuiLink href={linkToRepository(repositoryName)}>
+          {repositoryName}
+        </EuiLink>
+      ),
     },
     {
       field: 'startTimeInMillis',

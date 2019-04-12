@@ -13,6 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -23,6 +24,7 @@ import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
 import { formatDate } from '../../../../services/text';
+import { linkToRepository } from '../../../../services/navigation';
 
 interface Props extends RouteComponentProps {
   repositoryName: string;
@@ -304,7 +306,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryDetails.errorLoadingRepositoryTitle"
+            id="xpack.snapshotRestore.snapshotDetails.errorLoadingRepositoryTitle"
             defaultMessage="Error loading repository"
           />
         }
@@ -342,11 +344,17 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiTitle size="xxs">
+            <EuiText size="s">
               <p>
-                <EuiTextColor color="subdued">{repositoryName}</EuiTextColor>
+                <EuiLink href={linkToRepository(repositoryName)}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
+                    defaultMessage="'{repositoryName}' repository"
+                    values={{ repositoryName }}
+                  />
+                </EuiLink>
               </p>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
