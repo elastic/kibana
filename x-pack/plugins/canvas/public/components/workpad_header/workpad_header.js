@@ -141,6 +141,7 @@ export class WorkpadHeader extends React.PureComponent {
                     fill
                     size="s"
                     iconType="vector"
+                    data-test-subj="add-element-button"
                     onClick={() => setShowElementModal(true)}
                   >
                     Add element

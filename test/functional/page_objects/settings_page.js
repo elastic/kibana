@@ -66,6 +66,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await setting.getProperty('value');
     }
 
+    async expectDisabledAdvancedSetting(propertyName) {
+      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      expect(setting.getAttribute('disabled')).to.eql('');
+    }
+
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
       return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
@@ -380,6 +385,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('tab-sourceFilters');
     }
 
+    async editScriptedField(name) {
+      await this.filterField(name);
+      await find.clickByCssSelector('.euiTableRowCell--hasActions button:first-child');
+    }
+
     async addScriptedField(name, language, type, format, popularity, script) {
       await this.clickAddScriptedField();
       await this.setScriptedFieldName(name);
@@ -609,6 +619,50 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
 
       return objects;
+    }
+
+    async getSavedObjectsTableSummary() {
+      const table = await testSubjects.find('savedObjectsTable');
+      const rows = await table.findAllByCssSelector('tbody tr');
+
+      const summary = [];
+      for (const row of rows) {
+        const titleCell = await row.findByCssSelector('td:nth-child(3)');
+        const title = await titleCell.getVisibleText();
+
+
+        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const canViewInApp = Boolean(viewInAppButtons.length);
+        summary.push({
+          title,
+          canViewInApp,
+        });
+      }
+
+      return summary;
+    }
+
+    async clickSavedObjectsTableSelectAll() {
+      const checkboxSelectAll = await testSubjects.find('checkboxSelectAll');
+      await checkboxSelectAll.click();
+    }
+
+    async canSavedObjectsBeDeleted() {
+      const deleteButton = await testSubjects.find('savedObjectsManagementDelete');
+      return await deleteButton.isEnabled();
+    }
+
+    async canSavedObjectBeDeleted(id) {
+      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
+      for (const checkBox of allCheckBoxes) {
+        if (await checkBox.isSelected()) {
+          await checkBox.click();
+        }
+      }
+
+      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
+      await checkBox.click();
+      return await this.canSavedObjectsBeDeleted();
     }
   }
 
