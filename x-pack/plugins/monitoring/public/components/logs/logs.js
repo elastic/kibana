@@ -194,7 +194,7 @@ export class Logs extends PureComponent {
 
     if (nodeId) {
       description = i18n.translate('xpack.monitoring.logs.listing.nodePageDescription', {
-        defaultMessage: 'Showing the most recent logs for this node, up to {limit} total logs',
+        defaultMessage: 'Showing the most recent logs for this node, up to {limit} total logs.',
         values: {
           limit,
         }
@@ -202,7 +202,7 @@ export class Logs extends PureComponent {
     }
     else if (indexUuid) {
       description = i18n.translate('xpack.monitoring.logs.listing.indexPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this index, up to {limit} total logs',
+        defaultMessage: 'Showing the most recent logs for this index, up to {limit} total logs.',
         values: {
           limit,
         }
@@ -210,7 +210,7 @@ export class Logs extends PureComponent {
     }
     else {
       description = i18n.translate('xpack.monitoring.logs.listing.clusterPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this cluster, up to {limit} total logs',
+        defaultMessage: 'Showing the most recent logs for this cluster, up to {limit} total logs.',
         values: {
           limit,
         }
