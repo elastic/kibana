@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
-import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
-// @ts-ignore
+// @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   IndexPatternSavedObject,
@@ -17,40 +16,18 @@ import {
   SearchPanel,
   SearchRequest,
   SearchSource,
-  TimeRangeParams,
+  SearchSourceQuery,
 } from '../../';
+import {
+  CsvResultFromSearch,
+  ESQueryConfig,
+  GenerateCsvParams,
+  Filter,
+  ReqPayload,
+  IndexPatternField,
+} from './';
 import { getDataSource } from './get_data_source';
-
-interface SavedSearchGeneratorResult {
-  content: string;
-  maxSizeReached: boolean;
-  size: number;
-}
-
-interface CsvResultFromSearch {
-  type: string;
-  result: SavedSearchGeneratorResult | null;
-}
-
-type EndpointCaller = (method: string, params: any) => Promise<any>;
-type FormatsMap = Map<string, any>; // this is required for generateCsv, but formatting is not done for this API
-
-interface GenerateCsvParams {
-  searchRequest: SearchRequest;
-  callEndpoint: EndpointCaller;
-  fields: string[];
-  formatsMap: FormatsMap;
-  metaFields: string[]; // FIXME not sure what this is for
-  conflictedTypesFields: string[]; // FIXME not sure what this is for
-  cancellationToken: any;
-  settings: {
-    separator: string;
-    quoteValues: boolean;
-    timezone: string | null;
-    maxSizeBytes: number;
-    scroll: { duration: string; size: number };
-  };
-}
+import { getFilters } from './get_filters';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([
@@ -68,47 +45,6 @@ const getUiSettings = async (config: any) => {
   return { separator, quoteValues };
 };
 
-const getTimebasedParts = (
-  indexPatternSavedObject: IndexPatternSavedObject,
-  timerange: TimeRangeParams,
-  savedSearchObjectAttr: SavedSearchObjectAttributes,
-  searchSourceFilter: any[]
-) => {
-  let includes: string[];
-  let timeFilter: any | null;
-  let timezone: string | null;
-
-  const { timeFieldName: indexPatternTimeField } = indexPatternSavedObject;
-  if (indexPatternTimeField) {
-    includes = [indexPatternTimeField, ...savedSearchObjectAttr.columns];
-    timeFilter = {
-      range: {
-        [indexPatternTimeField]: {
-          format: 'epoch_millis',
-          gte: moment(timerange.min).valueOf(),
-          lte: moment(timerange.max).valueOf(),
-        },
-      },
-    };
-    timezone = timerange.timezone;
-  } else {
-    includes = savedSearchObjectAttr.columns;
-    timeFilter = null;
-    timezone = null;
-  }
-
-  const combinedFilter = timeFilter ? [timeFilter].concat(searchSourceFilter) : searchSourceFilter;
-
-  return { combinedFilter, includes, timezone };
-};
-
-interface IndexPatternField {
-  scripted: boolean;
-  lang?: string;
-  script?: string;
-  name: string;
-}
-
 export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
@@ -124,21 +60,40 @@ export async function generateCsvSearch(
     indexPatternSavedObjectId
   );
   const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
+  const esQueryConfig = await getEsQueryConfig(uiConfig);
 
-  const kibanaSavedObjectMeta = savedSearchObjectAttr.kibanaSavedObjectMeta;
-  const { searchSource } = kibanaSavedObjectMeta as { searchSource: SearchSource };
+  const {
+    kibanaSavedObjectMeta: {
+      searchSource: {
+        filter: [searchSourceFilter],
+        query: searchSourceQuery,
+      },
+    },
+  } = savedSearchObjectAttr as { kibanaSavedObjectMeta: { searchSource: SearchSource } };
 
-  const { filter: searchSourceFilter, query: searchSourceQuery } = searchSource;
-  const { combinedFilter, includes, timezone } = getTimebasedParts(
-    indexPatternSavedObject,
+  const {
+    timeFieldName: indexPatternTimeField,
+    title: esIndex,
+    fields: indexPatternFields,
+  } = indexPatternSavedObject;
+
+  const {
+    state: { query: payloadQuery, sort: payloadSort = [] },
+  } = req.payload as ReqPayload;
+
+  const { includes, timezone, combinedFilter } = getFilters(
+    indexPatternSavedObjectId,
+    indexPatternTimeField,
     timerange,
     savedSearchObjectAttr,
-    searchSourceFilter
+    searchSourceFilter,
+    payloadQuery
   );
-  const esQueryConfig = await getEsQueryConfig(uiConfig);
-  const [sortField, sortOrder] = savedSearchObjectAttr.sort;
 
-  const scriptFields = indexPatternSavedObject.fields
+  const [savedSortField, savedSortOrder] = savedSearchObjectAttr.sort;
+  const sortConfig = [...payloadSort, { [savedSortField]: { order: savedSortOrder } }];
+
+  const scriptFieldsConfig = indexPatternFields
     .filter((f: IndexPatternField) => f.scripted)
     .reduce((accum: any, curr: IndexPatternField) => {
       return {
@@ -151,21 +106,24 @@ export async function generateCsvSearch(
         },
       };
     }, {});
-  const { timeFieldName: indexPatternTimeField } = indexPatternSavedObject;
   const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
+
+  // this array helps ensure the params are passed to buildEsQuery (non-Typescript) in the right order
+  const buildCsvParams: [IndexPatternSavedObject, SearchSourceQuery, Filter[], ESQueryConfig] = [
+    indexPatternSavedObject,
+    searchSourceQuery,
+    combinedFilter,
+    esQueryConfig,
+  ];
+
   const searchRequest: SearchRequest = {
-    index: indexPatternSavedObject.title,
+    index: esIndex,
     body: {
       _source: { includes },
       docvalue_fields: docValueFields,
-      query: buildEsQuery(
-        indexPatternSavedObject,
-        searchSourceQuery,
-        combinedFilter,
-        esQueryConfig
-      ),
-      script_fields: scriptFields,
-      sort: [{ [sortField]: { order: sortOrder } }],
+      query: buildEsQuery(...buildCsvParams),
+      script_fields: scriptFieldsConfig,
+      sort: sortConfig,
     },
   };
 

@@ -29,7 +29,7 @@ export interface SavedSearchObjectAttributesJSON {
 export interface SavedSearchObjectAttributes {
   title: string;
   sort: any[];
-  columns: string[];
+  columns?: string[];
   kibanaSavedObjectMeta: SavedObjectMeta;
   uiState: any;
 }
@@ -93,8 +93,8 @@ export interface IndexPatternSavedObject {
 
 export interface TimeRangeParams {
   timezone: string;
-  min: Date;
-  max: Date;
+  min: Date | string | number;
+  max: Date | string | number;
 }
 
 export interface VisPanel {
@@ -110,8 +110,12 @@ export interface SearchPanel {
   timerange: TimeRangeParams;
 }
 
+export interface SearchSourceQuery {
+  isSearchSourceQuery: boolean;
+}
+
 export interface SearchSource {
-  query: any;
+  query: SearchSourceQuery;
   filter: any[];
 }
 
