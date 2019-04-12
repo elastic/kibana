@@ -26,12 +26,15 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, Authenticate } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequest } from './lifecycle/on_request';
 import { Router } from './router';
-import { CookieOptions, createCookieSessionStorageFactory } from './cookie_session_storage';
+import {
+  SessionStorageCookieOptions,
+  createCookieSessionStorageFactory,
+} from './cookie_session_storage';
 
 export interface HttpServerInfo {
   server: Server;
   options: ServerOptions;
-  registerAuth: <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) => void;
+  registerAuth: <T>(fn: Authenticate<T>, cookieOptions: SessionStorageCookieOptions<T>) => void;
   registerOnRequest: (fn: OnRequest) => void;
 }
 
@@ -87,7 +90,7 @@ export class HttpServer {
       server: this.server,
       options: serverOptions,
       registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) =>
+      registerAuth: <T>(fn: Authenticate<T>, cookieOptions: SessionStorageCookieOptions<T>) =>
         this.registerAuth(fn, cookieOptions, config.basePath),
     };
   }
@@ -150,7 +153,7 @@ export class HttpServer {
 
   private async registerAuth<T>(
     fn: Authenticate<T>,
-    cookieOptions: CookieOptions<T>,
+    cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {
     if (this.server === undefined) {

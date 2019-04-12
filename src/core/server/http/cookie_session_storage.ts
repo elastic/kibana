@@ -21,7 +21,7 @@ import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 
-export interface CookieOptions<T> {
+export interface SessionStorageCookieOptions<T> {
   name: string;
   encryptionKey: string;
   validate: (sessionValue: T) => boolean | Promise<boolean>;
@@ -54,7 +54,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
  */
 export async function createCookieSessionStorageFactory<T>(
   server: Server,
-  cookieOptions: CookieOptions<T>,
+  cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
   await server.register({ plugin: hapiAuthCookie });
