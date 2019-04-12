@@ -14,7 +14,6 @@ import { IndexPrivilegeForm } from './index_privilege_form';
 interface Props {
   role: Role;
   indexPatterns: string[];
-  editable: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   httpClient: any;
@@ -43,12 +42,7 @@ export class IndexPrivileges extends Component<Props, State> {
   public render() {
     const { indices = [] } = this.props.role.elasticsearch;
 
-    const {
-      indexPatterns,
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
-      editable,
-    } = this.props;
+    const { indexPatterns, allowDocumentLevelSecurity, allowFieldLevelSecurity } = this.props;
 
     const props = {
       indexPatterns,
