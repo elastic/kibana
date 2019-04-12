@@ -177,6 +177,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public awaitServerConnection() {
     return new Promise((res, rej) => {
       const server = net.createServer(socket => {
+        this.initialized = false;
         server.close();
         this.eventEmitter.emit('connect');
         socket.on('close', () => this.onSocketClosed());
