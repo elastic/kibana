@@ -27,6 +27,7 @@ import { AggParamEditorProps } from './agg_param_editor_props';
 interface AggParamReactWrapperProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  editorConfig: any;
   indexedFields: FieldParamType[];
   isInvalid: boolean;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
@@ -40,6 +41,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
   const {
     agg,
     aggParam,
+    editorConfig,
     indexedFields,
     isInvalid,
     paramEditor: ParamEditor,
@@ -52,6 +54,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
     <ParamEditor
       agg={agg}
       aggParam={aggParam}
+      editorConfig={editorConfig}
       indexedFields={indexedFields}
       isInvalid={isInvalid}
       value={value}

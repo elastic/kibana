@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
 
 export function initEditorConfig() {
@@ -45,7 +46,10 @@ export function initEditorConfig() {
         },
         interval: {
           base: interval,
-          help: `Must be a multiple of rollup configuration interval: ${interval}`
+          help: i18n.translate('xpack.rollupJobs.editorConfig.histogram.interval.helpText', {
+            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+            values: { interval }
+          })
         }
       } : {};
     }
@@ -67,7 +71,10 @@ export function initEditorConfig() {
         customInterval: {
           default: interval,
           timeBase: interval,
-          help: `Must be a multiple of rollup configuration interval: ${interval}`
+          help: i18n.translate('xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText', {
+            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+            values: { interval }
+          })
         }
       };
     }

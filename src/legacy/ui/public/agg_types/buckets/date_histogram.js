@@ -21,12 +21,12 @@ import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
 import '../../filters/field_type';
-import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import intervalTemplate from '../controls/time_interval.html';
+import { TimeIntervalParamEditor } from '../controls/time_interval';
+import { TimeCustomIntervalParamEditor } from '../controls/time_custom_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
@@ -130,7 +130,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       },
       default: 'auto',
       options: intervalOptions,
-      editor: intervalTemplate,
+      editorComponent: TimeIntervalParamEditor,
       modifyAggConfigOnSearchRequestStart: function (agg) {
         setBounds(agg, true);
       },
@@ -155,6 +155,12 @@ export const dateHistogramBucketAgg = new BucketAggType({
       }
     },
     {
+      name: 'customInterval',
+      editorComponent: TimeCustomIntervalParamEditor,
+      default: '2h',
+      write: _.noop
+    },
+    {
       name: 'time_zone',
       default: () => {
         const isDefaultTimezone = config.isDefault('dateFormat:tz');
@@ -173,12 +179,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
       default: false,
       write: _.noop,
       editorComponent: DropPartialsParamEditor,
-    },
-
-    {
-      name: 'customInterval',
-      default: '2h',
-      write: _.noop
     },
     {
       name: 'format'

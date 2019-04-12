@@ -46,9 +46,8 @@ function FieldParamEditor({
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption = get(options, '0.value');
-    if (!(aggParam.required && !selectedOption)) {
-      setValue(selectedOption);
-    }
+    setValidity(aggParam.required ? !!selectedOption : true);
+    setValue(selectedOption);
 
     if (aggParam.onChange) {
       aggParam.onChange(agg);

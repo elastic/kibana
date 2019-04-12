@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { debounce } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -27,12 +27,14 @@ uiModules
   .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
+    ['editorConfig', { watchDepth: 'collection' }],
     ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'field',
+    'interval',
     'isInvalid',
     'value',
   ]))
@@ -57,7 +59,9 @@ uiModules
             param-editor="editorComponent"
             agg="agg"
             agg-param="aggParam"
+            editor-config="editorConfig"
             field="agg.params.field"
+            interval="agg.params.interval"
             indexed-fields="indexedFields"
             is-invalid="isInvalid"
             value="paramValue"
@@ -74,19 +78,13 @@ uiModules
           $scope.$bind('aggParam', attr.aggParam);
           $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
+          $scope.$bind('editorConfig', attr.editorConfig);
           $scope.$bind('indexedFields', attr.indexedFields);
+          $scope.$bind('vis', attr.vis);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           let _isInvalid = false;
           $scope.config = config;
-
-          $scope.optionEnabled = function (option) {
-            if (option && isFunction(option.enabled)) {
-              return option.enabled($scope.agg);
-            }
-
-            return true;
-          };
 
           if (attr.editorComponent) {
             $scope.$watch('agg.params[aggParam.name]', (value) => {
@@ -106,13 +104,32 @@ uiModules
                 showValidation();
               }
             }, true);
+
+            $scope.$watch('vis.dirty', debounce(isDirty => {
+              const modelValue = $scope.agg.params[$scope.aggParam.name];
+              if (!isDirty && $scope.paramValue !== modelValue) {
+                // Since we don't update the state model (via $scope.$parent.onParamChange) when the value is invalid,
+                // we need to reset the current invalid value to the saved valid value when a user discards changes.
+                $scope.paramValue = modelValue;
+                $scope.setValidity(true);
+                showValidation();
+              }
+            }), 800);
+
             $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
           }
 
           $scope.onChange = (value) => {
-            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
+            $scope.paramValue = value;
+
+            if (_isInvalid) {
+              // We do the discard button available manually because we don't set invalid value into the state model.
+              $scope.vis.dirty = true;
+            } else {
+              // This is obviously not a good code quality, but without using scope binding (which we can't see above)
+              // to bind function values, this is right now the best temporary fix, until all of this will be gone.
+              $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
+            }
 
             ngModelCtrl.$setDirty();
           };

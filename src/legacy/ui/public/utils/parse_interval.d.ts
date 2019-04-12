@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
-
-interface AggParam {
-  type: string;
-  name: string;
-  options?: AggParamOption[];
-  required?: boolean;
-  displayName?: string;
-  onChange?(agg: AggConfig): void;
-  disabled?(agg: AggConfig): boolean;
-}
-
-interface AggParamOption {
-  val: string;
-  display: string;
-  enabled(agg: AggConfig): void;
-}
-
-export { AggParam, AggParamOption };
+export function parseInterval(interval: string): number | null;
