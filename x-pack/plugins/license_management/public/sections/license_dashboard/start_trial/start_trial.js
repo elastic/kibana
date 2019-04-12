@@ -51,7 +51,7 @@ export class StartTrial extends React.PureComponent {
               <p>
                 This trial is for the full set of{' '}
                 <EuiLink
-                  href="https://www.elastic.co/subscriptions/xpack"
+                  href="https://www.elastic.co/subscriptions"
                   target="_blank"
                 >
                   Platinum features
@@ -100,7 +100,7 @@ export class StartTrial extends React.PureComponent {
       <span>
         Experience what security, machine learning, and all our other{' '}
         <EuiLink
-          href="https://www.elastic.co/subscriptions/xpack"
+          href="https://www.elastic.co/subscriptions"
           target="_blank"
         >
           Platinum features

@@ -67,7 +67,7 @@ export class RevertToBasic extends React.PureComponent {
         You’ll revert to our free features and lose access to security, machine
         learning and other{' '}
         <EuiLink
-          href="https://www.elastic.co/subscriptions/xpack"
+          href="https://www.elastic.co/subscriptions"
           target="_blank"
         >
           Platinum features
