@@ -204,7 +204,10 @@ describe('<RemoteClusterList />', () => {
     describe('confirmation modal (delete remote cluster)', () => {
       test('should remove the remote cluster from the table after delete is successful', async () => {
         // Mock HTTP DELETE request
-        setDeleteRemoteClusterResponse();
+        setDeleteRemoteClusterResponse({
+          itemsDeleted: [remoteCluster1.name],
+          errors: [],
+        });
 
         // Make sure that we have our 2 remote clusters in the table
         expect(rows.length).toBe(2);

@@ -122,7 +122,10 @@ export const registerHttpRequestMockHelpers = server => {
   };
 
   const setDeleteRemoteClusterResponse = (response) => {
-    const defaultResponse = { success: true };
+    const defaultResponse = {
+      itemsDeleted: [],
+      errors: [],
+    };
 
     server.respondWith('DELETE', /api\/remote_clusters/,
       mockResponse(defaultResponse, response)
