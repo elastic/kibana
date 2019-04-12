@@ -4,42 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotDetails, SnapshotSummary } from '../../common/types';
-import { SnapshotDetailsEs, SnapshotSummaryEs } from '../types';
+import { SnapshotDetails } from '../../common/types';
+import { SnapshotDetailsEs } from '../types';
 
-export function deserializeSnapshotSummary(snapshotSummaryEs: SnapshotSummaryEs): SnapshotSummary {
-  if (!snapshotSummaryEs || typeof snapshotSummaryEs !== 'object') {
-    throw new Error('Unable to deserialize snapshot summary');
-  }
-
-  const {
-    status,
-    start_epoch: startEpoch,
-    start_time: startTime,
-    end_epoch: endEpoch,
-    end_time: endTime,
-    duration,
-    indices,
-    successful_shards: successfulShards,
-    failed_shards: failedShards,
-    total_shards: totalShards,
-  } = snapshotSummaryEs;
-
-  return {
-    status,
-    startEpoch,
-    startTime,
-    endEpoch,
-    endTime,
-    duration,
-    indices,
-    successfulShards,
-    failedShards,
-    totalShards,
-  };
-}
-
-export function deserializeSnapshotDetails(snapshotDetailsEs: SnapshotDetailsEs): SnapshotDetails {
+export function deserializeSnapshotDetails(
+  repository: string,
+  snapshotDetailsEs: SnapshotDetailsEs
+): SnapshotDetails {
   if (!snapshotDetailsEs || typeof snapshotDetailsEs !== 'object') {
     throw new Error('Unable to deserialize snapshot details');
   }
@@ -62,12 +33,13 @@ export function deserializeSnapshotDetails(snapshotDetailsEs: SnapshotDetailsEs)
   } = snapshotDetailsEs;
 
   return {
+    repository,
     snapshot,
     uuid,
     versionId,
     version,
     indices,
-    includeGlobalState,
+    includeGlobalState: Boolean(includeGlobalState) ? 1 : 0,
     state,
     startTime,
     startTimeInMillis,

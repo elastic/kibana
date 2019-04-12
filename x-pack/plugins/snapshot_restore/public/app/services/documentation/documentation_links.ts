@@ -40,6 +40,10 @@ class DocumentationLinksService {
         return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.default}`;
     }
   }
+
+  public getSnapshotDocUrl() {
+    return `${this.esDocBasePath}/modules-snapshots.html#_snapshot`;
+  }
 }
 
 export const documentationLinksService = new DocumentationLinksService();

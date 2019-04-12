@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { formatDate } from './format_date';
 export { textService } from './text';

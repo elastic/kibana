@@ -10,3 +10,7 @@ declare module '@elastic/eui' {
   export const EuiDescribedFormGroup: React.SFC<any>;
   export const EuiCodeEditor: React.SFC<any>;
 }
+
+declare module '@elastic/eui/lib/services/format' {
+  export const dateFormatAliases: any;
+}

@@ -4,25 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SnapshotSummaryEs {
-  id: string;
-  repository: string;
-  status: string;
-  /** This and other numerical values are typed as strings. e.g. '1554501400'. */
-  start_epoch: string;
-  /** e.g. '21:56:40' */
-  start_time: string;
-  end_epoch: string;
-  /** e.g. '21:56:45' */
-  end_time: string;
-  /** Includes unit, e.g. '4.7s' */
-  duration: string;
-  indices: string;
-  successful_shards: string;
-  failed_shards: string;
-  total_shards: string;
-}
-
 export interface SnapshotDetailsEs {
   snapshot: string;
   uuid: string;

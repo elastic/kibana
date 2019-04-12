@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { booleanizeSettings } from './booleanize_settings';
-export { deserializeSnapshotDetails } from './snapshot_serialization';
+import { dateFormatAliases } from '@elastic/eui/lib/services/format';
+import moment from 'moment';
+
+export function formatDate(epochMs: number): string {
+  return moment(Number(epochMs)).format(dateFormatAliases.longDateTime);
+}

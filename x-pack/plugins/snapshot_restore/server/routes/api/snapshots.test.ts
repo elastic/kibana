@@ -7,6 +7,24 @@
 import { Request, ResponseToolkit } from 'hapi';
 import { getAllHandler, getOneHandler } from './snapshots';
 
+const defaultSnapshot = {
+  repository: undefined,
+  snapshot: undefined,
+  uuid: undefined,
+  versionId: undefined,
+  version: undefined,
+  indices: undefined,
+  includeGlobalState: 0,
+  state: undefined,
+  startTime: undefined,
+  startTimeInMillis: undefined,
+  endTime: undefined,
+  endTimeInMillis: undefined,
+  durationInMillis: undefined,
+  failures: undefined,
+  shards: undefined,
+};
+
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
   const mockResponseToolkit = {} as ResponseToolkit;
 
@@ -19,29 +37,33 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         barRepository: {},
       };
 
-      const mockCatSnapshotsFooResponse = Promise.resolve([
-        {
-          id: 'snapshot1',
-        },
-      ]);
+      const mockGetSnapshotsFooResponse = Promise.resolve({
+        snapshots: [
+          {
+            snapshot: 'snapshot1',
+          },
+        ],
+      });
 
-      const mockCatSnapshotsBarResponse = Promise.resolve([
-        {
-          id: 'snapshot2',
-        },
-      ]);
+      const mockGetSnapshotsBarResponse = Promise.resolve({
+        snapshots: [
+          {
+            snapshot: 'snapshot2',
+          },
+        ],
+      });
 
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockSnapshotGetRepositoryEsResponse)
-        .mockReturnValueOnce(mockCatSnapshotsFooResponse)
-        .mockReturnValueOnce(mockCatSnapshotsBarResponse);
+        .mockReturnValueOnce(mockGetSnapshotsFooResponse)
+        .mockReturnValueOnce(mockGetSnapshotsBarResponse);
 
       const expectedResponse = {
         errors: [],
         snapshots: [
-          { repositories: ['fooRepository'], id: 'snapshot1', summary: {} },
-          { repositories: ['barRepository'], id: 'snapshot2', summary: {} },
+          { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
+          { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
         ],
       };
 
@@ -85,7 +107,11 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         snapshots: [{ snapshot }],
       };
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
-      const expectedResponse = { snapshot };
+      const expectedResponse = {
+        ...defaultSnapshot,
+        snapshot,
+        repository,
+      };
 
       const response = await getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit);
       expect(response).toEqual(expectedResponse);

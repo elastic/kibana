@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { httpService } from './index';
 
 interface SendRequest {
@@ -41,44 +41,56 @@ export const sendRequest = async ({
 
 interface UseRequest extends SendRequest {
   interval?: number;
+  initialData?: any;
 }
 
-export const useRequest = ({ path, method, body, interval }: UseRequest) => {
+export const useRequest = ({ path, method, body, interval, initialData }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>([]);
-  const isMounted = useRef<boolean>(true);
+  const [data, setData] = useState<any>(initialData);
+
+  // Tied to every render and bound to each request.
+  let isOutdatedRequest = false;
 
   const request = async () => {
     setError(null);
+    setData(initialData);
     setLoading(true);
+
     const { data: responseData, error: responseError } = await sendRequest({
       path,
       method,
       body,
     });
-    // Avoid setting state for components that unmounted before request completed
-    if (!isMounted.current) {
+
+    // Don't update state if an outdated request has resolved.
+    if (isOutdatedRequest) {
       return;
     }
-    // Set state for components that are still mounted
-    if (responseError) {
-      setError(responseError);
-    } else {
-      setData(responseData);
-    }
+
+    setError(responseError);
+    setData(responseData);
     setLoading(false);
   };
 
   useEffect(
     () => {
+      function cancelOutdatedRequest() {
+        isOutdatedRequest = true;
+      }
+
       request();
+
       if (interval) {
         const intervalRequest = setInterval(request, interval);
         return () => {
+          cancelOutdatedRequest();
           clearInterval(intervalRequest);
         };
       }
+
+      // Called when a new render will trigger this effect.
+      return cancelOutdatedRequest;
     },
     [path]
   );
@@ -88,8 +100,5 @@ export const useRequest = ({ path, method, body, interval }: UseRequest) => {
     loading,
     data,
     request,
-    setIsMounted: (status: boolean) => {
-      isMounted.current = status;
-    },
   };
 };

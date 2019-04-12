@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { httpService } from './http';
-export * from './requests';
+export * from './repository_requests';
+export * from './snapshot_requests';

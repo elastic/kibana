@@ -19,13 +19,13 @@ import { RepositoryTable } from './repository_table';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface MatchParams {
-  name?: Repository['name'];
+  repositoryName?: Repository['name'];
 }
 interface Props extends RouteComponentProps<MatchParams> {}
 
 export const RepositoryList: React.FunctionComponent<Props> = ({
   match: {
-    params: { name },
+    params: { repositoryName: name },
   },
   history,
 }) => {
@@ -64,7 +64,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositories"
-          defaultMessage="Loading repositories..."
+          defaultMessage="Loading repositories…"
         />
       </SectionLoading>
     );
