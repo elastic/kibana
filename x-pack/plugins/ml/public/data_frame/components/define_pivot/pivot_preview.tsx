@@ -88,6 +88,13 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
     };
   });
 
+  const sorting = {
+    sort: {
+      field: columns[0].field,
+      direction: 'asc',
+    },
+  };
+
   return (
     <Fragment>
       <h3>
@@ -98,7 +105,12 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
       {dataFramePreviewData.length > 0 && (
-        <EuiInMemoryTable items={dataFramePreviewData} columns={columns} pagination={true} />
+        <EuiInMemoryTable
+          items={dataFramePreviewData}
+          columns={columns}
+          pagination={true}
+          sorting={sorting}
+        />
       )}
     </Fragment>
   );
