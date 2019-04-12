@@ -191,7 +191,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.codeNode="true"',
       ],
     },
     uiSettings: {

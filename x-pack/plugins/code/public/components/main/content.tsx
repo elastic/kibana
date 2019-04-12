@@ -182,10 +182,11 @@ class CodeContent extends React.PureComponent<Props> {
     }
     const currentTree = this.props.currentTree;
     if (
+      this.props.file &&
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
-      const { isUnsupported, isOversize, isImage, lang } = this.props.file!;
+      const { isUnsupported, isOversize, isImage, lang } = this.props.file;
       const isMarkdown = lang === LANG_MD;
       const isText = !isUnsupported && !isOversize && !isImage;
 
