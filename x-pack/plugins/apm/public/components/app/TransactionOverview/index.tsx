@@ -23,6 +23,8 @@ import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { getHasMLJob } from '../../../services/rest/ml';
 
 interface TransactionOverviewProps extends RouteComponentProps {
   urlParams: IUrlParams;
@@ -56,6 +58,12 @@ export function TransactionOverviewView({
 }: TransactionOverviewProps) {
   const { serviceName, transactionType } = urlParams;
 
+  // TODO: improve urlParams typings.
+  // `serviceName` will never be undefined here, and this check should not be needed
+  if (!serviceName) {
+    return null;
+  }
+
   // redirect to first transaction type
   useRedirect(
     history,
@@ -71,6 +79,10 @@ export function TransactionOverviewView({
   );
 
   const { data: transactionListData } = useTransactionList(urlParams);
+  const { data: hasMLJob = false } = useFetcher(
+    () => getHasMLJob({ serviceName, transactionType }),
+    [serviceName, transactionType]
+  );
 
   // filtering by type is currently required
   if (!serviceName || !transactionType) {
@@ -107,6 +119,7 @@ export function TransactionOverviewView({
       ) : null}
 
       <TransactionCharts
+        hasMLJob={hasMLJob}
         charts={transactionOverviewCharts}
         location={location}
         urlParams={urlParams}
