@@ -42,6 +42,15 @@ import { ExpandedRow } from './expanded_row';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
+interface Sorting {
+  sort: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
+}
+
+type TableSorting = Sorting | boolean;
+
 interface Props {
   query: SimpleQuery;
   cellClick?(search: string): void;
@@ -145,6 +154,17 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
     return column;
   });
+
+  let sorting: TableSorting = false;
+
+  if (columns.length > 0) {
+    sorting = {
+      sort: {
+        field: columns[0].field,
+        direction: 'asc',
+      },
+    };
+  }
 
   if (docFieldsCount > MAX_COLUMNS) {
     columns.unshift({
@@ -254,6 +274,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         itemId="_id"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable={true}
+        sorting={sorting}
       />
     </Fragment>
   );
