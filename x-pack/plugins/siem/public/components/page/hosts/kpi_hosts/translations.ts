@@ -12,7 +12,7 @@ export const HOSTS = i18n.translate('xpack.siem.kpiHosts.source.hostsTitle', {
 export const INSTALLED_PACKAGES = i18n.translate(
   'xpack.siem.kpiHosts.source.installedPackagesTitle',
   {
-    defaultMessage: 'Installed Packages',
+    defaultMessage: 'Packages',
   }
 );
 
@@ -35,11 +35,11 @@ export const AUTHENTICATION_FAILURE = i18n.translate(
 );
 
 export const FIM_EVENTS = i18n.translate('xpack.siem.kpiHosts.source.fimEventsTitle', {
-  defaultMessage: 'FIM Events',
+  defaultMessage: 'Auditbeat FIM Events',
 });
 
 export const AUDITD_EVENTS = i18n.translate('xpack.siem.kpiHosts.source.auditEventsTitle', {
-  defaultMessage: 'Auditd Events',
+  defaultMessage: 'Auditbeat Auditd Events',
 });
 
 export const WINLOGBEAT_EVENTS = i18n.translate(
