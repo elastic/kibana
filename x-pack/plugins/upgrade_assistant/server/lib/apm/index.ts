@@ -62,7 +62,7 @@ export const isLegacyApmIndex = (
 // source: https://github.com/elastic/apm-integration-testing/blob/master/tests/server/test_upgrade.py
 export const apmReindexScript = `
   // add ecs version
-  ctx._source.ecs = ['version': '1.0.0-beta2'];
+  ctx._source.ecs = ['version': '1.1.0-dev'];
 
   // beat -> observer
   def beat = ctx._source.remove("beat");
@@ -127,6 +127,23 @@ export const apmReindexScript = `
           def http_version = request.remove("http_version");
           if (http_version != null) {
             ctx._source.http.version = http_version;
+          }
+
+          if (request.containsKey("headers")) {
+              // copy user-agent header
+              def ua;
+              for (entry in request["headers"].entrySet()) {
+                  if (entry.getKey().toLowerCase() == "user-agent") {
+                      ua = entry.getValue();
+                  }
+              }
+              if (ua != null) {
+                ctx._source.user_agent = new HashMap();
+                // setting original and original.text is not possible in painless
+                // as original is a keyword in ES template we cannot set it to a HashMap here,
+                // so the following is the only possible solution:
+                ctx._source.user_agent.original = ua.substring(0, Integer.min(1024, ua.length()));
+              }
           }
 
           // context.request.socket -> request.socket
@@ -202,7 +219,6 @@ export const apmReindexScript = `
             ctx._source.http.request.body = new HashMap();
             ctx._source.http.request.body.original = body;
           }
-
       }
 
       // bump timestamp.us by span.start.us for spans
@@ -256,6 +272,7 @@ export const apmReindexScript = `
           }
 
           // move user-agent info
+          // this will overwrite the value from http.request.headers if set
           def ua = user.remove("user-agent");
           if (ua != null) {
             ctx._source.user_agent = new HashMap();
@@ -381,6 +398,22 @@ export const apmReindexScript = `
               http.method = http.method.toLowerCase();
           }
           ctx._source.span.http = http;
+      }
+  }
+
+  // per https://github.com/elastic/apm/issues/21
+  //  if kubernetes.node.name is set, copy it to host.hostname
+  //  else if other kubernetes.* is set, remove host.hostname
+  //  else leave it alone
+  // relies on system.hostname -> host.hostname already happening earlier in this script
+  if (ctx._source.kubernetes?.node?.name != null) {
+      if (! ctx._source.containsKey("host")) {
+          ctx._source.host = new HashMap();
+      }
+      ctx._source.host.hostname = ctx._source.kubernetes.node.name;
+  } else if (ctx._source.containsKey("kubernetes")) {
+      if (ctx._source.host?.hostname != null) {
+          ctx._source.host.remove("hostname");
       }
   }
 
