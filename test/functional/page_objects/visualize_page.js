@@ -764,12 +764,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       ));
     }
 
-    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
-      const errorToast = await testSubjects.exists('saveVisualizationError', {
-        timeout: defaultFindTimeout
-      });
-      expect(errorToast).to.be(true);
+    async expectNoSaveOption() {
+      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
+      expect(saveButtonExists).to.be(false);
     }
 
     async clickLoadSavedVisButton() {

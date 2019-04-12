@@ -17,9 +17,10 @@ import {
   EuiToolTip,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { API_STATUS } from '../../../../../constants';
+import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
+import { trackUiMetric } from '../../../../../services/track_ui_metric';
 
 export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
@@ -75,7 +76,10 @@ export class AutoFollowPatternTable extends PureComponent {
       render: (name) => {
         return (
           <EuiLink
-            onClick={() => selectAutoFollowPattern(name)}
+            onClick={() => {
+              trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+              selectAutoFollowPattern(name);
+            }}
             data-test-subj="ccrAutoFollowPatternListPatternLink"
           >
             {name}

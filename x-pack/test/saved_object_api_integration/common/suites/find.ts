@@ -43,9 +43,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   };
 
   const createExpectRbacForbidden = (type?: string) => (resp: { [key: string]: any }) => {
-    const message = type
-      ? `Unable to find ${type}, missing action:saved_objects/${type}/find`
-      : `Not authorized to find saved_object`;
+    const message = type ? `Unable to find ${type}` : `Not authorized to find saved_object`;
 
     expect(resp.body).to.eql({
       statusCode: 403,
