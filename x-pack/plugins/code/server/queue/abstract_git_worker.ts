@@ -68,20 +68,26 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     }
   }
 
-  public async updateProgress(job: Job, progress: number, cloneProgress?: CloneProgress) {
+  public async updateProgress(
+    job: Job,
+    progress: number,
+    error?: Error,
+    cloneProgress?: CloneProgress
+  ) {
     const { uri } = job.payload;
     const p: CloneWorkerProgress = {
       uri,
       progress,
       timestamp: new Date(),
       cloneProgress,
+      errorMessage: error ? error.message : undefined,
     };
     try {
       return await this.objectClient.updateRepositoryGitStatus(uri, p);
-    } catch (error) {
+    } catch (err) {
       // This is a warning since it's not blocking anything.
       this.log.warn(`Update git clone progress error.`);
-      this.log.warn(error);
+      this.log.warn(err);
     }
   }
 }

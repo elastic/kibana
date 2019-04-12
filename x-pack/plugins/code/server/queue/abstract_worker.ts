@@ -121,7 +121,7 @@ export abstract class AbstractWorker implements Worker {
         res.job
       )} seconds.`
     );
-    return await this.updateProgress(res.job, WorkerReservedProgress.ERROR);
+    return await this.updateProgress(res.job, WorkerReservedProgress.ERROR, res.error);
   }
 
   public async onJobTimeOut(res: any) {
@@ -130,10 +130,10 @@ export abstract class AbstractWorker implements Worker {
         res.job
       )} seconds.`
     );
-    return await this.updateProgress(res.job, WorkerReservedProgress.TIMEOUT);
+    return await this.updateProgress(res.job, WorkerReservedProgress.TIMEOUT, res.error);
   }
 
-  public async updateProgress(job: Job, progress: number) {
+  public async updateProgress(job: Job, progress: number, error?: Error) {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<WorkerResult>((resolve, _) => {
       resolve();

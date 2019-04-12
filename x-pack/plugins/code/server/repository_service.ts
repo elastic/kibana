@@ -227,7 +227,7 @@ export class RepositoryService {
         const msg = `Clone repository from ${repo.url} error.`;
         this.log.error(msg);
         this.log.error(error);
-        throw new Error(msg);
+        throw new Error(error.message);
       }
     }
   }

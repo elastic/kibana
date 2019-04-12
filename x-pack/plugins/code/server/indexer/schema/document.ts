@@ -100,6 +100,9 @@ export const DocumentSchema = {
       revision: {
         type: 'keyword',
       },
+      errorMessage: {
+        type: 'text',
+      },
       cloneProgress: {
         properties: {
           isCloned: {

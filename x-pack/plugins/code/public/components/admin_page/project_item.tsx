@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
@@ -82,7 +83,14 @@ class CodeProjectItem extends React.PureComponent<{
       footer = <ErrorFooter>ERROR INDEX REPO</ErrorFooter>;
       hasError = true;
     } else if (status.state === RepoState.CLONE_ERROR) {
-      footer = <ErrorFooter>ERROR CLONE REPO</ErrorFooter>;
+      footer = (
+        <ErrorFooter>
+          ERROR CLONE REPO&nbsp;
+          <EuiToolTip position="top" content={status.errorMessage}>
+            <EuiIcon type="iInCircle" />
+          </EuiToolTip>
+        </ErrorFooter>
+      );
       // Disable repo link is clone failed.
       disableRepoLink = true;
       hasError = true;
@@ -104,7 +112,8 @@ class CodeProjectItem extends React.PureComponent<{
       status &&
       status.state !== RepoState.CLONING &&
       status.state !== RepoState.DELETING &&
-      status.state !== RepoState.INDEXING;
+      status.state !== RepoState.INDEXING &&
+      status.state !== RepoState.CLONE_ERROR;
     const indexVisibility = indexShow ? 'visible' : 'hidden';
 
     const deleteShow = status && status.state !== RepoState.DELETING;
