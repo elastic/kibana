@@ -207,12 +207,13 @@ class TableUI extends PureComponent {
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionName', defaultMessage: 'In app'
+              id: 'kbn.management.objects.objectsTable.table.columnActions.editActionName',
+              defaultMessage: 'Edit'
             }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionDescription',
-                defaultMessage: 'View this saved object within Kibana'
+                id: 'kbn.management.objects.objectsTable.table.columnActions.editActionDescription',
+                defaultMessage: 'Edit this saved object'
               }),
             type: 'icon',
             icon: 'pencil',

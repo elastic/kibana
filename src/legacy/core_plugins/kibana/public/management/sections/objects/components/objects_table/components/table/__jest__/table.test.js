@@ -60,6 +60,7 @@ const defaultProps = {
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
   onExport: () => {},
+  goEditObject: () => {},
   pageIndex: 1,
   pageSize: 2,
   items: [{

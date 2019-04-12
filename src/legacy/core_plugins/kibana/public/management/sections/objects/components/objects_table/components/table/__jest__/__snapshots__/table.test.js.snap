@@ -150,9 +150,9 @@ exports[`Table should render normally 1`] = `
             "actions": Array [
               Object {
                 "available": [Function],
-                "description": "View this saved object within Kibana",
-                "icon": "eye",
-                "name": "In app",
+                "description": "Edit this saved object",
+                "icon": "pencil",
+                "name": "Edit",
                 "onClick": [Function],
                 "type": "icon",
               },

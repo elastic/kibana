@@ -193,12 +193,13 @@ class RelationshipsUI extends Component {
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.columnActions.viewInAppActionName', defaultMessage: 'In app'
+              id: 'kbn.management.objects.objectsTable.relationships.columnActions.editActionName',
+              defaultMessage: 'Edit',
             }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.columnActions.viewInAppActionDescription',
-                defaultMessage: 'View this saved object within Kibana'
+                id: 'kbn.management.objects.objectsTable.relationships.columnActions.editActionDescription',
+                defaultMessage: 'Edit this saved object',
               }),
             type: 'icon',
             icon: 'pencil',
