@@ -46,7 +46,7 @@ export const createGlobalTimeEpic = <State>(): Epic<
           const momentDate = option != null ? dateMath.parse(option) : null;
           return setRelativeRangeDatePicker({
             id: 'global',
-            option: option!,
+            option: option != null ? option : '',
             to: Date.now(),
             from: momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0,
           });
