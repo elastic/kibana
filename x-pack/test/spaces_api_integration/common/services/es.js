@@ -7,7 +7,7 @@
 import { format as formatUrl } from 'url';
 
 import elasticsearch from 'elasticsearch';
-import shieldPlugin from '../../../../server/lib/esjs_shield_plugin';
+import shieldPlugin from '../../../../legacy/server/lib/esjs_shield_plugin';
 
 export function EsProvider({ getService }) {
   const config = getService('config');
