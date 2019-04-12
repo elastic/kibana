@@ -13,12 +13,10 @@ import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 
 export const DataFrameJobList: SFC = () => {
-  const [dataFrameJobs, setDataFrameJobs] = useState([] as DataFrameJobListRow[]);
+  const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const getJobs = getJobsFactory(setDataFrameJobs);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState(
-    {} as ItemIdToExpandedRowMap
-  );
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ItemIdToExpandedRowMap>({});
 
   // use this pattern so we don't return a promise
   useEffect(() => {
@@ -31,16 +29,24 @@ export const DataFrameJobList: SFC = () => {
 
   const columns = getColumns(getJobs, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
 
+  const sorting = {
+    sort: {
+      field: DataFrameJobListColumn.id,
+      direction: 'asc',
+    },
+  };
+
   return (
     <EuiInMemoryTable
-      items={dataFrameJobs}
       columns={columns}
-      pagination={true}
       hasActions={false}
+      isExpandable={true}
       isSelectable={false}
+      items={dataFrameJobs}
       itemId={DataFrameJobListColumn.id}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
+      pagination={true}
+      sorting={sorting}
     />
   );
 };

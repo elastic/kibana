@@ -22,9 +22,9 @@ export interface DataFrameJobListRow {
 
 // Used to pass on attribute names to table columns
 export enum DataFrameJobListColumn {
-  dest = 'config.dest',
-  id = 'config.id',
-  source = 'config.source',
+  configDest = 'config.dest',
+  configSource = 'config.source',
+  id = 'id',
 }
 
 export type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;

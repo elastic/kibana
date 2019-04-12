@@ -42,7 +42,8 @@ export const getJobsFactory = (
         return { config, state: {}, stats: {} };
       }
 
-      return { config, state: stats.state, stats: stats.stats };
+      // table with expandable rows requires `id` on the outer most level
+      return { config, id: config.id, state: stats.state, stats: stats.stats };
     });
 
     setDataFrameJobs(tableRows);
