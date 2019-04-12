@@ -116,7 +116,7 @@ export default class ClusterManager {
               resolve(path, 'target'),
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
-              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+              resolve(path, 'x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
             ),
           []
         );
@@ -169,7 +169,7 @@ export default class ClusterManager {
       fromRoot('src/legacy/ui'),
       fromRoot('src/legacy/utils'),
       fromRoot('x-pack/common'),
-      fromRoot('x-pack/plugins'),
+      fromRoot('x-pack/legacy/plugins'),
       fromRoot('x-pack/server'),
       fromRoot('config'),
       ...extraPaths,
