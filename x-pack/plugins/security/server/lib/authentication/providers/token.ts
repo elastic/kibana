@@ -11,6 +11,7 @@ import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { LoginAttempt } from '../login_attempt';
+import { ClusterSecurityFeatures } from '../../cluster_security_features';
 
 /**
  * Represents available provider options.
@@ -19,6 +20,7 @@ interface ProviderOptions {
   basePath: string;
   client: Cluster;
   log: (tags: string[], message: string) => void;
+  clusterSecurityFeatures: ClusterSecurityFeatures;
 }
 
 /**
@@ -79,8 +81,11 @@ export class TokenAuthenticationProvider {
   public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    if (!this._options.clusterSecurityFeatures.isTokenServiceEnabled()) {
-      this._options.log(['warning', 'security', 'token'], `Token service is not enabled in Elasticsearch.`);
+    if (!this.options.clusterSecurityFeatures.isTokenServiceEnabled()) {
+      this.options.log(
+        ['warning', 'security', 'token'],
+        `Token service is not enabled in Elasticsearch.`
+      );
       return AuthenticationResult.notHandled();
     }
 
