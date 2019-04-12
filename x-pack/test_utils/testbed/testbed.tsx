@@ -4,41 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { Provider } from 'react-redux';
+import React, { ComponentType } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+
+import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '../enzyme_helpers';
-import { findTestSubject as findTestSubjectHelper } from '../index';
+import { WithMemoryRouter, WithRoute } from '../router_helpers';
+import { WithStore } from '../redux_helpers';
+import { findTestSubject as findTestSubjectHelper } from './temp_test_subject';
 
-const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
+const registerTestSubjExists = (component: ReactWrapper) => (testSubject: string, count = 1) =>
+  findTestSubjectHelper(component, testSubject).length === count;
 
-const defaultOptions = {
+interface TestBedOptions {
+  memoryRouter: {
+    wrapRoute: boolean;
+    initialEntries?: string[];
+    initialIndex?: number;
+    componentRoutePath?: string;
+    onRouter?: (router: MemoryRouter) => void;
+  };
+}
+
+const defaultOptions: TestBedOptions = {
   memoryRouter: {
     wrapRoute: true,
   },
-};
-
-const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => {}) => {
-  return class extends Component {
-      static contextTypes = {
-        router: PropTypes.object
-      };
-
-      componentDidMount() {
-        const { router } = this.context;
-        onRouter(router);
-      }
-
-      render() {
-        return (
-          <Route
-            path={componentRoutePath}
-            render={(props) => <WrappedComponent {...props} {...this.props} />}
-          />
-        );
-      }
-  };
 };
 
 /**
@@ -59,7 +50,10 @@ const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => 
  * - form.selectCheckBox() Method to select a form checkbox
  * - form.getErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
  */
-export const registerTestBed = (Component, defaultProps = {}, store = {}) => (props, options = defaultOptions) => {
+export const registerTestBed = (Component: ComponentType, defaultProps = {}, store = null) => (
+  props: any,
+  options = defaultOptions
+) => {
   const wrapRoute = options.memoryRouter.wrapRoute !== false;
 
   /**
@@ -67,50 +61,50 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
    * Component mount
    * ----------------------------------------------------------------
    */
-  const Comp = wrapRoute
-    ? withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter)
-    : Component;
+  let Comp;
 
-  const component = wrapRoute
-    ? (mountWithIntl(
-      <Provider store={store}>
-        <MemoryRouter
-          initialEntries={options.memoryRouter.initialEntries || ['/']}
-          initialIndex={options.memoryRouter.initialIndex || 0}
-        >
-          <Comp {...defaultProps} {...props} />
-        </MemoryRouter>
-      </Provider>
-    ))
-    : (mountWithIntl(
-      <Provider store={store}>
-        <Comp {...defaultProps} {...props} />
-      </Provider>
-    ));
+  if (wrapRoute) {
+    const { componentRoutePath, onRouter, initialEntries, initialIndex } = options.memoryRouter;
 
-  const setProps = (props) => {
-    if (wrapRoute) {
-      throw new Error('setProps() can only be called on a component **not** wrapped by a router route.');
+    // Wrap the componenet with a MemoryRouter and attach it to a <Route />
+    Comp = WithMemoryRouter(initialEntries, initialIndex)(
+      WithRoute(componentRoutePath, onRouter)(Component)
+    );
+
+    // Wrap the component with a Redux Provider
+    if (store !== null) {
+      Comp = WithStore(store)(Comp);
     }
+  } else {
+    Comp = store !== null ? WithStore(store)(Component) : Component;
+  }
+
+  const component = mountWithIntl(<Comp {...props} />);
+
+  const setProps = (updatedProps: any) => {
+    if (wrapRoute) {
+      throw new Error(
+        'setProps() can only be called on a component **not** wrapped by a router route.'
+      );
+    }
+    if (store === null) {
+      return component.setProps(updatedProps);
+    }
+    // Update the props on the Redux Provider children
     return component.setProps({
-      children: (
-        <Component
-          {...defaultProps}
-          {...props}
-        />
-      )
+      children: <Component {...defaultProps} {...updatedProps} />,
     });
   };
 
   const exists = registerTestSubjExists(component);
-  const find = testSubject => findTestSubjectHelper(component, testSubject);
+  const find = (testSubject: string) => findTestSubjectHelper(component, testSubject);
 
   /**
    * ----------------------------------------------------------------
    * Forms
    * ----------------------------------------------------------------
    */
-  const setInputValue = (input, value, isAsync = false) => {
+  const setInputValue = (input: string | ReactWrapper, value: string, isAsync = false) => {
     const formInput = typeof input === 'string' ? find(input) : input;
 
     formInput.simulate('change', { target: { value } });
@@ -123,10 +117,10 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
     if (!isAsync) {
       return;
     }
-    return new Promise((resolve) => setTimeout(resolve));
+    return new Promise(resolve => setTimeout(resolve));
   };
 
-  const selectCheckBox = (checkboxTestSubject) => {
+  const selectCheckBox = (checkboxTestSubject: string) => {
     find(checkboxTestSubject).simulate('change', { target: { checked: true } });
   };
 
@@ -139,7 +133,7 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
    *
    * @param {string} value The value to add to the combobox
    */
-  const setComboBoxValue = (comboBoxTestSubject, value) => {
+  const setComboBoxValue = (comboBoxTestSubject: string, value: string) => {
     const comboBox = find(comboBoxTestSubject);
     const formInput = findTestSubjectHelper(comboBox, 'comboBoxSearchInput');
     setInputValue(formInput, value);
@@ -165,7 +159,7 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
    *
    * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
    */
-  const getMetaData = (tableTestSubject) => {
+  const getMetaData = (tableTestSubject: string) => {
     const table = find(tableTestSubject);
 
     if (!table.length) {
@@ -181,8 +175,8 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
           reactWrapper: col,
           // We can't access the td value with col.text() because
           // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
-          value: col.find('.euiTableCellContent').text()
-        }))
+          value: col.find('.euiTableCellContent').text(),
+        })),
       }));
 
     // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
@@ -203,7 +197,7 @@ export const registerTestBed = (Component, defaultProps = {}, store = {}) => (pr
       selectCheckBox,
       toggleEuiSwitch,
       setComboBoxValue,
-      getErrorsMessages
-    }
+      getErrorsMessages,
+    },
   };
 };
