@@ -168,6 +168,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -184,6 +185,20 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      it('should render as read only if saving is disabled', async () => {
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={false}
           />
         );
 
@@ -199,6 +214,7 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -214,6 +230,7 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -231,6 +248,7 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -247,6 +265,7 @@ describe('Field', () => {
             }}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -262,6 +281,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -318,6 +338,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 
@@ -364,6 +385,7 @@ describe('Field', () => {
             setting={setting}
             save={save}
             clear={clear}
+            enableSaving={true}
           />
         );
 

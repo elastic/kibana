@@ -14,6 +14,7 @@ export default function ({ getService, loadTestFile }) {
         ignore: [404],
       }));
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));
     loadTestFile(require.resolve('./graphql'));
   });

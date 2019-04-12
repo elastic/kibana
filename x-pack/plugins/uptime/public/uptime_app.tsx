@@ -140,7 +140,7 @@ const Application = (props: UptimeAppProps) => {
             }}
           >
             <UptimeRefreshContext.Provider value={{ lastRefresh }}>
-              <EuiPage className="app-wrapper-panel ">
+              <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                 <div>
                   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
                     <EuiFlexItem grow={false}>
