@@ -25,15 +25,19 @@ export function FieldTitleBar({ card }) {
   const cardTitleAriaLabel = [fieldName];
 
   const classNames = ['ml-field-title-bar'];
+
   if (card.fieldName === undefined) {
     classNames.push('document_count');
   } else if (card.isUnsupportedType === true) {
     classNames.push('type-other');
+  } else {
+    classNames.push(card.type);
+  }
+
+  if (card.isUnsupportedType !== true) {
     cardTitleAriaLabel.unshift(
       getMLJobTypeAriaLabel(card.type)
     );
-  } else {
-    classNames.push(card.type);
   }
 
   return (

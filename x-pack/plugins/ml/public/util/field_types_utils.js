@@ -50,7 +50,10 @@ export const mlJobTypeAriaLabels = {
     defaultMessage: 'date type',
   }),
   GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel', {
-    defaultMessage: 'geo point type',
+    defaultMessage: '{geoPointParam} type',
+    values: {
+      geoPointParam: 'geo point'
+    }
   }),
   IP: i18n.translate('xpack.ml.fieldTypeIcon.ipTypeAriaLabel', {
     defaultMessage: 'ip type',
