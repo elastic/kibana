@@ -10,7 +10,7 @@ import {
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
-} from '../../../../plugins/security/public/views/management/management_urls';
+} from '../../../../legacy/plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');

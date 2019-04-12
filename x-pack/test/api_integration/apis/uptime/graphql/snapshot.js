@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { snapshotQueryString } from '../../../../../plugins/uptime/public/queries';
+import { snapshotQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';

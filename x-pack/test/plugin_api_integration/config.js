@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
   const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
 
-  // Find all folders in ./plugins since we treat all them as plugin folder
+  // Find all folders in ./legacy/plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
   const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
 

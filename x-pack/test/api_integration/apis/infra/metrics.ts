@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
-import { MetricsQuery } from '../../../../plugins/infra/public/graphql/types';
+import { metricsQuery } from '../../../../legacy/plugins/infra/public/containers/metrics/metrics.gql_query';
+import { MetricsQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 import { DATES } from './constants';

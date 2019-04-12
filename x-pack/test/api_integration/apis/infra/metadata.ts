@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
-import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
+import { metadataQuery } from '../../../../legacy/plugins/infra/public/containers/metadata/metadata.gql_query';
+import { MetadataQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {

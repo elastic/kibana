@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../legacy/plugins/cross_cluster_replication/common/constants';
 import { API_BASE_PATH } from './constants';
 import { initClusterHelpers, initElasticsearchIndicesHelpers, getRandomString } from './lib';
 
