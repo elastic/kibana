@@ -12,7 +12,7 @@ export function createJestConfig({
     rootDir: xPackKibanaDirectory,
     roots: [
       '<rootDir>/legacy/plugins',
-      '<rootDir>/server',
+      '<rootDir>/legacy/server',
     ],
     moduleFileExtensions: [
       'js',
