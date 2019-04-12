@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const getSnapshotQueryString = `
+export const snapshotQueryString = `
 query Snapshot(
   $dateRangeStart: String!
   $dateRangeEnd: String!
@@ -31,6 +31,6 @@ snapshot: getSnapshot(
 }
 `;
 
-export const getSnapshotQuery = gql`
-  ${getSnapshotQueryString}
+export const snapshotQuery = gql`
+  ${snapshotQueryString}
 `;

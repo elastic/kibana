@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EmptyStateQuery } from './empty_state_query';
+import { createContext } from 'react';
+
+interface UMRefreshContext {
+  lastRefresh: number;
+}
+
+const defaultContext: UMRefreshContext = {
+  lastRefresh: 0,
+};
+
+export const UptimeRefreshContext = createContext(defaultContext);
