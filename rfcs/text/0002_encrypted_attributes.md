@@ -102,7 +102,7 @@ server.plugins.encrypted_saved_objects.registerType({
 
 Since `encrypted_saved_objects` adds its own wrapper (`EncryptedSavedObjectsClientWrapper`) into `SavedObjectsClient`
 wrapper chain consumers will be able to create, update, delete and retrieve saved objects using standard Saved Objects API.
-To main responsibilities of the wrapper are:
+Two main responsibilities of the wrapper are:
 
 * It encrypts attributes that are supposed to be encrypted during `create`, `bulkCreate` and `update` operations
 * It strips encrypted attributes from **any** saved object returned from the Saved Objects API
@@ -110,12 +110,12 @@ To main responsibilities of the wrapper are:
 As noted above the wrapper is stripping encrypted attributes from saved objects returned from the API methods, that means
 that there is no way at all to retrieve encrypted attributes using standard Saved Objects API unless `encrypted_saved_objects`
 plugin is disabled. This potentially can lead to the situation when consumer retrieves saved object, updates its non-encrypted
-properties and passed that same object to the `update` Saved Objects API method without re-defining encrypted attributes.
+properties and passes that same object to the `update` Saved Objects API method without re-defining encrypted attributes.
 At this stage we consider this as a developer mistake and don't prevent it from happening in any way apart from logging
 this type of event.
 
 Saved object ID is an essential part of Additional authenticated data (AAD) used during encryption process and hence
-should be as hard to guess as possible. To fulfil this requirements wrapper generates highly random IDs (UUIDv4) for the
+should be as hard to guess as possible. To fulfil this requirement wrapper generates highly random IDs (UUIDv4) for the
 saved objects that contain encrypted attributes and hence consumers are not allowed to specify ID when calling `create`
 or `bulkCreate` method and if they try to do so the error will be thrown.
 
