@@ -28,6 +28,8 @@ export async function findRelationships(type, id, options = {}) {
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
+
+  // Use a map to avoid duplicates, it does happen but have a different "name" in the reference
   const referencedToBulkGetOpts = new Map();
   for (const { type, id } of references) {
     referencedToBulkGetOpts.set(`${type}:${id}`, { id, type });
@@ -45,13 +47,15 @@ export async function findRelationships(type, id, options = {}) {
   ]);
 
   return [].concat(
-    injectMetaAttributes(referencedObjects.saved_objects, savedObjectSchemas)
+    referencedObjects.saved_objects
+      .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,
         relationship: 'child',
       })),
-    injectMetaAttributes(referencedResponse.saved_objects, savedObjectSchemas)
+    referencedResponse.saved_objects
+      .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,

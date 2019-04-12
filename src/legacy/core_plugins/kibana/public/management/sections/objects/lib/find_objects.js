@@ -21,10 +21,10 @@ import { kfetch } from 'ui/kfetch';
 import { keysToCamelCaseShallow } from 'ui/utils/case_conversion';
 
 export async function findObjects(findOptions) {
-  const resp = await kfetch({
+  const response = await kfetch({
     method: 'GET',
     pathname: '/api/kibana/management/saved_objects/_find',
     query: findOptions,
   });
-  return keysToCamelCaseShallow(resp);
+  return keysToCamelCaseShallow(response);
 }

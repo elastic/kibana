@@ -29,7 +29,7 @@ export default function (kibana) {
       mappings: require('./mappings.json'),
       savedObjectSchemas: {
         'ui-metric': {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
       },
     },

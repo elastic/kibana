@@ -192,13 +192,13 @@ export default function (kibana) {
         },
         'sample-data-telemetry': {
           isNamespaceAgnostic: true,
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
         server: {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
         'kql-telemetry': {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
         config: {
           getInAppUrl() {

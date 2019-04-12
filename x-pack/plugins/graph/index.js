@@ -32,7 +32,7 @@ export function graph(kibana) {
       migrations,
       savedObjectSchemas: {
         'graph-workspace': {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
       },
     },

@@ -63,7 +63,7 @@ import {
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const INCLUDED_TYPES = chrome.getInjected('importExportableTypes');
+export const INCLUDED_TYPES = chrome.getInjected('importAndExportableTypes');
 
 class ObjectsTableUI extends Component {
   static propTypes = {
@@ -170,6 +170,8 @@ class ObjectsTableUI extends Component {
     const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectSchemas "titleSearchField" attribute
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,

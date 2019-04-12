@@ -112,12 +112,16 @@ class RelationshipsUI extends Component {
     const columns = [
       {
         field: 'type',
-        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTypeName', defaultMessage: 'Type' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnTypeName',
+          defaultMessage: 'Type',
+        }),
         width: '50px',
         align: 'center',
         description:
           intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription', defaultMessage: 'Type of the saved object'
+            id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
+            defaultMessage: 'Type of the saved object',
           }),
         sortable: false,
         render: (type, object) => {
@@ -169,10 +173,14 @@ class RelationshipsUI extends Component {
       },
       {
         field: 'meta.title',
-        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnTitleName',
+          defaultMessage: 'Title',
+        }),
         description:
         intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnTitleDescription', defaultMessage: 'Title of the saved object'
+          id: 'kbn.management.objects.objectsTable.relationships.columnTitleDescription',
+          defaultMessage: 'Title of the saved object',
         }),
         dataType: 'string',
         sortable: false,
@@ -189,7 +197,10 @@ class RelationshipsUI extends Component {
         },
       },
       {
-        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.relationships.columnActionsName', defaultMessage: 'Actions' }),
+        name: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.relationships.columnActionsName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             name: intl.formatMessage({

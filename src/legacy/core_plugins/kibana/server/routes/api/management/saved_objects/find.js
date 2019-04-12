@@ -17,6 +17,14 @@
  * under the License.
  */
 
+/**
+ * This file wraps the saved object `_find` API and is designed specifically for the saved object
+ * management UI. The main difference is this will inject a root `meta` attribute on each saved object
+ * that the UI depends on. The meta fields come from functions within uiExports which can't be
+ * injected into the front end when defined within uiExports. There are alternatives to this but have
+ * decided to go with this approach at the time of development.
+ */
+
 import Joi from 'joi';
 import { injectMetaAttributes } from '../../../../lib/management/saved_objects/inject_meta_attributes';
 
@@ -63,10 +71,12 @@ export function registerFind(server) {
     },
     async handler(request) {
       const searchFields = new Set();
-      const { savedObjectSchemas } = request.server.kibanaMigrator.kbnServer.uiExports;
       const savedObjectsClient = request.getSavedObjectsClient();
-      const fieldsFilter = request.query.fields;
+      const { savedObjectSchemas } = request.server.kibanaMigrator.kbnServer.uiExports;
 
+      // Accumulate "titleSearchField" attributes from savedObjectSchemas. Unfortunately
+      // search fields apply to all types of saved objects, the sum of these fields will
+      // be searched on for each object.
       for (const schema of Object.values(savedObjectSchemas)) {
         if (schema.titleSearchField) {
           searchFields.add(schema.titleSearchField);
@@ -80,19 +90,15 @@ export function registerFind(server) {
       });
       return {
         ...findResponse,
-        saved_objects: injectMetaAttributes(findResponse.saved_objects, savedObjectSchemas).map((obj) => {
-          if (!fieldsFilter) {
-            return obj;
-          }
-          const attributes = {};
-          for (const field of fieldsFilter) {
-            attributes[field] = obj.attributes[field];
-          }
-          return {
-            ...obj,
-            attributes,
-          };
-        })
+        saved_objects: findResponse.saved_objects
+          .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
+          .map(obj => {
+            const result = { ...obj, attributes: {} };
+            for (const field of request.query.fields || []) {
+              result.attributes[field] = obj.attributes[field];
+            }
+            return result;
+          })
       };
     },
   });

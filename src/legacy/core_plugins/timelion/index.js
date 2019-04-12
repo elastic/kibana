@@ -66,7 +66,7 @@ export default function (kibana) {
       mappings: require('./mappings.json'),
       savedObjectSchemas: {
         'timelion-sheet': {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
       },
 

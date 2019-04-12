@@ -57,7 +57,7 @@ export const ml = (kibana) => {
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
-          isImportExportable: false,
+          isImportableAndExportable: false,
         }
       },
       mappings,

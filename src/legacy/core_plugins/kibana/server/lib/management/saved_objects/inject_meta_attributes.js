@@ -17,26 +17,23 @@
  * under the License.
  */
 
-export function injectMetaAttributes(savedObjects, savedObjectSchemas) {
-  return savedObjects.map((savedObject) => {
-    const schema = savedObjectSchemas[savedObject.type];
-    if (!schema) {
-      return {
-        ...savedObject,
-        meta: savedObject.meta || {},
-      };
-    }
-    return {
-      ...savedObject,
-      meta: {
-        ...(savedObject.meta || {}),
-        ...({
-          icon: schema.icon,
-          title: schema.getTitle ? schema.getTitle(savedObject) : undefined,
-          editUrl: schema.getEditUrl ? schema.getEditUrl(savedObject) : undefined,
-          inAppUrl: schema.getInAppUrl ? schema.getInAppUrl(savedObject) : undefined,
-        }),
-      },
-    };
-  });
+export function injectMetaAttributes(savedObject, savedObjectSchemas) {
+  const schema = savedObjectSchemas[savedObject.type];
+  const result = {
+    ...savedObject,
+    meta: savedObject.meta || {},
+  };
+
+  // If no schema is defined, there's no extra meta attributes we can add
+  if (!schema) {
+    return result;
+  }
+
+  // Add extra meta information
+  result.meta.icon = schema.icon;
+  result.meta.title = schema.getTitle ? schema.getTitle(savedObject) : undefined;
+  result.meta.editUrl = schema.getEditUrl ? schema.getEditUrl(savedObject) : undefined;
+  result.meta.inAppUrl = schema.getInAppUrl ? schema.getInAppUrl(savedObject) : undefined;
+
+  return result;
 }

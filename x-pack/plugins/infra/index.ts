@@ -65,7 +65,7 @@ export function infra(kibana: any) {
       mappings: savedObjectMappings,
       savedObjectSchemas: {
         'infrastructure-ui-source': {
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
       },
     },

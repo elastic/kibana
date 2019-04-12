@@ -86,7 +86,7 @@ export const xpackMain = (kibana) => {
       savedObjectSchemas: {
         telemetry: {
           isNamespaceAgnostic: true,
-          isImportExportable: false,
+          isImportableAndExportable: false,
         },
       },
       injectDefaultVars(server) {
