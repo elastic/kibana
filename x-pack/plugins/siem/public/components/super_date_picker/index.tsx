@@ -158,7 +158,7 @@ export const SuperDatePickerComponent = class extends Component<
 
   private formatDate = (date: string) => {
     const momentDate = dateMath.parse(date);
-    return momentDate ? momentDate.valueOf() : 0;
+    return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
   };
 
   private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {

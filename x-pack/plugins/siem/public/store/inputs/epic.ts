@@ -48,7 +48,7 @@ export const createGlobalTimeEpic = <State>(): Epic<
             id: 'global',
             option: option!,
             to: Date.now(),
-            from: momentDate ? momentDate.valueOf() : 0,
+            from: momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0,
           });
         }),
         takeUntil(action$.pipe(filter(stopAutoReload.match)))
