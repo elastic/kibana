@@ -6,3 +6,7 @@
 
 export { SourceConfigurationButton } from './source_configuration_button';
 export { SourceConfigurationFlyout } from './source_configuration_flyout';
+export {
+  SourceConfigurationFlyoutState,
+  useSourceConfigurationFlyoutState,
+} from './source_configuration_flyout_state';

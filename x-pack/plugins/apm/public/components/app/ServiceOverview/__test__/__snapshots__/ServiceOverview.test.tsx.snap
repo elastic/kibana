@@ -79,7 +79,7 @@ NodeList [
                    
                   <a
                     class="euiLink euiLink--primary"
-                    href="/app/kibana#/management/elasticsearch/upgrade_assistant?"
+                    href="/app/kibana#/management/elasticsearch/upgrade_assistant"
                   >
                     Learn more by visiting the Kibana Upgrade Assistant
                   </a>
@@ -95,7 +95,7 @@ NodeList [
             />
             <a
               class="euiLink euiLink--primary"
-              href="/app/kibana#/home/tutorial/apm?"
+              href="/app/kibana#/home/tutorial/apm"
             >
               <button
                 class="euiButton euiButton--primary euiButton--small euiButton--fill"

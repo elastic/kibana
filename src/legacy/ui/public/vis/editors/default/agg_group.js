@@ -26,6 +26,10 @@ import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
 import { aggGroupNameMaps } from './agg_group_names';
 
+import '../../draggable/draggable_container';
+import '../../draggable/draggable_item';
+import '../../draggable/draggable_handle';
+
 uiModules
   .get('app/visualize')
   .directive('visEditorAggGroup', function () {

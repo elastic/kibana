@@ -17,13 +17,15 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import _ from 'lodash';
 import { createAction } from 'redux-actions';
+import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';
 import { getEmbeddableCustomization, getPanel } from '../../selectors';
 import { PanelId, PanelState } from '../selectors';
 import { updatePanel } from './panels';
 
-import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';
 import { KibanaAction, KibanaThunk } from '../../selectors/types';
 
 export enum EmbeddableActionTypeKeys {

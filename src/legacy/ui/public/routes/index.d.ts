@@ -19,5 +19,6 @@
 
 import { uiRoutes, UIRoutes } from 'ui/routes/routes';
 
+// eslint-disable-next-line import/no-default-export
 export default uiRoutes;
 export { UIRoutes };

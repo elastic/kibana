@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "main": "./target/index.js",
+  "kibana": {
+    "build": {
+      "oss": false
+    }
+  },
   "dependencies": {
     "@elastic/bar": "link:../bar"
   },

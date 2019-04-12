@@ -16,7 +16,7 @@ describe('resolved args reducer', () => {
   beforeEach(() => {
     state = {
       selectedPage: 'page-1',
-      selectedElement: 'element-1',
+      selectedToplevelNodes: ['element-1'],
       resolvedArgs: {
         'element-0': [
           {
@@ -148,7 +148,7 @@ describe('resolved args reducer', () => {
     it('removes expression context from a given index to the end', () => {
       state = {
         selectedPage: 'page-1',
-        selectedElement: 'element-1',
+        selectedToplevelNodes: ['element-1'],
         resolvedArgs: {
           'element-1': {
             expressionContext: {

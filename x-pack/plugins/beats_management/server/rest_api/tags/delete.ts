@@ -18,8 +18,7 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
-    let success: boolean;
-    success = await libs.tags.delete(request.user, tagIds);
+    const success = await libs.tags.delete(request.user, tagIds);
 
     return {
       results: tagIds.map(() => ({

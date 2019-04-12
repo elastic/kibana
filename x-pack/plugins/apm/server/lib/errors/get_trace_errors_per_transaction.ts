@@ -8,7 +8,7 @@ import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
