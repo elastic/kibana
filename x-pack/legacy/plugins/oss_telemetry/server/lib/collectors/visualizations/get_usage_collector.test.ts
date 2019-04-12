@@ -10,7 +10,7 @@ import {
   getMockCallWithInternal,
   getMockKbnServer,
   getMockTaskFetch,
-} from '../../../../../test_utils';
+} from '../../../../test_utils';
 import { getUsageCollector } from './get_usage_collector';
 
 describe('getVisualizationsCollector#fetch', () => {
