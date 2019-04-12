@@ -59,13 +59,12 @@ export async function saveWatch(watch: BaseWatch, urlService: any, licenseServic
     await createWatch(watch);
     toastNotifications.addSuccess(
       i18n.translate('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
-        defaultMessage: `Saved "{watchDisplayName}"`,
+        defaultMessage: "Saved '{watchDisplayName}'",
         values: {
           watchDisplayName: watch.displayName,
         },
       })
     );
-    // TODO: Not correctly redirecting back to /watches route
     urlService.change('/management/elasticsearch/watcher/watches', {});
   } catch (error) {
     return licenseService
