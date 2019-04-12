@@ -11,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
-import { TestBedOptions } from './testbed';
+import { TestBedOptions } from './types';
 
 export const mountComponent = (
   Component: ComponentType,
