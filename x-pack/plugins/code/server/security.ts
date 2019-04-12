@@ -65,9 +65,12 @@ export class SecureRoute {
 
   private isSecurityEnabledInEs() {
     const xpackInfo = this.server.plugins.xpack_main.info;
+    if (!xpackInfo.isAvailable()) {
+      throw Boom.serverUnavailable('x-pack info is not available yet.');
+    }
     if (
-      xpackInfo.isAvailable() &&
-      (!xpackInfo.feature('security').isEnabled() || xpackInfo.license.isOneOf('basic'))
+      !xpackInfo.feature('security').isEnabled() ||
+      !xpackInfo.feature('security').isAvailable()
     ) {
       return false;
     }

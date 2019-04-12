@@ -35,7 +35,7 @@ export function lspRoute(
   serverOptions: ServerOptions
 ) {
   const log = new Logger(server);
-  server.route({
+  server.securedRoute({
     path: '/api/code/lsp/textDocument/{method}',
     async handler(req, h: hapi.ResponseToolkit) {
       if (typeof req.payload === 'object' && req.payload != null) {
@@ -77,7 +77,7 @@ export function lspRoute(
     method: 'POST',
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
     async handler(req, h: hapi.ResponseToolkit) {
@@ -170,7 +170,7 @@ export function lspRoute(
 }
 
 export function symbolByQnameRoute(server: hapi.Server, log: Logger) {
-  server.route({
+  server.securedRoute({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
     async handler(req) {

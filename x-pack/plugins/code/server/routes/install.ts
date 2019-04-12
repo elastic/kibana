@@ -29,7 +29,7 @@ export function installRoute(
     pluginName: def.pluginName,
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/install',
     handler() {
       return LanguageServers.map(status);

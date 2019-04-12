@@ -131,7 +131,7 @@ export function repositoryRoute(
   });
 
   // Get a git repository
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}',
     method: 'GET',
     async handler(req) {
@@ -149,7 +149,7 @@ export function repositoryRoute(
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/status/{uri*3}',
     method: 'GET',
     async handler(req) {
@@ -192,7 +192,7 @@ export function repositoryRoute(
   });
 
   // Get all git repositories
-  server.route({
+  server.securedRoute({
     path: '/api/code/repos',
     method: 'GET',
     async handler(req) {
@@ -212,9 +212,10 @@ export function repositoryRoute(
   // Issue a repository index task.
   // TODO(mengwei): This is just temporary API stub to trigger the index job. Eventually in the near
   // future, this route will be removed. The scheduling strategy is still in discussion.
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/index/{uri*3}',
     method: 'POST',
+    requireAdmin: true,
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Logger(req.server);
@@ -238,9 +239,10 @@ export function repositoryRoute(
   });
 
   // Update a repo config
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/config/{uri*3}',
     method: 'PUT',
+    requireAdmin: true,
     async handler(req, h) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
@@ -269,7 +271,7 @@ export function repositoryRoute(
   });
 
   // Get repository config
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/config/{uri*3}',
     method: 'GET',
     async handler(req) {
