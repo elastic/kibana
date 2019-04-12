@@ -238,6 +238,9 @@ describe('Terms Agg', function () {
           aggParams: {
             include: '404',
             exclude: '400',
+            field: {
+              type: 'string'
+            }
           }
         });
 
