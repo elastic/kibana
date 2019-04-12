@@ -70,6 +70,37 @@ export function apm(kibana: any) {
 
     // TODO: get proper types
     init(server: Server) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'apm',
+        name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
+          defaultMessage: 'APM'
+        }),
+        icon: 'apmApp',
+        navLinkId: 'apm',
+        app: ['apm', 'kibana'],
+        catalogue: ['apm'],
+        privileges: {
+          all: {
+            api: ['apm'],
+            catalogue: ['apm'],
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: ['show']
+          },
+          read: {
+            api: ['apm'],
+            catalogue: ['apm'],
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: ['show']
+          }
+        }
+      });
+
       const initializerContext = {} as PluginInitializerContext;
       const core = {
         http: {

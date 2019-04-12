@@ -13,7 +13,7 @@ import { LogsPageProviders } from './page_providers';
 
 export const LogsPage = () => (
   <LogsPageProviders>
-    <ColumnarPage>
+    <ColumnarPage data-test-subj="infraLogsPage">
       <LogsPageHeader />
       <LogsPageContent />
     </ColumnarPage>
