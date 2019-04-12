@@ -16,7 +16,7 @@ import { getDefaultElement } from '../defaults';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
-import { selectElement } from './transient';
+import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
 
 export function getSiblingContext(state, elementId, checkIndex) {
@@ -221,10 +221,7 @@ export const removeElements = createThunk(
 
     // todo consider doing the group membership collation in aeroelastic, or the Redux reducer, when adding templates
     const allElements = getNodes(state, pageId);
-    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id));
-    if (allRoots.indexOf(undefined) !== -1) {
-      throw new Error('Some of the elements to be deleted do not exist');
-    }
+    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id)).filter(d => d);
     const elementIds = subMultitree(e => e.id, e => e.position.parent, allElements, allRoots).map(
       e => e.id
     );
@@ -236,8 +233,8 @@ export const removeElements = createThunk(
     });
 
     const _removeElements = createAction('removeElements', (elementIds, pageId) => ({
-      pageId,
       elementIds,
+      pageId,
     }));
     dispatch(_removeElements(elementIds, pageId));
 
@@ -411,5 +408,5 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   }
 
   // select the new element
-  dispatch(selectElement(newElement.id));
+  dispatch(selectToplevelNodes([newElement.id]));
 });

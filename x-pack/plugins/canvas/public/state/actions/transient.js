@@ -7,5 +7,6 @@
 import { createAction } from 'redux-actions';
 
 export const setFullscreen = createAction('setFullscreen');
-export const selectElement = createAction('selectElement');
+export const selectToplevelNodes = createAction('selectToplevelNodes');
+export const setFirstLoad = createAction('setFirstLoad');
 export const setElementStats = createAction('setElementStats');

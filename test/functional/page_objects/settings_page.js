@@ -385,6 +385,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('tab-sourceFilters');
     }
 
+    async editScriptedField(name) {
+      await this.filterField(name);
+      await find.clickByCssSelector('.euiTableRowCell--hasActions button:first-child');
+    }
+
     async addScriptedField(name, language, type, format, popularity, script) {
       await this.clickAddScriptedField();
       await this.setScriptedFieldName(name);

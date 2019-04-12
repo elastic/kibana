@@ -12,7 +12,7 @@ import { registerRouter, getRouter } from '../../public/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => 'api/remote_clusters',
+  addBasePath: (path) => path || '/api/remote_clusters',
   breadcrumbs: { set: () => {} },
   getInjected: (key) => {
     if (key === 'uiCapabilities') {

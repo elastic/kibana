@@ -21,7 +21,7 @@ export const getInitialState = path => {
         error: 0,
       },
       fullscreen: false,
-      selectedElement: null,
+      selectedToplevelNodes: [],
       resolvedArgs: {},
       refresh: {
         interval: 0,
