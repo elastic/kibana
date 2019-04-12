@@ -36,7 +36,7 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
 } from './_terms_other_bucket_helper';
-import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { isType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { SwitchParamEditor } from '../controls/switch';
 
 const aggFilter = [
@@ -289,6 +289,7 @@ export const termsBucketAgg = new BucketAggType({
       name: 'otherBucket',
       default: false,
       editorComponent: SwitchParamEditor,
+      dataTestSubj: 'otherBucketSwitch',
       displayLabel: i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
         defaultMessage: 'Group other values in separate bucket',
       }),
@@ -307,13 +308,14 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      shouldShow: agg => !agg.params.otherBucket,
+      shouldShow: agg => agg.params.otherBucket,
       write: _.noop,
     },
     {
       name: 'missingBucket',
       default: false,
       editorComponent: SwitchParamEditor,
+      dataTestSubj: 'missingBucketSwitch',
       displayLabel: i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesLabel', {
         defaultMessage: 'Show missing values',
       }),
@@ -324,7 +326,7 @@ export const termsBucketAgg = new BucketAggType({
           'If not in the top N, and you enable "Group other values in separate bucket", ' +
           'Elasticsearch adds the missing values to the "other" bucket.',
       }),
-      disabled: isNotType('string'),
+      disabled: agg => !isType('string')(agg),
       write: _.noop,
     },
     {
@@ -339,7 +341,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      shouldShow: agg => !agg.params.missingBucket,
+      shouldShow: agg => agg.params.missingBucket,
       write: _.noop,
     },
     {
@@ -349,7 +351,7 @@ export const termsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isNotType('string'),
+      shouldShow: isType('string'),
       ...migrateIncludeExcludeFormat,
     },
     {
@@ -359,7 +361,7 @@ export const termsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isNotType('string'),
+      shouldShow: isType('string'),
       ...migrateIncludeExcludeFormat,
     },
   ],

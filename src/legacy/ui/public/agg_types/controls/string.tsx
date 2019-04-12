@@ -33,7 +33,7 @@ function StringParamEditor({
 }: AggParamEditorProps<string>) {
   const { displayName, name, shouldShow } = aggParam;
 
-  if (shouldShow && shouldShow(agg)) {
+  if (shouldShow && !shouldShow(agg)) {
     return null;
   }
 

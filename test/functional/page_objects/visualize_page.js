@@ -616,11 +616,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleOtherBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
+      return await testSubjects.click('otherBucketSwitch');
     }
 
     async toggleMissingBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
+      return await testSubjects.click('missingBucketSwitch');
     }
 
     async isApplyEnabled() {

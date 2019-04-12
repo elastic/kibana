@@ -19,10 +19,10 @@
 
 import { isString, isObject } from 'lodash';
 
-function isNotType(type) {
+function isType(type) {
   return function (agg) {
     const field = agg.params.field;
-    return !field || field.type !== type;
+    return field && field.type === type;
   };
 }
 
@@ -34,19 +34,15 @@ const migrateIncludeExcludeFormat = {
   write: function (aggConfig, output) {
     const value = aggConfig.params[this.name];
 
-    if (isNotType('string')(aggConfig)) {
-      return;
-    }
-
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
-    } else if (value) {
+    } else if (value && isType('string')(aggConfig)) {
       output.params[this.name] = value;
     }
   }
 };
 
 export {
-  isNotType,
+  isType,
   migrateIncludeExcludeFormat
 };

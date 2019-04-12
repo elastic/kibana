@@ -23,6 +23,7 @@ interface AggParam {
   type: string;
   name: string;
   required?: boolean;
+  dataTestSubj?: string;
   displayName?: string;
   displayLabel?: string;
   displayToolTip?: string;
