@@ -200,28 +200,28 @@ export const ecsSchema = gql`
   }
 
   type FileFields {
-    path: String
-    target_path: String
-    extension: String
-    type: String
-    device: String
-    inode: String
-    uid: String
-    owner: String
-    gid: String
-    group: String
-    mode: String
-    size: Float
-    mtime: Date
-    ctime: Date
+    path: ToStringArray
+    target_path: ToStringArray
+    extension: ToStringArray
+    type: ToStringArray
+    device: ToStringArray
+    inode: ToStringArray
+    uid: ToStringArray
+    owner: ToStringArray
+    gid: ToStringArray
+    group: ToStringArray
+    mode: ToStringArray
+    size: ToStringArray
+    mtime: ToStringArray
+    ctime: ToStringArray
   }
 
   type ZeekHttpData {
-    resp_mime_types: [String!]
-    trans_depth: String
-    status_msg: String
-    resp_fuids: [String!]
-    tags: [String!]
+    resp_mime_types: ToStringArray
+    trans_depth: ToStringArray
+    status_msg: ToStringArray
+    resp_fuids: ToStringArray
+    tags: ToStringArray
   }
 
   type HttpBodyData {

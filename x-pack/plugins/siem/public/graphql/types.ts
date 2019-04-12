@@ -558,15 +558,15 @@ export interface ZeekDnsData {
 }
 
 export interface ZeekHttpData {
-  resp_mime_types?: string[] | null;
+  resp_mime_types?: ToStringArray | null;
 
-  trans_depth?: string | null;
+  trans_depth?: ToStringArray | null;
 
-  status_msg?: string | null;
+  status_msg?: ToStringArray | null;
 
-  resp_fuids?: string[] | null;
+  resp_fuids?: ToStringArray | null;
 
-  tags?: string[] | null;
+  tags?: ToStringArray | null;
 }
 
 export interface ZeekFileData {
@@ -678,33 +678,33 @@ export interface ProcessEcsFields {
 }
 
 export interface FileFields {
-  path?: string | null;
+  path?: ToStringArray | null;
 
-  target_path?: string | null;
+  target_path?: ToStringArray | null;
 
-  extension?: string | null;
+  extension?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 
-  device?: string | null;
+  device?: ToStringArray | null;
 
-  inode?: string | null;
+  inode?: ToStringArray | null;
 
-  uid?: string | null;
+  uid?: ToStringArray | null;
 
-  owner?: string | null;
+  owner?: ToStringArray | null;
 
-  gid?: string | null;
+  gid?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 
-  mode?: string | null;
+  mode?: ToStringArray | null;
 
-  size?: number | null;
+  size?: ToStringArray | null;
 
-  mtime?: Date | null;
+  mtime?: ToStringArray | null;
 
-  ctime?: Date | null;
+  ctime?: ToStringArray | null;
 }
 
 export interface SystemEcsField {
@@ -2634,33 +2634,33 @@ export namespace GetTimelineQuery {
   export type File = {
     __typename?: 'FileFields';
 
-    path?: string | null;
+    path?: ToStringArray | null;
 
-    target_path?: string | null;
+    target_path?: ToStringArray | null;
 
-    extension?: string | null;
+    extension?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
 
-    device?: string | null;
+    device?: ToStringArray | null;
 
-    inode?: string | null;
+    inode?: ToStringArray | null;
 
-    uid?: string | null;
+    uid?: ToStringArray | null;
 
-    owner?: string | null;
+    owner?: ToStringArray | null;
 
-    gid?: string | null;
+    gid?: ToStringArray | null;
 
-    group?: string | null;
+    group?: ToStringArray | null;
 
-    mode?: string | null;
+    mode?: ToStringArray | null;
 
-    size?: number | null;
+    size?: ToStringArray | null;
 
-    mtime?: Date | null;
+    mtime?: ToStringArray | null;
 
-    ctime?: Date | null;
+    ctime?: ToStringArray | null;
   };
 
   export type Host = {
@@ -2986,15 +2986,15 @@ export namespace GetTimelineQuery {
   export type _Http = {
     __typename?: 'ZeekHttpData';
 
-    resp_mime_types?: string[] | null;
+    resp_mime_types?: ToStringArray | null;
 
-    trans_depth?: string | null;
+    trans_depth?: ToStringArray | null;
 
-    status_msg?: string | null;
+    status_msg?: ToStringArray | null;
 
-    resp_fuids?: string[] | null;
+    resp_fuids?: ToStringArray | null;
 
-    tags?: string[] | null;
+    tags?: ToStringArray | null;
   };
 
   export type Files = {

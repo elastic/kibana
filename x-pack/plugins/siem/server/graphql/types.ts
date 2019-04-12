@@ -587,15 +587,15 @@ export interface ZeekDnsData {
 }
 
 export interface ZeekHttpData {
-  resp_mime_types?: string[] | null;
+  resp_mime_types?: ToStringArray | null;
 
-  trans_depth?: string | null;
+  trans_depth?: ToStringArray | null;
 
-  status_msg?: string | null;
+  status_msg?: ToStringArray | null;
 
-  resp_fuids?: string[] | null;
+  resp_fuids?: ToStringArray | null;
 
-  tags?: string[] | null;
+  tags?: ToStringArray | null;
 }
 
 export interface ZeekFileData {
@@ -707,33 +707,33 @@ export interface ProcessEcsFields {
 }
 
 export interface FileFields {
-  path?: string | null;
+  path?: ToStringArray | null;
 
-  target_path?: string | null;
+  target_path?: ToStringArray | null;
 
-  extension?: string | null;
+  extension?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 
-  device?: string | null;
+  device?: ToStringArray | null;
 
-  inode?: string | null;
+  inode?: ToStringArray | null;
 
-  uid?: string | null;
+  uid?: ToStringArray | null;
 
-  owner?: string | null;
+  owner?: ToStringArray | null;
 
-  gid?: string | null;
+  gid?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 
-  mode?: string | null;
+  mode?: ToStringArray | null;
 
-  size?: number | null;
+  size?: ToStringArray | null;
 
-  mtime?: Date | null;
+  mtime?: ToStringArray | null;
 
-  ctime?: Date | null;
+  ctime?: ToStringArray | null;
 }
 
 export interface SystemEcsField {
@@ -3187,39 +3187,39 @@ export namespace ZeekDnsDataResolvers {
 
 export namespace ZeekHttpDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekHttpData> {
-    resp_mime_types?: RespMimeTypesResolver<string[] | null, TypeParent, Context>;
+    resp_mime_types?: RespMimeTypesResolver<ToStringArray | null, TypeParent, Context>;
 
-    trans_depth?: TransDepthResolver<string | null, TypeParent, Context>;
+    trans_depth?: TransDepthResolver<ToStringArray | null, TypeParent, Context>;
 
-    status_msg?: StatusMsgResolver<string | null, TypeParent, Context>;
+    status_msg?: StatusMsgResolver<ToStringArray | null, TypeParent, Context>;
 
-    resp_fuids?: RespFuidsResolver<string[] | null, TypeParent, Context>;
+    resp_fuids?: RespFuidsResolver<ToStringArray | null, TypeParent, Context>;
 
-    tags?: TagsResolver<string[] | null, TypeParent, Context>;
+    tags?: TagsResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type RespMimeTypesResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransDepthResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StatusMsgResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RespFuidsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TagsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3589,105 +3589,105 @@ export namespace ProcessEcsFieldsResolvers {
 
 export namespace FileFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = FileFields> {
-    path?: PathResolver<string | null, TypeParent, Context>;
+    path?: PathResolver<ToStringArray | null, TypeParent, Context>;
 
-    target_path?: TargetPathResolver<string | null, TypeParent, Context>;
+    target_path?: TargetPathResolver<ToStringArray | null, TypeParent, Context>;
 
-    extension?: ExtensionResolver<string | null, TypeParent, Context>;
+    extension?: ExtensionResolver<ToStringArray | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    device?: DeviceResolver<string | null, TypeParent, Context>;
+    device?: DeviceResolver<ToStringArray | null, TypeParent, Context>;
 
-    inode?: InodeResolver<string | null, TypeParent, Context>;
+    inode?: InodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    uid?: UidResolver<string | null, TypeParent, Context>;
+    uid?: UidResolver<ToStringArray | null, TypeParent, Context>;
 
-    owner?: OwnerResolver<string | null, TypeParent, Context>;
+    owner?: OwnerResolver<ToStringArray | null, TypeParent, Context>;
 
-    gid?: GidResolver<string | null, TypeParent, Context>;
+    gid?: GidResolver<ToStringArray | null, TypeParent, Context>;
 
-    group?: GroupResolver<string | null, TypeParent, Context>;
+    group?: GroupResolver<ToStringArray | null, TypeParent, Context>;
 
-    mode?: ModeResolver<string | null, TypeParent, Context>;
+    mode?: ModeResolver<ToStringArray | null, TypeParent, Context>;
 
-    size?: SizeResolver<number | null, TypeParent, Context>;
+    size?: SizeResolver<ToStringArray | null, TypeParent, Context>;
 
-    mtime?: MtimeResolver<Date | null, TypeParent, Context>;
+    mtime?: MtimeResolver<ToStringArray | null, TypeParent, Context>;
 
-    ctime?: CtimeResolver<Date | null, TypeParent, Context>;
+    ctime?: CtimeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PathResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TargetPathResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ExtensionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DeviceResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type InodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type UidResolver<R = string | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type UidResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type GidResolver<R = string | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type GidResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type GroupResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ModeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SizeResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type MtimeResolver<R = Date | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CtimeResolver<R = Date | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type MtimeResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CtimeResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace SystemEcsFieldResolvers {
