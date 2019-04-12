@@ -40,10 +40,10 @@ const watchReducer = (state: any, action: any) => {
       return payload;
     case 'setProperty':
       const { property, value } = payload;
-      if (!isEqual(state[property], value)) {
-        return new (Watch.getWatchTypes())[state.type]({ ...state, [property]: value });
-      } else {
+      if (isEqual(state[property], value)) {
         return state;
+      } else {
+        return new (Watch.getWatchTypes())[state.type]({ ...state, [property]: value });
       }
     case 'addAction':
       const newWatch = new (Watch.getWatchTypes())[state.type](state);

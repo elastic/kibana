@@ -25,25 +25,27 @@ export class SlackAction extends BaseAction {
     const errors = [];
 
     if (!this.to.length) {
-      errors.push({
-        message: <FormattedMessage
-          id="xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description"
-          // eslint-disable-next-line max-len
-          defaultMessage="This watch has a Slack {ymlValue} setting without a 'to' property. If this property is already set in your elasticsearch.yml file, you're all set. Otherwise, you can include it here in the watch JSON. {docsLink}"
+      const message = (
+        <FormattedMessage
+          id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage"
+          defaultMessage="This watch has a Slack {ymlValue} setting without a 'to' property.
+            If this property is already set in your elasticsearch.yml file, you're all set.
+            Otherwise, you can include it here in the watch JSON. {link}"
           values={{
-            ymlValue: (
-              <EuiCode transparentBackground>message_defaults</EuiCode>
-            ),
-            docsLink: (
+            ymlValue: <EuiCode transparentBackground>message_defaults</EuiCode>,
+            link: (
               <EuiLink href={documentationLinks.watcher.watchNotificationSettings} target="_blank">
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.documentationLink"
+                  id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage.helpLinkText"
                   defaultMessage="Learn more."
                 />
               </EuiLink>
-            ),
+            )
           }}
         />
+      );
+      errors.push({
+        message
       });
     }
 
