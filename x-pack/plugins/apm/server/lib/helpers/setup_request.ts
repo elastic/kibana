@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* tslint:disable no-console */
+/* eslint-disable no-console */
 import {
   AggregationSearchResponse,
   ESFilter,
@@ -13,14 +13,14 @@ import {
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
 import moment from 'moment';
-import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 
 function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
 export interface APMSearchParams extends SearchParams {
-  omitLegacyData?: boolean;
+  includeLegacyData?: boolean;
 }
 
 export type ESClient = <T = void, U = void>(
@@ -69,10 +69,10 @@ export function isApmIndex(
 
 function addFilterForLegacyData(
   apmIndices: string[],
-  { omitLegacyData = true, ...params }: APMSearchParams
+  { includeLegacyData = false, ...params }: APMSearchParams
 ): SearchParams {
   // search across all data (including data)
-  if (!omitLegacyData || !isApmIndex(apmIndices, params.index)) {
+  if (includeLegacyData || !isApmIndex(apmIndices, params.index)) {
     return params;
   }
 

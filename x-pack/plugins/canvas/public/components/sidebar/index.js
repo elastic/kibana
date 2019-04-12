@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { insertNodes, elementLayer } from '../../state/actions/elements';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
-import { selectElement } from './../../state/actions/transient';
+import { selectToplevelNodes } from '../../state/actions/transient';
 
 import { Sidebar as Component } from './sidebar';
 
@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => ({
     // todo: more unification w/ copy/paste; group cloning
     const newElements = cloneSubgraphs([selectedElement]);
     dispatch(insertNodes(newElements, pageId));
-    dispatch(selectElement(newElements[0].id));
+    dispatch(selectToplevelNodes(newElements.map(e => e.id)));
   },
   elementLayer: (pageId, selectedElement) => movement =>
     dispatch(

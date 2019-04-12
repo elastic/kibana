@@ -39,4 +39,10 @@ describe('getFilteredQueryAndStatusFilter', () => {
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
+
+  it('handles simple_query_string', () => {
+    filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
 });

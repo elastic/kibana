@@ -6,9 +6,9 @@
 
 import { get, indexBy, uniq } from 'lodash';
 import { first, has } from 'lodash';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { StringMap } from '../../../../typings/common';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import {
   PropertyTab,
   PropertyTabKey,

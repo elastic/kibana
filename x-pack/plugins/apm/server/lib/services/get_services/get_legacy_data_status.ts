@@ -7,7 +7,7 @@
 import {
   OBSERVER_VERSION_MAJOR,
   PROCESSOR_EVENT
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 import { APMSearchParams, Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
@@ -15,7 +15,7 @@ export async function getLegacyDataStatus(setup: Setup) {
   const { client, config } = setup;
 
   const params: APMSearchParams = {
-    omitLegacyData: false,
+    includeLegacyData: true,
     terminateAfter: 1,
     index: [config.get('apm_oss.transactionIndices')],
     body: {

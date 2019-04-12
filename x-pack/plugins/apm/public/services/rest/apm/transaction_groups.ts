@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
-import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
-import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
+import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
+import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
+import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';

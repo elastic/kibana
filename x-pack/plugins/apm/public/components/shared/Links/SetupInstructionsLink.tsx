@@ -15,7 +15,7 @@ export function SetupInstructionsLink({
   buttonFill?: boolean;
 }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
+    <KibanaLink path={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
         {i18n.translate('xpack.apm.setupInstructionsButtonLabel', {
           defaultMessage: 'Setup Instructions'
