@@ -45,7 +45,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           yDomain={
             Array [
               0,
-              75,
+              6669,
             ]
           }
         >

@@ -10,7 +10,7 @@ import React from 'react';
 export class NotFoundPage extends React.PureComponent {
   public render() {
     return (
-      <div>
+      <div data-test-subj="infraNotFoundPage">
         <FormattedMessage
           id="xpack.infra.notFoundPage.noContentFoundErrorTitle"
           defaultMessage="No content found"

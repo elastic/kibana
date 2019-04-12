@@ -150,6 +150,7 @@ export async function createDefaultSpace({ index, client }) {
       space: {
         name: 'Default Space',
         description: 'This is the default space',
+        disabledFeatures: [],
         _reserved: true
       }
     }
