@@ -6,13 +6,14 @@
 
 interface AbsoluteTimeRange {
   kind: 'absolute';
+  option: undefined;
   from: number;
   to: number;
 }
 
 interface RelativeTimeRange {
   kind: 'relative';
-  option: 'week-to-date' | 'month-to-date' | 'year-to-date' | 'quick-select';
+  option: string;
   from: number;
   to: number;
 }

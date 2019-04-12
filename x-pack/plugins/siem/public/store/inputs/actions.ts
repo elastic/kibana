@@ -32,3 +32,5 @@ export const stopAutoReload = actionCreator<{ id: string }>('STOP_KQL_AUTO_RELOA
 export const setQuery = actionCreator<{ id: string; loading: boolean; refetch: Refetch }>(
   'SET_QUERY'
 );
+
+export const deleteAllQuery = actionCreator('DELETE_ALL_QUERY');

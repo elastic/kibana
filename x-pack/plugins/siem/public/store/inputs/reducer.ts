@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import dateMath from '@elastic/datemath';
 import { get, unionBy } from 'lodash/fp';
-import moment from 'moment';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  deleteAllQuery,
   setAbsoluteRangeDatePicker,
   setDuration,
   setQuery,
@@ -19,14 +20,13 @@ import {
 import { InputsModel } from './model';
 
 export type InputsState = InputsModel;
-
+const momentDate = dateMath.parse('now-24h');
 export const initialInputsState: InputsState = {
   global: {
     timerange: {
-      kind: 'absolute',
-      from: moment()
-        .subtract(1, 'day') // subtracts 24 hours from 'now'
-        .valueOf(),
+      kind: 'relative',
+      option: 'now-24h',
+      from: momentDate ? momentDate.valueOf() : 0,
       to: Date.now(),
     },
     query: [],
@@ -59,6 +59,13 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
         from,
         to,
       },
+    },
+  }))
+  .case(deleteAllQuery, state => ({
+    ...state,
+    global: {
+      ...state.global,
+      query: state.global.query.slice(state.global.query.length),
     },
   }))
   .case(setQuery, (state, { id, loading, refetch }) => ({
