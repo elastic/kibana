@@ -39,9 +39,7 @@ export default function ({ getService }) {
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
               version: resp.body.version,
-              migrationVersion: {
-                visualization: '7.1.0',
-              },
+              migrationVersion: resp.body.migrationVersion,
               attributes: {
                 title: 'Count of requests',
                 description: '',

@@ -220,9 +220,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -273,9 +271,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -331,9 +327,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',

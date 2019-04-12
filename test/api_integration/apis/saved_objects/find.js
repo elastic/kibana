@@ -46,9 +46,7 @@ export default function ({ getService }) {
                   attributes: {
                     'title': 'Count of requests'
                   },
-                  migrationVersion: {
-                    visualization: '7.1.0',
-                  },
+                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',

@@ -66,9 +66,7 @@ export default function ({ getService }) {
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                   },
-                  migrationVersion: {
-                    visualization: '7.1.0',
-                  },
+                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   references: [{
                     name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                     type: 'index-pattern',
