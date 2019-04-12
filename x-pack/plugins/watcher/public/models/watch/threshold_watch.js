@@ -116,7 +116,7 @@ export class ThresholdWatch extends BaseWatch {
     if (this.index !== undefined && this.index.length < 1) {
       errors.index.push(
         i18n.translate(
-          'xpack.watcher.sections.watchEdit.tbreshold.enterOneOrMoreIndicesValidationMessage',
+          'xpack.watcher.sections.watchEdit.threshold.enterOneOrMoreIndicesValidationMessage',
           {
             defaultMessage: 'Enter one or more indices',
           }

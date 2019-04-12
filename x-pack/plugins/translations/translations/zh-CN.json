@@ -7975,7 +7975,6 @@
     "xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.descriptionFragmentText": "（名称：“{existingWatchName}”）",
     "xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.overwriteWatchButtonLabel": "覆盖监视",
     "xpack.watcher.sections.watchEdit.threshold.saveSuccessNotificationText": "已保存“{watchDisplayName}”",
-    "xpack.watcher.sections.watchEdit.threshold.watchNameIsRequiredValidationMessage": "“名称”必填",
     "xpack.watcher.sections.watchEdit.titleBar.cancelButtonLabel": "取消",
     "xpack.watcher.sections.watchEdit.titleBar.deleteButtonLabel": "删除",
     "xpack.watcher.sections.watchEdit.titleBar.deleteButtonTooltip": "删除监视",
