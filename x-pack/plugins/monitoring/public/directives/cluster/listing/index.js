@@ -66,7 +66,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
             <p>The Basic license does not support multi-cluster monitoring.</p>
             <p>
               Need to monitor multiple clusters?{' '}
-              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">Get a license with full functionality</a>{' '}
+              <a href="https://www.elastic.co/subscriptions" target="_blank">Get a license with full functionality</a>{' '}
               to enjoy multi-cluster monitoring.
             </p>
           </Fragment>
@@ -85,7 +85,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
             <p>
               Need a license?{' '}
               <a href={licensingPath}>Get a free Basic license</a> or{' '}
-              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">get a license with full functionality</a>{' '}
+              <a href="https://www.elastic.co/subscriptions" target="_blank">get a license with full functionality</a>{' '}
               to enjoy multi-cluster monitoring.
             </p>
           </Fragment>
