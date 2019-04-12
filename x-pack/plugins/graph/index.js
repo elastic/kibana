@@ -32,17 +32,7 @@ export function graph(kibana) {
       migrations,
       savedObjectSchemas: {
         'graph-workspace': {
-          icon: 'graphApp',
-          titleSearchField: 'title',
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/graph#/workspace/${obj.id}`,
-              refresh: true,
-            };
-          },
+          isImportExportable: false,
         },
       },
     },
