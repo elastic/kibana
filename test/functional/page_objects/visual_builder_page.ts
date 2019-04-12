@@ -91,13 +91,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      if (process.platform === 'darwin') {
-        await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
-      } else {
-        await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
-      }
-      await input.pressKeys(browser.keys.NULL); // Release modifier keys
-      await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      await input.clearValueWithKeyboard();
     }
 
     public async getMarkdownText() {
