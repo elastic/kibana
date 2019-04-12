@@ -52,9 +52,6 @@ export function registerFind(server) {
             defaultSearchOperator: Joi.string()
               .valid('OR', 'AND')
               .default('OR'),
-            searchFields: Joi.array()
-              .items(Joi.string())
-              .single(),
             sortField: Joi.string(),
             hasReference: Joi.object()
               .keys({
