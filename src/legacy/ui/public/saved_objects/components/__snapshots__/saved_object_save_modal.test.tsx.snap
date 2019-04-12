@@ -2,14 +2,14 @@
 
 exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 <EuiOverlayMask>
-  <EuiModal
-    className="dshSaveModal"
-    data-test-subj="savedObjectSaveModal"
-    maxWidth={true}
-    onClose={[Function]}
+  <form
+    onSubmit={[Function]}
   >
-    <form
-      onSubmit={[Function]}
+    <EuiModal
+      className="dshSaveModal"
+      data-test-subj="savedObjectSaveModal"
+      maxWidth={true}
+      onClose={[Function]}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
@@ -85,7 +85,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           />
         </EuiButton>
       </EuiModalFooter>
-    </form>
-  </EuiModal>
+    </EuiModal>
+  </form>
 </EuiOverlayMask>
 `;

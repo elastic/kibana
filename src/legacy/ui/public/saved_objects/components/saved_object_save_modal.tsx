@@ -73,12 +73,12 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
     return (
       <EuiOverlayMask>
-        <EuiModal
-          data-test-subj="savedObjectSaveModal"
-          className="dshSaveModal"
-          onClose={this.props.onClose}
-        >
-          <form onSubmit={this.onFormSubmit}>
+        <form onSubmit={this.onFormSubmit}>
+          <EuiModal
+            data-test-subj="savedObjectSaveModal"
+            className="dshSaveModal"
+            onClose={this.props.onClose}
+          >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <FormattedMessage
@@ -143,8 +143,8 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 )}
               </EuiButton>
             </EuiModalFooter>
-          </form>
-        </EuiModal>
+          </EuiModal>
+        </form>
       </EuiOverlayMask>
     );
   }
