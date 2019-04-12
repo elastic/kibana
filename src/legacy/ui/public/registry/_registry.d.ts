@@ -19,6 +19,7 @@
 
 import { IndexedArray, IndexedArrayConfig } from '../indexed_array';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface UIRegistry<T> extends IndexedArray<T> {}
 
 interface UIRegistrySpec<T> extends IndexedArrayConfig<T> {

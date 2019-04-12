@@ -62,6 +62,7 @@ export class PluginSpec {
       deprecations,
       preInit,
       init,
+      postInit,
       isEnabled,
     } = options;
 
@@ -81,6 +82,7 @@ export class PluginSpec {
     this._isEnabled = isEnabled;
     this._preInit = preInit;
     this._init = init;
+    this._postInit = postInit;
 
     if (!this.getId()) {
       throw createInvalidPluginError(this, 'Unable to determine plugin id');
@@ -174,6 +176,10 @@ export class PluginSpec {
 
   getInitHandler() {
     return this._init;
+  }
+
+  getPostInitHandler() {
+    return this._postInit;
   }
 
   getConfigPrefix() {

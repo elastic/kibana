@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Role } from '../../../../../../../common/model/role';
+import { Role } from '../../../../../../../common/model';
 // @ts-ignore
 import { documentationLinks } from '../../../../../../documentation_links';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -78,7 +78,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.clusterPrivilegesTitle"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
                 defaultMessage="Cluster privileges"
               />
             </h3>
@@ -86,7 +86,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           description={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.manageRoleActionsDescription"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
                 defaultMessage="Manage the actions this role can perform against your cluster. "
               />
               {this.learnMore(documentationLinks.esClusterPrivileges)}
@@ -104,7 +104,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.runAsPrivilegesTitle"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
                 defaultMessage="Run As privileges"
               />
             </h3>
@@ -112,7 +112,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           description={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+                id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
                 defaultMessage="Allow requests to be submitted on the behalf of other users. "
               />
               {this.learnMore(documentationLinks.esRunAsPrivileges)}
@@ -124,7 +124,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               placeholder={
                 this.props.editable
                   ? i18n.translate(
-                      'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
+                      'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
                       { defaultMessage: 'Add a user…' }
                     )
                   : undefined
@@ -147,7 +147,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         <EuiTitle size={'xs'}>
           <h3>
             <FormattedMessage
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.indexPrivilegesTitle"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
               defaultMessage="Index privileges"
             />
           </h3>
@@ -156,7 +156,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         <EuiText size={'s'} color={'subdued'}>
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
               defaultMessage="Control access to the data in your cluster. "
             />
             {this.learnMore(documentationLinks.esIndicesPrivileges)}
@@ -168,9 +168,9 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         <EuiHorizontalRule />
 
         {this.props.editable && (
-          <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
+          <EuiButton iconType={'plusInCircleFilled'} onClick={this.addIndexPrivilege}>
             <FormattedMessage
-              id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+              id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
               defaultMessage="Add index privilege"
             />
           </EuiButton>
@@ -182,7 +182,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
   public learnMore = (href: string) => (
     <EuiLink className="editRole__learnMore" href={href} target={'_blank'}>
       <FormattedMessage
-        id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
         defaultMessage="Learn more"
       />
     </EuiLink>

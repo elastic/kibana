@@ -41,7 +41,6 @@ export default (gulp, { buildTarget }) => {
       buildRoot
     );
     await del(resolve(buildRoot, 'x-pack'));
-    //#
 
     const log = new ToolingLog({
       level: 'info',

@@ -1,0 +1,12 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [OverlaySetup](./kibana-plugin-public.overlaysetup.md) &gt; [openFlyout](./kibana-plugin-public.overlaysetup.openflyout.md)
+
+## OverlaySetup.openFlyout property
+
+<b>Signature:</b>
+
+```typescript
+openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => FlyoutRef;
+```

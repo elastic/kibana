@@ -17,12 +17,12 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
-import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { ITransactionChartData } from '../../../../store/selectors/chartSelectors';
+import { IUrlParams } from '../../../../store/urlParams';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 import { LicenseContext } from '../../../app/Main/LicenseCheck';
+import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
@@ -112,7 +112,6 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
-            location={this.props.location}
           >
             View Job
           </MLJobLink>

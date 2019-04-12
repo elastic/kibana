@@ -8,7 +8,7 @@ import { Request, Server } from 'src/legacy/server/kbn_server';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 
 import moment from 'moment';
-import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
+import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';

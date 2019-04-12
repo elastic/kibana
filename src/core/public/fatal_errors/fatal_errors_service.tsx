@@ -37,6 +37,7 @@ interface Deps {
   i18n: I18nSetup;
 }
 
+/** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
   private i18n?: I18nSetup;
@@ -49,7 +50,7 @@ export class FatalErrorsService {
       )
       .subscribe({
         error: error => {
-          // tslint:disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.error('Uncaught error in fatal error screen internals', error);
         },
       });
@@ -62,7 +63,7 @@ export class FatalErrorsService {
 
     if (error instanceof Error) {
       // make stack traces clickable by putting whole error in the console
-      // tslint:disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.error(error);
     }
 
@@ -109,4 +110,5 @@ export class FatalErrorsService {
   }
 }
 
+/** @public */
 export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;

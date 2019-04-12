@@ -20,6 +20,7 @@
 import { Toast } from '@elastic/eui';
 import * as Rx from 'rxjs';
 
+/** @public */
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
 const normalizeToast = (toastOrTitle: ToastInput) => {
@@ -32,6 +33,7 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
   return toastOrTitle;
 };
 
+/** @public */
 export class ToastsSetup {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;

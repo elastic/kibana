@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<KibanaPrivileges> renders without crashing 1`] = `
+<CollapsiblePanel
+  iconType="logoKibana"
+  title="Kibana"
+>
+  <InjectIntl(SpaceAwarePrivilegeSectionUI)
+    editable={true}
+    features={Array []}
+    kibanaPrivileges={
+      KibanaPrivileges {
+        "rawKibanaPrivileges": Object {
+          "features": Object {},
+          "global": Object {},
+          "reserved": Object {},
+          "space": Object {},
+        },
+      }
+    }
+    onChange={[MockFunction]}
+    privilegeCalculatorFactory={
+      KibanaPrivilegeCalculatorFactory {
+        "kibanaPrivileges": KibanaPrivileges {
+          "rawKibanaPrivileges": Object {
+            "features": Object {},
+            "global": Object {},
+            "reserved": Object {},
+            "space": Object {},
+          },
+        },
+        "rankedFeaturePrivileges": Object {},
+      }
+    }
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Array [],
+        "name": "",
+      }
+    }
+    spaces={
+      Array [
+        Object {
+          "_reserved": true,
+          "disabledFeatures": Array [],
+          "id": "default",
+          "name": "Default Space",
+        },
+        Object {
+          "disabledFeatures": Array [],
+          "id": "marketing",
+          "name": "Marketing",
+        },
+      ]
+    }
+    uiCapabilities={
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
+      }
+    }
+    validator={
+      RoleValidator {
+        "shouldValidate": undefined,
+      }
+    }
+  />
+</CollapsiblePanel>
+`;

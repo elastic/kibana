@@ -388,7 +388,7 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ### Unit Testing Plugins
 
-This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
 To run the tests for just your particular plugin run the following command from your plugin:
 

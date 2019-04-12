@@ -156,6 +156,22 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
         },
       ],
     },
+    {
+      code: 'const d = require("./deep/d.js")',
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              allowSameFolder: true,
+              target: 'files/no_restricted_paths/**/*',
+              from: ['files/no_restricted_paths/**/*', '!files/no_restricted_paths/server/b*'],
+            },
+          ],
+        },
+      ],
+    },
   ],
 
   invalid: [

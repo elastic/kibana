@@ -12,21 +12,19 @@ export class SecureSavedObjectsClientWrapper {
       actions,
       auditLogger,
       baseClient,
-      checkPrivilegesWithRequest,
+      checkPrivilegesDynamicallyWithRequest,
       errors,
       request,
       savedObjectTypes,
-      spaces,
     } = options;
 
     this.errors = errors;
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this._checkPrivileges = checkPrivilegesWithRequest(request);
+    this._checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     this._request = request;
     this._savedObjectTypes = savedObjectTypes;
-    this._spaces = spaces;
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -103,13 +101,7 @@ export class SecureSavedObjectsClientWrapper {
 
   async _checkSavedObjectPrivileges(actions) {
     try {
-      if (this._spaces) {
-        const spaceId = this._spaces.getSpaceId(this._request);
-        return await this._checkPrivileges.atSpace(spaceId, actions);
-      }
-      else {
-        return await this._checkPrivileges.globally(actions);
-      }
+      return await this._checkPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
@@ -118,21 +110,22 @@ export class SecureSavedObjectsClientWrapper {
 
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
+    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
+    const actions = Array.from(actionsToTypesMap.keys());
     const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missing = this._getMissingPrivileges(privileges);
+      const missingPrivileges = this._getMissingPrivileges(privileges);
       this._auditLogger.savedObjectsAuthorizationFailure(
         username,
         action,
         types,
-        missing,
+        missingPrivileges,
         args
       );
-      const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
+      const msg = `Unable to ${action} ${missingPrivileges.map(privilege => actionsToTypesMap.get(privilege)).sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
