@@ -131,6 +131,7 @@ export const symbol = handleActions(
           ...state.symbols,
           [path]: data,
         };
+        draft.error = undefined;
       }),
     [String(loadStructureFailed)]: (state: SymbolState, action: Action<any>) => {
       if (action.payload) {
