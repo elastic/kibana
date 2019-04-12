@@ -200,6 +200,14 @@ export default function (kibana) {
         'kql-telemetry': {
           isImportExportable: false,
         },
+        config: {
+          getInAppUrl() {
+            return `/app/kibana#/management/kibana/settings`;
+          },
+          getEditUrl() {
+            return `/management/kibana/settings`;
+          },
+        }
       },
 
       injectDefaultVars(server, options) {
