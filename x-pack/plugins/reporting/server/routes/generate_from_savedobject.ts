@@ -101,7 +101,7 @@ export function registerGenerateCsvFromSavedObject(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      const logger = LevelLogger.createStaticFromServer(server, ['reporting', 'savedobject-csv']);
+      const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
 
       const { savedObjectType, savedObjectId } = request.params;
       const jobParams: JobParams = {
