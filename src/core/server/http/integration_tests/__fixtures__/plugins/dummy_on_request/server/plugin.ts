@@ -52,18 +52,19 @@ export class DummyOnRequestPlugin {
 
     core.http.registerOnRequest((request, t) => {
       if (request.path === url.independentReq) {
-        // @ts-ignore
+        // @ts-ignore. don't complain customField is not defined on Request type
         request.customField = { value: 42 };
       }
       return t.next();
     });
 
     core.http.registerOnRequest((request, t) => {
-      if (request.path === url.independentReq) {
-        // @ts-ignore
-        if (typeof request.customField !== 'undefined') {
-          throw new Error('Request object was mutated');
-        }
+      if (
+        request.path === url.independentReq &&
+        // @ts-ignore don't complain customField is not defined on Request type
+        typeof request.customField !== 'undefined'
+      ) {
+        throw new Error('Request object was mutated');
       }
       return t.next();
     });

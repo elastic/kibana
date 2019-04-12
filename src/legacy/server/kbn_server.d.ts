@@ -24,7 +24,7 @@ import {
   HttpServiceSetup,
   ConfigService,
   PluginsServiceSetup,
-} from '../../core/server/';
+} from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 

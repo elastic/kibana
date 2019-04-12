@@ -59,7 +59,7 @@ describe('Cookie based SessionStorage', () => {
         method: 'GET',
         path: '/set',
         options: {
-          handler: async (req, h) => {
+          handler: (req, h) => {
             const sessionStorage = factory.asScoped(req);
             sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
             return h.response();
