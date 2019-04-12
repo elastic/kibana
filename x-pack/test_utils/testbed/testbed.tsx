@@ -79,7 +79,7 @@ export const registerTestBed = (Component: ComponentType, defaultProps = {}, sto
     Comp = store !== null ? WithStore(store)(Component) : Component;
   }
 
-  const component = mountWithIntl(<Comp {...props} />);
+  const component = mountWithIntl(<Comp {...defaultProps} {...props} />);
 
   const setProps = (updatedProps: any) => {
     if (wrapRoute) {
