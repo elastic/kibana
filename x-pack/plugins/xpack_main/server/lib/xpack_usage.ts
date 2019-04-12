@@ -41,10 +41,6 @@ export interface XPackUsageResponse {
   };
 }
 
-interface XPackUsageOptions {
-  pollFrequencyInMillis?: number;
-}
-
 export interface XPackUsageContract {
   getUsage$(): Rx.Observable<XPackUsageResponse | undefined>;
   refreshNow(): void;
@@ -52,6 +48,10 @@ export interface XPackUsageContract {
 
 export interface XPackUsageDeps {
   elasticsearch: ElasticsearchPlugin;
+}
+
+interface XPackUsageOptions {
+  pollFrequencyInMillis?: number;
 }
 
 type Logger = (...args: any[]) => void;
