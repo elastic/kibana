@@ -341,12 +341,16 @@ The following table outlines possible test file locations and how to invoke them
 
 | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `yarn test:jest -t=regexp [test path]`                                                  |
-| `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `yarn test:mocha --grep=regexp [test path]`                                             |
-| `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t=regexp [test path]`                                   |
+| `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `yarn test:jest -t regexp [test path]`                                                  |
+| `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
+| `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
 | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`   | `node scripts/functional_tests --config test/[directory]/config.js --grep=regexp`       |
-| `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                                                                                          | `cd x-pack && yarn test:jest -t=regexp [test path]`                                     |
+| `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                                                                                          | `cd x-pack && yarn test:jest -t regexp [test path]`                                     |
 | `x-pack/test/*integration/**/config.ts`                                                                                                                 | ??                                                                                      |
+
+Test runner arguments:
+ - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
+ - `[test path]` is the relative path to the test file.
 
 ### Debugging Unit Tests
 
