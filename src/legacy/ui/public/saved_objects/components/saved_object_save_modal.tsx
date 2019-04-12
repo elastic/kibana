@@ -18,6 +18,7 @@
  */
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
   EuiForm,
@@ -119,12 +120,12 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButton data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
                 <FormattedMessage
                   id="common.ui.savedObjects.saveModal.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
 
               <EuiButton
                 fill
