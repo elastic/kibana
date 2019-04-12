@@ -58,6 +58,7 @@ export default function ({ getService }) {
                 }
               ]
             });
+            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           })
       ));
 

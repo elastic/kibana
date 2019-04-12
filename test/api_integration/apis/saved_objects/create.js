@@ -55,6 +55,7 @@ export default function ({ getService }) {
               },
               references: [],
             });
+            expect(resp.body.migrationVersion).to.be.ok();
           });
       });
     });
@@ -95,6 +96,7 @@ export default function ({ getService }) {
               },
               references: [],
             });
+            expect(resp.body.migrationVersion).to.be.ok();
           });
 
         expect(await es.indices.exists({ index: '.kibana' }))

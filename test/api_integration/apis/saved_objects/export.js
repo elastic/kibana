@@ -232,6 +232,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -283,6 +284,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -339,6 +341,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
