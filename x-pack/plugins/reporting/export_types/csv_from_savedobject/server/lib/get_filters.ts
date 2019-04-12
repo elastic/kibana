@@ -15,8 +15,8 @@ export function getFilters(
   indexPatternTimeField: string | null,
   timerange: TimeRangeParams | null,
   savedSearchObjectAttr: SavedSearchObjectAttributes,
-  searchSourceFilter: SearchSourceFilter,
-  queryFilter: QueryFilter
+  searchSourceFilter?: SearchSourceFilter,
+  queryFilter?: QueryFilter
 ) {
   let includes: string[];
   let timeFilter: any | null;

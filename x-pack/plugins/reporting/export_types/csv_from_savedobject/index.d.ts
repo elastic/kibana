@@ -111,8 +111,7 @@ export interface SearchPanel {
 }
 
 export interface SearchSourceQuery {
-  query: string;
-  language: string;
+  isSearchSourceQuery: boolean;
 }
 
 export interface SearchSource {
