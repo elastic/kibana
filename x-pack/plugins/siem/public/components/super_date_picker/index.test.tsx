@@ -21,185 +21,282 @@ describe('SIEM Super Date Picker', () => {
       store = createStore(state);
     });
 
-    test('Can select Today (it is a relative date)', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <SuperDatePicker id="global" />
-        </TestProviders>
-      );
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(store.getState().inputs.global.timerange.kind).toBe('relative');
-      expect(store.getState().inputs.global.timerange.option).toBe('now/d');
-    });
-
-    test('Recently used date ranges', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <SuperDatePicker id="global" />
-        </TestProviders>
-      );
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('button.euiQuickSelect__applyButton')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(
+    describe('Pick Relative Date', () => {
+      beforeEach(() => {
+        const wrapper = mount(
+          <TestProviders store={store}>
+            <SuperDatePicker id="global" />
+          </TestProviders>
+        );
         wrapper
-          .find('div.euiQuickSelectPopover__section')
-          .at(1)
-          .text()
-      ).toBe('Year to dateTodayLast 15 minutes');
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
 
-      wrapper
-        .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(
         wrapper
-          .find('div.euiQuickSelectPopover__section')
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+      });
+
+      test('Make Sure it is relative date', () => {
+        expect(store.getState().inputs.global.timerange.kind).toBe('relative');
+      });
+
+      test('Make Sure it is today date', () => {
+        expect(store.getState().inputs.global.timerange.option).toBe('now/d');
+      });
+    });
+
+    describe('Recently used date ranges', () => {
+      let wrapper = mount(
+        <TestProviders store={store}>
+          <SuperDatePicker id="global" />
+        </TestProviders>
+      );
+      beforeEach(() => {
+        wrapper = mount(
+          <TestProviders store={store}>
+            <SuperDatePicker id="global" />
+          </TestProviders>
+        );
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+      });
+
+      test('Today is in Recently used date ranges', () => {
+        expect(
+          wrapper
+            .find('div.euiQuickSelectPopover__section')
+            .at(1)
+            .text()
+        ).toBe('Today');
+      });
+
+      test('Today and Last 15 minutes are in Recently used date ranges', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('button.euiQuickSelect__applyButton')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        expect(
+          wrapper
+            .find('div.euiQuickSelectPopover__section')
+            .at(1)
+            .text()
+        ).toBe('Last 15 minutesToday');
+      });
+
+      test('Today and Year to date is in Recently used date ranges', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        expect(
+          wrapper
+            .find('div.euiQuickSelectPopover__section')
+            .at(1)
+            .text()
+        ).toBe('Year to dateToday');
+      });
+
+      test('Today and Last 15 minutes and Year to date is in Recently used date ranges', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('button.euiQuickSelect__applyButton')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        expect(
+          wrapper
+            .find('div.euiQuickSelectPopover__section')
+            .at(1)
+            .text()
+        ).toBe('Year to dateLast 15 minutesToday');
+      });
+
+      test('Make sure that it does not add any duplicate if you click again on today', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        expect(
+          wrapper
+            .find('div.euiQuickSelectPopover__section')
+            .at(1)
+            .text()
+        ).toBe('Today');
+      });
+    });
+
+    describe('Refresh Every', () => {
+      let wrapper = mount(
+        <TestProviders store={store}>
+          <SuperDatePicker id="global" />
+        </TestProviders>
+      );
+      beforeEach(() => {
+        wrapper = mount(
+          <TestProviders store={store}>
+            <SuperDatePicker id="global" />
+          </TestProviders>
+        );
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        const wrapperFixedEuiFieldSearch = wrapper.find(
+          'input[data-test-subj="superDatePickerRefreshIntervalInput"]'
+        );
+        wrapperFixedEuiFieldSearch.simulate('change', { target: { value: '2' } });
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+      });
+
+      test('Make sure the duration get updated to 2 minutes === 120000ms', () => {
+        expect(store.getState().inputs.global.policy.duration).toEqual(120000);
+      });
+
+      test('Make sure the stream live started', () => {
+        expect(store.getState().inputs.global.policy.kind).toBe('interval');
+      });
+
+      test('Make sure we can stop the stream live', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        expect(store.getState().inputs.global.policy.kind).toBe('manual');
+      });
+    });
+
+    describe('Pick Absolute Date', () => {
+      let wrapper = mount(
+        <TestProviders store={store}>
+          <SuperDatePicker id="global" />
+        </TestProviders>
+      );
+      beforeEach(() => {
+        wrapper = mount(
+          <TestProviders store={store}>
+            <SuperDatePicker id="global" />
+          </TestProviders>
+        );
+        wrapper
+          .find('[data-test-subj="superDatePickerShowDatesButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerstartDatePopoverButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerAbsoluteTab"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('button.react-datepicker__navigation--previous')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('div.react-datepicker__day')
           .at(1)
-          .text()
-      ).toBe('Year to dateTodayLast 15 minutes');
-    });
+          .simulate('click');
+        wrapper.update();
 
-    test('Refresh Every', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <SuperDatePicker id="global" />
-        </TestProviders>
-      );
+        wrapper
+          .find('button[data-test-subj="superDatePickerApplyTimeButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+      });
+      test('Make sure it is an absolute Date', () => {
+        expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
+      });
 
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      const wrapperFixedEuiFieldSearch = wrapper.find(
-        'input[data-test-subj="superDatePickerRefreshIntervalInput"]'
-      );
-      wrapperFixedEuiFieldSearch.simulate('change', { target: { value: '2' } });
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(store.getState().inputs.global.policy.duration).toEqual(120000);
-      expect(store.getState().inputs.global.policy.kind).toBe('interval');
-
-      wrapper
-        .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(store.getState().inputs.global.policy.kind).toBe('manual');
-    });
-
-    test('Absolute Data', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <SuperDatePicker id="global" />
-        </TestProviders>
-      );
-
-      wrapper
-        .find('[data-test-subj="superDatePickerShowDatesButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerstartDatePopoverButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('[data-test-subj="superDatePickerAbsoluteTab"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('button.react-datepicker__navigation--previous')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      wrapper
-        .find('div.react-datepicker__day')
-        .at(1)
-        .simulate('click');
-      wrapper.update();
-
-      const selectedDate =
-        wrapper.find('input[data-test-subj="superDatePickerAbsoluteDateInput"]').props().value ||
-        '';
-
-      wrapper
-        .find('button[data-test-subj="superDatePickerApplyTimeButton"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-
-      expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
-      expect(new Date(store.getState().inputs.global.timerange.from).toISOString()).toBe(
-        new Date(selectedDate as string).toISOString()
-      );
+      test('Make sure that the date in store match with the one selected', () => {
+        const selectedDate =
+          wrapper.find('input[data-test-subj="superDatePickerAbsoluteDateInput"]').props().value ||
+          '';
+        expect(new Date(store.getState().inputs.global.timerange.from).toISOString()).toBe(
+          new Date(selectedDate as string).toISOString()
+        );
+      });
     });
   });
 });

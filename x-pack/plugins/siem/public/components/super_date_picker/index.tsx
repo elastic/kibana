@@ -19,6 +19,8 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, State } from '../../store';
 
+const MAX_RECENTLY_USED_RANGES = 9;
+
 type MyEuiSuperDatePickerProps = Pick<
   EuiSuperDatePickerProps,
   | 'end'
@@ -99,12 +101,9 @@ export const SuperDatePickerComponent = class extends Component<
 
   public render() {
     const { end, start, kind, option, isLoading } = this.props;
-    let endDate = new Date(end).toISOString();
-    let startDate = new Date(start).toISOString();
-    if (kind === 'relative') {
-      startDate = option;
-      endDate = 'now';
-    }
+    const endDate = kind === 'relative' ? option : new Date(end).toISOString();
+    const startDate = kind === 'relative' ? 'now' : new Date(start).toISOString();
+
     return (
       <MyEuiSuperDatePicker
         end={endDate}
@@ -170,8 +169,8 @@ export const SuperDatePickerComponent = class extends Component<
           recentlyUsedRange => !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
         );
         recentlyUsedRanges =
-          recentlyUsedRanges.length > 9
-            ? [{ start, end }, ...recentlyUsedRanges.slice(0, 9)]
+          recentlyUsedRanges.length > MAX_RECENTLY_USED_RANGES
+            ? [{ start, end }, ...recentlyUsedRanges.slice(0, MAX_RECENTLY_USED_RANGES)]
             : [{ start, end }, ...recentlyUsedRanges];
 
         return {
