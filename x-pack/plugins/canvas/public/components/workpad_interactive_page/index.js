@@ -5,11 +5,17 @@
  */
 
 import { compose, withHandlers, withProps, withState } from 'recompose';
+import { connect } from 'react-redux';
 import { createStore } from '../../lib/aeroelastic/store';
 import { updater } from '../../lib/aeroelastic/layout';
-import { eventHandlers } from './event_handlers';
+import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
+import { flatten } from '../../lib/aeroelastic/functional';
+import { canUserWrite, getFullscreen } from '../../state/selectors/app';
+import { elementLayer, insertNodes, removeElements } from '../../state/actions/elements';
+import { selectToplevelNodes } from '../../state/actions/transient';
+import { crawlTree, globalStateUpdater, shapesForNodes } from './integration_utils';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
-import { shapesForNodes } from './integration_utils';
+import { eventHandlers } from './event_handlers';
 
 const configuration = {
   getAdHocChildAnnotationName: 'adHocChildAnnotation',
@@ -79,7 +85,65 @@ const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedTople
   return { aeroStore };
 };
 
+const mapStateToProps = (state, ownProps) => {
+  const selectedToplevelNodes = state.transient.selectedToplevelNodes;
+  const nodes = getNodes(state, ownProps.pageId);
+  const selectedPrimaryShapeObjects = selectedToplevelNodes
+    .map(id => nodes.find(s => s.id === id))
+    .filter(shape => shape);
+  const selectedPersistentPrimaryNodes = flatten(
+    selectedPrimaryShapeObjects.map(shape =>
+      nodes.find(n => n.id === shape.id) // is it a leaf or a persisted group?
+        ? [shape.id]
+        : nodes.filter(s => s.parent === shape.id).map(s => s.id)
+    )
+  );
+  const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
+  return {
+    state,
+    isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
+    elements: nodes,
+    selectedToplevelNodes,
+    selectedNodes: selectedNodeIds.map(id => nodes.find(s => s.id === id)),
+    pageStyle: getPageById(state, ownProps.pageId).style,
+  };
+};
+
+const mapDispatchToProps = dispatch => ({
+  dispatch,
+  insertNodes: pageId => selectedNodes => dispatch(insertNodes(selectedNodes, pageId)),
+  removeNodes: pageId => nodeIds => dispatch(removeElements(nodeIds, pageId)),
+  selectToplevelNodes: nodes =>
+    dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
+  // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
+  elementLayer: (pageId, selectedElement, movement) => {
+    dispatch(elementLayer({ pageId, elementId: selectedElement.id, movement }));
+  },
+});
+
+const mergeProps = (
+  { state, isEditable, elements, ...restStateProps },
+  { dispatch, ...restDispatchProps },
+  { isSelected, ...remainingOwnProps }
+) =>
+  isEditable && isSelected
+    ? {
+        elements,
+        isInteractive: true,
+        isSelected,
+        ...remainingOwnProps,
+        ...restDispatchProps,
+        ...restStateProps,
+        updateGlobalState: globalStateUpdater(dispatch, () => state),
+      }
+    : { elements, isSelected, isInteractive: false, ...remainingOwnProps };
+
 export const InteractivePage = compose(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps
+  ),
   withState('aeroStore', 'setAeroStore'),
   withProps(componentLayoutState),
   withProps(({ aeroStore, updateGlobalState }) => ({
