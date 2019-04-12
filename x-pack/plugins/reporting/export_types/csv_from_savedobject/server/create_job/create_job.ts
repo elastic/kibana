@@ -86,7 +86,7 @@ function createJobFn(server: KbnServer): CreateJobFn {
       basePath: req.getBasePath(),
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null,    // resolved in executeJob
+      type: null, // resolved in executeJob
       objects: null, // resolved in executeJob
       title,
     };
