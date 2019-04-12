@@ -14,23 +14,31 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+
 import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
+import { TabSummary, TabFailures } from './tabs';
 
 interface Props extends RouteComponentProps {
   repositoryName: string;
   snapshotId: string;
   onClose: () => void;
 }
+
+const TAB_SUMMARY = 'summary';
+const TAB_FAILURES = 'failures';
 
 const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   repositoryName,
@@ -60,233 +68,69 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     ),
   };
 
+  const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
+
+  // Reset tab when we look at a different snapshot.
+  useEffect(() => { setActiveTab(TAB_SUMMARY) }, [repositoryName, snapshotId]);
+
+  let tabs;
+
   let content;
 
   if (snapshotDetails) {
     const {
-      versionId,
-      version,
-      // TODO: Add a tooltip explaining that: a false value means that the cluster global state
-      // is not stored as part of the snapshot.
-      includeGlobalState,
-      indices,
-      state,
-      failures,
-      startTimeInMillis,
-      endTimeInMillis,
-      durationInMillis,
-      uuid,
+      indexFailures,
     } = snapshotDetails;
 
-    const indicesList = indices.length ? (
-      <ul>
-        {indices.map((index: string) => (
-          <li key={index}>
-            <EuiTitle size="xs">
-              <span>{index}</span>
-            </EuiTitle>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
-        data-test-subj="srSnapshotDetailsIndicesNoneTitle"
-        defaultMessage="-"
-      />
-    );
+    if (indexFailures.length) {
+      const tabOptions = [
+        {
+          id: TAB_SUMMARY,
+          name: (
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.summaryTabTitle"
+              defaultMessage="Summary"
+            />
+          ),
+          testSubj: 'srSnapshotDetailsSummaryTab',
+        },
+        {
+          id: TAB_FAILURES,
+          name: (
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.failuresTabTitle"
+              defaultMessage="Failed indices ({failuresCount})"
+              values={{ failuresCount: indexFailures.length }}
+            />
+          ),
+          testSubj: 'srSnapshotDetailsFailuresTab',
+        },
+      ];
 
-    const failuresList = failures.length ? (
-      <ul>
-        {failures.map((failure: any) => (
-          <li key={failure}>
-            <EuiTitle size="xs">
-              <span>{JSON.stringify(failure)}</span>
-            </EuiTitle>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemfFailuresNoneLabel"
-        data-test-subj="srSnapshotDetailsFailuresNoneTitle"
-        defaultMessage="-"
-      />
-    );
+      tabs = (
+        <Fragment>
+          <EuiSpacer size="s" />
+          <EuiTabs>
+            {tabOptions.map(tab => (
+              <EuiTab
+                onClick={() => setActiveTab(tab.id)}
+                isSelected={tab.id === activeTab}
+                key={tab.id}
+                data-test-subject={tab.testSubj}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </Fragment>
+      );
+    }
 
-    content = (
-      <EuiDescriptionList textStyle="reverse">
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="srSnapshotDetailsVersionItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemVersionLabel"
-                data-test-subj="srSnapshotDetailsVersionTitle"
-                defaultMessage="Version / Version ID"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailsVersionDescription"
-            >
-              {version} / {versionId}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalUuidItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemUuidLabel"
-                data-test-subj="srSnapshotDetailsUuidTitle"
-                defaultMessage="UUID"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailUuidDescription"
-            >
-              {uuid}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalStateItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateLabel"
-                data-test-subj="srSnapshotDetailsIncludeGlobalStateTitle"
-                defaultMessage="Includes global state"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailIncludeGlobalStateDescription"
-            >
-              {includeGlobalStateToHumanizedMap[includeGlobalState]}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="srSnapshotDetailsStateItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
-                data-test-subj="srSnapshotDetailsStateTitle"
-                defaultMessage="State"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailStateDescription"
-            >
-              {state}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="srSnapshotDetailsIndicesItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
-                data-test-subj="srSnapshotDetailsIndicesTitle"
-                defaultMessage="Indices ({indicesCount})"
-                values={{ indicesCount: indices.length }}
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailIndicesDescription"
-            >
-              <EuiText>{indicesList}</EuiText>
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="srSnapshotDetailsFailuresItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemFailuresLabel"
-                data-test-subj="srSnapshotDetailsFailuresTitle"
-                defaultMessage="Failures ({failuresCount})"
-                values={{ failuresCount: failures.length }}
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailFailuresDescription"
-            >
-              {failuresList}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="srSnapshotDetailsStartTimeItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemStartTimeLabel"
-                data-test-subj="srSnapshotDetailsStartTimeTitle"
-                defaultMessage="Start time"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailStartTimeDescription"
-            >
-              {formatDate(startTimeInMillis)}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="srSnapshotDetailsEndTimeItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemEndTimeLabel"
-                data-test-subj="srSnapshotDetailsEndTimeTitle"
-                defaultMessage="End time"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailEndTimeDescription"
-            >
-              {formatDate(endTimeInMillis)}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="srSnapshotDetailsDurationItem">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
-                data-test-subj="srSnapshotDetailsDurationTitle"
-                defaultMessage="Duration"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription
-              className="eui-textBreakWord"
-              data-test-subj="srSnapshotDetailDurationDescription"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
-                data-test-subj="srSnapshotDetailsDurationValue"
-                defaultMessage="{seconds} seconds"
-                values={{ seconds: Math.round(durationInMillis / 1000) }}
-              />
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiDescriptionList>
-    );
+    if (activeTab === TAB_SUMMARY) {
+      content = <TabSummary snapshotDetails={snapshotDetails} />;
+    } else if (activeTab === TAB_FAILURES) {
+      content = <TabFailures indexFailures={indexFailures} />;
+    }
   } else if (error) {
     const notFound = error.status === 404;
     const errorObject = notFound
@@ -302,6 +146,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
           },
         }
       : error;
+
     content = (
       <SectionError
         title={
@@ -357,6 +202,8 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        {tabs}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>

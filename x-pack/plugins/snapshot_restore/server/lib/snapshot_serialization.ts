@@ -32,6 +32,20 @@ export function deserializeSnapshotDetails(
     shards,
   } = snapshotDetailsEs;
 
+  // If an index has multiple failures, we'll want to see them grouped together.
+  const indexToFailuresMap = failures.reduce((map, failure) => {
+    const { index, ...rest } = failure;
+    if (!map[index]) {
+      map[index] = {
+        index,
+        failures: [],
+      };
+    }
+
+    map[index].failures.push(rest);
+    return map;
+  }, {});
+
   return {
     repository,
     snapshot,
@@ -46,7 +60,7 @@ export function deserializeSnapshotDetails(
     endTime,
     endTimeInMillis,
     durationInMillis,
-    failures,
+    indexFailures: Object.values(indexToFailuresMap),
     shards,
   };
 }

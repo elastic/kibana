@@ -21,7 +21,7 @@ const defaultSnapshot = {
   endTime: undefined,
   endTimeInMillis: undefined,
   durationInMillis: undefined,
-  failures: undefined,
+  indexFailures: undefined,
   shards: undefined,
 };
 

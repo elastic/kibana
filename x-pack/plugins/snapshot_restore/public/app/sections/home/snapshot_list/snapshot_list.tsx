@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
