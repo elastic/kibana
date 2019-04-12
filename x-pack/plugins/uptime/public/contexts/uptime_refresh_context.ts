@@ -12,6 +12,6 @@ interface UMRefreshContext {
 
 const defaultContext: UMRefreshContext = {
   lastRefresh: 0,
-}
+};
 
 export const UptimeRefreshContext = createContext(defaultContext);
