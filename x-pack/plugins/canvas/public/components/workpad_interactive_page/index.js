@@ -122,21 +122,15 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mergeProps = (
-  { state, isEditable, elements, ...restStateProps },
+  { state, ...restStateProps },
   { dispatch, ...restDispatchProps },
-  { isSelected, ...remainingOwnProps }
-) =>
-  isEditable && isSelected
-    ? {
-        elements,
-        isInteractive: true,
-        isSelected,
-        ...remainingOwnProps,
-        ...restDispatchProps,
-        ...restStateProps,
-        updateGlobalState: globalStateUpdater(dispatch, () => state),
-      }
-    : { elements, isSelected, isInteractive: false, ...remainingOwnProps };
+  ownProps
+) => ({
+  ...ownProps,
+  ...restDispatchProps,
+  ...restStateProps,
+  updateGlobalState: globalStateUpdater(dispatch, () => state),
+});
 
 export const InteractivePage = compose(
   connect(
