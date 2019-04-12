@@ -60,7 +60,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiHorizontalRule />
         <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
-          {this.props.allowDelete && this.props.editable && (
+          {this.props.allowDelete && !this.props.isReadOnlyRole && (
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon

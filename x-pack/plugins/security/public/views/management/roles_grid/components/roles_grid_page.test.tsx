@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 let mockSimulate403 = false;
+const mock403 = () => ({ body: { statusCode: 403 } });
 jest.mock('../../../../lib/roles_api', () => {
   return {
     RolesApi: {
       async getRoles() {
         if (mockSimulate403) {
-          throw {
-            body: { statusCode: 403 },
-          };
+          throw mock403();
         }
         return [
           {

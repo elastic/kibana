@@ -22,7 +22,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Role } from '../../../../../common/model/role';
-import { isRoleEnabled } from '../../../../lib/role';
+import { isRoleEnabled } from '../../../../lib/role_utils';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
