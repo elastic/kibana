@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SnapshotQuery } from './snapshot_query';
+export { UptimeRefreshContext } from './uptime_refresh_context';
+export { UptimeSettingsContext } from './uptime_settings_context';

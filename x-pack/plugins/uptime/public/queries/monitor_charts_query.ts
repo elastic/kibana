@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const getMonitorChartsQueryString = `
+export const monitorChartsQueryString = `
 query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String!) {
   monitorChartsData: getMonitorChartsData(
     monitorId: $monitorId
@@ -34,6 +34,6 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
 }
 `;
 
-export const getMonitorChartsQuery = gql`
-  ${getMonitorChartsQueryString}
+export const monitorChartsQuery = gql`
+  ${monitorChartsQueryString}
 `;
