@@ -615,12 +615,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async toggleOtherBucket() {
-      return await testSubjects.click('otherBucketSwitch');
+    async toggleOtherBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
     }
 
-    async toggleMissingBucket() {
-      return await testSubjects.click('missingBucketSwitch');
+    async toggleMissingBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
