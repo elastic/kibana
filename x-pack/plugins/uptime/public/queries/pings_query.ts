@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const getPingsQueryString = `
+export const pingsQueryString = `
 query PingList(
   $dateRangeStart: String!
   $dateRangeEnd: String!
@@ -51,6 +51,6 @@ query PingList(
   }
 `;
 
-export const getPingsQuery = gql`
-  ${getPingsQueryString}
+export const pingsQuery = gql`
+  ${pingsQueryString}
 `;
