@@ -30,9 +30,9 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { fetchFields, getMatchingIndices } from '../../../lib/api';
-import { aggTypes } from '../agg_types';
+import { aggTypes } from '../../../models/watch/agg_types';
+import { groupByTypes } from '../../../models/watch/group_by_types';
 import { comparators } from '../comparators';
-import { groupByTypes } from '../group_by_types';
 import { timeUnits } from '../time_units';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
@@ -150,9 +150,11 @@ const ThresholdWatchEditUi = ({
     setIndexPatterns(titles);
   };
   const loadData = async () => {
-    const theFields = await getFields(watch.index);
-    setFields(theFields);
-    setTimeFieldOptions(getTimeFieldOptions(theFields));
+    if (watch.index && watch.index.length > 0) {
+      const theFields = await getFields(watch.index);
+      setFields(theFields);
+      setTimeFieldOptions(getTimeFieldOptions(theFields));
+    }
     getIndexPatterns();
   };
   useEffect(() => {
@@ -160,7 +162,16 @@ const ThresholdWatchEditUi = ({
   }, []);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
-
+  const expressionErrorMessage = i18n.translate(
+    'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
+    {
+      defaultMessage: 'Please fix the errors in the expression below.',
+    }
+  );
+  const expressionFields = ['aggField', 'termSize', 'termField', 'threshold', 'timeWindowSize'];
+  const hasExpressionErrors = !!Object.keys(errors).find(
+    errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
+  );
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -199,7 +210,7 @@ const ThresholdWatchEditUi = ({
         >
           <EuiFieldText
             name="name"
-            value={watch.name}
+            value={watch.name || ''}
             onChange={e => {
               setWatchProperty('name', e.target.value);
             }}
@@ -361,279 +372,399 @@ const ThresholdWatchEditUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="aggTypePopover"
-              button={
-                <EuiExpression
-                  description="when"
-                  value={aggTypes[watch.aggType].text}
-                  isActive={aggTypePopoverOpen}
-                  onClick={() => {
-                    setAggTypePopoverOpen(true);
-                  }}
-                />
-              }
-              isOpen={aggTypePopoverOpen}
-              closePopover={() => {
-                setAggTypePopoverOpen(false);
-              }}
-              ownFocus
-              withTitle
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>when</EuiPopoverTitle>
-                <EuiSelect
-                  value={watch.aggType}
-                  onChange={e => {
-                    setWatchProperty('aggType', e.target.value);
+        {watch.index && watch.index.length > 0 ? (
+          <Fragment>
+            {hasExpressionErrors ? (
+              <Fragment>
+                <EuiText color="danger">{expressionErrorMessage}</EuiText>
+                <EuiSpacer size="s" />
+              </Fragment>
+            ) : null}
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="aggTypePopover"
+                  button={
+                    <EuiExpression
+                      description={i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.whenLabel',
+                        {
+                          defaultMessage: 'when',
+                        }
+                      )}
+                      value={aggTypes[watch.aggType].text}
+                      isActive={aggTypePopoverOpen}
+                      onClick={() => {
+                        setAggTypePopoverOpen(true);
+                      }}
+                    />
+                  }
+                  isOpen={aggTypePopoverOpen}
+                  closePopover={() => {
                     setAggTypePopoverOpen(false);
                   }}
-                  options={Object.values(aggTypes)}
-                />
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-          {watch.aggType && aggTypes[watch.aggType].fieldRequired ? (
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="aggFieldPopover"
-                button={
-                  <EuiExpression
-                    description={`OF`}
-                    value={watch.aggField || 'select a field'}
-                    isActive={aggFieldPopoverOpen}
-                    onClick={() => {
-                      setAggFieldPopoverOpen(true);
-                    }}
-                  />
-                }
-                isOpen={aggFieldPopoverOpen}
-                closePopover={() => {
-                  setAggFieldPopoverOpen(false);
-                }}
-                ownFocus
-                anchorPosition="downLeft"
-              >
-                <div>
-                  <EuiPopoverTitle>of</EuiPopoverTitle>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false} style={{ width: 150 }}>
-                      <EuiSelect
-                        value={watch.aggField}
-                        onChange={e => {
-                          setWatchProperty('aggField', e.target.value);
-                          setAggFieldPopoverOpen(false);
-                        }}
-                        options={fields.reduce(
-                          (options, field: any) => {
-                            if (
-                              aggTypes[watch.aggType].validNormalizedTypes.includes(
-                                field.normalizedType
-                              )
-                            ) {
-                              options.push({
-                                text: field.name,
-                                value: field.name,
-                              });
-                            }
-                            return options;
-                          },
-                          [
-                            {
-                              text: 'select a field',
-                              value: '',
-                            },
-                          ]
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="groupByPopover"
-              button={
-                <EuiExpression
-                  description={`${watch.groupBy === 'all' ? 'over' : 'grouped over'}`}
-                  value={groupByTypes[watch.groupBy].text}
-                  isActive={groupByPopoverOpen}
-                  onClick={() => {
-                    setGroupByPopoverOpen(true);
-                  }}
-                />
-              }
-              isOpen={groupByPopoverOpen}
-              closePopover={() => {
-                setGroupByPopoverOpen(false);
-              }}
-              ownFocus
-              withTitle
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>over</EuiPopoverTitle>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
+                  ownFocus
+                  withTitle
+                  anchorPosition="downLeft"
+                >
+                  <div>
+                    <EuiPopoverTitle>
+                      {i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.whenButtonLabel',
+                        {
+                          defaultMessage: 'when',
+                        }
+                      )}
+                    </EuiPopoverTitle>
                     <EuiSelect
-                      value={watch.groupBy}
+                      value={watch.aggType}
                       onChange={e => {
-                        setWatchProperty('groupBy', e.target.value);
+                        setWatchProperty('aggType', e.target.value);
+                        setAggTypePopoverOpen(false);
                       }}
-                      options={Object.values(groupByTypes)}
-                    />
-                  </EuiFlexItem>
-
-                  {groupByTypes[watch.groupBy].sizeRequired ? (
-                    <Fragment>
-                      <EuiFlexItem grow={false}>
-                        <EuiFieldNumber min={1} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiSelect
-                          value={watch.aggField}
-                          onChange={e => {
-                            setWatchProperty('aggField', e.target.value);
-                            setAggFieldPopoverOpen(false);
-                          }}
-                          options={fields.reduce(
-                            (options, field: any) => {
-                              if (
-                                groupByTypes[watch.groupBy].validNormalizedTypes.includes(
-                                  field.normalizedType
-                                )
-                              ) {
-                                options.push({
-                                  text: field.name,
-                                  value: field.name,
-                                });
-                              }
-                              return options;
-                            },
-                            [] as Array<{ text: string; value: string }>
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </Fragment>
-                  ) : null}
-                </EuiFlexGroup>
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="watchThresholdPopover"
-              button={
-                <EuiExpression
-                  description={comparators[watch.thresholdComparator].text}
-                  value={watch.threshold}
-                  isActive={watchThresholdPopoverOpen}
-                  onClick={() => {
-                    setWatchThresholdPopoverOpen(true);
-                  }}
-                />
-              }
-              isOpen={watchThresholdPopoverOpen}
-              closePopover={() => {
-                setWatchThresholdPopoverOpen(false);
-              }}
-              ownFocus
-              withTitle
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      value={watch.thresholdComparator}
-                      onChange={e => {
-                        setWatchProperty('thresholdComparator', e.target.value);
-                      }}
-                      options={Object.values(comparators)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFieldNumber
-                      value={watch.threshold}
-                      min={1}
-                      onChange={e => {
-                        const { value } = e.target;
-                        const threshold = value !== '' ? parseInt(value, 10) : value;
-                        setWatchProperty('threshold', threshold);
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="watchDurationPopover"
-              button={
-                <EuiExpression
-                  description="For the last"
-                  value={`${watch.timeWindowSize} ${
-                    watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
-                      ? timeUnits[watch.timeWindowUnit].labelSingular
-                      : timeUnits[watch.timeWindowUnit].labelPlural
-                  }`}
-                  isActive={watchDurationPopoverOpen}
-                  onClick={() => {
-                    setWatchDurationPopoverOpen(true);
-                  }}
-                />
-              }
-              isOpen={watchDurationPopoverOpen}
-              closePopover={() => {
-                setWatchDurationPopoverOpen(false);
-              }}
-              ownFocus
-              withTitle
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>For the last</EuiPopoverTitle>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiFieldNumber
-                      min={1}
-                      value={watch.timeWindowSize}
-                      onChange={e => {
-                        const { value } = e.target;
-                        const timeWindowSize = value !== '' ? parseInt(value, 10) : value;
-                        setWatchProperty('timeWindowSize', timeWindowSize);
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      value={watch.timeWindowUnit}
-                      onChange={e => {
-                        setWatchProperty('timeWindowUnit', e.target.value);
-                      }}
-                      options={Object.entries(timeUnits).map(([key, value]) => {
+                      options={Object.values(aggTypes).map(({ text, value }) => {
                         return {
-                          text:
-                            watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
-                              ? value.labelSingular
-                              : value.labelPlural,
-                          value: key,
+                          text,
+                          value,
                         };
                       })}
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                  </div>
+                </EuiPopover>
+              </EuiFlexItem>
+              {watch.aggType && aggTypes[watch.aggType].fieldRequired ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id="aggFieldPopover"
+                    button={
+                      <EuiExpression
+                        description={i18n.translate(
+                          'xpack.watcher.sections.watchEdit.threshold.ofLabel',
+                          {
+                            defaultMessage: 'of',
+                          }
+                        )}
+                        value={watch.aggField || firstFieldOption.text}
+                        isActive={aggFieldPopoverOpen || !watch.aggField}
+                        onClick={() => {
+                          setAggFieldPopoverOpen(true);
+                        }}
+                        color={watch.aggField ? 'secondary' : 'danger'}
+                      />
+                    }
+                    isOpen={aggFieldPopoverOpen}
+                    closePopover={() => {
+                      setAggFieldPopoverOpen(false);
+                    }}
+                    ownFocus
+                    anchorPosition="downLeft"
+                  >
+                    <div>
+                      <EuiPopoverTitle>
+                        {i18n.translate(
+                          'xpack.watcher.sections.watchEdit.threshold.ofButtonLabel',
+                          {
+                            defaultMessage: 'of',
+                          }
+                        )}
+                      </EuiPopoverTitle>
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false} style={{ width: 150 }}>
+                          <ErrableFormRow
+                            errorKey="aggField"
+                            isShowingErrors={hasErrors && watch.aggField !== undefined}
+                            errors={errors}
+                          >
+                            <EuiSelect
+                              value={watch.aggField}
+                              onChange={e => {
+                                setWatchProperty('aggField', e.target.value);
+                              }}
+                              onBlur={() => {
+                                if (!watch.aggField) {
+                                  setWatchProperty('aggField', '');
+                                }
+                              }}
+                              options={fields.reduce(
+                                (options, field: any) => {
+                                  if (
+                                    aggTypes[watch.aggType].validNormalizedTypes.includes(
+                                      field.normalizedType
+                                    )
+                                  ) {
+                                    options.push({
+                                      text: field.name,
+                                      value: field.name,
+                                    });
+                                  }
+                                  return options;
+                                },
+                                [firstFieldOption]
+                              )}
+                            />
+                          </ErrableFormRow>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </div>
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="groupByPopover"
+                  button={
+                    <EuiExpression
+                      description={`${
+                        groupByTypes[watch.groupBy].sizeRequired
+                          ? i18n.translate(
+                              'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                              {
+                                defaultMessage: 'grouped over',
+                              }
+                            )
+                          : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
+                              defaultMessage: 'over',
+                            })
+                      }`}
+                      value={`${groupByTypes[watch.groupBy].text} ${
+                        groupByTypes[watch.groupBy].sizeRequired
+                          ? `${watch.termSize || ''} ${
+                              watch.termField ? `'${watch.termField}'` : ''
+                            }`
+                          : ''
+                      }`}
+                      isActive={
+                        groupByPopoverOpen ||
+                        (watch.groupBy === 'top' && !(watch.termSize && watch.termField))
+                      }
+                      onClick={() => {
+                        setGroupByPopoverOpen(true);
+                      }}
+                      color={
+                        watch.groupBy === 'all' || (watch.termSize && watch.termField)
+                          ? 'secondary'
+                          : 'danger'
+                      }
+                    />
+                  }
+                  isOpen={groupByPopoverOpen}
+                  closePopover={() => {
+                    setGroupByPopoverOpen(false);
+                  }}
+                  ownFocus
+                  withTitle
+                  anchorPosition="downLeft"
+                >
+                  <div>
+                    <EuiPopoverTitle>
+                      {i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.overButtonLabel',
+                        {
+                          defaultMessage: 'over',
+                        }
+                      )}
+                    </EuiPopoverTitle>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiSelect
+                          value={watch.groupBy}
+                          onChange={e => {
+                            setWatchProperty('termSize', null);
+                            setWatchProperty('termField', null);
+                            setWatchProperty('groupBy', e.target.value);
+                          }}
+                          options={Object.values(groupByTypes).map(({ text, value }) => {
+                            return {
+                              text,
+                              value,
+                            };
+                          })}
+                        />
+                      </EuiFlexItem>
+
+                      {groupByTypes[watch.groupBy].sizeRequired ? (
+                        <Fragment>
+                          <EuiFlexItem grow={false}>
+                            <ErrableFormRow
+                              errorKey="termSize"
+                              isShowingErrors={hasErrors}
+                              errors={errors}
+                            >
+                              <EuiFieldNumber
+                                value={watch.termSize}
+                                onChange={e => {
+                                  setWatchProperty('termSize', e.target.value);
+                                }}
+                                min={1}
+                              />
+                            </ErrableFormRow>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <ErrableFormRow
+                              errorKey="termField"
+                              isShowingErrors={hasErrors && watch.termField !== undefined}
+                              errors={errors}
+                            >
+                              <EuiSelect
+                                value={watch.termField || ''}
+                                onChange={e => {
+                                  setWatchProperty('termField', e.target.value);
+                                }}
+                                options={fields.reduce(
+                                  (options, field: any) => {
+                                    if (
+                                      groupByTypes[watch.groupBy].validNormalizedTypes.includes(
+                                        field.normalizedType
+                                      )
+                                    ) {
+                                      options.push({
+                                        text: field.name,
+                                        value: field.name,
+                                      });
+                                    }
+                                    return options;
+                                  },
+                                  [firstFieldOption]
+                                )}
+                              />
+                            </ErrableFormRow>
+                          </EuiFlexItem>
+                        </Fragment>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPopover>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="watchThresholdPopover"
+                  button={
+                    <EuiExpression
+                      description={comparators[watch.thresholdComparator].text}
+                      value={watch.threshold}
+                      isActive={watchThresholdPopoverOpen || !watch.threshold}
+                      onClick={() => {
+                        setWatchThresholdPopoverOpen(true);
+                      }}
+                      color={watch.threshold ? 'secondary' : 'danger'}
+                    />
+                  }
+                  isOpen={watchThresholdPopoverOpen}
+                  closePopover={() => {
+                    setWatchThresholdPopoverOpen(false);
+                  }}
+                  ownFocus
+                  withTitle
+                  anchorPosition="downLeft"
+                >
+                  <div>
+                    <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiSelect
+                          value={watch.thresholdComparator}
+                          onChange={e => {
+                            setWatchProperty('thresholdComparator', e.target.value);
+                          }}
+                          options={Object.values(comparators)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ErrableFormRow
+                          errorKey="threshold"
+                          isShowingErrors={hasErrors}
+                          errors={errors}
+                        >
+                          <EuiFieldNumber
+                            value={watch.threshold}
+                            min={1}
+                            onChange={e => {
+                              const { value } = e.target;
+                              const threshold = value !== '' ? parseInt(value, 10) : value;
+                              setWatchProperty('threshold', threshold);
+                            }}
+                          />
+                        </ErrableFormRow>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPopover>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="watchDurationPopover"
+                  button={
+                    <EuiExpression
+                      description={i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.forTheLastLabel',
+                        {
+                          defaultMessage: 'for the last',
+                        }
+                      )}
+                      value={`${watch.timeWindowSize} ${
+                        watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
+                          ? timeUnits[watch.timeWindowUnit].labelSingular
+                          : timeUnits[watch.timeWindowUnit].labelPlural
+                      }`}
+                      isActive={watchDurationPopoverOpen || !watch.timeWindowSize}
+                      onClick={() => {
+                        setWatchDurationPopoverOpen(true);
+                      }}
+                      color={watch.timeWindowSize ? 'secondary' : 'danger'}
+                    />
+                  }
+                  isOpen={watchDurationPopoverOpen}
+                  closePopover={() => {
+                    setWatchDurationPopoverOpen(false);
+                  }}
+                  ownFocus
+                  withTitle
+                  anchorPosition="downLeft"
+                >
+                  <div>
+                    <EuiPopoverTitle>For the last</EuiPopoverTitle>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <ErrableFormRow
+                          errorKey="timeWindowSize"
+                          isShowingErrors={hasErrors}
+                          errors={errors}
+                        >
+                          <EuiFieldNumber
+                            min={1}
+                            value={watch.timeWindowSize || ''}
+                            onChange={e => {
+                              const { value } = e.target;
+                              const timeWindowSize = value !== '' ? parseInt(value, 10) : value;
+                              setWatchProperty('timeWindowSize', timeWindowSize);
+                            }}
+                          />
+                        </ErrableFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiSelect
+                          value={watch.timeWindowUnit}
+                          onChange={e => {
+                            setWatchProperty('timeWindowUnit', e.target.value);
+                          }}
+                          options={Object.entries(timeUnits).map(([key, value]) => {
+                            return {
+                              text:
+                                watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
+                                  ? value.labelSingular
+                                  : value.labelPlural,
+                              value: key,
+                            };
+                          })}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        ) : null}
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton

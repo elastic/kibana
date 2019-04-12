@@ -9,7 +9,8 @@ import uuid from 'uuid';
 import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from 'plugins/watcher/../common/constants';
 import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
 import { i18n } from '@kbn/i18n';
-
+import { aggTypes } from './agg_types';
+import { groupByTypes } from './group_by_types';
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',
   TERM_SIZE: 5,
@@ -33,16 +34,23 @@ export class ThresholdWatch extends BaseWatch {
 
     this.index = props.index;
     this.timeField = props.timeField;
-    this.triggerIntervalSize = props.triggerIntervalSize == null ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE : props.triggerIntervalSize;
+    this.triggerIntervalSize =
+      props.triggerIntervalSize == null
+        ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE
+        : props.triggerIntervalSize;
     this.triggerIntervalUnit = props.triggerIntervalUnit || DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT;
     this.aggType = props.aggType || DEFAULT_VALUES.AGG_TYPE;
     this.aggField = props.aggField;
     this.termSize = props.termSize == null ? DEFAULT_VALUES.TERM_SIZE : props.termSize;
     this.termField = props.termField;
     this.thresholdComparator = props.thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR;
-    this.timeWindowSize = props.timeWindowSize || DEFAULT_VALUES.TIME_WINDOW_SIZE;
+    this.timeWindowSize =
+      props.timeWindowSize == null ? DEFAULT_VALUES.TIME_WINDOW_SIZE : props.timeWindowSize;
     this.timeWindowUnit = props.timeWindowUnit || DEFAULT_VALUES.TIME_WINDOW_UNIT;
     this.groupBy = props.groupBy || DEFAULT_VALUES.GROUP_BY;
+    if (this.termField != null) {
+      this.groupBy = 'top';
+    }
 
     //NOTE: The threshold must be of the appropriate type, i.e.,number/date.
     //Conversion from string must occur by consumer when assigning a
@@ -91,28 +99,102 @@ export class ThresholdWatch extends BaseWatch {
       index: [],
       timeField: [],
       triggerIntervalSize: [],
+      aggField: [],
+      termSize: [],
+      termField: [],
+      threshold: [],
+      timeWindowSize: [],
     };
     validationResult.errors = errors;
     if (!this.name) {
-      errors.name.push(i18n.translate('xpack.watcher.sections.watchEdit.threshold.error.requiredNameText', {
-        defaultMessage: 'Name is required',
-      }));
+      errors.name.push(
+        i18n.translate('xpack.watcher.sections.watchEdit.threshold.error.requiredNameText', {
+          defaultMessage: 'Name is required',
+        })
+      );
     }
     if (this.index !== undefined && this.index.length < 1) {
-      errors.index.push(i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.enterOneOrMoreIndicesValidationMessage', {
-        defaultMessage: 'Enter one or more indices'
-      }));
+      errors.index.push(
+        i18n.translate(
+          'xpack.watcher.sections.watchEdit.threshold.enterOneOrMoreIndicesValidationMessage',
+          {
+            defaultMessage: 'Enter one or more indices',
+          }
+        )
+      );
     }
     if (!this.timeField) {
-      errors.timeField.push(i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldIsRequiredValidationText', {
-        defaultMessage: 'A time field is required'
-      }));
+      errors.timeField.push(
+        i18n.translate(
+          'xpack.watcher.sections.watchEdit.threshold.timeFieldIsRequiredValidationText',
+          {
+            defaultMessage: 'A time field is required',
+          }
+        )
+      );
     }
     if (!this.triggerIntervalSize) {
       errors.triggerIntervalSize.push(
-        i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage', {
-          defaultMessage: 'Interval size is required'
-        }));
+        i18n.translate(
+          'xpack.watcher.sections.watchEdit.threshold.intervalSizeIsRequiredValidationMessage',
+          {
+            defaultMessage: 'Interval size is required',
+          }
+        )
+      );
+    }
+    if (aggTypes[this.aggType].fieldRequired && !this.aggField) {
+      errors.aggField.push(
+        i18n.translate(
+          'xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage',
+          {
+            defaultMessage: 'Please select a field',
+          }
+        )
+      );
+    }
+    // term field and term size only required if the group by type requires them
+    if (groupByTypes[this.groupBy].sizeRequired) {
+      if (!this.termSize) {
+        errors.termSize.push(
+          i18n.translate(
+            'xpack.watcher.thresholdWatchExpression.aggType.xpack.watcher.thresholdWatchExpression.groupBy.requiredValueValidationMessage',
+            {
+              defaultMessage: 'A value is required.',
+            }
+          )
+        );
+      }
+      if (!this.termField) {
+        errors.termField.push(
+          i18n.translate(
+            'xpack.watcher.thresholdWatchExpression.groupBy.requiredFieldValidationMessage',
+            {
+              defaultMessage: 'Please select a field.',
+            }
+          )
+        );
+      }
+    }
+    if (!this.threshold) {
+      errors.threshold.push(
+        i18n.translate(
+          'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
+          {
+            defaultMessage: 'A value is required.',
+          }
+        )
+      );
+    }
+    if (!this.timeWindowSize) {
+      errors.timeWindowSize.push(
+        i18n.translate(
+          'xpack.watcher.thresholdWatchExpression.timeWindow.durationSizeIsRequiredValidationMessage',
+          {
+            defaultMessage: 'Window duration size is required.',
+          }
+        )
+      );
     }
     return validationResult;
   }
