@@ -488,6 +488,9 @@
             "_reserved": {
               "type": "boolean"
             },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
             "color": {
               "type": "keyword"
             },
