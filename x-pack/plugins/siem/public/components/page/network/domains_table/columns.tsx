@@ -74,7 +74,6 @@ export const getDomainsColumns = (
             }
           />
         );
-        // <DefaultDraggable id={id} field={domainNameAttr} value={domainName} />;
       } else {
         return getEmptyTagValue();
       }
