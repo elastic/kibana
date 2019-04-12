@@ -227,7 +227,7 @@ export interface LogRecord {
 // Warning: (ae-forgotten-export) The symbol "OnRequestResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult;
+export type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
 
 // @public
 export interface OnRequestToolkit {
@@ -264,7 +264,7 @@ export interface PluginSetupContext {
         dataClient$: Observable<ClusterClient>;
     };
     // (undocumented)
-    http?: {
+    http: {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnRequest: HttpServiceSetup['registerOnRequest'];
     };

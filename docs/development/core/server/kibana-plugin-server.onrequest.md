@@ -6,5 +6,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult;
+export declare type OnRequest<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
 ```

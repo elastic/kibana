@@ -5,7 +5,7 @@
 <b>Signature:</b>
 
 ```typescript
-http?: {
+http: {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnRequest: HttpServiceSetup['registerOnRequest'];
     };
