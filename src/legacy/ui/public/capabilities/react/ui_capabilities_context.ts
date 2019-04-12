@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { UICapabilities } from '../ui_capabilities';
+import { UICapabilities } from '..';
 
 export const UICapabilitiesContext = React.createContext<UICapabilities>({
   navLinks: {},

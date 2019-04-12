@@ -23,6 +23,7 @@ import { Subject } from 'rxjs';
 
 import { CoreSetup } from '.';
 import { BasePathService } from './base_path';
+import { CapabilitiesService } from './capabilities';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
 import { HttpService } from './http';
@@ -64,6 +65,7 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly capabilities: CapabilitiesService;
   private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
 
@@ -84,6 +86,8 @@ export class CoreSystem {
     this.rootDomElement = rootDomElement;
 
     this.i18n = new I18nService();
+
+    this.capabilities = new CapabilitiesService();
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -128,6 +132,7 @@ export class CoreSystem {
       const http = this.http.setup({ fatalErrors });
       const overlays = this.overlay.setup({ i18n });
       const basePath = this.basePath.setup({ injectedMetadata });
+      const capabilities = this.capabilities.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
         notifications,
         http,
@@ -145,6 +150,7 @@ export class CoreSystem {
         fatalErrors,
         http,
         i18n,
+        capabilities,
         injectedMetadata,
         notifications,
         uiSettings,

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { ReactNode } from 'react';
-import { uiCapabilities, UICapabilities } from '../../ui_capabilities';
+import { uiCapabilities, UICapabilities } from '../..';
 
 interface Props {
   children: ReactNode;

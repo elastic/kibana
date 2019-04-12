@@ -33,7 +33,8 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 
 interface State {
   isPopoverOpen: boolean;
