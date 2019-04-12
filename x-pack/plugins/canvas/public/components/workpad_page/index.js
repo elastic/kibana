@@ -7,17 +7,17 @@
 import isEqual from 'react-fast-compare';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { branch, compose, withHandlers, withProps, withState, shouldUpdate } from 'recompose';
+import { branch, compose, shouldUpdate, withHandlers, withProps, withState } from 'recompose';
 import { elementLayer, insertNodes, removeElements } from '../../state/actions/elements';
 import { canUserWrite, getFullscreen } from '../../state/selectors/app';
 import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
 import { updater } from '../../lib/aeroelastic/layout';
 import { createStore } from '../../lib/aeroelastic/store';
-import { not, flatten } from '../../lib/aeroelastic/functional';
-import { elementToShape, globalStateUpdater, crawlTree, shapesForNodes } from './integration_utils';
+import { flatten, not } from '../../lib/aeroelastic/functional';
+import { StaticPage } from '../workpad_static_page';
+import { crawlTree, globalStateUpdater, shapesForNodes } from './integration_utils';
 import { eventHandlers } from './event_handlers';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
-import { StaticWorkpadPage as StaticComponent } from './static_workpad_page';
 import { selectToplevelNodes } from './../../state/actions/transient';
 
 const configuration = {
@@ -79,30 +79,10 @@ const animationProps = ({ isSelected, animation }) => {
   };
 };
 
-const simplePositioning = ({ elements }) => ({
-  elements: elements.map((element, i) => {
-    const { type, subtype, transformMatrix } = elementToShape(element, i);
-    return {
-      id: element.id,
-      filter: element.filter,
-      width: element.position.width,
-      height: element.position.height,
-      type,
-      subtype,
-      transformMatrix,
-    };
-  }),
-});
-
 const groupHandlerCreators = {
   groupNodes: ({ commit }) => () => commit('actionEvent', { event: 'group' }),
   ungroupNodes: ({ commit }) => () => commit('actionEvent', { event: 'ungroup' }),
 };
-
-const StaticPage = compose(
-  withProps(simplePositioning),
-  () => StaticComponent
-);
 
 const mapStateToProps = (state, ownProps) => {
   const selectedToplevelNodes = state.transient.selectedToplevelNodes;
