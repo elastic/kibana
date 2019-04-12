@@ -132,9 +132,6 @@ export interface JobDocPayload {
 export interface JobDocOutput {
   content: string; // encoded content
   contentType: string;
-  headers?: any;
-  size?: number;
-  statusCode: number;
 }
 
 export interface JobDoc {
