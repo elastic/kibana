@@ -43,8 +43,10 @@ export const reporting = (kibana) => {
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
+        const config = server.config();
         return {
-          reportingPollConfig: options.poll
+          reportingPollConfig: options.poll,
+          enablePanelActionDownlad: config.get('xpack.reporting.csv.enablePanelActionDownlad'),
         };
       },
       uiSettingDefaults: {
@@ -125,6 +127,7 @@ export const reporting = (kibana) => {
           }).default()
         }).default(),
         csv: Joi.object({
+          enablePanelActionDownlad: Joi.boolean().default(false),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
             duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),
