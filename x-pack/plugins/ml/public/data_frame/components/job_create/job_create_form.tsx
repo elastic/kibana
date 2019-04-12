@@ -5,8 +5,8 @@
  */
 
 import React, { Fragment, SFC, useEffect, useState } from 'react';
-
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 
@@ -49,17 +49,55 @@ export const JobCreateForm: SFC<Props> = React.memo(({ jobConfig, jobId, onChang
 
   async function createDataFrame() {
     setCreated(true);
-    return await ml.dataFrame.createDataFrameTransformsJob(jobId, jobConfig);
+
+    try {
+      await ml.dataFrame.createDataFrameTransformsJob(jobId, jobConfig);
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.jobCreateForm.createJobSuccessMessage', {
+          defaultMessage: 'Data frame job {jobId} created successfully.',
+          values: { jobId },
+        })
+      );
+      return true;
+    } catch (e) {
+      setCreated(false);
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobCreateForm.createJobErrorMessage', {
+          defaultMessage: 'An error occurred creating the data frame job {jobId}: {error}',
+          values: { jobId, error: JSON.stringify(e) },
+        })
+      );
+      return false;
+    }
   }
 
   async function startDataFrame() {
     setStarted(true);
-    return await ml.dataFrame.startDataFrameTransformsJob(jobId);
+
+    try {
+      await ml.dataFrame.startDataFrameTransformsJob(jobId);
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.jobCreateForm.startJobSuccessMessage', {
+          defaultMessage: 'Data frame job {jobId} started successfully.',
+          values: { jobId },
+        })
+      );
+    } catch (e) {
+      setStarted(false);
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobCreateForm.startJobErrorMessage', {
+          defaultMessage: 'An error occurred starting the data frame job {jobId}: {error}',
+          values: { jobId, error: JSON.stringify(e) },
+        })
+      );
+    }
   }
 
   async function createAndStartDataFrame() {
-    await createDataFrame();
-    await startDataFrame();
+    const success = await createDataFrame();
+    if (success) {
+      await startDataFrame();
+    }
   }
 
   return (
