@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getDocCountQueryString } from '../../../../plugins/uptime/public/components/queries/empty_state/get_doc_count';
+import { docCountQueryString } from '../../../../plugins/uptime/public/queries';
 import { SecurityService, SpacesService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
@@ -32,7 +32,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const basePath = spaceId ? `/s/${spaceId}` : '';
     const getDocCountQuery = {
       operationName: null,
-      query: getDocCountQueryString,
+      query: docCountQueryString,
       variables: {},
     };
 
@@ -69,7 +69,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       .catch((error: any) => ({ error, response: undefined }));
   };
 
-  describe('feature controls', () => {
+  describe.only('feature controls', () => {
     it(`APIs can't be accessed by heartbeat-* read privileges role`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
