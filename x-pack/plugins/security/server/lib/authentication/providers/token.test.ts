@@ -495,6 +495,14 @@ describe('TokenAuthenticationProvider', () => {
           // no-op
         },
         basePath: '/base-path',
+        clusterSecurityFeatures: new ClusterSecurityFeatures({
+          getUsage$: () => {
+            throw new Error('should not be called via this test');
+          },
+          refreshNow: () => {
+            throw new Error('should not be called via this test');
+          },
+        }),
       });
     });
 
