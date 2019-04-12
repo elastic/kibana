@@ -14,30 +14,16 @@ import { not } from '../../lib/aeroelastic/functional';
 import { StaticPage } from '../workpad_static_page';
 import { InteractivePage } from '../workpad_interactive_page';
 
-const animationProps = ({ isSelected, animation }) => {
-  function getClassName() {
-    if (animation) {
-      return animation.name;
-    }
-    return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
-  }
-
-  function getAnimationStyle() {
-    if (!animation) {
-      return {};
-    }
-    return {
-      animationDirection: animation.direction,
-      // TODO: Make this configurable
-      animationDuration: '1s',
-    };
-  }
-
-  return {
-    className: getClassName(),
-    animationStyle: getAnimationStyle(),
-  };
-};
+const animationProps = ({ animation, isSelected }) =>
+  animation
+    ? {
+        className: animation.name + ' ' + (isSelected ? 'active' : 'inactive'),
+        animationStyle: {
+          animationDirection: animation.direction,
+          animationDuration: '1s', // TODO: Make this configurable
+        },
+      }
+    : { className: isSelected ? 'active' : 'inactive', animationStyle: {} };
 
 const mapStateToProps = (state, ownProps) => ({
   isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),

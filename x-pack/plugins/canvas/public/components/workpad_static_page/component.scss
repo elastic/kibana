@@ -1,5 +1,5 @@
-.canvasPage,
-.canvasPage:focus {
+.canvasStaticPage,
+.canvasStaticPage:focus {
   z-index: initial;
   box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.2);
   position: absolute;
@@ -8,13 +8,7 @@
   background-color: $euiColorEmptyShade;
 }
 
-.canvasPage--isEditable {
-  user-select: none;
-}
-
-.canvasLayout__stage {
-  .canvasPage--isInactive {
-    visibility: hidden;
-    opacity: 0;
-  }
+.canvasLayout__stage .canvasStaticPage.inactive {
+  visibility: hidden;
+  opacity: 0;
 }

@@ -53,7 +53,8 @@
 @import '../components/workpad_export/workpad_export';
 @import '../components/workpad_loader/workpad_loader';
 @import '../components/workpad_loader/workpad_dropzone/workpad_dropzone';
-@import '../components/workpad_page/workpad_page';
+@import '../components/workpad_interactive_page/component';
+@import '../components/workpad_static_page/component';
 
 @import '../../canvas_plugin_src/renderers/advanced_filter/component/advanced_filter.scss';
 @import '../../canvas_plugin_src/renderers/dropdown_filter/component/dropdown_filter.scss';
