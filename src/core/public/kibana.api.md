@@ -4,8 +4,10 @@
 
 ```ts
 
+import * as CSS from 'csstype';
 import { default } from 'react';
 import { Observable } from 'rxjs';
+import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -13,6 +15,21 @@ import { Toast } from '@elastic/eui';
 // 
 // @public (undocumented)
 export type BasePathSetup = ReturnType<BasePathService['setup']>;
+
+// @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export interface CapabilitiesSetup {
+    getCapabilities: () => Capabilities;
+}
 
 // @public (undocumented)
 export interface ChromeBrand {
@@ -51,6 +68,8 @@ export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
+    capabilities: CapabilitiesSetup;
+    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -62,6 +81,8 @@ export interface CoreSetup {
     injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
+    // (undocumented)
+    overlays: OverlaySetup;
     // (undocumented)
     uiSettings: UiSettingsSetup;
 }
@@ -92,6 +113,14 @@ export class CoreSystem {
 // 
 // @public (undocumented)
 export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+
+// @public
+export class FlyoutRef {
+    // (undocumented)
+    constructor();
+    close(): Promise<void>;
+    readonly onClose: Promise<void>;
+}
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 
@@ -152,16 +181,27 @@ export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
 
-// @public
-export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
+// @public (undocumented)
+export interface OverlaySetup {
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => FlyoutRef;
+}
+
+// @public
+export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
+    // (undocumented)
+    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
 
 // @public
 export interface PluginInitializerContext {

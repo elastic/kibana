@@ -337,8 +337,8 @@ class EditUserUI extends Component {
     }
 
     return (
-      <div className="mgtUsersEditPage">
-        <EuiPageContent className="mgtUsersEditPage__content">
+      <div className="secUsersEditPage">
+        <EuiPageContent className="secUsersEditPage__content">
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>

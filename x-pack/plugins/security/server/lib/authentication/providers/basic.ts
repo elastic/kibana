@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { Request } from 'hapi';
 import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
@@ -70,7 +72,6 @@ interface ProviderState {
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
-// tslint:disable-next-line: max-classes-per-file
 export class BasicAuthenticationProvider {
   /**
    * Instantiates BasicAuthenticationProvider.
@@ -129,7 +130,7 @@ export class BasicAuthenticationProvider {
   /**
    * Validates whether request contains a login payload and authenticates the
    * user if necessary.
-   * @param HapiJS request instance.
+   * @param request HapiJS request instance.
    */
   private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via login attempt.');

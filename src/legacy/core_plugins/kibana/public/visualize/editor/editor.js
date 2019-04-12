@@ -23,6 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
+import 'ui/query_bar';
+import { uiCapabilities } from 'ui/capabilities';
 import 'ui/search_bar';
 import 'ui/apply_filters';
 import 'ui/listen';
@@ -148,7 +150,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [{
+  $scope.topNavMenu = [...(uiCapabilities.visualize.save ? [{
     key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
@@ -201,7 +203,7 @@ function VisEditor(
         />);
       showSaveModal(saveModal);
     }
-  }, {
+  }] : []), {
     key: i18n('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
@@ -213,6 +215,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
+        allowShortUrl: uiCapabilities.visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
@@ -233,7 +236,11 @@ function VisEditor(
       return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
-      vis.openInspector().bindToAngularScope($scope);
+      const inspectorSession = vis.openInspector();
+      // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+      const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
+      // Remove that watch in case the user closes the inspector session herself.
+      inspectorSession.onClose.finally(removeWatch);
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {

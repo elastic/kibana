@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 
 import {
+  CanvasPageProvider,
   SecurityPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
@@ -19,12 +20,12 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
+  InfraLogsPageProvider,
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
   RollupPageProvider,
   UptimePageProvider,
-
 } from './page_objects';
 
 import {
@@ -56,8 +57,13 @@ import {
   GrokDebuggerProvider,
   UserMenuProvider,
   UptimeProvider,
-
+  InfraSourceConfigurationFlyoutProvider,
 } from './services';
+
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -75,21 +81,31 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/advanced_settings'),
       resolve(__dirname, './apps/canvas'),
       resolve(__dirname, './apps/graph'),
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
+      resolve(__dirname, './apps/dashboard'),
       resolve(__dirname, './apps/dashboard_mode'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
+      resolve(__dirname, './apps/machine_learning'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/uptime')
+      resolve(__dirname, './apps/visualize'),
+      resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/saved_objects_management'),
+      resolve(__dirname, './apps/dev_tools'),
+      resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/index_patterns')
     ],
 
     // define the name and providers for services that should be
@@ -124,15 +140,19 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
       userMenu: UserMenuProvider,
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
+      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
     },
 
     // just like services, PageObjects are defined as a map of
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
+      canvas: CanvasPageProvider,
       security: SecurityPageProvider,
       accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
@@ -143,11 +163,12 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      infraLogs: InfraLogsPageProvider,
       maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
-      rollup: RollupPageProvider
+      rollup: RollupPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -200,11 +221,19 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger',
       },
+      searchProfiler: {
+        pathname: '/app/kibana',
+        hash: '/dev_tools/searchprofiler',
+      },
       spaceSelector: {
         pathname: '/',
       },
       infraOps: {
         pathname: '/app/infra',
+      },
+      infraLogs: {
+        pathname: '/app/infra',
+        hash: '/logs',
       },
       canvas: {
         pathname: '/app/canvas',
@@ -213,9 +242,18 @@ export default async function ({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
+      apm: {
+        pathname: '/app/apm'
+      },
+      ml: {
+        pathname: '/app/ml'
+      },
       rollupJob: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/'
+        hash: '/management/elasticsearch/rollup_jobs/',
+      },
+      apm: {
+        pathname: '/app/apm',
       }
     },
 
@@ -233,5 +271,4 @@ export default async function ({ readConfigFile }) {
       reportName: 'X-Pack Functional Tests',
     },
   };
-
 }

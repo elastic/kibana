@@ -28,7 +28,7 @@ import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 import { timefilter } from '../../timefilter';
-import dropPartialTemplate from '../controls/drop_partials.html';
+import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -160,12 +160,19 @@ export const dateHistogramBucketAgg = new BucketAggType({
         const isDefaultTimezone = config.isDefault('dateFormat:tz');
         return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
       },
+      serialize() {
+        // We don't want to store the `time_zone` parameter ever in the saved object for the visualization.
+        // If we would store this changing the time zone in Kibana would not affect any already saved visualizations
+        // anymore, which is not the desired behavior. So always returning undefined here, makes sure we're never
+        // saving that parameter and just keep it "transient".
+        return undefined;
+      },
     },
     {
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editor: dropPartialTemplate,
+      editorComponent: DropPartialsParamEditor,
     },
 
     {

@@ -21,11 +21,14 @@ import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
 import chrome from 'ui/chrome';
-import { getSort } from 'ui/doc_table/lib/get_sort';
-import * as columnActions from 'ui/doc_table/actions/columns';
-import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
-import 'ui/doc_table';
+
+// doc table
+import '../doc_table';
+import { getSort } from '../doc_table/lib/get_sort';
+import * as columnActions from '../doc_table/actions/columns';
+import * as filterActions from '../doc_table/actions/filter';
+
 import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
@@ -65,6 +68,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import 'ui/capabilities/route_setup';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -82,12 +86,13 @@ const app = uiModules.get('apps/discover', [
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
     requireDefaultIndex: true,
+    requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
         $route.current.params.id
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
-      )
+      ),
   })
   .when('/discover/:id?', {
     template: indexTemplate,
@@ -170,6 +175,7 @@ function discoverController(
   kbnUrl,
   localStorage,
   i18n,
+  uiCapabilities,
 ) {
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
@@ -208,110 +214,131 @@ function discoverController(
     dirty: !savedSearch.id
   };
 
-  $scope.topNavMenu = [{
-    key: 'new',
-    label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
-      defaultMessage: 'New',
-    }),
-    description: i18n('kbn.discover.localMenu.newSearchDescription', {
-      defaultMessage: 'New Search',
-    }),
-    run: function () { kbnUrl.change('/discover'); },
-    testId: 'discoverNewButton',
-  }, {
-    key: 'save',
-    label: i18n('kbn.discover.localMenu.saveTitle', {
-      defaultMessage: 'Save',
-    }),
-    description: i18n('kbn.discover.localMenu.saveSearchDescription', {
-      defaultMessage: 'Save Search',
-    }),
-    testId: 'discoverSaveButton',
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedSearch.title;
-        savedSearch.title = newTitle;
-        savedSearch.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return saveDataSource(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedSearch.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
+  const getTopNavLinks = () => {
+    const newSearch = {
+      key: 'new',
+      label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
+        defaultMessage: 'New',
+      }),
+      description: i18n('kbn.discover.localMenu.newSearchDescription', {
+        defaultMessage: 'New Search',
+      }),
+      run: function () { kbnUrl.change('/discover'); },
+      testId: 'discoverNewButton',
+    };
 
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedSearch.title}
-          showCopyOnSave={savedSearch.id ? true : false}
-          objectType="search"
-        />);
-      showSaveModal(saveModal);
-    }
-  }, {
-    key: 'open',
-    label: i18n('kbn.discover.localMenu.openTitle', {
-      defaultMessage: 'Open',
-    }),
-    description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
-      defaultMessage: 'Open Saved Search',
-    }),
-    testId: 'discoverOpenButton',
-    run: () => {
-      showOpenSearchPanel({
-        makeUrl: (searchId) => {
-          return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-        }
-      });
-    }
-  }, {
-    key: 'share',
-    label: i18n('kbn.discover.localMenu.shareTitle', {
-      defaultMessage: 'Share',
-    }),
-    description: i18n('kbn.discover.localMenu.shareSearchDescription', {
-      defaultMessage: 'Share Search',
-    }),
-    testId: 'shareTopNavButton',
-    run: async (menuItem, navController, anchorElement) => {
-      const sharingData = await this.getSharingData();
-      showShareContextMenu({
-        anchorElement,
-        allowEmbed: false,
-        getUnhashableStates,
-        objectId: savedSearch.id,
-        objectType: 'search',
-        shareContextMenuExtensions,
-        sharingData: {
-          ...sharingData,
-          title: savedSearch.title,
-        },
-        isDirty: $appStatus.dirty,
-      });
-    }
-  }, {
-    key: 'inspect',
-    label: i18n('kbn.discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
-    }),
-    description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
-      defaultMessage: 'Open Inspector for search',
-    }),
-    testId: 'openInspectorButton',
-    run() {
-      Inspector.open(inspectorAdapters, {
-        title: savedSearch.title
-      });
-    }
-  }];
+    const saveSearch = {
+      key: 'save',
+      label: i18n('kbn.discover.localMenu.saveTitle', {
+        defaultMessage: 'Save',
+      }),
+      description: i18n('kbn.discover.localMenu.saveSearchDescription', {
+        defaultMessage: 'Save Search',
+      }),
+      testId: 'discoverSaveButton',
+      run: async () => {
+        const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          const currentTitle = savedSearch.title;
+          savedSearch.title = newTitle;
+          savedSearch.copyOnSave = newCopyOnSave;
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return saveDataSource(saveOptions).then(({ id, error }) => {
+            // If the save wasn't successful, put the original values back.
+            if (!id || error) {
+              savedSearch.title = currentTitle;
+            }
+            return { id, error };
+          });
+        };
+
+        const saveModal = (
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => { }}
+            title={savedSearch.title}
+            showCopyOnSave={savedSearch.id ? true : false}
+            objectType="search"
+          />);
+        showSaveModal(saveModal);
+      }
+    };
+
+    const openSearch = {
+      key: 'open',
+      label: i18n('kbn.discover.localMenu.openTitle', {
+        defaultMessage: 'Open',
+      }),
+      description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
+        defaultMessage: 'Open Saved Search',
+      }),
+      testId: 'discoverOpenButton',
+      run: () => {
+        showOpenSearchPanel({
+          makeUrl: (searchId) => {
+            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
+          }
+        });
+      }
+    };
+
+    const shareSearch = {
+      key: 'share',
+      label: i18n('kbn.discover.localMenu.shareTitle', {
+        defaultMessage: 'Share',
+      }),
+      description: i18n('kbn.discover.localMenu.shareSearchDescription', {
+        defaultMessage: 'Share Search',
+      }),
+      testId: 'shareTopNavButton',
+      run: async (menuItem, navController, anchorElement) => {
+        const sharingData = await this.getSharingData();
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: false,
+          allowShortUrl: uiCapabilities.discover.createShortUrl,
+          getUnhashableStates,
+          objectId: savedSearch.id,
+          objectType: 'search',
+          shareContextMenuExtensions,
+          sharingData: {
+            ...sharingData,
+            title: savedSearch.title,
+          },
+          isDirty: $appStatus.dirty,
+        });
+      }
+    };
+
+    const inspectSearch = {
+      key: 'inspect',
+      label: i18n('kbn.discover.localMenu.inspectTitle', {
+        defaultMessage: 'Inspect',
+      }),
+      description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
+        defaultMessage: 'Open Inspector for search',
+      }),
+      testId: 'openInspectorButton',
+      run() {
+        Inspector.open(inspectorAdapters, {
+          title: savedSearch.title
+        });
+      }
+    };
+
+    return [
+      newSearch,
+      ...uiCapabilities.discover.save ? [saveSearch] : [],
+      openSearch,
+      shareSearch,
+      inspectSearch,
+    ];
+  };
+
+  $scope.topNavMenu = getTopNavLinks();
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;

@@ -35,5 +35,10 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
     async getNoMetricsDataPrompt() {
       return await testSubjects.find('noMetricsDataPrompt');
     },
+
+    async openSourceConfigurationFlyout() {
+      await testSubjects.click('configureSourceButton');
+      await testSubjects.exists('sourceConfigurationFlyout');
+    },
   };
 }

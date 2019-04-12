@@ -91,7 +91,7 @@ class UsersUI extends Component {
     const { intl } = this.props;
     if (permissionDenied) {
       return (
-        <div className="mgtUsersListingPage">
+        <div className="secUsersListingPage">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt
               iconType="securityApp"
@@ -221,8 +221,8 @@ class UsersUI extends Component {
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;
     return (
-      <div className="mgtUsersListingPage">
-        <EuiPageContent className="mgtUsersListingPage__content">
+      <div className="secUsersListingPage">
+        <EuiPageContent className="secUsersListingPage__content">
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
