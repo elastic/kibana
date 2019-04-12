@@ -165,22 +165,20 @@ describe('Histogram Agg', function () {
     });
 
     describe('extended_bounds', function () {
-      it('writes when only eb.min is set', function () {
+      it('does not write when only eb.min is set', function () {
         const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: { min: 0 }
         });
-        expect(output.params.extended_bounds).to.have.property('min', 0);
-        expect(output.params.extended_bounds).to.have.property('max', undefined);
+        expect(output.params).not.to.have.property('extended_bounds');
       });
 
-      it('writes when only eb.max is set', function () {
+      it('does not write when only eb.max is set', function () {
         const output = paramWriter.write({
           min_doc_count: true,
           extended_bounds: { max: 0 }
         });
-        expect(output.params.extended_bounds).to.have.property('min', undefined);
-        expect(output.params.extended_bounds).to.have.property('max', 0);
+        expect(output.params).not.to.have.property('extended_bounds');
       });
 
       it('writes when both eb.min and eb.max are set', function () {

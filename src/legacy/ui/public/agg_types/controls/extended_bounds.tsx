@@ -50,7 +50,6 @@ function areBoundsInvalid({ min, max }: Bounds): boolean {
 
 function ExtendedBoundsParamEditor({
   agg,
-  aggParam,
   value,
   setValue,
   setValidity,
