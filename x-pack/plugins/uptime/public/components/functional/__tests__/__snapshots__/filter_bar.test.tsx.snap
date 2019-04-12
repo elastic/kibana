@@ -167,7 +167,6 @@ exports[`FilterBar component renders the component without errors 1`] = `
     ]
   }
   onChange={[MockFunction]}
-  query={Object {}}
   schema={
     Object {
       "fields": Object {

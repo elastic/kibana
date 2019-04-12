@@ -28,9 +28,10 @@ describe('FilterBar component', () => {
       schemes: ['tcp', 'http'],
     },
   };
-  const currentQuery = {};
+  let currentQuery;
 
   it('renders the component without errors', () => {
+    currentQuery = undefined;
     const component = shallowWithIntl(
       <FilterBarComponent
         currentQuery={currentQuery}
