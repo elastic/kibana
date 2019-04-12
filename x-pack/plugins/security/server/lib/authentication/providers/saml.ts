@@ -53,19 +53,18 @@ interface ProviderState {
 }
 
 /**
- * Defines the shape of the request body containing SAML response.
- */
-interface SAMLResponsePayload {
-  SAMLResponse: string;
-  RelayState?: string;
-}
-
-/**
  * Defines the shape of the request query containing SAML request.
  */
 interface SAMLRequestQuery {
   SAMLRequest: string;
 }
+
+/**
+ * Defines the shape of the request with a body containing SAML response.
+ */
+type RequestWithSAMLPayload = Request & {
+  payload: { SAMLResponse: string; RelayState?: string };
+};
 
 /**
  * If request with access token fails with `401 Unauthorized` then this token is no
@@ -88,10 +87,10 @@ function isAccessTokenExpiredError(err?: any) {
 
 /**
  * Checks whether request payload contains SAML response from IdP.
- * @param payload HTTP request body payload.
+ * @param request HapiJS request instance.
  */
-function isSAMLResponsePayload(payload: any): payload is SAMLResponsePayload {
-  return payload && payload.SAMLResponse;
+function isRequestWithSAMLResponsePayload(request: Request): request is RequestWithSAMLPayload {
+  return request.payload != null && !!(request.payload as any).SAMLResponse;
 }
 
 /**
@@ -137,7 +136,7 @@ export class SAMLAuthenticationProvider {
     }
 
     // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
-    if (isSAMLResponsePayload(request.payload)) {
+    if (isRequestWithSAMLResponsePayload(request)) {
       if (authenticationResult.notHandled()) {
         authenticationResult = await this.authenticateViaPayload(request, state);
       } else if (authenticationResult.succeeded()) {
@@ -241,7 +240,10 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  private async authenticateViaPayload(request: Request, state?: ProviderState | null) {
+  private async authenticateViaPayload(
+    request: RequestWithSAMLPayload,
+    state?: ProviderState | null
+  ) {
     this.debug('Trying to authenticate via SAML response payload.');
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
@@ -273,7 +275,7 @@ export class SAMLAuthenticationProvider {
       } = await this.options.client.callWithInternalUser('shield.samlAuthenticate', {
         body: {
           ids: stateRequestId ? [stateRequestId] : [],
-          content: (request.payload as any).SAMLResponse,
+          content: request.payload.SAMLResponse,
         },
       });
 
@@ -301,7 +303,7 @@ export class SAMLAuthenticationProvider {
    * @param user User returned for the existing session.
    */
   private async authenticateViaNewPayload(
-    request: Request,
+    request: RequestWithSAMLPayload,
     existingState: ProviderState,
     user: User
   ) {
@@ -562,7 +564,7 @@ export class SAMLAuthenticationProvider {
     this.debug('Single logout has been initiated by the user.');
 
     // This operation should be performed on behalf of the user with a privilege that normal
-    // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
+    // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
     const { redirect } = await this.options.client.callWithInternalUser('shield.samlLogout', {
       body: { token: accessToken, refresh_token: refreshToken },
     });
@@ -573,16 +575,16 @@ export class SAMLAuthenticationProvider {
   }
 
   /**
-   * Calls `saml/logout` with the `SAMLRequest` query string parameter received from the Identity Provider
-   * and redirects user back to the Identity Provider if needed.
+   * Calls `saml/invalidate` with the `SAMLRequest` query string parameter received from the Identity
+   * Provider and redirects user back to the Identity Provider if needed.
    * @param request HapiJS request instance.
    */
   private async performIdPInitiatedSingleLogout(request: Request) {
     this.debug('Single logout has been initiated by the Identity Provider.');
 
     // This operation should be performed on behalf of the user with a privilege that normal
-    // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
-    const { redirect } = await this.options.client.callWithInternalUser('shield.samlLogout', {
+    // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
+    const { redirect } = await this.options.client.callWithInternalUser('shield.samlInvalidate', {
       // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
       body: {
         queryString: request.url.search ? request.url.search.slice(1) : '',

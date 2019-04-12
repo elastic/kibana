@@ -181,29 +181,6 @@ export default function ({ getService }) {
         expect(apiResponse.body.username).to.be('a@b.c');
       });
 
-      it('should fail if there is an active authenticated session already', async () => {
-        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
-          .expect(302);
-
-        const sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
-
-        const secondSAMLAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse() }, {})
-          .expect(403);
-
-        expect(secondSAMLAuthenticationResponse.body).to.eql({
-          error: 'Forbidden',
-          message: 'Sorry, you already have an active Kibana session. ' +
-          'If you want to start a new one, please logout from the existing session first.',
-          statusCode: 403
-        });
-      });
-
       it('should fail if SAML response is not valid', async () => {
         await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
@@ -549,6 +526,86 @@ export default function ({ getService }) {
         const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
         expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
+      });
+    });
+
+    describe('IdP initiated login with active session', () => {
+      const existingUsername = 'a@b.c';
+      let existingSessionCookie;
+
+      beforeEach(async () => {
+        const handshakeResponse = await supertest.get('/abc/xyz')
+          .expect(302);
+
+        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId, username: existingUsername }) }, {})
+          .expect(302);
+
+        existingSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+      });
+
+      it('should renew session and redirect to the home page if login is for the same user', async () => {
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) }, {})
+          .expect('location', '/')
+          .expect(302);
+
+        const newSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+        expect(newSessionCookie.value).to.not.be.empty();
+        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+
+        // Tokens from old cookie are invalidated.
+        const rejectedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .expect(400);
+        expect(rejectedResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+
+        // Only tokens from new session are valid.
+        const acceptedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', newSessionCookie.cookieString())
+          .expect(200);
+        expect(acceptedResponse.body).to.have.property('username', existingUsername);
+      });
+
+      it('should create a new session and redirect to the `overwritten_session` if login is for another user', async () => {
+        const newUsername = 'c@d.e';
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) }, {})
+          .expect('location', '/overwritten_session')
+          .expect(302);
+
+        const newSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+        expect(newSessionCookie.value).to.not.be.empty();
+        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+
+        // Tokens from old cookie are invalidated.
+        const rejectedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .expect(400);
+        expect(rejectedResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+
+        // Only tokens from new session are valid.
+        const acceptedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', newSessionCookie.cookieString())
+          .expect(200);
+        expect(acceptedResponse.body).to.have.property('username', newUsername);
       });
     });
   });

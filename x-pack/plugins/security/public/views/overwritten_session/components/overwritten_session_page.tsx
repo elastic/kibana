@@ -8,12 +8,8 @@ import { EuiButton, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
-export interface Props {
+interface Props {
   addBasePath: (path: string) => string;
-  user: User;
-}
-
-interface User {
   username: string;
 }
 
@@ -31,7 +27,7 @@ export class OverwrittenSessionPage extends Component<Props, {}> {
               <h1>
                 <FormattedMessage
                   id="xpack.security.overwrittenSession.title"
-                  defaultMessage="You had an active session previously, but logged in as a different user."
+                  defaultMessage="You previously logged in as a different user."
                 />
               </h1>
             </EuiTitle>
@@ -43,7 +39,7 @@ export class OverwrittenSessionPage extends Component<Props, {}> {
             <FormattedMessage
               id="xpack.security.overwrittenSession.continueAsUserText"
               defaultMessage="Continue as {username}"
-              values={{ username: this.props.user.username }}
+              values={{ username: this.props.username }}
             />
           </EuiButton>
         </div>

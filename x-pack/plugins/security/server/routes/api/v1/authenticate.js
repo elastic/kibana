@@ -66,7 +66,7 @@ export function initAuthenticateApi(server) {
 
         return Boom.unauthorized(authenticationResult.error);
       } catch (err) {
-        throw wrapError(err);
+        return wrapError(err);
       }
     }
   });

@@ -5,15 +5,14 @@
  */
 
 import { Request, ResponseToolkit } from 'hapi';
+import { Legacy } from 'kibana';
 
-export function initOverwrittenSessionView(server: any) {
+export function initOverwrittenSessionView(server: Legacy.Server) {
   server.route({
     method: 'GET',
     path: '/overwritten_session',
     handler(request: Request, h: ResponseToolkit) {
-      return (h as any).renderAppWithDefaultConfig(
-        server.getHiddenUiAppById('overwritten_session')
-      );
+      return h.renderAppWithDefaultConfig(server.getHiddenUiAppById('overwritten_session'));
     },
   });
 }

@@ -14,9 +14,24 @@ interface UserRealm {
 }
 
 export interface User {
+  /**
+   * User principal name.
+   */
   username: string;
+
+  /**
+   * List of the roles assigned to the user.
+   */
   roles: string[];
+
+  /**
+   * The name and type of the Realm that has authenticated the user.
+   */
   authentication_realm: UserRealm;
+
+  /**
+   * The name and type of the Realm where the user information were retrieved from.
+   */
   lookup_realm: UserRealm;
 }
 

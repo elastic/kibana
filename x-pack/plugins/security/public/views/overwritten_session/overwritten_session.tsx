@@ -17,10 +17,10 @@ chrome
   .setRootTemplate('<div id="reactOverwrittenSessionRoot" />')
   .setRootController('overwritten_session', ($scope: any, ShieldUser: any) => {
     $scope.$$postDigest(() => {
-      ShieldUser.getCurrent().$promise.then((user: any) => {
+      ShieldUser.getCurrent().$promise.then((user: { username: string }) => {
         render(
           <I18nContext>
-            <OverwrittenSessionPage addBasePath={chrome.addBasePath} user={user} />
+            <OverwrittenSessionPage addBasePath={chrome.addBasePath} username={user.username} />
           </I18nContext>,
           document.getElementById('reactOverwrittenSessionRoot')
         );

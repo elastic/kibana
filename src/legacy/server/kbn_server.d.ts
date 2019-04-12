@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { ResponseObject, Server } from 'hapi';
 
 import {
   ElasticsearchServiceSetup,
@@ -36,6 +36,10 @@ export interface KibanaConfig {
   has(key: string): boolean;
 }
 
+export interface UiApp {
+  getId(): string;
+}
+
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
   interface PluginProperties {
@@ -51,12 +55,17 @@ declare module 'hapi' {
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getHiddenUiAppById(appId: string): UiApp;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+  }
+
+  interface ResponseToolkit {
+    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
 }
 
