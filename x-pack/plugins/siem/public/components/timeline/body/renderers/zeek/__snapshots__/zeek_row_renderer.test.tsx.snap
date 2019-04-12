@@ -386,7 +386,9 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
             "event": Object {
               "action": "Action",
               "category": "Access",
-              "id": "1",
+              "id": Array [
+                "1",
+              ],
               "module": "nginx",
               "severity": 3,
             },

@@ -22,8 +22,12 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
             "host": Object {
               "name": "elrond.elstc.co",
               "os": Object {
-                "name": "Ubuntu",
-                "version": "18.04.1 LTS (Bionic Beaver)",
+                "name": Array [
+                  "Ubuntu",
+                ],
+                "version": Array [
+                  "18.04.1 LTS (Bionic Beaver)",
+                ],
               },
             },
           },
@@ -37,8 +41,12 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
             "host": Object {
               "name": "siem-kibana",
               "os": Object {
-                "name": "Debian GNU/Linux",
-                "version": "9 (stretch)",
+                "name": Array [
+                  "Debian GNU/Linux",
+                ],
+                "version": Array [
+                  "9 (stretch)",
+                ],
               },
             },
           },

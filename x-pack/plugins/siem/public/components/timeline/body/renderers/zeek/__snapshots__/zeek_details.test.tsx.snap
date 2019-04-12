@@ -377,10 +377,14 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
       },
       "event": Object {
         "category": "Attempted Administrator Privilege Gain",
-        "id": "4",
+        "id": Array [
+          "4",
+        ],
         "module": "suricata",
         "severity": 1,
-        "type": "Alert",
+        "type": Array [
+          "Alert",
+        ],
       },
       "geo": Object {
         "country_iso_code": "xx",

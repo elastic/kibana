@@ -26,11 +26,11 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
       },
       host: {
         os: {
-          kernel: '4.14.50-v7+',
-          name: 'Raspbian GNU/Linux',
-          family: '',
-          version: '9 (stretch)',
-          platform: 'raspbian',
+          kernel: ['4.14.50-v7+'],
+          name: ['Raspbian GNU/Linux'],
+          family: [''],
+          version: ['9 (stretch)'],
+          platform: ['raspbian'],
         },
         name: 'raspberrypi',
         id: 'b19a781f683541a7a25ee345133aa399',
@@ -56,11 +56,11 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
       },
       host: {
         os: {
-          kernel: '4.14.50-v7+',
-          name: 'Raspbian GNU/Linux',
-          family: '',
-          version: '9 (stretch)',
-          platform: 'raspbian',
+          kernel: ['4.14.50-v7+'],
+          name: ['Raspbian GNU/Linux'],
+          family: [''],
+          version: ['9 (stretch)'],
+          platform: ['raspbian'],
         },
         name: 'raspberrypi',
         id: 'b19a781f683541a7a25ee345133aa399',

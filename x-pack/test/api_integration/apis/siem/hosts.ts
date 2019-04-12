@@ -80,7 +80,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.be(HOST_NAME);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
         });
     });
 
@@ -92,10 +92,10 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         mac: [],
         name: 'zeek-sensor-san-francisco',
         os: {
-          family: 'debian',
-          name: HOST_NAME,
-          platform: 'ubuntu',
-          version: '18.04.2 LTS (Bionic Beaver)',
+          family: ['debian'],
+          name: [HOST_NAME],
+          platform: ['ubuntu'],
+          version: ['18.04.2 LTS (Bionic Beaver)'],
           __typename: 'OsEcsFields',
         },
         type: null,

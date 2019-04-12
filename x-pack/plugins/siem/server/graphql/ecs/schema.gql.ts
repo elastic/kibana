@@ -13,21 +13,21 @@ export const ecsSchema = gql`
     action: String
     category: String
     created: Date
-    dataset: String
-    duration: Float
-    end: Date
-    hash: String
-    id: String
-    kind: String
+    dataset: ToStringArray
+    duration: ToStringArray
+    end: ToStringArray
+    hash: ToStringArray
+    id: ToStringArray
+    kind: ToStringArray
     module: String
-    original: [String]
+    original: ToStringArray
     outcome: ToStringArray
-    risk_score: Float
-    risk_score_norm: Float
+    risk_score: ToStringArray
+    risk_score_norm: ToStringArray
     severity: Float
-    start: Date
-    timezone: String
-    type: String
+    start: ToStringArray
+    timezone: ToStringArray
+    type: ToStringArray
   }
 
   type Location {
@@ -74,12 +74,12 @@ export const ecsSchema = gql`
   }
 
   type OsEcsFields {
-    platform: String
-    name: String
-    full: String
-    family: String
-    version: String
-    kernel: String
+    platform: ToStringArray
+    name: ToStringArray
+    full: ToStringArray
+    family: ToStringArray
+    version: ToStringArray
+    kernel: ToStringArray
   }
 
   type HostEcsFields {

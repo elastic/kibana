@@ -277,17 +277,17 @@ export interface HostEcsFields {
 }
 
 export interface OsEcsFields {
-  platform?: string | null;
+  platform?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full?: string | null;
+  full?: ToStringArray | null;
 
-  family?: string | null;
+  family?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 
-  kernel?: string | null;
+  kernel?: ToStringArray | null;
 }
 
 export interface CursorType {
@@ -427,35 +427,35 @@ export interface EventEcsFields {
 
   created?: Date | null;
 
-  dataset?: string | null;
+  dataset?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToStringArray | null;
 
-  end?: Date | null;
+  end?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
-  kind?: string | null;
+  kind?: ToStringArray | null;
 
   module?: string | null;
 
-  original?: (string | null)[] | null;
+  original?: ToStringArray | null;
 
   outcome?: ToStringArray | null;
 
-  risk_score?: number | null;
+  risk_score?: ToStringArray | null;
 
-  risk_score_norm?: number | null;
+  risk_score_norm?: ToStringArray | null;
 
   severity?: number | null;
 
-  start?: Date | null;
+  start?: ToStringArray | null;
 
-  timezone?: string | null;
+  timezone?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface NetworkEcsField {
@@ -2148,46 +2148,46 @@ export namespace HostEcsFieldsResolvers {
 
 export namespace OsEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OsEcsFields> {
-    platform?: PlatformResolver<string | null, TypeParent, Context>;
+    platform?: PlatformResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    full?: FullResolver<string | null, TypeParent, Context>;
+    full?: FullResolver<ToStringArray | null, TypeParent, Context>;
 
-    family?: FamilyResolver<string | null, TypeParent, Context>;
+    family?: FamilyResolver<ToStringArray | null, TypeParent, Context>;
 
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
 
-    kernel?: KernelResolver<string | null, TypeParent, Context>;
+    kernel?: KernelResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PlatformResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FullResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FamilyResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type KernelResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2634,35 +2634,35 @@ export namespace EventEcsFieldsResolvers {
 
     created?: CreatedResolver<Date | null, TypeParent, Context>;
 
-    dataset?: DatasetResolver<string | null, TypeParent, Context>;
+    dataset?: DatasetResolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<number | null, TypeParent, Context>;
+    duration?: DurationResolver<ToStringArray | null, TypeParent, Context>;
 
-    end?: EndResolver<Date | null, TypeParent, Context>;
+    end?: EndResolver<ToStringArray | null, TypeParent, Context>;
 
-    hash?: HashResolver<string | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
 
-    id?: IdResolver<string | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
-    kind?: KindResolver<string | null, TypeParent, Context>;
+    kind?: KindResolver<ToStringArray | null, TypeParent, Context>;
 
     module?: ModuleResolver<string | null, TypeParent, Context>;
 
-    original?: OriginalResolver<(string | null)[] | null, TypeParent, Context>;
+    original?: OriginalResolver<ToStringArray | null, TypeParent, Context>;
 
     outcome?: OutcomeResolver<ToStringArray | null, TypeParent, Context>;
 
-    risk_score?: RiskScoreResolver<number | null, TypeParent, Context>;
+    risk_score?: RiskScoreResolver<ToStringArray | null, TypeParent, Context>;
 
-    risk_score_norm?: RiskScoreNormResolver<number | null, TypeParent, Context>;
+    risk_score_norm?: RiskScoreNormResolver<ToStringArray | null, TypeParent, Context>;
 
     severity?: SeverityResolver<number | null, TypeParent, Context>;
 
-    start?: StartResolver<Date | null, TypeParent, Context>;
+    start?: StartResolver<ToStringArray | null, TypeParent, Context>;
 
-    timezone?: TimezoneResolver<string | null, TypeParent, Context>;
+    timezone?: TimezoneResolver<ToStringArray | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ActionResolver<
@@ -2681,32 +2681,32 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DatasetResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DurationResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EndResolver<
-    R = Date | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HashResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type KindResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2716,7 +2716,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OriginalResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2726,12 +2726,12 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RiskScoreResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RiskScoreNormResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2741,17 +2741,17 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StartResolver<
-    R = Date | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TimezoneResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

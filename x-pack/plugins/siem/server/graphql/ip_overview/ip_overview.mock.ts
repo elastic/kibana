@@ -30,11 +30,11 @@ export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
       },
       host: {
         os: {
-          name: 'Raspbian GNU/Linux',
-          family: '',
-          kernel: '4.14.50-v7+',
-          version: '9 (stretch)',
-          platform: 'raspbian',
+          name: ['Raspbian GNU/Linux'],
+          family: [''],
+          kernel: ['4.14.50-v7+'],
+          version: ['9 (stretch)'],
+          platform: ['raspbian'],
         },
         name: 'raspberrypi',
         id: 'b19a781f683541a7a25ee345133aa399',
@@ -62,11 +62,11 @@ export const mockIpOverviewData: { IpOverview: IpOverviewData } = {
       },
       host: {
         os: {
-          name: 'Raspbian GNU/Linux',
-          family: '',
-          kernel: '4.14.50-v7+',
-          version: '9 (stretch)',
-          platform: 'raspbian',
+          name: ['Raspbian GNU/Linux'],
+          family: [''],
+          kernel: ['4.14.50-v7+'],
+          version: ['9 (stretch)'],
+          platform: ['raspbian'],
         },
         ip: ['Hello World', 'Hello World'],
         mac: ['Hello World', 'Hello World'],

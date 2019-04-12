@@ -12,7 +12,9 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
       "event": Object {
         "action": null,
         "category": null,
-        "dataset": "zeek.connection",
+        "dataset": Array [
+          "zeek.connection",
+        ],
         "id": null,
         "module": "zeek",
         "severity": null,

@@ -21,12 +21,16 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "action": "user_login",
               "category": null,
               "created": null,
-              "dataset": "login",
+              "dataset": Array [
+                "login",
+              ],
               "duration": null,
               "end": null,
               "hash": null,
               "id": null,
-              "kind": "event",
+              "kind": Array [
+                "event",
+              ],
               "module": "system",
               "original": null,
               "outcome": Array [
@@ -108,12 +112,16 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
               "action": "process_started",
               "category": null,
               "created": null,
-              "dataset": "login",
+              "dataset": Array [
+                "login",
+              ],
               "duration": null,
               "end": null,
               "hash": null,
               "id": null,
-              "kind": "event",
+              "kind": Array [
+                "event",
+              ],
               "module": "system",
               "original": null,
               "outcome": Array [

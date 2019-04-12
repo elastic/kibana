@@ -154,7 +154,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     eventDuration={
       Array [
-        1000000,
+        "1000000",
       ]
     }
     eventEnd={

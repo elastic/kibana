@@ -874,10 +874,18 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
           ],
           "name": "siem-kibana",
           "os": Object {
-            "family": "debian",
-            "name": "Debian GNU/Linux",
-            "platform": "debian",
-            "version": "9 (stretch)",
+            "family": Array [
+              "debian",
+            ],
+            "name": Array [
+              "Debian GNU/Linux",
+            ],
+            "platform": Array [
+              "debian",
+            ],
+            "version": Array [
+              "9 (stretch)",
+            ],
           },
           "type": "projects/189716325846/machineTypes/n1-standard-1",
         },

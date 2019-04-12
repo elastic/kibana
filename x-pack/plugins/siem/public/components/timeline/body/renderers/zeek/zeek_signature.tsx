@@ -174,7 +174,7 @@ export const constructDroppedValue = (dropped: boolean | null | undefined): stri
 export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
-  const dataSet: string | null | undefined = get('event.dataset', data); // TODO: Array: event.dataset[0]
+  const dataSet: string | null | undefined = get('event.dataset[0]', data); // TODO: Array: event.dataset[0]
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
   const cipher: string | null | undefined = get('zeek.ssl.cipher[0]', data);
   const state: string | null | undefined = get('zeek.connection.state[0]', data);

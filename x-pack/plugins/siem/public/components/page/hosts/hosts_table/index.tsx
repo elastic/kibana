@@ -208,7 +208,7 @@ const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostOsName: string | null | undefined = get('host.os.name', node);
+      const hostOsName: string | null | undefined = get('host.os.name[0]', node);
       if (hostOsName != null) {
         return (
           <AddToKql

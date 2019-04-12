@@ -248,17 +248,17 @@ export interface HostEcsFields {
 }
 
 export interface OsEcsFields {
-  platform?: string | null;
+  platform?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full?: string | null;
+  full?: ToStringArray | null;
 
-  family?: string | null;
+  family?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 
-  kernel?: string | null;
+  kernel?: ToStringArray | null;
 }
 
 export interface CursorType {
@@ -398,35 +398,35 @@ export interface EventEcsFields {
 
   created?: Date | null;
 
-  dataset?: string | null;
+  dataset?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToStringArray | null;
 
-  end?: Date | null;
+  end?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
-  kind?: string | null;
+  kind?: ToStringArray | null;
 
   module?: string | null;
 
-  original?: (string | null)[] | null;
+  original?: ToStringArray | null;
 
   outcome?: ToStringArray | null;
 
-  risk_score?: number | null;
+  risk_score?: ToStringArray | null;
 
-  risk_score_norm?: number | null;
+  risk_score_norm?: ToStringArray | null;
 
   severity?: number | null;
 
-  start?: Date | null;
+  start?: ToStringArray | null;
 
-  timezone?: string | null;
+  timezone?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface NetworkEcsField {
@@ -1456,7 +1456,7 @@ export namespace GetEventsQuery {
 
     category?: string | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
   };
 
   export type Host = {
@@ -1574,13 +1574,13 @@ export namespace GetHostDetailsQuery {
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 
@@ -1674,9 +1674,9 @@ export namespace GetHostsTableQuery {
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -1800,13 +1800,13 @@ export namespace GetIpOverviewQuery {
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Destination = {
@@ -1880,13 +1880,13 @@ export namespace GetIpOverviewQuery {
   export type _Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 
@@ -2546,35 +2546,35 @@ export namespace GetTimelineQuery {
 
     created?: Date | null;
 
-    dataset?: string | null;
+    dataset?: ToStringArray | null;
 
-    duration?: number | null;
+    duration?: ToStringArray | null;
 
-    end?: Date | null;
+    end?: ToStringArray | null;
 
-    hash?: string | null;
+    hash?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    kind?: string | null;
+    kind?: ToStringArray | null;
 
     module?: string | null;
 
-    original?: (string | null)[] | null;
+    original?: ToStringArray | null;
 
     outcome?: ToStringArray | null;
 
-    risk_score?: number | null;
+    risk_score?: ToStringArray | null;
 
-    risk_score_norm?: number | null;
+    risk_score_norm?: ToStringArray | null;
 
     severity?: number | null;
 
-    start?: Date | null;
+    start?: ToStringArray | null;
 
-    timezone?: string | null;
+    timezone?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Auditd = {
