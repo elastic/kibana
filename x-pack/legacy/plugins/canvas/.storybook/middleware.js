@@ -9,5 +9,5 @@ const path = require('path');
 
 // Extend the Storybook Middleware to include a route to access ui assets
 module.exports = function (router) {
-  router.get('/ui', serve(path.resolve(__dirname, '../../../../src/legacy/ui/public/assets')));
+  router.get('/ui', serve(path.resolve(__dirname, '../../../../../src/legacy/ui/public/assets')));
 }

@@ -11,7 +11,7 @@ import { FollowerIndexAdd } from '../../public/app/sections/follower_index_add';
 import { AutoFollowPatternAdd } from '../../public/app/sections/auto_follow_pattern_add';
 import { RemoteClustersFormField } from '../../public/app/components';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 import routing from '../../public/app/services/routing';
 
 jest.mock('ui/chrome', () => ({
@@ -21,9 +21,9 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
   const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
-    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
+    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 

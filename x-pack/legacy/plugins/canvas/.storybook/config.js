@@ -12,7 +12,7 @@ import { create } from '@storybook/theming';
 // Import dependent CSS
 require('@elastic/eui/dist/eui_theme_light.css');
 require('@kbn/ui-framework/dist/kui_light.css');
-require('../../../../src/legacy/ui/public/styles/bootstrap_light.less');
+require('../../../../../src/legacy/ui/public/styles/bootstrap_light.less');
 
 // If we're running Storyshots, be sure to register the require context hook.
 // Otherwise, add the other decorators.
@@ -45,7 +45,7 @@ function loadStories() {
 
   // Include the legacy styles
   const uiStyles = require.context(
-    '../../../../src/legacy/ui/public/styles',
+    '../../../../../src/legacy/ui/public/styles',
     false,
     /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
   );

@@ -68,7 +68,7 @@ module.exports = async ({ config, _mode }) => {
   config.resolve.extensions.push('.ts', '.tsx');
 
   // Alias the any imports from ui/ to the proper directory.
-  config.resolve.alias.ui = path.resolve(__dirname, './../../../../src/legacy/ui/public');
+  config.resolve.alias.ui = path.resolve(__dirname, './../../../../../src/legacy/ui/public');
 
   return config;
 };

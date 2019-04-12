@@ -6,10 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { FieldFormat } from '../../../../../../../../src/legacy/ui/field_formats/field_format.js';
-import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
-import { createBytesFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes.js';
-import { createNumberFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number.js';
+import { FieldFormat } from '../../../../../../../../../src/legacy/ui/field_formats/field_format.js';
+import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
+import { createBytesFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes.js';
+import { createNumberFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number.js';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 

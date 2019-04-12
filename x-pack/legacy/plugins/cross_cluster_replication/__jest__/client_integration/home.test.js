@@ -18,7 +18,7 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+    require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
