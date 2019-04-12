@@ -22,6 +22,7 @@ import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
 import 'ui/filter_bar';
 import uiRoutes from 'ui/routes';
+import 'ui/capabilities/route_setup';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
@@ -30,7 +31,8 @@ import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs'
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapability: 'visualize.show',
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,

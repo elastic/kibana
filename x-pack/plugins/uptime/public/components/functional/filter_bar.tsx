@@ -10,21 +10,31 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { filterBarQuery } from '../../queries';
+import { FilterBarLoading } from './filter_bar_loading';
 import { filterBarSearchSchema } from './search_schema';
+
+interface FilterBarQueryResult {
+  filterBar?: FilterBarType;
+}
 
 interface FilterBarProps {
   currentQuery?: object;
-  filterBar: FilterBarType;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
+type Props = FilterBarProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
+
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({
-  currentQuery,
-  filterBar: { names, ports, ids, schemes },
-  updateQuery,
-}: FilterBarProps) => {
+export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
+  if (!data || !data.filterBar) {
+    return <FilterBarLoading />;
+  }
+  const {
+    filterBar: { ids, names, ports, schemes },
+  } = data;
   // TODO: add a factory function + type for these filter options
   const filters = [
     {
@@ -125,3 +135,8 @@ export const FilterBar = ({
     />
   );
 };
+
+export const FilterBar = withUptimeGraphQL<FilterBarQueryResult, FilterBarProps>(
+  FilterBarComponent,
+  filterBarQuery
+);

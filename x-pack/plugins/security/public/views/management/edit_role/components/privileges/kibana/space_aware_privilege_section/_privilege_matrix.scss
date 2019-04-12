@@ -1,0 +1,14 @@
+/**
+ * 1. Allow table to scroll both directions
+ */
+
+.secPrivilegeMatrix__modal,
+.secPrivilegeMatrix__modal .euiModal__flex {
+  overflow: hidden; /* 1 */
+}
+
+.secPrivilegeMatrix__row--isBasePrivilege,
+.secPrivilegeMatrix__cell--isGlobalPrivilege,
+.secPrivilegeTable__row--isGlobalSpace, {
+  background-color: $euiColorLightestShade;
+}
