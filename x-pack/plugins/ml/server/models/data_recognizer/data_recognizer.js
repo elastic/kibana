@@ -267,15 +267,12 @@ export class DataRecognizer {
 
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
-    const manifestFile = await this.getManifestFile(moduleId);
 
-    if (indexPatternName === undefined &&
-      manifestFile && manifestFile.json &&
-      manifestFile.json.defaultIndexPattern === undefined) {
+    if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
 
       throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
-    this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
+    this.indexPatternName = (indexPatternName === undefined) ? moduleConfig.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
 
     // create an empty results object
@@ -573,6 +570,12 @@ export class DataRecognizer {
   // listing each job/datafeed/savedObject with a save success boolean
   createResultsTemplate(moduleConfig) {
     const results = {};
+    const reducedConfig = {
+      jobs: moduleConfig.jobs,
+      datafeeds: moduleConfig.datafeeds,
+      kibana: moduleConfig.kibana,
+    };
+
     function createResultsItems(configItems, resultItems, index) {
       resultItems[index] = [];
       configItems.forEach((j) => {
@@ -583,13 +586,13 @@ export class DataRecognizer {
       });
     }
 
-    Object.keys(moduleConfig).forEach((i) => {
-      if (Array.isArray(moduleConfig[i])) {
-        createResultsItems(moduleConfig[i], results, i);
+    Object.keys(reducedConfig).forEach((i) => {
+      if (Array.isArray(reducedConfig[i])) {
+        createResultsItems(reducedConfig[i], results, i);
       } else {
         results[i] = {};
-        Object.keys(moduleConfig[i]).forEach((k) => {
-          createResultsItems(moduleConfig[i][k], results[i], k);
+        Object.keys(reducedConfig[i]).forEach((k) => {
+          createResultsItems(reducedConfig[i][k], results[i], k);
         });
       }
     });

@@ -15,5 +15,6 @@ import {
 } from './eui_styled_components';
 
 export { css, euiStyled, EuiTheme, EuiThemeProvider, injectGlobal, keyframes, withTheme };
-// tslint:disable-next-line:no-default-export to mimick the styled-components module
+// In order to to mimic the styled-components module we need to ignore the following
+// eslint-disable-next-line import/no-default-export
 export default euiStyled;

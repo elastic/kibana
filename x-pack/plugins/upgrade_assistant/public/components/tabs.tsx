@@ -26,13 +26,19 @@ import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
 import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
 
+enum ClusterUpgradeState {
+  needsUpgrade,
+  partiallyUpgraded,
+  upgraded,
+}
+
 interface TabsState {
   loadingState: LoadingState;
   loadingError?: Error;
   checkupData?: UpgradeAssistantStatus;
   selectedTabIndex: number;
   telemetryState: TelemetryState;
-  upgradeableCluster: boolean;
+  clusterUpgradeState: ClusterUpgradeState;
 }
 
 export class UpgradeAssistantTabsUI extends React.Component<
@@ -44,7 +50,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
 
     this.state = {
       loadingState: LoadingState.Loading,
-      upgradeableCluster: true,
+      clusterUpgradeState: ClusterUpgradeState.needsUpgrade,
       selectedTabIndex: 0,
       telemetryState: TelemetryState.Complete,
     };
@@ -58,10 +64,10 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   public render() {
-    const { selectedTabIndex, telemetryState, upgradeableCluster } = this.state;
+    const { selectedTabIndex, telemetryState, clusterUpgradeState } = this.state;
     const tabs = this.tabs;
 
-    if (!upgradeableCluster) {
+    if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
       return (
         <EuiPageContent>
           <EuiPageContentBody>
@@ -80,7 +86,33 @@ export class UpgradeAssistantTabsUI extends React.Component<
                   <FormattedMessage
                     id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
                     defaultMessage="One or more Elasticsearch nodes have a newer version of
-                      Elasticsearch than Kibana. Once all your nodes are upgraded, install the latest version of Kibana."
+                      Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
+                  />
+                </p>
+              }
+            />
+          </EuiPageContentBody>
+        </EuiPageContent>
+      );
+    } else if (clusterUpgradeState === ClusterUpgradeState.upgraded) {
+      return (
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <EuiEmptyPrompt
+              iconType="logoElasticsearch"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle"
+                    defaultMessage="Your cluster has been upgraded"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteDescription"
+                    defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
                   />
                 </p>
               }
@@ -134,7 +166,9 @@ export class UpgradeAssistantTabsUI extends React.Component<
       if (get(e, 'response.status') === 426) {
         this.setState({
           loadingState: LoadingState.Success,
-          upgradeableCluster: false,
+          clusterUpgradeState: get(e, 'response.data.attributes.allNodesUpgraded', false)
+            ? ClusterUpgradeState.upgraded
+            : ClusterUpgradeState.partiallyUpgraded,
         });
       } else {
         this.setState({ loadingState: LoadingState.Error, loadingError: e });
