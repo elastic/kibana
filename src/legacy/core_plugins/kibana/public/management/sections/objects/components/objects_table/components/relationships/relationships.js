@@ -139,11 +139,11 @@ class RelationshipsUI extends Component {
         field: 'relationship',
         name: intl.formatMessage({
           id: 'kbn.management.objects.objectsTable.relationships.columnRelationshipName',
-          defaultMessage: 'Relationship',
+          defaultMessage: 'Direct relationship',
         }),
         dataType: 'string',
         sortable: false,
-        width: '100px',
+        width: '125px',
         render: relationship => {
           if (relationship === 'parent') {
             return (
@@ -225,7 +225,7 @@ class RelationshipsUI extends Component {
           field: 'relationship',
           name: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
-            defaultMessage: 'Relationship',
+            defaultMessage: 'Direct relationship',
           }),
           multiSelect: 'or',
           options: [
