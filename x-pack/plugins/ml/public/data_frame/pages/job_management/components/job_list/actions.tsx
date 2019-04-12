@@ -4,12 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, SFC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EUI_MODAL_CONFIRM_BUTTON,
+} from '@elastic/eui';
 
 import { DataFrameJobListRow } from './common';
 import { deleteJobFactory, startJobFactory, stopJobFactory } from './job_service';
+
+interface DeleteActionProps {
+  disabled: boolean;
+  item: DataFrameJobListRow;
+  deleteJob(d: DataFrameJobListRow): void;
+}
+
+const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => {
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const closeModal = () => setModalVisible(false);
+  const deleteAndCloseModal = () => {
+    setModalVisible(false);
+    deleteJob(item);
+  };
+  const openModal = () => setModalVisible(true);
+
+  return (
+    <Fragment>
+      <EuiButtonEmpty color="danger" disabled={disabled} iconType="trash" onClick={openModal}>
+        {i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
+          defaultMessage: 'Delete',
+        })}
+      </EuiButtonEmpty>
+      {isModalVisible && (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={i18n.translate('xpack.ml.dataframe.jobsList.deleteModalTitle', {
+              defaultMessage: 'Delete {jobId}',
+              values: { jobId: item.config.id },
+            })}
+            onCancel={closeModal}
+            onConfirm={deleteAndCloseModal}
+            cancelButtonText={i18n.translate(
+              'xpack.ml.dataframe.jobsList.deleteModalCancelButton',
+              {
+                defaultMessage: 'Cancel',
+              }
+            )}
+            confirmButtonText={i18n.translate(
+              'xpack.ml.dataframe.jobsList.deleteModalDeleteButton',
+              {
+                defaultMessage: 'Delete',
+              }
+            )}
+            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+            buttonColor="danger"
+          >
+            <p>
+              {i18n.translate('xpack.ml.dataframe.jobsList.deleteModalBody', {
+                defaultMessage: 'Are you sure you want to delete this job?',
+              })}
+            </p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      )}
+    </Fragment>
+  );
+};
 
 export const getActions = (getJobs: () => void) => {
   const deleteJob = deleteJobFactory(getJobs);
@@ -42,16 +106,11 @@ export const getActions = (getJobs: () => void) => {
     {
       render: (item: DataFrameJobListRow) => {
         return (
-          <EuiButtonEmpty
-            color="danger"
+          <DeleteAction
+            deleteJob={deleteJob}
             disabled={item.state.transform_state === 'started'}
-            iconType="trash"
-            onClick={() => deleteJob(item)}
-          >
-            {i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiButtonEmpty>
+            item={item}
+          />
         );
       },
     },
