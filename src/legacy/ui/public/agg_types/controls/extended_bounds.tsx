@@ -99,7 +99,7 @@ function ExtendedBoundsParamEditor({
     });
   }
 
-  useEffect(() => setValidity(!isInvalid));
+  useEffect(() => setValidity(!isInvalid), [value]);
 
   return (
     <EuiFormRow
