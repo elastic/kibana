@@ -7,7 +7,7 @@
 import Boom from 'boom';
 
 import { Server } from 'hapi';
-import { isValidGitUrl } from '../../common/git_url_utils';
+import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig, RepositoryUri } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
@@ -37,14 +37,16 @@ export function repositoryRoute(
       const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
-      if (
-        !isValidGitUrl(
+      try {
+        validateGitUrl(
           repoUrl,
           options.security.gitHostWhitelist,
           options.security.gitProtocolWhitelist
-        )
-      ) {
-        return Boom.badRequest('Invalid git url.');
+        );
+      } catch (error) {
+        log.error(`Validate git url ${repoUrl} error.`);
+        log.error(error);
+        return Boom.badRequest(error);
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
