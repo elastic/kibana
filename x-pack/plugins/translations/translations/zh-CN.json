@@ -1592,8 +1592,6 @@
     "kbn.management.objects.objectsTable.relationships.columnTitleName": "标题",
     "kbn.management.objects.objectsTable.relationships.renderErrorMessage": "错误",
     "kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage": "无法解析查询",
-    "kbn.management.objects.objectsTable.table.columnActions.viewInAppActionDescription": "在 Kibana 内查看此已保存对象",
-    "kbn.management.objects.objectsTable.table.columnActions.viewInAppActionName": "应用内",
     "kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription": "查看此已保存对象与其他已保存对象的关系",
     "kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName": "关系",
     "kbn.management.objects.objectsTable.table.columnActionsName": "操作",
