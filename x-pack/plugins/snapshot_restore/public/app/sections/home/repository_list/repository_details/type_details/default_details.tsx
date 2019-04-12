@@ -6,10 +6,9 @@
 
 import React, { Fragment } from 'react';
 
+import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-
-import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import 'brace/theme/textmate';
 

@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
@@ -16,16 +17,12 @@ import { loadSnapshots } from '../../../services/http';
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-
 interface MatchParams {
   repositoryName?: string;
   snapshotId?: string;
 }
 
-interface Props extends RouteComponentProps<MatchParams> {}
-
-export const SnapshotList: React.FunctionComponent<Props> = ({
+export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { repositoryName, snapshotId },
   },

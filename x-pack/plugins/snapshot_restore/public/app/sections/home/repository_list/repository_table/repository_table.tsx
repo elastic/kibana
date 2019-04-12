@@ -64,7 +64,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
         if (type === REPOSITORY_TYPES.source) {
-          return textService.getRepositoryTypeName(type, repository.settings.delegate_type);
+          return textService.getRepositoryTypeName(type, repository.settings.delegateType);
         }
         return textService.getRepositoryTypeName(type);
       },

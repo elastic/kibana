@@ -12,7 +12,7 @@ import {
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
 
-import { booleanizeSettings } from '../../lib';
+import { deserializeRepositorySettings, serializeRepositorySettings } from '../../lib';
 
 export function registerRepositoriesRoutes(router: Router) {
   router.get('repository_types', getTypesHandler);
@@ -35,9 +35,11 @@ export const getAllHandler: RouterRouteHandler = async (
   });
   const repositoryNames = Object.keys(repositoriesByName);
   const repositories: Repository[] = repositoryNames.map(name => {
+    const { type = '', settings = {} } = repositoriesByName[name];
     return {
       name,
-      ...booleanizeSettings(repositoriesByName[name]),
+      type,
+      settings: deserializeRepositorySettings(settings),
     };
   });
   const repositoryVerification = await Promise.all(
@@ -83,10 +85,12 @@ export const getOneHandler: RouterRouteHandler = async (
   }));
 
   if (repositoryByName[name]) {
+    const { type = '', settings = {} } = repositoryByName[name];
     return {
       repository: {
         name,
-        ...booleanizeSettings(repositoryByName[name]),
+        type,
+        settings: deserializeRepositorySettings(settings),
       },
       verification: verificationResults.error
         ? verificationResults
@@ -118,7 +122,7 @@ export const getTypesHandler: RouterRouteHandler = async (req, callWithRequest) 
 };
 
 export const createHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { name, ...rest } = req.payload as Repository;
+  const { name = '', type = '', settings = {} } = req.payload as Repository;
   const conflictError = wrapCustomError(
     new Error('There is already a repository with that name.'),
     409
@@ -140,14 +144,17 @@ export const createHandler: RouterRouteHandler = async (req, callWithRequest) =>
   // Otherwise create new repository
   return await callWithRequest('snapshot.createRepository', {
     repository: name,
-    body: rest,
+    body: {
+      type,
+      settings: serializeRepositorySettings(settings),
+    },
     verify: false,
   });
 };
 
 export const updateHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { name } = req.params;
-  const { name: repositoryName, ...rest } = req.payload as Repository;
+  const { type = '', settings = {} } = req.payload as Repository;
 
   // Check that repository with the given name exists
   // If it doesn't exist, 404 will be thrown by ES and will be returned
@@ -156,7 +163,10 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
   // Otherwise update repository
   return await callWithRequest('snapshot.createRepository', {
     repository: name,
-    body: rest,
+    body: {
+      type,
+      settings: serializeRepositorySettings(settings),
+    },
     verify: false,
   });
 };

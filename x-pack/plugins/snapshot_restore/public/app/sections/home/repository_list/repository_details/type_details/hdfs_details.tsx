@@ -6,10 +6,9 @@
 
 import React, { Fragment } from 'react';
 
+import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { HDFSRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: HDFSRepository;
@@ -26,9 +25,9 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     uri,
     path,
-    load_defaults,
+    loadDefaults,
     compress,
-    chunk_size,
+    chunkSize,
     'security.principal': securityPrincipal,
     ...rest
   } = settings;
@@ -54,7 +53,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     },
   ];
 
-  if (load_defaults !== undefined) {
+  if (loadDefaults !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -62,7 +61,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Load defaults"
         />
       ),
-      description: String(load_defaults),
+      description: String(loadDefaults),
     });
   }
 
@@ -78,7 +77,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (chunk_size !== undefined) {
+  if (chunkSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -86,7 +85,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Chunk size"
         />
       ),
-      description: String(chunk_size),
+      description: String(chunkSize),
     });
   }
 

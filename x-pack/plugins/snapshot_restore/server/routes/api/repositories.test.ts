@@ -30,7 +30,18 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
       const expectedResponse = {
-        repositories: [{ name: 'fooRepository' }, { name: 'barRepository' }],
+        repositories: [
+          {
+            name: 'fooRepository',
+            type: '',
+            settings: {},
+          },
+          {
+            name: 'barRepository',
+            type: '',
+            settings: {},
+          },
+        ],
         verification: {
           fooRepository: { valid: true, response: {} },
           barRepository: { valid: true, response: {} },
@@ -69,7 +80,18 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockResolvedValueOnce({})
         .mockRejectedValueOnce(verificationError);
       const expectedResponse = {
-        repositories: [{ name: 'fooRepository' }, { name: 'barRepository' }],
+        repositories: [
+          {
+            name: 'fooRepository',
+            type: '',
+            settings: {},
+          },
+          {
+            name: 'barRepository',
+            type: '',
+            settings: {},
+          },
+        ],
         verification: {
           fooRepository: { valid: true, response: {} },
           barRepository: { valid: false, error: verificationError },
@@ -98,7 +120,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return repository object if returned from ES', async () => {
       const mockEsResponse = {
-        [name]: { abc: 123 },
+        [name]: { type: '', settings: {} },
       };
       const callWithRequest = jest
         .fn()
@@ -130,7 +152,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return failed verification from ES', async () => {
       const mockEsResponse = {
-        [name]: { abc: 123 },
+        [name]: { type: '', settings: {} },
       };
       const verificationError = new Error('failed verification');
       const callWithRequest = jest

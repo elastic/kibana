@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
+import { EuiHealth } from '@elastic/eui';
 import { RepositoryVerification } from '../../../common/types';
 import { useAppDependencies } from '../index';
-
-import { EuiHealth } from '@elastic/eui';
 
 interface Props {
   verificationResults: RepositoryVerification | null;

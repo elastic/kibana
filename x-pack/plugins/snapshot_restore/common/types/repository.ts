@@ -29,9 +29,9 @@ export interface FSRepository {
   settings: {
     location: string;
     compress?: boolean;
-    chunk_size?: string | null;
-    max_restore_bytes_per_sec?: string;
-    max_snapshot_bytes_per_sec?: string;
+    chunkSize?: string | null;
+    maxRestoreBytesPerSec?: string;
+    maxSnapshotBytesPerSec?: string;
     readonly?: boolean;
   };
 }
@@ -50,13 +50,13 @@ export interface S3Repository {
   settings: {
     bucket: string;
     client?: string;
-    base_path?: string;
+    basePath?: string;
     compress?: boolean;
-    chunk_size?: string | null;
-    server_side_encryption?: boolean;
-    buffer_size?: string;
-    canned_acl?: string;
-    storage_class?: string;
+    chunkSize?: string | null;
+    serverSideEncryption?: boolean;
+    bufferSize?: string;
+    cannedAcl?: string;
+    storageClass?: string;
   };
 }
 
@@ -66,9 +66,9 @@ export interface HDFSRepository {
   settings: {
     uri: string;
     path: string;
-    load_defaults?: boolean;
+    loadDefaults?: boolean;
     compress?: boolean;
-    chunk_size?: string | null;
+    chunkSize?: string | null;
     ['security.principal']?: string;
     [key: string]: any; // For conf.* settings
   };
@@ -80,11 +80,11 @@ export interface AzureRepository {
   settings: {
     client?: string;
     container?: string;
-    base_path?: string;
+    basePath?: string;
     compress?: boolean;
-    chunk_size?: string | null;
+    chunkSize?: string | null;
     readonly?: boolean;
-    location_mode?: string;
+    locationMode?: string;
   };
 }
 
@@ -94,9 +94,9 @@ export interface GCSRepository {
   settings: {
     bucket: string;
     client?: string;
-    base_path?: string;
+    basePath?: string;
     compress?: boolean;
-    chunk_size?: string | null;
+    chunkSize?: string | null;
   };
 }
 
@@ -125,7 +125,7 @@ export type SourceRepositorySettings<T> = T extends FSRepositoryType
   : T extends GCSRepositoryType
   ? GCSRepository['settings']
   : any & {
-      delegate_type: T;
+      delegateType: T;
     };
 
 export type Repository<T = null> =

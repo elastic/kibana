@@ -5,9 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { Repository, S3Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
-
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -16,6 +13,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import { Repository, S3Repository } from '../../../../../common/types';
+import { useAppDependencies } from '../../../index';
 
 interface Props {
   repository: S3Repository;
@@ -38,13 +37,13 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     settings: {
       bucket,
       client,
-      base_path,
+      basePath,
       compress,
-      chunk_size,
-      server_side_encryption,
-      buffer_size,
-      canned_acl,
-      storage_class,
+      chunkSize,
+      serverSideEncryption,
+      bufferSize,
+      cannedAcl,
+      storageClass,
     },
   } = repository;
 
@@ -186,11 +185,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryBasePathDescription']}
         >
           <EuiFieldText
-            defaultValue={base_path || ''}
+            defaultValue={basePath || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                base_path: e.target.value,
+                basePath: e.target.value,
               });
             }}
           />
@@ -275,11 +274,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryChunkSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={chunk_size || ''}
+            defaultValue={chunkSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                chunk_size: e.target.value,
+                chunkSize: e.target.value,
               });
             }}
           />
@@ -319,10 +318,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 defaultMessage="Enable server-side encryption"
               />
             }
-            checked={!!server_side_encryption}
+            checked={!!serverSideEncryption}
             onChange={e => {
               updateRepositorySettings({
-                server_side_encryption: e.target.checked,
+                serverSideEncryption: e.target.checked,
               });
             }}
           />
@@ -364,11 +363,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryBufferSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={buffer_size || ''}
+            defaultValue={bufferSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                buffer_size: e.target.value,
+                bufferSize: e.target.value,
               });
             }}
           />
@@ -408,10 +407,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         >
           <EuiSelect
             options={cannedAclOptions}
-            value={canned_acl || cannedAclOptions[0].value}
+            value={cannedAcl || cannedAclOptions[0].value}
             onChange={e => {
               updateRepositorySettings({
-                canned_acl: e.target.value,
+                cannedAcl: e.target.value,
               });
             }}
             fullWidth
@@ -454,10 +453,10 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         >
           <EuiSelect
             options={storageClassOptions}
-            value={storage_class || storageClassOptions[0].value}
+            value={storageClass || storageClassOptions[0].value}
             onChange={e => {
               updateRepositorySettings({
-                storage_class: e.target.value,
+                storageClass: e.target.value,
               });
             }}
             fullWidth

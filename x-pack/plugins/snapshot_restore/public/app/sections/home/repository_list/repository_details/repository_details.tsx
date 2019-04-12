@@ -132,7 +132,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             </EuiTitle>
             <EuiSpacer size="s" />
             {type === REPOSITORY_TYPES.source
-              ? textService.getRepositoryTypeName(type, repository.settings.delegate_type)
+              ? textService.getRepositoryTypeName(type, repository.settings.delegateType)
               : textService.getRepositoryTypeName(type)}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -36,10 +36,10 @@ export const TypeDetails: React.FunctionComponent<Props> = ({ repository }) => {
     case REPOSITORY_TYPES.url:
       return <ReadonlyDetails repository={repository as ReadonlyRepository} />;
     case REPOSITORY_TYPES.source:
-      const { delegate_type } = settings;
+      const { delegateType } = settings;
       const delegatedRepository = {
         ...repository,
-        type: delegate_type,
+        type: delegateType,
       };
       return <TypeDetails repository={delegatedRepository} />;
     case REPOSITORY_TYPES.azure:

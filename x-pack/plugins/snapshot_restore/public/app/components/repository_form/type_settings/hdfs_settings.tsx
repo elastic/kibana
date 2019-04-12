@@ -5,9 +5,6 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { HDFSRepository, Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
-
 import {
   EuiCode,
   EuiCodeEditor,
@@ -18,9 +15,11 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
+import { useAppDependencies } from '../../../index';
 
 interface Props {
-  repository: HDFSRepository;
+  repository: HDFSRepository | SourceRepository<HDFSRepository>;
   updateRepositorySettings: (
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
@@ -38,12 +37,12 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
   const {
     settings: {
-      delegate_type,
+      delegateType,
       uri,
       path,
-      load_defaults,
+      loadDefaults,
       compress,
-      chunk_size,
+      chunkSize,
       'security.principal': securityPrincipal,
       ...rest // For conf.* settings
     },
@@ -173,10 +172,10 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 defaultMessage="Enable load defaults"
               />
             }
-            checked={!(load_defaults === false)}
+            checked={!(loadDefaults === false)}
             onChange={e => {
               updateRepositorySettings({
-                load_defaults: e.target.checked,
+                loadDefaults: e.target.checked,
               });
             }}
           />
@@ -261,11 +260,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['hdfsRepositoryChunkSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={chunk_size || ''}
+            defaultValue={chunkSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                chunk_size: e.target.value,
+                chunkSize: e.target.value,
               });
             }}
           />
@@ -395,12 +394,12 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 setIsConfInvalid(false);
                 updateRepositorySettings(
                   {
-                    delegate_type,
+                    delegateType,
                     uri,
                     path,
-                    load_defaults,
+                    loadDefaults,
                     compress,
-                    chunk_size,
+                    chunkSize,
                     'security.principal': securityPrincipal,
                     ...parsedConf,
                   },

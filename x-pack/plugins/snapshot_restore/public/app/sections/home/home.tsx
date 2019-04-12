@@ -20,9 +20,7 @@ interface MatchParams {
   section: Section;
 }
 
-interface Props extends RouteComponentProps<MatchParams> {}
-
-export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
+export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { section },
   },

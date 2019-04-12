@@ -5,17 +5,6 @@
  */
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { PLUGIN_REPOSITORY_TYPES, REPOSITORY_TYPES } from '../../../../common/constants';
-import { Repository, RepositoryType } from '../../../../common/types';
-
-import { useAppDependencies } from '../../index';
-import { documentationLinksService } from '../../services/documentation';
-import { loadRepositoryTypes } from '../../services/http';
-import { textService } from '../../services/text';
-
-import { SectionError } from '../section_error';
-import { TypeSettings } from './type_settings';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -30,6 +19,16 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { PLUGIN_REPOSITORY_TYPES, REPOSITORY_TYPES } from '../../../../common/constants';
+import { Repository, RepositoryType } from '../../../../common/types';
+
+import { useAppDependencies } from '../../index';
+import { documentationLinksService } from '../../services/documentation';
+import { loadRepositoryTypes } from '../../services/http';
+import { textService } from '../../services/text';
+
+import { SectionError } from '../section_error';
+import { TypeSettings } from './type_settings';
 
 interface Props {
   repository: Repository;
@@ -89,10 +88,10 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   const updateRepository = (updatedFields: Partial<Repository>): void => {
     const newRepository: Repository = { ...repository, ...updatedFields };
     const { type, settings } = newRepository;
-    if (type === REPOSITORY_TYPES.source && !settings.delegate_type) {
-      settings.delegate_type = REPOSITORY_TYPES.fs;
-    } else if (type !== REPOSITORY_TYPES.source && settings.delegate_type) {
-      delete settings.delegate_type;
+    if (type === REPOSITORY_TYPES.source && !settings.delegateType) {
+      settings.delegateType = REPOSITORY_TYPES.fs;
+    } else if (type !== REPOSITORY_TYPES.source && settings.delegateType) {
+      delete settings.delegateType;
     }
     setRepository(newRepository);
   };
@@ -242,8 +241,8 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     if (repository.type !== REPOSITORY_TYPES.source) {
       return null;
     }
-    const typeValue = availableRepositoryTypes.includes(repository.settings.delegate_type)
-      ? repository.settings.delegate_type
+    const typeValue = availableRepositoryTypes.includes(repository.settings.delegateType)
+      ? repository.settings.delegateType
       : REPOSITORY_TYPES.fs;
 
     return (
@@ -295,7 +294,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
               onChange={e => {
                 updateRepository({
                   settings: {
-                    delegate_type: e.target.value,
+                    delegateType: e.target.value,
                   },
                 });
               }}

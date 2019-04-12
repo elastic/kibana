@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { camelCase, snakeCase } from 'lodash';
+
+interface RepositorySettings {
+  [key: string]: any;
+}
+
+const booleanizeValue = (value: any) => {
+  if (value === 'true') {
+    return true;
+  } else if (value === 'false') {
+    return false;
+  }
+  return value;
+};
+
+const flatten = (source: any, path: any[] = []): any => {
+  if (!(source instanceof Object)) {
+    return {
+      [path.join('.')]: source,
+    };
+  }
+
+  return Object.keys(source).reduce((result, key) => {
+    const flattened: any = flatten(source[key], [...path, key]);
+    return {
+      ...result,
+      ...flattened,
+    };
+  }, {});
+};
+
+export const deserializeRepositorySettings = (settings: RepositorySettings): RepositorySettings => {
+  const flattenedSettings: RepositorySettings = flatten(settings);
+  const deserializedSettings: RepositorySettings = {};
+
+  Object.entries(flattenedSettings).forEach(([key, value]) => {
+    // Avoid camel casing keys that are the result of being flattened, such as `security.principal` and `conf.*`
+    if (key.includes('.')) {
+      deserializedSettings[key] = booleanizeValue(value);
+    } else {
+      deserializedSettings[camelCase(key)] = booleanizeValue(value);
+    }
+  });
+
+  return deserializedSettings;
+};
+
+export const serializeRepositorySettings = (settings: RepositorySettings): RepositorySettings => {
+  const serializedSettings: RepositorySettings = {};
+
+  Object.entries(settings).forEach(([key, value]) => {
+    // Avoid snake casing keys that are the result of being flattened, such as `security.principal` and `conf.*`
+    if (key.includes('.')) {
+      serializedSettings[key] = value;
+    } else {
+      serializedSettings[snakeCase(key)] = value;
+    }
+  });
+
+  return serializedSettings;
+};

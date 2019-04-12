@@ -5,11 +5,10 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { Repository } from '../../../common/types';
 import { useAppDependencies } from '../index';
 import { deleteRepositories } from '../services/http';
-
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 interface Props {
   children: (deleteRepository: DeleteRepository) => React.ReactElement;

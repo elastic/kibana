@@ -5,10 +5,9 @@
  */
 
 import React, { Fragment } from 'react';
+import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
-
-import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: GCSRepository;
@@ -28,7 +27,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
     },
   } = useAppDependencies();
   const {
-    settings: { bucket, client, base_path, compress, chunk_size },
+    settings: { bucket, client, basePath, compress, chunkSize },
   } = repository;
 
   return (
@@ -151,11 +150,11 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['gcsRepositoryBasePathDescription']}
         >
           <EuiFieldText
-            defaultValue={base_path || ''}
+            defaultValue={basePath || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                base_path: e.target.value,
+                basePath: e.target.value,
               });
             }}
           />
@@ -240,11 +239,11 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['gcsRepositoryChunkSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={chunk_size || ''}
+            defaultValue={chunkSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                chunk_size: e.target.value,
+                chunkSize: e.target.value,
               });
             }}
           />

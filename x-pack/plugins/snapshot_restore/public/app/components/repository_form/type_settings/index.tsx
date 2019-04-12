@@ -92,6 +92,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({ repository, updat
   };
 
   return type === REPOSITORY_TYPES.source
-    ? renderTypeSettings(settings.delegate_type)
+    ? renderTypeSettings(settings.delegateType)
     : renderTypeSettings(type);
 };
