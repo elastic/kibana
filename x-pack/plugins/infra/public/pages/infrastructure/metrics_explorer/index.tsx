@@ -141,6 +141,7 @@ export const MetricsExplorerPage = injectI18n(
             data={data}
             options={options}
             onLoadMore={handleLoadMore}
+            onFilter={handleFilterQuerySubmit}
             onRefetch={handleRefresh}
           />
         )}

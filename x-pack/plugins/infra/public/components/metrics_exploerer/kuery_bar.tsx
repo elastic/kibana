@@ -6,7 +6,7 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
@@ -31,6 +31,17 @@ export const MetricsExploererKueryBar = injectI18n(
   ({ intl, derivedIndexPattern, onSubmit, value }: Props) => {
     const [draftQuery, setDraftQuery] = useState<string>(value || '');
     const [isValid, setValidation] = useState<boolean>(true);
+
+
+    // This ensures that if value changes out side this component it will update.
+    useEffect(
+      () => {
+        if (value) {
+          setDraftQuery(value);
+        }
+      },
+      [value]
+    );
 
     const handleChange = useCallback(
       (query: string) => {

@@ -6,7 +6,9 @@
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiHorizontalRule,
@@ -74,11 +76,12 @@ interface Props {
   options: MetricsExplorerOptions;
   onLoadMore: (afterKey: string | null) => void;
   onRefetch: () => void;
+  onFilter: (filter: string) => void;
   data: MetricsExplorerResponse | null;
   intl: InjectedIntl;
 }
 export const MetricsExplorerCharts = injectI18n(
-  ({ loading, data, onLoadMore, options, onRefetch, intl }: Props) => {
+  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter }: Props) => {
     const intlPrefix = 'xpack.infra.metricsExplorer';
     if (!data && loading) {
       return (
@@ -154,9 +157,16 @@ export const MetricsExplorerCharts = injectI18n(
           {data.series.map(series => (
             <EuiFlexItem key={series.id} style={{ padding: 16, minWidth: 0 }}>
               {data.series.length > 1 ? (
-                <EuiToolTip content={series.id}>
+                <EuiToolTip
+                  content={intl.formatMessage(
+                    { defaultMessage: 'Filter by "{name}"', id: `${intlPrefix}.titleTooltip` },
+                    { name: series.id }
+                  )}
+                >
                   <EuiTitle size="xs">
-                    <ChartTitle>{series.id}</ChartTitle>
+                    <ChartTitle onClick={() => onFilter(`${options.groupBy}: "${series.id}"`)}>
+                      {series.id}
+                    </ChartTitle>
                   </EuiTitle>
                 </EuiToolTip>
               ) : null}
@@ -238,8 +248,9 @@ export const MetricsExplorerCharts = injectI18n(
   }
 );
 
-const ChartTitle = euiStyled.h4`
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            `;
+const ChartTitle = euiStyled.button`
+  width: 100%
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

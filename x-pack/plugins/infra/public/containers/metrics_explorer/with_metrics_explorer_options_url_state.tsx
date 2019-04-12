@@ -70,7 +70,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
       .default(9),
     afterKey: Joi.string().allow(null),
     groupBy: Joi.string(),
-    filterQuery: Joi.string(),
+    filterQuery: Joi.string().allow(''),
     aggregation: Joi.string().required(),
     metrics: Joi.array()
       .items(
