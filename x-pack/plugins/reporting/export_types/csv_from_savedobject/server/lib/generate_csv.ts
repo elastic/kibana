@@ -6,7 +6,7 @@
 
 import { badRequest } from 'boom';
 import { Request } from 'hapi';
-import { KbnServer, Logger } from '../../../../types';
+import { KbnServer, Logger, JobParams } from '../../../../types';
 import { SearchPanel, VisPanel } from '../../';
 import { generateCsvSearch } from './generate_csv_search';
 
@@ -21,7 +21,8 @@ export function createGenerateCsv(logger: Logger) {
     request: Request | FakeRequest,
     server: KbnServer,
     visType: string,
-    panel: VisPanel | SearchPanel
+    panel: VisPanel | SearchPanel,
+    jobParams: JobParams
   ) {
     // This should support any vis type that is able to fetch
     // and model data on the server-side
@@ -30,7 +31,13 @@ export function createGenerateCsv(logger: Logger) {
     // expression that we could run through the interpreter to get csv
     switch (visType) {
       case 'search':
-        return await generateCsvSearch(request as Request, server, logger, panel as SearchPanel);
+        return await generateCsvSearch(
+          request as Request,
+          server,
+          logger,
+          panel as SearchPanel,
+          jobParams
+        );
       default:
         throw badRequest(`Unsupported or unrecognized saved object type: ${visType}`);
     }

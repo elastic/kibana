@@ -72,7 +72,7 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
     try {
       ({
         result: { content, maxSizeReached, size },
-      } = await generateCsv(requestObject, server, visType as string, panel));
+      } = await generateCsv(requestObject, server, visType as string, panel, jobParams));
     } catch (err) {
       if (err.stack) {
         logger.error(err.stack);

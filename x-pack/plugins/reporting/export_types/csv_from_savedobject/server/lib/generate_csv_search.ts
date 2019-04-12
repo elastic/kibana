@@ -7,7 +7,7 @@
 // @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
-import { KbnServer, Logger } from '../../../../types';
+import { KbnServer, Logger, JobParams } from '../../../../types';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
@@ -23,8 +23,8 @@ import {
   ESQueryConfig,
   GenerateCsvParams,
   Filter,
-  ReqPayload,
   IndexPatternField,
+  QueryFilter,
 } from './';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
@@ -49,7 +49,8 @@ export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
   logger: Logger,
-  searchPanel: SearchPanel
+  searchPanel: SearchPanel,
+  jobParams: JobParams
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
@@ -77,9 +78,13 @@ export async function generateCsvSearch(
     fields: indexPatternFields,
   } = indexPatternSavedObject;
 
-  const {
-    state: { query: payloadQuery, sort: payloadSort = [] },
-  } = req.payload as ReqPayload;
+  let payloadQuery: QueryFilter | undefined;
+  let payloadSort: any[] = [];
+  if (jobParams.post.state) {
+    ({
+      post: { state: { query: payloadQuery, sort: payloadSort = [] } },
+    } = jobParams);
+  }
 
   const { includes, timezone, combinedFilter } = getFilters(
     indexPatternSavedObjectId,

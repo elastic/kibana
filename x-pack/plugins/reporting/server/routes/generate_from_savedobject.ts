@@ -14,7 +14,7 @@ import { API_BASE_URL_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/con
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import { JobDocPayload, JobDocOutputExecuted, JobParams, KbnServer } from '../../types';
+import { JobDocPayload, JobParamPostPayload, JobDocOutputExecuted, JobParams, KbnServer } from '../../types';
 import { LevelLogger } from '../lib/level_logger';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
@@ -44,6 +44,7 @@ const getJobFromRouteHandler = async (
       savedObjectType,
       savedObjectId,
       isImmediate: options.isImmediate,
+      post: request.payload as JobParamPostPayload,
     };
     result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
   } catch (err) {
@@ -108,6 +109,7 @@ export function registerGenerateCsvFromSavedObject(
         savedObjectType,
         savedObjectId,
         isImmediate: true,
+        post: {}, // FIXME
       };
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server, request);

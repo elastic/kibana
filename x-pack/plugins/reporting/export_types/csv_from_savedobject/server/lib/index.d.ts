@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedSearchObjectAttributes,
-  SearchPanel,
-  SearchRequest,
-  SearchSource,
-  TimeRangeParams,
-} from '../../';
+import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../';
 
 export interface SavedSearchGeneratorResult {
   content: string;
@@ -33,18 +27,6 @@ type FormatsMap = Map<
     };
   }
 >;
-
-interface ReqPayload {
-  state: {
-    sort: Array<{
-      [sortKey: string]: {
-        order: string;
-      };
-    }>;
-    docvalue_fields: any;
-    query: any;
-  };
-}
 
 export interface GenerateCsvParams {
   searchRequest: SearchRequest;

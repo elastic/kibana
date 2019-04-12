@@ -28,9 +28,13 @@ export default function({ getService }: { getService: any }) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
   const generateAPI = {
-    getCsvFromSavedSearch: async (id: string, { timerange, state }: GenerateOpts) => {
+    getCsvFromSavedSearch: async (
+      id: string,
+      { timerange, state }: GenerateOpts,
+      isImmediate = true
+    ) => {
       return await supertestSvc
-        .post(`/api/reporting/v1/generate/immediate/csv/saved-object/${id}`)
+        .post(`/api/reporting/v1/generate/${isImmediate ? 'immediate/' : ''}csv/saved-object/${id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ timerange, state });
     },
@@ -163,39 +167,22 @@ export default function({ getService }: { getService: any }) {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/scripted');
 
+        const params = {
+          searchId: 'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          postPayload: {
+            timerange: { timezone: 'UTC', min: '1979-01-01T10:00:00Z', max: '1981-01-01T10:00:00Z' }, // prettier-ignore
+            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fe*' } }] } } ] } } ] } } } // prettier-ignore
+          },
+          isImmediate: true,
+        };
         const {
           status: resStatus,
           text: resText,
           type: resType,
         } = (await generateAPI.getCsvFromSavedSearch(
-          'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
-          {
-            timerange: {
-              timezone: 'UTC',
-              min: '1979-01-01T10:00:00Z',
-              max: '1981-01-01T10:00:00Z',
-            },
-            state: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [{ query_string: { fields: ['name'], query: 'Fe*' } }],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          }
+          params.searchId,
+          params.postPayload,
+          params.isImmediate
         )) as supertest.Response;
 
         expect(resStatus).to.eql(200);
@@ -228,6 +215,101 @@ export default function({ getService }: { getService: any }) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_SCRIPTED_RESORTED);
+
+        await esArchiver.unload('reporting/scripted');
+      });
+    });
+
+    describe('Non-Immediate', () => {
+      it('using queries in job params', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/scripted');
+
+        const params = {
+          searchId: 'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          postPayload: {
+            timerange: { timezone: 'UTC', min: '1979-01-01T10:00:00Z', max: '1981-01-01T10:00:00Z' }, // prettier-ignore
+            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fe*' } }] } } ] } } ] } } } // prettier-ignore
+          },
+          isImmediate: false,
+        };
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          params.searchId,
+          params.postPayload,
+          params.isImmediate
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('application/json');
+        const {
+          path: jobDownloadPath,
+          job: { index: jobIndex, jobtype: jobType, created_by: jobCreatedBy, payload: jobPayload },
+        } = JSON.parse(resText);
+
+        expect(jobDownloadPath.slice(0, 29)).to.equal('/api/reporting/jobs/download/');
+        expect(jobIndex.slice(0, 11)).to.equal('.reporting-');
+        expect(jobType).to.be('csv_from_savedobject');
+        expect(jobCreatedBy).to.be('elastic');
+
+        const {
+          title: payloadTitle,
+          objects: payloadObjects,
+          jobParams: payloadParams,
+        } = jobPayload;
+        expect(payloadTitle).to.be('EVERYBABY2');
+        expect(payloadObjects).to.be(null); // value for non-immediate
+        expect(payloadParams.savedObjectType).to.be('search');
+        expect(payloadParams.savedObjectId).to.be('f34bf440-5014-11e9-bce7-4dabcb8bef24');
+        expect(payloadParams.isImmediate).to.be(false);
+
+        const { state: postParamState, timerange: postParamTimerange } = payloadParams.post;
+        expect(postParamState).to.eql({
+          query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fe*' } }] } } ] } } ] } } // prettier-ignore
+        });
+        expect(postParamTimerange).to.eql({
+          max: '1981-01-01T10:00:00.000Z',
+          min: '1979-01-01T10:00:00.000Z',
+          timezone: 'UTC',
+        });
+
+        const {
+          indexPatternSavedObjectId: payloadPanelIndexPatternSavedObjectId,
+          timerange: payloadPanelTimerange,
+        } = payloadParams.panel;
+        expect(payloadPanelIndexPatternSavedObjectId).to.be('89655130-5013-11e9-bce7-4dabcb8bef24');
+        expect(payloadPanelTimerange).to.eql({
+          timezone: 'UTC',
+          min: '1979-01-01T10:00:00.000Z',
+          max: '1981-01-01T10:00:00.000Z',
+        });
+
+        expect(payloadParams.visType).to.be('search');
+
+        // check the resource at jobDownloadPath
+        const downloadFromPath = async (downloadPath: string) => {
+          const { status, text, type } = await supertestSvc
+            .get(downloadPath)
+            .set('kbn-xsrf', 'xxx');
+          return {
+            status,
+            text,
+            type,
+          };
+        };
+
+        await new Promise(resolve => {
+          setTimeout(async () => {
+            const { status, text, type } = await downloadFromPath(jobDownloadPath);
+            expect(status).to.eql(200);
+            expect(type).to.eql('text/csv');
+            expect(text).to.eql(CSV_RESULT_SCRIPTED_REQUERY);
+            resolve();
+          }, 5000); // x-pack/test/functional/config settings are inherited, uses 3 seconds for polling interval.
+        });
 
         await esArchiver.unload('reporting/scripted');
       });

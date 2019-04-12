@@ -107,11 +107,31 @@ export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
 
+export interface TimeRangeParams {
+  timezone: string;
+  min: Date | string | number;
+  max: Date | string | number;
+}
+
+type PostPayloadState = Partial<{
+  state: {
+    query: any;
+    sort: any[];
+    columns: string[]; // TODO
+  };
+}>;
+
+// retain POST payload data, needed for async
+interface JobParamPostPayload extends PostPayloadState {
+  timeRange: TimeRangeParams;
+}
+
 // params that come into a request
 export interface JobParams {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
+  post: JobParamPostPayload;
   panel?: any; // has to be resolved by the request handler
   visType?: string; // has to be resolved by the request handler
 }
