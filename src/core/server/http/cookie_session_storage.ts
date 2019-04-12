@@ -26,7 +26,6 @@ export interface CookieOptions<T> {
   password: string;
   validate: (sessionValue: T) => boolean | Promise<boolean>;
   isSecure: boolean;
-  path?: string;
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
@@ -55,7 +54,8 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
  */
 export async function createCookieSessionStorageFactory<T>(
   server: Server,
-  cookieOptions: CookieOptions<T>
+  cookieOptions: CookieOptions<T>,
+  basePath?: string
 ): Promise<SessionStorageFactory<T>> {
   await server.register({ plugin: hapiAuthCookie });
 
@@ -64,7 +64,7 @@ export async function createCookieSessionStorageFactory<T>(
     password: cookieOptions.password,
     validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
     isSecure: cookieOptions.isSecure,
-    path: cookieOptions.path,
+    path: basePath,
     clearInvalid: true,
     isHttpOnly: true,
     isSameSite: false,

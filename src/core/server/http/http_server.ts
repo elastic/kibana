@@ -37,8 +37,8 @@ export interface HttpServerInfo {
 
 export class HttpServer {
   private server?: Server;
-  private registeredRouters: Set<Router> = new Set();
-  private authRegistered: boolean = false;
+  private registeredRouters = new Set<Router>();
+  private authRegistered = false;
 
   constructor(private readonly log: Logger) {}
 
@@ -86,8 +86,9 @@ export class HttpServer {
     return {
       server: this.server,
       options: serverOptions,
-      registerOnRequest: this.registerOnRequest,
-      registerAuth: this.registerAuth,
+      registerOnRequest: this.registerOnRequest.bind(this),
+      registerAuth: <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) =>
+        this.registerAuth(fn, cookieOptions, config.basePath),
     };
   }
 
@@ -139,15 +140,19 @@ export class HttpServer {
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 
-  private registerOnRequest = (fn: OnRequest) => {
+  private registerOnRequest(fn: OnRequest) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
 
     this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
-  };
+  }
 
-  private registerAuth = async <T>(fn: Authenticate<T>, cookieOptions: CookieOptions<T>) => {
+  private async registerAuth<T>(
+    fn: Authenticate<T>,
+    cookieOptions: CookieOptions<T>,
+    basePath?: string
+  ) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
@@ -156,7 +161,11 @@ export class HttpServer {
     }
     this.authRegistered = true;
 
-    const sessionStorage = await createCookieSessionStorageFactory<T>(this.server, cookieOptions);
+    const sessionStorage = await createCookieSessionStorageFactory<T>(
+      this.server,
+      cookieOptions,
+      basePath
+    );
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
@@ -168,5 +177,5 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
-  };
+  }
 }
