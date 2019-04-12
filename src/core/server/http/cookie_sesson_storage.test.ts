@@ -44,7 +44,7 @@ const sessionDurationMs = 30;
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
-  password: 'something_at_least_32_characters',
+  encryptionKey: 'something_at_least_32_characters',
   validate: (session: Storage) => session.expires > Date.now(),
   isSecure: false,
   path: '/',

@@ -59,7 +59,7 @@ export class DummySecurityPlugin {
 
     const cookieOptions = {
       name: 'sid',
-      password: 'something_at_least_32_characters',
+      encryptionKey: 'something_at_least_32_characters',
       validate: (session: Storage) => true,
       isSecure: false,
       path: '/',

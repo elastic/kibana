@@ -23,7 +23,7 @@ import { SessionStorageFactory, SessionStorage } from './session_storage';
 
 export interface CookieOptions<T> {
   name: string;
-  password: string;
+  encryptionKey: string;
   validate: (sessionValue: T) => boolean | Promise<boolean>;
   isSecure: boolean;
 }
@@ -61,7 +61,7 @@ export async function createCookieSessionStorageFactory<T>(
 
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
-    password: cookieOptions.password,
+    password: cookieOptions.encryptionKey,
     validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
     isSecure: cookieOptions.isSecure,
     path: basePath,

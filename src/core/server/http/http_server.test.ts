@@ -576,7 +576,7 @@ test('registers auth request interceptor only once', async () => {
   const { registerAuth } = await server.start(config);
   const doRegister = () =>
     registerAuth(() => null as any, {
-      password: 'any_password',
+      encryptionKey: 'any_password',
     } as any);
 
   await doRegister();
