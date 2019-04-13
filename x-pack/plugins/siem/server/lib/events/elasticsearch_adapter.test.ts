@@ -62,8 +62,8 @@ describe('events elasticsearch_adapter', () => {
         action: 'event-action-1',
         module: 'event-module-1',
         type: 'event-type-1',
-        category: 'event-category-1',
-        severity: 1,
+        category: ['event-category-1'],
+        severity: ['1'],
         id: ['100'],
       },
     },
@@ -121,7 +121,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            category: 'event-category-1',
+            category: ['event-category-1'],
           },
         },
       };
@@ -199,7 +199,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            severity: 1,
+            severity: ['1'],
           },
         },
       };

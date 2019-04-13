@@ -17,9 +17,9 @@ export const mockEcsData: Ecs[] = [
     event: {
       id: ['1'],
       action: 'Action',
-      category: 'Access',
+      category: ['Access'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.1',
@@ -47,10 +47,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['3'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 1,
+      severity: ['1'],
     },
     source: {
       ip: '192.168.0.3',
@@ -78,10 +78,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['4'],
-      category: 'Attempted Administrator Privilege Gain',
+      category: ['Attempted Administrator Privilege Gain'],
       type: ['Alert'],
       module: 'suricata',
-      severity: 1,
+      severity: ['1'],
     },
     source: {
       ip: '192.168.0.3',
@@ -121,10 +121,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['5'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.3',
@@ -152,10 +152,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['6'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.6',
@@ -179,10 +179,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['8'],
-      category: 'Web Application Attack',
+      category: ['Web Application Attack'],
       type: ['Alert'],
       module: 'suricata',
-      severity: 2,
+      severity: ['2'],
     },
     suricata: {
       eve: {
@@ -220,10 +220,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['7'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'apache',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.7',
@@ -251,10 +251,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['9'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.9',
@@ -282,10 +282,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['10'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.10',
@@ -313,10 +313,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['11'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.11',
@@ -344,10 +344,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['12'],
-      category: 'Access',
+      category: ['Access'],
       type: ['HTTP Request'],
       module: 'nginx',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.12',
@@ -375,10 +375,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['2'],
-      category: 'Authentication',
+      category: ['Authentication'],
       type: ['Authentication Success'],
       module: 'authlog',
-      severity: 3,
+      severity: ['3'],
     },
     source: {
       ip: '192.168.0.2',
@@ -406,10 +406,10 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['13'],
-      category: 'Web Application Attack',
+      category: ['Web Application Attack'],
       type: ['Alert'],
       module: 'suricata',
-      severity: 1,
+      severity: ['1'],
     },
     suricata: {
       eve: {
@@ -755,7 +755,7 @@ export const mockEcsData: Ecs[] = [
       action: 'executed',
       severity: null,
       module: 'auditd',
-      category: 'audit-rule',
+      category: ['audit-rule'],
       id: null,
       dataset: null,
     },
@@ -792,7 +792,7 @@ export const mockEcsData: Ecs[] = [
       action: 'logged-in',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -855,7 +855,7 @@ export const mockEcsData: Ecs[] = [
       action: 'disposed-credentials',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -915,7 +915,7 @@ export const mockEcsData: Ecs[] = [
       action: 'ended-session',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -975,7 +975,7 @@ export const mockEcsData: Ecs[] = [
       action: 'acquired-credentials',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -1035,7 +1035,7 @@ export const mockEcsData: Ecs[] = [
       action: 'started-session',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -1095,7 +1095,7 @@ export const mockEcsData: Ecs[] = [
       action: 'was-authorized',
       severity: null,
       module: 'auditd',
-      category: 'user-login',
+      category: ['user-login'],
       id: null,
       dataset: null,
     },
@@ -1155,7 +1155,7 @@ export const mockEcsData: Ecs[] = [
       action: 'connected-to',
       severity: null,
       module: 'auditd',
-      category: 'audit-rule',
+      category: ['audit-rule'],
       id: null,
       dataset: null,
     },
@@ -1214,7 +1214,7 @@ export const mockEcsData: Ecs[] = [
       action: 'opened-file',
       severity: null,
       module: 'auditd',
-      category: 'audit-rule',
+      category: ['audit-rule'],
       id: null,
       dataset: null,
     },

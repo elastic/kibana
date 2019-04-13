@@ -30,10 +30,10 @@ describe('helpers', () => {
         },
         event: {
           id: ['4'],
-          category: 'Attempted Administrator Privilege Gain',
+          category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
           module: 'suricata',
-          severity: 1,
+          severity: ['1'],
         },
         source: {
           ip: '192.168.0.3',
@@ -72,10 +72,10 @@ describe('helpers', () => {
         },
         event: {
           id: ['4'],
-          category: 'Attempted Administrator Privilege Gain',
+          category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
           module: 'suricata',
-          severity: 1,
+          severity: ['1'],
         },
         source: {
           ip: '192.168.0.3',
@@ -113,10 +113,10 @@ describe('helpers', () => {
         host: {},
         event: {
           id: ['4'],
-          category: 'theory',
+          category: ['theory'],
           type: ['Alert'],
           module: 'me',
-          severity: 1,
+          severity: ['1'],
         },
         source: {
           port: 53,
@@ -152,10 +152,10 @@ describe('helpers', () => {
         },
         event: {
           id: ['4'],
-          category: 'theory',
+          category: ['theory'],
           type: ['Alert'],
           module: 'me',
-          severity: 1,
+          severity: ['1'],
         },
         source: {
           ip: undefined,

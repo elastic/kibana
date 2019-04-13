@@ -24,7 +24,7 @@ export const getMockNetflowData = (): Ecs => ({
   },
   event: {
     action: 'network_flow',
-    category: 'network_traffic',
+    category: ['network_traffic'],
     duration: [String(ONE_MILLISECOND_AS_NANOSECONDS)],
     end: ['2018-11-12T19:03:25.936Z'],
     start: ['2018-11-12T19:03:25.836Z'],

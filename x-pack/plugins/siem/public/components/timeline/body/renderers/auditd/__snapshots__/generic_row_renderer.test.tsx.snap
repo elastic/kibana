@@ -56,7 +56,9 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
             },
             "event": Object {
               "action": "connected-to",
-              "category": "audit-rule",
+              "category": Array [
+                "audit-rule",
+              ],
               "dataset": null,
               "id": null,
               "module": "auditd",
@@ -161,7 +163,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "destination": null,
             "event": Object {
               "action": "opened-file",
-              "category": "audit-rule",
+              "category": Array [
+                "audit-rule",
+              ],
               "dataset": null,
               "id": null,
               "module": "auditd",

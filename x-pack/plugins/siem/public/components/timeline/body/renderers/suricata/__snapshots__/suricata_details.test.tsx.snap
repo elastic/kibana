@@ -376,12 +376,16 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
         "port": 6343,
       },
       "event": Object {
-        "category": "Attempted Administrator Privilege Gain",
+        "category": Array [
+          "Attempted Administrator Privilege Gain",
+        ],
         "id": Array [
           "4",
         ],
         "module": "suricata",
-        "severity": 1,
+        "severity": Array [
+          "1",
+        ],
         "type": Array [
           "Alert",
         ],

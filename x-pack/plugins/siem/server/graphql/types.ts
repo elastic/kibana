@@ -423,9 +423,9 @@ export interface DestinationEcsFields {
 export interface EventEcsFields {
   action?: string | null;
 
-  category?: string | null;
+  category?: ToStringArray | null;
 
-  created?: Date | null;
+  created?: ToStringArray | null;
 
   dataset?: ToStringArray | null;
 
@@ -449,7 +449,7 @@ export interface EventEcsFields {
 
   risk_score_norm?: ToStringArray | null;
 
-  severity?: number | null;
+  severity?: ToStringArray | null;
 
   start?: ToStringArray | null;
 
@@ -2630,9 +2630,9 @@ export namespace EventEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventEcsFields> {
     action?: ActionResolver<string | null, TypeParent, Context>;
 
-    category?: CategoryResolver<string | null, TypeParent, Context>;
+    category?: CategoryResolver<ToStringArray | null, TypeParent, Context>;
 
-    created?: CreatedResolver<Date | null, TypeParent, Context>;
+    created?: CreatedResolver<ToStringArray | null, TypeParent, Context>;
 
     dataset?: DatasetResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2656,7 +2656,7 @@ export namespace EventEcsFieldsResolvers {
 
     risk_score_norm?: RiskScoreNormResolver<ToStringArray | null, TypeParent, Context>;
 
-    severity?: SeverityResolver<number | null, TypeParent, Context>;
+    severity?: SeverityResolver<ToStringArray | null, TypeParent, Context>;
 
     start?: StartResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2671,12 +2671,12 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CategoryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CreatedResolver<
-    R = Date | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2736,7 +2736,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SeverityResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

@@ -385,12 +385,16 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
             },
             "event": Object {
               "action": "Action",
-              "category": "Access",
+              "category": Array [
+                "Access",
+              ],
               "id": Array [
                 "1",
               ],
               "module": "nginx",
-              "severity": 3,
+              "severity": Array [
+                "3",
+              ],
             },
             "geo": Object {
               "country_iso_code": "xx",

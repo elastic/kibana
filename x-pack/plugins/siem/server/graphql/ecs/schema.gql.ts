@@ -11,8 +11,8 @@ export const ecsSchema = gql`
 
   type EventEcsFields {
     action: String
-    category: String
-    created: Date
+    category: ToStringArray
+    created: ToStringArray
     dataset: ToStringArray
     duration: ToStringArray
     end: ToStringArray
@@ -24,7 +24,7 @@ export const ecsSchema = gql`
     outcome: ToStringArray
     risk_score: ToStringArray
     risk_score_norm: ToStringArray
-    severity: Float
+    severity: ToStringArray
     start: ToStringArray
     timezone: ToStringArray
     type: ToStringArray

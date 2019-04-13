@@ -394,9 +394,9 @@ export interface DestinationEcsFields {
 export interface EventEcsFields {
   action?: string | null;
 
-  category?: string | null;
+  category?: ToStringArray | null;
 
-  created?: Date | null;
+  created?: ToStringArray | null;
 
   dataset?: ToStringArray | null;
 
@@ -420,7 +420,7 @@ export interface EventEcsFields {
 
   risk_score_norm?: ToStringArray | null;
 
-  severity?: number | null;
+  severity?: ToStringArray | null;
 
   start?: ToStringArray | null;
 
@@ -1450,11 +1450,11 @@ export namespace GetEventsQuery {
 
     action?: string | null;
 
-    severity?: number | null;
+    severity?: ToStringArray | null;
 
     module?: string | null;
 
-    category?: string | null;
+    category?: ToStringArray | null;
 
     id?: ToStringArray | null;
   };
@@ -2542,9 +2542,9 @@ export namespace GetTimelineQuery {
 
     action?: string | null;
 
-    category?: string | null;
+    category?: ToStringArray | null;
 
-    created?: Date | null;
+    created?: ToStringArray | null;
 
     dataset?: ToStringArray | null;
 
@@ -2568,7 +2568,7 @@ export namespace GetTimelineQuery {
 
     risk_score_norm?: ToStringArray | null;
 
-    severity?: number | null;
+    severity?: ToStringArray | null;
 
     start?: ToStringArray | null;
 
