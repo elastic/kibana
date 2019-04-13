@@ -71,7 +71,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
         },
       ],
-      migrationVersion: { visualization: '7.1.0' },
+      migrationVersion: response.migrationVersion,
       updated_at: '2017-09-21T18:51:23.794Z',
     });
   };
