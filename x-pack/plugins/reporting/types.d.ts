@@ -123,7 +123,7 @@ type PostPayloadState = Partial<{
 
 // retain POST payload data, needed for async
 interface JobParamPostPayload extends PostPayloadState {
-  timeRange: TimeRangeParams;
+  timerange: TimeRangeParams;
 }
 
 // params that come into a request
