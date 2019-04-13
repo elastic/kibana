@@ -137,8 +137,8 @@ export interface JobParams {
 }
 
 export interface JobDocPayload {
-  basePath: string;
-  headers: Record<string, string>;
+  basePath?: string;
+  headers?: Record<string, string>;
   jobParams: JobParams;
   relativeUrl?: string;
   timeRange?: any;
