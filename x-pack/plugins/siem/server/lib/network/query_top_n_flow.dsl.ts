@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../public/lib/helpers';
 import {
   Direction,
   FlowDirection,
@@ -258,10 +259,6 @@ const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
       return FlowTarget.server;
   }
   assertUnreachable(flowTarget);
-};
-
-const assertUnreachable = (x: never): never => {
-  throw new Error(`Unknown Field in switch statement ${x}`);
 };
 
 type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };

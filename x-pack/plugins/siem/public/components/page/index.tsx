@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPage } from '@elastic/eui';
+import { EuiBadge, EuiPage } from '@elastic/eui';
 import styled from 'styled-components';
 import { injectGlobal } from 'styled-components';
 
@@ -90,4 +90,8 @@ export const Pane1FlexContent = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   height: 100%;
+`;
+
+export const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
 `;

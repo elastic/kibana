@@ -13,6 +13,7 @@ import { mockFirstLastSeenDomainQuery } from '../../../../../containers/domains/
 import { FlowTarget } from '../../../../../graphql/types';
 import { wait } from '../../../../../lib/helpers';
 import { TestProviders } from '../../../../../mock';
+import { getEmptyValue } from '../../../../empty_value';
 
 import { FirstLastSeenDomain } from '.';
 
@@ -101,8 +102,7 @@ describe('FirstLastSeen Component', async () => {
 
   test('First Seen is empty but not Last Seen', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenDomainQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.DomainFirstLastSeen.firstSeen = null;
+    badDateTime[0].result.data!.source.DomainFirstLastSeen.firstSeen = null;
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -125,8 +125,7 @@ describe('FirstLastSeen Component', async () => {
 
   test('Last Seen is empty but not First Seen', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenDomainQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.DomainFirstLastSeen.lastSeen = null;
+    badDateTime[0].result.data!.source.DomainFirstLastSeen.lastSeen = null;
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -149,8 +148,7 @@ describe('FirstLastSeen Component', async () => {
 
   test('First Seen With a bad date time string', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenDomainQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.DomainFirstLastSeen.firstSeen = 'something-invalid';
+    badDateTime[0].result.data!.source.DomainFirstLastSeen.firstSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -169,8 +167,7 @@ describe('FirstLastSeen Component', async () => {
 
   test('Last Seen With a bad date time string', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenDomainQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.DomainFirstLastSeen.lastSeen = 'something-invalid';
+    badDateTime[0].result.data!.source.DomainFirstLastSeen.lastSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -205,7 +202,7 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
-    expect(container.innerHTML).toBe('GraphQL error: Error!');
+    await wait(10);
+    expect(container.innerHTML).toBe(getEmptyValue());
   });
 });

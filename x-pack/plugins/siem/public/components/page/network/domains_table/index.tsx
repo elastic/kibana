@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual, last } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
-import styled from 'styled-components';
 
 import {
   Direction,
@@ -22,6 +21,7 @@ import {
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
+import { CountBadge } from '../../index';
 
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
@@ -81,10 +81,6 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 50,
   },
 ];
-
-const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 export const DomainsTableId = 'domains-table';
 
@@ -160,7 +156,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
       const newDomainsSort: DomainsSortField = {
-        field: last(splitField) as DomainsFields,
+        field: getSortFromString(splitField[splitField.length - 1]),
         direction: criteria.sort.direction,
       };
       if (!isEqual(newDomainsSort, this.props.domainsSortField)) {
@@ -217,8 +213,23 @@ const getSortField = (sortField: DomainsSortField, flowTarget: FlowTarget): Sort
       };
     default:
       return {
-        field: `node.network.bytes`,
+        field: 'node.network.bytes',
         direction: Direction.desc,
       };
+  }
+};
+
+const getSortFromString = (sortField: string): DomainsFields => {
+  switch (sortField) {
+    case DomainsFields.domainName.valueOf():
+      return DomainsFields.domainName;
+    case DomainsFields.bytes.valueOf():
+      return DomainsFields.bytes;
+    case DomainsFields.packets.valueOf():
+      return DomainsFields.packets;
+    case DomainsFields.uniqueIpCount.valueOf():
+      return DomainsFields.uniqueIpCount;
+    default:
+      return DomainsFields.bytes;
   }
 };

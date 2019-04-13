@@ -15,6 +15,7 @@ import {
   FlowTarget,
   NetworkDirectionEcs,
 } from '../../../../graphql/types';
+import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -27,8 +28,6 @@ import { AddToKql } from '../../add_to_kql';
 import { FirstLastSeenDomain } from './first_last_seen';
 import * as i18n from './translations';
 
-type valueof<T> = T[keyof T];
-
 export const getDomainsColumns = (
   ip: string,
   startDate: number,
@@ -37,7 +36,7 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<DomainsEdges | valueof<DomainsNode>>> => [
+): Array<Columns<DomainsEdges | ValueOf<DomainsNode>>> => [
   {
     field: `node.${flowTarget}.domainName`,
     name: i18n.DOMAIN_NAME,
@@ -188,11 +187,16 @@ export const getDomainsColumns = (
   },
 ];
 
-const getFlowTargetTitle = (flowTarget: FlowTarget) => {
-  if (flowTarget === FlowTarget.source) {
-    return i18n.UNIQUE_DESTINATIONS;
-  } else if (flowTarget === FlowTarget.destination) {
-    return i18n.UNIQUE_SOURCES;
+const getFlowTargetTitle = (flowTarget: FlowTarget): string => {
+  switch (flowTarget) {
+    case FlowTarget.client:
+      return i18n.UNIQUE_CLIENTS;
+    case FlowTarget.server:
+      return i18n.UNIQUE_SERVERS;
+    case FlowTarget.source:
+      return i18n.UNIQUE_DESTINATIONS;
+    case FlowTarget.destination:
+      return i18n.UNIQUE_SOURCES;
   }
-  return '';
+  assertUnreachable(flowTarget);
 };

@@ -17,6 +17,7 @@ import {
   NetworkTopNFlowEdges,
   NetworkTopNFlowItem,
 } from '../../../../graphql/types';
+import { ValueOf } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -29,15 +30,13 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 
-type valueof<T> = T[keyof T];
-
 export const getNetworkTopNFlowColumns = (
   startDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<NetworkTopNFlowEdges | valueof<NetworkTopNFlowItem>>> => [
+): Array<Columns<NetworkTopNFlowEdges | ValueOf<NetworkTopNFlowItem>>> => [
   {
     name: getIpTitle(flowTarget),
     truncateText: false,

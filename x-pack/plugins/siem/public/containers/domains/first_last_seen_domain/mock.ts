@@ -4,15 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget, GetDomainFirstLastSeenQuery } from '../../../graphql/types';
 
 import { DomainFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
-interface MockedProvidedQuery {
-  request: object;
-  result: object;
+interface MockFirstLastSeenDomainQuery {
+  request: {
+    query: GetDomainFirstLastSeenQuery.Query;
+    variables: GetDomainFirstLastSeenQuery.Variables;
+  };
+  result: {
+    data?: {
+      source: {
+        id: string;
+        DomainFirstLastSeen: {
+          firstSeen: string | null;
+          lastSeen: string | null;
+        };
+      };
+    };
+    errors?: [{ message: string }];
+  };
 }
-export const mockFirstLastSeenDomainQuery: MockedProvidedQuery[] = [
+
+export const mockFirstLastSeenDomainQuery: MockFirstLastSeenDomainQuery[] = [
   {
     request: {
       query: DomainFirstLastSeenGqlQuery,

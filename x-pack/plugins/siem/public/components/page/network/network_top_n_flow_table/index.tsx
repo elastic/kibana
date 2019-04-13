@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,6 +22,7 @@ import { networkActions, networkModel, networkSelectors, State } from '../../../
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { CountBadge } from '../../index';
 
 import { getNetworkTopNFlowColumns } from './columns';
 import * as i18n from './translations';
@@ -84,10 +85,6 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 50,
   },
 ];
-
-const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
 

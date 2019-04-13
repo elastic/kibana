@@ -53,6 +53,20 @@ export const UNIQUE_SOURCES = i18n.translate(
   }
 );
 
+export const UNIQUE_CLIENTS = i18n.translate(
+  'xpack.siem.network.ipDetails.domainsTable.columns.uniqueClientsTitle',
+  {
+    defaultMessage: 'Unique Servers',
+  }
+);
+
+export const UNIQUE_SERVERS = i18n.translate(
+  'xpack.siem.network.ipDetails.domainsTable.columns.uniqueServersTitle',
+  {
+    defaultMessage: 'Unique Clients',
+  }
+);
+
 export const FIRST_SEEN = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.firstSeenTitle',
   {

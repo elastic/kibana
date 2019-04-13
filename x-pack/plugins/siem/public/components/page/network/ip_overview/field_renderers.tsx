@@ -84,7 +84,7 @@ export const hostIdRenderer = (host: HostEcsFields, ipFilter?: string): React.Re
             <HostDetailsLink hostName={host.name}>{host.id}</HostDetailsLink>
           </DefaultDraggable>
         ) : (
-          <>host.id</>
+          <>{host.id}</>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
