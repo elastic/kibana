@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import url from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
