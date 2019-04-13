@@ -6,6 +6,10 @@
 
 import { BASE_PATH } from '../../constants';
 
+export function linkToRepositories() {
+  return `#${BASE_PATH}/repositories`;
+}
+
 export function linkToRepository(repositoryName) {
   return `#${BASE_PATH}/repositories/${repositoryName}`;
 }

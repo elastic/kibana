@@ -5,4 +5,4 @@
  */
 
 export { breadcrumbService } from './breadcrumb';
-export { linkToRepository } from './links';
+export { linkToRepository, linkToRepositories } from './links';

@@ -31,7 +31,7 @@ export const getAllHandler: RouterRouteHandler = async (
   }
 
   const snapshots: SnapshotDetails[] = [];
-  const errors: any = [];
+  const errors: any = {};
 
   const fetchSnapshotsForRepository = async (repository: string) => {
     try {
@@ -51,7 +51,7 @@ export const getAllHandler: RouterRouteHandler = async (
     } catch (error) {
       // These errors are commonly due to a misconfiguration in the repository or plugin errors,
       // which can result in a variety of 400, 404, and 500 errors.
-      errors.push(error);
+      errors[repository] = error;
     }
   };
 
