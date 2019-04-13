@@ -22,7 +22,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui/lib/services';
 
-jest.mock('ui/kfetch', () => jest.fn());
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
@@ -44,7 +44,7 @@ jest.mock('ui/chrome', () => ({
 import { Table } from '../table';
 
 const defaultProps = {
-  selectedSavedObjects: [1],
+  selectedSavedObjects: [{ type: 'visualization' }],
   selectionConfig: {
     onSelectionChange: () => {},
   },
@@ -52,6 +52,7 @@ const defaultProps = {
   onDelete: () => {},
   onExport: () => {},
   getEditUrl: () => {},
+  canGoInApp: () => {},
   goInApp: () => {},
   pageIndex: 1,
   pageSize: 2,
@@ -62,6 +63,7 @@ const defaultProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
+  canDeleteSavedObjectTypes: ['visualization']
 };
 
 describe('Table', () => {
@@ -100,5 +102,17 @@ describe('Table', () => {
     searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: 'I am valid' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
     expect(component.state().isSearchTextValid).toBe(true);
+  });
+
+  it(`restricts which saved objects can be deleted based on type`, () => {
+    const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
+    const customizedProps = { ...defaultProps, selectedSavedObjects, canDeleteSavedObjectTypes: ['visualization'] };
+    const component = shallowWithIntl(
+      <Table.WrappedComponent
+        {...customizedProps}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
   });
 });

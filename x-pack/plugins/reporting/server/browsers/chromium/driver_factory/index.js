@@ -20,10 +20,11 @@ const compactWhitespace = str => {
 };
 
 export class HeadlessChromiumDriverFactory {
-  constructor(binaryPath, logger, browserConfig) {
+  constructor(binaryPath, logger, browserConfig, queueTimeout) {
     this.binaryPath = binaryPath;
     this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
+    this.queueTimeout = queueTimeout;
   }
 
   type = 'chromium';
@@ -82,6 +83,12 @@ export class HeadlessChromiumDriverFactory {
         });
 
         page = await browser.newPage();
+
+        // All navigation/waitFor methods default to 30 seconds,
+        // which can cause the job to fail even if we bump timeouts in
+        // the config. Help alleviate errors like
+        // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
+        page.setDefaultTimeout(this.queueTimeout);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;

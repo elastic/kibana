@@ -16,6 +16,21 @@ import { Toast } from '@elastic/eui';
 // @public (undocumented)
 export type BasePathSetup = ReturnType<BasePathService['setup']>;
 
+// @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export interface CapabilitiesSetup {
+    getCapabilities: () => Capabilities;
+}
+
 // @public (undocumented)
 export interface ChromeBrand {
     // (undocumented)
@@ -52,6 +67,8 @@ export interface CoreContext {
 export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
+    // (undocumented)
+    capabilities: CapabilitiesSetup;
     // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
@@ -176,15 +193,15 @@ export interface OverlaySetup {
 }
 
 // @public
-export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
+export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TDependencies>;
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
 
 // @public
 export interface PluginInitializerContext {

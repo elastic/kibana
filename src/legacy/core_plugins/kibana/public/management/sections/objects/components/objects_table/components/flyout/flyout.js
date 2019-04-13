@@ -58,7 +58,7 @@ import {
   resolveIndexPatternConflicts,
   saveObjects,
 } from '../../../../lib/resolve_saved_objects';
-import { INCLUDED_TYPES } from '../../objects_table';
+import { POSSIBLE_TYPES } from '../../objects_table';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class FlyoutUI extends Component {
@@ -109,6 +109,10 @@ class FlyoutUI extends Component {
   };
 
   setImportFile = ([file]) => {
+    if (!file) {
+      this.setState({ file: undefined, isLegacyFile: false });
+      return;
+    }
     this.setState({
       file,
       isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',
@@ -242,7 +246,7 @@ class FlyoutUI extends Component {
     }
 
     contents = contents.filter(content =>
-      INCLUDED_TYPES.includes(content._type)
+      POSSIBLE_TYPES.includes(content._type)
     ).map(doc => ({
       ...doc,
       // The server assumes that documents with no migrationVersion are up to date.
