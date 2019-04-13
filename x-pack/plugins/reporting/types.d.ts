@@ -138,11 +138,13 @@ export interface JobParams {
 
 export interface JobDocPayload {
   basePath?: string;
+  forceNow?: string;
   headers?: Record<string, string>;
   jobParams: JobParams;
   relativeUrl?: string;
   timeRange?: any;
   title: string;
+  urls?: string[];
   type?: string | null; // string if completed job; null if incomplete job;
   objects?: string | null; // string if completed job; null if incomplete job;
 }
