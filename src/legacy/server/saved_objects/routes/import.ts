@@ -44,7 +44,11 @@ interface ImportRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export const createImportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createImportRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_import',
   method: 'POST',
   config: {
@@ -73,6 +77,7 @@ export const createImportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
     return await importSavedObjects({
+      supportedTypes,
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),

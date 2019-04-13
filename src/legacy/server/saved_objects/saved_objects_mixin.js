@@ -41,8 +41,21 @@ import {
   createLogLegacyImportRoute,
 } from './routes';
 
+function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
+  const { savedObjectSchemas } = kbnServer.uiExports;
+  return visibleTypes.filter(
+    type =>
+      !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false
+  );
+}
+
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = new KibanaMigrator({ kbnServer });
+  const mappings = migrator.getActiveMappings();
+  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+  const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
   server.decorate('server', 'kibanaMigrator', migrator);
 
@@ -69,16 +82,12 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
-  server.route(createExportRoute(prereqs, server));
-  server.route(createImportRoute(prereqs, server));
-  server.route(createResolveImportErrorsRoute(prereqs, server));
+  server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
+  server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
+  server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
   server.route(createLogLegacyImportRoute());
 
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
-  const mappings = migrator.getActiveMappings();
-  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {

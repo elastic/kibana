@@ -126,6 +126,27 @@ export default function ({ getService }) {
               });
             });
         });
+
+        it(`should return 400 when exporting unsupported type`, async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              type: ['wigwags'],
+            })
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'child "type" fails because ["type" at position 0 fails because ' +
+                  '["0" must be one of [config, index-pattern, visualization, search, dashboard, url]]]',
+                validation: {
+                  source: 'payload',
+                  keys: ['type.0'],
+                }
+              });
+            });
+        });
       });
 
       describe('10,000 objects', () => {

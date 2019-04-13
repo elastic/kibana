@@ -38,7 +38,11 @@ interface ExportRequest extends Hapi.Request {
   };
 }
 
-export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createExportRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_export',
   method: 'POST',
   config: {
@@ -47,12 +51,14 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string())
+            .items(Joi.string().valid(supportedTypes))
             .single()
             .optional(),
           objects: Joi.array()
             .items({
-              type: Joi.string().required(),
+              type: Joi.string()
+                .valid(supportedTypes)
+                .required(),
               id: Joi.string().required(),
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
