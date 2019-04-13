@@ -54,9 +54,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (repositoryName: string) => (
-        <EuiLink href={linkToRepository(repositoryName)}>
-          {repositoryName}
-        </EuiLink>
+        <EuiLink href={linkToRepository(repositoryName)}>{repositoryName}</EuiLink>
       ),
     },
     {

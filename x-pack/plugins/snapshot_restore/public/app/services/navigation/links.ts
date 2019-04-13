@@ -10,6 +10,6 @@ export function linkToRepositories() {
   return `#${BASE_PATH}/repositories`;
 }
 
-export function linkToRepository(repositoryName) {
+export function linkToRepository(repositoryName: string) {
   return `#${BASE_PATH}/repositories/${repositoryName}`;
 }

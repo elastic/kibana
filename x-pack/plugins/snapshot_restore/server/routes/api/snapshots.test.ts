@@ -21,7 +21,7 @@ const defaultSnapshot = {
   endTime: undefined,
   endTimeInMillis: undefined,
   durationInMillis: undefined,
-  indexFailures: undefined,
+  indexFailures: [],
   shards: undefined,
 };
 
@@ -60,7 +60,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         .mockReturnValueOnce(mockGetSnapshotsBarResponse);
 
       const expectedResponse = {
-        errors: [],
+        errors: {},
         snapshots: [
           { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
           { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },

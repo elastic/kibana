@@ -5,9 +5,6 @@
  */
 
 import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,7 +15,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
@@ -27,7 +23,6 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import { loadSnapshot } from '../../../../services/http';
-import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
 import { TabSummary, TabFailures } from './tabs';
 
@@ -53,34 +48,22 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
 
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
-  const includeGlobalStateToHumanizedMap: Record<string, any> = {
-    0: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
-        defaultMessage="No"
-      />
-    ),
-    1: (
-      <FormattedMessage
-        id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-        defaultMessage="Yes"
-      />
-    ),
-  };
-
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different snapshot.
-  useEffect(() => { setActiveTab(TAB_SUMMARY) }, [repositoryName, snapshotId]);
+  useEffect(
+    () => {
+      setActiveTab(TAB_SUMMARY);
+    },
+    [repositoryName, snapshotId]
+  );
 
   let tabs;
 
   let content;
 
   if (snapshotDetails) {
-    const {
-      indexFailures,
-    } = snapshotDetails;
+    const { indexFailures } = snapshotDetails;
 
     if (indexFailures.length) {
       const tabOptions = [

@@ -4,35 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { SnapshotDetails } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 import { formatDate } from '../../../../../services/text';
 
-interface Props extends RouteComponentProps {
-  snapshotDetails: SnapshotDetails,
+interface Props {
+  snapshotDetails: any;
 }
 
-export const TabSummary: React.FunctionComponent<Props> = ({ snapshotDetails }) => {
+export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
   const {
     core: {
       i18n: { FormattedMessage },

@@ -115,12 +115,12 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <EuiCallOut
-        title={(
+        title={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryWarningTitle"
             defaultMessage="Some of your repositories contain errors"
           />
-        )}
+        }
         color="warning"
         iconType="alert"
       >
@@ -137,7 +137,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                   defaultMessage="Repositories tab"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </EuiCallOut>
@@ -151,7 +151,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
         <SnapshotTable
           snapshots={snapshots}
-          errors={errors}
           reload={reload}
           openSnapshotDetails={openSnapshotDetails}
         />

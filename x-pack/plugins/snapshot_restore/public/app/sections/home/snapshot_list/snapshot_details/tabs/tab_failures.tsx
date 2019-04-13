@@ -4,36 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiCard,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
-import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import React from 'react';
+
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { useAppDependencies } from '../../../../../index';
-import { formatDate } from '../../../../../services/text';
 
-interface Props extends RouteComponentProps {
-  failures: any[],
+interface Props {
+  indexFailures: any;
 }
 
-export const TabFailures: React.FunctionComponent<Props> = ({ indexFailures }) => {
+export const TabFailures: React.SFC<Props> = ({ indexFailures }) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -51,7 +32,7 @@ export const TabFailures: React.FunctionComponent<Props> = ({ indexFailures }) =
 
         <EuiSpacer size="s" />
 
-        {failures.map((failure, failuresCount) => {
+        {failures.map((failure: any, failuresCount: number) => {
           const { status, reason, shard_id: shardId } = failure;
 
           return (

@@ -28,7 +28,7 @@ export function deserializeSnapshotDetails(
     end_time: endTime,
     end_time_in_millis: endTimeInMillis,
     duration_in_millis: durationInMillis,
-    failures,
+    failures = [],
     shards,
   } = snapshotDetailsEs;
 
