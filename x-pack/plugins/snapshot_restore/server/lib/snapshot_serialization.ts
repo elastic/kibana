@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
+
 import { SnapshotDetails } from '../../common/types';
 import { SnapshotDetailsEs } from '../types';
 
@@ -45,6 +47,14 @@ export function deserializeSnapshotDetails(
     map[index].failures.push(rest);
     return map;
   }, {});
+
+  // Sort all failures by their shard.
+  Object.keys(indexToFailuresMap).forEach(index => {
+    indexToFailuresMap[index].failures = sortBy(
+      indexToFailuresMap[index].failures,
+      ({ shard }) => shard
+    );
+  });
 
   return {
     repository,
