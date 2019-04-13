@@ -14,6 +14,16 @@ import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || '/api/remote_clusters',
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
 }));
 
 const testBedOptions = {

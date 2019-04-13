@@ -14,6 +14,16 @@ import routing from '../../public/app/services/routing';
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
 }));
 
 jest.mock('ui/index_patterns', () => {
