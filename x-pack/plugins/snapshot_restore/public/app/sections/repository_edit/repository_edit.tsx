@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
@@ -15,15 +16,11 @@ import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
 import { editRepository, loadRepository } from '../../services/http';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-
 interface MatchParams {
   name: string;
 }
 
-interface Props extends RouteComponentProps<MatchParams> {}
-
-export const RepositoryEdit: React.FunctionComponent<Props> = ({
+export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { name },
   },

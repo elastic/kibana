@@ -22,7 +22,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
   } = useAppDependencies();
 
   const {
-    settings: { client, container, base_path, compress, chunk_size, readonly, location_mode },
+    settings: { client, container, basePath, compress, chunkSize, readonly, locationMode },
   } = repository;
 
   const listItems = [];
@@ -51,7 +51,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
     });
   }
 
-  if (base_path !== undefined) {
+  if (basePath !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -59,7 +59,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
           defaultMessage="Base path"
         />
       ),
-      description: base_path,
+      description: basePath,
     });
   }
 
@@ -75,7 +75,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
     });
   }
 
-  if (chunk_size !== undefined) {
+  if (chunkSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -83,7 +83,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
           defaultMessage="Chunk size"
         />
       ),
-      description: String(chunk_size),
+      description: String(chunkSize),
     });
   }
 
@@ -99,7 +99,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
     });
   }
 
-  if (location_mode !== undefined) {
+  if (locationMode !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -107,7 +107,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
           defaultMessage="Location mode"
         />
       ),
-      description: location_mode,
+      description: locationMode,
     });
   }
 

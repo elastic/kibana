@@ -5,9 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { FSRepository, Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
-
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -17,6 +14,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import { FSRepository, Repository } from '../../../../../common/types';
+import { useAppDependencies } from '../../../index';
 
 interface Props {
   repository: FSRepository;
@@ -39,9 +38,9 @@ export const FSSettings: React.FunctionComponent<Props> = ({
     settings: {
       location,
       compress,
-      chunk_size,
-      max_restore_bytes_per_sec,
-      max_snapshot_bytes_per_sec,
+      chunkSize,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
       readonly,
     },
   } = repository;
@@ -179,11 +178,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryChunkSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={chunk_size || ''}
+            defaultValue={chunkSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                chunk_size: e.target.value,
+                chunkSize: e.target.value,
               });
             }}
           />
@@ -222,11 +221,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
         >
           <EuiFieldText
-            defaultValue={max_restore_bytes_per_sec || ''}
+            defaultValue={maxRestoreBytesPerSec || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                max_restore_bytes_per_sec: e.target.value,
+                maxRestoreBytesPerSec: e.target.value,
               });
             }}
           />
@@ -265,11 +264,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryMaxSnapshotBytesDescription']}
         >
           <EuiFieldText
-            defaultValue={max_snapshot_bytes_per_sec || ''}
+            defaultValue={maxSnapshotBytesPerSec || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                max_snapshot_bytes_per_sec: e.target.value,
+                maxSnapshotBytesPerSec: e.target.value,
               });
             }}
           />

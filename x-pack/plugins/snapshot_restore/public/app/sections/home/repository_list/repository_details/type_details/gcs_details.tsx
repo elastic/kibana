@@ -6,10 +6,9 @@
 
 import React, { Fragment } from 'react';
 
+import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { GCSRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: GCSRepository;
@@ -23,7 +22,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   } = useAppDependencies();
 
   const {
-    settings: { bucket, client, base_path, compress, chunk_size },
+    settings: { bucket, client, basePath, compress, chunkSize },
   } = repository;
 
   const listItems = [
@@ -50,7 +49,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (base_path !== undefined) {
+  if (basePath !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -58,7 +57,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Base path"
         />
       ),
-      description: base_path,
+      description: basePath,
     });
   }
 
@@ -74,7 +73,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (chunk_size !== undefined) {
+  if (chunkSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -82,7 +81,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Chunk size"
         />
       ),
-      description: String(chunk_size),
+      description: String(chunkSize),
     });
   }
 

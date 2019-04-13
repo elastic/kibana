@@ -6,10 +6,9 @@
 
 import React, { Fragment } from 'react';
 
+import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FSRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: FSRepository;
@@ -26,9 +25,9 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     settings: {
       location,
       compress,
-      chunk_size,
-      max_restore_bytes_per_sec,
-      max_snapshot_bytes_per_sec,
+      chunkSize,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
       readonly,
     },
   } = repository;
@@ -69,7 +68,7 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (chunk_size !== undefined) {
+  if (chunkSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -77,11 +76,11 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Chunk size"
         />
       ),
-      description: String(chunk_size),
+      description: String(chunkSize),
     });
   }
 
-  if (max_restore_bytes_per_sec !== undefined) {
+  if (maxRestoreBytesPerSec !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -89,11 +88,11 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Max restore bytes per second"
         />
       ),
-      description: max_restore_bytes_per_sec,
+      description: maxRestoreBytesPerSec,
     });
   }
 
-  if (max_snapshot_bytes_per_sec !== undefined) {
+  if (maxSnapshotBytesPerSec !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -101,7 +100,7 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Max snapshot bytes per second"
         />
       ),
-      description: max_snapshot_bytes_per_sec,
+      description: maxSnapshotBytesPerSec,
     });
   }
 

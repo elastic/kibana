@@ -7,6 +7,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, Section } from '../../../constants';
@@ -16,14 +17,11 @@ import { loadRepositories } from '../../../services/http';
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-
 interface MatchParams {
   repositoryName?: Repository['name'];
 }
-interface Props extends RouteComponentProps<MatchParams> {}
 
-export const RepositoryList: React.FunctionComponent<Props> = ({
+export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { repositoryName: name },
   },

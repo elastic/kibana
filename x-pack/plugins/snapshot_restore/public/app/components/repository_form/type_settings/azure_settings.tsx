@@ -5,9 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { AzureRepository, Repository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
-
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -17,6 +14,8 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import { AzureRepository, Repository } from '../../../../../common/types';
+import { useAppDependencies } from '../../../index';
 
 interface Props {
   repository: AzureRepository;
@@ -36,7 +35,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
     },
   } = useAppDependencies();
   const {
-    settings: { client, container, base_path, compress, chunk_size, readonly, location_mode },
+    settings: { client, container, basePath, compress, chunkSize, readonly, locationMode },
   } = repository;
 
   const locationModeOptions = ['primary_only', 'secondary_only'].map(option => ({
@@ -164,11 +163,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           describedByIds={['azureRepositoryBasePathDescription']}
         >
           <EuiFieldText
-            defaultValue={base_path || ''}
+            defaultValue={basePath || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                base_path: e.target.value,
+                basePath: e.target.value,
               });
             }}
           />
@@ -253,11 +252,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           describedByIds={['azureRepositoryChunkSizeDescription']}
         >
           <EuiFieldText
-            defaultValue={chunk_size || ''}
+            defaultValue={chunkSize || ''}
             fullWidth
             onChange={e => {
               updateRepositorySettings({
-                chunk_size: e.target.value,
+                chunkSize: e.target.value,
               });
             }}
           />
@@ -291,7 +290,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           describedByIds={['azureRepositoryReadonlyDescription']}
         >
           <EuiSwitch
-            disabled={location_mode === locationModeOptions[1].value}
+            disabled={locationMode === locationModeOptions[1].value}
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
@@ -301,7 +300,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             checked={!!readonly}
             onChange={e => {
               updateRepositorySettings({
-                readonly: location_mode === locationModeOptions[1].value ? true : e.target.checked,
+                readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
               });
             }}
           />
@@ -344,10 +343,10 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         >
           <EuiSelect
             options={locationModeOptions}
-            value={location_mode || locationModeOptions[0].value}
+            value={locationMode || locationModeOptions[0].value}
             onChange={e => {
               updateRepositorySettings({
-                location_mode: e.target.value,
+                locationMode: e.target.value,
                 readonly: e.target.value === locationModeOptions[1].value ? true : readonly,
               });
             }}

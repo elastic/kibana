@@ -6,10 +6,9 @@
 
 import React, { Fragment } from 'react';
 
+import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { S3Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
   repository: S3Repository;
@@ -26,13 +25,13 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
     settings: {
       bucket,
       client,
-      base_path,
+      basePath,
       compress,
-      chunk_size,
-      server_side_encryption,
-      buffer_size,
-      canned_acl,
-      storage_class,
+      chunkSize,
+      serverSideEncryption,
+      bufferSize,
+      cannedAcl,
+      storageClass,
     },
   } = repository;
 
@@ -60,7 +59,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (base_path !== undefined) {
+  if (basePath !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -68,7 +67,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Base path"
         />
       ),
-      description: base_path,
+      description: basePath,
     });
   }
 
@@ -84,7 +83,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (chunk_size !== undefined) {
+  if (chunkSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -92,11 +91,11 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Chunk size"
         />
       ),
-      description: String(chunk_size),
+      description: String(chunkSize),
     });
   }
 
-  if (server_side_encryption !== undefined) {
+  if (serverSideEncryption !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -104,11 +103,11 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Server-side encryption"
         />
       ),
-      description: String(server_side_encryption),
+      description: String(serverSideEncryption),
     });
   }
 
-  if (buffer_size !== undefined) {
+  if (bufferSize !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -116,11 +115,11 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Buffer size"
         />
       ),
-      description: buffer_size,
+      description: bufferSize,
     });
   }
 
-  if (canned_acl !== undefined) {
+  if (cannedAcl !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -128,11 +127,11 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Canned ACL"
         />
       ),
-      description: canned_acl,
+      description: cannedAcl,
     });
   }
 
-  if (storage_class !== undefined) {
+  if (storageClass !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
@@ -140,7 +139,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Storage class"
         />
       ),
-      description: storage_class,
+      description: storageClass,
     });
   }
 

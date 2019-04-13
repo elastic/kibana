@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
 
@@ -14,8 +15,6 @@ import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/breadcrumb';
 import { addRepository } from '../../services/http';
-
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
