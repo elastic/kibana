@@ -14,7 +14,13 @@ import { API_BASE_URL_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/con
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
-import { JobDocPayload, JobParamPostPayload, JobDocOutputExecuted, JobParams, KbnServer } from '../../types';
+import {
+  JobDocPayload,
+  JobParamPostPayload,
+  JobDocOutputExecuted,
+  JobParams,
+  KbnServer,
+} from '../../types';
 import { LevelLogger } from '../lib/level_logger';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
@@ -40,11 +46,12 @@ const getJobFromRouteHandler = async (
   const { savedObjectType, savedObjectId } = request.params;
   let result: QueuedJobPayload;
   try {
+    const { timeRange, state } = request.payload as JobParamPostPayload;
     const jobParams: JobParams = {
       savedObjectType,
       savedObjectId,
       isImmediate: options.isImmediate,
-      post: request.payload as JobParamPostPayload,
+      post: { timeRange, state },
     };
     result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
   } catch (err) {
@@ -103,13 +110,13 @@ export function registerGenerateCsvFromSavedObject(
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
       const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
-
       const { savedObjectType, savedObjectId } = request.params;
+      const { timeRange, state } = request.payload as JobParamPostPayload;
       const jobParams: JobParams = {
         savedObjectType,
         savedObjectId,
         isImmediate: true,
-        post: {}, // FIXME
+        post: { timeRange, state },
       };
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server, request);
