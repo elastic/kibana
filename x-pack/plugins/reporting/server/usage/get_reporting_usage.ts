@@ -103,7 +103,6 @@ export async function getReportingUsage(server: any, callCluster: any) {
   const reportingIndex = config.get('xpack.reporting.index');
 
   const params = {
-    rest_total_hits_as_int: true,
     index: `${reportingIndex}-*`,
     filterPath: 'aggregations.*.buckets',
     body: {
