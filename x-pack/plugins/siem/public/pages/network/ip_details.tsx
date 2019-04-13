@@ -11,7 +11,7 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
-import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
+import { BreadcrumbItem } from '../../components/page/navigation';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';

@@ -25,7 +25,7 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
-import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
+import { HeaderBreadcrumbs } from '../../components/page/navigation';
 import { SuperDatePicker } from '../../components/super_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
