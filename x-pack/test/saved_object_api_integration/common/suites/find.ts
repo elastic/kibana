@@ -101,9 +101,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             title: 'Count of requests',
           },
-          migrationVersion: {
-            visualization: '7.0.1',
-          },
+          migrationVersion: resp.body.saved_objects[0].migrationVersion,
           references: [
             {
               id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
