@@ -18,7 +18,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "auditd": null,
             "destination": null,
             "event": Object {
-              "action": "user_login",
+              "action": Array [
+                "user_login",
+              ],
               "category": null,
               "created": null,
               "dataset": Array [
@@ -31,7 +33,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "kind": Array [
                 "event",
               ],
-              "module": "system",
+              "module": Array [
+                "system",
+              ],
               "original": null,
               "outcome": Array [
                 "failure",
@@ -109,7 +113,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "auditd": null,
             "destination": null,
             "event": Object {
-              "action": "process_started",
+              "action": Array [
+                "process_started",
+              ],
               "category": null,
               "created": null,
               "dataset": Array [
@@ -122,7 +128,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
               "kind": Array [
                 "event",
               ],
-              "module": "system",
+              "module": Array [
+                "system",
+              ],
               "original": null,
               "outcome": Array [
                 "failure",

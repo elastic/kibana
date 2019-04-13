@@ -16,9 +16,9 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: ['1'],
-      action: 'Action',
+      action: ['Action'],
       category: ['Access'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -49,7 +49,7 @@ export const mockEcsData: Ecs[] = [
       id: ['3'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['1'],
     },
     source: {
@@ -80,7 +80,7 @@ export const mockEcsData: Ecs[] = [
       id: ['4'],
       category: ['Attempted Administrator Privilege Gain'],
       type: ['Alert'],
-      module: 'suricata',
+      module: ['suricata'],
       severity: ['1'],
     },
     source: {
@@ -123,7 +123,7 @@ export const mockEcsData: Ecs[] = [
       id: ['5'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -154,7 +154,7 @@ export const mockEcsData: Ecs[] = [
       id: ['6'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -181,7 +181,7 @@ export const mockEcsData: Ecs[] = [
       id: ['8'],
       category: ['Web Application Attack'],
       type: ['Alert'],
-      module: 'suricata',
+      module: ['suricata'],
       severity: ['2'],
     },
     suricata: {
@@ -222,7 +222,7 @@ export const mockEcsData: Ecs[] = [
       id: ['7'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'apache',
+      module: ['apache'],
       severity: ['3'],
     },
     source: {
@@ -253,7 +253,7 @@ export const mockEcsData: Ecs[] = [
       id: ['9'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -284,7 +284,7 @@ export const mockEcsData: Ecs[] = [
       id: ['10'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -315,7 +315,7 @@ export const mockEcsData: Ecs[] = [
       id: ['11'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -346,7 +346,7 @@ export const mockEcsData: Ecs[] = [
       id: ['12'],
       category: ['Access'],
       type: ['HTTP Request'],
-      module: 'nginx',
+      module: ['nginx'],
       severity: ['3'],
     },
     source: {
@@ -377,7 +377,7 @@ export const mockEcsData: Ecs[] = [
       id: ['2'],
       category: ['Authentication'],
       type: ['Authentication Success'],
-      module: 'authlog',
+      module: ['authlog'],
       severity: ['3'],
     },
     source: {
@@ -408,7 +408,7 @@ export const mockEcsData: Ecs[] = [
       id: ['13'],
       category: ['Web Application Attack'],
       type: ['Alert'],
-      module: 'suricata',
+      module: ['suricata'],
       severity: ['1'],
     },
     suricata: {
@@ -440,7 +440,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.connection'],
@@ -490,7 +490,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.dns'],
@@ -546,7 +546,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.http'],
@@ -611,7 +611,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.notice'],
@@ -655,7 +655,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.ssl'],
@@ -702,7 +702,7 @@ export const mockEcsData: Ecs[] = [
     event: {
       action: null,
       severity: null,
-      module: 'zeek',
+      module: ['zeek'],
       category: null,
       id: null,
       dataset: ['zeek.files'],
@@ -752,9 +752,9 @@ export const mockEcsData: Ecs[] = [
     _id: '20',
     timestamp: '2019-03-13T05:42:11.815Z',
     event: {
-      action: 'executed',
+      action: ['executed'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['audit-rule'],
       id: null,
       dataset: null,
@@ -789,9 +789,9 @@ export const mockEcsData: Ecs[] = [
     _id: '21',
     timestamp: '2019-03-14T22:30:25.527Z',
     event: {
-      action: 'logged-in',
+      action: ['logged-in'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -852,9 +852,9 @@ export const mockEcsData: Ecs[] = [
     _id: '22',
     timestamp: '2019-03-13T03:35:21.614Z',
     event: {
-      action: 'disposed-credentials',
+      action: ['disposed-credentials'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -912,9 +912,9 @@ export const mockEcsData: Ecs[] = [
     _id: '23',
     timestamp: '2019-03-13T03:35:21.614Z',
     event: {
-      action: 'ended-session',
+      action: ['ended-session'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -972,9 +972,9 @@ export const mockEcsData: Ecs[] = [
     _id: '24',
     timestamp: '2019-03-18T23:17:01.645Z',
     event: {
-      action: 'acquired-credentials',
+      action: ['acquired-credentials'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -1032,9 +1032,9 @@ export const mockEcsData: Ecs[] = [
     _id: '25',
     timestamp: '2019-03-19T01:17:01.336Z',
     event: {
-      action: 'started-session',
+      action: ['started-session'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -1092,9 +1092,9 @@ export const mockEcsData: Ecs[] = [
     _id: '26',
     timestamp: '2019-03-13T03:34:08.890Z',
     event: {
-      action: 'was-authorized',
+      action: ['was-authorized'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['user-login'],
       id: null,
       dataset: null,
@@ -1152,9 +1152,9 @@ export const mockEcsData: Ecs[] = [
     _id: '27',
     timestamp: '2019-03-22T19:13:11.026Z',
     event: {
-      action: 'connected-to',
+      action: ['connected-to'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['audit-rule'],
       id: null,
       dataset: null,
@@ -1211,9 +1211,9 @@ export const mockEcsData: Ecs[] = [
     _id: '28',
     timestamp: '2019-03-26T22:12:18.609Z',
     event: {
-      action: 'opened-file',
+      action: ['opened-file'],
       severity: null,
-      module: 'auditd',
+      module: ['auditd'],
       category: ['audit-rule'],
       id: null,
       dataset: null,

@@ -54,13 +54,17 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
       },
       "destination": null,
       "event": Object {
-        "action": "disposed-credentials",
+        "action": Array [
+          "disposed-credentials",
+        ],
         "category": Array [
           "user-login",
         ],
         "dataset": null,
         "id": null,
-        "module": "auditd",
+        "module": Array [
+          "auditd",
+        ],
         "severity": null,
       },
       "geo": null,

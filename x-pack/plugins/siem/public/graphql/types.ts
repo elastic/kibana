@@ -392,7 +392,7 @@ export interface DestinationEcsFields {
 }
 
 export interface EventEcsFields {
-  action?: string | null;
+  action?: ToStringArray | null;
 
   category?: ToStringArray | null;
 
@@ -410,7 +410,7 @@ export interface EventEcsFields {
 
   kind?: ToStringArray | null;
 
-  module?: string | null;
+  module?: ToStringArray | null;
 
   original?: ToStringArray | null;
 
@@ -1448,11 +1448,11 @@ export namespace GetEventsQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    action?: string | null;
+    action?: ToStringArray | null;
 
     severity?: ToStringArray | null;
 
-    module?: string | null;
+    module?: ToStringArray | null;
 
     category?: ToStringArray | null;
 
@@ -2540,7 +2540,7 @@ export namespace GetTimelineQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    action?: string | null;
+    action?: ToStringArray | null;
 
     category?: ToStringArray | null;
 
@@ -2558,7 +2558,7 @@ export namespace GetTimelineQuery {
 
     kind?: ToStringArray | null;
 
-    module?: string | null;
+    module?: ToStringArray | null;
 
     original?: ToStringArray | null;
 

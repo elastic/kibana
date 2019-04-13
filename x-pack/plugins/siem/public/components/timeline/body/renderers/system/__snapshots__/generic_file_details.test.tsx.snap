@@ -11,7 +11,9 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
         "auditd": null,
         "destination": null,
         "event": Object {
-          "action": "process_started",
+          "action": Array [
+            "process_started",
+          ],
           "category": null,
           "created": null,
           "dataset": Array [
@@ -24,7 +26,9 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
           "kind": Array [
             "event",
           ],
-          "module": "system",
+          "module": Array [
+            "system",
+          ],
           "original": null,
           "outcome": Array [
             "failure",

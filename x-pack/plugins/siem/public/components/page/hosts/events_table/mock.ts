@@ -33,7 +33,7 @@ export const mockData: { Events: EventsData } = {
           event: {
             category: null,
             id: null,
-            module: 'system',
+            module: ['system'],
             severity: null,
             type: null,
           },
@@ -65,7 +65,7 @@ export const mockData: { Events: EventsData } = {
           event: {
             category: null,
             id: null,
-            module: 'system',
+            module: ['system'],
             severity: null,
             type: null,
           },

@@ -16,7 +16,9 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
           "zeek.connection",
         ],
         "id": null,
-        "module": "zeek",
+        "module": Array [
+          "zeek",
+        ],
         "severity": null,
       },
       "geo": Object {

@@ -421,7 +421,7 @@ export interface DestinationEcsFields {
 }
 
 export interface EventEcsFields {
-  action?: string | null;
+  action?: ToStringArray | null;
 
   category?: ToStringArray | null;
 
@@ -439,7 +439,7 @@ export interface EventEcsFields {
 
   kind?: ToStringArray | null;
 
-  module?: string | null;
+  module?: ToStringArray | null;
 
   original?: ToStringArray | null;
 
@@ -2628,7 +2628,7 @@ export namespace DestinationEcsFieldsResolvers {
 
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventEcsFields> {
-    action?: ActionResolver<string | null, TypeParent, Context>;
+    action?: ActionResolver<ToStringArray | null, TypeParent, Context>;
 
     category?: CategoryResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2646,7 +2646,7 @@ export namespace EventEcsFieldsResolvers {
 
     kind?: KindResolver<ToStringArray | null, TypeParent, Context>;
 
-    module?: ModuleResolver<string | null, TypeParent, Context>;
+    module?: ModuleResolver<ToStringArray | null, TypeParent, Context>;
 
     original?: OriginalResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2666,7 +2666,7 @@ export namespace EventEcsFieldsResolvers {
   }
 
   export type ActionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2711,7 +2711,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ModuleResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

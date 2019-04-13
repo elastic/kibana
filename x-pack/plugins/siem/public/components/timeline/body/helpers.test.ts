@@ -32,7 +32,7 @@ describe('helpers', () => {
           id: ['4'],
           category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
-          module: 'suricata',
+          module: ['suricata'],
           severity: ['1'],
         },
         source: {
@@ -74,7 +74,7 @@ describe('helpers', () => {
           id: ['4'],
           category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
-          module: 'suricata',
+          module: ['suricata'],
           severity: ['1'],
         },
         source: {
@@ -115,7 +115,7 @@ describe('helpers', () => {
           id: ['4'],
           category: ['theory'],
           type: ['Alert'],
-          module: 'me',
+          module: ['me'],
           severity: ['1'],
         },
         source: {
@@ -154,7 +154,7 @@ describe('helpers', () => {
           id: ['4'],
           category: ['theory'],
           type: ['Alert'],
-          module: 'me',
+          module: ['me'],
           severity: ['1'],
         },
         source: {

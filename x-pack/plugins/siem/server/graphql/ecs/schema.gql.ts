@@ -10,7 +10,7 @@ export const ecsSchema = gql`
   scalar ToStringArray
 
   type EventEcsFields {
-    action: String
+    action: ToStringArray
     category: ToStringArray
     created: ToStringArray
     dataset: ToStringArray
@@ -19,7 +19,7 @@ export const ecsSchema = gql`
     hash: ToStringArray
     id: ToStringArray
     kind: ToStringArray
-    module: String
+    module: ToStringArray
     original: ToStringArray
     outcome: ToStringArray
     risk_score: ToStringArray

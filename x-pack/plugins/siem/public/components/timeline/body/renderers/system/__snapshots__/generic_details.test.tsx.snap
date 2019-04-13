@@ -10,7 +10,9 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
       "auditd": null,
       "destination": null,
       "event": Object {
-        "action": "user_login",
+        "action": Array [
+          "user_login",
+        ],
         "category": null,
         "created": null,
         "dataset": Array [
@@ -23,7 +25,9 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
         "kind": Array [
           "event",
         ],
-        "module": "system",
+        "module": Array [
+          "system",
+        ],
         "original": null,
         "outcome": Array [
           "failure",

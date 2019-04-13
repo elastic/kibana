@@ -382,7 +382,9 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
         "id": Array [
           "4",
         ],
-        "module": "suricata",
+        "module": Array [
+          "suricata",
+        ],
         "severity": Array [
           "1",
         ],

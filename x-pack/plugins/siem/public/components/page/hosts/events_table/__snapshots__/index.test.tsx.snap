@@ -14,7 +14,9 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "event": Object {
           "category": null,
           "id": null,
-          "module": "system",
+          "module": Array [
+            "system",
+          ],
           "severity": null,
           "type": null,
         },
@@ -40,7 +42,9 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "event": Object {
           "category": null,
           "id": null,
-          "module": "system",
+          "module": Array [
+            "system",
+          ],
           "severity": null,
           "type": null,
         },

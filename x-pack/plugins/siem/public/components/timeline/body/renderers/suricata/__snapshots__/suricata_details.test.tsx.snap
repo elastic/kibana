@@ -382,7 +382,9 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
         "id": Array [
           "4",
         ],
-        "module": "suricata",
+        "module": Array [
+          "suricata",
+        ],
         "severity": Array [
           "1",
         ],

@@ -43,13 +43,17 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         },
         "destination": null,
         "event": Object {
-          "action": "opened-file",
+          "action": Array [
+            "opened-file",
+          ],
           "category": Array [
             "audit-rule",
           ],
           "dataset": null,
           "id": null,
-          "module": "auditd",
+          "module": Array [
+            "auditd",
+          ],
           "severity": null,
         },
         "file": Object {

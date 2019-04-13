@@ -55,13 +55,17 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
               "port": 80,
             },
             "event": Object {
-              "action": "connected-to",
+              "action": Array [
+                "connected-to",
+              ],
               "category": Array [
                 "audit-rule",
               ],
               "dataset": null,
               "id": null,
-              "module": "auditd",
+              "module": Array [
+                "auditd",
+              ],
               "severity": null,
             },
             "geo": null,
@@ -162,13 +166,17 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             },
             "destination": null,
             "event": Object {
-              "action": "opened-file",
+              "action": Array [
+                "opened-file",
+              ],
               "category": Array [
                 "audit-rule",
               ],
               "dataset": null,
               "id": null,
-              "module": "auditd",
+              "module": Array [
+                "auditd",
+              ],
               "severity": null,
             },
             "file": Object {

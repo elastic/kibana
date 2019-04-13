@@ -13,7 +13,7 @@ import { SuricataDetails } from '.';
 
 export const suricataRowRenderer: RowRenderer = {
   isInstance: ecs => {
-    const module: string | null = get('event.module', ecs);
+    const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
   renderRow: ({ browserFields, data, width, children }) => {
