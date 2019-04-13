@@ -37,11 +37,11 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await pageObjects.infraLogs.openSourceConfigurationFlyout();
 
         const nameInput = await infraSourceConfigurationFlyout.getNameInput();
-        await nameInput.clearValue();
+        await nameInput.clearValueWithKeyboard({ charByChar: true });
         await nameInput.type('Modified Source');
 
         const logIndicesInput = await infraSourceConfigurationFlyout.getLogIndicesInput();
-        await logIndicesInput.clearValue();
+        await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await logIndicesInput.type('does-not-exist-*');
 
         await infraSourceConfigurationFlyout.saveConfiguration();
@@ -56,7 +56,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await pageObjects.infraLogs.openSourceConfigurationFlyout();
 
         const logIndicesInput = await infraSourceConfigurationFlyout.getLogIndicesInput();
-        await logIndicesInput.clearValue();
+        await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await logIndicesInput.type('filebeat-*');
 
         await infraSourceConfigurationFlyout.saveConfiguration();
