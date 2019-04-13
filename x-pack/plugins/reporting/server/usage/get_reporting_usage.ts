@@ -65,10 +65,7 @@ function getAggStats(aggs: AggregationResults) {
   let statusTypes = {};
   const statusBuckets = get(aggs[STATUS_TYPES_KEY], 'buckets', []);
   if (statusBuckets) {
-    statusTypes = getKeyCount(statusBuckets) as {
-      completed: number;
-      failed: number;
-    };
+    statusTypes = getKeyCount(statusBuckets);
   }
 
   return { _all: all, status: statusTypes, ...jobTypes };
