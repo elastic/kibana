@@ -132,8 +132,8 @@ describe('AddToKql Component', async () => {
       queries: {
         topNFlow: {
           limit: 10,
-          topNFlowType: 'source',
-          topNFlowDirection: 'uniDirectional',
+          flowDirection: 'uniDirectional',
+          flowTarget: 'source',
           topNFlowSort: {
             field: 'bytes',
             direction: 'desc',

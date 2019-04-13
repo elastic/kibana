@@ -7,11 +7,11 @@
 import { defaultWidth } from '../components/timeline/body';
 import {
   Direction,
-  IpOverviewType,
+  DomainsFields,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
 } from '../graphql/types';
 import { State } from '../store';
 
@@ -52,8 +52,8 @@ export const mockGlobalState: State = {
       queries: {
         topNFlow: {
           limit: 10,
-          topNFlowType: NetworkTopNFlowType.source,
-          topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+          flowTarget: FlowTarget.source,
+          flowDirection: FlowDirection.uniDirectional,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         },
         dns: {
@@ -68,9 +68,12 @@ export const mockGlobalState: State = {
     details: {
       filterQuery: null,
       filterQueryDraft: null,
+      flowTarget: FlowTarget.source,
       queries: {
-        ipOverview: {
-          flowType: IpOverviewType.source,
+        domains: {
+          limit: 10,
+          flowDirection: FlowDirection.uniDirectional,
+          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
       },
     },

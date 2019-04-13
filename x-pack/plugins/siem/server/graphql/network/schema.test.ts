@@ -16,10 +16,10 @@ import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import {
   Direction,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
 } from '../types';
 
 import { getNetworkQueryMock, mockNetworkDnsData, mockNetworkTopNFlowData } from './network.mock';
@@ -29,21 +29,21 @@ const testNetworkTopNFlowSource = {
   id: 'Test case to query Network Top N Flow',
   query: `
     query GetNetworkTopNFlowQuery(
-      $direction: NetworkTopNFlowDirection!
-      $sort: NetworkTopNFlowSortField!
-      $type: NetworkTopNFlowType!
-      $timerange: TimerangeInput!
-      $pagination: PaginationInput!
       $filterQuery: String
+      $flowDirection: FlowDirection!
+      $flowTarget: FlowTarget!
+      $pagination: PaginationInput!
+      $sort: NetworkTopNFlowSortField!
+      $timerange: TimerangeInput!
     ) {
       source(id: "default") {
         NetworkTopNFlow(
-          direction: $direction
-          sort: $sort
-          type: $type
-          timerange: $timerange
-          pagination: $pagination
           filterQuery: $filterQuery
+          flowDirection: $flowDirection
+          flowTarget: $flowTarget
+          pagination: $pagination
+          sort: $sort
+          timerange: $timerange
         ) {
           totalCount
           edges {
@@ -85,8 +85,8 @@ const testNetworkTopNFlowSource = {
       from: new Date('2019-01-01T04:59:59.999Z').valueOf(),
     },
     sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-    type: NetworkTopNFlowType.source,
-    direction: NetworkTopNFlowDirection.uniDirectional,
+    flowTarget: FlowTarget.source,
+    flowDirection: FlowDirection.uniDirectional,
     pagination: {
       limit: 2,
       cursor: null,

@@ -8,20 +8,20 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import { FlowDirection } from '../../graphql/types';
 
-import { NetworkTopNFlowTableId } from '.';
-import { SelectDirection } from './select_direction';
+import { FlowDirectionSelect } from './flow_direction_select';
 
-describe('NetworkTopNFlow Select direction', () => {
+describe('Select Flow Direction', () => {
+  const TestFlowDirectionId = 'TestFlowDirectionId';
   const mockOnChange = jest.fn();
 
   describe('rendering', () => {
     test('it renders the basic group button for uni-direction and bi-direction', () => {
       const wrapper = shallow(
-        <SelectDirection
-          id={`${NetworkTopNFlowTableId}-select-direction`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
+        <FlowDirectionSelect
+          id={TestFlowDirectionId}
+          selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
       );
@@ -34,14 +34,14 @@ describe('NetworkTopNFlow Select direction', () => {
     test('when you click on bi-directional, you trigger onChange function', () => {
       const event = {
         target: {
-          name: `${NetworkTopNFlowTableId}-select-direction`,
-          value: NetworkTopNFlowDirection.biDirectional,
+          name: `${TestFlowDirectionId}-select-flow-direction`,
+          value: FlowDirection.biDirectional,
         },
       };
       const wrapper = mount(
-        <SelectDirection
-          id={`${NetworkTopNFlowTableId}-select-direction`}
-          selectedDirection={NetworkTopNFlowDirection.uniDirectional}
+        <FlowDirectionSelect
+          id={TestFlowDirectionId}
+          selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
       );
@@ -53,7 +53,7 @@ describe('NetworkTopNFlow Select direction', () => {
       wrapper.update();
 
       expect(mockOnChange.mock.calls[0]).toEqual([
-        `${NetworkTopNFlowTableId}-select-direction-biDirectional`,
+        `${TestFlowDirectionId}-select-flow-direction-biDirectional`,
         'biDirectional',
       ]);
     });
