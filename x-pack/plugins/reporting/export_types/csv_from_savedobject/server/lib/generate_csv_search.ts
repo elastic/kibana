@@ -80,7 +80,7 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
-  if (jobParams.post.state) {
+  if (jobParams.post && jobParams.post.state) {
     ({
       post: { state: { query: payloadQuery, sort: payloadSort = [] } },
     } = jobParams);

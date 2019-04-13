@@ -131,7 +131,7 @@ export interface JobParams {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
-  post: JobParamPostPayload;
+  post?: JobParamPostPayload;
   panel?: any; // has to be resolved by the request handler
   visType?: string; // has to be resolved by the request handler
 }

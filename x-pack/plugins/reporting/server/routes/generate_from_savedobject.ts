@@ -47,11 +47,12 @@ const getJobFromRouteHandler = async (
   let result: QueuedJobPayload;
   try {
     const { timerange, state } = request.payload as JobParamPostPayload;
+    const post = timerange || state ? { timerange, state } : undefined;
     const jobParams: JobParams = {
+      isImmediate: options.isImmediate,
       savedObjectType,
       savedObjectId,
-      isImmediate: options.isImmediate,
-      post: { timerange, state },
+      post,
     };
     result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
   } catch (err) {
@@ -112,11 +113,12 @@ export function registerGenerateCsvFromSavedObject(
       const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
       const { savedObjectType, savedObjectId } = request.params;
       const { timerange, state } = request.payload as JobParamPostPayload;
+      const post = timerange || state ? { timerange, state } : undefined;
       const jobParams: JobParams = {
+        isImmediate: true,
         savedObjectType,
         savedObjectId,
-        isImmediate: true,
-        post: { timerange, state },
+        post,
       };
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server, request);
