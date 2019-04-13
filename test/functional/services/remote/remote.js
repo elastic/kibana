@@ -31,8 +31,14 @@ export async function RemoteProvider({ getService }) {
   }
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({ log, browserType });
+  const caps = await driver.getCapabilities();
+  const browserVersion = caps.get(browserType === 'chrome' ? 'version' : 'browserVersion');
 
-  log.info('Remote initialized');
+  log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
+
+  if (browserType === 'chrome') {
+    log.info(`Chromedriver version: ${caps.get('chrome').chromedriverVersion}`);
+  }
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
