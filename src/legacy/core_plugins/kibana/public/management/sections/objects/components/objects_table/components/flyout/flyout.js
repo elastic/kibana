@@ -51,6 +51,7 @@ import {
   resolveImportErrors,
   logLegacyImport,
   processImportResponse,
+  getDefaultTitle,
 } from '../../../../lib';
 import {
   resolveSavedObjects,
@@ -887,7 +888,9 @@ class FlyoutUI extends Component {
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.confirmOverwriteBody"
                 defaultMessage="Are you sure you want to overwrite {title}?"
-                values={{ title: this.state.conflictingRecord.title }}
+                values={{
+                  title: this.state.conflictingRecord.title || getDefaultTitle(this.state.conflictingRecord)
+                }}
               />
             </p>
           </EuiConfirmModal>
