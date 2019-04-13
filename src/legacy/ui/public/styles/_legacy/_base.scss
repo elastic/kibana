@@ -114,7 +114,7 @@ input[type="checkbox"],
 // state. This is useful when you've already hand crafted your own
 // focus states in Kibana.
 :focus {
-  &:not([class^="eui"]):not([class^="kbn-resetFocusState"]) {
+  &:not([class^="eui"]):not(.kbn-resetFocusState) {
     @include euiFocusRing;
   }
 }
