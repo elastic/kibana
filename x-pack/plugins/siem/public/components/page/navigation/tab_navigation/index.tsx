@@ -5,7 +5,6 @@
  */
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../../link_to';

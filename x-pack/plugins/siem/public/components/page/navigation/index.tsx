@@ -16,11 +16,6 @@ import { pure } from 'recompose';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 
-export interface BreadcrumbItem {
-  text: string;
-  href?: string;
-}
-
 export const HeaderBreadcrumbsComponent = pure<RouteComponentProps>(({ location }) => (
   <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
     <TabNavigation location={location.pathname} />
