@@ -8,8 +8,12 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "_id": "Fo8nKWgBiyhPd5Zo3cib",
         "_index": "auditbeat-7.0.0-2019.01.07",
         "destination": Object {
-          "ip": "24.168.54.169",
-          "port": 62123,
+          "ip": Array [
+            "24.168.54.169",
+          ],
+          "port": Array [
+            "62123",
+          ],
         },
         "event": Object {
           "category": null,
@@ -26,8 +30,12 @@ exports[`Load More Events Table Component rendering it renders the default Event
           "name": "siem-general",
         },
         "source": Object {
-          "ip": "10.142.0.6",
-          "port": 9200,
+          "ip": Array [
+            "10.142.0.6",
+          ],
+          "port": Array [
+            "9200",
+          ],
         },
         "suricata": null,
         "timestamp": "2019-01-07T16:31:44.036Z",
@@ -36,8 +44,12 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "_id": "F48nKWgBiyhPd5Zo3cib",
         "_index": "auditbeat-7.0.0-2019.01.07",
         "destination": Object {
-          "ip": "24.168.54.169",
-          "port": 62145,
+          "ip": Array [
+            "24.168.54.169",
+          ],
+          "port": Array [
+            "62145",
+          ],
         },
         "event": Object {
           "category": null,
@@ -54,8 +66,12 @@ exports[`Load More Events Table Component rendering it renders the default Event
           "name": "siem-general",
         },
         "source": Object {
-          "ip": "10.142.0.6",
-          "port": 9200,
+          "ip": Array [
+            "10.142.0.6",
+          ],
+          "port": Array [
+            "9200",
+          ],
         },
         "suricata": null,
         "timestamp": "2019-01-07T16:31:44.036Z",

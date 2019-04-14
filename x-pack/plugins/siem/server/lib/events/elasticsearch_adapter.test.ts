@@ -47,15 +47,15 @@ describe('events elasticsearch_adapter', () => {
         },
       },
       source: {
-        ip: 'source-ip-1',
-        port: 100,
+        ip: ['source-ip-1'],
+        port: ['100'],
       },
       destination: {
-        ip: 'destination-ip-1',
-        port: 200,
+        ip: ['destination-ip-1'],
+        port: ['200'],
         geo: {
-          region_name: 'geo-region-1',
-          country_iso_code: 'geo-iso-code-1',
+          region_name: ['geo-region-1'],
+          country_iso_code: ['geo-iso-code-1'],
         },
       },
       event: {
@@ -311,7 +311,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           source: {
-            ip: 'source-ip-1',
+            ip: ['source-ip-1'],
           },
         },
       };
@@ -331,7 +331,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           source: {
-            port: 100,
+            port: ['100'],
           },
         },
       };
@@ -351,7 +351,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           destination: {
-            ip: 'destination-ip-1',
+            ip: ['destination-ip-1'],
           },
         },
       };
@@ -371,7 +371,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           destination: {
-            port: 200,
+            port: ['200'],
           },
         },
       };
@@ -391,7 +391,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           geo: {
-            region_name: 'geo-region-1',
+            region_name: ['geo-region-1'],
           },
         },
       };
@@ -411,7 +411,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           geo: {
-            country_iso_code: 'geo-iso-code-1',
+            country_iso_code: ['geo-iso-code-1'],
           },
         },
       };
@@ -441,7 +441,7 @@ describe('events elasticsearch_adapter', () => {
             ip: ['hostip-1'],
           },
           geo: {
-            region_name: 'geo-region-1',
+            region_name: ['geo-region-1'],
           },
           suricata: {
             eve: {

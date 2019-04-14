@@ -22,20 +22,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.1',
-      port: 80,
+      ip: ['192.168.0.1'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 1,
       name: 'john.dee',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -53,20 +53,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['1'],
     },
     source: {
-      ip: '192.168.0.3',
-      port: 443,
+      ip: ['192.168.0.3'],
+      port: ['443'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 3,
       name: 'evan.davis',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -84,12 +84,12 @@ export const mockEcsData: Ecs[] = [
       severity: ['1'],
     },
     source: {
-      ip: '192.168.0.3',
-      port: 53,
+      ip: ['192.168.0.3'],
+      port: ['53'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     suricata: {
       eve: {
@@ -108,8 +108,8 @@ export const mockEcsData: Ecs[] = [
       name: 'jenny.jones',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -127,20 +127,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.3',
-      port: 80,
+      ip: ['192.168.0.3'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 5,
       name: 'becky.davis',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -158,16 +158,16 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.6',
-      port: 80,
+      ip: ['192.168.0.6'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -195,20 +195,20 @@ export const mockEcsData: Ecs[] = [
       },
     },
     source: {
-      ip: '192.168.0.8',
-      port: 80,
+      ip: ['192.168.0.8'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 8,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -226,20 +226,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.7',
-      port: 80,
+      ip: ['192.168.0.7'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 7,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -257,20 +257,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.9',
-      port: 80,
+      ip: ['192.168.0.9'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 9,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -288,20 +288,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.10',
-      port: 80,
+      ip: ['192.168.0.10'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 10,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -319,20 +319,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.11',
-      port: 80,
+      ip: ['192.168.0.11'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 11,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -350,20 +350,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.12',
-      port: 80,
+      ip: ['192.168.0.12'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 12,
       name: 'jone.doe',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -381,20 +381,20 @@ export const mockEcsData: Ecs[] = [
       severity: ['3'],
     },
     source: {
-      ip: '192.168.0.2',
-      port: 80,
+      ip: ['192.168.0.2'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     user: {
       id: 1,
       name: 'joe.bob',
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -422,16 +422,16 @@ export const mockEcsData: Ecs[] = [
       },
     },
     source: {
-      ip: '192.168.0.8',
-      port: 80,
+      ip: ['192.168.0.8'],
+      port: ['80'],
     },
     destination: {
-      ip: '192.168.0.3',
-      port: 6343,
+      ip: ['192.168.0.3'],
+      port: ['6343'],
     },
     geo: {
-      region_name: 'xx',
-      country_iso_code: 'xx',
+      region_name: ['xx'],
+      country_iso_code: ['xx'],
     },
   },
   {
@@ -451,16 +451,16 @@ export const mockEcsData: Ecs[] = [
       ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
     },
     source: {
-      ip: '185.176.26.101',
-      port: 44059,
+      ip: ['185.176.26.101'],
+      port: ['44059'],
     },
     destination: {
-      ip: '207.154.238.205',
-      port: 11568,
+      ip: ['207.154.238.205'],
+      port: ['11568'],
     },
     geo: {
-      region_name: 'New York',
-      country_iso_code: 'US',
+      region_name: ['New York'],
+      country_iso_code: ['US'],
     },
     suricata: null,
     network: {
@@ -501,16 +501,16 @@ export const mockEcsData: Ecs[] = [
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
     source: {
-      ip: '206.189.35.240',
-      port: 57475,
+      ip: ['206.189.35.240'],
+      port: ['57475'],
     },
     destination: {
-      ip: '67.207.67.3',
-      port: 53,
+      ip: ['67.207.67.3'],
+      port: ['53'],
     },
     geo: {
-      region_name: 'New York',
-      country_iso_code: 'US',
+      region_name: ['New York'],
+      country_iso_code: ['US'],
     },
     suricata: null,
     network: {
@@ -557,16 +557,16 @@ export const mockEcsData: Ecs[] = [
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
     source: {
-      ip: '206.189.35.240',
-      port: 36220,
+      ip: ['206.189.35.240'],
+      port: ['36220'],
     },
     destination: {
-      ip: '192.241.164.26',
-      port: 80,
+      ip: ['192.241.164.26'],
+      port: ['80'],
     },
     geo: {
-      region_name: 'New York',
-      country_iso_code: 'US',
+      region_name: ['New York'],
+      country_iso_code: ['US'],
     },
     suricata: null,
     network: null,
@@ -622,7 +622,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
     },
     source: {
-      ip: '8.42.77.171',
+      ip: ['8.42.77.171'],
       port: null,
     },
     destination: null,
@@ -666,16 +666,16 @@ export const mockEcsData: Ecs[] = [
       ip: null,
     },
     source: {
-      ip: '188.166.66.184',
-      port: 34514,
+      ip: ['188.166.66.184'],
+      port: ['34514'],
     },
     destination: {
-      ip: '91.189.95.15',
-      port: 443,
+      ip: ['91.189.95.15'],
+      port: ['443'],
     },
     geo: {
-      region_name: 'England',
-      country_iso_code: 'GB',
+      region_name: ['England'],
+      country_iso_code: ['GB'],
     },
     suricata: null,
     network: null,
@@ -825,7 +825,7 @@ export const mockEcsData: Ecs[] = [
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
     source: {
-      ip: '8.42.77.171',
+      ip: ['8.42.77.171'],
       port: null,
     },
     destination: null,
@@ -1185,8 +1185,8 @@ export const mockEcsData: Ecs[] = [
     },
     source: null,
     destination: {
-      ip: '93.184.216.34',
-      port: 80,
+      ip: ['93.184.216.34'],
+      port: ['80'],
     },
     geo: null,
     suricata: null,

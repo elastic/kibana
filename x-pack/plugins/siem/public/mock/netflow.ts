@@ -10,17 +10,17 @@ import { Ecs } from '../graphql/types';
 /** Returns mock data for testing the Netflow component */
 export const getMockNetflowData = (): Ecs => ({
   destination: {
-    bytes: 40,
+    bytes: ['40'],
     geo: {
-      city_name: 'New York',
-      continent_name: 'North America',
-      country_iso_code: 'US',
-      country_name: 'United States',
-      region_name: 'New York',
+      city_name: ['New York'],
+      continent_name: ['North America'],
+      country_iso_code: ['US'],
+      country_name: ['United States'],
+      region_name: ['New York'],
     },
-    ip: '10.1.2.3',
-    packets: 1,
-    port: 80,
+    ip: ['10.1.2.3'],
+    packets: ['1'],
+    port: ['80'],
   },
   event: {
     action: ['network_flow'],
@@ -42,17 +42,17 @@ export const getMockNetflowData = (): Ecs => ({
     name: ['rat'],
   },
   source: {
-    bytes: 60,
+    bytes: ['60'],
     geo: {
-      city_name: 'Atlanta',
-      continent_name: 'North America',
-      country_iso_code: 'US',
-      country_name: 'United States',
-      region_name: 'Georgia',
+      city_name: ['Atlanta'],
+      continent_name: ['North America'],
+      country_iso_code: ['US'],
+      country_name: ['United States'],
+      region_name: ['Georgia'],
     },
-    ip: '192.168.1.2',
-    packets: 2,
-    port: 9987,
+    ip: ['192.168.1.2'],
+    packets: ['2'],
+    port: ['9987'],
   },
   timestamp: '2018-11-12T19:03:25.936Z',
   tls: {

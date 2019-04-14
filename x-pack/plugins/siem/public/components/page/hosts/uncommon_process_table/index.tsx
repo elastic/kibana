@@ -124,7 +124,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const processName: string | null = get('process.name[0]', node);
+      const processName: string | null | undefined = get('process.name[0]', node);
       if (processName != null) {
         const id = escapeDataProviderId(
           `uncommon-process-table-${node._id}-processName-${processName}`

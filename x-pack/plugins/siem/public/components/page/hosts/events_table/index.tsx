@@ -172,7 +172,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('source.ip', node)}:{getOrEmptyTag('source.port', node)}
+        {formatIpSafely('source.ip[0]', node)}:{getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -182,7 +182,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('destination.ip', node)}:{getOrEmptyTag('destination.port', node)}
+        {formatIpSafely('destination.ip[0]', node)}:{getOrEmptyTag('destination.port', node)}
       </>
     ),
   },

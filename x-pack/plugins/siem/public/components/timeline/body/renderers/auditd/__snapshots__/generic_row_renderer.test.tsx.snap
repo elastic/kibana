@@ -51,8 +51,12 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
               },
             },
             "destination": Object {
-              "ip": "93.184.216.34",
-              "port": 80,
+              "ip": Array [
+                "93.184.216.34",
+              ],
+              "port": Array [
+                "80",
+              ],
             },
             "event": Object {
               "action": Array [

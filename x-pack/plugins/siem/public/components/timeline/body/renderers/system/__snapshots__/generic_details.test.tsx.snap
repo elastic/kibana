@@ -66,7 +66,9 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
       "source": Object {
         "bytes": null,
         "geo": null,
-        "ip": "128.199.212.120",
+        "ip": Array [
+          "128.199.212.120",
+        ],
         "packets": null,
         "port": null,
       },

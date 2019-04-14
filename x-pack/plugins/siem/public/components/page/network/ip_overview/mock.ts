@@ -13,16 +13,16 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
       lastSeen: '2019-02-07T17:19:41.636Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
       geo: {
-        continent_name: 'North America',
-        city_name: 'New York',
-        country_iso_code: 'US',
+        continent_name: ['North America'],
+        city_name: ['New York'],
+        country_iso_code: ['US'],
         country_name: null,
         location: {
-          lat: 40.7214,
-          lon: -74.0052,
+          lat: ['40.7214'],
+          lon: ['-74.0052'],
         },
-        region_iso_code: 'US-NY',
-        region_name: 'New York',
+        region_iso_code: ['US-NY'],
+        region_name: ['New York'],
       },
       host: {
         os: {
@@ -43,16 +43,16 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
       lastSeen: '2019-02-07T17:19:41.648Z',
       autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
       geo: {
-        continent_name: 'North America',
-        city_name: 'New York',
-        country_iso_code: 'US',
+        continent_name: ['North America'],
+        city_name: ['New York'],
+        country_iso_code: ['US'],
         country_name: null,
         location: {
-          lat: 40.7214,
-          lon: -74.0052,
+          lat: ['40.7214'],
+          lon: ['-74.0052'],
         },
-        region_iso_code: 'US-NY',
-        region_name: 'New York',
+        region_iso_code: ['US-NY'],
+        region_name: ['New York'],
       },
       host: {
         os: {

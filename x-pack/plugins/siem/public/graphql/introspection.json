@@ -1766,7 +1766,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1774,7 +1774,7 @@
             "name": "ip",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1782,7 +1782,7 @@
             "name": "port",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1790,15 +1790,7 @@
             "name": "domain",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-              }
-            },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1814,13 +1806,23 @@
             "name": "packets",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ToStringArray",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -1833,7 +1835,7 @@
             "name": "city_name",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1841,7 +1843,7 @@
             "name": "continent_name",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1849,7 +1851,7 @@
             "name": "country_iso_code",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1857,7 +1859,7 @@
             "name": "country_name",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1873,7 +1875,7 @@
             "name": "region_iso_code",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1881,7 +1883,7 @@
             "name": "region_name",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1900,7 +1902,7 @@
             "name": "lon",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1908,7 +1910,7 @@
             "name": "lat",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -2049,16 +2051,6 @@
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "ToStringArray",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -2657,7 +2649,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2665,7 +2657,7 @@
             "name": "ip",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2673,7 +2665,7 @@
             "name": "port",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2681,15 +2673,7 @@
             "name": "domain",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-              }
-            },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2705,7 +2689,7 @@
             "name": "packets",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

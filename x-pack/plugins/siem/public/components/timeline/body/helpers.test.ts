@@ -36,12 +36,12 @@ describe('helpers', () => {
           severity: ['1'],
         },
         source: {
-          ip: '192.168.0.3',
-          port: 53,
+          ip: ['192.168.0.3'],
+          port: ['53'],
         },
         destination: {
-          ip: '192.168.0.3',
-          port: 6343,
+          ip: ['192.168.0.3'],
+          port: ['6343'],
         },
         suricata: {
           eve: {
@@ -59,8 +59,8 @@ describe('helpers', () => {
           name: 'jack.black',
         },
         geo: {
-          region_name: 'neither',
-          country_iso_code: 'sasquatch',
+          region_name: ['neither'],
+          country_iso_code: ['sasquatch'],
         },
       } as Ecs; // as cast so that `__typename` can be added for the tests even though it is not part of ECS
       const expected: Ecs = {
@@ -78,12 +78,12 @@ describe('helpers', () => {
           severity: ['1'],
         },
         source: {
-          ip: '192.168.0.3',
-          port: 53,
+          ip: ['192.168.0.3'],
+          port: ['53'],
         },
         destination: {
-          ip: '192.168.0.3',
-          port: 6343,
+          ip: ['192.168.0.3'],
+          port: ['6343'],
         },
         suricata: {
           eve: {
@@ -100,8 +100,8 @@ describe('helpers', () => {
           name: 'jack.black',
         },
         geo: {
-          region_name: 'neither',
-          country_iso_code: 'sasquatch',
+          region_name: ['neither'],
+          country_iso_code: ['sasquatch'],
         },
       };
       expect(JSON.parse(stringifyEvent(toStringify))).toEqual(expected);
@@ -119,11 +119,11 @@ describe('helpers', () => {
           severity: ['1'],
         },
         source: {
-          port: 53,
+          port: ['53'],
         },
         destination: {
-          ip: '192.168.0.3',
-          port: 6343,
+          ip: ['192.168.0.3'],
+          port: ['6343'],
         },
         suricata: {
           eve: {
@@ -139,8 +139,8 @@ describe('helpers', () => {
           name: 'no use for a',
         },
         geo: {
-          region_name: 'bizzaro',
-          country_iso_code: 'world',
+          region_name: ['bizzaro'],
+          country_iso_code: ['world'],
         },
       };
       const toStringify: Ecs = {
@@ -159,11 +159,11 @@ describe('helpers', () => {
         },
         source: {
           ip: undefined,
-          port: 53,
+          port: ['53'],
         },
         destination: {
-          ip: '192.168.0.3',
-          port: 6343,
+          ip: ['192.168.0.3'],
+          port: ['6343'],
         },
         suricata: {
           eve: {
@@ -180,8 +180,8 @@ describe('helpers', () => {
           name: 'no use for a',
         },
         geo: {
-          region_name: 'bizzaro',
-          country_iso_code: 'world',
+          region_name: ['bizzaro'],
+          country_iso_code: ['world'],
         },
       };
       expect(JSON.parse(stringifyEvent(toStringify))).toEqual(expected);

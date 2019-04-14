@@ -58,7 +58,7 @@ describe('Load More Events Table Component', () => {
     test('formatIpSafely happy path', () => {
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatIpSafely('source.ip', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('source.ip[0]', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 
@@ -91,10 +91,10 @@ describe('Load More Events Table Component', () => {
 
     test('formatIpSafely not happy with IP ranges that are of a particular size', () => {
       const ecs = cloneDeep(mockData.Events.edges[0].node);
-      ecs.source!.ip = '255.255.255.255';
+      ecs.source!.ip = ['255.255.255.255'];
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatIpSafely('source.ip', ecs)}</p>
+          <p>{formatIpSafely('source.ip[0]', ecs)}</p>
         </ThemeProvider>
       );
 
@@ -103,10 +103,10 @@ describe('Load More Events Table Component', () => {
 
     test('formatIpSafely test of IPv6 max string length of 45', () => {
       const ecs = cloneDeep(mockData.Events.edges[0].node);
-      ecs.source!.ip = '0000:0000:0000:0000:0000:ffff:192.168.100.228';
+      ecs.source!.ip = ['0000:0000:0000:0000:0000:ffff:192.168.100.228'];
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatIpSafely('source.ip', ecs)}</p>
+          <p>{formatIpSafely('source.ip[0]', ecs)}</p>
         </ThemeProvider>
       );
 

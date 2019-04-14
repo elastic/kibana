@@ -380,8 +380,12 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
           Object {
             "_id": "1",
             "destination": Object {
-              "ip": "192.168.0.3",
-              "port": 6343,
+              "ip": Array [
+                "192.168.0.3",
+              ],
+              "port": Array [
+                "6343",
+              ],
             },
             "event": Object {
               "action": Array [
@@ -401,8 +405,12 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
               ],
             },
             "geo": Object {
-              "country_iso_code": "xx",
-              "region_name": "xx",
+              "country_iso_code": Array [
+                "xx",
+              ],
+              "region_name": Array [
+                "xx",
+              ],
             },
             "host": Object {
               "ip": Array [
@@ -411,8 +419,12 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
               "name": "apache",
             },
             "source": Object {
-              "ip": "192.168.0.1",
-              "port": 80,
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "port": Array [
+                "80",
+              ],
             },
             "timestamp": "2018-11-05T19:03:25.937Z",
             "user": Object {

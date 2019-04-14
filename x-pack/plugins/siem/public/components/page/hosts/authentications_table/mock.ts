@@ -19,7 +19,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '127.0.0.1',
+              ip: ['127.0.0.1'],
             },
             host: {
               id: 'host-id-1',
@@ -29,7 +29,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
           lastFailure: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '8.8.8.8',
+              ip: ['8.8.8.8'],
             },
             host: {
               id: 'host-id-1',
@@ -50,7 +50,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '127.0.0.1',
+              ip: ['127.0.0.1'],
             },
             host: {
               id: 'host-id-1',
@@ -60,7 +60,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
           lastFailure: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '8.8.8.8',
+              ip: ['8.8.8.8'],
             },
             host: {
               id: 'host-id-1',

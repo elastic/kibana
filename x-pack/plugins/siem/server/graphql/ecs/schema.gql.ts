@@ -31,18 +31,18 @@ export const ecsSchema = gql`
   }
 
   type Location {
-    lon: Float
-    lat: Float
+    lon: ToStringArray
+    lat: ToStringArray
   }
 
   type GeoEcsFields {
-    city_name: String
-    continent_name: String
-    country_iso_code: String
-    country_name: String
+    city_name: ToStringArray
+    continent_name: ToStringArray
+    country_iso_code: ToStringArray
+    country_name: ToStringArray
     location: Location
-    region_iso_code: String
-    region_name: String
+    region_iso_code: ToStringArray
+    region_name: ToStringArray
   }
 
   type PrimarySecondary {
@@ -109,21 +109,21 @@ export const ecsSchema = gql`
   }
 
   type SourceEcsFields {
-    bytes: Float
-    ip: String
-    port: Float
-    domain: [String!]
+    bytes: ToStringArray
+    ip: ToStringArray
+    port: ToStringArray
+    domain: ToStringArray
     geo: GeoEcsFields
-    packets: Float
+    packets: ToStringArray
   }
 
   type DestinationEcsFields {
-    bytes: Float
-    ip: String
-    port: Float
-    domain: [String!]
+    bytes: ToStringArray
+    ip: ToStringArray
+    port: ToStringArray
+    domain: ToStringArray
     geo: GeoEcsFields
-    packets: Float
+    packets: ToStringArray
   }
 
   type SuricataAlertData {

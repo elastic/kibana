@@ -372,8 +372,12 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
     Object {
       "_id": "4",
       "destination": Object {
-        "ip": "192.168.0.3",
-        "port": 6343,
+        "ip": Array [
+          "192.168.0.3",
+        ],
+        "port": Array [
+          "6343",
+        ],
       },
       "event": Object {
         "category": Array [
@@ -393,8 +397,12 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
         ],
       },
       "geo": Object {
-        "country_iso_code": "xx",
-        "region_name": "xx",
+        "country_iso_code": Array [
+          "xx",
+        ],
+        "region_name": Array [
+          "xx",
+        ],
       },
       "host": Object {
         "ip": Array [
@@ -403,8 +411,12 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
         "name": "suricata",
       },
       "source": Object {
-        "ip": "192.168.0.3",
-        "port": 53,
+        "ip": Array [
+          "192.168.0.3",
+        ],
+        "port": Array [
+          "53",
+        ],
       },
       "suricata": Object {
         "eve": Object {

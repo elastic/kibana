@@ -14,7 +14,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           contextId="network_flow"
           destinationBytes={
             Array [
-              40,
+              "40",
             ]
           }
           destinationGeoCityName={
@@ -49,12 +49,12 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           }
           destinationPackets={
             Array [
-              1,
+              "1",
             ]
           }
           destinationPort={
             Array [
-              80,
+              "80",
             ]
           }
           eventDuration={
@@ -105,7 +105,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           }
           sourceBytes={
             Array [
-              60,
+              "60",
             ]
           }
           sourceGeoCityName={
@@ -140,12 +140,12 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           }
           sourcePackets={
             Array [
-              2,
+              "2",
             ]
           }
           sourcePort={
             Array [
-              9987,
+              "9987",
             ]
           }
           tlsClientCertificateFingerprintSha1={

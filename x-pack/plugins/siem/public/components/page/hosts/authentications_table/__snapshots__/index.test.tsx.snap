@@ -17,7 +17,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
               "name": "host-2",
             },
             "source": Object {
-              "ip": "8.8.8.8",
+              "ip": Array [
+                "8.8.8.8",
+              ],
             },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },
@@ -27,7 +29,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
               "name": "host-1",
             },
             "source": Object {
-              "ip": "127.0.0.1",
+              "ip": Array [
+                "127.0.0.1",
+              ],
             },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },
@@ -50,7 +54,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
               "name": "host-2",
             },
             "source": Object {
-              "ip": "8.8.8.8",
+              "ip": Array [
+                "8.8.8.8",
+              ],
             },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },
@@ -60,7 +66,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
               "name": "host-1",
             },
             "source": Object {
-              "ip": "127.0.0.1",
+              "ip": Array [
+                "127.0.0.1",
+              ],
             },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },

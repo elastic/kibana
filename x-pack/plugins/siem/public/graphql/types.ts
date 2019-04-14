@@ -200,39 +200,39 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToStringArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 }
 
 export interface GeoEcsFields {
-  city_name?: string | null;
+  city_name?: ToStringArray | null;
 
-  continent_name?: string | null;
+  continent_name?: ToStringArray | null;
 
-  country_iso_code?: string | null;
+  country_iso_code?: ToStringArray | null;
 
-  country_name?: string | null;
+  country_name?: ToStringArray | null;
 
   location?: Location | null;
 
-  region_iso_code?: string | null;
+  region_iso_code?: ToStringArray | null;
 
-  region_name?: string | null;
+  region_name?: ToStringArray | null;
 }
 
 export interface Location {
-  lon?: number | null;
+  lon?: ToStringArray | null;
 
-  lat?: number | null;
+  lat?: ToStringArray | null;
 }
 
 export interface HostEcsFields {
@@ -382,17 +382,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToStringArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 }
 
 export interface EventEcsFields {
@@ -1409,7 +1409,7 @@ export namespace GetAuthenticationsQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
   };
 
   export type Host = {
@@ -1433,7 +1433,7 @@ export namespace GetAuthenticationsQuery {
   export type __Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
   };
 
   export type _Host = {
@@ -1711,25 +1711,25 @@ export namespace GetEventsQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToStringArray | null;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToStringArray | null;
   };
 
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
   };
 
   export type Suricata = {
@@ -1995,27 +1995,27 @@ export namespace GetIpOverviewQuery {
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
     location?: Location | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type Location = {
     __typename?: 'Location';
 
-    lat?: number | null;
+    lat?: ToStringArray | null;
 
-    lon?: number | null;
+    lon?: ToStringArray | null;
   };
 
   export type Host = {
@@ -2075,27 +2075,27 @@ export namespace GetIpOverviewQuery {
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
     location?: _Location | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type _Location = {
     __typename?: 'Location';
 
-    lat?: number | null;
+    lat?: ToStringArray | null;
 
-    lon?: number | null;
+    lon?: ToStringArray | null;
   };
 
   export type _Host = {
@@ -2915,13 +2915,13 @@ export namespace GetTimelineQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    bytes?: number | null;
+    bytes?: ToStringArray | null;
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToStringArray | null;
 
     geo?: Geo | null;
   };
@@ -2929,29 +2929,29 @@ export namespace GetTimelineQuery {
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    bytes?: number | null;
+    bytes?: ToStringArray | null;
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToStringArray | null;
 
     geo?: _Geo | null;
   };
@@ -2959,25 +2959,25 @@ export namespace GetTimelineQuery {
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type __Geo = {
     __typename?: 'GeoEcsFields';
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
   };
 
   export type Suricata = {

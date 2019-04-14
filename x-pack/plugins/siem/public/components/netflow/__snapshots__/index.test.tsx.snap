@@ -109,7 +109,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     contextId="test"
     destinationBytes={
       Array [
-        40,
+        "40",
       ]
     }
     destinationGeoCityName={
@@ -144,12 +144,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     destinationPackets={
       Array [
-        1,
+        "1",
       ]
     }
     destinationPort={
       Array [
-        80,
+        "80",
       ]
     }
     eventDuration={
@@ -200,7 +200,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     sourceBytes={
       Array [
-        60,
+        "60",
       ]
     }
     sourceGeoCityName={
@@ -235,12 +235,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     sourcePackets={
       Array [
-        2,
+        "2",
       ]
     }
     sourcePort={
       Array [
-        9987,
+        "9987",
       ]
     }
     tlsClientCertificateFingerprintSha1={

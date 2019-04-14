@@ -229,39 +229,39 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToStringArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 }
 
 export interface GeoEcsFields {
-  city_name?: string | null;
+  city_name?: ToStringArray | null;
 
-  continent_name?: string | null;
+  continent_name?: ToStringArray | null;
 
-  country_iso_code?: string | null;
+  country_iso_code?: ToStringArray | null;
 
-  country_name?: string | null;
+  country_name?: ToStringArray | null;
 
   location?: Location | null;
 
-  region_iso_code?: string | null;
+  region_iso_code?: ToStringArray | null;
 
-  region_name?: string | null;
+  region_name?: ToStringArray | null;
 }
 
 export interface Location {
-  lon?: number | null;
+  lon?: ToStringArray | null;
 
-  lat?: number | null;
+  lat?: ToStringArray | null;
 }
 
 export interface HostEcsFields {
@@ -411,17 +411,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToStringArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 }
 
 export interface EventEcsFields {
@@ -2116,36 +2116,36 @@ export namespace LastSourceHostResolvers {
 
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SourceEcsFields> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<number | null, TypeParent, Context>;
+    port?: PortResolver<ToStringArray | null, TypeParent, Context>;
 
-    domain?: DomainResolver<string[] | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2155,7 +2155,7 @@ export namespace SourceEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2163,38 +2163,38 @@ export namespace SourceEcsFieldsResolvers {
 
 export namespace GeoEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = GeoEcsFields> {
-    city_name?: CityNameResolver<string | null, TypeParent, Context>;
+    city_name?: CityNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    continent_name?: ContinentNameResolver<string | null, TypeParent, Context>;
+    continent_name?: ContinentNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    country_iso_code?: CountryIsoCodeResolver<string | null, TypeParent, Context>;
+    country_iso_code?: CountryIsoCodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    country_name?: CountryNameResolver<string | null, TypeParent, Context>;
+    country_name?: CountryNameResolver<ToStringArray | null, TypeParent, Context>;
 
     location?: LocationResolver<Location | null, TypeParent, Context>;
 
-    region_iso_code?: RegionIsoCodeResolver<string | null, TypeParent, Context>;
+    region_iso_code?: RegionIsoCodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    region_name?: RegionNameResolver<string | null, TypeParent, Context>;
+    region_name?: RegionNameResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type CityNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ContinentNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CountryIsoCodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CountryNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2204,12 +2204,12 @@ export namespace GeoEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RegionIsoCodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RegionNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2217,21 +2217,21 @@ export namespace GeoEcsFieldsResolvers {
 
 export namespace LocationResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = Location> {
-    lon?: LonResolver<number | null, TypeParent, Context>;
+    lon?: LonResolver<ToStringArray | null, TypeParent, Context>;
 
-    lat?: LatResolver<number | null, TypeParent, Context>;
+    lat?: LatResolver<ToStringArray | null, TypeParent, Context>;
   }
 
-  export type LonResolver<R = number | null, Parent = Location, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type LatResolver<R = number | null, Parent = Location, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type LonResolver<
+    R = ToStringArray | null,
+    Parent = Location,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LatResolver<
+    R = ToStringArray | null,
+    Parent = Location,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace HostEcsFieldsResolvers {
@@ -2723,36 +2723,36 @@ export namespace PrimarySecondaryResolvers {
 
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DestinationEcsFields> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<number | null, TypeParent, Context>;
+    port?: PortResolver<ToStringArray | null, TypeParent, Context>;
 
-    domain?: DomainResolver<string[] | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2762,7 +2762,7 @@ export namespace DestinationEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

@@ -74,7 +74,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "source": Object {
               "bytes": null,
               "geo": null,
-              "ip": "128.199.212.120",
+              "ip": Array [
+                "128.199.212.120",
+              ],
               "packets": null,
               "port": null,
             },
@@ -169,7 +171,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "source": Object {
               "bytes": null,
               "geo": null,
-              "ip": "128.199.212.120",
+              "ip": Array [
+                "128.199.212.120",
+              ],
               "packets": null,
               "port": null,
             },

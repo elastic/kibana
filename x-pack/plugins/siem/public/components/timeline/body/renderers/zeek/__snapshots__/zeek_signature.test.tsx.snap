@@ -6,8 +6,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
     Object {
       "_id": "14",
       "destination": Object {
-        "ip": "207.154.238.205",
-        "port": 11568,
+        "ip": Array [
+          "207.154.238.205",
+        ],
+        "port": Array [
+          "11568",
+        ],
       },
       "event": Object {
         "action": null,
@@ -22,8 +26,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
         "severity": null,
       },
       "geo": Object {
-        "country_iso_code": "US",
-        "region_name": "New York",
+        "country_iso_code": Array [
+          "US",
+        ],
+        "region_name": Array [
+          "New York",
+        ],
       },
       "host": Object {
         "id": "37c81253e0fc4c46839c19b981be5177",
@@ -39,8 +47,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
         "transport": "tcp",
       },
       "source": Object {
-        "ip": "185.176.26.101",
-        "port": 44059,
+        "ip": Array [
+          "185.176.26.101",
+        ],
+        "port": Array [
+          "44059",
+        ],
       },
       "suricata": null,
       "timestamp": "2019-03-07T05:06:51.000Z",
