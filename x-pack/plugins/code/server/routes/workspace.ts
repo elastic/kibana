@@ -15,7 +15,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { ServerLoggerFactory } from '../utils/server_logger_factory';
 
 export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions) {
-  server.route({
+  server.securedRoute({
     path: '/api/code/workspace',
     method: 'GET',
     async handler() {
@@ -23,8 +23,9 @@ export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/workspace/{uri*3}/{revision}',
+    requireAdmin: true,
     method: 'POST',
     async handler(req: hapi.Request, reply) {
       const repoUri = req.params.uri as string;

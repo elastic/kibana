@@ -23,7 +23,7 @@ import { detectLanguage } from '../utils/detect_language';
 const TEXT_FILE_LIMIT = 1024 * 1024; // 1mb
 
 export function fileRoute(server: hapi.Server, options: ServerOptions) {
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request) {
@@ -58,7 +58,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
@@ -108,7 +108,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
     async handler(req, h: hapi.ResponseToolkit) {
@@ -131,7 +131,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
     handler: historyHandler,
@@ -176,7 +176,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       }
     }
   }
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
     async handler(req, reply) {
@@ -197,7 +197,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
     async handler(req) {
@@ -216,7 +216,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
     async handler(req) {

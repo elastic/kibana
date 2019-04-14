@@ -13,7 +13,7 @@ import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 
 export function repositorySearchRoute(server: hapi.Server, log: Logger) {
-  server.route({
+  server.securedRoute({
     path: '/api/code/search/repo',
     method: 'GET',
     async handler(req) {
@@ -43,7 +43,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/suggestions/repo',
     method: 'GET',
     async handler(req) {
@@ -75,7 +75,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
 }
 
 export function documentSearchRoute(server: hapi.Server, log: Logger) {
-  server.route({
+  server.securedRoute({
     path: '/api/code/search/doc',
     method: 'GET',
     async handler(req) {
@@ -107,7 +107,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
     },
   });
 
-  server.route({
+  server.securedRoute({
     path: '/api/code/suggestions/doc',
     method: 'GET',
     async handler(req) {
@@ -166,12 +166,12 @@ export function symbolSearchRoute(server: hapi.Server, log: Logger) {
   };
 
   // Currently these 2 are the same.
-  server.route({
+  server.securedRoute({
     path: '/api/code/suggestions/symbol',
     method: 'GET',
     handler: symbolSearchHandler,
   });
-  server.route({
+  server.securedRoute({
     path: '/api/code/search/symbol',
     method: 'GET',
     handler: symbolSearchHandler,
