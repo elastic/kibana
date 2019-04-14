@@ -24,7 +24,7 @@ import { CoreContext } from '../core_context';
 import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
@@ -106,8 +106,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<Plugin>) {
-    const pluginEnableStatuses = new Map<PluginName, { plugin: Plugin; isEnabled: boolean }>();
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+    const pluginEnableStatuses = new Map<
+      PluginName,
+      { plugin: PluginWrapper; isEnabled: boolean }
+    >();
     await plugin$
       .pipe(
         mergeMap(async plugin => {
@@ -139,13 +142,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
 
   private shouldEnablePlugin(
     pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: Plugin; isEnabled: boolean }>
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
   ): boolean {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
     return (
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredDependencies.every(dependencyName =>
+      pluginInfo.plugin.requiredPlugins.every(dependencyName =>
         this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
       )
     );
