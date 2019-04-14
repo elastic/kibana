@@ -42,7 +42,7 @@ import {
 } from './routes';
 
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
-  const { savedObjectSchemas } = kbnServer.uiExports;
+  const { savedObjectSchemas = {} } = kbnServer.uiExports;
   return visibleTypes.filter(
     type =>
       !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false
