@@ -87,7 +87,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
     it('Make sure that we get Host Details data', () => {
       const expectedHost: GetHostDetailsQuery.Host = {
         architecture: ['x86_64'],
-        id: CURSOR_ID,
+        id: [CURSOR_ID],
         ip: [],
         mac: [],
         name: ['zeek-sensor-san-francisco'],

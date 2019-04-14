@@ -149,7 +149,7 @@ interface GenericDetailsProps {
 export const SystemGenericFileDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
   const id = data._id;
   const message: string | null = data.message != null ? data.message[0] : null;
-  const hostName: string | null | undefined = get('host.name[0]', data); // TODO: Array:host.name[0]
+  const hostName: string | null | undefined = get('host.name[0]', data);
   const userName: string | null | undefined = get('user.name[0]', data);
   const outcome: string | null | undefined = get('event.outcome[0]', data);
   const packageName: string | null | undefined = get('system.audit.package.name[0]', data);

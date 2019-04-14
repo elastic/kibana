@@ -69,7 +69,9 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
       },
       "geo": null,
       "host": Object {
-        "id": "0a63559c1acf4c419d979c4b4d8b83ff",
+        "id": Array [
+          "0a63559c1acf4c419d979c4b4d8b83ff",
+        ],
         "ip": Array [
           "139.59.11.147",
           "10.47.0.5",

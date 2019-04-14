@@ -26,7 +26,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
               ip: ['127.0.0.1'],
             },
             host: {
-              id: 'host-id-1',
+              id: ['host-id-1'],
               name: ['host-1'],
             },
           },
@@ -36,7 +36,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
               ip: ['8.8.8.8'],
             },
             host: {
-              id: 'host-id-1',
+              id: ['host-id-1'],
               name: ['host-2'],
             },
           },
@@ -57,7 +57,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
               ip: ['127.0.0.1'],
             },
             host: {
-              id: 'host-id-1',
+              id: ['host-id-1'],
               name: ['host-1'],
             },
           },
@@ -67,7 +67,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
               ip: ['8.8.8.8'],
             },
             host: {
-              id: 'host-id-1',
+              id: ['host-id-1'],
               name: ['host-2'],
             },
           },

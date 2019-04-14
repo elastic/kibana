@@ -74,7 +74,9 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
             },
             "geo": null,
             "host": Object {
-              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
               "ip": Array [
                 "46.101.3.136",
                 "10.16.0.5",
@@ -221,7 +223,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             },
             "geo": null,
             "host": Object {
-              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
               "ip": Array [
                 "46.101.3.136",
                 "10.16.0.5",

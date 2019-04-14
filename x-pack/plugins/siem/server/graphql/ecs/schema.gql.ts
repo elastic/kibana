@@ -84,7 +84,7 @@ export const ecsSchema = gql`
 
   type HostEcsFields {
     architecture: ToStringArray
-    id: String
+    id: ToStringArray
     ip: ToStringArray
     mac: ToStringArray
     name: ToStringArray

@@ -139,7 +139,7 @@ const getHostsColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null | undefined = get('host.name[0]', node);
-      const hostId: string | null | undefined = get('host.id', node);
+      const hostId: string | null | undefined = get('host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
         return (

@@ -34,7 +34,9 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
         ],
       },
       "host": Object {
-        "id": "37c81253e0fc4c46839c19b981be5177",
+        "id": Array [
+          "37c81253e0fc4c46839c19b981be5177",
+        ],
         "ip": Array [
           "207.154.238.205",
           "10.19.0.5",

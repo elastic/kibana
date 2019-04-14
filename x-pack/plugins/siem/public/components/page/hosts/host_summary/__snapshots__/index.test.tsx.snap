@@ -848,7 +848,9 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
           "architecture": Array [
             "x86_64",
           ],
-          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          "id": Array [
+            "aa7ca589f1b8220002f2fc61c64cfbf1",
+          ],
           "ip": Array [
             "10.142.0.7",
             "fe80::4001:aff:fe8e:7",

@@ -420,7 +420,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: ['zeek.connection'],
       },
       host: {
-        id: '37c81253e0fc4c46839c19b981be5177',
+        id: ['37c81253e0fc4c46839c19b981be5177'],
         name: ['zeek-franfurt'],
         ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
       },
@@ -468,7 +468,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: ['zeek.dns'],
       },
       host: {
-        id: 'af3fddf15f1d47979ce817ba0df10c6e',
+        id: ['af3fddf15f1d47979ce817ba0df10c6e'],
         name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
@@ -522,7 +522,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: ['zeek.http'],
       },
       host: {
-        id: 'af3fddf15f1d47979ce817ba0df10c6e',
+        id: ['af3fddf15f1d47979ce817ba0df10c6e'],
         name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
@@ -573,7 +573,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: ['zeek.notice'],
       },
       host: {
-        id: '37c81253e0fc4c46839c19b981be5177',
+        id: ['37c81253e0fc4c46839c19b981be5177'],
         name: ['zeek-franfurt'],
         ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
       },
@@ -622,7 +622,7 @@ export const mockTimelineData: TimelineItem[] = [
         id: null,
         dataset: ['zeek.ssl'],
       },
-      host: { id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9', name: ['zeek-sensor-amsterdam'], ip: null },
+      host: { id: ['2ce8b1e7d69e4a1d9c6bcddc473da9d9'], name: ['zeek-sensor-amsterdam'], ip: null },
       source: { ip: ['188.166.66.184'], port: ['34514'] },
       destination: { ip: ['91.189.95.15'], port: ['443'] },
       geo: { region_name: ['England'], country_iso_code: ['GB'] },
@@ -664,7 +664,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: ['zeek.files'],
       },
       host: {
-        id: 'af3fddf15f1d47979ce817ba0df10c6e',
+        id: ['af3fddf15f1d47979ce817ba0df10c6e'],
         name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
@@ -724,7 +724,7 @@ export const mockTimelineData: TimelineItem[] = [
         dataset: null,
       },
       host: {
-        id: 'f896741c3b3b44bdb8e351a4ab6d2d7c',
+        id: ['f896741c3b3b44bdb8e351a4ab6d2d7c'],
         name: ['zeek-sanfran'],
         ip: ['134.209.63.134', '10.46.0.5', 'fe80::a0d9:16ff:fecf:e70b'],
       },
@@ -781,7 +781,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
@@ -837,7 +837,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '0a63559c1acf4c419d979c4b4d8b83ff',
+        id: ['0a63559c1acf4c419d979c4b4d8b83ff'],
         name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
@@ -893,7 +893,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '0a63559c1acf4c419d979c4b4d8b83ff',
+        id: ['0a63559c1acf4c419d979c4b4d8b83ff'],
         name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
@@ -949,7 +949,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
@@ -1004,7 +1004,7 @@ export const mockTimelineData: TimelineItem[] = [
           sequence: null,
         },
       },
-      host: { id: 'aa7ca589f1b8220002f2fc61c64cfbf1', name: ['siem-kibana'], ip: null },
+      host: { id: ['aa7ca589f1b8220002f2fc61c64cfbf1'], name: ['siem-kibana'], ip: null },
       source: null,
       destination: null,
       geo: null,
@@ -1057,7 +1057,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '0a63559c1acf4c419d979c4b4d8b83ff',
+        id: ['0a63559c1acf4c419d979c4b4d8b83ff'],
         name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
@@ -1115,7 +1115,7 @@ export const mockTimelineData: TimelineItem[] = [
         },
       },
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
@@ -1188,7 +1188,7 @@ export const mockTimelineData: TimelineItem[] = [
         ctime: null,
       },
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
@@ -1247,7 +1247,7 @@ export const mockTimelineData: TimelineItem[] = [
       auditd: null,
       file: null,
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
@@ -1315,7 +1315,7 @@ export const mockTimelineData: TimelineItem[] = [
       auditd: null,
       file: null,
       host: {
-        id: '7c21f5ed03b04d0299569d221fe18bbc',
+        id: ['7c21f5ed03b04d0299569d221fe18bbc'],
         name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },

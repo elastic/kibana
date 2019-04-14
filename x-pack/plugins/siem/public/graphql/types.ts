@@ -238,7 +238,7 @@ export interface Location {
 export interface HostEcsFields {
   architecture?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
   ip?: ToStringArray | null;
 
@@ -1415,7 +1415,7 @@ export namespace GetAuthenticationsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };
@@ -1439,7 +1439,7 @@ export namespace GetAuthenticationsQuery {
   export type _Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };
@@ -1705,7 +1705,7 @@ export namespace GetEventsQuery {
 
     ip?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
   };
 
   export type _Source = {
@@ -1797,7 +1797,7 @@ export namespace GetHostDetailsQuery {
 
     architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     ip?: ToStringArray | null;
 
@@ -1903,7 +1903,7 @@ export namespace GetHostsTableQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
 
@@ -2023,7 +2023,7 @@ export namespace GetIpOverviewQuery {
 
     architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     ip?: ToStringArray | null;
 
@@ -2103,7 +2103,7 @@ export namespace GetIpOverviewQuery {
 
     architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     ip?: ToStringArray | null;
 
@@ -2905,7 +2905,7 @@ export namespace GetTimelineQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
 
@@ -3362,7 +3362,7 @@ export namespace GetUncommonProcessesQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };

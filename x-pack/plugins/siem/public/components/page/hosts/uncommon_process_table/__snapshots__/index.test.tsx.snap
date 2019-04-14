@@ -39,7 +39,9 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Array [
               Object {
-                "id": "host-id-1",
+                "id": Array [
+                  "host-id-1",
+                ],
                 "name": Array [
                   "hello-world",
                 ],
@@ -72,13 +74,17 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Array [
               Object {
-                "id": "host-id-1",
+                "id": Array [
+                  "host-id-1",
+                ],
                 "name": Array [
                   "hello-world",
                 ],
               },
               Object {
-                "id": "host-id-2",
+                "id": Array [
+                  "host-id-2",
+                ],
                 "name": Array [
                   "hello-world-2",
                 ],
@@ -148,7 +154,9 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
                 ],
               },
               Object {
-                "id": "host-id-1",
+                "id": Array [
+                  "host-id-1",
+                ],
                 "name": Array [
                   "hello-world",
                 ],
@@ -159,7 +167,9 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
                 ],
               },
               Object {
-                "id": "host-id-2",
+                "id": Array [
+                  "host-id-2",
+                ],
                 "name": Array [
                   "hello-world-2",
                 ],

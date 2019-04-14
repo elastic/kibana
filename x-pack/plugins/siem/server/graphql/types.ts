@@ -267,7 +267,7 @@ export interface Location {
 export interface HostEcsFields {
   architecture?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
   ip?: ToStringArray | null;
 
@@ -2238,7 +2238,7 @@ export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostEcsFields> {
     architecture?: ArchitectureResolver<ToStringArray | null, TypeParent, Context>;
 
-    id?: IdResolver<string | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
     ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2257,7 +2257,7 @@ export namespace HostEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
