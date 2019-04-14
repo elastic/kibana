@@ -18,6 +18,7 @@ import {
 
 import { useAppDependencies } from '../../../../../index';
 import { formatDate } from '../../../../../services/text';
+import { SnapshotState } from './snapshot_state';
 
 interface Props {
   snapshotDetails: any;
@@ -116,6 +117,23 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
       </EuiFlexGroup>
 
       <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="srSnapshotDetailsStateItem">
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
+              data-test-subj="srSnapshotDetailsStateTitle"
+              defaultMessage="State"
+            />
+          </EuiDescriptionListTitle>
+
+          <EuiDescriptionListDescription
+            className="eui-textBreakWord"
+            data-test-subj="srSnapshotDetailStateDescription"
+          >
+            <SnapshotState state={state} />
+          </EuiDescriptionListDescription>
+        </EuiFlexItem>
+
         <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalStateItem">
           <EuiDescriptionListTitle>
             <FormattedMessage
@@ -130,23 +148,6 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             data-test-subj="srSnapshotDetailIncludeGlobalStateDescription"
           >
             {includeGlobalStateToHumanizedMap[includeGlobalState]}
-          </EuiDescriptionListDescription>
-        </EuiFlexItem>
-
-        <EuiFlexItem data-test-subj="srSnapshotDetailsStateItem">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
-              data-test-subj="srSnapshotDetailsStateTitle"
-              defaultMessage="State"
-            />
-          </EuiDescriptionListTitle>
-
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailStateDescription"
-          >
-            {state}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -225,7 +226,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
               id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
               data-test-subj="srSnapshotDetailsDurationValue"
               defaultMessage="{seconds} seconds"
-              values={{ seconds: Math.round(durationInMillis / 1000) }}
+              values={{ seconds: Math.ceil(durationInMillis / 1000) }}
             />
           </EuiDescriptionListDescription>
         </EuiFlexItem>
