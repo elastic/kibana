@@ -19,7 +19,7 @@ export class StaticWorkpadPage extends PureComponent {
         key={pageId}
         id={pageId}
         data-test-subj="canvasWorkpadPage"
-        className={`canvasPage ${className}`}
+        className={`canvasPage kbn-resetFocusState ${className}`}
         data-shared-items-container
         style={{ ...pageStyle, ...animationStyle, height, width }}
       >
