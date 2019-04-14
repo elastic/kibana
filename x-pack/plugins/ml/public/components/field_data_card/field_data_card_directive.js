@@ -14,7 +14,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import chrome from 'ui/chrome';
-// import 'ui/filters/moment';
 
 import template from './field_data_card.html';
 import { ML_JOB_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
@@ -57,10 +56,7 @@ module.directive('mlFieldDataCard', function (config) {
     }
 
     scope.toMoment = function (datetime) {
-      const format = config.get('dateFormat');
-      if (moment.isMoment(datetime)) return datetime.format(format);
-      if (_.isDate(datetime)) return moment(datetime).format(format);
-      return datetime;
+      return moment(datetime).format(config.get('dateFormat'));
     };
 
     scope.getCardUrl = function () {

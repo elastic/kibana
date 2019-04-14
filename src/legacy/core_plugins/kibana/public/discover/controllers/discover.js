@@ -793,10 +793,7 @@ function discoverController(
   };
 
   $scope.toMoment = function (datetime) {
-    const format = config.get('dateFormat');
-    if (moment.isMoment(datetime)) return datetime.format(format);
-    if (_.isDate(datetime)) return moment(datetime).format(format);
-    return datetime;
+    return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.updateRefreshInterval = function () {
