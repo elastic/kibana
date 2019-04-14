@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../public/lib/helpers';
 import {
   Direction,
-  NetworkTopNFlowDirection,
+  FlowDirection,
+  FlowTarget,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
-const getUniDirectionalFilter = (networkTopNFlowDirection: NetworkTopNFlowDirection) =>
-  networkTopNFlowDirection === NetworkTopNFlowDirection.uniDirectional
+const getUniDirectionalFilter = (flowDirection: FlowDirection) =>
+  flowDirection === FlowDirection.uniDirectional
     ? {
         must_not: [
           {
@@ -28,13 +29,10 @@ const getUniDirectionalFilter = (networkTopNFlowDirection: NetworkTopNFlowDirect
       }
     : {};
 
-const getBiDirectionalFilter = (
-  networkTopNFlowDirection: NetworkTopNFlowDirection,
-  networkTopNFlowType: NetworkTopNFlowType
-) => {
+const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTarget) => {
   if (
-    networkTopNFlowDirection === NetworkTopNFlowDirection.biDirectional &&
-    [NetworkTopNFlowType.source, NetworkTopNFlowType.destination].includes(networkTopNFlowType)
+    flowDirection === FlowDirection.biDirectional &&
+    [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
   ) {
     return {
       must: [
@@ -51,8 +49,8 @@ const getBiDirectionalFilter = (
       ],
     };
   } else if (
-    networkTopNFlowDirection === NetworkTopNFlowDirection.biDirectional &&
-    [NetworkTopNFlowType.client, NetworkTopNFlowType.server].includes(networkTopNFlowType)
+    flowDirection === FlowDirection.biDirectional &&
+    [FlowTarget.client, FlowTarget.server].includes(flowTarget)
   ) {
     return {
       must: [
@@ -72,10 +70,10 @@ const getBiDirectionalFilter = (
   return [];
 };
 
-const getCountAgg = (networkTopNFlowType: NetworkTopNFlowType) => ({
+const getCountAgg = (flowTarget: FlowTarget) => ({
   top_n_flow_count: {
     cardinality: {
-      field: `${networkTopNFlowType}.ip`,
+      field: `${flowTarget}.ip`,
     },
   },
 });
@@ -83,9 +81,9 @@ const getCountAgg = (networkTopNFlowType: NetworkTopNFlowType) => ({
 export const buildTopNFlowQuery = ({
   fields,
   filterQuery,
-  networkTopNFlowDirection,
+  flowDirection,
   networkTopNFlowSort,
-  networkTopNFlowType,
+  flowTarget,
   timerange: { from, to },
   pagination: { limit },
   sourceConfiguration: {
@@ -105,25 +103,15 @@ export const buildTopNFlowQuery = ({
     ignoreUnavailable: true,
     body: {
       aggregations: {
-        ...getCountAgg(networkTopNFlowType),
-        ...getUniDirectionAggs(
-          networkTopNFlowDirection,
-          networkTopNFlowSort,
-          networkTopNFlowType,
-          limit
-        ),
-        ...getBiDirectionAggs(
-          networkTopNFlowDirection,
-          networkTopNFlowSort,
-          networkTopNFlowType,
-          limit
-        ),
+        ...getCountAgg(flowTarget),
+        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
+        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
       },
       query: {
         bool: {
           filter,
-          ...getUniDirectionalFilter(networkTopNFlowDirection),
-          ...getBiDirectionalFilter(networkTopNFlowDirection, networkTopNFlowType),
+          ...getUniDirectionalFilter(flowDirection),
+          ...getBiDirectionalFilter(flowDirection, flowTarget),
         },
       },
     },
@@ -134,16 +122,16 @@ export const buildTopNFlowQuery = ({
 };
 
 const getUniDirectionAggs = (
-  networkTopNFlowDirection: NetworkTopNFlowDirection,
+  flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
-  networkTopNFlowType: NetworkTopNFlowType,
+  flowTarget: FlowTarget,
   limit: number
 ) =>
-  networkTopNFlowDirection === NetworkTopNFlowDirection.uniDirectional
+  flowDirection === FlowDirection.uniDirectional
     ? {
         top_uni_flow: {
           terms: {
-            field: `${networkTopNFlowType}.ip`,
+            field: `${flowTarget}.ip`,
             size: limit + 1,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
@@ -162,7 +150,7 @@ const getUniDirectionAggs = (
             },
             domain: {
               terms: {
-                field: `${networkTopNFlowType}.domain`,
+                field: `${flowTarget}.domain`,
                 order: {
                   timestamp: 'desc',
                 },
@@ -178,9 +166,7 @@ const getUniDirectionAggs = (
             ip_count: {
               cardinality: {
                 field: `${
-                  networkTopNFlowType === NetworkTopNFlowType.source
-                    ? NetworkTopNFlowType.destination
-                    : NetworkTopNFlowType.source
+                  flowTarget === FlowTarget.source ? FlowTarget.destination : FlowTarget.source
                 }.ip`,
               },
             },
@@ -200,16 +186,16 @@ const getUniDirectionAggs = (
     : {};
 
 const getBiDirectionAggs = (
-  networkTopNFlowDirection: NetworkTopNFlowDirection,
+  flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
-  networkTopNFlowType: NetworkTopNFlowType,
+  flowTarget: FlowTarget,
   limit: number
 ) =>
-  networkTopNFlowDirection === NetworkTopNFlowDirection.biDirectional
+  flowDirection === FlowDirection.biDirectional
     ? {
         top_bi_flow: {
           terms: {
-            field: `${networkTopNFlowType}.ip`,
+            field: `${flowTarget}.ip`,
             size: limit + 1,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
@@ -218,7 +204,7 @@ const getBiDirectionAggs = (
           aggs: {
             bytes: {
               sum: {
-                field: `${networkTopNFlowType}.bytes`,
+                field: `${flowTarget}.bytes`,
               },
             },
             direction: {
@@ -228,7 +214,7 @@ const getBiDirectionAggs = (
             },
             domain: {
               terms: {
-                field: `${networkTopNFlowType}.domain`,
+                field: `${flowTarget}.domain`,
                 order: {
                   timestamp: 'desc',
                 },
@@ -243,12 +229,12 @@ const getBiDirectionAggs = (
             },
             ip_count: {
               cardinality: {
-                field: `${getOppositeField(networkTopNFlowType)}.ip`,
+                field: `${getOppositeField(flowTarget)}.ip`,
               },
             },
             packets: {
               sum: {
-                field: `${networkTopNFlowType}.packets`,
+                field: `${flowTarget}.packets`,
               },
             },
             timestamp: {
@@ -261,22 +247,18 @@ const getBiDirectionAggs = (
       }
     : {};
 
-const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType): NetworkTopNFlowType => {
-  switch (networkTopNFlowType) {
-    case NetworkTopNFlowType.source:
-      return NetworkTopNFlowType.destination;
-    case NetworkTopNFlowType.destination:
-      return NetworkTopNFlowType.source;
-    case NetworkTopNFlowType.server:
-      return NetworkTopNFlowType.client;
-    case NetworkTopNFlowType.client:
-      return NetworkTopNFlowType.server;
+const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return FlowTarget.destination;
+    case FlowTarget.destination:
+      return FlowTarget.source;
+    case FlowTarget.server:
+      return FlowTarget.client;
+    case FlowTarget.client:
+      return FlowTarget.server;
   }
-  assertUnreachable(networkTopNFlowType);
-};
-
-const assertUnreachable = (x: never): never => {
-  throw new Error(`Unknown Field in switch statement ${x}`);
+  assertUnreachable(flowTarget);
 };
 
 type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };

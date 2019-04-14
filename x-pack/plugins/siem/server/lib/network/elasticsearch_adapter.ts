@@ -7,11 +7,11 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
+  FlowDirection,
+  FlowTarget,
   NetworkDnsEdges,
   NetworkTopNFlowData,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -64,7 +64,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
-    const networkDnsEdges: NetworkDnsEdges[] = formatDnsEgdes(
+    const networkDnsEdges: NetworkDnsEdges[] = formatDnsEdges(
       getOr([], 'aggregations.dns_name_query_count.buckets', response)
     );
     const hasNextPage = networkDnsEdges.length > limit;
@@ -89,27 +89,27 @@ const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
-  if (options.networkTopNFlowDirection === NetworkTopNFlowDirection.uniDirectional) {
-    return formatTopNFlowEgdes(
+  if (options.flowDirection === FlowDirection.uniDirectional) {
+    return formatTopNFlowEdges(
       getOr([], 'aggregations.top_uni_flow.buckets', response),
-      options.networkTopNFlowType
+      options.flowTarget
     );
   }
-  return formatTopNFlowEgdes(
+  return formatTopNFlowEdges(
     getOr([], 'aggregations.top_bi_flow.buckets', response),
-    options.networkTopNFlowType
+    options.flowTarget
   );
 };
 
-const formatTopNFlowEgdes = (
+const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
-  networkTopNFlowType: NetworkTopNFlowType
+  flowTarget: FlowTarget
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {
       _id: bucket.key,
       timestamp: bucket.timestamp.value_as_string,
-      [networkTopNFlowType]: {
+      [flowTarget]: {
         count: getOrNumber('ip_count.value', bucket),
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
@@ -126,7 +126,7 @@ const formatTopNFlowEgdes = (
     },
   }));
 
-const formatDnsEgdes = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
+const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
   buckets.map((bucket: NetworkDnsBuckets) => ({
     node: {
       _id: bucket.key,

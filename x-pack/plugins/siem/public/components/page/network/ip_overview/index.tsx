@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { IpOverviewData, IpOverviewType, Overview } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { FlowDirection, FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
+import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 
 import {
   autonomousSystemRenderer,
@@ -32,7 +32,6 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from './field_renderers';
-import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 export const IpOverviewId = 'ip-overview';
@@ -47,42 +46,34 @@ interface DescriptionList {
 }
 
 interface OwnProps {
-  ip: string;
   data: IpOverviewData;
+  flowTarget: FlowTarget;
+  ip: string;
   loading: boolean;
   type: networkModel.NetworkType;
+  updateFlowTargetAction: ActionCreator<{ flowTarget: FlowTarget }>;
 }
 
-interface IpOverviewReduxProps {
-  flowType: IpOverviewType;
-}
+type IpOverviewProps = OwnProps;
 
-interface IpOverViewDispatchProps {
-  updateIpOverviewFlowType: ActionCreator<{
-    flowType: IpOverviewType;
-  }>;
-}
-
-type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps;
-
-class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
+export class IpOverview extends React.PureComponent<IpOverviewProps> {
   public render() {
-    const { ip, data, loading, flowType } = this.props;
-    const typeData: Overview = data[flowType]!;
+    const { ip, data, loading, flowTarget, updateFlowTargetAction } = this.props;
+    const typeData: Overview = data[flowTarget]!;
 
     const descriptionLists: Readonly<DescriptionList[][]> = [
       [
         {
           title: i18n.LOCATION,
           description: locationRenderer(
-            [`${flowType}.geo.city_name`, `${flowType}.geo.region_name`],
+            [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
             data
           ),
         },
         {
           title: i18n.AUTONOMOUS_SYSTEM,
           description: typeData
-            ? autonomousSystemRenderer(typeData.autonomousSystem, flowType)
+            ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
             : getEmptyTagValue(),
         },
       ],
@@ -114,12 +105,14 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
               <h1>{ip}</h1>
             </EuiText>
           </EuiFlexItem>
-          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
-            <SelectType
-              id={`${IpOverviewId}-select-type`}
-              selectedType={flowType}
-              onChangeType={this.onChangeType}
+          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
+            <FlowTargetSelect
+              id={IpOverviewId}
               isLoading={loading}
+              selectedDirection={FlowDirection.uniDirectional}
+              selectedTarget={flowTarget}
+              displayTextOverride={[i18n.AS_SOURCE, i18n.AS_DESTINATION]}
+              updateFlowTargetAction={updateFlowTargetAction}
             />
           </SelectTypeItem>
         </EuiFlexGroup>
@@ -157,21 +150,4 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
       </EuiFlexItem>
     );
   };
-
-  private onChangeType = (flowType: IpOverviewType) => {
-    this.props.updateIpOverviewFlowType({ flowType });
-  };
 }
-
-const makeMapStateToProps = () => {
-  const getIpOverviewSelector = networkSelectors.ipOverviewSelector();
-  const mapStateToProps = (state: State) => getIpOverviewSelector(state);
-  return mapStateToProps;
-};
-
-export const IpOverview = connect(
-  makeMapStateToProps,
-  {
-    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
-  }
-)(IpOverviewComponent);

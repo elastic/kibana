@@ -10,7 +10,7 @@ import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
-import { createIpOverviewResolvers } from './graphql/ip_overview';
+import { createIpDetailsResolvers } from './graphql/ip_details';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createOverviewResolvers } from './graphql/overview';
@@ -35,7 +35,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,
-      createIpOverviewResolvers(libs) as IResolvers,
+      createIpDetailsResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarToStringArrayValueResolvers() as IResolvers,
       createOverviewResolvers(libs) as IResolvers,

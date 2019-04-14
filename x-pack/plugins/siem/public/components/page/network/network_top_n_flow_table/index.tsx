@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -12,18 +12,19 @@ import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import {
-  NetworkTopNFlowDirection,
+  FlowDirection,
+  FlowTarget,
   NetworkTopNFlowEdges,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { CountBadge } from '../../index';
 
 import { getNetworkTopNFlowColumns } from './columns';
-import { SelectDirection } from './select_direction';
-import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -39,14 +40,14 @@ interface OwnProps {
 
 interface NetworkTopNFlowTableReduxProps {
   limit: number;
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
-  topNFlowType: NetworkTopNFlowType;
+  flowTarget: FlowTarget;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
   updateTopNFlowDirection: ActionCreator<{
-    topNFlowDirection: NetworkTopNFlowDirection;
+    flowDirection: FlowDirection;
     networkType: networkModel.NetworkType;
   }>;
   updateTopNFlowLimit: ActionCreator<{
@@ -57,9 +58,8 @@ interface NetworkTopNFlowTableDispatchProps {
     topNFlowSort: NetworkTopNFlowSortField;
     networkType: networkModel.NetworkType;
   }>;
-  updateTopNFlowType: ActionCreator<{
-    topNFlowType: NetworkTopNFlowType;
-    networkType: networkModel.NetworkType;
+  updateTopNFlowTarget: ActionCreator<{
+    flowTarget: FlowTarget;
   }>;
 }
 
@@ -86,10 +86,6 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
-
 export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
 
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
@@ -104,23 +100,24 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       nextCursor,
       updateTopNFlowLimit,
       startDate,
-      topNFlowDirection,
+      flowDirection,
       topNFlowSort,
-      topNFlowType,
+      flowTarget,
       type,
+      updateTopNFlowTarget,
     } = this.props;
 
     const field =
       topNFlowSort.field === NetworkTopNFlowFields.ipCount
-        ? `node.${topNFlowType}.count`
+        ? `node.${flowTarget}.count`
         : `node.network.${topNFlowSort.field}`;
 
     return (
       <LoadMoreTable
         columns={getNetworkTopNFlowColumns(
           startDate,
-          topNFlowDirection,
-          topNFlowType,
+          flowDirection,
+          flowTarget,
           type,
           NetworkTopNFlowTableId
         )}
@@ -148,22 +145,28 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                 </EuiFlexItem>
                 <SelectTypeItem
                   grow={false}
-                  data-test-subj={`${NetworkTopNFlowTableId}-select-type`}
+                  data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
                 >
-                  <SelectType
-                    id={`${NetworkTopNFlowTableId}-select-type`}
-                    selectedDirection={topNFlowDirection}
-                    selectedType={topNFlowType}
-                    onChangeType={this.onChangeTopNFlowType}
+                  <FlowTargetSelect
+                    id={NetworkTopNFlowTableId}
                     isLoading={loading}
+                    selectedDirection={flowDirection}
+                    selectedTarget={flowTarget}
+                    displayTextOverride={[
+                      i18n.BY_SOURCE_IP,
+                      i18n.BY_DESTINATION_IP,
+                      i18n.BY_CLIENT_IP,
+                      i18n.BY_SERVER_IP,
+                    ]}
+                    updateFlowTargetAction={updateTopNFlowTarget}
                   />
                 </SelectTypeItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SelectDirection
-                id={`${NetworkTopNFlowTableId}-select-direction`}
-                selectedDirection={topNFlowDirection}
+              <FlowDirectionSelect
+                id={NetworkTopNFlowTableId}
+                selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />
             </EuiFlexItem>
@@ -190,11 +193,8 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     }
   };
 
-  private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
-    this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
-
-  private onChangeTopNFlowDirection = (_: string, topNFlowDirection: NetworkTopNFlowDirection) =>
-    this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
+  private onChangeTopNFlowDirection = (_: string, flowDirection: FlowDirection) =>
+    this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });
 }
 
 const makeMapStateToProps = () => {
@@ -208,7 +208,7 @@ export const NetworkTopNFlowTable = connect(
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTopNFlowType: networkActions.updateTopNFlowType,
+    updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
   }
 )(NetworkTopNFlowTableComponent);

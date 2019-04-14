@@ -9,22 +9,22 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
-    $direction: NetworkTopNFlowDirection!
+    $flowDirection: FlowDirection!
     $filterQuery: String
     $pagination: PaginationInput!
     $sort: NetworkTopNFlowSortField!
-    $type: NetworkTopNFlowType!
+    $flowTarget: FlowTarget!
     $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id
       NetworkTopNFlow(
-        direction: $direction
         filterQuery: $filterQuery
+        flowDirection: $flowDirection
+        flowTarget: $flowTarget
         pagination: $pagination
         sort: $sort
         timerange: $timerange
-        type: $type
       ) {
         totalCount
         edges {

@@ -29,7 +29,7 @@ export const buildLastFirstSeenHostQuery = ({
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 

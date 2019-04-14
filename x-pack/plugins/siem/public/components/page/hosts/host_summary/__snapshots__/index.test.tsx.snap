@@ -172,16 +172,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
       First Seen
     </dt>
     <div>
-      Network error: No more mocked responses for the query: query GetHostFirstLastSeenQuery($sourceId: ID!, $hostName: String!) {
-  source(id: $sourceId) {
-    id
-    HostFirstLastSeen(hostName: $hostName) {
-      firstSeen
-      lastSeen
-    }
-  }
-}
-, variables: {"sourceId":"default","hostName":"siem-kibana"}
+      --
     </div>
     <dt
       class="euiDescriptionList__title"
@@ -189,16 +180,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
       Last Seen
     </dt>
     <div>
-      Network error: No more mocked responses for the query: query GetHostFirstLastSeenQuery($sourceId: ID!, $hostName: String!) {
-  source(id: $sourceId) {
-    id
-    HostFirstLastSeen(hostName: $hostName) {
-      firstSeen
-      lastSeen
-    }
-  }
-}
-, variables: {"sourceId":"default","hostName":"siem-kibana"}
+      --
     </div>
     <dt
       class="euiDescriptionList__title"
