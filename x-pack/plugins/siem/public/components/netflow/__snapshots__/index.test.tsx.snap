@@ -170,7 +170,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     networkBytes={
       Array [
-        100,
+        "100",
       ]
     }
     networkCommunityId={
@@ -185,7 +185,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
     networkPackets={
       Array [
-        3,
+        "3",
       ]
     }
     networkProtocol={

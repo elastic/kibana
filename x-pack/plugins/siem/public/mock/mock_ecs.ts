@@ -464,7 +464,7 @@ export const mockEcsData: Ecs[] = [
     },
     suricata: null,
     network: {
-      transport: 'tcp',
+      transport: ['tcp'],
     },
     http: null,
     url: null,
@@ -514,7 +514,7 @@ export const mockEcsData: Ecs[] = [
     },
     suricata: null,
     network: {
-      transport: 'udp',
+      transport: ['udp'],
     },
     http: null,
     url: null,
@@ -571,19 +571,19 @@ export const mockEcsData: Ecs[] = [
     suricata: null,
     network: null,
     http: {
-      version: '1.1',
+      version: ['1.1'],
       request: {
         method: null,
         body: {
-          bytes: 0,
+          bytes: ['0'],
           content: null,
         },
         referrer: null,
       },
       response: {
-        status_code: 302,
+        status_code: ['302'],
         body: {
-          bytes: 154,
+          bytes: ['154'],
           content: null,
         },
       },

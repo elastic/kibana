@@ -2863,7 +2863,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2871,7 +2871,7 @@
             "name": "community_id",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2879,7 +2879,7 @@
             "name": "direction",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2887,7 +2887,7 @@
             "name": "packets",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2895,7 +2895,7 @@
             "name": "protocol",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2903,7 +2903,7 @@
             "name": "transport",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3057,7 +3057,7 @@
             "name": "sha1",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3095,7 +3095,7 @@
             "name": "hash",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3666,7 +3666,7 @@
             "name": "version",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3701,7 +3701,7 @@
             "name": "method",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3717,7 +3717,7 @@
             "name": "referrer",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3725,7 +3725,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3744,7 +3744,7 @@
             "name": "content",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3752,7 +3752,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3771,7 +3771,7 @@
             "name": "status_code",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3787,7 +3787,7 @@
             "name": "bytes",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3806,7 +3806,7 @@
             "name": "domain",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3814,7 +3814,7 @@
             "name": "original",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3822,7 +3822,7 @@
             "name": "username",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3830,7 +3830,7 @@
             "name": "password",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

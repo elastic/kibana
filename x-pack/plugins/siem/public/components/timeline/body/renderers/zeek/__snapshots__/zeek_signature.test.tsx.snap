@@ -44,7 +44,9 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
       },
       "http": null,
       "network": Object {
-        "transport": "tcp",
+        "transport": Array [
+          "tcp",
+        ],
       },
       "source": Object {
         "ip": Array [

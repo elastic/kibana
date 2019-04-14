@@ -463,17 +463,17 @@ export interface EventEcsFields {
 }
 
 export interface NetworkEcsField {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  community_id?: string | null;
+  community_id?: ToStringArray | null;
 
-  direction?: string | null;
+  direction?: ToStringArray | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 
-  protocol?: string | null;
+  protocol?: ToStringArray | null;
 
-  transport?: string | null;
+  transport?: ToStringArray | null;
 }
 
 export interface SuricataEcsFields {
@@ -507,7 +507,7 @@ export interface TlsClientCertificateData {
 }
 
 export interface FingerprintData {
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 }
 
 export interface TlsFingerprintsData {
@@ -515,7 +515,7 @@ export interface TlsFingerprintsData {
 }
 
 export interface TlsJa3Data {
-  hash?: string | null;
+  hash?: ToStringArray | null;
 }
 
 export interface TlsServerCertificateData {
@@ -651,7 +651,7 @@ export interface ZeekSslData {
 }
 
 export interface HttpEcsFields {
-  version?: string | null;
+  version?: ToStringArray | null;
 
   request?: HttpRequestData | null;
 
@@ -659,37 +659,37 @@ export interface HttpEcsFields {
 }
 
 export interface HttpRequestData {
-  method?: string | null;
+  method?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  referrer?: string | null;
+  referrer?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface HttpBodyData {
-  content?: string | null;
+  content?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: number | null;
+  status_code?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface UrlEcsFields {
-  domain?: string | null;
+  domain?: ToStringArray | null;
 
-  original?: string | null;
+  original?: ToStringArray | null;
 
-  username?: string | null;
+  username?: ToStringArray | null;
 
-  password?: string | null;
+  password?: ToStringArray | null;
 }
 
 export interface ProcessEcsFields {
@@ -2901,46 +2901,46 @@ export namespace EventEcsFieldsResolvers {
 
 export namespace NetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
 
-    community_id?: CommunityIdResolver<string | null, TypeParent, Context>;
+    community_id?: CommunityIdResolver<ToStringArray | null, TypeParent, Context>;
 
-    direction?: DirectionResolver<string | null, TypeParent, Context>;
+    direction?: DirectionResolver<ToStringArray | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
 
-    protocol?: ProtocolResolver<string | null, TypeParent, Context>;
+    protocol?: ProtocolResolver<ToStringArray | null, TypeParent, Context>;
 
-    transport?: TransportResolver<string | null, TypeParent, Context>;
+    transport?: TransportResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CommunityIdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DirectionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ProtocolResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransportResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3051,11 +3051,11 @@ export namespace TlsClientCertificateDataResolvers {
 
 export namespace FingerprintDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = FingerprintData> {
-    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+    sha1?: Sha1Resolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type Sha1Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FingerprintData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3075,11 +3075,11 @@ export namespace TlsFingerprintsDataResolvers {
 
 export namespace TlsJa3DataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TlsJa3Data> {
-    hash?: HashResolver<string | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type HashResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = TlsJa3Data,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3533,7 +3533,7 @@ export namespace ZeekSslDataResolvers {
 
 export namespace HttpEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpEcsFields> {
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
 
     request?: RequestResolver<HttpRequestData | null, TypeParent, Context>;
 
@@ -3541,7 +3541,7 @@ export namespace HttpEcsFieldsResolvers {
   }
 
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3559,17 +3559,17 @@ export namespace HttpEcsFieldsResolvers {
 
 export namespace HttpRequestDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpRequestData> {
-    method?: MethodResolver<string | null, TypeParent, Context>;
+    method?: MethodResolver<ToStringArray | null, TypeParent, Context>;
 
     body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
 
-    referrer?: ReferrerResolver<string | null, TypeParent, Context>;
+    referrer?: ReferrerResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type MethodResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3579,12 +3579,12 @@ export namespace HttpRequestDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ReferrerResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3592,18 +3592,18 @@ export namespace HttpRequestDataResolvers {
 
 export namespace HttpBodyDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpBodyData> {
-    content?: ContentResolver<string | null, TypeParent, Context>;
+    content?: ContentResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ContentResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpBodyData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = HttpBodyData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3611,15 +3611,15 @@ export namespace HttpBodyDataResolvers {
 
 export namespace HttpResponseDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpResponseData> {
-    status_code?: StatusCodeResolver<number | null, TypeParent, Context>;
+    status_code?: StatusCodeResolver<ToStringArray | null, TypeParent, Context>;
 
     body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type StatusCodeResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3629,7 +3629,7 @@ export namespace HttpResponseDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3637,32 +3637,32 @@ export namespace HttpResponseDataResolvers {
 
 export namespace UrlEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = UrlEcsFields> {
-    domain?: DomainResolver<string | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
-    original?: OriginalResolver<string | null, TypeParent, Context>;
+    original?: OriginalResolver<ToStringArray | null, TypeParent, Context>;
 
-    username?: UsernameResolver<string | null, TypeParent, Context>;
+    username?: UsernameResolver<ToStringArray | null, TypeParent, Context>;
 
-    password?: PasswordResolver<string | null, TypeParent, Context>;
+    password?: PasswordResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type DomainResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OriginalResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type UsernameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PasswordResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

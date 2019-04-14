@@ -75,7 +75,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           }
           networkBytes={
             Array [
-              100,
+              "100",
             ]
           }
           networkCommunityId={
@@ -90,7 +90,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
           }
           networkPackets={
             Array [
-              3,
+              "3",
             ]
           }
           networkProtocol={

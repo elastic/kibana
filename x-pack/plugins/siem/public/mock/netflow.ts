@@ -31,12 +31,12 @@ export const getMockNetflowData = (): Ecs => ({
   },
   _id: 'abcd',
   network: {
-    bytes: 100,
-    community_id: 'we.live.in.a',
-    direction: 'outgoing',
-    packets: 3,
-    protocol: 'http',
-    transport: 'tcp',
+    bytes: ['100'],
+    community_id: ['we.live.in.a'],
+    direction: ['outgoing'],
+    packets: ['3'],
+    protocol: ['http'],
+    transport: ['tcp'],
   },
   process: {
     name: ['rat'],
@@ -58,17 +58,17 @@ export const getMockNetflowData = (): Ecs => ({
   tls: {
     client_certificate: {
       fingerprint: {
-        sha1: 'tls.client_certificate.fingerprint.sha1-value',
+        sha1: ['tls.client_certificate.fingerprint.sha1-value'],
       },
     },
     fingerprints: {
       ja3: {
-        hash: 'tls.fingerprints.ja3.hash-value',
+        hash: ['tls.fingerprints.ja3.hash-value'],
       },
     },
     server_certificate: {
       fingerprint: {
-        sha1: 'tls.server_certificate.fingerprint.sha1-value',
+        sha1: ['tls.server_certificate.fingerprint.sha1-value'],
       },
     },
   },

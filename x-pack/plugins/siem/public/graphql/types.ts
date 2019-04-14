@@ -434,17 +434,17 @@ export interface EventEcsFields {
 }
 
 export interface NetworkEcsField {
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 
-  community_id?: string | null;
+  community_id?: ToStringArray | null;
 
-  direction?: string | null;
+  direction?: ToStringArray | null;
 
-  packets?: number | null;
+  packets?: ToStringArray | null;
 
-  protocol?: string | null;
+  protocol?: ToStringArray | null;
 
-  transport?: string | null;
+  transport?: ToStringArray | null;
 }
 
 export interface SuricataEcsFields {
@@ -478,7 +478,7 @@ export interface TlsClientCertificateData {
 }
 
 export interface FingerprintData {
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 }
 
 export interface TlsFingerprintsData {
@@ -486,7 +486,7 @@ export interface TlsFingerprintsData {
 }
 
 export interface TlsJa3Data {
-  hash?: string | null;
+  hash?: ToStringArray | null;
 }
 
 export interface TlsServerCertificateData {
@@ -622,7 +622,7 @@ export interface ZeekSslData {
 }
 
 export interface HttpEcsFields {
-  version?: string | null;
+  version?: ToStringArray | null;
 
   request?: HttpRequestData | null;
 
@@ -630,37 +630,37 @@ export interface HttpEcsFields {
 }
 
 export interface HttpRequestData {
-  method?: string | null;
+  method?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  referrer?: string | null;
+  referrer?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface HttpBodyData {
-  content?: string | null;
+  content?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: number | null;
+  status_code?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: number | null;
+  bytes?: ToStringArray | null;
 }
 
 export interface UrlEcsFields {
-  domain?: string | null;
+  domain?: ToStringArray | null;
 
-  original?: string | null;
+  original?: ToStringArray | null;
 
-  username?: string | null;
+  username?: ToStringArray | null;
 
-  password?: string | null;
+  password?: ToStringArray | null;
 }
 
 export interface ProcessEcsFields {
@@ -3007,23 +3007,23 @@ export namespace GetTimelineQuery {
   export type Network = {
     __typename?: 'NetworkEcsField';
 
-    bytes?: number | null;
+    bytes?: ToStringArray | null;
 
-    community_id?: string | null;
+    community_id?: ToStringArray | null;
 
-    direction?: string | null;
+    direction?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToStringArray | null;
 
-    protocol?: string | null;
+    protocol?: ToStringArray | null;
 
-    transport?: string | null;
+    transport?: ToStringArray | null;
   };
 
   export type Http = {
     __typename?: 'HttpEcsFields';
 
-    version?: string | null;
+    version?: ToStringArray | null;
 
     request?: Request | null;
 
@@ -3033,25 +3033,25 @@ export namespace GetTimelineQuery {
   export type Request = {
     __typename?: 'HttpRequestData';
 
-    method?: string | null;
+    method?: ToStringArray | null;
 
     body?: Body | null;
 
-    referrer?: string | null;
+    referrer?: ToStringArray | null;
   };
 
   export type Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: number | null;
+    bytes?: ToStringArray | null;
 
-    content?: string | null;
+    content?: ToStringArray | null;
   };
 
   export type Response = {
     __typename?: 'HttpResponseData';
 
-    status_code?: number | null;
+    status_code?: ToStringArray | null;
 
     body?: _Body | null;
   };
@@ -3059,9 +3059,9 @@ export namespace GetTimelineQuery {
   export type _Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: number | null;
+    bytes?: ToStringArray | null;
 
-    content?: string | null;
+    content?: ToStringArray | null;
   };
 
   export type Tls = {
@@ -3083,7 +3083,7 @@ export namespace GetTimelineQuery {
   export type Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
   };
 
   export type Fingerprints = {
@@ -3095,7 +3095,7 @@ export namespace GetTimelineQuery {
   export type Ja3 = {
     __typename?: 'TlsJa3Data';
 
-    hash?: string | null;
+    hash?: ToStringArray | null;
   };
 
   export type ServerCertificate = {
@@ -3107,19 +3107,19 @@ export namespace GetTimelineQuery {
   export type _Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
   };
 
   export type Url = {
     __typename?: 'UrlEcsFields';
 
-    original?: string | null;
+    original?: ToStringArray | null;
 
-    domain?: string | null;
+    domain?: ToStringArray | null;
 
-    username?: string | null;
+    username?: ToStringArray | null;
 
-    password?: string | null;
+    password?: ToStringArray | null;
   };
 
   export type User = {

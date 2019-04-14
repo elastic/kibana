@@ -142,11 +142,11 @@ export const ecsSchema = gql`
   }
 
   type TlsJa3Data {
-    hash: String
+    hash: ToStringArray
   }
 
   type FingerprintData {
-    sha1: String
+    sha1: ToStringArray
   }
 
   type TlsClientCertificateData {
@@ -225,34 +225,34 @@ export const ecsSchema = gql`
   }
 
   type HttpBodyData {
-    content: String
-    bytes: Float
+    content: ToStringArray
+    bytes: ToStringArray
   }
 
   type HttpRequestData {
-    method: String
+    method: ToStringArray
     body: HttpBodyData
-    referrer: String
-    bytes: Float
+    referrer: ToStringArray
+    bytes: ToStringArray
   }
 
   type HttpResponseData {
-    status_code: Float
+    status_code: ToStringArray
     body: HttpBodyData
-    bytes: Float
+    bytes: ToStringArray
   }
 
   type HttpEcsFields {
-    version: String
+    version: ToStringArray
     request: HttpRequestData
     response: HttpResponseData
   }
 
   type UrlEcsFields {
-    domain: String
-    original: String
-    username: String
-    password: String
+    domain: ToStringArray
+    original: ToStringArray
+    username: ToStringArray
+    password: ToStringArray
   }
 
   type ZeekFileData {
@@ -303,12 +303,12 @@ export const ecsSchema = gql`
   }
 
   type NetworkEcsField {
-    bytes: Float
-    community_id: String
-    direction: String
-    packets: Float
-    protocol: String
-    transport: String
+    bytes: ToStringArray
+    community_id: ToStringArray
+    direction: ToStringArray
+    packets: ToStringArray
+    protocol: ToStringArray
+    transport: ToStringArray
   }
 
   type PackageEcsFields {

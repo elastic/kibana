@@ -428,7 +428,7 @@ export const mockTimelineData: TimelineItem[] = [
       destination: { ip: ['207.154.238.205'], port: ['11568'] },
       geo: { region_name: ['New York'], country_iso_code: ['US'] },
       suricata: null,
-      network: { transport: 'tcp' },
+      network: { transport: ['tcp'] },
       http: null,
       url: null,
       zeek: {
@@ -476,7 +476,7 @@ export const mockTimelineData: TimelineItem[] = [
       destination: { ip: ['67.207.67.3'], port: ['53'] },
       geo: { region_name: ['New York'], country_iso_code: ['US'] },
       suricata: null,
-      network: { transport: 'udp' },
+      network: { transport: ['udp'] },
       http: null,
       url: null,
       zeek: {
@@ -532,9 +532,9 @@ export const mockTimelineData: TimelineItem[] = [
       suricata: null,
       network: null,
       http: {
-        version: '1.1',
-        request: { method: null, body: { bytes: 0, content: null }, referrer: null },
-        response: { status_code: 302, body: { bytes: 154, content: null } },
+        version: ['1.1'],
+        request: { method: null, body: { bytes: ['0'], content: null }, referrer: null },
+        response: { status_code: ['302'], body: { bytes: ['154'], content: null } },
       },
       url: null,
       zeek: {
