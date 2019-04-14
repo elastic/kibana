@@ -28,7 +28,7 @@ export function injectVars(server) {
 
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
   const { types: allTypes } = server.savedObjects;
-  const { savedObjectSchemas } = server.kibanaMigrator.kbnServer.uiExports;
+  const { savedObjectSchemas = {} } = server.kibanaMigrator.kbnServer.uiExports;
   const importAndExportableTypes = allTypes.filter(
     type => !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false
   );
