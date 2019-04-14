@@ -80,7 +80,9 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
                 "10.16.0.5",
                 "fe80::4066:42ff:fe19:b3b9",
               ],
-              "name": "zeek-london",
+              "name": Array [
+                "zeek-london",
+              ],
             },
             "http": null,
             "network": null,
@@ -225,7 +227,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
                 "10.16.0.5",
                 "fe80::4066:42ff:fe19:b3b9",
               ],
-              "name": "zeek-london",
+              "name": Array [
+                "zeek-london",
+              ],
             },
             "http": null,
             "network": null,

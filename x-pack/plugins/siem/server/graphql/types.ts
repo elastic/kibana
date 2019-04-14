@@ -265,19 +265,19 @@ export interface Location {
 }
 
 export interface HostEcsFields {
-  architecture?: string | null;
+  architecture?: ToStringArray | null;
 
   id?: string | null;
 
-  ip?: (string | null)[] | null;
+  ip?: ToStringArray | null;
 
-  mac?: (string | null)[] | null;
+  mac?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
   os?: OsEcsFields | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface OsEcsFields {
@@ -2236,23 +2236,23 @@ export namespace LocationResolvers {
 
 export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostEcsFields> {
-    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+    architecture?: ArchitectureResolver<ToStringArray | null, TypeParent, Context>;
 
     id?: IdResolver<string | null, TypeParent, Context>;
 
-    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+    mac?: MacResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
     os?: OsResolver<OsEcsFields | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ArchitectureResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2262,17 +2262,17 @@ export namespace HostEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MacResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2282,7 +2282,7 @@ export namespace HostEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

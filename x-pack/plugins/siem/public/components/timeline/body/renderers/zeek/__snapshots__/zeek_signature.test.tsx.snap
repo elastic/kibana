@@ -40,7 +40,9 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
           "10.19.0.5",
           "fe80::d82b:9aff:fe0d:1e12",
         ],
-        "name": "zeek-franfurt",
+        "name": Array [
+          "zeek-franfurt",
+        ],
       },
       "http": null,
       "network": Object {

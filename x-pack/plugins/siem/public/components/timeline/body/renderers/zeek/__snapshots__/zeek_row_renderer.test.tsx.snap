@@ -416,7 +416,9 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
               "ip": Array [
                 "192.168.0.1",
               ],
-              "name": "apache",
+              "name": Array [
+                "apache",
+              ],
             },
             "source": Object {
               "ip": Array [

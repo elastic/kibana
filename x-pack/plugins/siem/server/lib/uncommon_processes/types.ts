@@ -18,7 +18,7 @@ export interface UncommonProcessesAdapter {
 type StringOrNumber = string | number;
 export interface UncommonProcessHit extends Hit {
   total: TotalHit;
-  host: Array<{ id: string; name: string }>;
+  host: Array<{ id: string; name: string[] | null | undefined }>; // TODO: Isn't this technically string | sring[] | null | undefined
   _source: {
     '@timestamp': string;
     process: ProcessEcsFields;

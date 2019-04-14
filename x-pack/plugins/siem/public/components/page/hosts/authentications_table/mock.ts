@@ -23,7 +23,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
             },
             host: {
               id: 'host-id-1',
-              name: 'host-1',
+              name: ['host-1'],
             },
           },
           lastFailure: {
@@ -33,7 +33,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
             },
             host: {
               id: 'host-id-1',
-              name: 'host-2',
+              name: ['host-2'],
             },
           },
         },
@@ -54,7 +54,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
             },
             host: {
               id: 'host-id-1',
-              name: 'host-1',
+              name: ['host-1'],
             },
           },
           lastFailure: {
@@ -64,7 +64,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
             },
             host: {
               id: 'host-id-1',
-              name: 'host-2',
+              name: ['host-2'],
             },
           },
         },

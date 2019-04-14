@@ -14,7 +14,7 @@ export const mockData: { Hosts: HostsData } = {
         node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           host: {
-            name: 'elrond.elstc.co',
+            name: ['elrond.elstc.co'],
             os: {
               name: ['Ubuntu'],
               version: ['18.04.1 LTS (Bionic Beaver)'],
@@ -29,7 +29,7 @@ export const mockData: { Hosts: HostsData } = {
         node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           host: {
-            name: 'siem-kibana',
+            name: ['siem-kibana'],
             os: {
               name: ['Debian GNU/Linux'],
               version: ['9 (stretch)'],

@@ -108,7 +108,7 @@ interface GenericDetailsProps {
 export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
   const id = data._id;
   const session: string | null | undefined = get('auditd.session[0]', data);
-  const hostName: string | null | undefined = get('host.name', data); // TODO: Array:host.name[0]
+  const hostName: string | null | undefined = get('host.name[0]', data);
   const userName: string | null | undefined = get('user.name[0]', data);
   const result: string | null | undefined = get('auditd.result[0]', data);
   const processPid: string | null | undefined = get('process.pid[0]', data);

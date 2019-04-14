@@ -72,7 +72,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.edges[0]!.node.lastSuccess!.host!.name).to.be(HOST_NAME);
+          expect(authentications.edges[0]!.node.lastSuccess!.host!.name).to.eql([HOST_NAME]);
         });
     });
   });

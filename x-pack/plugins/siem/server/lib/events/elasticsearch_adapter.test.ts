@@ -31,7 +31,7 @@ describe('events elasticsearch_adapter', () => {
     _source: {
       '@timestamp': ['time-1'],
       host: {
-        name: 'hostname-1',
+        name: ['hostname-1'],
         ip: ['hostip-1'],
       },
       suricata: {
@@ -83,7 +83,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           host: {
-            name: 'hostname-1',
+            name: ['hostname-1'],
           },
         },
       };
@@ -437,7 +437,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           host: {
-            name: 'hostname-1',
+            name: ['hostname-1'],
             ip: ['hostip-1'],
           },
           geo: {
@@ -485,14 +485,14 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           data: [
-            { field: 'host.name', value: 'hostname-1' },
+            { field: 'host.name', value: ['hostname-1'] },
             { field: 'suricata.eve.alert.signature_id', value: ['5000'] },
             { field: '@timestamp', value: ['time-1'] },
           ],
           ecs: {
             _id: 'id-123',
             _index: 'index-123',
-            host: { name: 'hostname-1' },
+            host: { name: ['hostname-1'] },
             suricata: { eve: { alert: { signature_id: ['5000'] } } },
           },
         },

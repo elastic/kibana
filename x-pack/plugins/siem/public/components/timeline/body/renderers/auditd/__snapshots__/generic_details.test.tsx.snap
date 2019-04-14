@@ -75,7 +75,9 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
           "10.47.0.5",
           "fe80::ec0b:1bff:fe29:80bd",
         ],
-        "name": "suricata-bangalore",
+        "name": Array [
+          "suricata-bangalore",
+        ],
       },
       "http": null,
       "network": null,

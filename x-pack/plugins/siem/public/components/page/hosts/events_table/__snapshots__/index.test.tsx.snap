@@ -27,7 +27,9 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "geo": null,
         "host": Object {
           "ip": null,
-          "name": "siem-general",
+          "name": Array [
+            "siem-general",
+          ],
         },
         "source": Object {
           "ip": Array [
@@ -63,7 +65,9 @@ exports[`Load More Events Table Component rendering it renders the default Event
         "geo": null,
         "host": Object {
           "ip": null,
-          "name": "siem-general",
+          "name": Array [
+            "siem-general",
+          ],
         },
         "source": Object {
           "ip": Array [

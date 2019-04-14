@@ -14,7 +14,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "lastFailure": Object {
             "host": Object {
               "id": "host-id-1",
-              "name": "host-2",
+              "name": Array [
+                "host-2",
+              ],
             },
             "source": Object {
               "ip": Array [
@@ -26,7 +28,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "lastSuccess": Object {
             "host": Object {
               "id": "host-id-1",
-              "name": "host-1",
+              "name": Array [
+                "host-1",
+              ],
             },
             "source": Object {
               "ip": Array [
@@ -53,7 +57,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "lastFailure": Object {
             "host": Object {
               "id": "host-id-1",
-              "name": "host-2",
+              "name": Array [
+                "host-2",
+              ],
             },
             "source": Object {
               "ip": Array [
@@ -65,7 +71,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "lastSuccess": Object {
             "host": Object {
               "id": "host-id-1",
-              "name": "host-1",
+              "name": Array [
+                "host-1",
+              ],
             },
             "source": Object {
               "ip": Array [

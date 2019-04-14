@@ -44,7 +44,7 @@ export const mockEventsData: { Events: EventsData } = {
           },
           geo: null,
           host: {
-            name: 'siem-general',
+            name: ['siem-general'],
             ip: null,
           },
           source: {
@@ -76,7 +76,7 @@ export const mockEventsData: { Events: EventsData } = {
           },
           geo: null,
           host: {
-            name: 'siem-general',
+            name: ['siem-general'],
             ip: null,
           },
           source: {
@@ -111,7 +111,7 @@ export const mockTimelineData: { Timeline: TimelineData } = {
             destination: { ip: ['24.168.54.169'], port: ['62123'] },
             event: { category: null, id: null, module: ['system'], severity: null, type: null },
             geo: null,
-            host: { name: 'siem-general', ip: null },
+            host: { name: ['siem-general'], ip: null },
             source: { ip: ['10.142.0.6'], port: ['9200'] },
             suricata: null,
           },
@@ -133,7 +133,7 @@ export const mockTimelineData: { Timeline: TimelineData } = {
             destination: { ip: ['24.168.54.169'], port: ['62145'] },
             event: { category: null, id: null, module: ['system'], severity: null, type: null },
             geo: null,
-            host: { name: 'siem-general', ip: null },
+            host: { name: ['siem-general'], ip: null },
             source: { ip: ['10.142.0.6'], port: ['9200'] },
             suricata: null,
           },

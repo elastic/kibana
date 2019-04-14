@@ -88,11 +88,11 @@ export const getEuiDescriptionList = (
                 getEmptyTagValue()
               ) : (
                 summaryValue.map((value: string) =>
-                  createDraggable(value, field, startDate, endDate, get('host.name', host))
+                  createDraggable(value, field, startDate, endDate, get('host.name[0]', host))
                 )
               )
             ) : (
-              createDraggable(summaryValue, field, startDate, endDate, get('host.name', host))
+              createDraggable(summaryValue, field, startDate, endDate, get('host.name[0]', host))
             )}
           </div>
         </React.Fragment>

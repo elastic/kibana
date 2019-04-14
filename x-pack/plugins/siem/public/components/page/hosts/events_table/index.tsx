@@ -120,7 +120,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('host.name', node);
+      const hostName: string | null | undefined = get('host.name[0]', node);
       if (hostName != null) {
         const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
         return (

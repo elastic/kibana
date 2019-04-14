@@ -20,7 +20,9 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           "node": Object {
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Object {
-              "name": "elrond.elstc.co",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
               "os": Object {
                 "name": Array [
                   "Ubuntu",
@@ -39,7 +41,9 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           "node": Object {
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Object {
-              "name": "siem-kibana",
+              "name": Array [
+                "siem-kibana",
+              ],
               "os": Object {
                 "name": Array [
                   "Debian GNU/Linux",

@@ -64,7 +64,7 @@ describe('Load More Events Table Component', () => {
 
       const wrapperHostName = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatIpSafely('host.name', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('host.name[0]', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 

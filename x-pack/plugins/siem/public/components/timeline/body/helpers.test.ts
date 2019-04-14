@@ -25,7 +25,7 @@ describe('helpers', () => {
         timestamp: '2018-11-08T19:03:25.937Z',
         host: {
           __typename: 'level 1',
-          name: 'suricata',
+          name: ['suricata'],
           ip: ['192.168.0.1'],
         },
         event: {
@@ -67,7 +67,7 @@ describe('helpers', () => {
         _id: '4',
         timestamp: '2018-11-08T19:03:25.937Z',
         host: {
-          name: 'suricata',
+          name: ['suricata'],
           ip: ['192.168.0.1'],
         },
         event: {

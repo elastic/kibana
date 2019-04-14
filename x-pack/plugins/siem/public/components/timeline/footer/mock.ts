@@ -39,7 +39,7 @@ export const mockData: { Events: EventsData } = {
           },
           geo: null,
           host: {
-            name: 'siem-general',
+            name: ['siem-general'],
             ip: null,
           },
           source: {
@@ -71,7 +71,7 @@ export const mockData: { Events: EventsData } = {
           },
           geo: null,
           host: {
-            name: 'siem-general',
+            name: ['siem-general'],
             ip: null,
           },
           source: {

@@ -49,7 +49,9 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
             "10.16.0.5",
             "fe80::4066:42ff:fe19:b3b9",
           ],
-          "name": "zeek-london",
+          "name": Array [
+            "zeek-london",
+          ],
         },
         "http": null,
         "network": null,

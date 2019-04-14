@@ -236,19 +236,19 @@ export interface Location {
 }
 
 export interface HostEcsFields {
-  architecture?: string | null;
+  architecture?: ToStringArray | null;
 
   id?: string | null;
 
-  ip?: (string | null)[] | null;
+  ip?: ToStringArray | null;
 
-  mac?: (string | null)[] | null;
+  mac?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
   os?: OsEcsFields | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface OsEcsFields {
@@ -1417,7 +1417,7 @@ export namespace GetAuthenticationsQuery {
 
     id?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type LastFailure = {
@@ -1441,7 +1441,7 @@ export namespace GetAuthenticationsQuery {
 
     id?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -1701,9 +1701,9 @@ export namespace GetEventsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
     id?: string | null;
   };
@@ -1795,19 +1795,19 @@ export namespace GetHostDetailsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
     id?: string | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Os = {
@@ -1905,7 +1905,7 @@ export namespace GetHostsTableQuery {
 
     id?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
   };
@@ -2021,19 +2021,19 @@ export namespace GetIpOverviewQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
     id?: string | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Os = {
@@ -2101,19 +2101,19 @@ export namespace GetIpOverviewQuery {
   export type _Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
     id?: string | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: _Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type _Os = {
@@ -2907,9 +2907,9 @@ export namespace GetTimelineQuery {
 
     id?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
   };
 
   export type _Source = {
@@ -3364,7 +3364,7 @@ export namespace GetUncommonProcessesQuery {
 
     id?: string | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Cursor = {

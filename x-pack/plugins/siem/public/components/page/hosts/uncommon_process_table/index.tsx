@@ -195,39 +195,45 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     render: ({ node }) => {
       const hosts: HostEcsFields[] = node.host;
       const draggables = hosts
-        .filter(({ id, name }) => id != null && name != null)
-        .map(({ id, name }, index) => {
-          const dwId = escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`);
-          return (
-            <React.Fragment key={dwId}>
-              {index !== 0 ? <>,&nbsp;</> : null}
-              <DraggableWrapper
-                key={dwId}
-                dataProvider={{
-                  and: [],
-                  enabled: true,
-                  id: dwId,
-                  name: name!,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: {
-                    field: 'host.name',
-                    value: name!,
-                  },
-                  queryDate: { from: startDate, to: Date.now() },
-                }}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <HostDetailsLink hostName={name!}>{name}</HostDetailsLink>
-                  )
-                }
-              />
-            </React.Fragment>
-          );
+        .filter(({ name }) => name != null && name[0] != null)
+        .map(({ name }, index) => {
+          if (name != null && name[0] != null) {
+            const dwId = escapeDataProviderId(
+              `uncommon-process-table-${node._id}-hostName-${name[0]}`
+            );
+            return (
+              <React.Fragment key={dwId}>
+                {index !== 0 ? <>,&nbsp;</> : null}
+                <DraggableWrapper
+                  key={dwId}
+                  dataProvider={{
+                    and: [],
+                    enabled: true,
+                    id: dwId,
+                    name: name[0],
+                    excluded: false,
+                    kqlQuery: '',
+                    queryMatch: {
+                      field: 'host.name',
+                      value: name[0],
+                    },
+                    queryDate: { from: startDate, to: Date.now() },
+                  }}
+                  render={(dataProvider, _, snapshot) =>
+                    snapshot.isDragging ? (
+                      <DragEffects>
+                        <Provider dataProvider={dataProvider} />
+                      </DragEffects>
+                    ) : (
+                      <HostDetailsLink hostName={name[0]}>{name}</HostDetailsLink>
+                    )
+                  }
+                />
+              </React.Fragment>
+            );
+          } else {
+            return getEmptyTagValue();
+          }
         });
       return draggables.length > 0 ? draggables : getEmptyTagValue();
     },

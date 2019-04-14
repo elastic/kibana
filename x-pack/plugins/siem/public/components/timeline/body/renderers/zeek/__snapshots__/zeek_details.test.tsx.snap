@@ -408,7 +408,9 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
         "ip": Array [
           "192.168.0.1",
         ],
-        "name": "suricata",
+        "name": Array [
+          "suricata",
+        ],
       },
       "source": Object {
         "ip": Array [

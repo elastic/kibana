@@ -22,7 +22,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '1',
       timestamp: '2018-11-05T19:03:25.937Z',
-      host: { name: 'apache', ip: ['192.168.0.1'] },
+      host: { name: ['apache'], ip: ['192.168.0.1'] },
       event: {
         id: ['1'],
         action: ['Action'],
@@ -50,7 +50,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '3',
       timestamp: '2018-11-07T19:03:25.937Z',
-      host: { name: 'nginx', ip: ['192.168.0.1'] },
+      host: { name: ['nginx'], ip: ['192.168.0.1'] },
       event: {
         id: ['3'],
         category: ['Access'],
@@ -78,7 +78,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '4',
       timestamp: '2018-11-08T19:03:25.937Z',
-      host: { name: 'suricata', ip: ['192.168.0.1'] },
+      host: { name: ['suricata'], ip: ['192.168.0.1'] },
       event: {
         id: ['4'],
         category: ['Attempted Administrator Privilege Gain'],
@@ -118,7 +118,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '5',
       timestamp: '2018-11-09T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['5'],
         category: ['Access'],
@@ -145,7 +145,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '6',
       timestamp: '2018-11-10T19:03:25.937Z',
-      host: { name: 'braden.davis', ip: ['192.168.0.1'] },
+      host: { name: ['braden.davis'], ip: ['192.168.0.1'] },
       event: {
         id: ['6'],
         category: ['Access'],
@@ -172,7 +172,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '8',
       timestamp: '2018-11-12T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['8'],
         category: ['Web Application Attack'],
@@ -210,7 +210,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '7',
       timestamp: '2018-11-11T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['7'],
         category: ['Access'],
@@ -238,7 +238,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '9',
       timestamp: '2018-11-13T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['9'],
         category: ['Access'],
@@ -266,7 +266,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '10',
       timestamp: '2018-11-14T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['10'],
         category: ['Access'],
@@ -294,7 +294,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '11',
       timestamp: '2018-11-15T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['11'],
         category: ['Access'],
@@ -322,7 +322,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '12',
       timestamp: '2018-11-16T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['12'],
         category: ['Access'],
@@ -350,7 +350,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '2',
       timestamp: '2018-11-06T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['2'],
         category: ['Authentication'],
@@ -377,7 +377,7 @@ export const mockTimelineData: TimelineItem[] = [
     ecs: {
       _id: '13',
       timestamp: '2018-13-12T19:03:25.937Z',
-      host: { name: 'joe.computer', ip: ['192.168.0.1'] },
+      host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['13'],
         category: ['Web Application Attack'],
@@ -421,7 +421,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '37c81253e0fc4c46839c19b981be5177',
-        name: 'zeek-franfurt',
+        name: ['zeek-franfurt'],
         ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
       },
       source: { ip: ['185.176.26.101'], port: ['44059'] },
@@ -469,7 +469,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: 'af3fddf15f1d47979ce817ba0df10c6e',
-        name: 'suricata-zeek-singapore',
+        name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
       source: { ip: ['206.189.35.240'], port: ['57475'] },
@@ -523,7 +523,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: 'af3fddf15f1d47979ce817ba0df10c6e',
-        name: 'suricata-zeek-singapore',
+        name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
       source: { ip: ['206.189.35.240'], port: ['36220'] },
@@ -574,7 +574,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '37c81253e0fc4c46839c19b981be5177',
-        name: 'zeek-franfurt',
+        name: ['zeek-franfurt'],
         ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
       },
       source: { ip: ['8.42.77.171'], port: null },
@@ -622,7 +622,7 @@ export const mockTimelineData: TimelineItem[] = [
         id: null,
         dataset: ['zeek.ssl'],
       },
-      host: { id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9', name: 'zeek-sensor-amsterdam', ip: null },
+      host: { id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9', name: ['zeek-sensor-amsterdam'], ip: null },
       source: { ip: ['188.166.66.184'], port: ['34514'] },
       destination: { ip: ['91.189.95.15'], port: ['443'] },
       geo: { region_name: ['England'], country_iso_code: ['GB'] },
@@ -665,7 +665,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: 'af3fddf15f1d47979ce817ba0df10c6e',
-        name: 'suricata-zeek-singapore',
+        name: ['suricata-zeek-singapore'],
         ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
       },
       source: null,
@@ -725,7 +725,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: 'f896741c3b3b44bdb8e351a4ab6d2d7c',
-        name: 'zeek-sanfran',
+        name: ['zeek-sanfran'],
         ip: ['134.209.63.134', '10.46.0.5', 'fe80::a0d9:16ff:fecf:e70b'],
       },
       source: null,
@@ -782,7 +782,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: { ip: ['8.42.77.171'], port: null },
@@ -838,7 +838,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '0a63559c1acf4c419d979c4b4d8b83ff',
-        name: 'suricata-bangalore',
+        name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
       source: null,
@@ -894,7 +894,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '0a63559c1acf4c419d979c4b4d8b83ff',
-        name: 'suricata-bangalore',
+        name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
       source: null,
@@ -950,7 +950,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: null,
@@ -1004,7 +1004,7 @@ export const mockTimelineData: TimelineItem[] = [
           sequence: null,
         },
       },
-      host: { id: 'aa7ca589f1b8220002f2fc61c64cfbf1', name: 'siem-kibana', ip: null },
+      host: { id: 'aa7ca589f1b8220002f2fc61c64cfbf1', name: ['siem-kibana'], ip: null },
       source: null,
       destination: null,
       geo: null,
@@ -1058,7 +1058,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '0a63559c1acf4c419d979c4b4d8b83ff',
-        name: 'suricata-bangalore',
+        name: ['suricata-bangalore'],
         ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
       },
       source: null,
@@ -1116,7 +1116,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: null,
@@ -1189,7 +1189,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: null,
@@ -1248,7 +1248,7 @@ export const mockTimelineData: TimelineItem[] = [
       file: null,
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: {
@@ -1316,7 +1316,7 @@ export const mockTimelineData: TimelineItem[] = [
       file: null,
       host: {
         id: '7c21f5ed03b04d0299569d221fe18bbc',
-        name: 'zeek-london',
+        name: ['zeek-london'],
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: {

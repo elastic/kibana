@@ -101,12 +101,12 @@ describe('Field Renderers', () => {
 
   describe('#hostIdRenderer', () => {
     const emptyIdHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: null,
       ip: ['10.10.10.10'],
     };
     const emptyIpHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: 'test',
       ip: null,
     };
@@ -145,12 +145,12 @@ describe('Field Renderers', () => {
 
   describe('#hostNameRenderer', () => {
     const emptyIdHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: null,
       ip: ['10.10.10.10'],
     };
     const emptyIpHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: 'test',
       ip: null,
     };

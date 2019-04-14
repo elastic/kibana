@@ -83,13 +83,13 @@ export const ecsSchema = gql`
   }
 
   type HostEcsFields {
-    architecture: String
+    architecture: ToStringArray
     id: String
-    ip: [String]
-    mac: [String]
-    name: String
+    ip: ToStringArray
+    mac: ToStringArray
+    name: ToStringArray
     os: OsEcsFields
-    type: String
+    type: ToStringArray
   }
 
   type Thread {

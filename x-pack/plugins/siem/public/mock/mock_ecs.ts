@@ -11,7 +11,7 @@ export const mockEcsData: Ecs[] = [
     _id: '1',
     timestamp: '2018-11-05T19:03:25.937Z',
     host: {
-      name: 'apache',
+      name: ['apache'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -42,7 +42,7 @@ export const mockEcsData: Ecs[] = [
     _id: '3',
     timestamp: '2018-11-07T19:03:25.937Z',
     host: {
-      name: 'nginx',
+      name: ['nginx'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -73,7 +73,7 @@ export const mockEcsData: Ecs[] = [
     _id: '4',
     timestamp: '2018-11-08T19:03:25.937Z',
     host: {
-      name: 'suricata',
+      name: ['suricata'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -116,7 +116,7 @@ export const mockEcsData: Ecs[] = [
     _id: '5',
     timestamp: '2018-11-09T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -147,7 +147,7 @@ export const mockEcsData: Ecs[] = [
     _id: '6',
     timestamp: '2018-11-10T19:03:25.937Z',
     host: {
-      name: 'braden.davis',
+      name: ['braden.davis'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -174,7 +174,7 @@ export const mockEcsData: Ecs[] = [
     _id: '8',
     timestamp: '2018-11-12T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -215,7 +215,7 @@ export const mockEcsData: Ecs[] = [
     _id: '7',
     timestamp: '2018-11-11T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -246,7 +246,7 @@ export const mockEcsData: Ecs[] = [
     _id: '9',
     timestamp: '2018-11-13T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -277,7 +277,7 @@ export const mockEcsData: Ecs[] = [
     _id: '10',
     timestamp: '2018-11-14T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -308,7 +308,7 @@ export const mockEcsData: Ecs[] = [
     _id: '11',
     timestamp: '2018-11-15T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -339,7 +339,7 @@ export const mockEcsData: Ecs[] = [
     _id: '12',
     timestamp: '2018-11-16T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -370,7 +370,7 @@ export const mockEcsData: Ecs[] = [
     _id: '2',
     timestamp: '2018-11-06T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -401,7 +401,7 @@ export const mockEcsData: Ecs[] = [
     _id: '13',
     timestamp: '2018-13-12T19:03:25.937Z',
     host: {
-      name: 'joe.computer',
+      name: ['joe.computer'],
       ip: ['192.168.0.1'],
     },
     event: {
@@ -447,7 +447,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '37c81253e0fc4c46839c19b981be5177',
-      name: 'zeek-franfurt',
+      name: ['zeek-franfurt'],
       ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
     },
     source: {
@@ -497,7 +497,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: 'af3fddf15f1d47979ce817ba0df10c6e',
-      name: 'suricata-zeek-singapore',
+      name: ['suricata-zeek-singapore'],
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
     source: {
@@ -553,7 +553,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: 'af3fddf15f1d47979ce817ba0df10c6e',
-      name: 'suricata-zeek-singapore',
+      name: ['suricata-zeek-singapore'],
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
     source: {
@@ -618,7 +618,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '37c81253e0fc4c46839c19b981be5177',
-      name: 'zeek-franfurt',
+      name: ['zeek-franfurt'],
       ip: ['207.154.238.205', '10.19.0.5', 'fe80::d82b:9aff:fe0d:1e12'],
     },
     source: {
@@ -662,7 +662,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
-      name: 'zeek-sensor-amsterdam',
+      name: ['zeek-sensor-amsterdam'],
       ip: null,
     },
     source: {
@@ -709,7 +709,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: 'af3fddf15f1d47979ce817ba0df10c6e',
-      name: 'suricata-zeek-singapore',
+      name: ['suricata-zeek-singapore'],
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
     source: null,
@@ -761,7 +761,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: 'f896741c3b3b44bdb8e351a4ab6d2d7c',
-      name: 'zeek-sanfran',
+      name: ['zeek-sanfran'],
       ip: ['134.209.63.134', '10.46.0.5', 'fe80::a0d9:16ff:fecf:e70b'],
     },
     source: null,
@@ -821,7 +821,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '7c21f5ed03b04d0299569d221fe18bbc',
-      name: 'zeek-london',
+      name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
     source: {
@@ -884,7 +884,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '0a63559c1acf4c419d979c4b4d8b83ff',
-      name: 'suricata-bangalore',
+      name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
     source: null,
@@ -944,7 +944,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '0a63559c1acf4c419d979c4b4d8b83ff',
-      name: 'suricata-bangalore',
+      name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
     source: null,
@@ -1004,7 +1004,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '7c21f5ed03b04d0299569d221fe18bbc',
-      name: 'zeek-london',
+      name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
     source: null,
@@ -1064,7 +1064,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-      name: 'siem-kibana',
+      name: ['siem-kibana'],
       ip: null,
     },
     source: null,
@@ -1124,7 +1124,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '0a63559c1acf4c419d979c4b4d8b83ff',
-      name: 'suricata-bangalore',
+      name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
     source: null,
@@ -1180,7 +1180,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '7c21f5ed03b04d0299569d221fe18bbc',
-      name: 'zeek-london',
+      name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
     source: null,
@@ -1255,7 +1255,7 @@ export const mockEcsData: Ecs[] = [
     },
     host: {
       id: '7c21f5ed03b04d0299569d221fe18bbc',
-      name: 'zeek-london',
+      name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
     source: null,

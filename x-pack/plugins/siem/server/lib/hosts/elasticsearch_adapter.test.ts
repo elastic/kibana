@@ -68,7 +68,8 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
-      const expected: HostsEdges = {
+      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
+      const expected = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { host: { name: 'zeek-london' }, _id: 'zeek-london' },
       };
@@ -103,7 +104,8 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
-      const expected: HostsEdges = {
+      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
+      const expected = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { _id: 'zeek-london', host: { name: 'zeek-london' } },
       };
