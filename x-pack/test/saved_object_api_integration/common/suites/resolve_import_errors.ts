@@ -67,10 +67,7 @@ export function resolveImportErrorsTestSuiteFactory(
           type: 'wigwags',
           title: 'Wigwags title',
           error: {
-            message: `Unsupported saved object type: 'wigwags': Bad Request`,
-            statusCode: 400,
-            error: 'Bad Request',
-            type: 'unknown',
+            type: 'unsupported_type',
           },
         },
       ],
@@ -82,22 +79,6 @@ export function resolveImportErrorsTestSuiteFactory(
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to bulk_create dashboard, missing action:saved_objects/dashboard/bulk_create`,
-    });
-  };
-
-  const expectRbacForbiddenWithUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,wigwags, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/wigwags/bulk_create`,
-    });
-  };
-
-  const expectRbacForbiddenForUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,wigwags, missing action:saved_objects/wigwags/bulk_create`,
     });
   };
 
@@ -184,7 +165,5 @@ export function resolveImportErrorsTestSuiteFactory(
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
-    expectRbacForbiddenWithUnknownType,
-    expectRbacForbiddenForUnknownType,
   };
 }

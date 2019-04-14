@@ -28,7 +28,9 @@ export default kibana => new kibana.Plugin({
       return {
         from_defaults: true
       };
-    }
+    },
+
+    savedObjectSchemas: {},
   },
   init(server) {
     server.injectUiAppVars('test_app', () => ({
