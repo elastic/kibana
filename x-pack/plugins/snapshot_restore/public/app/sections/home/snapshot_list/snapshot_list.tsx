@@ -39,7 +39,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     loading,
-    data: { snapshots = [], errors = {} },
+    data: { snapshots = [], repositories = [], errors = {} },
     request: reload,
   } = loadSnapshots();
 
@@ -151,6 +151,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
         <SnapshotTable
           snapshots={snapshots}
+          repositories={repositories}
           reload={reload}
           openSnapshotDetails={openSnapshotDetails}
         />

@@ -19,6 +19,7 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   snapshots: SnapshotDetails[];
   errors: any[];
+  repositories: string[];
 }> => {
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
@@ -27,11 +28,12 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [] };
+    return { snapshots: [], errors: [], repositories: [] };
   }
 
   const snapshots: SnapshotDetails[] = [];
   const errors: any = {};
+  const repositories: string[] = [];
 
   const fetchSnapshotsForRepository = async (repository: string) => {
     try {
@@ -48,6 +50,8 @@ export const getAllHandler: RouterRouteHandler = async (
       fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
         snapshots.push(deserializeSnapshotDetails(repository, snapshot));
       });
+
+      repositories.push(repository);
     } catch (error) {
       // These errors are commonly due to a misconfiguration in the repository or plugin errors,
       // which can result in a variety of 400, 404, and 500 errors.
@@ -59,6 +63,7 @@ export const getAllHandler: RouterRouteHandler = async (
 
   return {
     snapshots,
+    repositories,
     errors,
   };
 };

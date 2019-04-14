@@ -61,6 +61,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
       const expectedResponse = {
         errors: {},
+        repositories: ['fooRepository', 'barRepository'],
         snapshots: [
           { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
           { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
@@ -74,7 +75,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     test('returns empty arrays if no snapshots returned from ES', async () => {
       const mockSnapshotGetRepositoryEsResponse = {};
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
-      const expectedResponse = { errors: [], snapshots: [] };
+      const expectedResponse = { errors: [], snapshots: [], repositories: [] };
 
       const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
       expect(response).toEqual(expectedResponse);

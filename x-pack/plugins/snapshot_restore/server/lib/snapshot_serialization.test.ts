@@ -10,6 +10,23 @@ describe('deserializeSnapshotDetails', () => {
   test('groups multiple failures by their index and sorts them by their shard', () => {
     expect(
       deserializeSnapshotDetails('repositoryName', {
+        snapshot: 'snapshot name',
+        uuid: 'UUID',
+        version_id: 5,
+        version: 'version',
+        indices: ['index1'],
+        include_global_state: false,
+        state: 'SUCCESS',
+        start_time: '0',
+        start_time_in_millis: 0,
+        end_time: '1',
+        end_time_in_millis: 1,
+        duration_in_millis: 1,
+        shards: {
+          total: 3,
+          failed: 1,
+          successful: 2,
+        },
         failures: [
           {
             index: 'a',
@@ -27,11 +44,11 @@ describe('deserializeSnapshotDetails', () => {
       })
     ).toEqual({
       repository: 'repositoryName',
-      snapshot: undefined,
-      uuid: undefined,
-      versionId: undefined,
-      version: undefined,
-      indices: undefined,
+      snapshot: 'snapshot name',
+      uuid: 'UUID',
+      versionId: 5,
+      version: 'version',
+      indices: ['index1'],
       includeGlobalState: 0,
       indexFailures: [
         {
@@ -49,13 +66,17 @@ describe('deserializeSnapshotDetails', () => {
           ],
         },
       ],
-      state: undefined,
-      startTime: undefined,
-      startTimeInMillis: undefined,
-      endTime: undefined,
-      endTimeInMillis: undefined,
-      durationInMillis: undefined,
-      shards: undefined,
+      state: 'SUCCESS',
+      startTime: '0',
+      startTimeInMillis: 0,
+      endTime: '1',
+      endTimeInMillis: 1,
+      durationInMillis: 1,
+      shards: {
+        total: 3,
+        failed: 1,
+        successful: 2,
+      },
     });
   });
 });

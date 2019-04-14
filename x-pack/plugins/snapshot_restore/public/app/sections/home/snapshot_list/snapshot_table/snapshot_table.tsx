@@ -16,12 +16,14 @@ import { linkToRepository } from '../../../../services/navigation';
 
 interface Props extends RouteComponentProps {
   snapshots: SnapshotDetails[];
+  repositories: string[];
   reload: () => Promise<void>;
   openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
 }
 
 const SnapshotTableUi: React.FunctionComponent<Props> = ({
   snapshots,
+  repositories,
   reload,
   openSnapshotDetails,
   history,
@@ -140,6 +142,18 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       incremental: true,
       schema: true,
     },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'repository',
+        name: 'Repository',
+        multiSelect: false,
+        options: repositories.map(repository => ({
+          value: repository,
+          view: repository,
+        })),
+      },
+    ],
   };
 
   return (
