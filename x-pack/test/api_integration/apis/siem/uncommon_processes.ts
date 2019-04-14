@@ -118,8 +118,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           __typename: 'ProcessEcsFields',
         },
         user: {
-          id: 0,
-          name: 'root',
+          id: ['0'],
+          name: ['root'],
           __typename: 'UserEcsFields',
         },
         host: [

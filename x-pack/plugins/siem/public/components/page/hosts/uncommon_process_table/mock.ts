@@ -20,8 +20,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [],
           instances: 93,
           user: {
-            id: 0,
-            name: 'root',
+            id: ['0'],
+            name: ['root'],
           },
         },
         cursor: {
@@ -38,8 +38,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [{ id: 'host-id-1', name: 'hello-world' }],
           instances: 93,
           user: {
-            id: 0,
-            name: 'root',
+            id: ['0'],
+            name: ['root'],
           },
         },
         cursor: {
@@ -59,8 +59,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           ],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {
@@ -77,8 +77,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [{ ip: ['127.0.0.1'] }],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {
@@ -101,8 +101,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           ],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {

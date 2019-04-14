@@ -37,7 +37,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           },
           "successes": 0,
           "user": Object {
-            "name": "Evan Hassanabad",
+            "name": Array [
+              "Evan Hassanabad",
+            ],
           },
         },
       },
@@ -74,7 +76,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           },
           "successes": 0,
           "user": Object {
-            "name": "Braden Hassanabad",
+            "name": Array [
+              "Braden Hassanabad",
+            ],
           },
         },
       },

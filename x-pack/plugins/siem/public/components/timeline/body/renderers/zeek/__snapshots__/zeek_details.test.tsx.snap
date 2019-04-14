@@ -438,8 +438,12 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
       },
       "timestamp": "2018-11-08T19:03:25.937Z",
       "user": Object {
-        "id": 4,
-        "name": "jenny.jones",
+        "id": Array [
+          "4",
+        ],
+        "name": Array [
+          "jenny.jones",
+        ],
       },
     }
   }

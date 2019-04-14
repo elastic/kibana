@@ -28,8 +28,8 @@ export const mockUncommonProcessesData: MockData = {
             title: ['Hello World'],
           },
           user: {
-            id: 0,
-            name: 'Evan',
+            id: ['0'],
+            name: ['Evan'],
           },
         },
         cursor: {
@@ -46,8 +46,8 @@ export const mockUncommonProcessesData: MockData = {
             title: ['Hello World'],
           },
           user: {
-            id: 1,
-            name: 'Braden',
+            id: ['1'],
+            name: ['Braden'],
           },
         },
         cursor: {

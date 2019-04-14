@@ -108,7 +108,9 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
             "timestamp": "2019-03-22T19:13:11.026Z",
             "url": null,
             "user": Object {
-              "name": "alice",
+              "name": Array [
+                "alice",
+              ],
             },
             "zeek": null,
           }
@@ -253,7 +255,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "timestamp": "2019-03-26T22:12:18.609Z",
             "url": null,
             "user": Object {
-              "name": "root",
+              "name": Array [
+                "root",
+              ],
             },
             "zeek": null,
           }

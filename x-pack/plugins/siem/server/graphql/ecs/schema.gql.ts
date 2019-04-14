@@ -294,12 +294,12 @@ export const ecsSchema = gql`
   }
 
   type UserEcsFields {
-    id: Float
-    name: String
-    full_name: String
-    email: String
-    hash: String
-    group: String
+    id: ToStringArray
+    name: ToStringArray
+    full_name: ToStringArray
+    email: ToStringArray
+    hash: ToStringArray
+    group: ToStringArray
   }
 
   type NetworkEcsField {

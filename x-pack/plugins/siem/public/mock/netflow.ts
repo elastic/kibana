@@ -73,6 +73,6 @@ export const getMockNetflowData = (): Ecs => ({
     },
   },
   user: {
-    name: 'first.last',
+    name: ['first.last'],
   },
 });

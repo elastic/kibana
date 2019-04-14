@@ -19,7 +19,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           failures: 10,
           successes: 0,
-          user: { name: 'Evan Hassanabad' },
+          user: { name: ['Evan Hassanabad'] },
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
@@ -50,7 +50,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           failures: 10,
           successes: 0,
-          user: { name: 'Braden Hassanabad' },
+          user: { name: ['Braden Hassanabad'] },
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {

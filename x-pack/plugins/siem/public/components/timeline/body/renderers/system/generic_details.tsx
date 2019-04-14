@@ -137,7 +137,7 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId
   const id = data._id;
   const message: string | null = data.message != null ? data.message[0] : null;
   const hostName: string | null | undefined = get('host.name', data); // TODO: Array: host.name[0]
-  const userName: string | null | undefined = get('user.name', data); // TODO: Array: user.name[0]
+  const userName: string | null | undefined = get('user.name[0]', data);
   const outcome: string | null | undefined = get('event.outcome[0]', data);
   const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
   const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);

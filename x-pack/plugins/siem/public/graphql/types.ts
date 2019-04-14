@@ -13,9 +13,9 @@
 // Scalars
 // ====================================================
 
-export type Date = any;
-
 export type ToStringArray = string[];
+
+export type Date = any;
 
 export type EsValue = any;
 
@@ -178,17 +178,17 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
-  id?: number | null;
+  id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full_name?: string | null;
+  full_name?: ToStringArray | null;
 
-  email?: string | null;
+  email?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 }
 
 export interface LastSourceHost {
@@ -1393,7 +1393,7 @@ export namespace GetAuthenticationsQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type LastSuccess = {
@@ -3125,7 +3125,7 @@ export namespace GetTimelineQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Process = {
@@ -3354,9 +3354,9 @@ export namespace GetUncommonProcessesQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
-    id?: number | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Host = {

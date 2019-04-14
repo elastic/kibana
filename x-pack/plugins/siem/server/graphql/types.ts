@@ -42,9 +42,9 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // Scalars
 // ====================================================
 
-export type Date = any;
-
 export type ToStringArray = string[];
+
+export type Date = any;
 
 export type EsValue = any;
 
@@ -207,17 +207,17 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
-  id?: number | null;
+  id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full_name?: string | null;
+  full_name?: ToStringArray | null;
 
-  email?: string | null;
+  email?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 }
 
 export interface LastSourceHost {
@@ -2043,46 +2043,46 @@ export namespace AuthenticationItemResolvers {
 
 export namespace UserEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = UserEcsFields> {
-    id?: IdResolver<number | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    full_name?: FullNameResolver<string | null, TypeParent, Context>;
+    full_name?: FullNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    email?: EmailResolver<string | null, TypeParent, Context>;
+    email?: EmailResolver<ToStringArray | null, TypeParent, Context>;
 
-    hash?: HashResolver<string | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
 
-    group?: GroupResolver<string | null, TypeParent, Context>;
+    group?: GroupResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type IdResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FullNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EmailResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HashResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type GroupResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

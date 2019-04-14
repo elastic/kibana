@@ -78,7 +78,9 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
         "tls": null,
         "url": null,
         "user": Object {
-          "name": "Evan",
+          "name": Array [
+            "Evan",
+          ],
         },
         "zeek": null,
       }

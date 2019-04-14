@@ -85,7 +85,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "tls": null,
             "url": null,
             "user": Object {
-              "name": "Braden",
+              "name": Array [
+                "Braden",
+              ],
             },
             "zeek": null,
           }
@@ -182,7 +184,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "tls": null,
             "url": null,
             "user": Object {
-              "name": "Evan",
+              "name": Array [
+                "Evan",
+              ],
             },
             "zeek": null,
           }

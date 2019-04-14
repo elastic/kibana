@@ -126,7 +126,9 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         "timestamp": "2019-03-26T22:12:18.609Z",
         "url": null,
         "user": Object {
-          "name": "root",
+          "name": Array [
+            "root",
+          ],
         },
         "zeek": null,
       }

@@ -30,8 +30,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 1,
-      name: 'john.dee',
+      id: ['1'],
+      name: ['john.dee'],
     },
     geo: {
       region_name: ['xx'],
@@ -61,8 +61,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 3,
-      name: 'evan.davis',
+      id: ['3'],
+      name: ['evan.davis'],
     },
     geo: {
       region_name: ['xx'],
@@ -104,8 +104,8 @@ export const mockEcsData: Ecs[] = [
       },
     },
     user: {
-      id: 4,
-      name: 'jenny.jones',
+      id: ['4'],
+      name: ['jenny.jones'],
     },
     geo: {
       region_name: ['xx'],
@@ -135,8 +135,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 5,
-      name: 'becky.davis',
+      id: ['5'],
+      name: ['becky.davis'],
     },
     geo: {
       region_name: ['xx'],
@@ -203,8 +203,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 8,
-      name: 'jone.doe',
+      id: ['8'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -234,8 +234,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 7,
-      name: 'jone.doe',
+      id: ['7'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -265,8 +265,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 9,
-      name: 'jone.doe',
+      id: ['9'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -296,8 +296,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 10,
-      name: 'jone.doe',
+      id: ['10'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -327,8 +327,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 11,
-      name: 'jone.doe',
+      id: ['11'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -358,8 +358,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 12,
-      name: 'jone.doe',
+      id: ['12'],
+      name: ['jone.doe'],
     },
     geo: {
       region_name: ['xx'],
@@ -389,8 +389,8 @@ export const mockEcsData: Ecs[] = [
       port: ['6343'],
     },
     user: {
-      id: 1,
-      name: 'joe.bob',
+      id: ['1'],
+      name: ['joe.bob'],
     },
     geo: {
       region_name: ['xx'],
@@ -772,7 +772,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'johnson',
+      name: ['johnson'],
     },
     process: {
       pid: ['5402'],
@@ -835,7 +835,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['17471'],
@@ -895,7 +895,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['21202'],
@@ -955,7 +955,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['21202'],
@@ -1015,7 +1015,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['9592'],
@@ -1075,7 +1075,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['725'],
@@ -1135,7 +1135,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'alice',
+      name: ['alice'],
     },
     process: {
       pid: ['21170'],
@@ -1194,7 +1194,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'alice',
+      name: ['alice'],
     },
     process: {
       pid: ['1490'],
@@ -1266,7 +1266,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: 'root',
+      name: ['root'],
     },
     process: {
       pid: ['27244'],

@@ -120,7 +120,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const userName: string | null = get('user.name', node);
+      const userName: string | null | undefined = get('user.name[0]', node);
       if (userName != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`);
         return (

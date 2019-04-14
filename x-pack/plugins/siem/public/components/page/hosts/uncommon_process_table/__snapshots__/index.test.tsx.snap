@@ -22,8 +22,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
             },
           },
         },
@@ -49,8 +53,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
             },
           },
         },
@@ -80,8 +88,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },
@@ -108,8 +120,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },
@@ -154,8 +170,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },

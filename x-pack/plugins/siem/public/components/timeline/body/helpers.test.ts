@@ -55,8 +55,8 @@ describe('helpers', () => {
           },
         },
         user: {
-          id: 4,
-          name: 'jack.black',
+          id: ['4'],
+          name: ['jack.black'],
         },
         geo: {
           region_name: ['neither'],
@@ -96,8 +96,8 @@ describe('helpers', () => {
           },
         },
         user: {
-          id: 4,
-          name: 'jack.black',
+          id: ['4'],
+          name: ['jack.black'],
         },
         geo: {
           region_name: ['neither'],
@@ -135,8 +135,8 @@ describe('helpers', () => {
           },
         },
         user: {
-          id: 4,
-          name: 'no use for a',
+          id: ['4'],
+          name: ['no use for a'],
         },
         geo: {
           region_name: ['bizzaro'],
@@ -176,8 +176,8 @@ describe('helpers', () => {
           },
         },
         user: {
-          id: 4,
-          name: 'no use for a',
+          id: ['4'],
+          name: ['no use for a'],
         },
         geo: {
           region_name: ['bizzaro'],
