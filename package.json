@@ -161,7 +161,7 @@
     "inert": "^5.1.0",
     "joi": "^13.5.2",
     "jquery": "^3.3.1",
-    "js-yaml": "3.13.1",
+    "js-yaml": "3.4.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
     "leaflet": "1.0.3",
