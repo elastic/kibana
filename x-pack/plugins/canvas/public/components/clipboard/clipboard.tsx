@@ -6,7 +6,7 @@
 
 import copy from 'copy-to-clipboard';
 import PropTypes from 'prop-types';
-import React, { MouseEvent, ReactElement } from 'react';
+import React, { MouseEvent, KeyboardEvent, ReactElement } from 'react';
 
 interface Props {
   children: ReactElement<any>;
@@ -23,13 +23,19 @@ export class Clipboard extends React.PureComponent<Props> {
 
   public render() {
     return (
-      <div className="canvasClipboard" onClick={this.onClick} role="button">
+      <div
+        className="canvasClipboard"
+        onClick={this.onClick}
+        onKeyPress={this.onClick}
+        role="button"
+        tabIndex={0}
+      >
         {this.props.children}
       </div>
     );
   }
 
-  private onClick = (ev: MouseEvent<HTMLDivElement>) => {
+  private onClick = (ev: MouseEvent<HTMLDivElement> | KeyboardEvent) => {
     const { content, onCopy } = this.props;
     ev.preventDefault();
     onCopy(copy(content.toString(), { debug: true }));

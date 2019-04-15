@@ -36,7 +36,13 @@ export class Download extends React.PureComponent<Props> {
 
   public render() {
     return (
-      <div className="canvasDownload" onClick={this.onClick} role="button">
+      <div
+        className="canvasDownload"
+        onClick={this.onClick}
+        onKeyPress={this.onClick}
+        tabIndex={0}
+        role="button"
+      >
         {this.props.children}
       </div>
     );
