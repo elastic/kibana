@@ -37,6 +37,9 @@ async function runAndRender(
       onDestroy: (fn: () => never) => {
         /* this is just here for compatibility with legacy kibana renderers */
       },
+      done: () => {
+        /* this is just here for compatibility with legacy kibana renderers */
+      },
     });
   } else {
     // tslint:disable-next-line:no-console
