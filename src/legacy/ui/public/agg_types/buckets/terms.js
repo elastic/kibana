@@ -333,9 +333,8 @@ export const termsBucketAgg = new BucketAggType({
       name: 'missingBucketLabel',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
         defaultMessage: 'Missing',
-        description: `Default label used inside of charts for documents missing a specific field.
-          Can be seen when creating a chart with a terms aggregation and select the "Show missing values"
-          checkbox.`,
+        description: `Default label used in charts when documents are missing a field. 
+          Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
       }),
       type: 'string',
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
