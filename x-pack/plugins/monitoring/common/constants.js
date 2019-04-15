@@ -159,3 +159,5 @@ export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logs
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
 export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
+
+export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
