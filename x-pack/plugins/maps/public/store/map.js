@@ -166,7 +166,7 @@ export function map(state = INITIAL_STATE, action) {
           ...layerList.slice(0, layerIdx),
           {
             ...layerList[layerIdx],
-            __isInErrorState: true,
+            __isInErrorState: action.isInErrorState,
             __errorMessage: action.errorMessage
           },
           ...layerList.slice(layerIdx + 1)

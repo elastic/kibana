@@ -20,6 +20,8 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -37,9 +39,18 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
 
+jest.mock('../../../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
+}));
+
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
+
   it('should render index patterns normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
@@ -55,6 +66,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'index-pattern',
@@ -95,6 +107,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'search',
@@ -133,6 +146,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'visualization',
@@ -171,6 +185,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',
@@ -202,6 +217,7 @@ describe('Relationships', () => {
         throw new Error('foo');
       }),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',

@@ -129,6 +129,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async expectMissingSaveButton() {
+      await testSubjects.missingOrFail('mapSaveButton');
+    }
+
+    async expectMissingCreateNewButton() {
+      await testSubjects.missingOrFail('newMapLink');
+    }
+
+    async expectMissingAddLayerButton() {
+      await testSubjects.missingOrFail('addLayerButton');
+    }
+
+    async expectExistAddLayerButton() {
+      await testSubjects.existOrFail('addLayerButton');
+    }
+
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
       const exists = await testSubjects.exists('mapsListingPage');

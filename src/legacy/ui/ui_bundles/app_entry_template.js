@@ -56,10 +56,12 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       }
     });
 
-    const coreStart = coreSystem.setup();
-
-    if (i18nError) {
-      coreStart.fatalErrors.add(i18nError);
-    }
+    coreSystem
+      .setup()
+      .then((coreSetup) => {
+        if (i18nError) {
+          coreSetup.fatalErrors.add(i18nError);
+        }
+      });
   });
 `;

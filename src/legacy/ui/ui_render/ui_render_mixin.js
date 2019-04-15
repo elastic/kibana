@@ -39,6 +39,19 @@ export function uiRenderMixin(kbnServer, server, config) {
     );
   }
 
+  function getInitialDefaultInjectedVars() {
+    const navLinkSpecs = server.getUiNavLinks();
+
+    return {
+      uiCapabilities: {
+        navLinks: navLinkSpecs.reduce((acc, navLinkSpec) => ({
+          ...acc,
+          [navLinkSpec._id]: true
+        }), {})
+      }
+    };
+  }
+
   let defaultInjectedVars = {};
   kbnServer.afterPluginsInit(() => {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
@@ -48,7 +61,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
-      ), {});
+      ), getInitialDefaultInjectedVars());
   });
 
   // render all views from ./views
