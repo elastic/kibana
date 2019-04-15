@@ -122,8 +122,7 @@ export const registerHelpers = ({ supertest, es }) => {
   const cleanUp = () => (
     Promise.all([
       stopAllJobs().then(deleteJob),
-      deleteIndicesGeneratedByJobs(),
-      deleteAllIndices(),
+      deleteIndicesGeneratedByJobs().then(deleteAllIndices),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
       throw err;
