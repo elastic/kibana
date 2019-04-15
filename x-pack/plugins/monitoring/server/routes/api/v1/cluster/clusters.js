@@ -39,7 +39,7 @@ export function clustersRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server, { INDEX_PATTERN_FILEBEAT });
+        const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {
         throw handleError(err, req);

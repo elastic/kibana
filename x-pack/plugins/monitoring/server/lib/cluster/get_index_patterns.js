@@ -13,7 +13,7 @@ import {
   INDEX_ALERTS
 } from '../../../common/constants';
 
-export function getIndexPatterns(server) {
+export function getIndexPatterns(server, additionalPatterns = {}) {
   // wildcard means to search _all_ clusters
   const ccs = '*';
   const config = server.config();
@@ -23,7 +23,20 @@ export function getIndexPatterns(server) {
   const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-  const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
+  const indexPatterns = {
+    esIndexPattern,
+    kbnIndexPattern,
+    lsIndexPattern,
+    beatsIndexPattern,
+    apmIndexPattern,
+    alertsIndex,
+    ...Object.keys(additionalPatterns).reduce((accum, varName) => {
+      return {
+        ...accum,
+        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
+      };
+    })
+  };
 
   return indexPatterns;
 }
