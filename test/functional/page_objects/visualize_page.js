@@ -567,9 +567,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getInterval() {
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option[selected]`);
-      return await intervalElement.getProperty('label');
+      const intervalOptions = await find.allByCssSelector(
+        `select[data-test-subj="visEditorInterval"] option`);
+
+      for (const option of intervalOptions) {
+        try {
+          const isSelectedOption = await option.getProperty('selected');
+          if (isSelectedOption) {
+            return await option.getProperty('label');
+          }
+        } catch (err) {
+          throw new Error('No interval selected.');
+        }
+      }
     }
 
     async setInterval(newValue) {

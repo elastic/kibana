@@ -116,7 +116,7 @@ describe('editor', function () {
 
       expect(params).to.have.property('interval');
       expect(params.interval).to.have.property('$el');
-      expect(params.interval.modelValue()).to.be(interval);
+      expect($scope.params.interval).to.be(interval);
     });
   });
 

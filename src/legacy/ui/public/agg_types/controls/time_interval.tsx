@@ -29,7 +29,6 @@ import { AggParamOption } from '../agg_param';
 interface SelectOption {
   value: string;
   text: string;
-  option: AggParamOption;
 }
 
 function TimeIntervalParamEditor({
@@ -89,12 +88,18 @@ function TimeIntervalParamEditor({
   const options = aggParamOptions.reduce(
     (filtered, option) => {
       if (option.enabled ? option.enabled(agg) : true) {
-        filtered.push({ value: option.val, text: option.display, option });
+        filtered.push({ value: option.val, text: option.display });
       }
       return filtered;
     },
     [] as SelectOption[]
   );
+  options.unshift({
+    value: '',
+    text: i18n.translate('common.ui.aggTypes.timeInterval.selectValidIntervalPlaceholder', {
+      defaultMessage: '-- select a valid interval --',
+    }),
+  });
 
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = aggParamOptions.find(opt => opt.val === e.target.value);
@@ -120,11 +125,10 @@ function TimeIntervalParamEditor({
       <EuiSelect
         id={`visEditorInterval${agg.id}`}
         options={options}
-        hasNoInitialSelection={true}
         value={selectedOption}
         isInvalid={isInvalid}
         onChange={onChange}
-        data-test-subj="visDefaultEditorField"
+        data-test-subj="visEditorInterval"
         fullWidth={true}
         onBlur={setTouched}
       />
