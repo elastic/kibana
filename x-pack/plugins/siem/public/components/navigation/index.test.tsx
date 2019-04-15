@@ -19,17 +19,12 @@ const pop: Action = 'POP';
 describe('SIEM Navigation', () => {
   const location = {
     pathname: '/hosts',
-    search: 'Search',
-    state: 'S',
-    hash: 'Hash',
+    search: '',
+    state: '',
+    hash: '',
   };
   const mockProps = {
-    location: {
-      pathname: '/hosts',
-      search: 'Search',
-      state: 'S',
-      hash: 'Hash',
-    },
+    location,
     match: {
       isExact: true,
       params: {},
