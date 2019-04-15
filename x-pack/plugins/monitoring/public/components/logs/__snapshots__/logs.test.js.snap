@@ -102,7 +102,7 @@ exports[`Logs should render a reason if the logs are disabled 1`] = `
   <EuiSpacer
     size="m"
   />
-  <Component
+  <Reason
     reason={Object {}}
   />
   <EuiSpacer
