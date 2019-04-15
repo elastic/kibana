@@ -225,7 +225,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
               data-test-subj="srSnapshotDetailsDurationValue"
-              defaultMessage="{seconds} seconds"
+              defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
               values={{ seconds: Math.ceil(durationInMillis / 1000) }}
             />
           </EuiDescriptionListDescription>

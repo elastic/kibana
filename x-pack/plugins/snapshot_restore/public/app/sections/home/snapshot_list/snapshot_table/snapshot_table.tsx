@@ -80,7 +80,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
           defaultMessage="{seconds}s"
-          values={{ seconds: Math.round(durationInMillis / 1000) }}
+          values={{ seconds: Math.ceil(durationInMillis / 1000) }}
         />
       ),
     },
