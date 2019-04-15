@@ -249,7 +249,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async increasePopularity() {
       const field = await testSubjects.find('editorFieldCount');
-      await field.clearValueWithKeyboard();
+      await field.click();
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type('1');
     }
 
@@ -420,7 +421,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldName(name) {
       log.debug('set scripted field name = ' + name);
       const field = await testSubjects.find('editorFieldName');
-      await field.clearValue();
+      await field.click();
+      await field.clearValueWithKeyboard({ charByChar: true });
       await field.type(name);
     }
 
@@ -474,8 +476,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         'input[data-test-subj="dateEditorPattern"]'
       );
       // Both clearValue & clearValueWithKeyboard does not work here
-      // Send Backspace event for each char in value string to clear field
-      await datePatternField.clearValueWithKeyboard({ charByChar: true });
+      // Using retry to clear input in 2 attempts
+      await retry.waitFor('clear date', async () => {
+        await datePatternField.click();
+        await datePatternField.clearValueWithKeyboard({ charByChar: true });
+        const value = await datePatternField.getProperty('value');
+        return value.length === 0;
+      });
       await datePatternField.type(datePattern);
     }
 
@@ -500,6 +507,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (script === currentValue) {
         return;
       }
+      await field.click();
       await field.clearValueWithKeyboard({ charByChar: true });
       await field.type(script);
     }
