@@ -35,10 +35,10 @@ const writeFileAsync = promisify(fs.writeFile);
 const rimrafAsync = promisify(rimraf);
 
 export class DllCompiler {
-  static getRawDllConfig(uiBundles = {}, babelCacheLoaderConfig, threadLoaderPoolConfig = {}) {
+  static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
     return {
       uiBundles,
-      babelCacheLoaderConfig,
+      babelLoaderCacheDir,
       threadLoaderPoolConfig,
       context: fromRoot('.'),
       entryName: 'vendors',
@@ -54,10 +54,10 @@ export class DllCompiler {
     };
   }
 
-  constructor(uiBundles, threadLoaderPoolConfig, cacheLoaderConfigGenerator, logWithMetadata) {
+  constructor(uiBundles, threadLoaderPoolConfig, logWithMetadata) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
       uiBundles,
-      cacheLoaderConfigGenerator(uiBundles.getCacheDirectory('babel')),
+      uiBundles.getCacheDirectory('babel'),
       threadLoaderPoolConfig
     );
     this.logWithMetadata = logWithMetadata || (() => null);

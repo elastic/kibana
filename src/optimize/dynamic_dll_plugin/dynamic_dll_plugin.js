@@ -32,9 +32,9 @@ const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, threadLoaderPoolConfig, cacheLoaderConfigGenerator, logWithMetadata, maxCompilations = 1 }) {
+  constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
     this.logWithMetadata = logWithMetadata || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, cacheLoaderConfigGenerator, logWithMetadata);
+    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
     this.entryPaths = dllEntryTemplate();
     this.afterCompilationEntryPaths = dllEntryTemplate();
     this.maxCompilations = maxCompilations;

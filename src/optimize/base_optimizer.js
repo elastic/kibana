@@ -174,14 +174,6 @@ export default class BaseOptimizer {
     };
   }
 
-  getCacheLoaderConfigGenerator(cacheDir) {
-    return {
-      cacheContext: fromRoot('.'),
-      cacheDirectory: cacheDir,
-      readOnly: !!IS_KIBANA_DISTRIBUTABLE
-    };
-  }
-
   getConfig() {
     function getStyleLoaderExtractor() {
       return [
@@ -223,9 +215,11 @@ export default class BaseOptimizer {
       return [
         {
           loader: 'cache-loader',
-          options: this.getCacheLoaderConfigGenerator(
-            this.uiBundles.getCacheDirectory(cacheName)
-          ),
+          options: {
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: !!IS_KIBANA_DISTRIBUTABLE
+          }
         },
         ...loaders
       ];
@@ -312,7 +306,6 @@ export default class BaseOptimizer {
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          cacheLoaderConfigGenerator: this.getCacheLoaderConfigGenerator,
           logWithMetadata: this.logWithMetadata
         }),
 

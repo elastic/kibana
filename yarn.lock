@@ -6506,10 +6506,9 @@ cache-base@^1.0.1:
     union-value "^1.0.0"
     unset-value "^1.0.0"
 
-cache-loader@2.0.1:
+"cache-loader@https://github.com/webpack-contrib/cache-loader.git":
   version "2.0.1"
-  resolved "https://registry.yarnpkg.com/cache-loader/-/cache-loader-2.0.1.tgz#5758f41a62d7c23941e3c3c7016e6faeb03acb07"
-  integrity sha512-V99T3FOynmGx26Zom+JrVBytLBsmUCzVG2/4NnUKgvXN4bEV42R1ERl1IyiH/cvFIDA1Ytq2lPZ9tXDSahcQpQ==
+  resolved "https://github.com/webpack-contrib/cache-loader.git#0eae4e6017de8bc9e388d1e7c4da3539a0347d33"
   dependencies:
     loader-utils "^1.1.0"
     mkdirp "^0.5.1"
