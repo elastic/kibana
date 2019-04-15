@@ -115,59 +115,114 @@ module.exports = context => {
     }
   }
 
-  function makeCondition(node, state, inside) {
-    if (inside) {
-      return t.ConditionalExpression(
-        t.BinaryExpression('!=', t.AssignmentExpression('=', state.temp, node), t.NullLiteral()),
-        inside,
-        state.temp
-      );
-    } else {
-      return node;
+  class UnsupportedNodeTypeError extends Error {
+    constructor(node, ...params) {
+      super(`Node type is not supported: ${node.type}`, ...params);
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, UnsupportedNodeTypeError);
+      }
+
+      this.name = 'UnsupportedNodeTypeError';
     }
   }
 
-  function makeChain(node, state, inside) {
+  function getDeepProperties(node, properties = [], computedProperties = new Set()) {
     if (t.isMemberExpression(node)) {
-      return makeChain(
-        node.object,
-        state,
-        makeCondition(t.MemberExpression(state.temp, node.property, node.computed), state, inside)
-      );
+      if (node.computed) {
+        computedProperties.add(node.property);
+      }
+      return getDeepProperties(node.object, [node.property, ...properties], computedProperties);
     } else if (t.isIdentifier(node)) {
-      if (node.name !== state.base.name) {
+      return [[node, ...properties], computedProperties];
+    }
+
+    throw new UnsupportedNodeTypeError(node);
+  }
+
+  function buildMemberChain(properties, computedProperties) {
+    if (properties.length > 1) {
+      const lead = properties.slice(0, properties.length - 1);
+      const last = properties[properties.length - 1];
+      return t.MemberExpression(
+        buildMemberChain(lead, computedProperties),
+        last,
+        computedProperties.has(last)
+      );
+    } else if (properties.length === 1) {
+      return properties[0];
+    }
+    return t.identifier('undefined');
+  }
+
+  function buildExpandedMemberNullChecks(
+    leadingProperties = [],
+    trailingProperties = [],
+    computedProperties
+  ) {
+    const propertyChainNullCheck = t.BinaryExpression(
+      '!=',
+      buildMemberChain(leadingProperties, computedProperties),
+      t.NullLiteral()
+    );
+
+    if (trailingProperties.length <= 1) {
+      return propertyChainNullCheck;
+    }
+
+    const [headTrailingProperty, ...tailProperties] = trailingProperties;
+
+    return t.LogicalExpression(
+      '&&',
+      propertyChainNullCheck,
+      buildExpandedMemberNullChecks(
+        [...leadingProperties, headTrailingProperty],
+        tailProperties,
+        computedProperties
+      )
+    );
+  }
+
+  function buildExpandedMemberAccess(node, state) {
+    let baseNode;
+    let properties;
+    let computedProperties;
+
+    try {
+      [[baseNode, ...properties], computedProperties] = getDeepProperties(node);
+    } catch (error) {
+      if (error instanceof UnsupportedNodeTypeError) {
         throw state.file.buildCodeFrameError(
           node,
-          'The parameter of the arrow function supplied to `idx` must match ' +
-            'the base of the body expression.'
+          'idx callbacks may only access properties on the callback parameter.'
         );
       }
-      return makeCondition(state.input, state, inside);
-    } else {
+
+      throw error;
+    }
+
+    if (baseNode.name !== state.base.name) {
       throw state.file.buildCodeFrameError(
         node,
-        'idx callbacks may only access properties on the callback parameter.'
+        'The parameter of the arrow function supplied to `idx` must match ' +
+          'the base of the body expression.'
       );
     }
+    return t.ConditionalExpression(
+      buildExpandedMemberNullChecks([state.input], properties, computedProperties),
+      buildMemberChain([state.input, ...properties], computedProperties),
+      t.identifier('undefined')
+    );
   }
 
   function visitIdxCallExpression(path, state) {
     const node = path.node;
     checkIdxArguments(state.file, node);
-    const temp = path.scope.generateUidIdentifier('ref');
-    const replacement = makeChain(node.arguments[1].body, {
+    const replacement = buildExpandedMemberAccess(node.arguments[1].body, {
       file: state.file,
       input: node.arguments[0],
       base: node.arguments[1].params[0],
-      temp,
     });
     path.replaceWith(replacement);
-    // Hoist to the top if it's an async method.
-    if (path.scope.path.isClassMethod({ async: true })) {
-      path.scope.push({ id: temp, _blockHoist: 3 });
-    } else {
-      path.scope.push({ id: temp });
-    }
   }
 
   function isIdxImportOrRequire(node, name) {
