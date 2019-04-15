@@ -63,56 +63,53 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   let content;
 
   if (snapshotDetails) {
-    const { indexFailures } = snapshotDetails;
+    const { indexFailures, state } = snapshotDetails;
+    const tabOptions = [
+      {
+        id: TAB_SUMMARY,
+        name: (
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotDetails.summaryTabTitle"
+            defaultMessage="Summary"
+          />
+        ),
+        testSubj: 'srSnapshotDetailsSummaryTab',
+      },
+      {
+        id: TAB_FAILURES,
+        name: (
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotDetails.failuresTabTitle"
+            defaultMessage="Failed indices ({failuresCount})"
+            values={{ failuresCount: indexFailures.length }}
+          />
+        ),
+        testSubj: 'srSnapshotDetailsFailuresTab',
+      },
+    ];
 
-    if (indexFailures.length) {
-      const tabOptions = [
-        {
-          id: TAB_SUMMARY,
-          name: (
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.summaryTabTitle"
-              defaultMessage="Summary"
-            />
-          ),
-          testSubj: 'srSnapshotDetailsSummaryTab',
-        },
-        {
-          id: TAB_FAILURES,
-          name: (
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.failuresTabTitle"
-              defaultMessage="Failed indices ({failuresCount})"
-              values={{ failuresCount: indexFailures.length }}
-            />
-          ),
-          testSubj: 'srSnapshotDetailsFailuresTab',
-        },
-      ];
-
-      tabs = (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiTabs>
-            {tabOptions.map(tab => (
-              <EuiTab
-                onClick={() => setActiveTab(tab.id)}
-                isSelected={tab.id === activeTab}
-                key={tab.id}
-                data-test-subject={tab.testSubj}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </Fragment>
-      );
-    }
+    tabs = (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiTabs>
+          {tabOptions.map(tab => (
+            <EuiTab
+              onClick={() => setActiveTab(tab.id)}
+              isSelected={tab.id === activeTab}
+              key={tab.id}
+              data-test-subject={tab.testSubj}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </Fragment>
+    );
 
     if (activeTab === TAB_SUMMARY) {
       content = <TabSummary snapshotDetails={snapshotDetails} />;
     } else if (activeTab === TAB_FAILURES) {
-      content = <TabFailures indexFailures={indexFailures} />;
+      content = <TabFailures state={state} indexFailures={indexFailures} />;
     }
   } else if (error) {
     const notFound = error.status === 404;

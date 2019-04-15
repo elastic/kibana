@@ -18,6 +18,7 @@ import {
 
 import { useAppDependencies } from '../../../../../index';
 import { formatDate } from '../../../../../services/text';
+import { DataPlaceholder } from '../../../../../components';
 import { SnapshotState } from './snapshot_state';
 
 interface Props {
@@ -186,7 +187,10 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             className="eui-textBreakWord"
             data-test-subj="srSnapshotDetailStartTimeDescription"
           >
-            {formatDate(startTimeInMillis)}
+            {startTimeInMillis ? formatDate(startTimeInMillis) : '-'}
+            <DataPlaceholder data={startTimeInMillis}>
+              {formatDate(startTimeInMillis)}
+            </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
@@ -203,7 +207,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             className="eui-textBreakWord"
             data-test-subj="srSnapshotDetailEndTimeDescription"
           >
-            {formatDate(endTimeInMillis)}
+            <DataPlaceholder data={endTimeInMillis}>
+              {formatDate(endTimeInMillis)}
+            </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -222,12 +228,14 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             className="eui-textBreakWord"
             data-test-subj="srSnapshotDetailDurationDescription"
           >
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
-              data-test-subj="srSnapshotDetailsDurationValue"
-              defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-              values={{ seconds: Math.ceil(durationInMillis / 1000) }}
-            />
+            <DataPlaceholder data={durationInMillis}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
+                data-test-subj="srSnapshotDetailsDurationValue"
+                defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+              />
+            </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>

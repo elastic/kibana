@@ -13,6 +13,7 @@ import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
+import { DataPlaceholder } from '../../../../components';
 
 interface Props extends RouteComponentProps {
   snapshots: SnapshotDetails[];
@@ -66,7 +67,11 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (startTimeInMillis: number) => formatDate(startTimeInMillis),
+      render: (startTimeInMillis: number) => (
+        <DataPlaceholder data={startTimeInMillis}>
+          {formatDate(startTimeInMillis)}
+        </DataPlaceholder>
+      ),
     },
     {
       field: 'durationInMillis',
@@ -77,11 +82,13 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       sortable: true,
       width: '100px',
       render: (durationInMillis: number) => (
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
-          defaultMessage="{seconds}s"
-          values={{ seconds: Math.ceil(durationInMillis / 1000) }}
-        />
+        <DataPlaceholder data={durationInMillis}>
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
+            defaultMessage="{seconds}s"
+            values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+          />
+        </DataPlaceholder>
       ),
     },
     {

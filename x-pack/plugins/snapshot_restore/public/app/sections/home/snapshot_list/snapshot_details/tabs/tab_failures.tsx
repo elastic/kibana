@@ -8,18 +8,39 @@ import React from 'react';
 
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
+import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   indexFailures: any;
+  state: string;
 }
 
-export const TabFailures: React.SFC<Props> = ({ indexFailures }) => {
+export const TabFailures: React.SFC<Props> = ({ indexFailures, state }) => {
   const {
     core: {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
+  if (!indexFailures.length) {
+    // If the snapshot is in progress then we still might encounter errors later.
+    if (state === SNAPSHOT_STATE.IN_PROGRESS) {
+      return (
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.snapshotIsBeingCreatedMessage"
+          defaultMessage="Snapshot is being created."
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.snapshotRestore.snapshotDetails.noIndexFailuresMessage"
+          defaultMessage="All indices were stored successfully."
+        />
+      );
+    }
+  }
 
   return indexFailures.map((indexObject: any, count: number) => {
     const { index, failures } = indexObject;
