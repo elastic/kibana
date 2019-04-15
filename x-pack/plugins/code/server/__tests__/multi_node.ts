@@ -7,19 +7,26 @@
 import getPort from 'get-port';
 import { resolve } from 'path';
 import { Root } from 'src/core/server/root';
-import { createRootWithCorePlugins, request, startTestServers } from 'src/test_utils/kbn_server';
+import {
+  createRootWithCorePlugins,
+  request,
+  startTestServers,
+} from '../../../../../src/test_utils/kbn_server';
 
 describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
-  let port: number;
+  const nonodeNodeUuid = '22b75e04-0e50-4647-9643-6b1b1d88beaf';
+  let codePort: number;
+  let nonCodePort: number;
   let codeNode: Root;
   let nonCodeNode: Root;
 
   let servers: any;
-  const pluginPaths = resolve(__dirname, '../../../../../node_modules/x-pack');
+  const pluginPaths = resolve(__dirname, '../../../../../x-pack');
 
   async function startServers() {
-    port = await getPort();
+    codePort = await getPort();
+    nonCodePort = await getPort();
     servers = await startTestServers({
       adjustTimeout: t => {
         // @ts-ignore
@@ -29,15 +36,12 @@ describe('code in multiple nodes', () => {
         kbn: {
           server: {
             uuid: codeNodeUuid,
-            port,
+            port: codePort,
           },
           plugins: { paths: [pluginPaths] },
           xpack: {
             upgrade_assistant: {
               enabled: false,
-            },
-            code: {
-              codeNode: true,
             },
             security: {
               enabled: false,
@@ -52,12 +56,16 @@ describe('code in multiple nodes', () => {
 
   async function startNonCodeNodeKibana() {
     const setting = {
+      server: {
+        port: nonCodePort,
+        uuid: nonodeNodeUuid,
+      },
       plugins: { paths: [pluginPaths] },
       xpack: {
         upgrade_assistant: {
           enabled: false,
         },
-        code: { codeNode: false },
+        code: { codeNodeUrl: `http://localhost:${codePort}` },
         security: {
           enabled: false,
         },
@@ -93,22 +101,11 @@ describe('code in multiple nodes', () => {
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
     await codeNode.shutdown();
+    await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(502);
     await codeNode.setup();
     await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
     // @ts-ignore
   }).timeout(20000);
-
-  it('cluster uuid should equals Code node uuid', async () => {
-    const url = `http://localhost:${port}`;
-    await request.get(codeNode, '/api/code/cluster').expect(200, {
-      uuid: codeNodeUuid,
-      url,
-    });
-    await request.get(nonCodeNode, '/api/code/cluster').expect(200, {
-      uuid: codeNodeUuid,
-      url,
-    });
-  });
 });

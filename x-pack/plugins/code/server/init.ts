@@ -5,8 +5,8 @@
  */
 
 import { Server } from 'hapi';
+import fetch from 'node-fetch';
 import { checkRepos } from './check_repos';
-import { clientWithInternalUser, CodeNodeInfo } from './code_node_client';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -64,6 +64,16 @@ function getServerUuid(server: Server): Promise<string> {
   return Promise.resolve(uid);
 }
 
+async function getCodeNodeUuid(url: string, log: Logger) {
+  const res = await fetch(`${url}/api/stats`, {});
+  if (res.ok) {
+    return (await res.json()).kibana.uuid;
+  }
+
+  log.info(`Access code node ${url} failed, try again later.`);
+  return null;
+}
+
 export function init(server: Server, options: any) {
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
@@ -71,64 +81,34 @@ export function init(server: Server, options: any) {
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    const codeNodeClient = await clientWithInternalUser(server);
     // enable security check in routes
     enableSecurity(server);
-    if (serverOptions.codeNode) {
-      let info = await codeNodeClient.getCodeNodeInfo();
-      if (!info) {
-        let url: string = server.info.uri;
-        const serverHost = server.config().get('server.host');
-        if (serverHost !== undefined && serverHost !== 'localhost') {
-          const serverPort = server.config().get('server.port');
-          const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';
-          let basePath: string = server.config().get('server.basePath') || '';
-          if (!basePath.startsWith('/')) {
-            basePath = '/' + basePath;
-          }
-          url = `${schema}://${serverHost}:${serverPort}}${basePath}`;
-        }
-        info = await codeNodeClient.createNodeInfo({
-          uuid: serverUuid,
-          url,
-        });
-      }
-      if (info.uuid === serverUuid) {
+    const codeNodeUrl = serverOptions.codeNodeUrl;
+    if (codeNodeUrl) {
+      const codeNodeUuid = (await retryUntilAvailable(
+        async () => await getCodeNodeUuid(codeNodeUrl, log),
+        5000
+      )) as string;
+      if (codeNodeUuid === serverUuid) {
         await initCodeNode(server, serverOptions, log);
       } else {
-        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-        // @ts-ignore
-        const esUrl = adminCluster.clusterClient.config.hosts[0];
-        log.error(
-          `A code node with different uuid:${info.uuid} is already registered as code nodes.
-            1. If this kibana node should be a non-code node, then please set "xpack.code.codeNode" to false in kibana.yml.
-            2. If you want to replace the code-node to this kibana node, then please delete the old info by execute:
-               curl --request DELETE --url ${esUrl}/.code_node/_doc/code-node-info  
-          `
-        );
-        await initNonCodeNode(info, server, serverOptions, log);
+        await initNonCodeNode(codeNodeUrl, server, serverOptions, log);
       }
     } else {
-      const info = await retryUntilAvailable(
-        async () => await codeNodeClient.getCodeNodeInfo(),
-        50
-      );
-      await initNonCodeNode(info!, server, serverOptions, log);
+      // codeNodeUrl not set, single node mode
+      await initCodeNode(server, serverOptions, log);
     }
   });
 }
 
 async function initNonCodeNode(
-  info: CodeNodeInfo,
+  url: string,
   server: Server,
   serverOptions: ServerOptions,
   log: Logger
 ) {
-  log.info(
-    `Initializing Code plugin as non-code node, redirecting all code requests to ${info.url}`
-  );
-
-  redirectRoute(server, info.url, log);
+  log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
+  redirectRoute(server, url, log);
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {

@@ -62,7 +62,7 @@ export class ServerOptions {
 
   public readonly enabled: boolean = this.options.enabled;
 
-  public readonly codeNode: boolean = this.options.codeNode;
+  public readonly codeNodeUrl: string = this.options.codeNodeUrl;
 
   constructor(private options: any, private config: any) {}
 }
